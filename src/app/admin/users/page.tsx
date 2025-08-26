@@ -15,7 +15,9 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
 interface User {
   id: string;
@@ -48,7 +50,7 @@ export default function AdminUsersPage() {
       } catch (err: any) {
         console.error("Error fetching users:", err);
         if (err.code === 'permission-denied' || err.code === 'failed-precondition') {
-             setError("Access Denied: You don't have permission to view this page. Please ensure you are logged in with an admin account.");
+             setError("Access Denied: You don't have permission to view this page. Please ensure you are logged in with an admin account and that your Firestore security rules allow admin access.");
         } else {
             setError('Failed to load users. Please try again later.');
         }
@@ -60,7 +62,7 @@ export default function AdminUsersPage() {
     fetchUsers();
   }, []);
 
-  const formatDate = (timestamp?: { seconds: number }) => {
+  const formatDate = (timestamp?: { seconds: number; nanoseconds: number; }) => {
     if (!timestamp || typeof timestamp.seconds !== 'number') {
       return 'N/A';
     }
@@ -92,6 +94,9 @@ export default function AdminUsersPage() {
                   <TableHead>Username</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Date Joined</TableHead>
+                  <TableHead>
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -109,11 +114,26 @@ export default function AdminUsersPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>{formatDate(user.createdAt)}</TableCell>
+                       <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Toggle menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center">
+                    <TableCell colSpan={6} className="text-center">
                       No users found.
                     </TableCell>
                   </TableRow>

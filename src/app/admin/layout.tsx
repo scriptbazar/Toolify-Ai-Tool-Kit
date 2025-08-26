@@ -8,6 +8,7 @@ import {
   Settings,
   Users,
   PenSquare,
+  Package,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -65,6 +66,7 @@ export default function AdminLayout({
   const navLinks = [
     { href: '/admin/dashboard', icon: Home, label: 'Dashboard' },
     { href: '/admin/users', icon: Users, label: 'Users' },
+    { href: '/admin/tools', icon: Package, label: 'Tool Management' },
     { href: '/admin/prompt-templates', icon: PenSquare, label: 'Prompt Templates' },
     { href: '/admin/analytics', icon: LineChart, label: 'Analytics' },
   ];
