@@ -8,6 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
+
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -16,6 +20,7 @@ const formSchema = z.object({
 
 export default function AdminLoginPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -24,13 +29,24 @@ export default function AdminLoginPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // TODO: Implement Firebase admin login
-    toast({
-      title: "Admin logged in successfully!",
-      description: "Redirecting to admin panel...",
-    });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      // For now, any user can log in as admin. 
+      // In a real app, you'd check if the user has an admin role in your database.
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      toast({
+        title: "Admin logged in successfully!",
+        description: "Redirecting to admin panel...",
+      });
+      router.push('/admin/dashboard');
+    } catch (error: any) {
+      console.error("Admin login error:", error);
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: error.message || "There was a problem with your request.",
+        variant: "destructive",
+      });
+    }
   }
 
   return (

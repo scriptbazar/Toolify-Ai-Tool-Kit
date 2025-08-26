@@ -9,6 +9,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -17,6 +20,7 @@ const formSchema = z.object({
 
 export default function LoginPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -25,13 +29,22 @@ export default function LoginPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // TODO: Implement Firebase login
-    toast({
-      title: "Logged in successfully!",
-      description: "Redirecting...",
-    });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      toast({
+        title: "Logged in successfully!",
+        description: "Redirecting...",
+      });
+      router.push('/');
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: error.message || "There was a problem with your request.",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
