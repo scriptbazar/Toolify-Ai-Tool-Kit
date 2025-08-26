@@ -103,13 +103,6 @@ export const tools: Tool[] = [
     slug: 'merge-pdf',
     category: 'pdf',
   },
-   {
-    name: 'Upload PDF for analysis',
-    description: 'Upload a PDF to start an analysis session.',
-    Icon: FileUp,
-    slug: 'pdf-q-and-a',
-    category: 'pdf',
-  },
   // AI Tools
   {
     name: 'AI Writer',
