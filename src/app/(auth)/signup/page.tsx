@@ -45,7 +45,7 @@ export default function SignupPage() {
     try {
       const { email, password, firstName, lastName, userName } = values;
       // Create user with email and password
-      const userCredential = await createUserWithEmaislAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
       // Save user data to Firestore
