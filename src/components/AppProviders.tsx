@@ -8,7 +8,8 @@ import Footer from '@/components/common/Footer';
 export function AppProviders({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const authRoutes = ['/login', '/signup', '/admin/login'];
-  const showHeaderFooter = !authRoutes.includes(pathname);
+  const isAdminRoute = pathname.startsWith('/admin');
+  const showHeaderFooter = !authRoutes.includes(pathname) && !isAdminRoute;
 
   return (
     <div className="relative flex min-h-screen flex-col">
