@@ -49,6 +49,9 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useState } from 'react';
+
 
 const pageViewsData = [
   { date: '2024-05-01', views: 2345 },
@@ -88,7 +91,7 @@ const recentSignups = [
         name: 'Isabella Nguyen',
         email: 'isabella.nguyen@email.com',
         plan: 'Pro',
-        date: '2023-06-26',
+        date: '20_23-06-26',
         avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026706d',
     },
     {
@@ -107,7 +110,25 @@ const recentSignups = [
     },
 ];
 
+const ComingSoonDialogContent = () => (
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Feature Coming Soon</DialogTitle>
+      <DialogDescription>
+        This analytics section is under construction. Check back later for more insights!
+      </DialogDescription>
+    </DialogHeader>
+    <div className="min-h-[200px] flex items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8">
+        <p className="text-lg text-muted-foreground">
+            Coming soon!
+        </p>
+    </div>
+  </DialogContent>
+);
+
 export default function AdminAnalyticsPage() {
+  const [activeTab, setActiveTab] = useState('overview');
+
   return (
     <div className="flex-1 space-y-4">
       <header className="mb-8">
@@ -117,7 +138,7 @@ export default function AdminAnalyticsPage() {
         </p>
       </header>
 
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="audience">Audience</TabsTrigger>
@@ -244,27 +265,19 @@ export default function AdminAnalyticsPage() {
               </CardContent>
             </Card>
         </TabsContent>
-        <TabsContent value="audience">
-           <div className="min-h-[300px] flex items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8">
-                <p className="text-lg text-muted-foreground">
-                    Audience analytics coming soon!
-                </p>
-            </div>
-        </TabsContent>
-        <TabsContent value="behavior">
-            <div className="min-h-[300px] flex items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8">
-                <p className="text-lg text-muted-foreground">
-                    Behavior analytics coming soon!
-                </p>
-            </div>
-        </TabsContent>
-        <TabsContent value="conversions">
-            <div className="min-h-[300px] flex items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8">
-                <p className="text-lg text-muted-foreground">
-                    Conversions analytics coming soon!
-                </p>
-            </div>
-        </TabsContent>
+
+        <Dialog open={activeTab !== 'overview'} onOpenChange={(isOpen) => !isOpen && setActiveTab('overview')}>
+          <TabsContent value="audience">
+            <ComingSoonDialogContent />
+          </TabsContent>
+          <TabsContent value="behavior">
+            <ComingSoonDialogContent />
+          </TabsContent>
+          <TabsContent value="conversions">
+            <ComingSoonDialogContent />
+          </TabsContent>
+        </Dialog>
+
       </Tabs>
     </div>
   );
