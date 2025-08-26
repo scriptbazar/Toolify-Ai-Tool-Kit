@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -47,19 +48,36 @@ export default function PromptTemplateManager() {
     async function loadInitialTemplates() {
       setIsLoading(true);
       try {
-        // In a real app, you would fetch these from a database.
-        // For now, we seed with default templates if none exist.
         const savedTemplatesPromises = defaultTemplates.map(t => getPromptTemplate(t.name));
-        const savedTemplates = (await Promise.all(savedTemplatesPromises)).filter(Boolean) as AiPromptTemplateOutput[];
+        let savedTemplates = (await Promise.all(savedTemplatesPromises)).filter(Boolean) as AiPromptTemplateOutput[];
 
         if (savedTemplates.length === 0) {
           // First time load, save default templates
           const newTemplatesPromises = defaultTemplates.map(t => savePromptTemplate(t));
           const newTemplates = await Promise.all(newTemplatesPromises);
           setTemplates(newTemplates);
-        } else {
-          setTemplates(savedTemplates);
+          savedTemplates = newTemplates;
         }
+
+        const allTemplates = [...defaultTemplates];
+        savedTemplates.forEach(saved => {
+            const index = allTemplates.findIndex(t => t.name === saved.name);
+            if (index !== -1) {
+                allTemplates[index] = saved;
+            } else {
+                allTemplates.push(saved);
+            }
+        });
+        
+        // Filter again to remove duplicates that might arise if a default one wasn't saved before
+        const uniqueTemplates = allTemplates.filter((template, index, self) =>
+          index === self.findIndex((t) => (
+            t.name === template.name
+          ))
+        );
+
+        setTemplates(uniqueTemplates);
+
       } catch (error) {
         console.error('Failed to load templates:', error);
         toast({
