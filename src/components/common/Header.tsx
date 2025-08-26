@@ -11,7 +11,7 @@ const NavLinks = () => {
   const pathname = usePathname();
   const authRoutes = ['/login', '/signup', '/admin/login'];
 
-  if (authRoutes.includes(pathname)) {
+  if (authRoutes.includes(pathname) || pathname.startsWith('/admin')) {
     return null;
   }
   
@@ -55,8 +55,9 @@ export default function Header() {
   const isMobile = useIsMobile();
   const pathname = usePathname();
   const authRoutes = ['/login', '/signup', '/admin/login'];
+  const isAdminRoute = pathname.startsWith('/admin');
 
-  const showNav = !authRoutes.includes(pathname);
+  const showNav = !authRoutes.includes(pathname) && !isAdminRoute;
 
 
   return (
@@ -97,12 +98,16 @@ export default function Header() {
             </nav>
            )}
             <div className="flex flex-1 items-center justify-end space-x-4">
-              <Button asChild variant="ghost">
-                <Link href="/login">Log in</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup">Sign Up</Link>
-              </Button>
+            {!isAdminRoute && (
+              <>
+                <Button asChild variant="ghost">
+                  <Link href="/login">Log in</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
             </div>
           </>
         )}
