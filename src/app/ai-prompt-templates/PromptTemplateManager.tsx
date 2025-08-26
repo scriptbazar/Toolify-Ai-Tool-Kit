@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -44,53 +43,42 @@ export default function PromptTemplateManager() {
     },
   });
 
-  useEffect(() => {
-    async function loadInitialTemplates() {
-      setIsLoading(true);
-      try {
-        const savedTemplatesPromises = defaultTemplates.map(t => getPromptTemplate(t.name));
-        let savedTemplates = (await Promise.all(savedTemplatesPromises)).filter(Boolean) as AiPromptTemplateOutput[];
+  const loadInitialTemplates = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // Fetch all templates that might exist.
+      const existingTemplatesPromises = defaultTemplates.map(t => getPromptTemplate(t.name));
+      const existingTemplates = (await Promise.all(existingTemplatesPromises)).filter(Boolean) as AiPromptTemplateOutput[];
+      
+      const templatesToCreate = defaultTemplates.filter(
+        defaultT => !existingTemplates.some(existingT => existingT.name === defaultT.name)
+      );
 
-        if (savedTemplates.length === 0) {
-          // First time load, save default templates
-          const newTemplatesPromises = defaultTemplates.map(t => savePromptTemplate(t));
-          const newTemplates = await Promise.all(newTemplatesPromises);
-          setTemplates(newTemplates);
-          savedTemplates = newTemplates;
-        }
-
-        const allTemplates = [...defaultTemplates];
-        savedTemplates.forEach(saved => {
-            const index = allTemplates.findIndex(t => t.name === saved.name);
-            if (index !== -1) {
-                allTemplates[index] = saved;
-            } else {
-                allTemplates.push(saved);
-            }
-        });
-        
-        // Filter again to remove duplicates that might arise if a default one wasn't saved before
-        const uniqueTemplates = allTemplates.filter((template, index, self) =>
-          index === self.findIndex((t) => (
-            t.name === template.name
-          ))
-        );
-
-        setTemplates(uniqueTemplates);
-
-      } catch (error) {
-        console.error('Failed to load templates:', error);
-        toast({
-          title: 'Error',
-          description: 'Could not load prompt templates.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
+      // If there are templates that don't exist in the "database", create them now.
+      if (templatesToCreate.length > 0) {
+        const newTemplatesPromises = templatesToCreate.map(t => savePromptTemplate(t));
+        const newTemplates = await Promise.all(newTemplatesPromises);
+        setTemplates([...existingTemplates, ...newTemplates]);
+      } else {
+        setTemplates(existingTemplates);
       }
+
+    } catch (error) {
+      console.error('Failed to load templates:', error);
+      toast({
+        title: 'Error',
+        description: 'Could not load prompt templates.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
     }
-    loadInitialTemplates();
   }, [toast]);
+
+
+  useEffect(() => {
+    loadInitialTemplates();
+  }, [loadInitialTemplates]);
 
   useEffect(() => {
     if (selectedTemplate) {
