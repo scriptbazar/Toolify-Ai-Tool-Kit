@@ -21,7 +21,7 @@ interface User {
   userName: string;
   email: string;
   role: 'admin' | 'user';
-  createdAt: {
+  createdAt?: {
     seconds: number;
     nanoseconds: number;
   };
@@ -53,8 +53,10 @@ export default function AdminUsersPage() {
     fetchUsers();
   }, []);
 
-  const formatDate = (timestamp: { seconds: number }) => {
-    if (!timestamp?.seconds) return 'N/A';
+  const formatDate = (timestamp?: { seconds: number }) => {
+    if (!timestamp || typeof timestamp.seconds !== 'number') {
+      return 'N/A';
+    }
     return new Date(timestamp.seconds * 1000).toLocaleDateString();
   };
 
