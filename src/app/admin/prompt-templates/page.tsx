@@ -1,4 +1,4 @@
-import PromptTemplateManager from './PromptTemplateManager';
+import PromptTemplateManager from '@/app/ai-prompt-templates/PromptTemplateManager';
 
 export default function AIPromptTemplatesPage() {
   return (
