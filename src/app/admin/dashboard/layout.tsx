@@ -32,7 +32,7 @@ export default function AdminPanelLayout({
         <Sidebar>
           <SidebarHeader>
             <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-              <Link href="/admin" className="flex items-center gap-2 font-semibold">
+              <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
                 <Package2 className="h-6 w-6" />
                 <span>ToolifyAI Admin</span>
               </Link>
@@ -45,7 +45,7 @@ export default function AdminPanelLayout({
           <SidebarContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/admin" tooltip="Dashboard">
+                <SidebarMenuButton href="/admin/dashboard" tooltip="Dashboard">
                   <Home />
                   Dashboard
                 </SidebarMenuButton>
