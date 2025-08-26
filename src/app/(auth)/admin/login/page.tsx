@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-xl">
+      <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Admin Access</CardTitle>
           <CardDescription>Sign in to the ToolifyAI Admin Panel</CardDescription>
@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
                   name="email"
