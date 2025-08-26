@@ -8,13 +8,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname } from 'next/navigation';
 
 const NavLinks = () => {
-  const pathname = usePathname();
-  const authRoutes = ['/login', '/signup', '/admin/login'];
-
-  if (authRoutes.includes(pathname) || pathname.startsWith('/admin')) {
-    return null;
-  }
-  
   return (
     <>
       <Link
@@ -54,11 +47,7 @@ const NavLinks = () => {
 export default function Header() {
   const isMobile = useIsMobile();
   const pathname = usePathname();
-  const authRoutes = ['/login', '/signup', '/admin/login'];
   const isAdminRoute = pathname.startsWith('/admin');
-
-  const showNav = !authRoutes.includes(pathname) && !isAdminRoute;
-
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -72,7 +61,6 @@ export default function Header() {
 
         {isMobile ? (
           <>
-            {showNav && (
             <div className="flex flex-1 items-center justify-end">
               <Sheet>
                 <SheetTrigger asChild>
@@ -88,15 +76,12 @@ export default function Header() {
                 </SheetContent>
               </Sheet>
             </div>
-            )}
           </>
         ) : (
           <>
-           {showNav && (
             <nav className="flex items-center space-x-6 text-sm font-medium">
               <NavLinks />
             </nav>
-           )}
             <div className="flex flex-1 items-center justify-end space-x-4">
             {!isAdminRoute && (
               <>

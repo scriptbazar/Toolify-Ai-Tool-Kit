@@ -3,8 +3,7 @@ import './globals.css';
 import { Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
-import Header from '@/components/common/Header';
-import Footer from '@/components/common/Footer';
+import { AppProviders } from '@/components/AppProviders';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -32,11 +31,9 @@ export default function RootLayout({
           inter.variable
         )}
       >
-        <div className="relative flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+        <AppProviders>
+          {children}
+        </AppProviders>
         <Toaster />
       </body>
     </html>
