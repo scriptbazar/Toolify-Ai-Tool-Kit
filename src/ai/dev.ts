@@ -8,3 +8,4 @@ import '@/ai/flows/code-helper.ts';
 import '@/ai/flows/ai-writer.ts';
 import '@/ai/flows/ai-prompt-templates.ts';
 import '@/ai/flows/ai-image-generator.ts';
+import '@/ai/flows/user-management.ts';

@@ -18,6 +18,12 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { updateUserRole, type UpdateUserRoleInput } from '@/ai/flows/user-management';
+
 
 interface User {
   id: string;
@@ -36,31 +42,72 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const usersCollection = collection(db, 'users');
+      const usersSnapshot = await getDocs(usersCollection);
+      const usersList = usersSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as User[];
+      setUsers(usersList);
+      setError(null);
+    } catch (err: any) {
+      console.error("Error fetching users:", err);
+      if (err.code === 'permission-denied' || err.code === 'failed-precondition') {
+           setError("Access Denied: You don't have permission to view this page. Please ensure you are logged in with an admin account and that your Firestore security rules allow admin access.");
+      } else {
+          setError('Failed to load users. Please try again later.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const usersCollection = collection(db, 'users');
-        const usersSnapshot = await getDocs(usersCollection);
-        const usersList = usersSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as User[];
-        setUsers(usersList);
-      } catch (err: any) {
-        console.error("Error fetching users:", err);
-        if (err.code === 'permission-denied' || err.code === 'failed-precondition') {
-             setError("Access Denied: You don't have permission to view this page. Please ensure you are logged in with an admin account and that your Firestore security rules allow admin access.");
-        } else {
-            setError('Failed to load users. Please try again later.');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
   }, []);
+  
+  const handleEditClick = (user: User) => {
+    setSelectedUser(user);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleRoleChange = async () => {
+    if (!selectedUser) return;
+    
+    setIsUpdating(true);
+    try {
+      const input: UpdateUserRoleInput = {
+        userId: selectedUser.id,
+        newRole: selectedUser.role,
+      };
+      await updateUserRole(input);
+      toast({
+        title: 'Success!',
+        description: `User role for ${selectedUser.email} has been updated.`,
+      });
+      // Refresh user list
+      await fetchUsers();
+      setIsEditDialogOpen(false);
+    } catch (error: any) {
+      console.error("Failed to update role:", error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Could not update user role.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
 
   const formatDate = (timestamp?: { seconds: number; nanoseconds: number; }) => {
     if (!timestamp || typeof timestamp.seconds !== 'number') {
@@ -124,7 +171,7 @@ export default function AdminUsersPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditClick(user)}>Edit</DropdownMenuItem>
                             <DropdownMenuItem>Delete</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -143,6 +190,50 @@ export default function AdminUsersPage() {
           )}
         </CardContent>
       </Card>
+      
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Change the role for {selectedUser?.email}.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="role" className="text-right">
+                  Role
+                </Label>
+                <Select
+                  value={selectedUser.role}
+                  onValueChange={(value: 'user' | 'admin') => 
+                    setSelectedUser(prev => prev ? { ...prev, role: value } : null)
+                  }
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button type="button" onClick={handleRoleChange} disabled={isUpdating}>
+              {isUpdating ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
