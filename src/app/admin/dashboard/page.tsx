@@ -1,3 +1,6 @@
+
+'use client';
+
 import {
   Activity,
   ArrowUpRight,
@@ -6,6 +9,14 @@ import {
   UserCheck,
   UserRound,
 } from 'lucide-react';
+import {
+  Line,
+  LineChart as RechartsLineChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from 'recharts';
 
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +36,27 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
+
+const chartData = [
+  { month: 'January', users: 186 },
+  { month: 'February', users: 305 },
+  { month: 'March', users: 237 },
+  { month: 'April', users: 273 },
+  { month: 'May', users: 209 },
+  { month: 'June', users: 214 },
+];
+
+const chartConfig = {
+  users: {
+    label: 'Users',
+    color: 'hsl(var(--chart-1))',
+  },
+};
 
 export default function AdminDashboard() {
   return (
@@ -79,11 +111,11 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-      <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
+      <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
+        <Card>
           <CardHeader className="flex flex-row items-center">
             <div className="grid gap-2">
-              <CardTitle>Recent Users</CardTitle>
+              <CardTitle>Recent Signups</CardTitle>
               <CardDescription>
                 Recent users that signed up for ToolifyAI.
               </CardDescription>
@@ -169,67 +201,52 @@ export default function AdminDashboard() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Recent Signups</CardTitle>
+            <CardTitle>Monthly User Signups</CardTitle>
+            <CardDescription>
+              A line chart showing the number of new users per month.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-8">
-            <div className="flex items-center gap-4">
-              <div className="grid gap-1">
-                <p className="text-sm font-medium leading-none">
-                  Olivia Martin
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  olivia.martin@email.com
-                </p>
-              </div>
-              <div className="ml-auto font-medium">+1,999.00</div>
-            </div>
-             <div className="flex items-center gap-4">
-              <div className="grid gap-1">
-                <p className="text-sm font-medium leading-none">
-                  Jackson Lee
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  jackson.lee@email.com
-                </p>
-              </div>
-              <div className="ml-auto font-medium">+39.00</div>
-            </div>
-             <div className="flex items-center gap-4">
-              <div className="grid gap-1">
-                <p className="text-sm font-medium leading-none">
-                  Isabella Nguyen
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  isabella.nguyen@email.com
-                </p>
-              </div>
-              <div className="ml-auto font-medium">+299.00</div>
-            </div>
-             <div className="flex items-center gap-4">
-              <div className="grid gap-1">
-                <p className="text-sm font-medium leading-none">
-                  Sofia Davis
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  sofia.davis@email.com
-                </p>
-              </div>
-              <div className="ml-auto font-medium">+39.00</div>
-            </div>
-              <div className="flex items-center gap-4">
-              <div className="grid gap-1">
-                <p className="text-sm font-medium leading-none">
-                  William Taylor
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  william.taylor@email.com
-                </p>
-              </div>
-              <div className="ml-auto font-medium">+99.00</div>
-            </div>
+          <CardContent>
+            <ChartContainer config={chartConfig}>
+              <RechartsLineChart
+                data={chartData}
+                margin={{
+                  top: 5,
+                  right: 20,
+                  left: -10,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickCount={6}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="dot" />}
+                />
+                <Line
+                  dataKey="users"
+                  type="monotone"
+                  stroke="var(--color-users)"
+                  strokeWidth={2}
+                  dot={true}
+                />
+              </RechartsLineChart>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
     </>
   );
 }
+
