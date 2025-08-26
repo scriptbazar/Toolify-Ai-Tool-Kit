@@ -55,6 +55,7 @@ export default function SignupPage() {
         lastName,
         userName,
         email,
+        role: "user",
         createdAt: new Date(),
       });
 
