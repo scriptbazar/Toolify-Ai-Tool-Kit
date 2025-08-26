@@ -9,8 +9,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import { doc, getDoc } from "firebase/firestore";
 
 
 const formSchema = z.object({
@@ -31,19 +32,41 @@ export default function AdminLoginPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      // For now, any user can log in as admin. 
-      // In a real app, you'd check if the user has an admin role in your database.
-      await signInWithEmailAndPassword(auth, values.email, values.password);
-      toast({
-        title: "Admin logged in successfully!",
-        description: "Redirecting to admin panel...",
-      });
-      router.push('/admin/dashboard');
+      // 1. Sign in the user with Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      // 2. Check the user's role in Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
+        // 3. If user is an admin, redirect to dashboard
+        toast({
+          title: "Admin logged in successfully!",
+          description: "Redirecting to admin panel...",
+        });
+        router.push('/admin/dashboard');
+      } else {
+        // 4. If user is not an admin, show error and log out
+        await auth.signOut();
+        toast({
+          title: "Access Denied",
+          description: "You do not have permission to access the admin panel.",
+          variant: "destructive",
+        });
+      }
     } catch (error: any) {
       console.error("Admin login error:", error);
+      let description = "There was a problem with your request.";
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+        description = "Invalid email or password.";
+      } else {
+        description = error.message;
+      }
       toast({
         title: "Uh oh! Something went wrong.",
-        description: error.message || "There was a problem with your request.",
+        description,
         variant: "destructive",
       });
     }
