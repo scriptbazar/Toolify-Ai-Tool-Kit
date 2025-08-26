@@ -68,6 +68,12 @@ export default function AdminPanelLayout({
                   Analytics
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton href="/admin/settings" tooltip="Settings" disabled>
+                  <Settings />
+                  Settings
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
         </Sidebar>

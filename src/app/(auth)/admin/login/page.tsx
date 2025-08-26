@@ -74,7 +74,7 @@ export default function AdminLoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-lg">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Admin Access</CardTitle>
           <CardDescription>Sign in to the ToolifyAI Admin Panel</CardDescription>

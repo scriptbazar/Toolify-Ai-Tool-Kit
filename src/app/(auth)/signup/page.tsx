@@ -55,7 +55,7 @@ export default function SignupPage() {
         lastName,
         userName,
         email,
-        role: "user",
+        role: "user", // Default role is 'user'
         createdAt: new Date(),
       });
 
@@ -76,7 +76,7 @@ export default function SignupPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-lg">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Create an Account</CardTitle>
           <CardDescription>Join ToolifyAI to get started</CardDescription>
@@ -112,7 +112,7 @@ export default function SignupPage() {
                   )}
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                  <FormField
                   control={form.control}
                   name="userName"
