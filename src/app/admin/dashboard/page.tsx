@@ -79,8 +79,8 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-      <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
+      <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
+        <Card>
           <CardHeader className="flex flex-row items-center">
             <div className="grid gap-2">
               <CardTitle>Recent Users</CardTitle>
@@ -126,6 +126,42 @@ export default function AdminDashboard() {
                     2023-06-23
                   </TableCell>
                   <TableCell className="text-right">$250.00</TableCell>
+                </TableRow>
+                 <TableRow>
+                  <TableCell>
+                    <div className="font-medium">Olivia Martin</div>
+                    <div className="hidden text-sm text-muted-foreground md:inline">
+                      olivia.martin@email.com
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden xl:table-column">Subscription</TableCell>
+                  <TableCell className="hidden xl:table-column">
+                    <Badge className="text-xs" variant="outline">
+                      Active
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
+                    2023-06-24
+                  </TableCell>
+                  <TableCell className="text-right">$1,999.00</TableCell>
+                </TableRow>
+                 <TableRow>
+                  <TableCell>
+                    <div className="font-medium">Jackson Lee</div>
+                    <div className="hidden text-sm text-muted-foreground md:inline">
+                      jackson.lee@email.com
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden xl:table-column">Sale</TableCell>
+                  <TableCell className="hidden xl:table-column">
+                    <Badge className="text-xs" variant="outline">
+                      Approved
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
+                    2023-06-25
+                  </TableCell>
+                  <TableCell className="text-right">$39.00</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
