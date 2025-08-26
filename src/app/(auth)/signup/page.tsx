@@ -9,6 +9,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required." }),
@@ -24,6 +28,7 @@ const formSchema = z.object({
 
 export default function SignupPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,13 +41,36 @@ export default function SignupPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // TODO: Implement Firebase signup
-    toast({
-      title: "Account created successfully!",
-      description: "You can now log in.",
-    });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const { email, password, firstName, lastName, userName } = values;
+      // Create user with email and password
+      const userCredential = await createUserWithEmaislAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Save user data to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        firstName,
+        lastName,
+        userName,
+        email,
+        createdAt: new Date(),
+      });
+
+      toast({
+        title: "Account created successfully!",
+        description: "You can now log in.",
+      });
+      router.push('/login');
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: error.message || "There was a problem with your request.",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
