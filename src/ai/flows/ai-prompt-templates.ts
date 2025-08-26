@@ -26,8 +26,14 @@ const AiPromptTemplateOutputSchema = z.object({
 });
 export type AiPromptTemplateOutput = z.infer<typeof AiPromptTemplateOutputSchema>;
 
+const GetPromptTemplateInputSchema = z.object({
+  name: z.string(),
+});
+export type GetPromptTemplateInput = z.infer<typeof GetPromptTemplateInputSchema>;
+
+
 export async function getPromptTemplate(name: string): Promise<AiPromptTemplateOutput | undefined> {
-  return getPromptTemplateFlow(name);
+  return getPromptTemplateFlow({name});
 }
 
 export async function savePromptTemplate(input: AiPromptTemplateInput): Promise<AiPromptTemplateOutput> {
@@ -37,10 +43,10 @@ export async function savePromptTemplate(input: AiPromptTemplateInput): Promise<
 const getPromptTemplateFlow = ai.defineFlow(
   {
     name: 'getPromptTemplateFlow',
-    inputSchema: z.string(),
+    inputSchema: GetPromptTemplateInputSchema,
     outputSchema: AiPromptTemplateOutputSchema.optional(),
   },
-  async name => {
+  async ({name}) => {
     // TODO: Replace with actual database lookup
     const template = promptTemplates.find(template => template.name === name);
     return template;
