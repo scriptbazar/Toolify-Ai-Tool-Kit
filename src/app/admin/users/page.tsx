@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,6 +14,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface User {
   id: string;
@@ -42,9 +45,13 @@ export default function AdminUsersPage() {
           ...doc.data(),
         })) as User[];
         setUsers(usersList);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error fetching users:", err);
-        setError('Failed to load users. Please try again later.');
+        if (err.code === 'permission-denied' || err.code === 'failed-precondition') {
+             setError("Access Denied: You don't have permission to view this page. Please ensure you are logged in with an admin account.");
+        } else {
+            setError('Failed to load users. Please try again later.');
+        }
       } finally {
         setLoading(false);
       }
@@ -69,7 +76,13 @@ export default function AdminUsersPage() {
         </CardHeader>
         <CardContent>
           {loading && <p>Loading users...</p>}
-          {error && <p className="text-destructive">{error}</p>}
+          {error && (
+             <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           {!loading && !error && (
             <Table>
               <TableHeader>
