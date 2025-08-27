@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { getAllEmails } from '@/ai/flows/user-management';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Users, UserPlus, User, Search, AlertCircle, Copy } from 'lucide-react';
+import { Users, UserPlus, User, Search, AlertCircle, Copy, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -26,7 +26,7 @@ type EmailData = {
   date: string;
 };
 
-type FilterType = 'all' | 'Signup' | 'Lead';
+type FilterType = 'all' | 'Signup' | 'Lead' | 'Comment';
 
 export default function SubscribersPage() {
   const [emails, setEmails] = useState<EmailData[]>([]);
@@ -65,6 +65,8 @@ export default function SubscribersPage() {
     return emails
       .filter(email => {
         if (activeFilter === 'all') return true;
+        // The 'Comment' filter is prepared for future implementation
+        if (activeFilter === 'Comment') return false; 
         return email.source === activeFilter;
       })
       .filter(email =>
@@ -76,13 +78,20 @@ export default function SubscribersPage() {
     all: emails.length,
     Signup: emails.filter(e => e.source === 'Signup').length,
     Lead: emails.filter(e => e.source === 'Lead').length,
+    Comment: 0, // Placeholder for future implementation
   }), [emails]);
 
   return (
     <div className="space-y-6">
+       <div>
+        <h1 className="text-3xl font-bold tracking-tight">All Subscribers</h1>
+        <p className="text-muted-foreground">
+          View and manage all email subscribers from various sources.
+        </p>
+      </div>
       <Card>
         <CardHeader>
-          <CardTitle>All Subscribers</CardTitle>
+          <CardTitle>Subscriber List</CardTitle>
           <CardDescription>
             A complete list of all registered users and leads.
           </CardDescription>
@@ -110,6 +119,14 @@ export default function SubscribersPage() {
                 >
                 <User className="mr-2 h-4 w-4" />
                 Lead Subscribers ({counts.Lead})
+              </Button>
+               <Button 
+                variant={activeFilter === 'Comment' ? 'default' : 'outline'}
+                onClick={() => setActiveFilter('Comment')}
+                disabled // Disabled until backend support is added
+                >
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Comment Subscribers ({counts.Comment})
               </Button>
             </div>
              <div className="flex items-center gap-2 w-full sm:w-auto">
