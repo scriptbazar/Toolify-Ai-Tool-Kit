@@ -31,8 +31,8 @@ export default function AdvertisementPage() {
         </p>
       </div>
 
-      <div className="space-y-6">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Ad Configuration</CardTitle>
             <CardDescription>
@@ -75,52 +75,7 @@ export default function AdvertisementPage() {
           </CardContent>
         </Card>
         
-        <div className={cn('transition-opacity duration-300', adType !== 'auto' && 'opacity-50 pointer-events-none hidden')}>
-           <Card>
-            <CardHeader>
-              <CardTitle>Auto Ads Script</CardTitle>
-              <CardDescription>
-                Paste your ad script here. It will be added to your site's header.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                  id="auto-ads-script"
-                  placeholder='<script async src="..."></script>'
-                  value={autoAdsScript}
-                  onChange={(e) => setAutoAdsScript(e.target.value)}
-                  className="min-h-[150px] font-mono"
-                  disabled={adType !== 'auto'}
-                />
-            </CardContent>
-          </Card>
-        </div>
-        
-         <div className={cn('transition-opacity duration-300', adType !== 'manual' && 'opacity-50 pointer-events-none hidden')}>
-           <Card>
-            <CardHeader>
-              <CardTitle>Manual Ad Slots</CardTitle>
-              <CardDescription>
-                Place specific ads in predefined locations.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {manualAdSlots.map((slot) => (
-                <div key={slot.id}>
-                  <Label htmlFor={`manual-ad-${slot.id}`}>{slot.name}</Label>
-                  <Textarea
-                    id={`manual-ad-${slot.id}`}
-                    placeholder={`Paste ad code for ${slot.name}`}
-                    className="min-h-[100px] font-mono text-xs"
-                     disabled={adType !== 'manual'}
-                  />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-         </div>
-
-          <Card>
+        <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Audience Settings</CardTitle>
             <CardDescription>
@@ -145,6 +100,51 @@ export default function AdvertisementPage() {
             </div>
           </CardContent>
         </Card>
+
+        <div className={cn('lg:col-span-2 transition-opacity duration-300', adType !== 'auto' && 'opacity-50 pointer-events-none hidden')}>
+           <Card>
+            <CardHeader>
+              <CardTitle>Auto Ads Script</CardTitle>
+              <CardDescription>
+                Paste your ad script here. It will be added to your site's header.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                  id="auto-ads-script"
+                  placeholder='<script async src="..."></script>'
+                  value={autoAdsScript}
+                  onChange={(e) => setAutoAdsScript(e.target.value)}
+                  className="min-h-[150px] font-mono"
+                  disabled={adType !== 'auto'}
+                />
+            </CardContent>
+          </Card>
+        </div>
+        
+         <div className={cn('lg:col-span-2 transition-opacity duration-300', adType !== 'manual' && 'opacity-50 pointer-events-none hidden')}>
+           <Card>
+            <CardHeader>
+              <CardTitle>Manual Ad Slots</CardTitle>
+              <CardDescription>
+                Place specific ads in predefined locations.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {manualAdSlots.map((slot) => (
+                <div key={slot.id}>
+                  <Label htmlFor={`manual-ad-${slot.id}`}>{slot.name}</Label>
+                  <Textarea
+                    id={`manual-ad-${slot.id}`}
+                    placeholder={`Paste ad code for ${slot.name}`}
+                    className="min-h-[100px] font-mono text-xs"
+                     disabled={adType !== 'manual'}
+                  />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+         </div>
       </div>
 
       <div className="flex justify-end pt-6">
