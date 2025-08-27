@@ -49,7 +49,7 @@ const initialToolsWithStatus: ToolWithStatus[] = tools.map((tool, index) => ({
 
 type FilterType = 'all' | 'pro' | 'free' | 'new' | 'active' | 'disabled';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 5;
 
 export default function AdminToolsPage() {
   const [toolsList, setToolsList] = useState<ToolWithStatus[]>(initialToolsWithStatus);
@@ -297,3 +297,5 @@ export default function AdminToolsPage() {
     </div>
   );
 }
+
+    
