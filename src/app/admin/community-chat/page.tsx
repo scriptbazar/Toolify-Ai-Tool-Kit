@@ -233,10 +233,12 @@ export default function CommunityChatPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label>Poll Options</Label>
-                                        <Input name="option1" placeholder="Option 1" required />
-                                        <Input name="option2" placeholder="Option 2" required />
-                                        <Input name="option3" placeholder="Option 3" />
-                                        <Input name="option4" placeholder="Option 4" />
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <Input name="option1" placeholder="Option 1" required />
+                                            <Input name="option2" placeholder="Option 2" required />
+                                            <Input name="option3" placeholder="Option 3" />
+                                            <Input name="option4" placeholder="Option 4" />
+                                        </div>
                                     </div>
                                     <div className="flex items-center space-x-2 pt-2">
                                         <Switch id="allowCustomAnswer" name="allowCustomAnswer" />
