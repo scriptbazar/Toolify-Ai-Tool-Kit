@@ -53,17 +53,17 @@ export function ChatWidget() {
     e.preventDefault();
     setIsSubmittingContact(true);
     const formData = new FormData(e.currentTarget);
-    const firstName = formData.get('firstName') as string;
-    const lastName = formData.get('lastName') as string;
+    const name = `${formData.get('firstName') as string} ${formData.get('lastName') as string}`;
     const email = formData.get('email') as string;
+    const message = `User started a chat.`; // Add a default message
     
     try {
-      await addLeadUser({ name: `${firstName} ${lastName}`, email, message: `User started a chat.` });
+      await addLeadUser({ name, email, message });
       toast({
         title: 'Thank you!',
         description: "Your information has been saved. You can now chat with our AI.",
       });
-      setMessages([{ role: 'model', content: `Hello ${firstName}! How can I help you with ToolifyAI today?` }]);
+      setMessages([{ role: 'model', content: `Hello ${formData.get('firstName')}! How can I help you with ToolifyAI today?` }]);
       setStep('chat');
     } catch (error: any) {
         console.error("Failed to save lead:", error);
