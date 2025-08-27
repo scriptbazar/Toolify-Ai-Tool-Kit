@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -121,8 +122,14 @@ export default function UserPanelLayout({
         </nav>
       </ScrollArea>
        <div className="mt-auto p-4 border-t">
-          <div className="flex flex-col gap-2">
-            <Button variant="destructive" onClick={handleLogout} className="w-full justify-start">
+          <div className="flex gap-2">
+            <Button asChild className="flex-1 justify-start">
+              <Link href="/profile">
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
+            </Button>
+            <Button variant="destructive" onClick={handleLogout} className="flex-1 justify-start">
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </Button>
@@ -214,7 +221,7 @@ export default function UserPanelLayout({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push('/profile')}>Profile</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/settings')}>Settings</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/support')}>Support</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/my-tickets')}>Support</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
