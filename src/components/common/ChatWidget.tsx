@@ -102,29 +102,33 @@ export function ChatWidget() {
 
   const ContactForm = (
     <form onSubmit={handleContactSubmit}>
-      <CardContent className="p-4 space-y-4">
-        <div className="bg-muted p-4 rounded-lg text-center">
-            <h4 className="font-semibold text-lg">Welcome!</h4>
-            <p className="text-sm text-muted-foreground">
-            Please enter your details to get started.
-            </p>
-        </div>
-        <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" name="firstName" required disabled={isSubmittingContact} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" name="lastName" required disabled={isSubmittingContact} />
-              </div>
+      <CardContent className="p-0">
+         <ScrollArea className="h-[350px] w-full p-4">
+            <div className="space-y-4">
+                <div className="bg-muted p-4 rounded-lg text-center">
+                    <h4 className="font-semibold text-lg">Welcome!</h4>
+                    <p className="text-sm text-muted-foreground">
+                    Please enter your details to get started.
+                    </p>
+                </div>
+                <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input id="firstName" name="firstName" required disabled={isSubmittingContact} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input id="lastName" name="lastName" required disabled={isSubmittingContact} />
+                      </div>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" name="email" type="email" required disabled={isSubmittingContact} />
+                    </div>
+                </div>
             </div>
-             <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" required disabled={isSubmittingContact} />
-            </div>
-        </div>
+        </ScrollArea>
       </CardContent>
       <CardFooter className="p-4 border-t">
         <Button type="submit" className="w-full" disabled={isSubmittingContact}>
@@ -201,7 +205,7 @@ export function ChatWidget() {
           )}
           data-state={isOpen ? 'open' : 'closed'}
         >
-          <Card className="shadow-2xl flex flex-col">
+          <Card className="shadow-2xl flex flex-col max-h-[calc(100vh-8rem)]">
             <CardHeader className="flex flex-row items-center justify-between bg-primary text-primary-foreground p-4 rounded-t-lg">
               <div className="flex items-center gap-3">
                 <Logo className="h-6 w-6 text-primary-foreground" />
