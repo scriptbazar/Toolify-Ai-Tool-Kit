@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Check, Bot, User } from 'lucide-react';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
@@ -135,14 +135,14 @@ export default function CommunityChatPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-14rem)]">
         <div className="lg:col-span-2 flex flex-col h-full">
            <Card className="flex-grow flex flex-col">
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-0">
               <CardTitle>Live Chat Feed</CardTitle>
               <p className="text-muted-foreground text-sm">
                   All messages from users and the AI assistant.
               </p>
             </CardHeader>
             <CardContent className="flex-grow p-0">
-               <ScrollArea className="h-full max-h-[calc(100vh-27rem)] p-4" ref={scrollAreaRef}>
+               <ScrollArea className="h-full max-h-[calc(100vh-27rem)] px-4 pt-4" ref={scrollAreaRef}>
                   <div className="space-y-6">
                       {messages.map((msg) => (
                           <div key={msg.id} className={cn("flex items-start gap-3", msg.from === 'Admin' ? 'flex-row-reverse' : '')}>
