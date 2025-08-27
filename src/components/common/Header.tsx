@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Sprout } from 'lucide-react';
+import { Menu, LayoutGrid } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname } from 'next/navigation';
 
@@ -55,7 +55,7 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex items-center">
           <Link href="/" className="flex items-center space-x-2">
-            <Sprout className="h-6 w-6 text-primary" />
+            <LayoutGrid className="h-6 w-6 text-primary" />
             <span className="font-bold">ToolifyAI</span>
           </Link>
         </div>
@@ -72,7 +72,7 @@ export default function Header() {
                 </SheetTrigger>
                 <SheetContent side="left">
                   <SheetHeader>
-                    <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                    <SheetTitle>Navigation Menu</SheetTitle>
                   </SheetHeader>
                   <div className="mt-8 flex flex-col space-y-4">
                     <NavLinks />
