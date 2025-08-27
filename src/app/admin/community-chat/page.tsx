@@ -137,12 +137,12 @@ export default function CommunityChatPage() {
            <Card className="flex-grow flex flex-col">
             <CardHeader className="pb-0">
               <CardTitle>Live Chat Feed</CardTitle>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-sm pb-4">
                   All messages from users and the AI assistant.
               </p>
             </CardHeader>
             <CardContent className="flex-grow p-0">
-               <ScrollArea className="h-full max-h-[calc(100vh-27rem)] px-4 pt-4" ref={scrollAreaRef}>
+               <ScrollArea className="h-full max-h-[calc(100vh-27rem)] px-4" ref={scrollAreaRef}>
                   <div className="space-y-6">
                       {messages.map((msg) => (
                           <div key={msg.id} className={cn("flex items-start gap-3", msg.from === 'Admin' ? 'flex-row-reverse' : '')}>
