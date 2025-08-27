@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 type FilterType = 'all' | 'direct' | 'team' | 'pending';
 type StatusType = 'Completed' | 'Pending';
@@ -42,6 +43,7 @@ export default function ReferralManagementPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isReferralEnabled, setIsReferralEnabled] = useState(true);
   const { toast } = useToast();
 
   const tabs: { id: FilterType; label: string; icon: React.ElementType }[] = [
@@ -203,54 +205,65 @@ export default function ReferralManagementPage() {
               </CardContent>
           </Card>
           
-          <Card>
-              <CardHeader>
-                  <CardTitle>Referral Settings</CardTitle>
-                  <CardDescription>Configure your referral program.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between rounded-lg border p-4">
-                      <Label htmlFor="enable-referrals" className="font-medium">Enable Referral Program</Label>
-                      <Switch id="enable-referrals" defaultChecked />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="commission-rate">Commission Rate</Label>
-                        <div className="relative">
-                            <Input id="commission-rate" type="number" defaultValue="20" className="pl-8" />
-                            <Percent className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="cookie-duration">Cookie Duration (Days)</Label>
-                          <div className="relative">
-                            <Input id="cookie-duration" type="number" defaultValue="30" className="pl-8" />
-                            <Cookie className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        </div>
-                    </div>
-                  </div>
-
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="payout-threshold">Minimum Payout Threshold</Label>
-                          <div className="relative">
-                            <Input id="payout-threshold" type="number" defaultValue="50" className="pl-8" />
-                            <CircleDollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        </div>
-                    </div>
+          <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                    <CardTitle>Referral Program Status</CardTitle>
+                </CardHeader>
+                <CardContent>
                     <div className="flex items-center justify-between rounded-lg border p-4">
-                        <Label htmlFor="enable-multi-level" className="font-medium">Enable Multi-level Referrals</Label>
-                        <Switch id="enable-multi-level" />
+                        <Label htmlFor="enable-referrals" className="font-medium">Enable Referral Program</Label>
+                        <Switch id="enable-referrals" checked={isReferralEnabled} onCheckedChange={setIsReferralEnabled} />
                     </div>
-                  </div>
+                </CardContent>
+              </Card>
 
-                  <Button className="w-full" onClick={handleSaveSettings} disabled={isSaving}>
-                      <Save className="mr-2 h-4 w-4" />
-                      {isSaving ? 'Saving...' : 'Save Settings'}
-                  </Button>
-              </CardContent>
-          </Card>
+              <div className={cn('transition-opacity duration-300 space-y-6', !isReferralEnabled && 'opacity-50 pointer-events-none hidden')}>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Referral Settings</CardTitle>
+                        <CardDescription>Configure your referral program.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="commission-rate">Commission Rate</Label>
+                                <div className="relative">
+                                    <Input id="commission-rate" type="number" defaultValue="20" className="pl-8" />
+                                    <Percent className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="cookie-duration">Cookie Duration (Days)</Label>
+                                <div className="relative">
+                                    <Input id="cookie-duration" type="number" defaultValue="30" className="pl-8" />
+                                    <Cookie className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="payout-threshold">Minimum Payout Threshold</Label>
+                                <div className="relative">
+                                    <Input id="payout-threshold" type="number" defaultValue="50" className="pl-8" />
+                                    <CircleDollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between rounded-lg border p-4">
+                                <Label htmlFor="enable-multi-level" className="font-medium">Enable Multi-level Referrals</Label>
+                                <Switch id="enable-multi-level" />
+                            </div>
+                        </div>
+
+                        <Button className="w-full" onClick={handleSaveSettings} disabled={isSaving}>
+                            <Save className="mr-2 h-4 w-4" />
+                            {isSaving ? 'Saving...' : 'Save Settings'}
+                        </Button>
+                    </CardContent>
+                </Card>
+              </div>
+          </div>
       </div>
     </div>
   );
