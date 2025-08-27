@@ -103,21 +103,21 @@ export default function SubscribersPage() {
                 variant={activeFilter === 'all' ? 'default' : 'outline'}
                 onClick={() => setActiveFilter('all')}
                 >
-                <Users className="mr-2 h-4 w-4" />
+                <Users className="h-4 w-4" />
                 All Subscribers ({counts.all})
               </Button>
                <Button 
                 variant={activeFilter === 'Signup' ? 'default' : 'outline'}
                 onClick={() => setActiveFilter('Signup')}
                 >
-                <UserPlus className="mr-2 h-4 w-4" />
+                <UserPlus className="h-4 w-4" />
                 Direct Subscribers ({counts.Signup})
               </Button>
                <Button 
                 variant={activeFilter === 'Lead' ? 'default' : 'outline'}
                 onClick={() => setActiveFilter('Lead')}
                 >
-                <User className="mr-2 h-4 w-4" />
+                <User className="h-4 w-4" />
                 Lead Subscribers ({counts.Lead})
               </Button>
                <Button 
@@ -125,7 +125,7 @@ export default function SubscribersPage() {
                 onClick={() => setActiveFilter('Comment')}
                 disabled // Disabled until backend support is added
                 >
-                <MessageSquare className="mr-2 h-4 w-4" />
+                <MessageSquare className="h-4 w-4" />
                 Comment Subscribers ({counts.Comment})
               </Button>
             </div>
@@ -205,3 +205,4 @@ export default function SubscribersPage() {
     </div>
   );
 }
+
