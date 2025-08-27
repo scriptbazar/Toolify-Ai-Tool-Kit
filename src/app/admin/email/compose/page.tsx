@@ -12,14 +12,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { composeEmail, AiEmailComposerInputSchema, type AiEmailComposerInput } from '@/ai/flows/ai-email-composer';
+import { composeEmail, type AiEmailComposerInput } from '@/ai/flows/ai-email-composer';
 import { Wand2, Send, Mail } from 'lucide-react';
 import { z } from 'zod';
 
 
-const formSchema = AiEmailComposerInputSchema.extend({
+// Re-define the base schema on the client and then extend it.
+const formSchema = z.object({
+  subject: z.string().describe('The subject line of the email.'),
+  keyPoints: z.string().describe('The key points or message to convey in the email. This can be a simple sentence or a list of bullet points.'),
+  tone: z.enum(['Formal', 'Casual', 'Friendly', 'Professional', 'Humorous']).describe('The desired tone of voice for the email.'),
   recipient: z.string().email({ message: 'Please enter a valid email address.' }),
 });
+
 
 type ComposeFormValues = z.infer<typeof formSchema>;
 
@@ -52,7 +57,7 @@ export default function ComposeEmailPage() {
 
     setIsGenerating(true);
     try {
-      const result = await composeEmail({ subject, keyPoints, tone });
+      const result = await composeEmail({ subject, keyPoints, tone: tone as AiEmailComposerInput['tone'] });
       setGeneratedBody(result.emailBody);
       form.setValue('keyPoints', result.emailBody);
       toast({
