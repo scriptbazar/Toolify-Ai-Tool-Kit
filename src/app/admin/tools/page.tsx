@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -35,10 +36,14 @@ const toolsWithStatus: ToolWithStatus[] = tools.map((tool, index) => ({
 
 type FilterType = 'all' | 'pro' | 'free' | 'new' | 'active' | 'disabled';
 
+const ITEMS_PER_PAGE = 10;
+
 export default function AdminToolsPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+
 
   const getCategoryName = (categoryId: string) => {
     return toolCategories.find(c => c.id === categoryId)?.name || 'Unknown';
@@ -74,6 +79,28 @@ export default function AdminToolsPage() {
       );
   }, [activeFilter, selectedCategory, searchQuery]);
   
+  const paginatedTools = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredTools.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredTools, currentPage]);
+
+  const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
+
+  const handleFilterChange = (filter: FilterType) => {
+    setActiveFilter(filter);
+    setCurrentPage(1);
+  };
+  
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
+  
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
   const tabs: { id: FilterType; label: string; icon: React.ElementType, count: number }[] = [
     { id: 'all', label: 'All', icon: Package, count: counts.all },
     { id: 'pro', label: 'Pro', icon: Star, count: counts.pro },
@@ -97,7 +124,7 @@ export default function AdminToolsPage() {
                     <Button
                     key={tab.id}
                     variant={activeFilter === tab.id ? 'default' : 'outline'}
-                    onClick={() => setActiveFilter(tab.id)}
+                    onClick={() => handleFilterChange(tab.id)}
                     className="shrink-0"
                     >
                     <tab.icon className="mr-2 h-4 w-4" />
@@ -106,7 +133,7 @@ export default function AdminToolsPage() {
                 ))}
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
                     <SelectTrigger className="w-full sm:w-[180px]">
                         <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
@@ -122,7 +149,7 @@ export default function AdminToolsPage() {
                     <Input
                         placeholder="Search tools..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => handleSearchChange(e.target.value)}
                         className="pl-9 w-full sm:w-auto"
                     />
                 </div>
@@ -139,7 +166,7 @@ export default function AdminToolsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTools.map(tool => (
+              {paginatedTools.map(tool => (
                 <TableRow key={tool.slug}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
@@ -157,7 +184,7 @@ export default function AdminToolsPage() {
                   </TableCell>
                 </TableRow>
               ))}
-               {filteredTools.length === 0 && (
+               {paginatedTools.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} className="h-24 text-center">
                     No tools found.
@@ -166,6 +193,30 @@ export default function AdminToolsPage() {
               )}
             </TableBody>
           </Table>
+
+           {totalPages > 1 && (
+            <div className="flex items-center justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
