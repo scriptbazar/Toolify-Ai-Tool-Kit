@@ -96,7 +96,7 @@ export default function UserPanelLayout({
 
   const mobileNavContent = (
     <>
-      <SheetHeader className="text-left border-b pb-4">
+      <SheetHeader className="text-left border-b p-4">
         <SheetTitle>
           <Link href="/" className="flex items-center gap-2 font-semibold">
             <Logo />

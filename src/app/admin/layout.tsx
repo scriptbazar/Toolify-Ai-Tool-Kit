@@ -31,6 +31,7 @@ import {
   CreditCard,
   FileCog,
   LogOut,
+  User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -60,6 +61,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Logo } from '@/components/common/Logo';
+import { ModeToggle } from '@/components/common/ModeToggle';
 
 export default function AdminLayout({
   children,
@@ -132,7 +134,7 @@ export default function AdminLayout({
 
   const mobileNavContent = (
     <>
-      <SheetHeader className="text-left border-b pb-4">
+      <SheetHeader className="text-left border-b p-4">
         <SheetTitle>
           <Link href="/" className="flex items-center gap-2 font-semibold">
             <Logo />
@@ -251,9 +253,7 @@ export default function AdminLayout({
           <div className="flex gap-2">
             <Button asChild className="flex-1 justify-start">
               <Link href="/admin/profile">
-                <Avatar className="h-6 w-6 mr-2">
-                  <AvatarFallback>N</AvatarFallback>
-                </Avatar>
+                <User className="mr-2 h-4 w-4" />
                 Profile
               </Link>
             </Button>
@@ -281,7 +281,7 @@ export default function AdminLayout({
             </Button>
           </div>
           <ScrollArea className="flex-1">
-            <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4 lg:py-4">
+            <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4 py-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -391,9 +391,7 @@ export default function AdminLayout({
               <div className="flex gap-2">
                 <Button asChild className="flex-1">
                   <Link href="/admin/profile">
-                    <Avatar className="h-6 w-6 mr-2">
-                      <AvatarFallback>A</AvatarFallback>
-                    </Avatar>
+                    <User className="h-4 w-4" />
                     Profile
                   </Link>
                 </Button>
@@ -432,6 +430,7 @@ export default function AdminLayout({
             </Sheet>
           </div>
            <div className="hidden md:flex items-center gap-4">
+             <ModeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
