@@ -5,9 +5,9 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/common/ThemeProvider';
 import { AppProviders } from '@/components/AppProviders';
+import { headers } from 'next/headers';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
-import { ChatWidget } from '@/components/common/ChatWidget';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -22,6 +22,31 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = headers();
+  const pathname = headersList.get('x-next-pathname') || '/';
+
+  const authRoutes = ['/login', '/signup', '/admin/login', '/forgot-password'];
+  const isAuthRoute = authRoutes.includes(pathname);
+
+  const isAdminRoute = pathname.startsWith('/admin');
+
+  const isUserPanelRoute = [
+    '/dashboard',
+    '/profile',
+    '/manage-subscription',
+    '/payment-history',
+    '/settings',
+    '/usage-history',
+    '/login-history',
+    '/my-media',
+    '/refer-a-friend',
+    '/my-tickets',
+    '/create-ticket',
+    '/community-chat',
+  ].some(route => pathname.startsWith(route));
+
+  const showPublicLayout = !isAuthRoute && !isAdminRoute && !isUserPanelRoute;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
@@ -38,12 +63,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AppProviders>
-            <div className="relative flex min-h-screen flex-col">
-              <Header />
-              <div className="flex-1">{children}</div>
-              <Footer />
-            </div>
-            <ChatWidget />
+            {showPublicLayout && <Header />}
+            <div className={cn(showPublicLayout && "flex-1")}>{children}</div>
+            {showPublicLayout && <Footer />}
           </AppProviders>
           <Toaster />
         </ThemeProvider>

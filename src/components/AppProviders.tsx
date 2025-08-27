@@ -2,13 +2,18 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { ChatWidget } from './common/ChatWidget';
+import { cn } from '@/lib/utils';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  
   const authRoutes = ['/login', '/signup', '/admin/login', '/forgot-password'];
+  const isAuthRoute = authRoutes.includes(pathname);
+  
   const isAdminRoute = pathname.startsWith('/admin');
   
-  const userPanelRoutes = [
+  const isUserPanelRoute = [
     '/dashboard',
     '/profile',
     '/manage-subscription',
@@ -21,29 +26,15 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     '/my-tickets',
     '/create-ticket',
     '/community-chat',
-  ];
+  ].some(route => pathname.startsWith(route));
 
-  const isDashboardRoute = (
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/profile') ||
-    pathname.startsWith('/manage-subscription') ||
-    pathname.startsWith('/payment-history') ||
-    pathname.startsWith('/settings') ||
-    pathname.startsWith('/usage-history') ||
-    pathname.startsWith('/login-history') ||
-    pathname.startsWith('/my-media') ||
-    pathname.startsWith('/refer-a-friend') ||
-    pathname.startsWith('/my-tickets') ||
-    pathname.startsWith('/create-ticket') ||
-    pathname.startsWith('/community-chat')
-  )
+  const showPublicLayout = !isAuthRoute && !isAdminRoute && !isUserPanelRoute;
 
-
-  const showHeaderFooter = !authRoutes.includes(pathname) && !isAdminRoute && !isDashboardRoute;
-  
-  if (!showHeaderFooter) {
-    return <>{children}</>;
-  }
-
-  return <>{children}</>;
+  return (
+    <div className={cn(showPublicLayout && "relative flex min-h-screen flex-col")}>
+      {children}
+      {/* Show chat widget on non-admin pages */}
+      {!isAdminRoute && <ChatWidget />}
+    </div>
+  );
 }
