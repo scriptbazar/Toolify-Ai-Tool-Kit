@@ -44,7 +44,7 @@ export default function SubscribersPage() {
         setEmails(fetchedEmails);
         setError(null);
       } catch (err: any) {
-        setError('Failed to load subscribers. Please try again later.');
+        setError(err.message || 'Failed to load subscribers. Please try again later.');
         console.error(err);
       } finally {
         setLoading(false);
@@ -74,8 +74,8 @@ export default function SubscribersPage() {
 
   const counts = useMemo(() => ({
     all: emails.length,
-    direct: emails.filter(e => e.source === 'Signup').length,
-    lead: emails.filter(e => e.source === 'Lead').length,
+    Signup: emails.filter(e => e.source === 'Signup').length,
+    Lead: emails.filter(e => e.source === 'Lead').length,
   }), [emails]);
 
   return (
@@ -102,14 +102,14 @@ export default function SubscribersPage() {
                 onClick={() => setActiveFilter('Signup')}
                 >
                 <UserPlus className="mr-2 h-4 w-4" />
-                Direct Subscribers ({counts.direct})
+                Direct Subscribers ({counts.Signup})
               </Button>
                <Button 
                 variant={activeFilter === 'Lead' ? 'default' : 'outline'}
                 onClick={() => setActiveFilter('Lead')}
                 >
                 <User className="mr-2 h-4 w-4" />
-                Lead Subscribers ({counts.lead})
+                Lead Subscribers ({counts.Lead})
               </Button>
             </div>
              <div className="flex items-center gap-2 w-full sm:w-auto">
