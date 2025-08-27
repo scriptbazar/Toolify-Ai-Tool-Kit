@@ -4,39 +4,37 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
+import { LogIn, Menu, UserPlus } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
+import { toolCategories } from '@/lib/constants';
 
-const NavLinks = () => {
+const NavLinks = ({ isMobile = false }) => {
   const pathname = usePathname();
-  const navLinks = [
-    { href: '/#text', label: 'Text' },
-    { href: '/#pdf', label: 'PDF' },
-    { href: '/#ai', label: 'AI' },
-    { href: '/#dev', label: 'Dev' },
-  ];
 
   return (
     <>
-      {navLinks.map((link) => {
-        // A simple way to check for active hash links.
-        // In a real app, you might want a more robust solution using IntersectionObserver.
-        const isActive = pathname === '/' && link.label === 'Text'; // Example for active state
-
+      {toolCategories.slice(0, 4).map((category) => {
+        const isActive = pathname === '/' && category.id === 'text';
+        const linkHref = `/#${category.id}`;
         return (
-          <Link
-            key={link.href}
-            href={link.href}
+          <Button
+            key={category.id}
+            asChild
+            variant={isActive ? 'secondary' : 'ghost'}
             className={cn(
-              'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-              isActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+              'w-full justify-start text-base',
+              !isMobile &&
+                'text-sm w-auto'
             )}
           >
-            {link.label}
-          </Link>
+            <Link href={linkHref}>
+              <category.Icon className="mr-2 h-4 w-4" />
+              {category.name.replace(' Tools', '')}
+            </Link>
+          </Button>
         );
       })}
     </>
@@ -68,8 +66,8 @@ export default function Header() {
                     <span className="sr-only">Toggle navigation menu</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right">
-                  <SheetHeader>
+                <SheetContent side="right" className="flex flex-col p-0 w-[280px]">
+                  <SheetHeader className="p-4 border-b">
                      <SheetTitle>
                       <Link href="/" className="flex items-center space-x-2">
                         <Logo />
@@ -77,8 +75,18 @@ export default function Header() {
                       </Link>
                     </SheetTitle>
                   </SheetHeader>
-                  <div className="mt-8 flex flex-col space-y-2">
-                    <NavLinks />
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <nav className="flex flex-col space-y-2">
+                       <NavLinks isMobile={true} />
+                    </nav>
+                  </div>
+                   <div className="mt-auto p-4 border-t space-y-2">
+                      <Button asChild className="w-full justify-start">
+                        <Link href="/login"><LogIn className="mr-2" /> Log in</Link>
+                      </Button>
+                      <Button asChild variant="secondary" className="w-full justify-start">
+                        <Link href="/signup"><UserPlus className="mr-2" /> Sign Up</Link>
+                      </Button>
                   </div>
                 </SheetContent>
               </Sheet>
@@ -86,10 +94,10 @@ export default function Header() {
           </>
         ) : (
           <>
-            <nav className="flex items-center space-x-2 text-sm font-medium">
+            <nav className="flex items-center space-x-1 text-sm font-medium">
               <NavLinks />
             </nav>
-            <div className="flex flex-1 items-center justify-end space-x-4">
+            <div className="flex flex-1 items-center justify-end space-x-2">
             {!isAdminRoute && (
               <>
                 <Button asChild variant="ghost">
