@@ -17,6 +17,8 @@ const NavLinks = ({ isMobile = false }) => {
   return (
     <>
       {toolCategories.slice(0, 4).map((category) => {
+        // For demonstration, making 'text' category active.
+        // In a real app, this would be dynamic based on scroll position.
         const isActive = pathname === '/' && category.id === 'text';
         const linkHref = `/#${category.id}`;
         return (
@@ -82,10 +84,10 @@ export default function Header() {
                   </div>
                    <div className="mt-auto p-4 border-t">
                       <div className="flex gap-2">
-                        <Button asChild className="flex-1">
+                        <Button asChild variant="ghost" className="flex-1">
                            <Link href="/login"><LogIn className="mr-2" /> Log in</Link>
                         </Button>
-                        <Button asChild variant="secondary" className="flex-1">
+                        <Button asChild className="flex-1">
                            <Link href="/signup"><UserPlus className="mr-2" /> Sign Up</Link>
                         </Button>
                       </div>
