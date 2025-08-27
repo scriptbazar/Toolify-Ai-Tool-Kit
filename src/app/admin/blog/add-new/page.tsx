@@ -14,8 +14,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter, type AiWriterInput } from '@/ai/flows/ai-writer';
-import { Wand2, PlusCircle, UploadCloud, Send, Loader2 } from 'lucide-react';
+import { Wand2, PlusCircle, UploadCloud, Send, Loader2, Save, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import Image from 'next/image';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+
 
 const postSchema = z.object({
   title: z.string().min(5, { message: 'Title must be at least 5 characters long.' }),
@@ -23,6 +28,7 @@ const postSchema = z.object({
   content: z.string().min(50, { message: 'Content must be at least 50 characters long.' }),
   category: z.string().min(1, { message: 'Please select a category.' }),
   tags: z.string().optional(),
+  scheduledDate: z.date().optional(),
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
@@ -30,6 +36,8 @@ type PostFormValues = z.infer<typeof postSchema>;
 export default function AddNewPostPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
   const { toast } = useToast();
 
   const form = useForm<PostFormValues>({
@@ -86,15 +94,25 @@ export default function AddNewPostPage() {
 
   const handlePublish = async (values: PostFormValues) => {
     setIsPublishing(true);
-    // Simulate publishing action
-    console.log('Publishing post:', values);
+    console.log('Publishing post:', { ...values, scheduledDate });
     await new Promise(resolve => setTimeout(resolve, 1500));
     toast({
-      title: 'Post Published (Simulated)',
-      description: `Your post "${values.title}" has been successfully published.`,
+      title: scheduledDate ? 'Post Scheduled!' : 'Post Published!',
+      description: `Your post "${values.title}" has been successfully ${scheduledDate ? 'scheduled' : 'published'}.`,
     });
     setIsPublishing(false);
-    // form.reset();
+  };
+  
+  const handleSaveDraft = async () => {
+    const values = form.getValues();
+    setIsSavingDraft(true);
+    console.log('Saving draft:', values);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    toast({
+      title: 'Draft Saved',
+      description: `Your post "${values.title}" has been saved as a draft.`,
+    });
+    setIsSavingDraft(false);
   };
 
   return (
@@ -180,13 +198,49 @@ export default function AddNewPostPage() {
           <div className="lg:col-span-1 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Publish</CardTitle>
+                <CardTitle>Publishing Actions</CardTitle>
               </CardHeader>
-              <CardContent>
-                <Button type="submit" className="w-full" disabled={isPublishing}>
-                  {isPublishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                  Publish Post
-                </Button>
+              <CardContent className="space-y-4">
+                 <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Status:</span>
+                  <span className="font-semibold">Draft</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Visibility:</span>
+                  <span className="font-semibold">Public</span>
+                </div>
+                 <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground"/>
+                    <span className="text-muted-foreground">Publish:</span>
+                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                        <Button variant="link" className="p-0 h-auto font-semibold">
+                          {scheduledDate ? format(scheduledDate, "PPP") : "Immediately"}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={scheduledDate}
+                        onSelect={setScheduledDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 pt-4">
+                  <Button type="button" variant="outline" className="w-full" onClick={handleSaveDraft} disabled={isSavingDraft}>
+                     {isSavingDraft ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                     Save Draft
+                  </Button>
+                  <Button type="submit" className="w-full" disabled={isPublishing}>
+                    {isPublishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                    {scheduledDate ? 'Schedule' : 'Publish'}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
             
