@@ -52,17 +52,17 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        <div className="mr-4 flex items-center md:flex-1">
+      <div className="container flex h-16 items-center px-4 md:px-8">
+        <div className="flex-1 md:flex-initial">
           <Link href="/" className="flex items-center space-x-2">
             <Logo />
-            <span className="font-bold text-lg">ToolifyAI</span>
+            <span className="font-bold text-xl">ToolifyAI</span>
           </Link>
         </div>
 
         {isMobile ? (
           <>
-            <div className="flex flex-1 items-center justify-end">
+            <div className="flex flex-1 items-center justify-end space-x-2">
                <ModeToggle />
               <Sheet>
                 <SheetTrigger asChild>
@@ -76,7 +76,7 @@ export default function Header() {
                      <SheetTitle>
                       <Link href="/" className="flex items-center space-x-2">
                         <Logo />
-                        <span className="font-bold text-lg">ToolifyAI</span>
+                        <span className="font-bold text-xl">ToolifyAI</span>
                       </Link>
                     </SheetTitle>
                   </SheetHeader>
