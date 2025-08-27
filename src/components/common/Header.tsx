@@ -73,7 +73,12 @@ export default function Header() {
                 </SheetTrigger>
                 <SheetContent side="right">
                   <SheetHeader>
-                    <SheetTitle>Navigation Menu</SheetTitle>
+                    <SheetTitle>
+                      <Link href="/" className="flex items-center space-x-2">
+                        <Logo />
+                        <span className="font-bold">ToolifyAI</span>
+                      </Link>
+                    </SheetTitle>
                   </SheetHeader>
                   <div className="mt-8 flex flex-col space-y-4">
                     <NavLinks />
