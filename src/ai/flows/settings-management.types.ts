@@ -34,6 +34,9 @@ export const GeneralSettingsSchema = z.object({
   siteDescription: z.string().default('Over 100 smart utility tools and AI-powered solutions.'),
   metaKeywords: z.string().default('ai tools, utility, productivity, developer tools'),
   copyrightText: z.string().default('© {year} ToolifyAI. All rights reserved.'),
+  logoUrl: z.string().optional(),
+  faviconUrl: z.string().optional(),
+  contactEmail: z.string().email().optional(),
 });
 export type GeneralSettings = z.infer<typeof GeneralSettingsSchema>;
 
