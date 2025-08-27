@@ -4,9 +4,10 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, LayoutGrid } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname } from 'next/navigation';
+import { Logo } from './Logo';
 
 const NavLinks = () => {
   return (
@@ -55,7 +56,7 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex items-center">
           <Link href="/" className="flex items-center space-x-2">
-            <LayoutGrid className="h-6 w-6 text-primary" />
+            <Logo />
             <span className="font-bold">ToolifyAI</span>
           </Link>
         </div>

@@ -58,6 +58,7 @@ import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Logo } from '@/components/common/Logo';
 
 export default function AdminLayout({
   children,
@@ -133,7 +134,7 @@ export default function AdminLayout({
       <SheetHeader className="text-left border-b pb-4">
         <SheetTitle>
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <LayoutGrid className="h-6 w-6" />
+            <Logo />
             <span className="">ToolifyAI</span>
           </Link>
         </SheetTitle>
@@ -270,7 +271,7 @@ export default function AdminLayout({
         <div className="flex h-full max-h-screen flex-col">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
-              <LayoutGrid className="h-6 w-6" />
+              <Logo />
               <span className="">ToolifyAI</span>
             </Link>
             <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
@@ -407,7 +408,7 @@ export default function AdminLayout({
         <header className="flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-50">
            <div className="flex-1 md:hidden">
              <Link href="/" className="flex items-center gap-2 font-semibold">
-                <LayoutGrid className="h-6 w-6" />
+                <Logo />
                 <span className="">ToolifyAI</span>
              </Link>
            </div>
