@@ -5,7 +5,6 @@ import {
   Bell,
   Home,
   LineChart,
-  Package2,
   Settings,
   Users,
   PenSquare,
@@ -14,11 +13,10 @@ import {
   GitCommitVertical,
   Megaphone,
   DatabaseBackup,
-  Shield,
+  UserCog,
   Star,
   Mail,
   BookText,
-  UserCog,
   Ticket,
   FileText as FileTextIcon,
   PlusCircle,
@@ -32,7 +30,6 @@ import {
   CreditCard,
   FileCog,
   LogOut,
-  User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -136,7 +133,7 @@ export default function AdminLayout({
       <SheetHeader className="text-left border-b pb-4">
         <SheetTitle>
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <Package2 className="h-6 w-6" />
+            <LayoutGrid className="h-6 w-6" />
             <span className="">ToolifyAI</span>
           </Link>
         </SheetTitle>
@@ -148,8 +145,8 @@ export default function AdminLayout({
               key={link.href}
               href={link.href}
               className={cn(
-                'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
-                pathname === link.href && 'bg-muted text-foreground'
+                'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
               )}
             >
               <link.icon className="h-5 w-5" />
@@ -159,8 +156,8 @@ export default function AdminLayout({
           <Accordion type="single" collapsible defaultValue={isEmailRouteActive ? 'email-management' : undefined} className="w-full">
             <AccordionItem value="email-management" className="border-b-0">
               <AccordionTrigger className={cn(
-                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline',
-                  isEmailRouteActive && 'bg-muted text-foreground'
+                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
+                  isEmailRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
               )}>
                  <div className="flex items-center gap-4">
                   <Mail className="h-5 w-5" />
@@ -174,8 +171,8 @@ export default function AdminLayout({
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                      pathname === link.href && 'bg-muted text-primary'
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                      pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                     )}
                   >
                     <link.icon className="h-4 w-4" />
@@ -189,8 +186,8 @@ export default function AdminLayout({
           <Accordion type="single" collapsible defaultValue={isBlogRouteActive ? 'blog-management' : undefined} className="w-full">
             <AccordionItem value="blog-management" className="border-b-0">
               <AccordionTrigger className={cn(
-                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline',
-                  isBlogRouteActive && 'bg-muted text-foreground'
+                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
+                  isBlogRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
               )}>
                  <div className="flex items-center gap-4">
                   <BookText className="h-5 w-5" />
@@ -204,8 +201,8 @@ export default function AdminLayout({
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                      pathname === link.href && 'bg-muted text-primary'
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                      pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                     )}
                   >
                     <link.icon className="h-4 w-4" />
@@ -219,8 +216,8 @@ export default function AdminLayout({
           <Accordion type="single" collapsible defaultValue={isSettingsRouteActive ? 'settings' : undefined} className="w-full">
             <AccordionItem value="settings" className="border-b-0">
               <AccordionTrigger className={cn(
-                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline',
-                  isSettingsRouteActive && 'bg-muted text-foreground'
+                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
+                  isSettingsRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
               )}>
                  <div className="flex items-center gap-4">
                   <Settings className="h-5 w-5" />
@@ -234,8 +231,8 @@ export default function AdminLayout({
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                      pathname === link.href && 'bg-muted text-primary'
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                      pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                     )}
                   >
                     <link.icon className="h-4 w-4" />
@@ -273,7 +270,7 @@ export default function AdminLayout({
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
-              <Package2 className="h-6 w-6" />
+              <LayoutGrid className="h-6 w-6" />
               <span className="">ToolifyAI</span>
             </Link>
             <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
@@ -288,8 +285,8 @@ export default function AdminLayout({
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                    pathname === link.href && 'bg-muted text-primary'
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                    pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                   )}
                 >
                   <link.icon className="h-4 w-4" />
@@ -299,8 +296,8 @@ export default function AdminLayout({
               <Accordion type="single" collapsible defaultValue={isEmailRouteActive ? 'email-management' : undefined}>
                 <AccordionItem value="email-management" className="border-b-0">
                   <AccordionTrigger className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline',
-                      isEmailRouteActive && 'bg-muted text-primary'
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
+                      isEmailRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                   )}>
                      <div className="flex items-center gap-3">
                       <Mail className="h-4 w-4" />
@@ -314,8 +311,8 @@ export default function AdminLayout({
                         key={link.href}
                         href={link.href}
                         className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                          pathname === link.href && 'bg-muted text-primary'
+                          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                          pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                         )}
                       >
                         <link.icon className="h-4 w-4" />
@@ -329,8 +326,8 @@ export default function AdminLayout({
                <Accordion type="single" collapsible defaultValue={isBlogRouteActive ? 'blog-management' : undefined}>
                 <AccordionItem value="blog-management" className="border-b-0">
                   <AccordionTrigger className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline',
-                      isBlogRouteActive && 'bg-muted text-primary'
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
+                      isBlogRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                   )}>
                      <div className="flex items-center gap-3">
                       <BookText className="h-4 w-4" />
@@ -344,8 +341,8 @@ export default function AdminLayout({
                         key={link.href}
                         href={link.href}
                         className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                          pathname === link.href && 'bg-muted text-primary'
+                          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                          pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                         )}
                       >
                         <link.icon className="h-4 w-4" />
@@ -359,8 +356,8 @@ export default function AdminLayout({
               <Accordion type="single" collapsible defaultValue={isSettingsRouteActive ? 'settings' : undefined}>
                 <AccordionItem value="settings" className="border-b-0">
                   <AccordionTrigger className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline',
-                      isSettingsRouteActive && 'bg-muted text-primary'
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
+                      isSettingsRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                   )}>
                      <div className="flex items-center gap-3">
                       <Settings className="h-4 w-4" />
@@ -374,8 +371,8 @@ export default function AdminLayout({
                         key={link.href}
                         href={link.href}
                         className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                          pathname === link.href && 'bg-muted text-primary'
+                          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                          pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                         )}
                       >
                         <link.icon className="h-4 w-4" />
@@ -394,7 +391,7 @@ export default function AdminLayout({
         <header className="flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-50">
            <div className="flex-1 md:hidden">
              <Link href="/" className="flex items-center gap-2 font-semibold">
-                <Package2 className="h-6 w-6" />
+                <LayoutGrid className="h-6 w-6" />
                 <span className="">ToolifyAI</span>
              </Link>
            </div>
@@ -440,3 +437,5 @@ export default function AdminLayout({
     </div>
   );
 }
+
+    
