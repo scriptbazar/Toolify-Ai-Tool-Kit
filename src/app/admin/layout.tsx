@@ -137,7 +137,7 @@ export default function AdminLayout({
         <SheetTitle>ToolifyAI</SheetTitle>
       </SheetHeader>
       <ScrollArea className="flex-1">
-        <nav className="grid gap-2 text-lg font-medium p-4">
+        <nav className="grid gap-2 text-base font-medium p-4">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -421,7 +421,7 @@ export default function AdminLayout({
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col p-0">
+            <SheetContent side="right" className="flex flex-col p-0">
                {mobileNavContent}
             </SheetContent>
           </Sheet>
@@ -433,5 +433,3 @@ export default function AdminLayout({
     </div>
   );
 }
-
-    
