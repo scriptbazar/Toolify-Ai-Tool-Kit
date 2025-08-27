@@ -197,7 +197,7 @@ export default function CommunityChatPage() {
                   </div>
               </ScrollArea>
             </CardContent>
-            <CardFooter className="p-4 border-t">
+            <CardFooter className="p-2 border-t">
               <form onSubmit={handleSendMessage} className="relative w-full flex items-center gap-2">
                   <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
                       <Paperclip className="h-5 w-5"/>
