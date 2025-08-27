@@ -279,7 +279,7 @@ export default function AdminLayout({
             </Button>
           </div>
           <ScrollArea className="flex-1">
-            <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+            <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
