@@ -136,7 +136,7 @@ export default function AdminLayout({
     <>
       <SheetHeader className="text-left border-b p-4">
         <SheetTitle>
-          <Link href="/" className="flex items-center gap-2 font-semibold">
+           <Link href="/" className="flex items-center gap-2 font-semibold">
             <Logo />
             <span className="text-lg">ToolifyAI</span>
           </Link>
@@ -405,14 +405,15 @@ export default function AdminLayout({
       </div>
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-50">
-           <div className="flex-1 md:hidden">
+           <div className="flex-1 md:hidden pt-1.5">
              <Link href="/" className="flex items-center gap-2 font-semibold">
                 <Logo />
                 <span className="text-lg">ToolifyAI</span>
              </Link>
            </div>
           <div className="w-full flex-1 hidden md:block">&nbsp;</div>
-          <div className="flex-1 flex justify-end md:hidden">
+          <div className="flex-1 flex justify-end items-center gap-2 md:hidden">
+             <ModeToggle />
             <Sheet>
               <SheetTrigger asChild>
                 <Button
