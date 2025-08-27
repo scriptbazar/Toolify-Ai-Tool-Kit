@@ -19,6 +19,10 @@ import {
   BookText,
   UserCog,
   Ticket,
+  FileText as FileTextIcon,
+  PlusCircle,
+  LayoutGrid,
+  MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -44,7 +48,7 @@ import { auth } from '@/lib/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function AdminLayout({
   children,
@@ -87,10 +91,17 @@ export default function AdminLayout({
     { href: '/admin/administrators', icon: UserCog, label: 'Administrators' },
     { href: '/admin/review-management', icon: Star, label: 'Review Management' },
     { href: '/admin/email-management', icon: Mail, label: 'Email Management' },
-    { href: '/admin/blog-management', icon: BookText, label: 'Blog Management' },
     { href: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
 
+  const blogManagementLinks = [
+    { href: '/admin/blog/all-posts', icon: FileTextIcon, label: 'All Posts' },
+    { href: '/admin/blog/add-new', icon: PlusCircle, label: 'Add New Post' },
+    { href: '/admin/blog/categories', icon: LayoutGrid, label: 'Categories' },
+    { href: '/admin/blog/comments', icon: MessageSquare, label: 'Comments' },
+  ];
+
+  const isBlogRouteActive = pathname.startsWith('/admin/blog');
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -121,6 +132,36 @@ export default function AdminLayout({
                   {link.label}
                 </Link>
               ))}
+               <Accordion type="single" collapsible defaultValue={isBlogRouteActive ? 'blog-management' : undefined}>
+                <AccordionItem value="blog-management" className="border-b-0">
+                  <AccordionTrigger className={cn(
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline',
+                      isBlogRouteActive && 'bg-muted text-primary'
+                  )}>
+                     <div className="flex items-center gap-3">
+                      <BookText className="h-4 w-4" />
+                      <span>Blog Management</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pl-8 pt-1">
+                    <nav className="grid gap-1">
+                    {blogManagementLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={cn(
+                          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+                          pathname === link.href && 'bg-muted text-primary'
+                        )}
+                      >
+                        <link.icon className="h-4 w-4" />
+                        {link.label}
+                      </Link>
+                    ))}
+                    </nav>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </nav>
           </div>
         </div>
@@ -160,6 +201,17 @@ export default function AdminLayout({
                     {link.label}
                   </Link>
                 ))}
+                {/* Mobile Blog Management Accordion could be added here if needed */}
+                 <Link
+                    href={'/admin/blog-management'}
+                    className={cn(
+                      'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
+                       isBlogRouteActive && 'bg-muted text-foreground'
+                    )}
+                  >
+                    <BookText className="h-5 w-5" />
+                    Blog Management
+                  </Link>
               </nav>
             </SheetContent>
           </Sheet>
