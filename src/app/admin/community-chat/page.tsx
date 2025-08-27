@@ -142,7 +142,7 @@ export default function CommunityChatPage() {
               </p>
             </CardHeader>
             <CardContent className="flex-grow p-0">
-               <ScrollArea className="h-full max-h-[calc(100vh-28rem)] p-6" ref={scrollAreaRef}>
+               <ScrollArea className="h-full max-h-[calc(100vh-27rem)] p-4" ref={scrollAreaRef}>
                   <div className="space-y-6">
                       {messages.map((msg) => (
                           <div key={msg.id} className={cn("flex items-start gap-3", msg.from === 'Admin' ? 'flex-row-reverse' : '')}>
