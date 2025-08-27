@@ -210,12 +210,12 @@ export default function CommunityChatPage() {
                 <div className="space-y-1">
                     <div className="grid grid-cols-2 gap-1">
                         <Button variant="outline" onClick={() => setActiveUserFilter('all')}>
-                            <Users className="mr-2 h-4 w-4" /> All Members
+                            <span className="flex items-center"><Users className="mr-2 h-4 w-4" /> All Members</span>
                         </Button>
                         <Dialog open={isPollModalOpen} onOpenChange={setIsPollModalOpen}>
                             <DialogTrigger asChild>
                                 <Button variant="outline">
-                                    <Vote className="mr-2 h-4 w-4" /> Create Poll
+                                    <span className="flex items-center"><Vote className="mr-2 h-4 w-4" /> Create Poll</span>
                                 </Button>
                             </DialogTrigger>
                             <DialogContent>
@@ -256,10 +256,10 @@ export default function CommunityChatPage() {
                     </div>
                     <div className="grid w-full grid-cols-2 gap-1">
                         <Button variant={activeUserFilter === 'live' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('live')}>
-                            <Wifi className="mr-2 h-4 w-4"/>Live Users
+                           <span className="flex items-center"><Wifi className="mr-2 h-4 w-4"/>Live Users</span>
                         </Button>
                         <Button variant={activeUserFilter === 'new' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('new')}>
-                            <UserPlus className="mr-2 h-4 w-4"/>New Users
+                           <span className="flex items-center"><UserPlus className="mr-2 h-4 w-4"/>New Users</span>
                         </Button>
                     </div>
                 </div>
