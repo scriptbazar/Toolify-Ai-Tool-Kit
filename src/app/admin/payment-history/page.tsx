@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -25,7 +25,6 @@ import {
   XCircle,
   Clock,
   Search,
-  Upload,
   MoreHorizontal,
 } from 'lucide-react';
 import {
@@ -120,11 +119,18 @@ export default function PaymentHistoryPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const tabs: { id: FilterType; label: string; icon: React.ElementType }[] = [
-    { id: 'all', label: 'All', icon: FileText },
-    { id: 'completed', label: 'Completed', icon: CheckCircle2 },
-    { id: 'pending', label: 'Pending', icon: Clock },
-    { id: 'failed', label: 'Failed', icon: XCircle },
+  const counts = useMemo(() => ({
+    all: payments.length,
+    completed: payments.filter(p => p.status === 'completed').length,
+    pending: payments.filter(p => p.status === 'pending').length,
+    failed: payments.filter(p => p.status === 'failed').length,
+  }), [payments]);
+
+  const tabs: { id: FilterType; label: string; icon: React.ElementType; count: number }[] = [
+    { id: 'all', label: 'All Transactions', icon: FileText, count: counts.all },
+    { id: 'completed', label: 'Completed', icon: CheckCircle2, count: counts.completed },
+    { id: 'pending', label: 'Pending', icon: Clock, count: counts.pending },
+    { id: 'failed', label: 'Failed', icon: XCircle, count: counts.failed },
   ];
   
   const filteredPayments = payments.filter(p => {
@@ -162,7 +168,7 @@ export default function PaymentHistoryPage() {
                   className="shrink-0"
                 >
                   <tab.icon className="mr-2 h-4 w-4" />
-                  {tab.label}
+                  {tab.label} ({tab.count})
                 </Button>
               ))}
             </div>
@@ -176,10 +182,6 @@ export default function PaymentHistoryPage() {
                   className="pl-9 w-full sm:w-auto"
                 />
               </div>
-              <Button variant="outline">
-                <Upload className="mr-2 h-4 w-4" />
-                Export
-              </Button>
             </div>
           </div>
 
