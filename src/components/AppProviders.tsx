@@ -4,6 +4,7 @@
 import { usePathname } from 'next/navigation';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
+import { ChatWidget } from './common/ChatWidget';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -34,6 +35,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       {showHeaderFooter && <Header />}
       <div className="flex-1">{children}</div>
       {showHeaderFooter && <Footer />}
+      {showHeaderFooter && <ChatWidget />}
     </div>
   );
 }
