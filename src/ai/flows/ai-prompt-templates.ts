@@ -1,9 +1,10 @@
 'use server';
 
 /**
- * @fileOverview Manages AI prompt templates for different AI tools.
+ * @fileOverview Manages AI prompt templates for different AI tools in Firestore.
  *
  * - getPromptTemplate - Retrieves a prompt template by name.
+ * - getAllPromptTemplates - Retrieves all prompt templates.
  * - savePromptTemplate - Saves or updates a prompt template.
  * - AiPromptTemplateInput - The input type for prompt templates.
  * - AiPromptTemplateOutput - The return type for prompt templates.
@@ -11,29 +12,34 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {getFirestore} from 'firebase-admin/firestore';
+import {getApps, initializeApp} from 'firebase-admin/app';
 
-const AiPromptTemplateInputSchema = z.object({
-  name: z.string().describe('The name of the prompt template.'),
+// Initialize Firebase Admin SDK if not already done
+if (!getApps().length) {
+  initializeApp();
+}
+const db = getFirestore();
+const templatesCollection = db.collection('promptTemplates');
+
+const AiPromptTemplateSchema = z.object({
+  name: z.string().describe('The unique name of the prompt template.'),
   content: z.string().describe('The content of the prompt template.'),
   description: z.string().optional().describe('A description of the prompt template.'),
 });
-export type AiPromptTemplateInput = z.infer<typeof AiPromptTemplateInputSchema>;
-
-const AiPromptTemplateOutputSchema = z.object({
-  name: z.string().describe('The name of the prompt template.'),
-  content: z.string().describe('The content of the prompt template.'),
-  description: z.string().optional().describe('A description of the prompt template.'),
-});
-export type AiPromptTemplateOutput = z.infer<typeof AiPromptTemplateOutputSchema>;
+export type AiPromptTemplateInput = z.infer<typeof AiPromptTemplateSchema>;
+export type AiPromptTemplateOutput = z.infer<typeof AiPromptTemplateSchema>;
 
 const GetPromptTemplateInputSchema = z.object({
   name: z.string(),
 });
-export type GetPromptTemplateInput = z.infer<typeof GetPromptTemplateInputSchema>;
-
 
 export async function getPromptTemplate(name: string): Promise<AiPromptTemplateOutput | undefined> {
   return getPromptTemplateFlow({name});
+}
+
+export async function getAllPromptTemplates(): Promise<AiPromptTemplateOutput[]> {
+    return getAllPromptTemplatesFlow();
 }
 
 export async function savePromptTemplate(input: AiPromptTemplateInput): Promise<AiPromptTemplateOutput> {
@@ -44,32 +50,41 @@ const getPromptTemplateFlow = ai.defineFlow(
   {
     name: 'getPromptTemplateFlow',
     inputSchema: GetPromptTemplateInputSchema,
-    outputSchema: AiPromptTemplateOutputSchema.optional(),
+    outputSchema: AiPromptTemplateSchema.optional(),
   },
   async ({name}) => {
-    // TODO: Replace with actual database lookup
-    const template = promptTemplates.find(template => template.name === name);
-    return template;
+    const docSnap = await templatesCollection.doc(name).get();
+    if (!docSnap.exists) {
+      return undefined;
+    }
+    return docSnap.data() as AiPromptTemplateOutput;
   }
 );
+
+const getAllPromptTemplatesFlow = ai.defineFlow(
+    {
+      name: 'getAllPromptTemplatesFlow',
+      outputSchema: z.array(AiPromptTemplateSchema),
+    },
+    async () => {
+      const snapshot = await templatesCollection.get();
+      if (snapshot.empty) {
+        return [];
+      }
+      return snapshot.docs.map(doc => doc.data() as AiPromptTemplateOutput);
+    }
+);
+
 
 const savePromptTemplateFlow = ai.defineFlow(
   {
     name: 'savePromptTemplateFlow',
-    inputSchema: AiPromptTemplateInputSchema,
-    outputSchema: AiPromptTemplateOutputSchema,
+    inputSchema: AiPromptTemplateSchema,
+    outputSchema: AiPromptTemplateSchema,
   },
   async input => {
-    // TODO: Replace with actual database save/update logic
-    const existingIndex = promptTemplates.findIndex(template => template.name === input.name);
-    if (existingIndex > -1) {
-      promptTemplates[existingIndex] = input;
-    } else {
-      promptTemplates.push(input);
-    }
+    // Using the 'name' field as the document ID for easy retrieval.
+    await templatesCollection.doc(input.name).set(input, { merge: true });
     return input;
   }
 );
-
-// In-memory storage for prompt templates (replace with database)
-const promptTemplates: AiPromptTemplateOutput[] = [];

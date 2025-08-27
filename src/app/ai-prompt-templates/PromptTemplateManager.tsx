@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { getPromptTemplate, savePromptTemplate, type AiPromptTemplateOutput } from '@/ai/flows/ai-prompt-templates';
+import { getAllPromptTemplates, savePromptTemplate, type AiPromptTemplateOutput } from '@/ai/flows/ai-prompt-templates';
 import { tools } from '@/lib/constants';
 
 const formSchema = z.object({
@@ -46,25 +46,29 @@ export default function PromptTemplateManager() {
   const loadInitialTemplates = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Fetch all templates that might exist.
-      const existingTemplatesPromises = defaultTemplates.map(t => getPromptTemplate(t.name));
-      const existingTemplates = (await Promise.all(existingTemplatesPromises)).filter(Boolean) as AiPromptTemplateOutput[];
+      // First, get all templates that already exist in Firestore.
+      let existingTemplates = await getAllPromptTemplates();
       
-      const templatesToCreate = defaultTemplates.filter(
+      // Determine which default templates are missing from Firestore.
+      const missingTemplates = defaultTemplates.filter(
         defaultT => !existingTemplates.some(existingT => existingT.name === defaultT.name)
       );
 
-      // If there are templates that don't exist in the "database", create them now.
-      if (templatesToCreate.length > 0) {
-        const newTemplatesPromises = templatesToCreate.map(t => savePromptTemplate(t));
-        const newTemplates = await Promise.all(newTemplatesPromises);
-        setTemplates([...existingTemplates, ...newTemplates]);
-      } else {
-        setTemplates(existingTemplates);
+      // If there are missing templates, save them to Firestore.
+      if (missingTemplates.length > 0) {
+        await Promise.all(missingTemplates.map(t => savePromptTemplate(t)));
+        // Reload all templates to get a fresh list including the new ones.
+        existingTemplates = await getAllPromptTemplates();
+      }
+      
+      setTemplates(existingTemplates);
+
+      if (existingTemplates.length > 0 && !selectedTemplate) {
+        setSelectedTemplate(existingTemplates[0]);
       }
 
     } catch (error) {
-      console.error('Failed to load templates:', error);
+      console.error('Failed to load or create templates:', error);
       toast({
         title: 'Error',
         description: 'Could not load prompt templates.',
@@ -73,7 +77,7 @@ export default function PromptTemplateManager() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, selectedTemplate]);
 
 
   useEffect(() => {
@@ -95,15 +99,9 @@ export default function PromptTemplateManager() {
         title: 'Success!',
         description: `Template "${saved.name}" has been saved.`,
       });
-      setTemplates(prev => {
-        const existingIndex = prev.findIndex(t => t.name === saved.name);
-        if (existingIndex > -1) {
-          const updated = [...prev];
-          updated[existingIndex] = saved;
-          return updated;
-        }
-        return [...prev, saved];
-      });
+      // Refresh the list from the source of truth
+      const allTemplates = await getAllPromptTemplates();
+      setTemplates(allTemplates);
       setSelectedTemplate(saved);
     } catch (error) {
       console.error('Failed to save template:', error);
