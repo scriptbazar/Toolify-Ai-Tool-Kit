@@ -56,10 +56,9 @@ export function ChatWidget() {
     const formData = new FormData(e.currentTarget);
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
-    const message = formData.get('message') as string;
 
     try {
-      await addLeadUser({ name, email, message });
+      await addLeadUser({ name, email, message: "User started a chat." });
       toast({
         title: 'Thank you!',
         description: "Your information has been saved. You can now chat with our AI.",
@@ -116,10 +115,6 @@ export function ChatWidget() {
             <Label htmlFor="email">Email</Label>
             <Input id="email" name="email" type="email" placeholder="Enter your email" required disabled={isSubmittingContact} />
           </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="message">Message</Label>
-          <Textarea id="message" name="message" placeholder="Your message..." required className="min-h-[100px]" disabled={isSubmittingContact} />
         </div>
       </CardContent>
       <CardFooter className="p-4 border-t">
@@ -192,7 +187,7 @@ export function ChatWidget() {
       {isOpen && (
         <div
           className={cn(
-            'fixed bottom-24 right-6 z-50 w-full max-w-sm transition-all duration-300 ease-in-out',
+            'fixed bottom-24 right-6 z-50 w-full max-w-sm',
             'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-bottom-2 data-[state=open]:slide-in-from-bottom-2'
           )}
           data-state={isOpen ? 'open' : 'closed'}
