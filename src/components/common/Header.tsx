@@ -51,7 +51,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        <div className="mr-4 flex items-center">
+        <div className="mr-4 flex items-center md:flex-1">
           <Link href="/" className="flex items-center space-x-2">
             <Logo />
             <span className="font-bold">ToolifyAI</span>
@@ -85,10 +85,10 @@ export default function Header() {
                    <div className="mt-auto p-4 border-t">
                       <div className="flex gap-2">
                         <Button asChild variant="ghost" className="flex-1">
-                           <Link href="/login"><LogIn className="mr-2" /> Log in</Link>
+                           <Link href="/login"><LogIn className="mr-2 h-4 w-4" /> Log in</Link>
                         </Button>
                         <Button asChild className="flex-1">
-                           <Link href="/signup"><UserPlus className="mr-2" /> Sign Up</Link>
+                           <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" /> Sign Up</Link>
                         </Button>
                       </div>
                   </div>
@@ -98,17 +98,17 @@ export default function Header() {
           </>
         ) : (
           <>
-            <nav className="flex items-center space-x-1 text-sm font-medium">
+            <nav className="flex flex-1 items-center justify-center space-x-1 text-sm font-medium">
               <NavLinks />
             </nav>
             <div className="flex flex-1 items-center justify-end space-x-2">
             {!isAdminRoute && (
               <>
                 <Button asChild variant="ghost">
-                  <Link href="/login">Log in</Link>
+                  <Link href="/login"><LogIn className="mr-2 h-4 w-4" />Log in</Link>
                 </Button>
                 <Button asChild>
-                  <Link href="/signup">Sign Up</Link>
+                  <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" />Sign Up</Link>
                 </Button>
               </>
             )}
