@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Diamond, RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Check } from 'lucide-react';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Check, Bot, User } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
@@ -135,7 +135,7 @@ export default function CommunityChatPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-14rem)]">
         <div className="lg:col-span-2 flex flex-col h-full">
            <Card className="flex-grow flex flex-col">
-            <CardHeader>
+            <CardHeader className="pb-4">
               <CardTitle>Live Chat Feed</CardTitle>
               <p className="text-muted-foreground text-sm">
                   All messages from users and the AI assistant.
