@@ -28,9 +28,19 @@ export const ReferralSettingsSchema = z.object({
 });
 export type ReferralSettings = z.infer<typeof ReferralSettingsSchema>;
 
+export const GeneralSettingsSchema = z.object({
+  siteTitle: z.string().default('ToolifyAI'),
+  slogan: z.string().default('Your All-in-One Smart Toolkit'),
+  siteDescription: z.string().default('Over 100 smart utility tools and AI-powered solutions.'),
+  metaKeywords: z.string().default('ai tools, utility, productivity, developer tools'),
+  copyrightText: z.string().default('© {year} ToolifyAI. All rights reserved.'),
+});
+export type GeneralSettings = z.infer<typeof GeneralSettingsSchema>;
+
 
 export const AppSettingsSchema = z.object({
   advertisement: AdvertisementSettingsSchema.optional(),
   referral: ReferralSettingsSchema.optional(),
+  general: GeneralSettingsSchema.optional(),
 });
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
