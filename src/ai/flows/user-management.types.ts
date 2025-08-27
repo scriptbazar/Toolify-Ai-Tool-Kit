@@ -12,6 +12,6 @@ export type UpdateUserRoleInput = z.infer<typeof UpdateUserRoleInputSchema>;
 export const AddLeadUserInputSchema = z.object({
   name: z.string().describe("The name of the lead."),
   email: z.string().email().describe("The email of the lead."),
-  message: z.string().describe("The initial message from the lead."),
+  message: z.string().optional().describe("The initial message from the lead."),
 });
 export type AddLeadUserInput = z.infer<typeof AddLeadUserInputSchema>;
