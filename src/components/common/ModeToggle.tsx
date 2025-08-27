@@ -17,7 +17,7 @@ export function ModeToggle() {
 
   if (!mounted) {
     // Render a placeholder or nothing until mounted
-    return <div className="h-6 w-11" />
+    return <div className="w-11 h-6" />
   }
 
   const isDarkMode = theme === "dark"
@@ -27,15 +27,13 @@ export function ModeToggle() {
   }
 
   return (
-    <div className="flex items-center space-x-2">
-      <Sun className="h-5 w-5 text-yellow-500" />
+    <div className="flex items-center">
       <Switch
         id="theme-toggle"
         checked={isDarkMode}
         onCheckedChange={toggleTheme}
         aria-label="Toggle dark mode"
       />
-      <Moon className="h-5 w-5 text-gray-400" />
       <Label htmlFor="theme-toggle" className="sr-only">
         Toggle theme
       </Label>
