@@ -23,6 +23,9 @@ import {
   PlusCircle,
   LayoutGrid,
   MessageSquare,
+  BarChart3,
+  Cog,
+  UserPlus,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -90,7 +93,6 @@ export default function AdminLayout({
     { href: '/admin/backup-restore', icon: DatabaseBackup, label: 'Backup & Restore' },
     { href: '/admin/administrators', icon: UserCog, label: 'Administrators' },
     { href: '/admin/review-management', icon: Star, label: 'Review Management' },
-    { href: '/admin/email-management', icon: Mail, label: 'Email Management' },
     { href: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
 
@@ -101,7 +103,17 @@ export default function AdminLayout({
     { href: '/admin/blog/comments', icon: MessageSquare, label: 'Comments' },
   ];
 
+  const emailManagementLinks = [
+    { href: '/admin/email/templates', icon: FileTextIcon, label: 'Email Templates' },
+    { href: '/admin/email/subscribers', icon: UserPlus, label: 'Subscribers' },
+    { href: '/admin/email/compose', icon: PenSquare, label: 'Compose' },
+    { href: '/admin/email/all-emails', icon: History, label: 'All Emails' },
+    { href: '/admin/email/reports', icon: BarChart3, label: 'Email Reports' },
+    { href: '/admin/email/settings', icon: Cog, label: 'Mail Settings' },
+  ];
+
   const isBlogRouteActive = pathname.startsWith('/admin/blog');
+  const isEmailRouteActive = pathname.startsWith('/admin/email');
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -132,6 +144,36 @@ export default function AdminLayout({
                   {link.label}
                 </Link>
               ))}
+              <Accordion type="single" collapsible defaultValue={isEmailRouteActive ? 'email-management' : undefined}>
+                <AccordionItem value="email-management" className="border-b-0">
+                  <AccordionTrigger className={cn(
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline',
+                      isEmailRouteActive && 'bg-muted text-primary'
+                  )}>
+                     <div className="flex items-center gap-3">
+                      <Mail className="h-4 w-4" />
+                      <span>Email Management</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pl-8 pt-1">
+                    <nav className="grid gap-1">
+                    {emailManagementLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={cn(
+                          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+                          pathname === link.href && 'bg-muted text-primary'
+                        )}
+                      >
+                        <link.icon className="h-4 w-4" />
+                        {link.label}
+                      </Link>
+                    ))}
+                    </nav>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
                <Accordion type="single" collapsible defaultValue={isBlogRouteActive ? 'blog-management' : undefined}>
                 <AccordionItem value="blog-management" className="border-b-0">
                   <AccordionTrigger className={cn(
