@@ -47,8 +47,8 @@ export default function Footer() {
   return (
     <footer className="bg-card text-card-foreground border-t">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          <div className="md:col-span-2 lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <Logo />
               <span className="font-bold text-xl">ToolifyAI</span>
@@ -70,56 +70,58 @@ export default function Footer() {
             </div>
           </div>
 
-          <div>
-            <h3 className="font-semibold mb-4">Top Tools</h3>
-            <ul className="space-y-3">
-              {topTools.map((tool) => (
-                <li key={tool.name}>
-                  <Link href={tool.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {tool.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-8">
+             <div>
+              <h3 className="font-semibold mb-4">Top Tools</h3>
+              <ul className="space-y-3">
+                {topTools.map((tool) => (
+                  <li key={tool.name}>
+                    <Link href={tool.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      {tool.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div>
-            <h3 className="font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-3">
-              {quickLinks.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-           <div>
-            <h3 className="font-semibold mb-4">More Tools</h3>
-            <ul className="space-y-3">
-              {moreTools.map((tool) => (
-                <li key={tool.name}>
-                  <Link href={tool.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {tool.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div>
+              <h3 className="font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-3">
+                {quickLinks.map((link) => (
+                  <li key={link.name}>
+                    <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+             <div>
+              <h3 className="font-semibold mb-4">More Tools</h3>
+              <ul className="space-y-3">
+                {moreTools.map((tool) => (
+                  <li key={tool.name}>
+                    <Link href={tool.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      {tool.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div>
-            <h3 className="font-semibold mb-4">Best Hostings</h3>
-            <ul className="space-y-3">
-              {bestHostings.map((hosting) => (
-                <li key={hosting.name}>
-                  <Link href={hosting.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {hosting.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <div>
+              <h3 className="font-semibold mb-4">Best Hostings</h3>
+              <ul className="space-y-3">
+                {bestHostings.map((hosting) => (
+                  <li key={hosting.name}>
+                    <Link href={hosting.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      {hosting.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
