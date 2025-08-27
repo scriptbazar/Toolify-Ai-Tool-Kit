@@ -6,6 +6,7 @@
  *
  * - updateUserRole - A function that updates a user's role in the database.
  * - addLeadUser - Saves lead information from the chat widget.
+ * - getAllEmails - Fetches all unique emails from both users and leads collections.
  */
 
 import { z } from 'zod';
@@ -23,7 +24,7 @@ const db = getFirestore();
 
 export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ success: boolean; message: string }> {
   try {
-    const { userId, newRole } = UpdateUserRoleInputSchema.parse(input);
+    const { userId, newRole } = UpdateUserRoleRoleInputSchema.parse(input);
     const userRef = db.collection('users').doc(userId);
     await userRef.update({ role: newRole });
     return { success: true, message: 'User role updated successfully.' };
@@ -53,5 +54,49 @@ export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: b
       return { success: false, message: `Validation error: ${error.errors.map(e => e.message).join(', ')}` };
     }
     return { success: false, message: error.message || 'An unknown error occurred.' };
+  }
+}
+
+export async function getAllEmails(): Promise<{ email: string; source: string; date: string }[]> {
+  try {
+    const usersSnapshot = await db.collection('users').get();
+    const leadsSnapshot = await db.collection('leads').get();
+
+    const emailMap = new Map<string, { source: string; date: string }>();
+
+    usersSnapshot.forEach(doc => {
+      const data = doc.data();
+      const email = data.email;
+      if (email && !emailMap.has(email)) {
+        emailMap.set(email, {
+          source: 'Signup',
+          date: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+        });
+      }
+    });
+
+    leadsSnapshot.forEach(doc => {
+      const data = doc.data();
+      const email = data.email;
+      if (email && !emailMap.has(email)) {
+        emailMap.set(email, {
+          source: 'Lead',
+          date: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+        });
+      }
+    });
+    
+    const allEmails = Array.from(emailMap.entries()).map(([email, { source, date }]) => ({
+      email,
+      source,
+      date,
+    }));
+
+    allEmails.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return allEmails;
+  } catch (error) {
+    console.error("Error fetching all emails:", error);
+    return [];
   }
 }
