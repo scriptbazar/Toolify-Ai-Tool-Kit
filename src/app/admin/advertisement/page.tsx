@@ -135,18 +135,20 @@ export default function AdvertisementPage() {
                 Place specific ads in predefined locations.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {manualAdSlots.map((slot) => (
-                <div key={slot.id}>
-                  <Label htmlFor={`manual-ad-${slot.id}`}>{slot.name}</Label>
-                  <Textarea
-                    id={`manual-ad-${slot.id}`}
-                    placeholder={`Paste ad code for ${slot.name}`}
-                    className="min-h-[100px] font-mono text-xs"
-                     disabled={adType !== 'manual'}
-                  />
-                </div>
-              ))}
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {manualAdSlots.map((slot) => (
+                  <div key={slot.id} className="space-y-2">
+                    <Label htmlFor={`manual-ad-${slot.id}`}>{slot.name}</Label>
+                    <Textarea
+                      id={`manual-ad-${slot.id}`}
+                      placeholder={`Paste ad code for ${slot.name}`}
+                      className="min-h-[100px] font-mono text-xs"
+                      disabled={adType !== 'manual'}
+                    />
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
          </div>
