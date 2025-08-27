@@ -94,7 +94,6 @@ export default function AdminLayout({
     { href: '/admin/dashboard', icon: Home, label: 'Dashboard' },
     { href: '/admin/users', icon: Users, label: 'User Management' },
     { href: '/admin/tools', icon: Package, label: 'Tool Management' },
-    { href: '/admin/prompt-templates', icon: PenSquare, label: 'Prompt Templates' },
     { href: '/admin/analytics', icon: LineChart, label: 'Analytics' },
     { href: '/admin/ticket-management', icon: Ticket, label: 'Ticket Management'},
     { href: '/admin/payment-history', icon: History, label: 'Payment History' },
