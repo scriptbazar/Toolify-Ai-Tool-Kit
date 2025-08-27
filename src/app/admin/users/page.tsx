@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, MoreHorizontal } from 'lucide-react';
+import { AlertCircle, MoreHorizontal, User, Bot, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { updateUserRole, type UpdateUserRoleInput } from '@/ai/flows/user-management';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 
 interface User {
@@ -38,8 +39,20 @@ interface User {
   };
 }
 
+interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  createdAt?: {
+    seconds: number;
+    nanoseconds: number;
+  };
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -47,7 +60,7 @@ export default function AdminUsersPage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
-  const fetchUsers = async () => {
+  const fetchUsersAndLeads = async () => {
     setLoading(true);
     try {
       const usersCollection = collection(db, 'users');
@@ -57,13 +70,22 @@ export default function AdminUsersPage() {
         ...doc.data(),
       })) as User[];
       setUsers(usersList);
+      
+      const leadsQuery = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
+      const leadsSnapshot = await getDocs(leadsQuery);
+      const leadsList = leadsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Lead[];
+      setLeads(leadsList);
+      
       setError(null);
     } catch (err: any) {
-      console.error("Error fetching users:", err);
+      console.error("Error fetching data:", err);
       if (err.code === 'permission-denied' || err.code === 'failed-precondition') {
            setError("Access Denied: You don't have permission to view this page. Please ensure you are logged in with an admin account and that your Firestore security rules allow admin access.");
       } else {
-          setError('Failed to load users. Please try again later.');
+          setError('Failed to load data. Please try again later.');
       }
     } finally {
       setLoading(false);
@@ -71,7 +93,7 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsersAndLeads();
   }, []);
   
   const handleEditClick = (user: User) => {
@@ -93,10 +115,9 @@ export default function AdminUsersPage() {
         title: 'Success!',
         description: `User role for ${selectedUser.email} has been updated.`,
       });
-      // Refresh user list
-      await fetchUsers();
+      await fetchUsersAndLeads();
       setIsEditDialogOpen(false);
-    } catch (error: any) {
+    } catch (error: any)dea
       console.error("Failed to update role:", error);
       toast({
         title: 'Error',
@@ -113,14 +134,14 @@ export default function AdminUsersPage() {
     if (!timestamp || typeof timestamp.seconds !== 'number') {
       return 'N/A';
     }
-    return new Date(timestamp.seconds * 1000).toLocaleDateString();
+    return new Date(timestamp.seconds * 1000).toLocaleString();
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
+    <div className="container mx-auto px-4 py-8 md:py-12 space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle>User Management</CardTitle>
+          <CardTitle>Registered Users</CardTitle>
           <CardDescription>View and manage all registered users.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -151,7 +172,12 @@ export default function AdminUsersPage() {
                   users.map(user => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">
-                        {user.firstName} {user.lastName}
+                         <div className="flex items-center gap-2">
+                           <Avatar className="h-8 w-8">
+                              <AvatarFallback>{user.firstName?.[0] || 'U'}</AvatarFallback>
+                           </Avatar>
+                           <span>{user.firstName} {user.lastName}</span>
+                         </div>
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.userName}</TableCell>
@@ -181,13 +207,52 @@ export default function AdminUsersPage() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center">
-                      No users found.
+                      No registered users found.
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
           )}
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Chatbot Leads</CardTitle>
+          <CardDescription>Users who have interacted with the AI chatbot.</CardDescription>
+        </CardHeader>
+        <CardContent>
+           {!loading && !error && (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Initial Message</TableHead>
+                  <TableHead>Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {leads.length > 0 ? (
+                  leads.map(lead => (
+                    <TableRow key={lead.id}>
+                      <TableCell className="font-medium">{lead.name}</TableCell>
+                      <TableCell>{lead.email}</TableCell>
+                       <TableCell className="max-w-xs truncate">{lead.message}</TableCell>
+                      <TableCell>{formatDate(lead.createdAt)}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center">
+                      No leads found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+           )}
         </CardContent>
       </Card>
       

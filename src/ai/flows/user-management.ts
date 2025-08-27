@@ -6,6 +6,7 @@
  *
  * - updateUserRole - A function that updates a user's role in the database.
  * - UpdateUserRoleInput - The input type for the updateUserRole function.
+ * - addLeadUser - Saves lead information from the chat widget.
  */
 
 import { ai } from '@/ai/genkit';
@@ -54,6 +55,42 @@ const updateUserRoleFlow = ai.defineFlow(
         throw new Error(`Failed to update user role: ${error.message}`);
       }
       throw new Error('An unknown error occurred while updating user role.');
+    }
+  }
+);
+
+
+// New flow and types for adding a lead user
+export const AddLeadUserInputSchema = z.object({
+  name: z.string().describe("The name of the lead."),
+  email: z.string().email().describe("The email of the lead."),
+  message: z.string().describe("The initial message from the lead."),
+});
+export type AddLeadUserInput = z.infer<typeof AddLeadUserInputSchema>;
+
+export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: boolean; leadId: string }> {
+  return addLeadUserFlow(input);
+}
+
+const addLeadUserFlow = ai.defineFlow(
+  {
+    name: 'addLeadUserFlow',
+    inputSchema: AddLeadUserInputSchema,
+    outputSchema: z.object({ success: z.boolean(), leadId: z.string() }),
+  },
+  async (input) => {
+    try {
+      const leadRef = await db.collection('leads').add({
+        ...input,
+        createdAt: new Date(),
+      });
+      return { success: true, leadId: leadRef.id };
+    } catch (error) {
+      console.error("Error adding lead user:", error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to save lead: ${error.message}`);
+      }
+      throw new Error('An unknown error occurred while saving the lead.');
     }
   }
 );

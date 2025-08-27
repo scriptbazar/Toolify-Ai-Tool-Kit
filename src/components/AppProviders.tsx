@@ -29,13 +29,15 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   const isUserPanelRoute = userPanelRoutes.includes(pathname);
 
   const showHeaderFooter = !authRoutes.includes(pathname) && !isAdminRoute && !isUserPanelRoute;
+  const showChatWidget = !authRoutes.includes(pathname) && !isAdminRoute;
+
 
   return (
     <div className="relative flex min-h-screen flex-col">
       {showHeaderFooter && <Header />}
       <div className="flex-1">{children}</div>
       {showHeaderFooter && <Footer />}
-      {showHeaderFooter && <ChatWidget />}
+      {showChatWidget && <ChatWidget />}
     </div>
   );
 }
