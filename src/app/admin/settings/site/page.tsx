@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -129,28 +130,30 @@ export default function SiteSettingsPage() {
               />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="siteDescription">Site Description</Label>
-            <Textarea 
-              id="siteDescription" 
-              name="siteDescription"
-              value={settings.siteDescription}
-              onChange={handleInputChange}
-              placeholder="A brief description of your site." 
-              className="min-h-[100px]"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="metaKeywords">Meta Keywords</Label>
-            <Textarea 
-              id="metaKeywords" 
-              name="metaKeywords"
-              value={settings.metaKeywords}
-              onChange={handleInputChange}
-              placeholder="e.g., ai tools, productivity, seo" 
-              className="min-h-[80px]"
-            />
-             <p className="text-sm text-muted-foreground">Separate keywords with commas.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="siteDescription">Site Description</Label>
+              <Textarea 
+                id="siteDescription" 
+                name="siteDescription"
+                value={settings.siteDescription}
+                onChange={handleInputChange}
+                placeholder="A brief description of your site." 
+                className="min-h-[100px]"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="metaKeywords">Meta Keywords</Label>
+              <Textarea 
+                id="metaKeywords" 
+                name="metaKeywords"
+                value={settings.metaKeywords}
+                onChange={handleInputChange}
+                placeholder="e.g., ai tools, productivity, seo" 
+                className="min-h-[100px]"
+              />
+               <p className="text-sm text-muted-foreground">Separate keywords with commas.</p>
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="copyrightText">Copyright Text</Label>
