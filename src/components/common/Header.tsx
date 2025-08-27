@@ -53,15 +53,14 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 md:px-8">
-        <div className="flex-1 md:flex-initial">
-          <Link href="/" className="flex items-center space-x-2">
-            <Logo />
-            <span className="font-bold text-xl">ToolifyAI</span>
-          </Link>
-        </div>
-
         {isMobile ? (
-          <>
+           <div className="container flex h-16 items-center px-0">
+            <div className="flex-1">
+              <Link href="/" className="flex items-center space-x-2">
+                <Logo />
+                <span className="font-bold text-xl">ToolifyAI</span>
+              </Link>
+            </div>
             <div className="flex flex-1 items-center justify-end space-x-2">
                <ModeToggle />
               <Sheet>
@@ -98,9 +97,15 @@ export default function Header() {
                 </SheetContent>
               </Sheet>
             </div>
-          </>
+            </div>
         ) : (
           <>
+            <div className="flex-1 md:flex-initial">
+              <Link href="/" className="flex items-center space-x-2">
+                <Logo />
+                <span className="font-bold text-xl">ToolifyAI</span>
+              </Link>
+            </div>
             <nav className="flex flex-1 items-center justify-center space-x-1 text-sm font-medium">
               <NavLinks />
             </nav>
