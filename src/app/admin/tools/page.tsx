@@ -16,8 +16,21 @@ import { tools, toolCategories, type Tool } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Sparkles, CheckCircle, XCircle, Package } from 'lucide-react';
+import { Search, Star, Sparkles, CheckCircle, XCircle, Package, MoreHorizontal } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+    DropdownMenuSub,
+    DropdownMenuSubTrigger,
+    DropdownMenuSubContent,
+    DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu";
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 // Extend tool type for filtering demo
 type ToolWithStatus = Tool & {
@@ -27,10 +40,10 @@ type ToolWithStatus = Tool & {
 };
 
 // Add dummy data for demonstration
-const toolsWithStatus: ToolWithStatus[] = tools.map((tool, index) => ({
+const initialToolsWithStatus: ToolWithStatus[] = tools.map((tool, index) => ({
   ...tool,
   plan: index % 3 === 0 ? 'Pro' : 'Free',
-  isNew: index === 1,
+  isNew: index < 3, // Make first 3 tools new
   status: 'Active',
 }));
 
@@ -39,28 +52,28 @@ type FilterType = 'all' | 'pro' | 'free' | 'new' | 'active' | 'disabled';
 const ITEMS_PER_PAGE = 10;
 
 export default function AdminToolsPage() {
+  const [toolsList, setToolsList] = useState<ToolWithStatus[]>(initialToolsWithStatus);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-
+  const { toast } = useToast();
 
   const getCategoryName = (categoryId: string) => {
     return toolCategories.find(c => c.id === categoryId)?.name || 'Unknown';
   };
   
   const counts = useMemo(() => ({
-    all: toolsWithStatus.length,
-    pro: toolsWithStatus.filter(t => t.plan === 'Pro').length,
-    free: toolsWithStatus.filter(t => t.plan === 'Free').length,
-    new: toolsWithStatus.filter(t => t.isNew).length,
-    active: toolsWithStatus.filter(t => t.status === 'Active').length,
-    disabled: toolsWithStatus.filter(t => t.status === 'Disabled').length,
-  }), []);
-
+    all: toolsList.length,
+    pro: toolsList.filter(t => t.plan === 'Pro').length,
+    free: toolsList.filter(t => t.plan === 'Free').length,
+    new: toolsList.filter(t => t.isNew).length,
+    active: toolsList.filter(t => t.status === 'Active').length,
+    disabled: toolsList.filter(t => t.status === 'Disabled').length,
+  }), [toolsList]);
 
   const filteredTools = useMemo(() => {
-    return toolsWithStatus
+    return toolsList
       .filter(tool => {
         if (activeFilter === 'all') return true;
         if (activeFilter === 'pro') return tool.plan === 'Pro';
@@ -77,7 +90,7 @@ export default function AdminToolsPage() {
       .filter(tool =>
         tool.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
-  }, [activeFilter, selectedCategory, searchQuery]);
+  }, [activeFilter, selectedCategory, searchQuery, toolsList]);
   
   const paginatedTools = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -85,6 +98,18 @@ export default function AdminToolsPage() {
   }, [filteredTools, currentPage]);
 
   const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
+  
+  const handleUpdateTool = (slug: string, updates: Partial<ToolWithStatus>) => {
+    setToolsList(prevList =>
+      prevList.map(tool =>
+        tool.slug === slug ? { ...tool, ...updates } : tool
+      )
+    );
+    toast({
+      title: "Tool Updated",
+      description: `The tool "${tools.find(t => t.slug === slug)?.name}" has been updated.`,
+    });
+  };
 
   const handleFilterChange = (filter: FilterType) => {
     setActiveFilter(filter);
@@ -163,6 +188,7 @@ export default function AdminToolsPage() {
                 <TableHead>Category</TableHead>
                 <TableHead>Plan</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -182,11 +208,54 @@ export default function AdminToolsPage() {
                   <TableCell>
                     <Badge variant={tool.status === 'Active' ? 'default' : 'destructive'} className={cn(tool.status === 'Active' && 'bg-green-500 hover:bg-green-600')}>{tool.status}</Badge>
                   </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Actions for {tool.name}</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuSub>
+                           <DropdownMenuSubTrigger>Change Plan</DropdownMenuSubTrigger>
+                           <DropdownMenuSubContent>
+                                <DropdownMenuItem onClick={() => handleUpdateTool(tool.slug, { plan: 'Free' })}>
+                                    Free
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleUpdateTool(tool.slug, { plan: 'Pro' })}>
+                                    Pro
+                                </DropdownMenuItem>
+                           </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSub>
+                           <DropdownMenuSubTrigger>Change Status</DropdownMenuSubTrigger>
+                           <DropdownMenuSubContent>
+                                <DropdownMenuItem onClick={() => handleUpdateTool(tool.slug, { status: 'Active' })}>
+                                    Active
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleUpdateTool(tool.slug, { status: 'Disabled' })}>
+                                    Disabled
+                                </DropdownMenuItem>
+                           </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSeparator />
+                         <DropdownMenuCheckboxItem
+                            checked={tool.isNew}
+                            onCheckedChange={(checked) => handleUpdateTool(tool.slug, { isNew: checked })}
+                         >
+                            Mark as New
+                         </DropdownMenuCheckboxItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))}
                {paginatedTools.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     No tools found.
                   </TableCell>
                 </TableRow>
