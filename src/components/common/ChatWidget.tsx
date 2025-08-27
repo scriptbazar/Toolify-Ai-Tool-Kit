@@ -200,7 +200,7 @@ export function ChatWidget() {
           <Card className="shadow-2xl flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between bg-primary text-primary-foreground p-4 rounded-t-lg">
               <div className="flex items-center gap-3">
-                <Logo className="h-6 w-6" />
+                <Logo className="h-6 w-6 text-primary-foreground" />
                 <CardTitle className="text-lg">ToolifyAI Assistant</CardTitle>
               </div>
               <Button variant="ghost" size="icon" onClick={toggleOpen} className="h-8 w-8 hover:bg-primary/80">
