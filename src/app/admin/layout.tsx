@@ -9,6 +9,16 @@ import {
   Users,
   PenSquare,
   Package,
+  History,
+  GitCommitVertical,
+  Megaphone,
+  DatabaseBackup,
+  Shield,
+  Star,
+  Mail,
+  BookText,
+  UserCog,
+  Ticket,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -69,6 +79,16 @@ export default function AdminLayout({
     { href: '/admin/tools', icon: Package, label: 'Tool Management' },
     { href: '/admin/prompt-templates', icon: PenSquare, label: 'Prompt Templates' },
     { href: '/admin/analytics', icon: LineChart, label: 'Analytics' },
+    { href: '/admin/ticket-management', icon: Ticket, label: 'Ticket Management'},
+    { href: '/admin/payment-history', icon: History, label: 'Payment History' },
+    { href: '/admin/referral-management', icon: GitCommitVertical, label: 'Referral Management' },
+    { href: '/admin/advertisement', icon: Megaphone, label: 'Advertisement' },
+    { href: '/admin/backup-restore', icon: DatabaseBackup, label: 'Backup & Restore' },
+    { href: '/admin/administrators', icon: UserCog, label: 'Administrators' },
+    { href: '/admin/review-management', icon: Star, label: 'Review Management' },
+    { href: '/admin/email-management', icon: Mail, label: 'Email Management' },
+    { href: '/admin/blog-management', icon: BookText, label: 'Blog Management' },
+    { href: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
 
 
@@ -86,7 +106,7 @@ export default function AdminLayout({
               <span className="sr-only">Toggle notifications</span>
             </Button>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 overflow-auto">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               {navLinks.map((link) => (
                 <Link
