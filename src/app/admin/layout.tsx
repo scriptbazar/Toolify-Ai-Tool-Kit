@@ -367,13 +367,14 @@ export default function AdminLayout({
         </div>
       </div>
       <div className="flex flex-col">
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-           <div className="w-full flex-1">
-             <Link href="/" className="flex items-center gap-2 font-semibold md:hidden">
+        <header className="flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-50">
+           <div className="w-full flex-1 md:hidden">
+             <Link href="/" className="flex items-center gap-2 font-semibold">
                 <Package2 className="h-6 w-6" />
                 <span className="">ToolifyAI</span>
              </Link>
            </div>
+          <div className="w-full flex-1 hidden md:block">&nbsp;</div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
@@ -401,7 +402,7 @@ export default function AdminLayout({
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="flex flex-col p-0">
+            <SheetContent side="left" className="flex flex-col p-0">
                {mobileNavContent}
             </SheetContent>
           </Sheet>
@@ -413,5 +414,3 @@ export default function AdminLayout({
     </div>
   );
 }
-
-    
