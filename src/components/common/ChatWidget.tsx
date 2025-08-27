@@ -111,7 +111,7 @@ export function ChatWidget() {
             </p>
         </div>
         <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input id="firstName" name="firstName" required disabled={isSubmittingContact} />
@@ -121,7 +121,7 @@ export function ChatWidget() {
                 <Input id="lastName" name="lastName" required disabled={isSubmittingContact} />
               </div>
             </div>
-             <div className="grid grid-cols-2 gap-4">
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" name="email" type="email" required disabled={isSubmittingContact} />
@@ -193,7 +193,7 @@ export function ChatWidget() {
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={toggleOpen}
-          className="rounded-full w-12 h-12 shadow-lg duration-200"
+          className="rounded-full w-12 h-12 shadow-lg"
           aria-label="Toggle chat widget"
         >
           {isOpen ? <X className="h-8 w-8" /> : <Logo className="h-10 w-10 text-primary-foreground" />}
@@ -213,7 +213,7 @@ export function ChatWidget() {
               <div className="flex items-center gap-3">
                 <Logo className="h-6 w-6 text-primary-foreground" />
                 <div>
-                  <CardTitle className="text-lg">AI Smart Tools Assistant</CardTitle>
+                  <CardTitle className="text-lg">ToolifyAI Assistant</CardTitle>
                   <p className="text-sm text-primary-foreground/80">Ask me about this site!</p>
                 </div>
               </div>
