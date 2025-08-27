@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -117,7 +118,7 @@ export default function SignupPage() {
                   )}
                 />
               </div>
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <FormField
                   control={form.control}
                   name="userName"
