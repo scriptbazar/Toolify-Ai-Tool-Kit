@@ -5,6 +5,9 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/common/ThemeProvider';
 import { AppProviders } from '@/components/AppProviders';
+import Header from '@/components/common/Header';
+import Footer from '@/components/common/Footer';
+import { ChatWidget } from '@/components/common/ChatWidget';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -35,7 +38,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AppProviders>
-            {children}
+            <div className="relative flex min-h-screen flex-col">
+              <Header />
+              <div className="flex-1">{children}</div>
+              <Footer />
+            </div>
+            <ChatWidget />
           </AppProviders>
           <Toaster />
         </ThemeProvider>

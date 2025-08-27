@@ -28,6 +28,14 @@ export const ReferralSettingsSchema = z.object({
 });
 export type ReferralSettings = z.infer<typeof ReferralSettingsSchema>;
 
+export const SocialLinksSchema = z.object({
+  facebook: z.string().url().optional().or(z.literal('')),
+  twitter: z.string().url().optional().or(z.literal('')),
+  instagram: z.string().url().optional().or(z.literal('')),
+  youtube: z.string().url().optional().or(z.literal('')),
+});
+export type SocialLinks = z.infer<typeof SocialLinksSchema>;
+
 export const GeneralSettingsSchema = z.object({
   siteTitle: z.string().default('ToolifyAI'),
   slogan: z.string().default('Your All-in-One Smart Toolkit'),
@@ -37,6 +45,7 @@ export const GeneralSettingsSchema = z.object({
   logoUrl: z.string().optional(),
   faviconUrl: z.string().optional(),
   contactEmail: z.string().email().optional(),
+  socialLinks: SocialLinksSchema.optional(),
 });
 export type GeneralSettings = z.infer<typeof GeneralSettingsSchema>;
 

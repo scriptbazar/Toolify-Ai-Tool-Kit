@@ -1,7 +1,7 @@
-
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from './Logo';
+import { getSettings } from '@/ai/flows/settings-management';
 
 const topTools = [
   { name: 'Age Calculator', href: '#' },
@@ -35,15 +35,18 @@ const bestHostings = [
     { name: 'Hostwinds', href: '#' },
 ];
 
-const socialLinks = [
-  { name: 'Facebook', href: '#', icon: Facebook },
-  { name: 'Twitter', href: '#', icon: Twitter },
-  { name: 'Instagram', href: '#', icon: Instagram },
-  { name: 'YouTube', href: '#', icon: Youtube },
-];
+export default async function Footer() {
+  const settings = await getSettings();
+  const generalSettings = settings.general;
+  const copyrightText = generalSettings?.copyrightText?.replace('{year}', new Date().getFullYear().toString()) || `© ${new Date().getFullYear()} ToolifyAI. All rights reserved.`;
 
+  const socialLinks = [
+    { name: 'Facebook', href: generalSettings?.socialLinks?.facebook, icon: Facebook },
+    { name: 'Twitter', href: generalSettings?.socialLinks?.twitter, icon: Twitter },
+    { name: 'Instagram', href: generalSettings?.socialLinks?.instagram, icon: Instagram },
+    { name: 'YouTube', href: generalSettings?.socialLinks?.youtube, icon: Youtube },
+  ].filter(link => link.href);
 
-export default function Footer() {
   return (
     <footer className="bg-card text-card-foreground border-t">
       <div className="container mx-auto px-4 py-12">
@@ -51,18 +54,15 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <Logo />
-              <span className="font-bold text-xl">ToolifyAI</span>
+              <span className="font-bold text-xl">{generalSettings?.siteTitle || 'ToolifyAI'}</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-6">
-              ToolifyAI is your go-to hub for powerful, easy-to-use
-              online utilities that simplify everyday tasks. Whether you
-              need converters, analyzers, or creative tools, ToolifyAI
-              connects you to everything in one place.
+              {generalSettings?.siteDescription || 'ToolifyAI is your go-to hub for powerful, easy-to-use online utilities that simplify everyday tasks. Whether you need converters, analyzers, or creative tools, ToolifyAI connects you to everything in one place.'}
             </p>
             <h3 className="font-semibold mb-4">Follow Us</h3>
             <div className="flex space-x-3">
               {socialLinks.map((social) => (
-                <Link key={social.name} href={social.href} className="text-muted-foreground hover:text-primary transition-colors">
+                <Link key={social.name} href={social.href!} className="text-muted-foreground hover:text-primary transition-colors">
                   <social.icon className="h-5 w-5" />
                    <span className="sr-only">{social.name}</span>
                 </Link>
@@ -127,7 +127,7 @@ export default function Footer() {
       </div>
        <div className="border-t border-border/50">
           <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} ToolifyAI. All rights reserved.
+            {copyrightText}
           </div>
         </div>
     </footer>

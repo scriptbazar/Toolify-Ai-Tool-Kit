@@ -2,16 +2,12 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import Header from '@/components/common/Header';
-import Footer from '@/components/common/Footer';
-import { ChatWidget } from './common/ChatWidget';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const authRoutes = ['/login', '/signup', '/admin/login', '/forgot-password'];
   const isAdminRoute = pathname.startsWith('/admin');
   
-  // New user panel routes that should not have the default header/footer
   const userPanelRoutes = [
     '/dashboard',
     '/profile',
@@ -44,15 +40,10 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
 
   const showHeaderFooter = !authRoutes.includes(pathname) && !isAdminRoute && !isDashboardRoute;
-  const showChatWidget = !authRoutes.includes(pathname) && !isAdminRoute;
+  
+  if (!showHeaderFooter) {
+    return <>{children}</>;
+  }
 
-
-  return (
-    <div className="relative flex min-h-screen flex-col">
-      {showHeaderFooter && <Header />}
-      <div className="flex-1">{children}</div>
-      {showHeaderFooter && <Footer />}
-      {showChatWidget && <ChatWidget />}
-    </div>
-  );
+  return <>{children}</>;
 }

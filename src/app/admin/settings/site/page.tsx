@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail } from 'lucide-react';
+import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
@@ -33,7 +33,8 @@ export default function SiteSettingsPage() {
             copyrightText: '',
             logoUrl: '',
             faviconUrl: '',
-            contactEmail: ''
+            contactEmail: '',
+            socialLinks: { facebook: '', twitter: '', instagram: '', youtube: '' }
         });
       } catch (error) {
         console.error('Failed to fetch settings:', error);
@@ -52,6 +53,17 @@ export default function SiteSettingsPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setSettings(prev => (prev ? { ...prev, [name]: value } : null));
+  };
+  
+  const handleSocialLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSettings(prev => (prev ? { 
+        ...prev, 
+        socialLinks: {
+            ...prev.socialLinks,
+            [name]: value
+        }
+    } : null));
   };
 
   const handleSave = async () => {
@@ -226,6 +238,73 @@ export default function SiteSettingsPage() {
                   <p className="text-sm text-muted-foreground">Use {'{year}'} to automatically insert the current year.</p>
               </div>
           </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Social Media Links</CardTitle>
+          <CardDescription>
+            Provide links to your social media profiles.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+                <Label htmlFor="facebook">Facebook</Label>
+                 <div className="relative">
+                  <Facebook className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="facebook" 
+                      name="facebook"
+                      value={settings.socialLinks?.facebook || ''} 
+                      onChange={handleSocialLinkChange}
+                      placeholder="https://facebook.com/your-page"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="twitter">Twitter (X)</Label>
+                 <div className="relative">
+                  <Twitter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="twitter" 
+                      name="twitter"
+                      value={settings.socialLinks?.twitter || ''} 
+                      onChange={handleSocialLinkChange}
+                      placeholder="https://x.com/your-profile"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="instagram">Instagram</Label>
+                 <div className="relative">
+                  <Instagram className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="instagram" 
+                      name="instagram"
+                      value={settings.socialLinks?.instagram || ''} 
+                      onChange={handleSocialLinkChange}
+                      placeholder="https://instagram.com/your-profile"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="youtube">YouTube</Label>
+                 <div className="relative">
+                  <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="youtube" 
+                      name="youtube"
+                      value={settings.socialLinks?.youtube || ''} 
+                      onChange={handleSocialLinkChange}
+                      placeholder="https://youtube.com/your-channel"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
         </CardContent>
       </Card>
       
