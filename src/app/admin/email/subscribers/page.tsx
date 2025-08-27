@@ -130,7 +130,7 @@ export default function SubscribersPage() {
                   placeholder="Search by email..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-9 w-full sm:w-56"
+                  className="pl-9 w-full sm:w-64"
                 />
               </div>
             </div>
