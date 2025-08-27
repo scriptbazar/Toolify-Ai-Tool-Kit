@@ -75,28 +75,30 @@ export default function CommunityChatPage() {
       </div>
       <div className="lg:col-span-1 h-full">
          <Card className="h-full flex flex-col">
-            <CardHeader className="space-y-4">
+            <CardHeader>
                 <div>
                     <CardTitle>Community Members</CardTitle>
                     <p className="text-muted-foreground text-sm">
                         See which members are active.
                     </p>
                 </div>
-                 <div className="grid grid-cols-2 gap-1">
-                    <Button variant="outline">
-                        <Users className="mr-2 h-4 w-4" /> All Members
-                    </Button>
-                    <Button variant="outline">
-                        <Vote className="mr-2 h-4 w-4" /> Create Poll
-                    </Button>
-                </div>
-                <div className="grid w-full grid-cols-2 gap-1">
-                    <Button variant={activeTab === 'live' ? 'default' : 'outline'} onClick={() => setActiveTab('live')}>
-                        <Wifi className="mr-2 h-4 w-4"/>Live Users
-                    </Button>
-                    <Button variant={activeTab === 'new' ? 'default' : 'outline'} onClick={() => setActiveTab('new')}>
-                        <UserPlus className="mr-2 h-4 w-4"/>New Users
-                    </Button>
+                <div className="space-y-1">
+                    <div className="grid grid-cols-2 gap-1">
+                        <Button variant="outline">
+                            <Users className="mr-2 h-4 w-4" /> All Members
+                        </Button>
+                        <Button variant="outline">
+                            <Vote className="mr-2 h-4 w-4" /> Create Poll
+                        </Button>
+                    </div>
+                    <div className="grid w-full grid-cols-2 gap-1">
+                        <Button variant={activeTab === 'live' ? 'default' : 'outline'} onClick={() => setActiveTab('live')}>
+                            <Wifi className="mr-2 h-4 w-4"/>Live Users
+                        </Button>
+                        <Button variant={activeTab === 'new' ? 'default' : 'outline'} onClick={() => setActiveTab('new')}>
+                            <UserPlus className="mr-2 h-4 w-4"/>New Users
+                        </Button>
+                    </div>
                 </div>
             </CardHeader>
             <CardContent className="flex-grow">
