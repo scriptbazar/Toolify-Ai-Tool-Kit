@@ -114,17 +114,19 @@ export default function MailSettingsPage() {
               <CardTitle>Sender Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="from-name">From Name</Label>
-                <Input id="from-name" placeholder="ToolifyAI" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="from-email">From Email Address</Label>
-                <Input
-                  id="from-email"
-                  type="email"
-                  placeholder="no-reply@toolifyai.com"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="from-name">From Name</Label>
+                  <Input id="from-name" placeholder="ToolifyAI" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="from-email">From Email Address</Label>
+                  <Input
+                    id="from-email"
+                    type="email"
+                    placeholder="no-reply@toolifyai.com"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
