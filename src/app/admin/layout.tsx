@@ -386,19 +386,16 @@ export default function AdminLayout({
             </nav>
           </ScrollArea>
           <div className="mt-auto p-4 border-t">
-              <div className="flex flex-col gap-2">
-                <Button asChild className="w-full justify-start text-left">
+              <div className="flex gap-2">
+                <Button asChild className="flex-1">
                   <Link href="/admin/profile">
-                    <Avatar className="h-8 w-8 mr-2">
+                    <Avatar className="h-6 w-6 mr-2">
                       <AvatarFallback>A</AvatarFallback>
                     </Avatar>
-                    <div className='flex flex-col'>
-                      <span className="text-sm">Admin</span>
-                      <span className="text-xs text-primary-foreground/80">View Profile</span>
-                    </div>
+                    Profile
                   </Link>
                 </Button>
-                <Button variant="ghost" onClick={handleLogout} className="w-full justify-start">
+                <Button variant="destructive" onClick={handleLogout} className="flex-1">
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </Button>
@@ -415,7 +412,24 @@ export default function AdminLayout({
              </Link>
            </div>
           <div className="w-full flex-1 hidden md:block">&nbsp;</div>
-          <div className="hidden md:block">
+          <div className="flex-1 flex justify-end md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                >
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="flex flex-col p-0 w-[280px] sm:w-[320px]">
+                 {mobileNavContent}
+              </SheetContent>
+            </Sheet>
+          </div>
+           <div className="hidden md:flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
@@ -433,21 +447,6 @@ export default function AdminLayout({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="shrink-0 md:hidden"
-              >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="flex flex-col p-0 w-[280px] sm:w-[320px]">
-               {mobileNavContent}
-            </SheetContent>
-          </Sheet>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           {children}
