@@ -203,7 +203,7 @@ export function ChatWidget() {
                 <Logo className="h-6 w-6 text-primary-foreground" />
                 <div>
                   <CardTitle className="text-lg">ToolifyAI Assistant</CardTitle>
-                  <p className="text-xs text-primary-foreground/80">I'm here to help. Ask a question!</p>
+                  <p className="text-sm text-primary-foreground/80">I'm here to help. Ask a question!</p>
                 </div>
               </div>
               <Button variant="ghost" size="icon" onClick={toggleOpen} className="h-8 w-8 hover:bg-primary/80">
