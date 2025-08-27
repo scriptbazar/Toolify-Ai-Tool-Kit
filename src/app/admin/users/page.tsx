@@ -138,7 +138,14 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12 space-y-8">
+    <div className="space-y-6">
+       <div>
+        <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
+        <p className="text-muted-foreground">
+          View and manage registered users and chatbot leads.
+        </p>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Registered Users</CardTitle>
