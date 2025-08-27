@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useRef, type FormEvent } from 'react';
+import { useState, useMemo, useRef, type FormEvent, useEffect } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -52,6 +52,13 @@ export default function CommunityChatPage() {
     const [activeUserFilter, setActiveUserFilter] = useState<'all' | 'live' | 'new'>('live');
     const [isPollModalOpen, setIsPollModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+        }
+    }, [messages]);
 
     const handleSendMessage = (e: FormEvent) => {
         e.preventDefault();
@@ -80,7 +87,6 @@ export default function CommunityChatPage() {
         ].filter(Boolean);
 
         if (!question || options.length < 2) {
-            // Add some validation feedback if needed
             return;
         }
 
@@ -128,7 +134,7 @@ export default function CommunityChatPage() {
             </p>
           </CardHeader>
           <CardContent className="flex-grow p-0">
-             <ScrollArea className="h-full max-h-[calc(100vh-24rem)] p-6">
+             <ScrollArea className="h-full max-h-[calc(100vh-24rem)] p-6" ref={scrollAreaRef}>
                 <div className="space-y-6">
                     {messages.map((msg) => (
                         <div key={msg.id} className={cn("flex items-start gap-3", msg.from === 'Admin' ? 'flex-row-reverse' : '')}>
