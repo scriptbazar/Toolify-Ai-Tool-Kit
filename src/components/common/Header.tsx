@@ -8,40 +8,37 @@ import { Menu } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
+import { cn } from '@/lib/utils';
 
 const NavLinks = () => {
+  const pathname = usePathname();
+  const navLinks = [
+    { href: '/#text', label: 'Text' },
+    { href: '/#pdf', label: 'PDF' },
+    { href: '/#ai', label: 'AI' },
+    { href: '/#dev', label: 'Dev' },
+  ];
+
   return (
     <>
-      <Link
-        href="/#text"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
-        Text
-      </Link>
-      <Link
-        href="/#pdf"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
-        PDF
-      </Link>
-      <Link
-        href="/#ai"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
-        AI
-      </Link>
-      <Link
-        href="/#dev"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
-        Dev
-      </Link>
-      <Link
-        href="/ai-prompt-templates"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
-        Prompt Templates
-      </Link>
+      {navLinks.map((link) => {
+        // A simple way to check for active hash links.
+        // In a real app, you might want a more robust solution using IntersectionObserver.
+        const isActive = pathname === '/' && link.label === 'Text'; // Example for active state
+
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+              isActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+            )}
+          >
+            {link.label}
+          </Link>
+        );
+      })}
     </>
   );
 };
@@ -73,14 +70,14 @@ export default function Header() {
                 </SheetTrigger>
                 <SheetContent side="right">
                   <SheetHeader>
-                    <SheetTitle>
+                     <SheetTitle>
                       <Link href="/" className="flex items-center space-x-2">
                         <Logo />
                         <span className="font-bold">ToolifyAI</span>
                       </Link>
                     </SheetTitle>
                   </SheetHeader>
-                  <div className="mt-8 flex flex-col space-y-4">
+                  <div className="mt-8 flex flex-col space-y-2">
                     <NavLinks />
                   </div>
                 </SheetContent>
@@ -89,7 +86,7 @@ export default function Header() {
           </>
         ) : (
           <>
-            <nav className="flex items-center space-x-6 text-sm font-medium">
+            <nav className="flex items-center space-x-2 text-sm font-medium">
               <NavLinks />
             </nav>
             <div className="flex flex-1 items-center justify-end space-x-4">
