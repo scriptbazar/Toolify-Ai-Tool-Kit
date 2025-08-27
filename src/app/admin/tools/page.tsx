@@ -156,6 +156,7 @@ export default function AdminToolsPage() {
                   key={tab.id}
                   variant={activeFilter === tab.id ? 'default' : 'outline'}
                   onClick={() => handleFilterChange(tab.id)}
+                  size="lg"
                   className="shrink-0"
                 >
                   <tab.icon className="mr-2 h-4 w-4" />
@@ -164,7 +165,7 @@ export default function AdminToolsPage() {
               ))}
               <div className="flex-grow" />
               <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-auto h-11">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
