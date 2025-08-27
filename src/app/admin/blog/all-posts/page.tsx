@@ -1,11 +1,12 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import {
   FileText,
   CheckCircle,
@@ -14,30 +15,80 @@ import {
   Search,
   PlusCircle,
   MoreHorizontal,
+  Clock,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from 'next/link';
 
-type FilterType = 'all' | 'published' | 'drafts' | 'trash';
+type PostStatus = 'Published' | 'Draft' | 'Scheduled' | 'Trash';
+
+const allPosts = [
+    { title: 'The Future of AI', slug: 'the-future-of-ai', category: 'Artificial Intelligence', publishedDate: '2024-07-28', status: 'Published' },
+    { title: '10 Productivity Hacks for Developers', slug: 'productivity-hacks-dev', category: 'Productivity', publishedDate: '2024-07-25', status: 'Published' },
+    { title: 'Getting Started with Next.js 14', slug: 'getting-started-nextjs-14', category: 'Technology', publishedDate: '2024-07-22', status: 'Published' },
+    { title: 'A Guide to SaaS Marketing', slug: 'saas-marketing-guide', category: 'News', publishedDate: '2024-07-20', status: 'Draft' },
+    { title: 'Why Tailwind CSS is Overrated', slug: 'tailwind-css-overrated', category: 'Technology', publishedDate: '2024-07-18', status: 'Published' },
+    { title: 'The Ultimate Guide to API Design', slug: 'ultimate-api-design-guide', category: 'Technology', publishedDate: '2024-08-05', status: 'Scheduled' },
+    { title: 'My Journey into Entrepreneurship', slug: 'entrepreneurship-journey', category: 'News', publishedDate: '—', status: 'Draft' },
+];
+
+const ITEMS_PER_PAGE = 5;
 
 export default function AllPostsPage() {
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [activeFilter, setActiveFilter] = useState<PostStatus | 'All'>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const tabs: { id: FilterType; label: string; icon: React.ElementType }[] = [
-    { id: 'all', label: 'All', icon: FileText },
-    { id: 'published', label: 'Published', icon: CheckCircle },
-    { id: 'drafts', label: 'Drafts', icon: Edit },
-    { id: 'trash', label: 'Trash', icon: Trash2 },
+  const filteredPosts = useMemo(() => {
+    let posts = allPosts;
+    if (activeFilter !== 'All') {
+        if (activeFilter === 'Draft') {
+            posts = posts.filter(p => p.status === 'Draft' || p.status === 'Scheduled');
+        } else {
+            posts = posts.filter(p => p.status === activeFilter);
+        }
+    }
+    return posts.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [allPosts, searchQuery, activeFilter]);
+  
+  const paginatedPosts = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredPosts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredPosts, currentPage]);
+  
+  const totalPages = Math.ceil(filteredPosts.length / ITEMS_PER_PAGE);
+
+  const getStatusBadge = (status: PostStatus) => {
+    switch (status) {
+      case 'Published':
+        return <Badge><CheckCircle className="mr-1 h-3 w-3"/>Published</Badge>;
+      case 'Draft':
+        return <Badge variant="secondary"><Edit className="mr-1 h-3 w-3"/>Draft</Badge>;
+      case 'Scheduled':
+        return <Badge variant="outline" className="text-blue-500 border-blue-500"><Clock className="mr-1 h-3 w-3"/>Scheduled</Badge>;
+      case 'Trash':
+         return <Badge variant="destructive"><Trash2 className="mr-1 h-3 w-3"/>Trashed</Badge>;
+    }
+  };
+
+  const tabs: { id: PostStatus | 'All'; label: string; icon: React.ElementType }[] = [
+    { id: 'All', label: 'All', icon: FileText },
+    { id: 'Published', label: 'Published', icon: CheckCircle },
+    { id: 'Draft', label: 'Drafts', icon: Edit },
+    { id: 'Trash', label: 'Trash', icon: Trash2 },
   ];
+
+  const getCount = (status: PostStatus | 'All') => {
+    if (status === 'All') return allPosts.length;
+    if (status === 'Draft') return allPosts.filter(p => p.status === 'Draft' || p.status === 'Scheduled').length;
+    return allPosts.filter(p => p.status === status).length;
+  }
 
   return (
     <div className="space-y-6">
@@ -62,11 +113,11 @@ export default function AllPostsPage() {
                 <Button
                   key={tab.id}
                   variant={activeFilter === tab.id ? 'default' : 'outline'}
-                  onClick={() => setActiveFilter(tab.id)}
+                  onClick={() => { setActiveFilter(tab.id); setCurrentPage(1); }}
                   className="shrink-0"
                 >
                   <tab.icon className="mr-2 h-4 w-4" />
-                  {tab.label} (0)
+                  {tab.label} ({getCount(tab.id)})
                 </Button>
               ))}
             </div>
@@ -76,8 +127,8 @@ export default function AllPostsPage() {
                 <Input
                   placeholder="Search posts..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 w-full sm:w-auto"
+                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                  className="pl-9 w-full sm:w-64"
                 />
               </div>
               <Button asChild>
@@ -101,14 +152,66 @@ export default function AllPostsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell colSpan={5} className="h-48 text-center">
-                    No blog posts found.
-                  </TableCell>
-                </TableRow>
+                {paginatedPosts.length > 0 ? (
+                    paginatedPosts.map(post => (
+                        <TableRow key={post.slug}>
+                            <TableCell className="font-medium">{post.title}</TableCell>
+                            <TableCell>{getStatusBadge(post.status as PostStatus)}</TableCell>
+                            <TableCell>{post.category}</TableCell>
+                            <TableCell>{post.publishedDate}</TableCell>
+                            <TableCell className="text-right">
+                               <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button size="icon" variant="ghost">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem>
+                                            <Edit className="mr-2 h-4 w-4"/> Edit
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className="text-red-500">
+                                            <Trash2 className="mr-2 h-4 w-4"/> Delete
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </TableCell>
+                        </TableRow>
+                    ))
+                ) : (
+                    <TableRow>
+                        <TableCell colSpan={5} className="h-48 text-center">
+                            No blog posts found.
+                        </TableCell>
+                    </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
+          
+           {totalPages > 1 && (
+            <div className="flex items-center justify-end space-x-2 pt-4">
+                <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                >
+                Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                    Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                >
+                Next
+                </Button>
+            </div>
+            )}
         </CardContent>
       </Card>
     </div>
