@@ -180,10 +180,10 @@ export function ChatWidget() {
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={toggleOpen}
-          className="rounded-full w-16 h-16 shadow-lg hover:scale-110 transition-transform duration-200"
+          className="rounded-full w-14 h-14 shadow-lg hover:scale-110 transition-transform duration-200"
           aria-label="Toggle chat widget"
         >
-          {isOpen ? <X className="h-8 w-8" /> : <Logo className="h-8 w-8 text-primary-foreground" />}
+          {isOpen ? <X className="h-8 w-8" /> : <Logo className="h-10 w-10 text-primary-foreground" />}
         </Button>
       </div>
       
