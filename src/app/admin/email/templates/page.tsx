@@ -19,6 +19,9 @@ import {
   MailCheck,
   ShieldCheck,
   Receipt,
+  AlertTriangle,
+  UserX,
+  CalendarClock,
 } from 'lucide-react';
 import {
   Dialog,
@@ -70,7 +73,7 @@ const templates = [
     subject: 'Your ToolifyAI Subscription is Confirmed!',
     body: `Hi {{firstName}},\n\nYour subscription to the {{planName}} plan is now active! Thank you for upgrading.\n\nYou now have access to all the premium features included in your plan. You can manage your subscription at any time from your account dashboard.\n\nWe're excited to see what you create!\n\nBest,\nThe ToolifyAI Team`,
   },
-    {
+  {
     id: 'payment-receipt',
     icon: Receipt,
     title: 'Payment Receipt',
@@ -93,6 +96,30 @@ const templates = [
     description: 'Confirms receipt of a user\'s support ticket.',
     subject: 'We\'ve Received Your Support Request (Ticket #{{ticketId}})',
     body: `Hello {{firstName}},\n\nThanks for reaching out! This email is to confirm that we have received your support request (Ticket #{{ticketId}}). Our team will review it and get back to you as soon as possible.\n\nYou can view the status of your ticket in your user dashboard.\n\nBest regards,\nThe ToolifyAI Support Team`,
+  },
+   {
+    id: 'security-alert',
+    icon: AlertTriangle,
+    title: 'Security Alert',
+    description: 'Alerts users of a login from a new device or location.',
+    subject: 'Security Alert: New Login to Your ToolifyAI Account',
+    body: `Hello {{firstName}},\n\nYour account was just accessed from a new device or location. If this was you, you can safely ignore this email. If you do not recognize this activity, please change your password immediately and contact support.\n\nDevice: {{device}}\nLocation: {{location}}\n\nThanks,\nThe ToolifyAI Security Team`,
+  },
+  {
+    id: 'account-deactivation',
+    icon: UserX,
+    title: 'Account Deactivation',
+    description: 'Confirms a user\'s account has been deactivated.',
+    subject: 'Your ToolifyAI Account Has Been Deactivated',
+    body: `Hello {{firstName}},\n\nThis is to confirm that your ToolifyAI account has been successfully deactivated. We're sorry to see you go. Your data will be permanently deleted in 30 days. You can reactivate your account by logging in within this period.\n\nIf you have any feedback, we\'d love to hear it.\n\nBest,\nThe ToolifyAI Team`,
+  },
+   {
+    id: 'renewal-reminder',
+    icon: CalendarClock,
+    title: 'Subscription Renewal Reminder',
+    description: 'Reminds users that their subscription is about to renew.',
+    subject: 'Your ToolifyAI Subscription is Renewing Soon',
+    body: `Hi {{firstName}},\n\nJust a friendly reminder that your subscription for the {{planName}} plan will automatically renew on {{renewalDate}}.\n\nIf you need to make any changes to your subscription or billing information, please visit your account dashboard.\n\nThanks for being a valued member!\n\nThe ToolifyAI Team`,
   },
 ];
 
