@@ -157,7 +157,7 @@ export default function AdminToolsPage() {
                   variant={activeFilter === tab.id ? 'default' : 'outline'}
                   onClick={() => handleFilterChange(tab.id)}
                   size="lg"
-                  className="shrink-0 gap-1.5"
+                  className="shrink-0 gap-1.5 px-4"
                 >
                   <tab.icon className="h-4 w-4" />
                   {tab.label} ({tab.count})
