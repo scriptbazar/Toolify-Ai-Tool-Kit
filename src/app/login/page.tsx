@@ -8,22 +8,21 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
 import { Eye, EyeOff } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
-
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
 
-export default function AdminLoginPage() {
+export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -37,41 +36,17 @@ export default function AdminLoginPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      // 1. Sign in the user with Firebase Auth
-      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-      const user = userCredential.user;
-
-      // 2. Check the user's role in Firestore
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-        // 3. If user is an admin, redirect to dashboard
-        toast({
-          title: "Admin logged in successfully!",
-          description: "Redirecting to admin panel...",
-        });
-        router.push('/admin/dashboard');
-      } else {
-        // 4. If user is not an admin, show error and log out
-        await auth.signOut();
-        toast({
-          title: "Access Denied",
-          description: "You do not have permission to access the admin panel.",
-          variant: "destructive",
-        });
-      }
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      toast({
+        title: "Logged in successfully!",
+        description: "Redirecting...",
+      });
+      router.push('/dashboard');
     } catch (error: any) {
-      console.error("Admin login error:", error);
-      let description = "There was a problem with your request.";
-      if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        description = "Invalid email or password.";
-      } else {
-        description = error.message;
-      }
+      console.error("Login error:", error);
       toast({
         title: "Uh oh! Something went wrong.",
-        description,
+        description: error.message || "There was a problem with your request.",
         variant: "destructive",
       });
     }
@@ -81,12 +56,12 @@ export default function AdminLoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-           <div className="flex justify-center items-center gap-2 mb-4">
+           <Link href="/" className="flex justify-center items-center gap-2 mb-4">
             <Logo />
             <span className="text-2xl font-bold">ToolifyAI</span>
-          </div>
-          <CardTitle className="text-2xl">Admin Access</CardTitle>
-          <CardDescription>Sign in to the ToolifyAI Admin Panel</CardDescription>
+          </Link>
+          <CardTitle className="text-2xl">Welcome Back!</CardTitle>
+          <CardDescription>Sign in to your ToolifyAI account</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -99,7 +74,7 @@ export default function AdminLoginPage() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="admin@example.com" {...field} />
+                        <Input placeholder="you@example.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -110,16 +85,16 @@ export default function AdminLoginPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                       <FormLabel>Password</FormLabel>
                        <div className="relative">
                         <FormControl>
-                          <Input
+                           <Input
                             type={showPassword ? "text" : "password"}
                             placeholder="••••••••"
                             {...field}
                           />
                         </FormControl>
-                        <Button
+                         <Button
                           type="button"
                           variant="ghost"
                           size="icon"
@@ -137,6 +112,13 @@ export default function AdminLoginPage() {
                         </Button>
                       </div>
                       <FormMessage />
+                        <div className="text-right">
+                         <Link href="/forgot-password" passHref>
+                          <span className="text-sm text-primary hover:underline cursor-pointer">
+                            Forgot Password?
+                          </span>
+                        </Link>
+                      </div>
                     </FormItem>
                   )}
                 />
@@ -146,6 +128,12 @@ export default function AdminLoginPage() {
               </Button>
             </form>
           </Form>
+          <div className="mt-6 text-center text-sm">
+            Don't have an account?{" "}
+            <Link href="/signup" className="font-medium text-primary hover:underline">
+              Sign up
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
