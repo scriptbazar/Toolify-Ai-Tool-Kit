@@ -117,7 +117,7 @@ export default function AdminUsersPage() {
       });
       await fetchUsersAndLeads();
       setIsEditDialogOpen(false);
-    } catch (error: any)dea
+    } catch (error: any) {
       console.error("Failed to update role:", error);
       toast({
         title: 'Error',
