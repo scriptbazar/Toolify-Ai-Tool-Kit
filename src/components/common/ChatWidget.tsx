@@ -108,7 +108,7 @@ export function ChatWidget() {
           Welcome! Provide your details to start a chat with our AI assistant.
         </p>
         <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input id="firstName" name="firstName" placeholder="Enter first name" required disabled={isSubmittingContact} />
@@ -187,7 +187,7 @@ export function ChatWidget() {
           className="rounded-full w-14 h-14 shadow-lg duration-200"
           aria-label="Toggle chat widget"
         >
-          {isOpen ? <X className="h-8 w-8" /> : <Logo className="h-12 w-12 text-primary-foreground" />}
+          {isOpen ? <X className="h-8 w-8" /> : <Logo className="h-10 w-10 text-primary-foreground" />}
         </Button>
       </div>
       
