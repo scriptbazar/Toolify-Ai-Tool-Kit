@@ -54,7 +54,7 @@ export default function Header() {
         <div className="mr-4 flex items-center md:flex-1">
           <Link href="/" className="flex items-center space-x-2">
             <Logo />
-            <span className="font-bold">ToolifyAI</span>
+            <span className="font-bold text-lg">ToolifyAI</span>
           </Link>
         </div>
 
@@ -73,7 +73,7 @@ export default function Header() {
                      <SheetTitle>
                       <Link href="/" className="flex items-center space-x-2">
                         <Logo />
-                        <span className="font-bold">ToolifyAI</span>
+                        <span className="font-bold text-lg">ToolifyAI</span>
                       </Link>
                     </SheetTitle>
                   </SheetHeader>

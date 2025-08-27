@@ -135,7 +135,7 @@ export default function AdminLayout({
         <SheetTitle>
           <Link href="/" className="flex items-center gap-2 font-semibold">
             <Logo />
-            <span className="">ToolifyAI</span>
+            <span className="text-lg">ToolifyAI</span>
           </Link>
         </SheetTitle>
       </SheetHeader>
@@ -272,7 +272,7 @@ export default function AdminLayout({
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Logo />
-              <span className="">ToolifyAI</span>
+              <span className="text-lg">ToolifyAI</span>
             </Link>
             <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
               <Bell className="h-4 w-4" />
@@ -409,7 +409,7 @@ export default function AdminLayout({
            <div className="flex-1 md:hidden">
              <Link href="/" className="flex items-center gap-2 font-semibold">
                 <Logo />
-                <span className="">ToolifyAI</span>
+                <span className="text-lg">ToolifyAI</span>
              </Link>
            </div>
           <div className="w-full flex-1 hidden md:block">&nbsp;</div>
