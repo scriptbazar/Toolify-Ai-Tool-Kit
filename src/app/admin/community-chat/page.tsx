@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { Diamond, RefreshCw, UserPlus, Users, Vote, Wifi } from 'lucide-react';
 
@@ -91,12 +90,16 @@ export default function CommunityChatPage() {
                 </div>
             </CardHeader>
             <CardContent className="flex-grow">
-                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="live"><Wifi className="mr-2 h-4 w-4"/>Live Users</TabsTrigger>
-                        <TabsTrigger value="new"><UserPlus className="mr-2 h-4 w-4"/>New Users</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="live" className="mt-4">
+                 <div className="w-full">
+                    <div className="grid w-full grid-cols-2 gap-2 mb-4">
+                        <Button variant={activeTab === 'live' ? 'default' : 'outline'} onClick={() => setActiveTab('live')}>
+                            <Wifi className="mr-2 h-4 w-4"/>Live Users
+                        </Button>
+                        <Button variant={activeTab === 'new' ? 'default' : 'outline'} onClick={() => setActiveTab('new')}>
+                            <UserPlus className="mr-2 h-4 w-4"/>New Users
+                        </Button>
+                    </div>
+                    {activeTab === 'live' && (
                         <div className="space-y-4">
                         {liveUsers.map(user => (
                             <div key={user.name} className="flex items-center justify-between">
@@ -110,8 +113,8 @@ export default function CommunityChatPage() {
                             </div>
                         ))}
                         </div>
-                    </TabsContent>
-                    <TabsContent value="new" className="mt-4">
+                    )}
+                    {activeTab === 'new' && (
                          <div className="space-y-4">
                         {newUsers.map(user => (
                             <div key={user.name} className="flex items-center justify-between">
@@ -124,8 +127,8 @@ export default function CommunityChatPage() {
                             </div>
                         ))}
                         </div>
-                    </TabsContent>
-                 </Tabs>
+                    )}
+                 </div>
             </CardContent>
          </Card>
       </div>
