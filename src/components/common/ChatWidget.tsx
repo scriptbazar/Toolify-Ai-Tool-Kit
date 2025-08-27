@@ -56,10 +56,9 @@ export function ChatWidget() {
     const firstName = formData.get('firstName') as string;
     const lastName = formData.get('lastName') as string;
     const email = formData.get('email') as string;
-    const language = formData.get('language') as string;
-
+    
     try {
-      await addLeadUser({ name: `${firstName} ${lastName}`, email, message: `User started a chat. Language: ${language}` });
+      await addLeadUser({ name: `${firstName} ${lastName}`, email, message: `User started a chat.` });
       toast({
         title: 'Thank you!',
         description: "Your information has been saved. You can now chat with our AI.",
@@ -121,15 +120,9 @@ export function ChatWidget() {
                 <Input id="lastName" name="lastName" required disabled={isSubmittingContact} />
               </div>
             </div>
-             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" name="email" type="email" required disabled={isSubmittingContact} />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="language">Language</Label>
-                    <Input id="language" name="language" placeholder="e.g. English" required disabled={isSubmittingContact} />
-                </div>
+             <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="email" type="email" required disabled={isSubmittingContact} />
             </div>
         </div>
       </CardContent>
@@ -214,7 +207,7 @@ export function ChatWidget() {
                 <Logo className="h-6 w-6 text-primary-foreground" />
                 <div>
                   <CardTitle className="text-lg">ToolifyAI Assistant</CardTitle>
-                  <p className="text-sm text-primary-foreground/80">Ask me about this site!</p>
+                  <p className="text-sm text-primary-foreground/80">I'm here to help. Ask a question!</p>
                 </div>
               </div>
               <Button variant="ghost" size="icon" onClick={toggleOpen} className="h-8 w-8 hover:bg-primary/80">
