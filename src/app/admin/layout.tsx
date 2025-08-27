@@ -128,6 +128,7 @@ export default function AdminLayout({
     { href: '/admin/tools', icon: Package, label: 'Tool Management' },
     { href: '/admin/analytics', icon: LineChart, label: 'Analytics' },
     { href: '/admin/ticket-management', icon: Ticket, label: 'Ticket Management'},
+    { href: '/admin/community-chat', icon: MessageSquare, label: 'Community Chat'},
     { href: '/admin/payment-history', icon: History, label: 'Payment History' },
     { href: '/admin/referral-management', icon: GitCommitVertical, label: 'Referral Management' },
     { href: '/admin/advertisement', icon: Megaphone, label: 'Advertisement' },
