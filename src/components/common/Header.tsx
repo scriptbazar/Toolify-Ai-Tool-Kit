@@ -80,13 +80,15 @@ export default function Header() {
                        <NavLinks isMobile={true} />
                     </nav>
                   </div>
-                   <div className="mt-auto p-4 border-t space-y-2">
-                      <Button asChild className="w-full justify-start">
-                        <Link href="/login"><LogIn className="mr-2" /> Log in</Link>
-                      </Button>
-                      <Button asChild variant="secondary" className="w-full justify-start">
-                        <Link href="/signup"><UserPlus className="mr-2" /> Sign Up</Link>
-                      </Button>
+                   <div className="mt-auto p-4 border-t">
+                      <div className="flex gap-2">
+                        <Button asChild className="flex-1">
+                           <Link href="/login"><LogIn className="mr-2" /> Log in</Link>
+                        </Button>
+                        <Button asChild variant="secondary" className="flex-1">
+                           <Link href="/signup"><UserPlus className="mr-2" /> Sign Up</Link>
+                        </Button>
+                      </div>
                   </div>
                 </SheetContent>
               </Sheet>
