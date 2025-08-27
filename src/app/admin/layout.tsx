@@ -31,6 +31,8 @@ import {
   ListChecks,
   CreditCard,
   FileCog,
+  LogOut,
+  User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -58,6 +60,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export default function AdminLayout({
   children,
@@ -240,6 +243,22 @@ export default function AdminLayout({
           </Accordion>
         </nav>
       </ScrollArea>
+      <div className="mt-auto p-4 border-t">
+          <div className="flex gap-2">
+            <Button asChild className="flex-1 justify-start">
+              <Link href="/admin/profile">
+                <Avatar className="h-6 w-6 mr-2">
+                  <AvatarFallback>N</AvatarFallback>
+                </Avatar>
+                Profile
+              </Link>
+            </Button>
+            <Button variant="destructive" onClick={handleLogout} className="flex-1 justify-start">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
+        </div>
     </>
   );
 
@@ -414,3 +433,5 @@ export default function AdminLayout({
     </div>
   );
 }
+
+    
