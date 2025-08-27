@@ -17,9 +17,14 @@ export default function AdvertisementPage() {
   const [showAdsForPro, setShowAdsForPro] = useState(false);
 
   const manualAdSlots = [
+    { id: 'site-header-banner', name: 'Site-wide: Header Banner' },
     { id: 'homepage-banner-top', name: 'Homepage: Top Banner' },
-    { id: 'toolpage-sidebar', name: 'Tool Page: Sidebar' },
     { id: 'homepage-banner-bottom', name: 'Homepage: Bottom Banner' },
+    { id: 'toolpage-sidebar', name: 'Tool Page: Sidebar' },
+    { id: 'toolpage-banner-top', name: 'Tool Page: Top Banner' },
+    { id: 'toolpage-banner-bottom', name: 'Tool Page: Bottom Banner' },
+    { id: 'blog-post-sidebar', name: 'Blog Post: Sidebar' },
+    { id: 'blog-post-in-content', name: 'Blog Post: In-content Ad' },
   ];
 
   return (
