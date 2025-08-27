@@ -16,6 +16,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Eye, EyeOff } from "lucide-react";
+import { Logo } from "@/components/common/Logo";
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required." }),
@@ -84,6 +85,10 @@ export default function SignupPage() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+           <div className="flex justify-center items-center gap-2 mb-4">
+            <Logo />
+            <span className="text-2xl font-bold">ToolifyAI</span>
+          </div>
           <CardTitle className="text-2xl">Create an Account</CardTitle>
           <CardDescription>Join ToolifyAI to get started</CardDescription>
         </CardHeader>
