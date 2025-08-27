@@ -120,10 +120,7 @@ export default function AdvertisementPage() {
               </CardContent>
             </Card>
            </div>
-        </div>
-
-        <div className="lg:col-span-1">
-          <Card>
+            <Card>
             <CardHeader>
               <CardTitle>Audience Settings</CardTitle>
               <CardDescription>
@@ -148,6 +145,10 @@ export default function AdvertisementPage() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        <div className="lg:col-span-1">
+         
         </div>
       </div>
 
