@@ -122,11 +122,17 @@ export default function AllEmailsPage() {
 
   return (
     <div className="space-y-6">
+       <div>
+        <h1 className="text-3xl font-bold tracking-tight">All Sent Emails</h1>
+        <p className="text-muted-foreground">
+          Browse the history of all sent emails from your system.
+        </p>
+      </div>
        <Card>
         <CardHeader>
-          <CardTitle>All Emails</CardTitle>
+          <CardTitle>Email History</CardTitle>
           <CardDescription>
-            Browse the history of all sent emails from your system.
+            A detailed log of all emails sent from your system.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -238,4 +244,3 @@ export default function AllEmailsPage() {
     </div>
   );
 }
-
