@@ -235,7 +235,7 @@ export default function AdminUsersPage() {
                   placeholder="Search by name, email, or username"
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  className="pl-9 w-full sm:w-64"
+                  className="pl-9 w-full sm:w-52"
                 />
             </div>
           </div>
