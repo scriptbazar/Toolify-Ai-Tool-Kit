@@ -54,8 +54,6 @@ export default function ReferralManagementPage() {
   ];
 
   const filteredReferrals = useMemo(() => {
-      // In a real app, filtering logic for 'direct' and 'team' would be implemented here.
-      // For now, only 'pending' and 'all' will filter the dummy data.
       let referrals = allReferrals;
       if (activeFilter === 'pending') {
           referrals = referrals.filter(r => r.status === 'Pending');
@@ -207,62 +205,58 @@ export default function ReferralManagementPage() {
           
           <div className="space-y-6">
               <Card>
-                <CardHeader>
-                    <CardTitle>Referral Program Status</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                        <Label htmlFor="enable-referrals" className="font-medium">Enable Referral Program</Label>
-                        <Switch id="enable-referrals" checked={isReferralEnabled} onCheckedChange={setIsReferralEnabled} />
-                    </div>
-                </CardContent>
+                  <CardHeader>
+                      <CardTitle>Referral Settings</CardTitle>
+                      <CardDescription>Configure your referral program.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div>
+                          <Label htmlFor="enable-referrals" className="font-medium">Enable Referral Program</Label>
+                          <p className="text-sm text-muted-foreground">Turn the entire referral system on or off.</p>
+                        </div>
+                          <Switch id="enable-referrals" checked={isReferralEnabled} onCheckedChange={setIsReferralEnabled} />
+                      </div>
+
+                      <div className={cn('space-y-6 transition-opacity duration-300', !isReferralEnabled && 'opacity-50 pointer-events-none hidden')}>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                  <Label htmlFor="commission-rate">Commission Rate</Label>
+                                  <div className="relative">
+                                      <Input id="commission-rate" type="number" defaultValue="20" className="pl-8" />
+                                      <Percent className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                  </div>
+                              </div>
+                              <div className="space-y-2">
+                                  <Label htmlFor="cookie-duration">Cookie Duration (Days)</Label>
+                                  <div className="relative">
+                                      <Input id="cookie-duration" type="number" defaultValue="30" className="pl-8" />
+                                      <Cookie className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                  <Label htmlFor="payout-threshold">Minimum Payout Threshold</Label>
+                                  <div className="relative">
+                                      <Input id="payout-threshold" type="number" defaultValue="50" className="pl-8" />
+                                      <CircleDollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                  </div>
+                              </div>
+                              <div className="flex items-center justify-between rounded-lg border p-4">
+                                  <Label htmlFor="enable-multi-level" className="font-medium">Enable Multi-level Referrals</Label>
+                                  <Switch id="enable-multi-level" />
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <Button className="w-full" onClick={handleSaveSettings} disabled={isSaving}>
+                          <Save className="mr-2 h-4 w-4" />
+                          {isSaving ? 'Saving...' : 'Save Settings'}
+                      </Button>
+                  </CardContent>
               </Card>
-
-              <div className={cn('transition-opacity duration-300 space-y-6', !isReferralEnabled && 'opacity-50 pointer-events-none hidden')}>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Referral Settings</CardTitle>
-                        <CardDescription>Configure your referral program.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="commission-rate">Commission Rate</Label>
-                                <div className="relative">
-                                    <Input id="commission-rate" type="number" defaultValue="20" className="pl-8" />
-                                    <Percent className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="cookie-duration">Cookie Duration (Days)</Label>
-                                <div className="relative">
-                                    <Input id="cookie-duration" type="number" defaultValue="30" className="pl-8" />
-                                    <Cookie className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="payout-threshold">Minimum Payout Threshold</Label>
-                                <div className="relative">
-                                    <Input id="payout-threshold" type="number" defaultValue="50" className="pl-8" />
-                                    <CircleDollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-between rounded-lg border p-4">
-                                <Label htmlFor="enable-multi-level" className="font-medium">Enable Multi-level Referrals</Label>
-                                <Switch id="enable-multi-level" />
-                            </div>
-                        </div>
-
-                        <Button className="w-full" onClick={handleSaveSettings} disabled={isSaving}>
-                            <Save className="mr-2 h-4 w-4" />
-                            {isSaving ? 'Saving...' : 'Save Settings'}
-                        </Button>
-                    </CardContent>
-                </Card>
-              </div>
           </div>
       </div>
     </div>
