@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search } from 'lucide-react';
+import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -33,13 +33,19 @@ interface User {
   email: string;
   userName?: string;
   role: 'admin' | 'user' | 'lead';
-  type: 'Signup' | 'Lead';
+  type: 'Signup' | 'Lead' | 'Comment';
   createdAt?: {
     seconds: number;
     nanoseconds: number;
   };
 }
 
+const dummyCommentUsers: User[] = [
+    { id: 'commenter-1', name: 'Alex Johnson', email: 'alexj@example.com', role: 'user', type: 'Comment', createdAt: { seconds: 1672531199, nanoseconds: 0 } },
+    { id: 'commenter-2', name: 'Samantha Bee', email: 'samanthab@example.com', role: 'user', type: 'Comment', createdAt: { seconds: 1672617599, nanoseconds: 0 } },
+];
+
+const ITEMS_PER_PAGE = 5;
 
 export default function AdminUsersPage() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -48,8 +54,9 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'signup' | 'lead'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'signup' | 'lead' | 'comment'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
   const fetchUsersAndLeads = async () => {
@@ -87,7 +94,7 @@ export default function AdminUsersPage() {
       });
 
       // Combine and sort by date
-      const combinedList = [...usersList, ...leadsList].sort((a, b) => {
+      const combinedList = [...usersList, ...leadsList, ...dummyCommentUsers].sort((a, b) => {
         const dateA = a.createdAt?.seconds ?? 0;
         const dateB = b.createdAt?.seconds ?? 0;
         return dateB - dateA;
@@ -113,25 +120,43 @@ export default function AdminUsersPage() {
   
   const filteredUsers = useMemo(() => {
     return allUsers.filter(user => {
-      const filterMatch = activeFilter === 'all' || (activeFilter === 'signup' && user.type === 'Signup') || (activeFilter === 'lead' && user.type === 'Lead');
+      const filterMatch = activeFilter === 'all' || user.type.toLowerCase() === activeFilter;
       const searchMatch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase()) || (user.userName && user.userName.toLowerCase().includes(searchQuery.toLowerCase()));
       return filterMatch && searchMatch;
     });
   }, [allUsers, activeFilter, searchQuery]);
+
+  const paginatedUsers = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredUsers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredUsers, currentPage]);
+
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
   
   const counts = useMemo(() => ({
     all: allUsers.length,
     signup: allUsers.filter(u => u.type === 'Signup').length,
     lead: allUsers.filter(u => u.type === 'Lead').length,
+    comment: allUsers.filter(u => u.type === 'Comment').length,
   }), [allUsers]);
 
   const handleEditClick = (user: User) => {
-    if (user.type === 'Lead') {
-        toast({ title: "Info", description: "Leads cannot be edited." });
+    if (user.type === 'Lead' || user.type === 'Comment') {
+        toast({ title: "Info", description: "This user type cannot be edited." });
         return;
     }
     setSelectedUser(user);
     setIsEditDialogOpen(true);
+  };
+  
+  const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment') => {
+      setActiveFilter(filter);
+      setCurrentPage(1);
+  };
+  
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(e.target.value);
+      setCurrentPage(1);
   };
 
   const handleRoleChange = async () => {
@@ -187,17 +212,21 @@ export default function AdminUsersPage() {
         <CardContent>
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                <Button variant={activeFilter === 'all' ? 'default' : 'outline'} onClick={() => setActiveFilter('all')}>
+                <Button variant={activeFilter === 'all' ? 'default' : 'outline'} onClick={() => handleFilterChange('all')}>
                     <Users className="mr-2 h-4 w-4" />
                     All Users ({counts.all})
                 </Button>
-                <Button variant={activeFilter === 'signup' ? 'default' : 'outline'} onClick={() => setActiveFilter('signup')}>
+                <Button variant={activeFilter === 'signup' ? 'default' : 'outline'} onClick={() => handleFilterChange('signup')}>
                     <UserPlus className="mr-2 h-4 w-4" />
                     Signup Users ({counts.signup})
                 </Button>
-                <Button variant={activeFilter === 'lead' ? 'default' : 'outline'} onClick={() => setActiveFilter('lead')}>
+                <Button variant={activeFilter === 'lead' ? 'default' : 'outline'} onClick={() => handleFilterChange('lead')}>
                     <User className="mr-2 h-4 w-4" />
                     Lead Users ({counts.lead})
+                </Button>
+                <Button variant={activeFilter === 'comment' ? 'default' : 'outline'} onClick={() => handleFilterChange('comment')}>
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Comment Users ({counts.comment})
                 </Button>
             </div>
             <div className="relative w-full sm:w-auto">
@@ -205,7 +234,7 @@ export default function AdminUsersPage() {
                 <Input
                   placeholder="Search by name, email, or username"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleSearchChange}
                   className="pl-9 w-full sm:w-64"
                 />
             </div>
@@ -219,65 +248,90 @@ export default function AdminUsersPage() {
             </Alert>
           )}
           {!loading && !error && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Full Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Date Joined</TableHead>
-                  <TableHead className="text-right">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map(user => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">
-                         <div className="flex items-center gap-2">
-                           <Avatar className="h-8 w-8">
-                              <AvatarFallback>{user.name?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
-                           </Avatar>
-                           <span>{user.name}</span>
-                         </div>
-                      </TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.userName || '—'}</TableCell>
-                      <TableCell>
-                        <Badge variant={user.role === 'admin' ? 'default' : (user.role === 'user' ? 'secondary' : 'outline')}>
-                          {user.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{formatDate(user.createdAt)}</TableCell>
-                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button aria-haspopup="true" size="icon" variant="ghost" disabled={user.type === 'Lead'}>
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Toggle menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => handleEditClick(user)}>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Delete</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Full Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Username</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Date Joined</TableHead>
+                    <TableHead className="text-right">
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedUsers.length > 0 ? (
+                    paginatedUsers.map(user => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">
+                           <div className="flex items-center gap-2">
+                             <Avatar className="h-8 w-8">
+                                <AvatarFallback>{user.name?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
+                             </Avatar>
+                             <span>{user.name}</span>
+                           </div>
+                        </TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>{user.userName || '—'}</TableCell>
+                        <TableCell>
+                          <Badge variant={user.role === 'admin' ? 'default' : (user.role === 'user' ? 'secondary' : 'outline')}>
+                            {user.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{formatDate(user.createdAt)}</TableCell>
+                         <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button aria-haspopup="true" size="icon" variant="ghost" disabled={user.type === 'Lead' || user.type === 'Comment'}>
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => handleEditClick(user)}>Edit</DropdownMenuItem>
+                              <DropdownMenuItem>Delete</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center h-24">
+                        No users found for the current selection.
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center h-24">
-                      No users found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+           {totalPages > 1 && (
+            <div className="flex items-center justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                  Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -328,3 +382,4 @@ export default function AdminUsersPage() {
     </div>
   );
 }
+
