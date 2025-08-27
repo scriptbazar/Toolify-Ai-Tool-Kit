@@ -10,6 +10,8 @@ import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
 import { toolCategories } from '@/lib/constants';
+import { ModeToggle } from './ModeToggle';
+
 
 const NavLinks = ({ isMobile = false }) => {
   const pathname = usePathname();
@@ -61,6 +63,7 @@ export default function Header() {
         {isMobile ? (
           <>
             <div className="flex flex-1 items-center justify-end">
+               <ModeToggle />
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -104,6 +107,7 @@ export default function Header() {
             <div className="flex flex-1 items-center justify-end space-x-2">
             {!isAdminRoute && (
               <>
+                <ModeToggle />
                 <Button asChild variant="ghost">
                   <Link href="/login"><LogIn className="mr-2 h-4 w-4" />Log in</Link>
                 </Button>
