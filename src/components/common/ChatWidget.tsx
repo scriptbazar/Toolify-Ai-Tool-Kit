@@ -56,9 +56,10 @@ export function ChatWidget() {
     const firstName = formData.get('firstName') as string;
     const lastName = formData.get('lastName') as string;
     const email = formData.get('email') as string;
+    const language = formData.get('language') as string;
 
     try {
-      await addLeadUser({ name: `${firstName} ${lastName}`, email, message: "User started a chat." });
+      await addLeadUser({ name: `${firstName} ${lastName}`, email, message: `User started a chat. Language: ${language}` });
       toast({
         title: 'Thank you!',
         description: "Your information has been saved. You can now chat with our AI.",
@@ -103,23 +104,32 @@ export function ChatWidget() {
   const ContactForm = (
     <form onSubmit={handleContactSubmit}>
       <CardContent className="p-4 space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Welcome! Provide your details to start a chat with our AI assistant.
-        </p>
+        <div className="bg-muted p-4 rounded-lg text-center">
+            <h4 className="font-semibold text-lg">Welcome!</h4>
+            <p className="text-sm text-muted-foreground">
+            Please enter your details to get started.
+            </p>
+        </div>
         <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" name="firstName" placeholder="Enter first name" required disabled={isSubmittingContact} />
+                <Input id="firstName" name="firstName" required disabled={isSubmittingContact} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" name="lastName" placeholder="Enter last name" required disabled={isSubmittingContact} />
+                <Input id="lastName" name="lastName" required disabled={isSubmittingContact} />
               </div>
             </div>
-             <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" placeholder="Enter your email" required disabled={isSubmittingContact} />
+             <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" name="email" type="email" required disabled={isSubmittingContact} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="language">Language</Label>
+                    <Input id="language" name="language" placeholder="e.g. English" required disabled={isSubmittingContact} />
+                </div>
             </div>
         </div>
       </CardContent>
@@ -183,7 +193,7 @@ export function ChatWidget() {
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={toggleOpen}
-          className="rounded-full w-14 h-14 shadow-lg duration-200"
+          className="rounded-full w-12 h-12 shadow-lg duration-200"
           aria-label="Toggle chat widget"
         >
           {isOpen ? <X className="h-8 w-8" /> : <Logo className="h-10 w-10 text-primary-foreground" />}
@@ -203,8 +213,8 @@ export function ChatWidget() {
               <div className="flex items-center gap-3">
                 <Logo className="h-6 w-6 text-primary-foreground" />
                 <div>
-                  <CardTitle className="text-lg">ToolifyAI Assistant</CardTitle>
-                  <p className="text-sm text-primary-foreground/80">I'm here to help. Ask a question!</p>
+                  <CardTitle className="text-lg">AI Smart Tools Assistant</CardTitle>
+                  <p className="text-sm text-primary-foreground/80">Ask me about this site!</p>
                 </div>
               </div>
               <Button variant="ghost" size="icon" onClick={toggleOpen} className="h-8 w-8 hover:bg-primary/80">
