@@ -19,6 +19,7 @@ import Image from 'next/image';
 
 const postSchema = z.object({
   title: z.string().min(5, { message: 'Title must be at least 5 characters long.' }),
+  slug: z.string().min(5, { message: 'Slug must be at least 5 characters long.' }),
   content: z.string().min(50, { message: 'Content must be at least 50 characters long.' }),
   category: z.string().min(1, { message: 'Please select a category.' }),
   tags: z.string().optional(),
@@ -35,11 +36,22 @@ export default function AddNewPostPage() {
     resolver: zodResolver(postSchema),
     defaultValues: {
       title: '',
+      slug: '',
       content: '',
       category: '',
       tags: '',
     },
   });
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const title = e.target.value;
+    form.setValue('title', title, { shouldValidate: true });
+    const slug = title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '');
+    form.setValue('slug', slug, { shouldValidate: true });
+  };
 
   const handleGenerateContent = async () => {
     const title = form.getValues('title');
@@ -101,19 +113,34 @@ export default function AddNewPostPage() {
                 <CardTitle>Post Content</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Post Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., The Future of Artificial Intelligence" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Post Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., The Future of AI" {...field} onChange={handleTitleChange} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="slug"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Post Slug</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., the-future-of-ai" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <div className="relative">
                    <FormField
