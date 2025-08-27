@@ -12,7 +12,6 @@ import {
   RefreshCw,
   CheckCircle,
   Search,
-  PlusCircle,
   MoreHorizontal,
 } from 'lucide-react';
 import {
@@ -79,12 +78,6 @@ export default function TicketManagementPage() {
                   className="pl-9 w-full sm:w-auto"
                 />
               </div>
-              <Button asChild>
-                <Link href="/create-ticket">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add New
-                </Link>
-              </Button>
             </div>
           </div>
 
