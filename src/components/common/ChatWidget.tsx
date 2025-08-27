@@ -101,41 +101,41 @@ export function ChatWidget() {
   };
 
   const ContactForm = (
-    <form onSubmit={handleContactSubmit}>
-      <CardContent className="p-0">
-         <ScrollArea className="h-[350px] w-full p-4">
-            <div className="space-y-4">
-                <div className="bg-muted p-4 rounded-lg text-center">
-                    <h4 className="font-semibold text-lg">Welcome!</h4>
-                    <p className="text-sm text-muted-foreground">
-                    Please enter your details to get started.
-                    </p>
-                </div>
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" name="firstName" required disabled={isSubmittingContact} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" name="lastName" required disabled={isSubmittingContact} />
-                      </div>
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" name="email" type="email" required disabled={isSubmittingContact} />
-                    </div>
-                </div>
+    <CardContent className="p-0">
+      <form onSubmit={handleContactSubmit}>
+        <ScrollArea className="h-[350px] w-full p-4">
+          <div className="space-y-4">
+            <div className="bg-muted p-4 rounded-lg text-center">
+              <h4 className="font-semibold text-lg">Welcome!</h4>
+              <p className="text-sm text-muted-foreground">
+                Please enter your details to get started.
+              </p>
             </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input id="firstName" name="firstName" required disabled={isSubmittingContact} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input id="lastName" name="lastName" required disabled={isSubmittingContact} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="email" type="email" required disabled={isSubmittingContact} />
+              </div>
+            </div>
+          </div>
         </ScrollArea>
-      </CardContent>
-      <CardFooter className="p-4 border-t">
-        <Button type="submit" className="w-full" disabled={isSubmittingContact}>
-          {isSubmittingContact ? 'Submitting...' : 'Start Chat'}
-        </Button>
-      </CardFooter>
-    </form>
+        <CardFooter className="p-4 border-t">
+          <Button type="submit" className="w-full" disabled={isSubmittingContact}>
+            {isSubmittingContact ? 'Submitting...' : 'Start Chat'}
+          </Button>
+        </CardFooter>
+      </form>
+    </CardContent>
   );
 
   const ChatInterface = (
