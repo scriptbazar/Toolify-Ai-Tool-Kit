@@ -110,7 +110,7 @@ export function ChatWidget() {
             </p>
         </div>
         <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input id="firstName" name="firstName" required disabled={isSubmittingContact} />
@@ -207,7 +207,7 @@ export function ChatWidget() {
                 <Logo className="h-6 w-6 text-primary-foreground" />
                 <div>
                   <CardTitle className="text-lg">ToolifyAI Assistant</CardTitle>
-                  <p className="text-sm text-primary-foreground/80">I'm here to help. Ask a question!</p>
+                  <p className="text-sm text-primary-foreground/80">Ask me about this site!</p>
                 </div>
               </div>
               <Button variant="ghost" size="icon" onClick={toggleOpen} className="h-8 w-8 hover:bg-primary/80">
