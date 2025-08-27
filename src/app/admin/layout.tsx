@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -140,7 +141,7 @@ export default function AdminLayout({
         </SheetTitle>
       </SheetHeader>
       <ScrollArea className="flex-1">
-        <nav className="grid gap-2 text-base font-medium p-4">
+        <nav className="grid gap-2 text-base font-medium p-4 py-4">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -280,7 +281,7 @@ export default function AdminLayout({
             </Button>
           </div>
           <ScrollArea className="flex-1">
-            <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4">
+            <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4 lg:py-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
