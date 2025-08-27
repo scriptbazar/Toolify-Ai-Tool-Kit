@@ -1,31 +1,121 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Save, Ban, Edit, Bot } from 'lucide-react';
+import { Save, Ban, Edit, Bot, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getSettings, updateSettings } from '@/ai/flows/settings-management';
+import type { AdvertisementSettings, ManualAdSlot } from '@/ai/flows/settings-management.types';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
+
+
+const defaultManualAdSlots: ManualAdSlot[] = [
+    { id: 'site-header-banner', name: 'Site-wide: Header Banner', code: '' },
+    { id: 'homepage-banner-top', name: 'Homepage: Top Banner', code: '' },
+    { id: 'homepage-banner-bottom', name: 'Homepage: Bottom Banner', code: '' },
+    { id: 'toolpage-sidebar', name: 'Tool Page: Sidebar', code: '' },
+    { id: 'toolpage-banner-top', name: 'Tool Page: Top Banner', code: '' },
+    { id: 'toolpage-banner-bottom', name: 'Tool Page: Bottom Banner', code: '' },
+    { id: 'blog-post-sidebar', name: 'Blog Post: Sidebar', code: '' },
+    { id: 'blog-post-in-content', name: 'Blog Post: In-content Ad', code: '' },
+];
+
 
 export default function AdvertisementPage() {
-  const [adType, setAdType] = useState('none');
-  const [autoAdsScript, setAutoAdsScript] = useState('');
-  const [showAdsForPro, setShowAdsForPro] = useState(false);
+  const [settings, setSettings] = useState<AdvertisementSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
-  const manualAdSlots = [
-    { id: 'site-header-banner', name: 'Site-wide: Header Banner' },
-    { id: 'homepage-banner-top', name: 'Homepage: Top Banner' },
-    { id: 'homepage-banner-bottom', name: 'Homepage: Bottom Banner' },
-    { id: 'toolpage-sidebar', name: 'Tool Page: Sidebar' },
-    { id: 'toolpage-banner-top', name: 'Tool Page: Top Banner' },
-    { id: 'toolpage-banner-bottom', name: 'Tool Page: Bottom Banner' },
-    { id: 'blog-post-sidebar', name: 'Blog Post: Sidebar' },
-    { id: 'blog-post-in-content', name: 'Blog Post: In-content Ad' },
-  ];
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const appSettings = await getSettings();
+        // Ensure manualAdSlots are populated even if they don't exist in Firestore
+        const adSettings = appSettings.advertisement || {};
+        const existingSlots = adSettings.manualAdSlots || [];
+        const mergedSlots = defaultManualAdSlots.map(defaultSlot => {
+          const existing = existingSlots.find(s => s.id === defaultSlot.id);
+          return existing ? { ...defaultSlot, ...existing } : defaultSlot;
+        });
+
+        setSettings({
+            ...adSettings,
+            manualAdSlots: mergedSlots,
+        });
+
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+        toast({
+          title: 'Error',
+          description: 'Could not load advertisement settings.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSettings();
+  }, [toast]);
+
+  const handleManualAdSlotChange = (id: string, code: string) => {
+    if (!settings) return;
+    const updatedSlots = settings.manualAdSlots?.map(slot => 
+        slot.id === id ? { ...slot, code } : slot
+    );
+    setSettings(prev => prev ? { ...prev, manualAdSlots: updatedSlots } : null);
+  };
+
+  const handleSave = async () => {
+    if (!settings) return;
+    setIsSaving(true);
+    try {
+      await updateSettings({ advertisement: settings });
+      toast({
+        title: 'Success!',
+        description: 'Advertisement settings have been saved.',
+      });
+    } catch (error: any) {
+      console.error('Failed to save settings:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Could not save settings.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (loading || !settings) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-1/3" />
+        <Skeleton className="h-8 w-2/3" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </CardContent>
+          </Card>
+           <Card>
+            <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+            <CardContent><Skeleton className="h-16 w-full" /></CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -45,7 +135,10 @@ export default function AdvertisementPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <RadioGroup value={adType} onValueChange={setAdType} className="space-y-4">
+            <RadioGroup 
+                value={settings.adType} 
+                onValueChange={(value) => setSettings(prev => prev ? { ...prev, adType: value as any } : null)} 
+                className="space-y-4">
               <div className="flex items-center space-x-3 p-4 border rounded-lg has-[[data-state=checked]]:bg-muted">
                 <RadioGroupItem value="none" id="none" />
                 <Label htmlFor="none" className="flex items-center gap-3 w-full cursor-pointer">
@@ -99,14 +192,14 @@ export default function AdvertisementPage() {
               </div>
               <Switch 
                 id="pro-user-ads" 
-                checked={showAdsForPro}
-                onCheckedChange={setShowAdsForPro}
+                checked={settings.showAdsForPro}
+                onCheckedChange={(checked) => setSettings(prev => prev ? { ...prev, showAdsForPro: checked } : null)}
               />
             </div>
           </CardContent>
         </Card>
 
-        <div className={cn('lg:col-span-2 transition-opacity duration-300', adType !== 'auto' && 'opacity-50 pointer-events-none hidden')}>
+        <div className={cn('lg:col-span-2 transition-opacity duration-300', settings.adType !== 'auto' && 'opacity-50 pointer-events-none hidden')}>
            <Card>
             <CardHeader>
               <CardTitle>Auto Ads Script</CardTitle>
@@ -118,16 +211,16 @@ export default function AdvertisementPage() {
               <Textarea
                   id="auto-ads-script"
                   placeholder='<script async src="..."></script>'
-                  value={autoAdsScript}
-                  onChange={(e) => setAutoAdsScript(e.target.value)}
+                  value={settings.autoAdsScript || ''}
+                  onChange={(e) => setSettings(prev => prev ? { ...prev, autoAdsScript: e.target.value } : null)}
                   className="min-h-[150px] font-mono"
-                  disabled={adType !== 'auto'}
+                  disabled={settings.adType !== 'auto'}
                 />
             </CardContent>
           </Card>
         </div>
         
-         <div className={cn('lg:col-span-2 transition-opacity duration-300', adType !== 'manual' && 'opacity-50 pointer-events-none hidden')}>
+         <div className={cn('lg:col-span-2 transition-opacity duration-300', settings.adType !== 'manual' && 'opacity-50 pointer-events-none hidden')}>
            <Card>
             <CardHeader>
               <CardTitle>Manual Ad Slots</CardTitle>
@@ -137,14 +230,16 @@ export default function AdvertisementPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {manualAdSlots.map((slot) => (
+                {settings.manualAdSlots?.map((slot) => (
                   <div key={slot.id} className="space-y-2">
                     <Label htmlFor={`manual-ad-${slot.id}`}>{slot.name}</Label>
                     <Textarea
                       id={`manual-ad-${slot.id}`}
                       placeholder={`Paste ad code for ${slot.name}`}
+                      value={slot.code || ''}
+                      onChange={(e) => handleManualAdSlotChange(slot.id, e.target.value)}
                       className="min-h-[100px] font-mono text-xs"
-                      disabled={adType !== 'manual'}
+                      disabled={settings.adType !== 'manual'}
                     />
                   </div>
                 ))}
@@ -155,8 +250,8 @@ export default function AdvertisementPage() {
       </div>
 
       <div className="flex justify-end pt-6">
-        <Button>
-          <Save className="mr-2 h-4 w-4" />
+        <Button onClick={handleSave} disabled={isSaving}>
+          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
           Save Ad Settings
         </Button>
       </div>

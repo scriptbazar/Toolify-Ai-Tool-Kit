@@ -10,22 +10,15 @@
  */
 
 import { z } from 'zod';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import {getApps, initializeApp} from 'firebase-admin/app';
+import { FieldValue } from 'firebase-admin/firestore';
 import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput } from './user-management.types';
+import { adminDb } from '@/lib/firebase-admin';
 
-
-// Initialize Firebase Admin SDK
-if (!getApps().length) {
-  initializeApp();
-}
-
-const db = getFirestore();
 
 export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ success: boolean; message: string }> {
   try {
     const { userId, newRole } = UpdateUserRoleInputSchema.parse(input);
-    const userRef = db.collection('users').doc(userId);
+    const userRef = adminDb.collection('users').doc(userId);
     await userRef.update({ role: newRole });
     return { success: true, message: 'User role updated successfully.' };
   } catch (error: any) {
@@ -40,7 +33,7 @@ export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ succ
 export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: boolean; message: string }> {
   try {
     const { name, email, message } = AddLeadUserInputSchema.parse(input);
-    const leadsRef = db.collection('leads');
+    const leadsRef = adminDb.collection('leads');
     await leadsRef.add({
       name,
       email,
@@ -59,8 +52,8 @@ export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: b
 
 export async function getAllEmails(): Promise<{ email: string; source: string; date: string }[]> {
   try {
-    const usersSnapshot = await db.collection('users').get();
-    const leadsSnapshot = await db.collection('leads').get();
+    const usersSnapshot = await adminDb.collection('users').get();
+    const leadsSnapshot = await adminDb.collection('leads').get();
 
     const emailMap = new Map<string, { source: string; date: string }>();
 

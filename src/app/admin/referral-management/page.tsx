@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,10 +18,14 @@ import {
   Percent,
   Cookie,
   CircleDollarSign,
+  Loader2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { getSettings, updateSettings } from '@/ai/flows/settings-management';
+import type { ReferralSettings } from '@/ai/flows/settings-management.types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type FilterType = 'all' | 'direct' | 'team' | 'pending';
 type StatusType = 'Completed' | 'Pending';
@@ -39,13 +43,61 @@ const allReferrals = [
 const ITEMS_PER_PAGE = 5;
 
 export default function ReferralManagementPage() {
+  const [settings, setSettings] = useState<ReferralSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isReferralEnabled, setIsReferralEnabled] = useState(true);
   const { toast } = useToast();
 
+  useEffect(() => {
+    async function fetchSettings() {
+      setLoading(true);
+      try {
+        const appSettings = await getSettings();
+        setSettings(appSettings.referral || {
+          isReferralEnabled: true,
+          commissionRate: 20,
+          cookieDuration: 30,
+          payoutThreshold: 50,
+          isMultiLevel: false,
+        });
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+        toast({
+          title: 'Error',
+          description: 'Could not load referral settings.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSettings();
+  }, [toast]);
+
+  const handleSaveSettings = async () => {
+    if (!settings) return;
+    setIsSaving(true);
+    try {
+      await updateSettings({ referral: settings });
+      toast({
+        title: 'Settings Saved',
+        description: 'Your referral settings have been updated.',
+      });
+    } catch (error: any) {
+      console.error('Failed to save settings:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Could not save settings.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
   const tabs: { id: FilterType; label: string; icon: React.ElementType }[] = [
     { id: 'all', label: 'All', icon: Users },
     { id: 'direct', label: 'Direct', icon: UserPlus },
@@ -71,19 +123,6 @@ export default function ReferralManagementPage() {
 
   const totalPages = Math.ceil(filteredReferrals.length / ITEMS_PER_PAGE);
 
-
-  const handleSaveSettings = () => {
-    setIsSaving(true);
-    // Simulate saving settings
-    setTimeout(() => {
-        setIsSaving(false);
-        toast({
-            title: 'Settings Saved',
-            description: 'Your referral settings have been updated.',
-        });
-    }, 1500);
-  };
-
   const getStatusBadge = (status: StatusType) => {
     switch (status) {
         case 'Completed':
@@ -94,6 +133,23 @@ export default function ReferralManagementPage() {
             return <Badge variant='outline'>{status}</Badge>;
     }
   };
+
+  if (loading || !settings) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-1/3" />
+        <Skeleton className="h-8 w-2/3" />
+        <Card>
+            <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+            <CardContent><Skeleton className="h-48 w-full" /></CardContent>
+        </Card>
+        <Card>
+            <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+            <CardContent><Skeleton className="h-48 w-full" /></CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -215,22 +271,36 @@ export default function ReferralManagementPage() {
                           <Label htmlFor="enable-referrals" className="font-medium">Enable Referral Program</Label>
                           <p className="text-sm text-muted-foreground">Turn the entire referral system on or off.</p>
                         </div>
-                          <Switch id="enable-referrals" checked={isReferralEnabled} onCheckedChange={setIsReferralEnabled} />
+                          <Switch 
+                            id="enable-referrals" 
+                            checked={settings.isReferralEnabled} 
+                            onCheckedChange={(checked) => setSettings(prev => prev ? { ...prev, isReferralEnabled: checked } : null)}
+                          />
                       </div>
 
-                      <div className={cn('space-y-6 transition-opacity duration-300', !isReferralEnabled && 'opacity-50 pointer-events-none hidden')}>
+                      <div className={cn('space-y-6 transition-opacity duration-300', !settings.isReferralEnabled && 'opacity-50 pointer-events-none hidden')}>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div className="space-y-2">
                                   <Label htmlFor="commission-rate">Commission Rate</Label>
                                   <div className="relative">
-                                      <Input id="commission-rate" type="number" defaultValue="20" className="pl-8" />
+                                      <Input 
+                                        id="commission-rate" 
+                                        type="number" 
+                                        value={settings.commissionRate}
+                                        onChange={(e) => setSettings(prev => prev ? { ...prev, commissionRate: Number(e.target.value) } : null)}
+                                        className="pl-8" />
                                       <Percent className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                   </div>
                               </div>
                               <div className="space-y-2">
                                   <Label htmlFor="cookie-duration">Cookie Duration (Days)</Label>
                                   <div className="relative">
-                                      <Input id="cookie-duration" type="number" defaultValue="30" className="pl-8" />
+                                      <Input 
+                                        id="cookie-duration" 
+                                        type="number" 
+                                        value={settings.cookieDuration}
+                                        onChange={(e) => setSettings(prev => prev ? { ...prev, cookieDuration: Number(e.target.value) } : null)}
+                                        className="pl-8" />
                                       <Cookie className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                   </div>
                               </div>
@@ -240,20 +310,29 @@ export default function ReferralManagementPage() {
                               <div className="space-y-2">
                                   <Label htmlFor="payout-threshold">Minimum Payout Threshold</Label>
                                   <div className="relative">
-                                      <Input id="payout-threshold" type="number" defaultValue="50" className="pl-8" />
+                                      <Input 
+                                        id="payout-threshold" 
+                                        type="number" 
+                                        value={settings.payoutThreshold}
+                                        onChange={(e) => setSettings(prev => prev ? { ...prev, payoutThreshold: Number(e.target.value) } : null)}
+                                        className="pl-8" />
                                       <CircleDollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                   </div>
                               </div>
                               <div className="flex items-center justify-between rounded-lg border p-4">
                                   <Label htmlFor="enable-multi-level" className="font-medium">Enable Multi-level Referrals</Label>
-                                  <Switch id="enable-multi-level" />
+                                  <Switch 
+                                    id="enable-multi-level" 
+                                    checked={settings.isMultiLevel}
+                                    onCheckedChange={(checked) => setSettings(prev => prev ? { ...prev, isMultiLevel: checked } : null)}
+                                  />
                               </div>
                           </div>
                       </div>
                       
                       <Button className="w-full" onClick={handleSaveSettings} disabled={isSaving}>
-                          <Save className="mr-2 h-4 w-4" />
-                          {isSaving ? 'Saving...' : 'Save Settings'}
+                          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                          Save Settings
                       </Button>
                   </CardContent>
               </Card>
