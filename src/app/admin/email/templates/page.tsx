@@ -16,6 +16,9 @@ import {
   BadgeCheck,
   Megaphone,
   Ticket,
+  MailCheck,
+  ShieldCheck,
+  Receipt,
 } from 'lucide-react';
 import {
   Dialog,
@@ -44,12 +47,36 @@ const templates = [
     body: `Hello {{firstName}},\n\nSomeone has requested a password reset for your ToolifyAI account. If this was you, please click the link below to set a new password:\n\n[Reset Password Link]\n\nIf you did not request this, you can safely ignore this email.\n\nThanks,\nThe ToolifyAI Team`,
   },
   {
+    id: 'email-verification',
+    icon: MailCheck,
+    title: 'Email Address Verification',
+    description: 'Sent to new users to verify their email address.',
+    subject: 'Verify Your Email Address for ToolifyAI',
+    body: `Hi {{firstName}},\n\nPlease verify your email address by clicking the link below:\n\n[Verification Link]\n\nThis link will expire in 24 hours. If you did not sign up for ToolifyAI, please disregard this email.\n\nThanks,\nThe ToolifyAI Team`,
+  },
+  {
+    id: 'password-changed',
+    icon: ShieldCheck,
+    title: 'Password Change Notification',
+    description: 'Confirms that a user\'s password has been changed.',
+    subject: 'Your ToolifyAI Password Has Been Changed',
+    body: `Hello {{firstName}},\n\nThis is a confirmation that the password for your ToolifyAI account has been successfully changed.\n\nIf you did not make this change, please contact our support team immediately.\n\nBest,\nThe ToolifyAI Team`,
+  },
+  {
     id: 'subscription-confirmation',
     icon: BadgeCheck,
     title: 'Subscription Confirmation',
     description: 'Confirms a user\'s successful subscription to a plan.',
     subject: 'Your ToolifyAI Subscription is Confirmed!',
     body: `Hi {{firstName}},\n\nYour subscription to the {{planName}} plan is now active! Thank you for upgrading.\n\nYou now have access to all the premium features included in your plan. You can manage your subscription at any time from your account dashboard.\n\nWe're excited to see what you create!\n\nBest,\nThe ToolifyAI Team`,
+  },
+    {
+    id: 'payment-receipt',
+    icon: Receipt,
+    title: 'Payment Receipt',
+    description: 'Provides users with a receipt for their payment.',
+    subject: 'Your ToolifyAI Receipt (Order #{{orderId}})',
+    body: `Hi {{firstName}},\n\nThank you for your payment. Here is the receipt for your recent purchase.\n\nPlan: {{planName}}\nAmount: {{amount}}\nDate: {{date}}\n\nYou can view your full billing history in your account settings.\n\nThanks,\nThe ToolifyAI Team`,
   },
   {
     id: 'new-feature',
