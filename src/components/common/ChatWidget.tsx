@@ -107,13 +107,15 @@ export function ChatWidget() {
         <p className="text-sm text-muted-foreground">
           Welcome! Provide your details to start a chat with our AI assistant.
         </p>
-        <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" name="name" placeholder="Enter your name" required disabled={isSubmittingContact} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" name="email" type="email" placeholder="Enter your email" required disabled={isSubmittingContact} />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input id="name" name="name" placeholder="Enter your name" required disabled={isSubmittingContact} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" name="email" type="email" placeholder="Enter your email" required disabled={isSubmittingContact} />
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="message">Message</Label>
