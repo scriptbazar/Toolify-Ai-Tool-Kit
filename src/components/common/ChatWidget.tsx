@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { addLeadUser } from '@/ai/flows/user-management';
 import { aiChat } from '@/ai/flows/ai-chat';
 import { ScrollArea } from '../ui/scroll-area';
+import { Avatar, AvatarFallback } from '../ui/avatar';
 
 
 type ChatMessage = {
@@ -182,7 +183,7 @@ export function ChatWidget() {
           className="rounded-full w-16 h-16 shadow-lg hover:scale-110 transition-transform duration-200"
           aria-label="Toggle chat widget"
         >
-          {isOpen ? <X className="h-8 w-8" /> : <Logo className="h-8 w-8" />}
+          {isOpen ? <X className="h-8 w-8" /> : <Logo className="h-8 w-8 text-primary-foreground" />}
         </Button>
       </div>
       
