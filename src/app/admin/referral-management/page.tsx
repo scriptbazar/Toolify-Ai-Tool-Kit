@@ -213,26 +213,36 @@ export default function ReferralManagementPage() {
                       <Label htmlFor="enable-referrals" className="font-medium">Enable Referral Program</Label>
                       <Switch id="enable-referrals" defaultChecked />
                   </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="commission-rate">Commission Rate</Label>
-                      <div className="relative">
-                          <Input id="commission-rate" type="number" defaultValue="20" className="pl-8" />
-                          <Percent className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      </div>
-                  </div>
-                  <div className="space-y-2">
-                      <Label htmlFor="cookie-duration">Cookie Duration (Days)</Label>
+                        <Label htmlFor="commission-rate">Commission Rate</Label>
                         <div className="relative">
-                          <Input id="cookie-duration" type="number" defaultValue="30" className="pl-8" />
-                          <Cookie className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      </div>
+                            <Input id="commission-rate" type="number" defaultValue="20" className="pl-8" />
+                            <Percent className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="cookie-duration">Cookie Duration (Days)</Label>
+                          <div className="relative">
+                            <Input id="cookie-duration" type="number" defaultValue="30" className="pl-8" />
+                            <Cookie className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        </div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                      <Label htmlFor="payout-threshold">Minimum Payout Threshold</Label>
-                        <div className="relative">
-                          <Input id="payout-threshold" type="number" defaultValue="50" className="pl-8" />
-                          <CircleDollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      </div>
+
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="payout-threshold">Minimum Payout Threshold</Label>
+                          <div className="relative">
+                            <Input id="payout-threshold" type="number" defaultValue="50" className="pl-8" />
+                            <CircleDollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                        <Label htmlFor="enable-multi-level" className="font-medium">Enable Multi-level Referrals</Label>
+                        <Switch id="enable-multi-level" />
+                    </div>
                   </div>
 
                   <Button className="w-full" onClick={handleSaveSettings} disabled={isSaving}>
