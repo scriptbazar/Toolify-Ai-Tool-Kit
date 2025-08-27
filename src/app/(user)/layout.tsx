@@ -49,6 +49,7 @@ import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Logo } from '@/components/common/Logo';
+import { ModeToggle } from '@/components/common/ModeToggle';
 
 export default function UserPanelLayout({
   children,
