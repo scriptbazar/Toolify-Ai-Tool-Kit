@@ -7,7 +7,7 @@ type ToolGridProps = {
 
 export function ToolGrid({ tools }: ToolGridProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-5">
       {tools.map((tool) => (
         <ToolCard key={tool.slug} tool={tool} />
       ))}
