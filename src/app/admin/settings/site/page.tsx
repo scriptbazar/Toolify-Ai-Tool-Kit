@@ -159,17 +159,6 @@ export default function SiteSettingsPage() {
                <p className="text-sm text-muted-foreground">Separate keywords with commas.</p>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="copyrightText">Copyright Text</Label>
-            <Input 
-                id="copyrightText" 
-                name="copyrightText"
-                value={settings.copyrightText} 
-                onChange={handleInputChange}
-                placeholder="e.g., © 2024 Your Company. All rights reserved."
-              />
-              <p className="text-sm text-muted-foreground">Use {'{year}'} to automatically insert the current year.</p>
-          </div>
         </CardContent>
       </Card>
 
@@ -209,20 +198,33 @@ export default function SiteSettingsPage() {
               <p className="text-sm text-muted-foreground">Must be a .ico or .png file. Recommended size: 32x32 pixels.</p>
             </div>
           </div>
-          <div className="space-y-2">
-              <Label htmlFor="contactEmail">Contact Email</Label>
-               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+                <Label htmlFor="contactEmail">Contact Email</Label>
+                 <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="contactEmail" 
+                      name="contactEmail"
+                      type="email"
+                      value={settings.contactEmail || ''} 
+                      onChange={handleInputChange}
+                      placeholder="e.g., contact@toolifyai.com"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="copyrightText">Copyright Text</Label>
                 <Input 
-                    id="contactEmail" 
-                    name="contactEmail"
-                    type="email"
-                    value={settings.contactEmail || ''} 
+                    id="copyrightText" 
+                    name="copyrightText"
+                    value={settings.copyrightText} 
                     onChange={handleInputChange}
-                    placeholder="e.g., contact@toolifyai.com"
-                    className="pl-10"
-                />
-               </div>
+                    placeholder="e.g., © 2024 Your Company. All rights reserved."
+                  />
+                  <p className="text-sm text-muted-foreground">Use {'{year}'} to automatically insert the current year.</p>
+              </div>
           </div>
         </CardContent>
       </Card>
