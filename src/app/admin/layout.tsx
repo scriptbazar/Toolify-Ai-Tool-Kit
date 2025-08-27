@@ -134,7 +134,12 @@ export default function AdminLayout({
   const mobileNavContent = (
     <>
       <SheetHeader className="text-left border-b pb-4">
-        <SheetTitle>ToolifyAI</SheetTitle>
+        <SheetTitle>
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <Package2 className="h-6 w-6" />
+            <span className="">ToolifyAI</span>
+          </Link>
+        </SheetTitle>
       </SheetHeader>
       <ScrollArea className="flex-1">
         <nav className="grid gap-2 text-base font-medium p-4">
