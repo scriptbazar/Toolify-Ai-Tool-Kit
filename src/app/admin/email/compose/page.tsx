@@ -13,8 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { composeEmail, type AiEmailComposerInput } from '@/ai/flows/ai-email-composer';
-import { Wand2, Send, Mail } from 'lucide-react';
+import { Wand2, Send, Mail, Eye } from 'lucide-react';
 import { z } from 'zod';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 
 
 // Re-define the base schema on the client and then extend it.
@@ -32,6 +33,7 @@ export default function ComposeEmailPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [generatedBody, setGeneratedBody] = useState('');
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<ComposeFormValues>({
@@ -201,6 +203,28 @@ export default function ComposeEmailPage() {
                     <Wand2 className="mr-2 h-4 w-4" />
                     {isGenerating ? 'Generating...' : 'Generate with AI'}
                   </Button>
+                  <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+                    <DialogTrigger asChild>
+                       <Button type="button" variant="outline" className="w-full sm:w-auto">
+                        <Eye className="mr-2 h-4 w-4" />
+                        Preview
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[625px]">
+                       <DialogHeader>
+                        <DialogTitle>Email Preview</DialogTitle>
+                         <DialogDescription>
+                          This is a preview of the email that will be sent to {form.getValues().recipient || '...'}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                         <h3 className="font-semibold">Subject: {form.getValues().subject || '...'}</h3>
+                        <div className="p-4 border rounded-lg bg-muted min-h-[200px] whitespace-pre-wrap">
+                          {form.getValues().keyPoints || 'Email body will appear here...'}
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                    <Button type="submit" disabled={isSending} className="w-full sm:w-auto">
                     <Send className="mr-2 h-4 w-4" />
                     {isSending ? 'Sending...' : 'Send Email'}
