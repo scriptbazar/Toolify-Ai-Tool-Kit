@@ -1,8 +1,9 @@
+
 'use client';
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Sprout } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname } from 'next/navigation';
@@ -70,6 +71,9 @@ export default function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left">
+                  <SheetHeader>
+                    <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                  </SheetHeader>
                   <div className="mt-8 flex flex-col space-y-4">
                     <NavLinks />
                   </div>
