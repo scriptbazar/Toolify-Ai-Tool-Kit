@@ -213,19 +213,19 @@ export default function AdminUsersPage() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
                 <Button variant={activeFilter === 'all' ? 'default' : 'outline'} onClick={() => handleFilterChange('all')}>
-                    <Users className="mr-2 h-4 w-4" />
+                    <Users className="h-4 w-4" />
                     All Users ({counts.all})
                 </Button>
                 <Button variant={activeFilter === 'signup' ? 'default' : 'outline'} onClick={() => handleFilterChange('signup')}>
-                    <UserPlus className="mr-2 h-4 w-4" />
+                    <UserPlus className="h-4 w-4" />
                     Signup Users ({counts.signup})
                 </Button>
                 <Button variant={activeFilter === 'lead' ? 'default' : 'outline'} onClick={() => handleFilterChange('lead')}>
-                    <User className="mr-2 h-4 w-4" />
+                    <User className="h-4 w-4" />
                     Lead Users ({counts.lead})
                 </Button>
                 <Button variant={activeFilter === 'comment' ? 'default' : 'outline'} onClick={() => handleFilterChange('comment')}>
-                    <MessageSquare className="mr-2 h-4 w-4" />
+                    <MessageSquare className="h-4 w-4" />
                     Comment Users ({counts.comment})
                 </Button>
             </div>
