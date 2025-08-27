@@ -27,7 +27,7 @@ import { z } from 'zod';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { KeyRound } from 'lucide-react';
+import { KeyRound, Mail } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
 
 const formSchema = z.object({
@@ -37,6 +37,8 @@ const formSchema = z.object({
 export default function ForgotPasswordPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const [emailSentTo, setEmailSentTo] = useState<string | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,11 +49,7 @@ export default function ForgotPasswordPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       await sendPasswordResetEmail(auth, values.email);
-      toast({
-        title: 'Password Reset Email Sent',
-        description: 'Please check your inbox for a link to reset your password.',
-      });
-      form.reset();
+      setEmailSentTo(values.email);
     } catch (error: any) {
       console.error('Password reset error:', error);
       toast({
@@ -61,6 +59,41 @@ export default function ForgotPasswordPage() {
       });
     }
   }
+
+  if (emailSentTo) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <Link
+              href="/"
+              className="flex justify-center items-center gap-2 mb-4"
+            >
+              <Logo />
+              <span className="text-2xl font-bold">ToolifyAI</span>
+            </Link>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center text-center space-y-4">
+            <Mail className="h-16 w-16 text-primary" />
+            <CardTitle className="text-2xl">Check your email</CardTitle>
+            <CardDescription>
+              We've sent a password reset link to{' '}
+              <span className="font-medium text-foreground">{emailSentTo}</span>.
+              Please check your inbox and spam folder.
+            </CardDescription>
+            <Button
+              variant="outline"
+              onClick={() => router.push('/login')}
+              className="w-full"
+            >
+              Back to Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
