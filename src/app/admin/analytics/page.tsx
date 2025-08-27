@@ -71,44 +71,6 @@ const usersByCountryData = [
   { country: 'Brazil', users: 120 },
 ];
 
-const recentSignups = [
-    {
-        name: 'Olivia Martin',
-        email: 'olivia.martin@email.com',
-        plan: 'Pro',
-        date: '2023-06-24',
-        avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
-    },
-    {
-        name: 'Jackson Lee',
-        email: 'jackson.lee@email.com',
-        plan: 'Free',
-        date: '2023-06-25',
-        avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026705d',
-    },
-    {
-        name: 'Isabella Nguyen',
-        email: 'isabella.nguyen@email.com',
-        plan: 'Pro',
-        date: '20_23-06-26',
-        avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026706d',
-    },
-    {
-        name: 'William Kim',
-        email: 'will@email.com',
-        plan: 'Free',
-        date: '2023-06-27',
-        avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026707d',
-    },
-    {
-        name: 'Sofia Davis',
-        email: 'sofia.davis@email.com',
-        plan: 'Pro',
-        date: '2023-06-28',
-        avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026708d',
-    },
-];
-
 const ComingSoonDialogContent = () => (
   <DialogContent>
     <DialogHeader>
@@ -225,44 +187,6 @@ export default function AdminAnalyticsPage() {
               </CardContent>
             </Card>
           </div>
-          <Card>
-              <CardHeader>
-                <CardTitle>Recent Signups</CardTitle>
-                <CardDescription>The most recent users to sign up for your application.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentSignups.map((user) => (
-                      <TableRow key={user.email}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                                <AvatarImage src={user.avatar} alt={user.name} />
-                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium">{user.name}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.plan === 'Pro' ? 'default' : 'secondary'}>{user.plan}</Badge>
-                        </TableCell>
-                        <TableCell>{user.date}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
         </TabsContent>
 
         <Dialog open={activeTab !== 'overview'} onOpenChange={(isOpen) => !isOpen && setActiveTab('overview')}>
