@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { getAllEmails } from '@/ai/flows/user-management';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Users, UserPlus, User, Download, Search, AlertCircle, Copy } from 'lucide-react';
+import { Users, UserPlus, User, Search, AlertCircle, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -78,13 +78,6 @@ export default function SubscribersPage() {
     lead: emails.filter(e => e.source === 'Lead').length,
   }), [emails]);
 
-  const handleExport = () => {
-    toast({
-      title: "Coming Soon!",
-      description: "CSV export functionality will be available soon.",
-    });
-  };
-
   return (
     <div className="space-y-6">
       <Card>
@@ -120,10 +113,6 @@ export default function SubscribersPage() {
               </Button>
             </div>
              <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Button variant="outline" onClick={handleExport} className="w-full sm:w-auto">
-                <Download className="mr-2 h-4 w-4" />
-                Export as CSV
-              </Button>
               <div className="relative w-full sm:w-auto">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
