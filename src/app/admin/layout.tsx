@@ -57,6 +57,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function AdminLayout({
   children,
@@ -127,6 +128,121 @@ export default function AdminLayout({
   const isEmailRouteActive = pathname.startsWith('/admin/email');
   const isSettingsRouteActive = pathname.startsWith('/admin/settings');
 
+  const mobileNavContent = (
+    <>
+      <SheetHeader className="text-left border-b pb-4">
+        <SheetTitle>ToolifyAI</SheetTitle>
+      </SheetHeader>
+      <ScrollArea className="flex-1">
+        <nav className="grid gap-2 text-lg font-medium p-4">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
+                pathname === link.href && 'bg-muted text-foreground'
+              )}
+            >
+              <link.icon className="h-5 w-5" />
+              {link.label}
+            </Link>
+          ))}
+          <Accordion type="single" collapsible defaultValue={isEmailRouteActive ? 'email-management' : undefined} className="w-full">
+            <AccordionItem value="email-management" className="border-b-0">
+              <AccordionTrigger className={cn(
+                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline',
+                  isEmailRouteActive && 'bg-muted text-foreground'
+              )}>
+                 <div className="flex items-center gap-4">
+                  <Mail className="h-5 w-5" />
+                  <span>Email Management</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pl-12 pt-1">
+                <nav className="grid gap-1">
+                {emailManagementLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+                      pathname === link.href && 'bg-muted text-primary'
+                    )}
+                  >
+                    <link.icon className="h-4 w-4" />
+                    {link.label}
+                  </Link>
+                ))}
+                </nav>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+          <Accordion type="single" collapsible defaultValue={isBlogRouteActive ? 'blog-management' : undefined} className="w-full">
+            <AccordionItem value="blog-management" className="border-b-0">
+              <AccordionTrigger className={cn(
+                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline',
+                  isBlogRouteActive && 'bg-muted text-foreground'
+              )}>
+                 <div className="flex items-center gap-4">
+                  <BookText className="h-5 w-5" />
+                  <span>Blog Management</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pl-12 pt-1">
+                <nav className="grid gap-1">
+                {blogManagementLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+                      pathname === link.href && 'bg-muted text-primary'
+                    )}
+                  >
+                    <link.icon className="h-4 w-4" />
+                    {link.label}
+                  </Link>
+                ))}
+                </nav>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+          <Accordion type="single" collapsible defaultValue={isSettingsRouteActive ? 'settings' : undefined} className="w-full">
+            <AccordionItem value="settings" className="border-b-0">
+              <AccordionTrigger className={cn(
+                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline',
+                  isSettingsRouteActive && 'bg-muted text-foreground'
+              )}>
+                 <div className="flex items-center gap-4">
+                  <Settings className="h-5 w-5" />
+                  <span>Settings</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pl-12 pt-1">
+                <nav className="grid gap-1">
+                {settingsLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+                      pathname === link.href && 'bg-muted text-primary'
+                    )}
+                  >
+                    <link.icon className="h-4 w-4" />
+                    {link.label}
+                  </Link>
+                ))}
+                </nav>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </nav>
+      </ScrollArea>
+    </>
+  );
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -141,7 +257,7 @@ export default function AdminLayout({
               <span className="sr-only">Toggle notifications</span>
             </Button>
           </div>
-          <div className="flex-1 overflow-auto">
+          <ScrollArea className="flex-1">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               {navLinks.map((link) => (
                 <Link
@@ -247,64 +363,17 @@ export default function AdminLayout({
                 </AccordionItem>
               </Accordion>
             </nav>
-          </div>
+          </ScrollArea>
         </div>
       </div>
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="shrink-0 md:hidden"
-              >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
-               <SheetHeader className="text-left">
-                  <SheetTitle>Navigation Menu</SheetTitle>
-              </SheetHeader>
-              <nav className="grid gap-2 text-lg font-medium">
-                <Link
-                  href="#"
-                  className="flex items-center gap-2 text-lg font-semibold mb-4"
-                >
-                  <Package2 className="h-6 w-6" />
-                  <span className="sr-only">ToolifyAI</span>
-                </Link>
-                 {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
-                      pathname === link.href && 'bg-muted text-foreground'
-                    )}
-                  >
-                    <link.icon className="h-5 w-5" />
-                    {link.label}
-                  </Link>
-                ))}
-                {/* Mobile Blog Management Accordion could be added here if needed */}
-                 <Link
-                    href={'/admin/blog-management'}
-                    className={cn(
-                      'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
-                       isBlogRouteActive && 'bg-muted text-foreground'
-                    )}
-                  >
-                    <BookText className="h-5 w-5" />
-                    Blog Management
-                  </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
-          <div className="w-full flex-1">
-            {/* You can add a search bar here if needed */}
-          </div>
+           <div className="w-full flex-1">
+             <Link href="/" className="flex items-center gap-2 font-semibold md:hidden">
+                <Package2 className="h-6 w-6" />
+                <span className="">ToolifyAI</span>
+             </Link>
+           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
@@ -321,6 +390,21 @@ export default function AdminLayout({
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 md:hidden"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="flex flex-col p-0">
+               {mobileNavContent}
+            </SheetContent>
+          </Sheet>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           {children}
@@ -329,3 +413,5 @@ export default function AdminLayout({
     </div>
   );
 }
+
+    
