@@ -24,6 +24,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Link from 'next/link';
 
 type FilterType = 'all' | 'published' | 'drafts' | 'trash';
 
@@ -79,9 +80,11 @@ export default function AllPostsPage() {
                   className="pl-9 w-full sm:w-auto"
                 />
               </div>
-              <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add New
+              <Button asChild>
+                <Link href="/admin/blog/add-new">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add New
+                </Link>
               </Button>
             </div>
           </div>
