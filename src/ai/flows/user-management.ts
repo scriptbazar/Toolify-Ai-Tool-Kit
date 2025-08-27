@@ -8,7 +8,6 @@
  * - addLeadUser - Saves lead information from the chat widget.
  */
 
-import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import {getApps, initializeApp} from 'firebase-admin/app';
