@@ -26,9 +26,24 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     '/create-ticket',
     '/community-chat',
   ];
-  const isUserPanelRoute = userPanelRoutes.includes(pathname);
 
-  const showHeaderFooter = !authRoutes.includes(pathname) && !isAdminRoute && !isUserPanelRoute;
+  const isDashboardRoute = (
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/profile') ||
+    pathname.startsWith('/manage-subscription') ||
+    pathname.startsWith('/payment-history') ||
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/usage-history') ||
+    pathname.startsWith('/login-history') ||
+    pathname.startsWith('/my-media') ||
+    pathname.startsWith('/refer-a-friend') ||
+    pathname.startsWith('/my-tickets') ||
+    pathname.startsWith('/create-ticket') ||
+    pathname.startsWith('/community-chat')
+  )
+
+
+  const showHeaderFooter = !authRoutes.includes(pathname) && !isAdminRoute && !isDashboardRoute;
   const showChatWidget = !authRoutes.includes(pathname) && !isAdminRoute;
 
 
