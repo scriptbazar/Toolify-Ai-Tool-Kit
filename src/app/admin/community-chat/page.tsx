@@ -80,7 +80,7 @@ export default function CommunityChatPage() {
                  <p className="text-muted-foreground text-sm">
                     See which members are active.
                 </p>
-                 <div className="grid grid-cols-2 gap-2 pt-2">
+                 <div className="grid grid-cols-2 gap-1 pt-2">
                     <Button variant="outline">
                         <Users className="mr-2 h-4 w-4" /> All Members
                     </Button>
@@ -91,7 +91,7 @@ export default function CommunityChatPage() {
             </CardHeader>
             <CardContent className="flex-grow">
                  <div className="w-full">
-                    <div className="grid w-full grid-cols-2 gap-2 mb-4">
+                    <div className="grid w-full grid-cols-2 gap-1 mb-4">
                         <Button variant={activeTab === 'live' ? 'default' : 'outline'} onClick={() => setActiveTab('live')}>
                             <Wifi className="mr-2 h-4 w-4"/>Live Users
                         </Button>
