@@ -32,6 +32,7 @@ import {
   FileCog,
   LogOut,
   User,
+  Shield,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -52,8 +53,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { CircleUser, Menu } from 'lucide-react';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -62,6 +63,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
+import { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+
+interface AppUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 
 export default function AdminLayout({
   children,
@@ -71,6 +81,28 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [userData, setUserData] = useState<AppUser | null>(null);
+
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          setUserData(userDocSnap.data() as AppUser);
+        }
+      } else {
+        setUser(null);
+        setUserData(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
 
   const handleLogout = async () => {
     try {
@@ -434,17 +466,37 @@ export default function AdminLayout({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
-                  <CircleUser className="h-5 w-5" />
+                  <Avatar className="h-8 w-8">
+                     <AvatarFallback>{userData?.firstName?.[0] || 'A'}</AvatarFallback>
+                  </Avatar>
                   <span className="sr-only">Toggle user menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {userData ? `${userData.firstName} ${userData.lastName}` : 'Admin'}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {userData?.email || 'admin@example.com'}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Support</DropdownMenuItem>
+                 <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>
+                  <Shield className="mr-2 h-4 w-4" />
+                  <span>Admin Panel</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/admin/profile')}>
+                  <UserCog className="mr-2 h-4 w-4" />
+                  <span>Manage Profile</span>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                   <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
