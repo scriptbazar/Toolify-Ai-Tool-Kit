@@ -10,9 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Diamond, RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Check } from 'lucide-react';
+import { Diamond, RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Check, Switch as SwitchIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Switch } from '@/components/ui/switch';
 
 
 type Message = {
@@ -24,6 +25,7 @@ type Message = {
     poll?: {
       question: string;
       options: string[];
+      allowCustomAnswer: boolean;
     };
     media?: {
         fileName: string;
@@ -69,6 +71,7 @@ export default function CommunityChatPage() {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         const question = formData.get('question') as string;
+        const allowCustomAnswer = formData.get('allowCustomAnswer') === 'on';
         const options = [
             formData.get('option1') as string,
             formData.get('option2') as string,
@@ -85,7 +88,7 @@ export default function CommunityChatPage() {
             id: messages.length + 1,
             from: 'Admin',
             type: 'poll',
-            poll: { question, options }
+            poll: { question, options, allowCustomAnswer }
         };
 
         setMessages(prev => [...prev, newPollMessage]);
@@ -145,12 +148,14 @@ export default function CommunityChatPage() {
                                                     <Label htmlFor={`opt-${msg.id}-${i}`}>{opt}</Label>
                                                 </div>
                                             ))}
-                                            <div className="flex items-center space-x-2 pt-2">
-                                                <RadioGroupItem value="other" id={`opt-other-${msg.id}`} />
-                                                <Label htmlFor={`opt-other-${msg.id}`} className="flex-1">
-                                                    <Input placeholder="Other (please specify)" className="h-8"/>
-                                                </Label>
-                                            </div>
+                                            {msg.poll.allowCustomAnswer && (
+                                                <div className="flex items-center space-x-2 pt-2">
+                                                    <RadioGroupItem value="other" id={`opt-other-${msg.id}`} />
+                                                    <Label htmlFor={`opt-other-${msg.id}`} className="flex-1">
+                                                        <Input placeholder="Other (please specify)" className="h-8"/>
+                                                    </Label>
+                                                </div>
+                                            )}
                                          </RadioGroup>
                                      </CardContent>
                                      <CardFooter>
@@ -232,6 +237,10 @@ export default function CommunityChatPage() {
                                         <Input name="option2" placeholder="Option 2" required />
                                         <Input name="option3" placeholder="Option 3" />
                                         <Input name="option4" placeholder="Option 4" />
+                                    </div>
+                                    <div className="flex items-center space-x-2 pt-2">
+                                        <Switch id="allowCustomAnswer" name="allowCustomAnswer" />
+                                        <Label htmlFor="allowCustomAnswer">Allow custom answers</Label>
                                     </div>
                                 </div>
                                 <DialogFooter>
