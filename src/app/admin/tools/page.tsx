@@ -136,11 +136,17 @@ export default function AdminToolsPage() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Tool Management</h1>
+        <p className="text-muted-foreground">
+          View, manage, and filter all available tools.
+        </p>
+      </div>
       <Card>
         <CardHeader>
-          <CardTitle>Tool Management</CardTitle>
-          <CardDescription>View, manage, and filter all available tools.</CardDescription>
+          <CardTitle>All Tools</CardTitle>
+          <CardDescription>A comprehensive list of all tools available in the application.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
