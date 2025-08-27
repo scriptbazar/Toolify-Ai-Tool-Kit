@@ -8,7 +8,7 @@ import { ChatWidget } from './common/ChatWidget';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const authRoutes = ['/login', '/signup', '/admin/login'];
+  const authRoutes = ['/login', '/signup', '/admin/login', '/forgot-password'];
   const isAdminRoute = pathname.startsWith('/admin');
   
   // New user panel routes that should not have the default header/footer
