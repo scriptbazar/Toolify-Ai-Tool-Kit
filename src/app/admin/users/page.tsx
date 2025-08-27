@@ -213,19 +213,19 @@ export default function AdminUsersPage() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
                 <Button variant={activeFilter === 'all' ? 'default' : 'outline'} onClick={() => handleFilterChange('all')}>
-                    <Users className="h-4 w-4" />
+                    <Users />
                     All Users ({counts.all})
                 </Button>
                 <Button variant={activeFilter === 'signup' ? 'default' : 'outline'} onClick={() => handleFilterChange('signup')}>
-                    <UserPlus className="h-4 w-4" />
+                    <UserPlus />
                     Signup Users ({counts.signup})
                 </Button>
                 <Button variant={activeFilter === 'lead' ? 'default' : 'outline'} onClick={() => handleFilterChange('lead')}>
-                    <User className="h-4 w-4" />
+                    <User />
                     Lead Users ({counts.lead})
                 </Button>
                 <Button variant={activeFilter === 'comment' ? 'default' : 'outline'} onClick={() => handleFilterChange('comment')}>
-                    <MessageSquare className="h-4 w-4" />
+                    <MessageSquare />
                     Comment Users ({counts.comment})
                 </Button>
             </div>
@@ -235,7 +235,7 @@ export default function AdminUsersPage() {
                   placeholder="Search by name, email, or username"
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  className="pl-9 w-full sm:w-64"
+                  className="pl-9 w-full sm:w-80"
                 />
             </div>
           </div>
@@ -382,4 +382,3 @@ export default function AdminUsersPage() {
     </div>
   );
 }
-
