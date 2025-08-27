@@ -149,8 +149,8 @@ export default function AdminToolsPage() {
           <CardDescription>A comprehensive list of all tools available in the application.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-4 mb-6">
-            <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+            <div className="flex flex-wrap items-center gap-2 flex-grow">
               {tabs.map((tab) => (
                 <Button
                   key={tab.id}
@@ -163,27 +163,28 @@ export default function AdminToolsPage() {
                   {tab.label} ({tab.count})
                 </Button>
               ))}
-              <div className="flex-grow" />
-              <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                <SelectTrigger className="w-full sm:w-auto h-11">
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {toolCategories.map(cat => (
-                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
-             <div className="relative w-full sm:w-auto">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search tools..."
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-9 w-full sm:max-w-xs"
-              />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="relative w-full sm:w-auto">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                    placeholder="Search tools..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    className="pl-9 w-full sm:max-w-xs h-11"
+                />
+                </div>
+                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+                    <SelectTrigger className="w-full sm:w-auto h-11">
+                    <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {toolCategories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
             </div>
           </div>
 
