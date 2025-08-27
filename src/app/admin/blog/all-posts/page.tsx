@@ -128,7 +128,7 @@ export default function AllPostsPage() {
                   placeholder="Search posts..."
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                  className="pl-9 w-full sm:w-64"
+                  className="pl-9 w-full sm:w-52"
                 />
               </div>
               <Button asChild>
