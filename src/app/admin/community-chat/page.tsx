@@ -80,7 +80,7 @@ export default function CommunityChatPage() {
                  <p className="text-muted-foreground text-sm">
                     See which members are active.
                 </p>
-                 <div className="grid grid-cols-2 gap-1 pt-2">
+                 <div className="grid grid-cols-2 gap-1">
                     <Button variant="outline">
                         <Users className="mr-2 h-4 w-4" /> All Members
                     </Button>
