@@ -196,7 +196,7 @@ export function ChatWidget() {
       {isOpen && (
         <div
           className={cn(
-            'fixed bottom-24 right-6 z-50 w-full max-w-sm',
+            'fixed bottom-24 right-6 left-6 z-50 max-w-sm sm:left-auto',
             'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-bottom-2 data-[state=open]:slide-in-from-bottom-2'
           )}
           data-state={isOpen ? 'open' : 'closed'}
