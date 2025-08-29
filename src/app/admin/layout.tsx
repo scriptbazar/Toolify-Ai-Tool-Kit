@@ -34,6 +34,7 @@ import {
   User,
   Shield,
   ShieldCheck,
+  TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -135,6 +136,7 @@ export default function AdminLayout({
     { href: '/admin/referral-management', label: 'Referral Management', icon: GitCommitVertical },
     { href: '/admin/review-management', label: 'Review Management', icon: Star },
     { href: '/admin/advertisement', label: 'Advertisement', icon: Megaphone },
+    { href: '/admin/top-tools', label: 'Top Tools', icon: TrendingUp },
     { href: '/admin/backup-restore', label: 'Backup & Restore', icon: DatabaseBackup },
   ];
 

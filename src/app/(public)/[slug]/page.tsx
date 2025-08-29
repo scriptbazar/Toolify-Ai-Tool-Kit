@@ -1,3 +1,4 @@
+
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CaseConverter } from '@/components/tools/CaseConverter';
@@ -36,6 +37,20 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-6">{tool.description}</p>
+              
+              {tool.slug === 'case-converter' && (
+                <div className="prose prose-sm dark:prose-invert max-w-none mb-6">
+                    <p>The Case Converter tool is a versatile utility designed to make text manipulation effortless. Whether you're a writer, developer, or student, this tool helps you instantly switch your text between different case formats. With a simple click, you can convert your content to:</p>
+                    <ul>
+                        <li><strong>Sentence case:</strong> Capitalizes the first letter of each sentence, perfect for standard writing.</li>
+                        <li><strong>lowercase:</strong> Converts all characters to their lowercase equivalents.</li>
+                        <li><strong>UPPERCASE:</strong> Transforms all characters into their uppercase form for emphasis or headlines.</li>
+                        <li><strong>Title Case:</strong> Capitalizes the first letter of every word, ideal for titles and headings.</li>
+                    </ul>
+                    <p>It also provides a real-time count of words and characters, helping you stay on top of your writing metrics. Simply type or paste your text, choose a conversion, and copy the result. It's that easy!</p>
+                </div>
+              )}
+
               <div className="min-h-[300px] rounded-lg bg-muted/50 p-8">
                 {ToolComponent ? <ToolComponent /> : (
                   <div className="flex h-full items-center justify-center">
