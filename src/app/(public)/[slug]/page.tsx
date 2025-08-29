@@ -50,6 +50,7 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
 
               {tool.slug === 'case-converter' && (
                 <div className="prose prose-sm dark:prose-invert max-w-none mt-8 pt-6 border-t">
+                    <h2 className="text-2xl font-bold">Case Converter Description</h2>
                     <p>The Case Converter tool is a versatile utility designed to make text manipulation effortless. Whether you're a writer, developer, or student, this tool helps you instantly switch your text between different case formats. With a simple click, you can convert your content to:</p>
                     <ul>
                         <li><strong>Sentence case:</strong> Capitalizes the first letter of each sentence, perfect for standard writing.</li>
