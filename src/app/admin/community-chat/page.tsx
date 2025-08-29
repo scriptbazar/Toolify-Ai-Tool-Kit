@@ -229,43 +229,43 @@ export default function CommunityChatPage() {
               </ScrollArea>
             </CardContent>
             <CardFooter className="p-2 border-t">
-              <form onSubmit={handleSendMessage} className="relative w-full flex items-center gap-2">
-                  <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
-                      <Paperclip className="h-5 w-5"/>
-                      <span className="sr-only">Attach file</span>
-                  </Button>
-                  <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-                  <Popover open={mentionPopoverOpen} onOpenChange={setMentionPopoverOpen}>
-                        <PopoverTrigger asChild>
-                           <Input
-                                ref={inputRef}
-                                placeholder="Type your message..."
-                                className="pr-12 h-12"
-                                value={input}
-                                onChange={handleInputChange}
-                                autoComplete="off"
-                            />
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0" side="top" align="start">
-                           <Command>
-                               <CommandInput placeholder="Mention a user..." />
-                               <CommandList>
-                                   <CommandEmpty>No user found.</CommandEmpty>
-                                   <CommandGroup>
-                                       {allUsers.filter(u => u.username !== 'Admin').map(user => (
-                                           <CommandItem key={user.username} onSelect={() => handleMentionSelect(user.username)}>
-                                               {user.name} (@{user.username})
-                                           </CommandItem>
-                                       ))}
-                                   </CommandGroup>
-                               </CommandList>
-                           </Command>
-                        </PopoverContent>
-                    </Popover>
-                  <Button type="submit" variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90">
-                      <Send className="h-5 w-5"/>
-                  </Button>
-              </form>
+               <Popover open={mentionPopoverOpen} onOpenChange={setMentionPopoverOpen}>
+                <form onSubmit={handleSendMessage} className="relative w-full flex items-center gap-2">
+                    <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
+                        <Paperclip className="h-5 w-5"/>
+                        <span className="sr-only">Attach file</span>
+                    </Button>
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                    <PopoverTrigger asChild>
+                         <Input
+                            ref={inputRef}
+                            placeholder="Type your message..."
+                            className="pr-12 h-12"
+                            value={input}
+                            onChange={handleInputChange}
+                            autoComplete="off"
+                        />
+                    </PopoverTrigger>
+                    <Button type="submit" variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90">
+                        <Send className="h-5 w-5"/>
+                    </Button>
+                </form>
+                <PopoverContent className="w-[300px] p-0" side="top" align="start">
+                   <Command>
+                       <CommandInput placeholder="Mention a user..." />
+                       <CommandList>
+                           <CommandEmpty>No user found.</CommandEmpty>
+                           <CommandGroup>
+                               {allUsers.filter(u => u.username !== 'Admin').map(user => (
+                                   <CommandItem key={user.username} onSelect={() => handleMentionSelect(user.username)}>
+                                       {user.name} (@{user.username})
+                                   </CommandItem>
+                               ))}
+                           </CommandGroup>
+                       </CommandList>
+                   </Command>
+                </PopoverContent>
+              </Popover>
             </CardFooter>
           </Card>
         </div>
