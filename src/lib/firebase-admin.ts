@@ -5,21 +5,27 @@ import { getApps, initializeApp, App, cert, ServiceAccount } from 'firebase-admi
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 
 function initializeFirebaseAdmin(): App {
-  if (!getApps().length) {
+  if (getApps().length) {
+    return getApps()[0];
+  }
+
+  const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+
+  if (serviceAccountKey) {
     try {
-      const serviceAccount: ServiceAccount = JSON.parse(
-        process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string
-      );
+      const serviceAccount: ServiceAccount = JSON.parse(serviceAccountKey);
       return initializeApp({
         credential: cert(serviceAccount),
       });
     } catch (error) {
-       console.error('Firebase Admin SDK initialization error:', error);
-       // Fallback for environments where ADC might be expected or for local dev without service account JSON
-       return initializeApp();
+      console.error('Error parsing Firebase service account key:', error);
+      // Fallback to default initialization if parsing fails
+      return initializeApp();
     }
+  } else {
+    // Use Application Default Credentials if the service account key is not provided
+    return initializeApp();
   }
-  return getApps()[0];
 }
 
 const adminApp: App = initializeFirebaseAdmin();
