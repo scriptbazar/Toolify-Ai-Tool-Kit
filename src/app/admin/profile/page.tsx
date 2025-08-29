@@ -35,6 +35,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { getAllEmails } from '@/ai/flows/user-management';
+import { useRouter } from 'next/navigation';
 
 
 interface UserProfile {
@@ -74,6 +75,7 @@ const StatCard = ({ title, value, percentage, icon: Icon, href }: { title: strin
 
 export default function AdminProfilePage() {
   const { toast } = useToast();
+  const router = useRouter();
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -204,7 +206,7 @@ export default function AdminProfilePage() {
                         <Edit className="mr-2 h-4 w-4" /> Edit Profile
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/admin/analytics?tab=activity')}>
                       <History className="mr-2 h-4 w-4" /> View Activity Log
                     </DropdownMenuItem>
                   </DropdownMenuContent>

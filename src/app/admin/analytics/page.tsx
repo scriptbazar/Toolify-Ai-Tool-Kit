@@ -4,14 +4,13 @@
 import { useState, useEffect } from 'react';
 import {
   ArrowUpRight,
-  BarChart3,
   UserCheck,
   UserPlus,
   Users,
   Construction,
-  Globe,
-  Link as LinkIcon,
-  Chrome,
+  BookOpen,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
 import {
   Card,
@@ -21,6 +20,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -28,7 +35,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -49,6 +56,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 
 interface ChartData {
@@ -60,6 +68,28 @@ interface PieChartData {
   name: string;
   value: number;
 }
+
+interface ActivityLog {
+  id: string;
+  action: string;
+  date: string;
+  ipAddress: string;
+}
+
+const dummyActivityLog: ActivityLog[] = [
+    { id: '1', action: 'Logged into the system', date: '2024-07-30 10:00 AM', ipAddress: '192.168.1.1' },
+    { id: '2', action: 'Updated Site Settings', date: '2024-07-30 09:55 AM', ipAddress: '192.168.1.1' },
+    { id: '3', action: 'Viewed Analytics Dashboard', date: '2024-07-30 09:50 AM', ipAddress: '192.168.1.1' },
+    { id: '4', action: 'Edited user profile: john@example.com', date: '2024-07-29 03:20 PM', ipAddress: '203.0.113.25' },
+    { id: '5', action: 'Added new plan: Enterprise', date: '2024-07-29 11:10 AM', ipAddress: '203.0.113.25' },
+    { id: '6', action: 'Logged out', date: '2024-07-28 05:00 PM', ipAddress: '198.51.100.10' },
+    { id: '7', action: 'Logged into the system', date: '2024-07-28 04:50 PM', ipAddress: '198.51.100.10' },
+    { id: '8', action: 'Deleted a blog post: "Old News"', date: '2024-07-27 01:15 PM', ipAddress: '198.51.100.10' },
+    { id: '9', action: 'Responded to support ticket #12345', date: '2024-07-27 10:00 AM', ipAddress: '198.51.100.10' },
+    { id: '10', action: 'Cleared application cache', date: '2024-07-26 08:00 AM', ipAddress: '198.51.100.10' },
+    { id: '11', action: 'Generated a new sitemap', date: '2024-07-25 02:00 PM', ipAddress: '198.51.100.10' },
+];
+
 
 const lineChartConfig = {
   users: {
@@ -80,6 +110,7 @@ const pieChartConfig = {
 };
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))'];
+const ITEMS_PER_PAGE = 10;
 
 
 export default function AdminAnalyticsPage() {
@@ -93,6 +124,13 @@ export default function AdminAnalyticsPage() {
   });
   const [lineChartData, setLineChartData] = useState<ChartData[]>([]);
   const [pieChartData, setPieChartData] = useState<PieChartData[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(dummyActivityLog.length / ITEMS_PER_PAGE);
+  const currentActivityLog = dummyActivityLog.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   useEffect(() => {
     async function fetchAnalyticsData() {
@@ -169,7 +207,12 @@ export default function AdminAnalyticsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const tabs = ['overview', 'audience', 'behavior', 'conversions'];
+  const tabs = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'activity', label: 'Activity Log' },
+    { id: 'audience', label: 'Audience' },
+    { id: 'conversions', label: 'Conversions' },
+  ];
 
   const renderOverview = () => {
      if (loading) {
@@ -308,7 +351,57 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
       )
-  }
+  };
+
+   const renderActivityLog = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle>Admin Activity Log</CardTitle>
+        <CardDescription>A log of all actions performed by administrators.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Action</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>IP Address</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {currentActivityLog.map(log => (
+              <TableRow key={log.id}>
+                <TableCell className="font-medium">{log.action}</TableCell>
+                <TableCell>{log.date}</TableCell>
+                <TableCell>{log.ipAddress}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <div className="flex items-center justify-end space-x-2 pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="flex-1 space-y-4">
@@ -325,20 +418,21 @@ export default function AdminAnalyticsPage() {
         <div className="flex space-x-2">
           {tabs.map((tab) => (
             <Button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              variant={activeTab === tab ? 'default' : 'outline'}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              variant={activeTab === tab.id ? 'default' : 'outline'}
               className="capitalize"
             >
-              {tab}
+              {tab.label}
             </Button>
           ))}
         </div>
 
         {activeTab === 'overview' && renderOverview()}
+        {activeTab === 'activity' && renderActivityLog()}
 
         <Dialog
-          open={activeTab !== 'overview'}
+          open={activeTab === 'audience' || activeTab === 'conversions'}
           onOpenChange={(isOpen) => !isOpen && setActiveTab('overview')}
         >
            <DialogContent>
