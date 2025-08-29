@@ -9,6 +9,9 @@ import {
   UserPlus,
   Users,
   Construction,
+  Globe,
+  Link as LinkIcon,
+  Chrome,
 } from 'lucide-react';
 import {
   Card,
@@ -72,6 +75,24 @@ const ComingSoonDialogContent = () => (
       </div>
     </div>
   </DialogContent>
+);
+
+const AnalyticsPlaceholder = ({ title, icon: Icon }: { title: string, icon: React.ElementType }) => (
+    <Card>
+        <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+                <Icon className="h-5 w-5" />
+                {title}
+            </CardTitle>
+        </CardHeader>
+        <CardContent className="h-[300px] flex flex-col items-center justify-center text-center p-4">
+             <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg w-full">
+                <BarChart3 className="w-12 h-12 text-muted-foreground mb-4" />
+                <p className="text-sm font-medium text-muted-foreground">Data not available</p>
+                <p className="text-xs text-muted-foreground">Please configure your analytics provider in the settings.</p>
+            </div>
+        </CardContent>
+    </Card>
 );
 
 export default function AdminAnalyticsPage() {
@@ -161,7 +182,7 @@ export default function AdminAnalyticsPage() {
         )
      }
       return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -240,6 +261,11 @@ export default function AdminAnalyticsPage() {
                     </ChartContainer>
                 </CardContent>
             </Card>
+             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <AnalyticsPlaceholder title="Visitors by Browser" icon={Chrome} />
+                <AnalyticsPlaceholder title="Visitors by Country" icon={Globe} />
+                <AnalyticsPlaceholder title="Top Referrers" icon={LinkIcon} />
+            </div>
           </div>
       )
   }
