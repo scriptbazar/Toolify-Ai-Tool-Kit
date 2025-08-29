@@ -124,7 +124,6 @@ export default function AdminLayout({
 
   const navLinks = [
     { href: '/admin/dashboard', icon: Home, label: 'Dashboard' },
-    { href: '/admin/profile', icon: User, label: 'Profile' },
     { href: '/admin/users', icon: Users, label: 'User Management' },
     { href: '/admin/tools', icon: Package, label: 'Tool Management' },
     { href: '/admin/analytics', icon: LineChart, label: 'Analytics' },
@@ -285,9 +284,9 @@ export default function AdminLayout({
       <div className="mt-auto p-4 border-t">
           <div className="flex gap-2">
             <Button asChild className="flex-1 justify-start">
-              <Link href="/admin/profile">
+              <Link href={`/admin/users/${user?.uid}`}>
                 <User className="mr-2 h-4 w-4" />
-                Profile
+                Admin Profile
               </Link>
             </Button>
             <Button variant="destructive" onClick={handleLogout} className="flex-1 justify-start">
@@ -472,13 +471,13 @@ export default function AdminLayout({
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                 <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>
+                 <DropdownMenuItem onClick={() => router.push('/admin/administrators')}>
                   <Shield className="mr-2 h-4 w-4" />
                   <span>Admin Panel</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/admin/profile')}>
+                <DropdownMenuItem onClick={() => router.push(`/admin/users/${user?.uid}`)}>
                   <UserCog className="mr-2 h-4 w-4" />
-                  <span>Manage Profile</span>
+                  <span>Admin Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
