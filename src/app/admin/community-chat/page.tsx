@@ -10,13 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy } from 'lucide-react';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 
 
 type Message = {
@@ -56,22 +53,12 @@ export default function CommunityChatPage() {
     const [isPollModalOpen, setIsPollModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-    const { toast } = useToast();
     
-    // State for @mention popover
-    const [mentionPopoverOpen, setMentionPopoverOpen] = useState(false);
-    const inputRef = useRef<HTMLInputElement>(null);
-
     useEffect(() => {
         if (scrollAreaRef.current) {
             scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
         }
     }, [messages]);
-    
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        toast({ description: `Copied: ${text}` });
-    };
 
     const handleSendMessage = (e: FormEvent) => {
         e.preventDefault();
@@ -128,24 +115,6 @@ export default function CommunityChatPage() {
             };
             setMessages(prev => [...prev, newMediaMessage]);
         }
-    };
-    
-     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setInput(value);
-        if (value.includes('@') && value.split('@').pop()?.length >= 0) {
-            setMentionPopoverOpen(true);
-        } else {
-            setMentionPopoverOpen(false);
-        }
-    };
-
-    const handleMentionSelect = (username: string) => {
-        const parts = input.split(' ');
-        parts[parts.length - 1] = `@${username} `;
-        setInput(parts.join(' '));
-        setMentionPopoverOpen(false);
-        inputRef.current?.focus();
     };
 
     const filteredUsers = useMemo(() => {
@@ -229,43 +198,23 @@ export default function CommunityChatPage() {
               </ScrollArea>
             </CardContent>
             <CardFooter className="p-2 border-t">
-               <Popover open={mentionPopoverOpen} onOpenChange={setMentionPopoverOpen}>
                 <form onSubmit={handleSendMessage} className="relative w-full flex items-center gap-2">
                     <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
                         <Paperclip className="h-5 w-5"/>
                         <span className="sr-only">Attach file</span>
                     </Button>
                     <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-                    <PopoverTrigger asChild>
-                         <Input
-                            ref={inputRef}
-                            placeholder="Type your message..."
-                            className="pr-12 h-12"
-                            value={input}
-                            onChange={handleInputChange}
-                            autoComplete="off"
-                        />
-                    </PopoverTrigger>
+                    <Input
+                        placeholder="Type your message..."
+                        className="pr-12 h-12"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        autoComplete="off"
+                    />
                     <Button type="submit" variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90">
                         <Send className="h-5 w-5"/>
                     </Button>
                 </form>
-                <PopoverContent className="w-[300px] p-0" side="top" align="start">
-                   <Command>
-                       <CommandInput placeholder="Mention a user..." />
-                       <CommandList>
-                           <CommandEmpty>No user found.</CommandEmpty>
-                           <CommandGroup>
-                               {allUsers.filter(u => u.username !== 'Admin').map(user => (
-                                   <CommandItem key={user.username} onSelect={() => handleMentionSelect(user.username)}>
-                                       {user.name} (@{user.username})
-                                   </CommandItem>
-                               ))}
-                           </CommandGroup>
-                       </CommandList>
-                   </Command>
-                </PopoverContent>
-              </Popover>
             </CardFooter>
           </Card>
         </div>
@@ -348,10 +297,6 @@ export default function CommunityChatPage() {
                                       <p className="font-medium">{user.name}</p>
                                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                         <span>@{user.username}</span>
-                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(`@${user.username}`)}>
-                                            <Copy className="h-3 w-3" />
-                                            <span className="sr-only">Copy username</span>
-                                        </Button>
                                       </div>
                                     </div>
                               </div>
