@@ -133,7 +133,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
-             <Card>
+             <Card className="h-full">
                 <CardHeader>
                     <CardTitle>Profile Picture</CardTitle>
                 </CardHeader>
@@ -149,7 +149,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
              </Card>
         </div>
         <div className="lg:col-span-2">
-            <Card>
+            <Card className="h-full">
                 <CardHeader>
                     <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
