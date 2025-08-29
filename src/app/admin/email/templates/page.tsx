@@ -139,14 +139,6 @@ const initialTemplates = [
     subject: 'Your ToolifyAI Subscription is Renewing Soon',
     body: `Hi {{name}},\n\nThis is a friendly reminder that your subscription for the {{planName}} plan will automatically renew on {{renewalDate}}.\n\nIf you need to make any changes to your subscription or billing information, please visit your account dashboard. No action is required to continue your subscription.\n\n<a href="{{dashboardLink}}" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Manage Subscription</a>\n\nThanks for being a valued member!\n\nThe ToolifyAI Team`,
   },
-  {
-    id: 'subscription-cancellation',
-    icon: UserX,
-    title: 'Subscription Cancellation',
-    description: 'Confirms that a user\'s subscription has been cancelled.',
-    subject: 'Your ToolifyAI Subscription Has Been Cancelled',
-    body: `Hi {{name}},\n\nThis email confirms that your subscription to the {{planName}} plan has been successfully cancelled. You will retain access to premium features until the end of your current billing period on {{endDate}}.\n\nWe're sorry to see you go! If you have a moment, we'd love to hear your feedback on why you cancelled. You can resubscribe at any time from your account dashboard.\n\nBest,\nThe ToolifyAI Team`,
-  },
 ];
 
 
