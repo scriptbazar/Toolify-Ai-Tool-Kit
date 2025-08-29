@@ -57,38 +57,28 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
 
     const emailMap = new Map<string, { source: string; date: string }>();
 
-    usersSnapshot.forEach(doc => {
-      const data = doc.data();
-      const email = data.email;
-      if (email && !emailMap.has(email)) {
-         const timestamp = data.createdAt;
-        // Handle both Firestore Timestamp and regular Date objects for createdAt
-        const date = timestamp && typeof timestamp.toDate === 'function' 
-          ? timestamp.toDate().toISOString() 
-          : (timestamp instanceof Date ? timestamp.toISOString() : new Date().toISOString());
-
-        emailMap.set(email, {
-          source: 'Signup',
-          date: date,
-        });
-      }
-    });
-
-    leadsSnapshot.forEach(doc => {
+    const processDoc = (doc: FirebaseFirestore.QueryDocumentSnapshot, source: 'Signup' | 'Lead') => {
       const data = doc.data();
       const email = data.email;
       if (email && !emailMap.has(email)) {
         const timestamp = data.createdAt;
-        const date = timestamp && typeof timestamp.toDate === 'function' 
-          ? timestamp.toDate().toISOString() 
-          : (timestamp instanceof Date ? timestamp.toISOString() : new Date().toISOString());
+        let dateString: string;
+
+        if (timestamp && typeof timestamp.toDate === 'function') {
+          dateString = timestamp.toDate().toISOString();
+        } else if (timestamp instanceof Date) {
+          dateString = timestamp.toISOString();
+        } else {
+          // Fallback for missing or malformed dates
+          dateString = new Date().toISOString();
+        }
         
-        emailMap.set(email, {
-          source: 'Lead',
-          date: date,
-        });
+        emailMap.set(email, { source, date: dateString });
       }
-    });
+    };
+    
+    usersSnapshot.forEach(doc => processDoc(doc, 'Signup'));
+    leadsSnapshot.forEach(doc => processDoc(doc, 'Lead'));
     
     const allEmails = Array.from(emailMap.entries()).map(([email, { source, date }]) => ({
       email,
