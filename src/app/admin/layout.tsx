@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -134,7 +135,6 @@ export default function AdminLayout({
     { href: '/admin/referral-management', label: 'Referral Management', icon: GitCommitVertical },
     { href: '/admin/advertisement', label: 'Advertisement', icon: Megaphone },
     { href: '/admin/backup-restore', label: 'Backup & Restore', icon: DatabaseBackup },
-    { href: '/admin/administrators', label: 'Administrators', icon: UserCog },
     { href: '/admin/review-management', label: 'Review Management', icon: Star },
   ];
 

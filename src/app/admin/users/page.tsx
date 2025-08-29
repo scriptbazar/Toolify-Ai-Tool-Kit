@@ -37,10 +37,6 @@ interface User {
   };
 }
 
-const dummyCommentUsers: User[] = [
-    { id: 'commenter-1', name: 'Alex Johnson', email: 'alexj@example.com', role: 'user', type: 'Comment', createdAt: { seconds: 1672531199, nanoseconds: 0 } },
-    { id: 'commenter-2', name: 'Samantha Bee', email: 'samanthab@example.com', role: 'user', type: 'Comment', createdAt: { seconds: 1672617599, nanoseconds: 0 } },
-];
 
 const ITEMS_PER_PAGE = 5;
 
@@ -88,7 +84,7 @@ export default function AdminUsersPage() {
       });
 
       // Combine and sort by date
-      const combinedList = [...usersList, ...leadsList, ...dummyCommentUsers].sort((a, b) => {
+      const combinedList = [...usersList, ...leadsList].sort((a, b) => {
         const dateA = a.createdAt?.seconds ?? 0;
         const dateB = b.createdAt?.seconds ?? 0;
         return dateB - dateA;
@@ -112,9 +108,9 @@ export default function AdminUsersPage() {
     fetchUsersAndLeads();
   }, []);
   
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, fieldName: string) => {
     navigator.clipboard.writeText(text);
-    toast({ description: `Copied: ${text}` });
+    toast({ description: `Copied ${fieldName}: ${text}` });
   };
   
   const filteredUsers = useMemo(() => {
@@ -238,7 +234,7 @@ export default function AdminUsersPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {user.email}
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(user.email)}>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(user.email, 'Email')}>
                               <Copy className="h-3 w-3" />
                               <span className="sr-only">Copy email</span>
                             </Button>
@@ -248,7 +244,7 @@ export default function AdminUsersPage() {
                           {user.userName ? (
                             <div className="flex items-center gap-2">
                               @{user.userName}
-                               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(user.userName!)}>
+                               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(user.userName!, 'Username')}>
                                 <Copy className="h-3 w-3" />
                                 <span className="sr-only">Copy username</span>
                               </Button>

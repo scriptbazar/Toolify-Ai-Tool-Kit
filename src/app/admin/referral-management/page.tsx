@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -76,6 +77,11 @@ export default function ReferralManagementPage() {
     }
     fetchSettings();
   }, [toast]);
+  
+  const handleInputChange = (field: keyof ReferralSettings, value: string | number | boolean) => {
+    setSettings(prev => (prev ? { ...prev, [field]: value } : null));
+  };
+
 
   const handleSaveSettings = async () => {
     if (!settings) return;
@@ -274,11 +280,11 @@ export default function ReferralManagementPage() {
                           <Switch 
                             id="enable-referrals" 
                             checked={settings.isReferralEnabled} 
-                            onCheckedChange={(checked) => setSettings(prev => prev ? { ...prev, isReferralEnabled: checked } : null)}
+                            onCheckedChange={(checked) => handleInputChange('isReferralEnabled', checked)}
                           />
                       </div>
 
-                      <div className={cn('space-y-6 transition-opacity duration-300', !settings.isReferralEnabled && 'opacity-50 pointer-events-none hidden')}>
+                      <div className={cn('space-y-6 transition-opacity duration-300', !settings.isReferralEnabled && 'opacity-50 pointer-events-none')}>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div className="space-y-2">
                                   <Label htmlFor="commission-rate">Commission Rate</Label>
@@ -287,7 +293,7 @@ export default function ReferralManagementPage() {
                                         id="commission-rate" 
                                         type="number" 
                                         value={settings.commissionRate}
-                                        onChange={(e) => setSettings(prev => prev ? { ...prev, commissionRate: Number(e.target.value) } : null)}
+                                        onChange={(e) => handleInputChange('commissionRate', Number(e.target.value))}
                                         className="pl-8" />
                                       <Percent className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                   </div>
@@ -299,7 +305,7 @@ export default function ReferralManagementPage() {
                                         id="cookie-duration" 
                                         type="number" 
                                         value={settings.cookieDuration}
-                                        onChange={(e) => setSettings(prev => prev ? { ...prev, cookieDuration: Number(e.target.value) } : null)}
+                                        onChange={(e) => handleInputChange('cookieDuration', Number(e.target.value))}
                                         className="pl-8" />
                                       <Cookie className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                   </div>
@@ -314,7 +320,7 @@ export default function ReferralManagementPage() {
                                         id="payout-threshold" 
                                         type="number" 
                                         value={settings.payoutThreshold}
-                                        onChange={(e) => setSettings(prev => prev ? { ...prev, payoutThreshold: Number(e.target.value) } : null)}
+                                        onChange={(e) => handleInputChange('payoutThreshold', Number(e.target.value))}
                                         className="pl-8" />
                                       <CircleDollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                   </div>
@@ -324,7 +330,7 @@ export default function ReferralManagementPage() {
                                   <Switch 
                                     id="enable-multi-level" 
                                     checked={settings.isMultiLevel}
-                                    onCheckedChange={(checked) => setSettings(prev => prev ? { ...prev, isMultiLevel: checked } : null)}
+                                    onCheckedChange={(checked) => handleInputChange('isMultiLevel', checked)}
                                   />
                               </div>
                           </div>
