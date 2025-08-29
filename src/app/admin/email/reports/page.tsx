@@ -165,7 +165,7 @@ export default function EmailReportsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalSent.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">+12.5% from last month (demo)</p>
+            <p className="text-xs text-muted-foreground">Total emails dispatched from the system.</p>
           </CardContent>
         </Card>
         <Card>
@@ -174,8 +174,8 @@ export default function EmailReportsPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.openRate}%</div>
-            <p className="text-xs text-muted-foreground">(demo data)</p>
+            <div className="text-2xl font-bold">N/A</div>
+            <p className="text-xs text-muted-foreground">Requires webhook integration.</p>
           </CardContent>
         </Card>
         <Card>
@@ -184,8 +184,8 @@ export default function EmailReportsPage() {
             <MousePointerClick className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.clickRate}%</div>
-            <p className="text-xs text-muted-foreground">(demo data)</p>
+            <div className="text-2xl font-bold">N/A</div>
+            <p className="text-xs text-muted-foreground">Requires webhook integration.</p>
           </CardContent>
         </Card>
         <Card>
@@ -194,8 +194,8 @@ export default function EmailReportsPage() {
             <UserX className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.unsubscribeRate}%</div>
-            <p className="text-xs text-muted-foreground">(demo data)</p>
+            <div className="text-2xl font-bold">N/A</div>
+            <p className="text-xs text-muted-foreground">Requires webhook integration.</p>
           </CardContent>
         </Card>
       </div>
