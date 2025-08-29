@@ -27,7 +27,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
@@ -36,6 +36,7 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type FilterType = 'all' | 'open' | 'in-progress' | 'closed';
 type TicketStatus = 'Open' | 'In Progress' | 'Closed';
@@ -233,10 +234,10 @@ export default function TicketManagementPage() {
                                   <DialogTrigger asChild>
                                     <Button variant="outline" onClick={() => setSelectedTicket(ticket)}>View/Reply</Button>
                                   </DialogTrigger>
-                                  <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+                                  <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
                                     {selectedTicket && (
                                        <>
-                                        <DialogHeader>
+                                        <DialogHeader className="p-6">
                                             <DialogTitle className="flex items-center gap-2">
                                                 <span className="text-muted-foreground">[{selectedTicket.id}]</span> 
                                                 {selectedTicket.subject}
@@ -245,50 +246,28 @@ export default function TicketManagementPage() {
                                                 Opened by {selectedTicket.user.name}
                                             </DialogDescription>
                                         </DialogHeader>
-                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
+                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-6 flex-1 overflow-y-auto">
                                             <div className="lg:col-span-2 flex flex-col space-y-4">
                                                 <Card className="flex-1 overflow-hidden flex flex-col">
                                                     <CardHeader>
                                                         <CardTitle>Conversation</CardTitle>
                                                     </CardHeader>
-                                                    <CardContent className="flex-1 overflow-y-auto space-y-6">
-                                                        {selectedTicket.messages.map((message, index) => (
-                                                        <div key={index} className={cn("flex items-start gap-4", message.author === 'admin' && 'flex-row-reverse')}>
-                                                            <Avatar>
-                                                                <AvatarImage src={message.avatar} alt={message.name} />
-                                                                <AvatarFallback>{message.name.charAt(0)}</AvatarFallback>
-                                                            </Avatar>
-                                                            <div className={cn("rounded-lg p-4 max-w-xl", message.author === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                                                                <p className="text-sm">{message.text}</p>
-                                                                <p className="text-xs text-right mt-2 opacity-70">{message.timestamp}</p>
+                                                     <ScrollArea className="flex-grow px-6">
+                                                        <CardContent className="space-y-6">
+                                                            {selectedTicket.messages.map((message, index) => (
+                                                            <div key={index} className={cn("flex items-start gap-4", message.author === 'admin' && 'flex-row-reverse')}>
+                                                                <Avatar>
+                                                                    <AvatarImage src={message.avatar} alt={message.name} />
+                                                                    <AvatarFallback>{message.name.charAt(0)}</AvatarFallback>
+                                                                </Avatar>
+                                                                <div className={cn("rounded-lg p-4 max-w-xl", message.author === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                    <p className="text-sm">{message.text}</p>
+                                                                    <p className="text-xs text-right mt-2 opacity-70">{message.timestamp}</p>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        ))}
-                                                    </CardContent>
-                                                </Card>
-                                                <Card>
-                                                    <CardHeader>
-                                                        <CardTitle>Add a Reply</CardTitle>
-                                                    </CardHeader>
-                                                    <CardContent>
-                                                        <form onSubmit={handleReply}>
-                                                        <div className="grid w-full gap-2">
-                                                            <Textarea 
-                                                                placeholder="Type your reply here..." 
-                                                                className="min-h-[120px]"
-                                                                value={replyText}
-                                                                onChange={(e) => setReplyText(e.target.value)}
-                                                            />
-                                                            <div className="flex justify-end items-center gap-2">
-                                                                <Button type="button" variant="outline"><Paperclip className="mr-2 h-4 w-4"/>Attach File</Button>
-                                                                <Button type="submit" disabled={isReplying || !replyText.trim()}>
-                                                                    {isReplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
-                                                                    Send Reply
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                        </form>
-                                                    </CardContent>
+                                                            ))}
+                                                        </CardContent>
+                                                    </ScrollArea>
                                                 </Card>
                                             </div>
                                             <div className="lg:col-span-1 space-y-6">
@@ -324,7 +303,9 @@ export default function TicketManagementPage() {
                                                             </Select>
                                                         </div>
                                                         <Separator />
-                                                        <Button className="w-full" onClick={handleTicketUpdate}><Save className="mr-2 h-4 w-4"/>Save Changes</Button>
+                                                        <DialogClose asChild>
+                                                            <Button className="w-full" onClick={handleTicketUpdate}><Save className="mr-2 h-4 w-4"/>Save Changes</Button>
+                                                        </DialogClose>
                                                     </CardContent>
                                                 </Card>
                                                 <Card>
@@ -350,6 +331,25 @@ export default function TicketManagementPage() {
                                                     </CardContent>
                                                 </Card>
                                             </div>
+                                        </div>
+                                        <div className="p-6 border-t bg-background">
+                                            <form onSubmit={handleReply}>
+                                                <div className="grid w-full gap-2">
+                                                    <Textarea 
+                                                        placeholder="Type your reply here..." 
+                                                        className="min-h-[100px]"
+                                                        value={replyText}
+                                                        onChange={(e) => setReplyText(e.target.value)}
+                                                    />
+                                                    <div className="flex justify-end items-center gap-2">
+                                                        <Button type="button" variant="outline"><Paperclip className="mr-2 h-4 w-4"/>Attach File</Button>
+                                                        <Button type="submit" disabled={isReplying || !replyText.trim()}>
+                                                            {isReplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
+                                                            Send Reply
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </form>
                                         </div>
                                        </>
                                     )}
