@@ -63,6 +63,8 @@ export const SecuritySettingsSchema = z.object({
     recaptchaSiteKey: z.string().optional(),
     recaptchaSecretKey: z.string().optional(),
     maintenanceMode: z.boolean().default(false),
+    maintenanceModeMessage: z.string().optional(),
+    maintenanceModeUntil: z.date().optional(),
     enableNewLoginAlerts: z.boolean().default(true),
 });
 export type SecuritySettings = z.infer<typeof SecuritySettingsSchema>;

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare, AlertTriangle } from 'lucide-react';
+import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare, AlertTriangle, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
@@ -18,6 +18,9 @@ import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
 
 type CollapsibleSectionProps = {
   id: string;
@@ -75,7 +78,14 @@ export default function SiteSettingsPage() {
       setLoading(true);
       try {
         const appSettings = await getSettings();
-        setSettings(appSettings.general || {
+        const generalData = appSettings.general || {};
+        
+        // Ensure date fields are Date objects if they exist
+        if (generalData.security?.maintenanceModeUntil && typeof generalData.security.maintenanceModeUntil === 'string') {
+          generalData.security.maintenanceModeUntil = new Date(generalData.security.maintenanceModeUntil);
+        }
+
+        setSettings({
             siteTitle: '',
             slogan: '',
             siteDescription: '',
@@ -86,7 +96,8 @@ export default function SiteSettingsPage() {
             contactEmail: '',
             socialLinks: { facebook: '', twitter: '', instagram: '', youtube: '' },
             webmaster: { googleSearchConsole: '', googleAnalytics: '', googleAdsense: '', yandexWebmaster: '', bingWebmaster: '', pinterest: '', baidu: '', yahooSearchConsole: '' },
-            security: { enableTwoFactorAuth: false, twoFactorAuthMethods: {email: true, authenticatorApp: false, mobileNumber: false}, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '', maintenanceMode: false, enableNewLoginAlerts: true },
+            security: { enableTwoFactorAuth: false, twoFactorAuthMethods: {email: true, authenticatorApp: false, mobileNumber: false}, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '', maintenanceMode: false, maintenanceModeMessage: '', maintenanceModeUntil: undefined, enableNewLoginAlerts: true },
+            ...generalData,
         });
       } catch (error) {
         console.error('Failed to fetch settings:', error);
@@ -129,12 +140,11 @@ export default function SiteSettingsPage() {
     } : null));
   };
 
-  const handleSecurityChange = (field: string, value: string | boolean) => {
+  const handleSecurityChange = (field: string, value: any) => {
     setSettings(prev => {
         if (!prev) return null;
-        const newSettings = { ...prev };
-        (newSettings.security as any)[field] = value;
-        return newSettings;
+        const newSecuritySettings = { ...(prev.security || {}), [field]: value };
+        return { ...prev, security: newSecuritySettings };
     });
   };
   
@@ -460,25 +470,65 @@ export default function SiteSettingsPage() {
                 <div className="space-y-2 pt-4">
                     <Label className="text-base font-medium">Maintenance &amp; Utilities</Label>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="flex items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                                <Label htmlFor="maintenanceMode" className="font-medium">Enable Maintenance Mode</Label>
-                                <p className="text-sm text-muted-foreground">Temporarily take your site offline for visitors.</p>
+                        <div className="rounded-lg border p-4 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Label htmlFor="maintenanceMode" className="font-medium">Enable Maintenance Mode</Label>
+                                    <p className="text-sm text-muted-foreground">Temporarily take your site offline for visitors.</p>
+                                </div>
+                                <Switch
+                                    id="maintenanceMode"
+                                    checked={settings.security?.maintenanceMode || false}
+                                    onCheckedChange={(checked) => handleSecurityChange('maintenanceMode', checked)}
+                                />
                             </div>
-                            <Switch
-                                id="maintenanceMode"
-                                checked={settings.security?.maintenanceMode || false}
-                                onCheckedChange={(checked) => handleSecurityChange('maintenanceMode', checked)}
-                            />
+                            {settings.security?.maintenanceMode && (
+                                <div className="space-y-4 pt-4 border-t">
+                                     <div className="space-y-2">
+                                        <Label htmlFor="maintenanceModeMessage">Maintenance Message</Label>
+                                        <Textarea
+                                            id="maintenanceModeMessage"
+                                            placeholder="e.g., We'll be back online shortly!"
+                                            value={settings.security?.maintenanceModeMessage || ''}
+                                            onChange={(e) => handleSecurityChange('maintenanceModeMessage', e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="maintenanceModeUntil">Ends At (Optional)</Label>
+                                         <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "w-full justify-start text-left font-normal",
+                                                        !settings.security?.maintenanceModeUntil && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {settings.security?.maintenanceModeUntil ? format(settings.security.maintenanceModeUntil, "PPP") : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={settings.security?.maintenanceModeUntil}
+                                                    onSelect={(date) => handleSecurityChange('maintenanceModeUntil', date)}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                         <div className="flex items-center justify-between rounded-lg border p-4">
+                         <div className="flex items-start justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
                                 <Label htmlFor="enableNewLoginAlerts" className="font-medium">Enable New Login Alerts</Label>
                                 <p className="text-sm text-muted-foreground">Notify users of logins from new devices.</p>
                             </div>
                             <Switch
                                 id="enableNewLoginAlerts"
-                                checked={settings.security?.enableNewLoginAlerts || false}
+                                checked={settings.security?.enableNewLoginAlerts ?? true}
                                 onCheckedChange={(checked) => handleSecurityChange('enableNewLoginAlerts', checked)}
                             />
                         </div>
