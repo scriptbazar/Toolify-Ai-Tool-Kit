@@ -16,6 +16,7 @@ import {
   Smartphone,
   MessageSquare,
   AlertTriangle,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -34,7 +35,7 @@ import { cn } from '@/lib/utils';
 import { countries } from '@/lib/countries';
 import { Combobox } from '@/components/ui/combobox';
 import { sendPasswordChangeEmail } from '@/ai/flows/send-email';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 
 interface UserProfile {
@@ -79,8 +80,9 @@ const TwoFactorAuthOptionCard = ({
 };
 
 
-export default function UserDetailPage() {
+export default function EditUserDetailPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const params = useParams();
   const { id } = params;
 
@@ -208,17 +210,23 @@ export default function UserDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+      <Link href="/admin/profile" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" />
-        Back to Dashboard
+        Back to Profile
       </Link>
       
       <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">Admin Profile</h1>
-          <Button onClick={handleSaveChanges} disabled={isSaving}>
-            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            Save Changes
-          </Button>
+          <h1 className="text-3xl font-bold tracking-tight">Edit Admin Profile</h1>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => router.push('/admin/profile')}>
+                <X className="mr-2 h-4 w-4"/>
+                Cancel
+            </Button>
+            <Button onClick={handleSaveChanges} disabled={isSaving}>
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save Changes
+            </Button>
+          </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

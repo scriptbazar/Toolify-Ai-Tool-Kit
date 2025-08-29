@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -33,6 +32,7 @@ import {
   LogOut,
   User,
   Shield,
+  ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -199,7 +199,7 @@ export default function AdminLayout({
       <ScrollArea className="flex-1">
         <nav className="grid gap-2 text-base font-medium p-4 py-4">
           {navLinks.map((link) => {
-            const href = link.href === '/admin/administrators' ? `/admin/users/${user?.uid}` : link.href;
+            const href = link.href === '/admin/administrators' ? `/admin/users` : link.href;
             return(
             <Link
               key={link.href}
@@ -266,7 +266,7 @@ export default function AdminLayout({
       <div className="mt-auto p-4 border-t">
           <div className="flex gap-2">
             <Button asChild className="flex-1 justify-start">
-              <Link href={`/admin/users/${user?.uid}`}>
+              <Link href="/admin/profile">
                 <User className="mr-2 h-4 w-4" />
                 Admin Profile
               </Link>
@@ -297,7 +297,7 @@ export default function AdminLayout({
           <ScrollArea className="flex-1">
             <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4 py-4">
               {navLinks.map((link) => {
-                 const href = link.href === '/admin/administrators' ? `/admin/users/${user?.uid}` : link.href;
+                 const href = link.href === '/admin/administrators' ? `/admin/users` : link.href;
                  return (
                     <Link
                       key={link.href}
@@ -414,13 +414,13 @@ export default function AdminLayout({
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                 <DropdownMenuItem onClick={() => router.push(`/admin/users/${user?.uid}`)}>
-                  <Shield className="mr-2 h-4 w-4" />
-                  <span>Edit Admin Profile</span>
+                 <DropdownMenuItem onClick={() => router.push(`/admin/profile`)}>
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  <span>Admin Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push(`/admin/users/${user?.uid}`)}>
                   <UserCog className="mr-2 h-4 w-4" />
-                  <span>Admin Profile</span>
+                  <span>Edit Admin Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
