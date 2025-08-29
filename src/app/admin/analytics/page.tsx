@@ -102,7 +102,7 @@ export default function AdminAnalyticsPage() {
     totalUsers: 0,
     newUsers: 0,
     totalLeads: 0,
-    activeUsers: 789, // Static for now
+    activeUsers: 0,
   });
   const [chartData, setChartData] = useState<ChartData[]>([]);
 
@@ -113,36 +113,45 @@ export default function AdminAnalyticsPage() {
         const usersRef = collection(db, 'users');
         const leadsRef = collection(db, 'leads');
 
-        // Total Users & Leads
-        const usersSnapshot = await getDocs(usersRef);
-        const leadsSnapshot = await getDocs(leadsRef);
+        // --- Fetch all data in parallel ---
+        const [usersSnapshot, leadsSnapshot] = await Promise.all([
+            getDocs(usersRef),
+            getDocs(leadsRef)
+        ]);
+
         const totalUsers = usersSnapshot.size;
         const totalLeads = leadsSnapshot.size;
+        const allUsersList = usersSnapshot.docs.map(doc => doc.data());
 
-        // New Users (last 30 days)
+        // --- Calculate New Users (last 30 days) ---
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const thirtyDaysAgoTimestamp = Timestamp.fromDate(thirtyDaysAgo);
+        const newUsersCount = allUsersList.filter(user => 
+            user.createdAt && user.createdAt.toDate() >= thirtyDaysAgo
+        ).length;
+
+        // --- Calculate Active Users (last 5 minutes) ---
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const activeUsersCount = allUsersList.filter(user =>
+          user.lastActive && user.lastActive.toDate() >= fiveMinutesAgo
+        ).length;
         
-        const newUsersQuery = query(usersRef, where('createdAt', '>=', thirtyDaysAgoTimestamp));
-        const newUsersSnapshot = await getDocs(newUsersQuery);
-        const newUsersCount = newUsersSnapshot.size;
+        setStats({ 
+            totalUsers, 
+            totalLeads,
+            newUsers: newUsersCount,
+            activeUsers: activeUsersCount
+        });
 
-        setStats(prev => ({ 
-            ...prev, 
-            totalUsers: totalUsers, 
-            totalLeads: totalLeads,
-            newUsers: newUsersCount 
-        }));
-
-        // Chart Data (monthly signups for current year)
-        const allUsersList = usersSnapshot.docs.map(doc => doc.data());
+        // --- Chart Data (monthly signups for current year) ---
         const monthlySignups: { [key: string]: number } = {};
         allUsersList.forEach(user => {
           if (user.createdAt && user.createdAt.seconds) {
             const date = new Date(user.createdAt.seconds * 1000);
-            const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
-            monthlySignups[monthKey] = (monthlySignups[monthKey] || 0) + 1;
+            if (date.getFullYear() === new Date().getFullYear()) {
+                const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+                monthlySignups[monthKey] = (monthlySignups[monthKey] || 0) + 1;
+            }
           }
         });
         
@@ -166,6 +175,9 @@ export default function AdminAnalyticsPage() {
       }
     }
     fetchAnalyticsData();
+     // Refresh active users every 30 seconds
+    const interval = setInterval(fetchAnalyticsData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const tabs = ['overview', 'audience', 'behavior', 'conversions'];
@@ -227,14 +239,14 @@ export default function AdminAnalyticsPage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Active Users (Placeholder)
+                    Active Users
                   </CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.activeUsers.toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground">
-                    +2.5% from last month
+                    Users active in the last 5 minutes
                   </p>
                 </CardContent>
               </Card>

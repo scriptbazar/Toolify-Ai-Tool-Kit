@@ -54,6 +54,7 @@ import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
+import { updateUserActivity } from '@/ai/flows/user-management';
 
 interface AppUser {
   firstName: string;
@@ -82,6 +83,14 @@ export default function UserPanelLayout({
         if (userDocSnap.exists()) {
           setUserData(userDocSnap.data() as AppUser);
         }
+
+        // Set up an interval to update user activity
+        const activityInterval = setInterval(() => {
+          updateUserActivity(firebaseUser.uid);
+        }, 30000); // Update every 30 seconds
+
+        return () => clearInterval(activityInterval);
+
       } else {
         setUser(null);
         setUserData(null);

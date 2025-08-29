@@ -7,6 +7,7 @@
  * - updateUserRole - A function that updates a user's role in the database.
  * - addLeadUser - Saves lead information from the chat widget.
  * - getAllEmails - Fetches all unique emails from both users and leads collections.
+ * - updateUserActivity - Updates the last active timestamp for a user.
  */
 
 import { z } from 'zod';
@@ -94,5 +95,29 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
     // Instead of throwing, return an empty array to allow the UI to render gracefully.
     // The error is logged on the server for debugging.
     return [];
+  }
+}
+
+
+/**
+ * Updates the last active timestamp for a given user.
+ * @param userId - The ID of the user to update.
+ * @returns An object indicating success or failure.
+ */
+export async function updateUserActivity(userId: string): Promise<{ success: boolean }> {
+  if (!userId) {
+    return { success: false };
+  }
+  try {
+    const userRef = adminDb.collection('users').doc(userId);
+    await userRef.update({
+      lastActive: FieldValue.serverTimestamp(),
+    });
+    return { success: true };
+  } catch (error) {
+    // It's okay if this fails silently (e.g., user doc doesn't exist),
+    // as it's just a background heartbeat.
+    console.log(`Could not update activity for user ${userId}:`, error);
+    return { success: false };
   }
 }
