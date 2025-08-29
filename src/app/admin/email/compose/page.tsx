@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { composeEmail, type AiEmailComposerInput } from '@/ai/flows/ai-email-composer';
 import { Wand2, Send, Mail, Eye, Users } from 'lucide-react';
 import { z } from 'zod';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import Link from 'next/link';
 
