@@ -12,10 +12,7 @@ export async function AppProviders({ children }: { children: React.ReactNode }) 
   
   const authRoutes = ['/login', '/signup', '/admin/login', '/forgot-password'];
   const isAuthRoute = authRoutes.includes(pathname);
-  
-  // This is the main fix: ensure that any path starting with /admin is considered an admin route.
   const isAdminRoute = pathname.startsWith('/admin');
-  
   const isUserPanelRoute = [
     '/dashboard',
     '/profile',

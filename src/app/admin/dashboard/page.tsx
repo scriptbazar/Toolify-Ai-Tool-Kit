@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
   Activity,
   ArrowUpRight,
@@ -8,6 +9,7 @@ import {
   UserPlus,
   UserCheck,
   UserRound,
+  Copy,
 } from 'lucide-react';
 import {
   Line,
@@ -17,7 +19,6 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts';
-
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,21 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  plan: string; // e.g., 'Free', 'Pro'
+  status: string; // e.g., 'Approved', 'Active'
+  date: string;
+  amount: string;
+}
 
 const chartData = [
   { month: 'January', users: 186 },
@@ -59,6 +75,50 @@ const chartConfig = {
 };
 
 export default function AdminDashboard() {
+  const [recentUsers, setRecentUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchRecentUsers() {
+      setLoading(true);
+      try {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, orderBy('createdAt', 'desc'), limit(5));
+        const querySnapshot = await getDocs(q);
+        const usersList = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: `${data.firstName} ${data.lastName}`,
+            email: data.email,
+            plan: data.plan || 'Free', // Placeholder
+            status: 'Approved', // Placeholder
+            date: data.createdAt.toDate().toLocaleDateString(),
+            amount: '$0.00', // Placeholder
+          };
+        });
+        setRecentUsers(usersList);
+      } catch (error) {
+        console.error("Error fetching recent users:", error);
+        toast({
+            title: "Error",
+            description: "Could not load recent signups.",
+            variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchRecentUsers();
+  }, [toast]);
+  
+  const copyToClipboard = (text: string, fieldName: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ description: `Copied ${fieldName}: ${text}` });
+  };
+
+
   return (
     <div className="space-y-6">
        <div>
@@ -135,7 +195,7 @@ export default function AdminDashboard() {
               </CardDescription>
             </div>
             <Button asChild size="sm" className="ml-auto gap-1">
-              <Link href="#">
+              <Link href="/admin/users">
                 View All
                 <ArrowUpRight className="h-4 w-4" />
               </Link>
@@ -146,69 +206,55 @@ export default function AdminDashboard() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Customer</TableHead>
-                  <TableHead className="hidden xl:table-column">Type</TableHead>
+                  <TableHead className="hidden xl:table-column">Plan</TableHead>
                   <TableHead className="hidden xl:table-column">
                     Status
                   </TableHead>
-                  <TableHead className="hidden xl:table-column">Date</TableHead>
+                  <TableHead className="hidden md:table-cell lg:hidden xl:table-column">Date</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
+                {loading && [...Array(5)].map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell><div className="h-4 bg-muted rounded w-3/4"></div></TableCell>
+                        <TableCell className="hidden xl:table-column"><div className="h-4 bg-muted rounded w-1/2"></div></TableCell>
+                        <TableCell className="hidden xl:table-column"><div className="h-4 bg-muted rounded w-1/2"></div></TableCell>
+                        <TableCell className="hidden md:table-cell lg:hidden xl:table-column"><div className="h-4 bg-muted rounded w-3/4"></div></TableCell>
+                        <TableCell className="text-right"><div className="h-4 bg-muted rounded w-1/4 ml-auto"></div></TableCell>
+                    </TableRow>
+                ))}
+                {!loading && recentUsers.map(user => (
+                <TableRow key={user.id}>
                   <TableCell>
-                    <div className="font-medium">Liam Johnson</div>
-                    <div className="hidden text-sm text-muted-foreground md:inline">
-                      liam@example.com
+                    <div className="flex items-center gap-2">
+                       <Avatar className="hidden h-9 w-9 sm:flex">
+                        <AvatarFallback>{user.name?.[0] || 'U'}</AvatarFallback>
+                      </Avatar>
+                      <div className="grid gap-1">
+                         <div className="font-medium">{user.name}</div>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            {user.email}
+                            <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(user.email, 'Email')}>
+                                <Copy className="h-3 w-3" />
+                                <span className="sr-only">Copy Email</span>
+                            </Button>
+                          </div>
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden xl:table-column">Sale</TableCell>
+                  <TableCell className="hidden xl:table-column">{user.plan}</TableCell>
                   <TableCell className="hidden xl:table-column">
                     <Badge className="text-xs" variant="outline">
-                      Approved
+                      {user.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                    2023-06-23
+                    {user.date}
                   </TableCell>
-                  <TableCell className="text-right">$250.00</TableCell>
+                  <TableCell className="text-right">{user.amount}</TableCell>
                 </TableRow>
-                 <TableRow>
-                  <TableCell>
-                    <div className="font-medium">Olivia Martin</div>
-                    <div className="hidden text-sm text-muted-foreground md:inline">
-                      olivia.martin@email.com
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden xl:table-column">Subscription</TableCell>
-                  <TableCell className="hidden xl:table-column">
-                    <Badge className="text-xs" variant="outline">
-                      Active
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                    2023-06-24
-                  </TableCell>
-                  <TableCell className="text-right">$1,999.00</TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell>
-                    <div className="font-medium">Jackson Lee</div>
-                    <div className="hidden text-sm text-muted-foreground md:inline">
-                      jackson.lee@email.com
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden xl:table-column">Sale</TableCell>
-                  <TableCell className="hidden xl:table-column">
-                    <Badge className="text-xs" variant="outline">
-                      Approved
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                    2023-06-25
-                  </TableCell>
-                  <TableCell className="text-right">$39.00</TableCell>
-                </TableRow>
+                ))}
               </TableBody>
             </Table>
           </CardContent>
