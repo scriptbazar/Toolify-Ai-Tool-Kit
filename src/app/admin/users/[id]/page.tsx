@@ -79,6 +79,7 @@ const TwoFactorAuthOptionCard = ({
 export default function UserDetailPage({ params }: { params: { id: string } }) {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -288,7 +289,12 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                   </div>
                    <div className="space-y-2">
                     <Label htmlFor="confirm-password">Confirm New Password</Label>
-                    <Input id="confirm-password" type={showPassword ? 'text' : 'password'} placeholder="Confirm new password" />
+                    <div className="relative">
+                        <Input id="confirm-password" type={showConfirmPassword ? 'text' : 'password'} placeholder="Confirm new password" />
+                         <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                    </div>
                   </div>
                 </div>
              </div>
@@ -305,7 +311,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                  {profile.enable2FA && (
                     <Card className="p-4">
                         <Label className="text-base font-medium">Enabled 2FA Methods</Label>
-                        <p className="text-sm text-muted-foreground mb-4">Select which methods users can choose from.</p>
+                        <p className="text-sm text-muted-foreground mb-4">Select the authentication methods you would like to enable.</p>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <TwoFactorAuthOptionCard 
                                 icon={MailCheck}

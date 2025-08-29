@@ -401,20 +401,9 @@ export default function SiteSettingsPage() {
             </div>
         </CollapsibleSection>
 
-        <CollapsibleSection id="security" title="Security Settings" description="Manage site security features like 2FA and reCAPTCHA." isOpen={openSection === 'security'} onToggle={handleToggle} isFullWidth={openSection === 'security'}>
+        <CollapsibleSection id="security" title="Security Settings" description="Manage site security features and maintenance mode." isOpen={openSection === 'security'} onToggle={handleToggle} isFullWidth={openSection === 'security'}>
             <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex items-start justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                            <Label htmlFor="enableTwoFactorAuth" className="font-medium">Enable Two-Factor Authentication</Label>
-                            <p className="text-sm text-muted-foreground">Enhance account security for all users.</p>
-                        </div>
-                        <Switch
-                            id="enableTwoFactorAuth"
-                            checked={settings.security?.enableTwoFactorAuth || false}
-                            onCheckedChange={(checked) => handleSecurityChange('enableTwoFactorAuth', checked)}
-                        />
-                    </div>
                     <div className="flex items-start justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
                             <Label htmlFor="enableRecaptcha" className="font-medium">Enable Google reCAPTCHA</Label>
@@ -426,28 +415,18 @@ export default function SiteSettingsPage() {
                             onCheckedChange={(checked) => handleSecurityChange('enableRecaptcha', checked)}
                         />
                     </div>
-                </div>
-
-                 {settings.security?.enableTwoFactorAuth && (
-                    <Card className="p-4">
-                        <Label className="text-base font-medium">Enabled 2FA Methods</Label>
-                        <p className="text-sm text-muted-foreground mb-4">Select which methods users can choose from.</p>
-                        <div className="space-y-3">
-                            <div className="flex items-center space-x-3">
-                                <Checkbox id="2fa-email" checked={settings.security?.twoFactorAuthMethods?.email} onCheckedChange={(checked) => handle2faMethodChange('email', checked as boolean)} />
-                                <Label htmlFor="2fa-email" className="flex items-center gap-2 font-normal"><MailCheck className="h-4 w-4"/> Email Authentication</Label>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                                <Checkbox id="2fa-app" checked={settings.security?.twoFactorAuthMethods?.authenticatorApp} onCheckedChange={(checked) => handle2faMethodChange('authenticatorApp', checked as boolean)} />
-                                <Label htmlFor="2fa-app" className="flex items-center gap-2 font-normal"><Smartphone className="h-4 w-4"/> Authenticator App</Label>
-                            </div>
-                             <div className="flex items-center space-x-3">
-                                <Checkbox id="2fa-sms" checked={settings.security?.twoFactorAuthMethods?.mobileNumber} onCheckedChange={(checked) => handle2faMethodChange('mobileNumber', checked as boolean)} />
-                                <Label htmlFor="2fa-sms" className="flex items-center gap-2 font-normal"><MessageSquare className="h-4 w-4"/> Mobile Number (SMS)</Label>
-                            </div>
+                     <div className="flex items-start justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="enableNewLoginAlerts" className="font-medium">Enable New Login Alerts</Label>
+                            <p className="text-sm text-muted-foreground">Notify users of logins from new devices.</p>
                         </div>
-                    </Card>
-                )}
+                        <Switch
+                            id="enableNewLoginAlerts"
+                            checked={settings.security?.enableNewLoginAlerts ?? true}
+                            onCheckedChange={(checked) => handleSecurityChange('enableNewLoginAlerts', checked)}
+                        />
+                    </div>
+                </div>
                 
                 {settings.security?.enableRecaptcha && (
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -521,22 +500,14 @@ export default function SiteSettingsPage() {
                                 </div>
                             )}
                         </div>
-                         <div className="flex items-start justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                                <Label htmlFor="enableNewLoginAlerts" className="font-medium">Enable New Login Alerts</Label>
-                                <p className="text-sm text-muted-foreground">Notify users of logins from new devices.</p>
-                            </div>
-                            <Switch
-                                id="enableNewLoginAlerts"
-                                checked={settings.security?.enableNewLoginAlerts ?? true}
-                                onCheckedChange={(checked) => handleSecurityChange('enableNewLoginAlerts', checked)}
-                            />
-                        </div>
-                     </div>
-                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                        <Button variant="outline" type="button" onClick={() => handleUtilityClick('Clear Cache')}><Eraser className="mr-2 h-4 w-4" />Clear Cache</Button>
-                        <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Sitemap')}><FileCode className="mr-2 h-4 w-4" />Generate sitemap.xml</Button>
-                        <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Robots.txt')}><FileText className="mr-2 h-4 w-4" />Generate robots.txt</Button>
+                         <div className="space-y-4 rounded-lg border p-4">
+                            <Label className="font-medium">Site Utilities</Label>
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <Button variant="outline" type="button" onClick={() => handleUtilityClick('Clear Cache')}><Eraser className="mr-2 h-4 w-4" />Clear Cache</Button>
+                                <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Sitemap')}><FileCode className="mr-2 h-4 w-4" />Generate sitemap.xml</Button>
+                                <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Robots.txt')}><FileText className="mr-2 h-4 w-4" />Generate robots.txt</Button>
+                             </div>
+                         </div>
                      </div>
                 </div>
             </div>
