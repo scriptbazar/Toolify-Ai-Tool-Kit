@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import {
   ArrowUpRight,
   BarChart3,
-  DollarSign,
+  UserCheck,
   UserPlus,
   Users,
   Construction,
@@ -80,7 +80,7 @@ export default function AdminAnalyticsPage() {
   const [stats, setStats] = useState({
     totalUsers: 0,
     newUsers: 0,
-    revenue: 45231.89, // Static for now
+    totalLeads: 0,
     bounceRate: 23.5, // Static for now
   });
   const [chartData, setChartData] = useState<ChartData[]>([]);
@@ -92,10 +92,11 @@ export default function AdminAnalyticsPage() {
         const usersRef = collection(db, 'users');
         const leadsRef = collection(db, 'leads');
 
-        // Total Users
+        // Total Users & Leads
         const usersSnapshot = await getDocs(usersRef);
         const leadsSnapshot = await getDocs(leadsRef);
-        const totalUsers = usersSnapshot.size + leadsSnapshot.size;
+        const totalUsers = usersSnapshot.size;
+        const totalLeads = leadsSnapshot.size;
 
         // New Users (last 30 days)
         const thirtyDaysAgo = new Date();
@@ -106,7 +107,12 @@ export default function AdminAnalyticsPage() {
         const newUsersSnapshot = await getDocs(newUsersQuery);
         const newUsersCount = newUsersSnapshot.size;
 
-        setStats(prev => ({ ...prev, totalUsers: totalUsers, newUsers: newUsersCount }));
+        setStats(prev => ({ 
+            ...prev, 
+            totalUsers: totalUsers, 
+            totalLeads: totalLeads,
+            newUsers: newUsersCount 
+        }));
 
         // Chart Data (monthly signups for current year)
         const allUsersList = usersSnapshot.docs.map(doc => doc.data());
@@ -173,11 +179,11 @@ export default function AdminAnalyticsPage() {
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Revenue (Placeholder)</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
+                  <UserCheck className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${stats.revenue.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{stats.totalLeads.toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground">
                     +18.3% from last month
                   </p>
