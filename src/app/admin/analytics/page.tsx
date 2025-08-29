@@ -7,6 +7,7 @@ import {
   DollarSign,
   UserPlus,
   Users,
+  Construction,
 } from 'lucide-react';
 import {
   Card,
@@ -23,61 +24,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useState } from 'react';
-import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-
-const ResponsiveContainer = dynamic(
-  () => import('recharts').then((mod) => mod.ResponsiveContainer),
-  { ssr: false }
-);
-const LineChart = dynamic(() => import('recharts').then((mod) => mod.LineChart), {
-  ssr: false,
-});
-const BarChart = dynamic(() => import('recharts').then((mod) => mod.BarChart), {
-  ssr: false,
-});
-const Line = dynamic(() => import('recharts').then((mod) => mod.Line), {
-  ssr: false,
-});
-const Bar = dynamic(() => import('recharts').then((mod) => mod.Bar), {
-  ssr: false,
-});
-const XAxis = dynamic(() => import('recharts').then((mod) => mod.XAxis), {
-  ssr: false,
-});
-const YAxis = dynamic(() => import('recharts').then((mod) => mod.YAxis), {
-  ssr: false,
-});
-const Tooltip = dynamic(() => import('recharts').then((mod) => mod.Tooltip), {
-  ssr: false,
-});
-const CartesianGrid = dynamic(
-  () => import('recharts').then((mod) => mod.CartesianGrid),
-  { ssr: false }
-);
-const Legend = dynamic(() => import('recharts').then((mod) => mod.Legend), {
-  ssr: false,
-});
-
-const pageViewsData = [
-  { date: '2024-05-01', views: 2345 },
-  { date: '2024-05-02', views: 2834 },
-  { date: '2024-05-03', views: 3123 },
-  { date: '2024-05-04', views: 2987 },
-  { date: '2024-05-05', views: 3456 },
-  { date: '2024-05-06', views: 3678 },
-  { date: '2024-05-07', views: 4123 },
-];
-
-const usersByCountryData = [
-  { country: 'USA', users: 450 },
-  { country: 'India', users: 320 },
-  { country: 'Germany', users: 210 },
-  { country: 'Japan', users: 180 },
-  { country: 'UK', users: 150 },
-  { country: 'Brazil', users: 120 },
-];
 
 const ComingSoonDialogContent = () => (
   <DialogContent>
@@ -182,53 +129,21 @@ export default function AdminAnalyticsPage() {
                 </CardContent>
               </Card>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-4">
+            <Card>
                 <CardHeader>
-                  <CardTitle>Page Views</CardTitle>
-                  <CardDescription>
-                    A line chart showing page views over the last 7 days.
-                  </CardDescription>
+                    <CardTitle>Analytics Under Development</CardTitle>
+                    <CardDescription>
+                    Live analytics data and charts are coming soon.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={pageViewsData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="views"
-                        stroke="hsl(var(--primary))"
-                        activeDot={{ r: 8 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                    <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-8 border-2 border-dashed rounded-lg bg-muted/50">
+                        <Construction className="w-16 h-16 text-muted-foreground mb-4" />
+                        <p className="text-lg text-muted-foreground">We're working on bringing you live analytics!</p>
+                        <p className="text-muted-foreground">Check back soon for detailed insights.</p>
+                    </div>
                 </CardContent>
-              </Card>
-              <Card className="col-span-4 lg:col-span-3">
-                <CardHeader>
-                  <CardTitle>Users by Country</CardTitle>
-                  <CardDescription>
-                    A bar chart showing the distribution of users by country.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={usersByCountryData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="country" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="users" fill="hsl(var(--primary))" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </div>
+            </Card>
           </div>
         )}
 

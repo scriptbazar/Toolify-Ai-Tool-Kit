@@ -111,18 +111,17 @@ export default function AdminDashboard() {
 
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const today = new Date();
-        const last12MonthsData: ChartData[] = [];
+        const currentYear = today.getFullYear();
+        const fullYearData: ChartData[] = [];
 
-        for (let i = 11; i >= 0; i--) {
-          const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-          const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
-          const monthName = monthNames[d.getMonth()];
-          last12MonthsData.push({
-            month: monthName,
+        for (let i = 0; i < 12; i++) {
+          const monthKey = `${currentYear}-${i}`;
+          fullYearData.push({
+            month: monthNames[i],
             users: monthlySignups[monthKey] || 0,
           });
         }
-        setChartData(last12MonthsData);
+        setChartData(fullYearData);
 
 
         // --- Process Recent Users Table (first 5) ---
@@ -364,4 +363,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
