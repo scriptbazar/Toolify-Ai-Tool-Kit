@@ -12,6 +12,9 @@ import {
   User,
   Lock,
   Loader2,
+  MailCheck,
+  Smartphone,
+  MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -25,6 +28,8 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
 
 interface UserProfile {
@@ -35,7 +40,39 @@ interface UserProfile {
   mobileNumber?: string;
   countryCode?: string;
   enable2FA?: boolean;
+  twoFactorAuthMethods?: {
+    email?: boolean;
+    authenticatorApp?: boolean;
+    mobileNumber?: boolean;
+  };
 }
+
+const TwoFactorAuthOptionCard = ({
+  icon: Icon,
+  label,
+  checked,
+  onCheckedChange,
+}: {
+  icon: React.ElementType;
+  label: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}) => {
+  return (
+    <div
+      onClick={() => onCheckedChange(!checked)}
+      className={cn(
+        'flex flex-col items-center justify-center gap-3 rounded-lg border-2 p-6 cursor-pointer transition-all',
+        checked ? 'border-primary bg-primary/5' : 'border-muted bg-transparent hover:bg-muted/50'
+      )}
+    >
+      <Icon className={cn("h-8 w-8", checked ? 'text-primary' : 'text-muted-foreground')} />
+      <span className="font-medium text-center">{label}</span>
+      <Checkbox checked={checked} className="sr-only" />
+    </div>
+  );
+};
+
 
 export default function UserDetailPage({ params }: { params: { id: string } }) {
   const { toast } = useToast();
@@ -50,15 +87,24 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
       if (firebaseUser && firebaseUser.uid === params.id) {
         setUser(firebaseUser);
         const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-          setProfile(userDocSnap.data() as UserProfile);
+        try {
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+             setProfile(userDocSnap.data() as UserProfile);
+          }
+        } catch (error) {
+          console.error("Error fetching user document:", error);
+          toast({
+            title: "Error",
+            description: "Could not load user profile.",
+            variant: "destructive",
+          });
         }
       }
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [params.id]);
+  }, [params.id, toast]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -68,20 +114,32 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
   const handleSwitchChange = (id: string, checked: boolean) => {
      setProfile(prev => prev ? { ...prev, [id]: checked } : null);
   };
+  
+  const handle2faMethodChange = (method: 'email' | 'authenticatorApp' | 'mobileNumber', checked: boolean) => {
+     setProfile(prev => {
+        if (!prev) return null;
+        return {
+            ...prev,
+            twoFactorAuthMethods: {
+                ...(prev.twoFactorAuthMethods || {}),
+                [method]: checked,
+            }
+        }
+     });
+  };
 
   const handleSaveChanges = async () => {
     if (!user || !profile) return;
     setIsSaving(true);
     try {
       const userDocRef = doc(db, 'users', user.uid);
+      
+      const { ...profileData } = profile;
+
       await updateDoc(userDocRef, {
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        userName: profile.userName,
-        mobileNumber: profile.mobileNumber,
-        countryCode: profile.countryCode,
-        enable2FA: profile.enable2FA,
+        ...profileData
       });
+
        toast({
         title: 'Profile Updated',
         description: 'Your profile has been saved successfully.',
@@ -225,6 +283,33 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                   </div>
                   <Switch id="enable2FA" checked={profile.enable2FA || false} onCheckedChange={(checked) => handleSwitchChange('enable2FA', checked)} />
                 </div>
+                
+                 {profile.enable2FA && (
+                    <Card className="p-4">
+                        <Label className="text-base font-medium">Enabled 2FA Methods</Label>
+                        <p className="text-sm text-muted-foreground mb-4">Select which methods users can choose from.</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <TwoFactorAuthOptionCard 
+                                icon={MailCheck}
+                                label="Email Authentication"
+                                checked={profile.twoFactorAuthMethods?.email || false}
+                                onCheckedChange={(checked) => handle2faMethodChange('email', checked)}
+                            />
+                            <TwoFactorAuthOptionCard 
+                                icon={Smartphone}
+                                label="Authenticator App"
+                                checked={profile.twoFactorAuthMethods?.authenticatorApp || false}
+                                onCheckedChange={(checked) => handle2faMethodChange('authenticatorApp', checked)}
+                            />
+                            <TwoFactorAuthOptionCard 
+                                icon={MessageSquare}
+                                label="Mobile Number (SMS)"
+                                checked={profile.twoFactorAuthMethods?.mobileNumber || false}
+                                onCheckedChange={(checked) => handle2faMethodChange('mobileNumber', checked)}
+                            />
+                        </div>
+                    </Card>
+                )}
              </div>
           </CardContent>
        </Card>
