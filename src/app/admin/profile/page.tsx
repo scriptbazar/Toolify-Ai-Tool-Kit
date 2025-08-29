@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -20,6 +19,10 @@ import {
   Briefcase,
   Edit,
   History,
+  Users,
+  UserPlus,
+  MessageSquare,
+  GitCommitVertical,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -49,7 +52,7 @@ interface UserProfile {
 }
 
 const StatCard = ({ title, value, percentage, icon: Icon }: { title: string, value: string, percentage: string, icon: React.ElementType }) => (
-    <Card>
+    <Card className="hover:bg-muted/50 transition-colors">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
             <Icon className="h-4 w-4 text-muted-foreground" />
@@ -198,10 +201,10 @@ export default function AdminProfilePage() {
             </TabsList>
             <TabsContent value="overview" className="mt-6">
                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <StatCard title="Total Volume" value="$4,523.89" percentage="+20.1% from last month" icon={DollarSign}/>
-                  <StatCard title="Successful Transactions" value="+235" percentage="+18.1% from last month" icon={CheckCheck}/>
-                  <StatCard title="Success Rate" value="98.5%" percentage="+1.2% from last month" icon={CheckCircle}/>
-                  <StatCard title="Last Transaction" value="2d ago" percentage="on 8/3/2025" icon={CalendarDays}/>
+                  <Link href="/admin/users?filter=all"><StatCard title="Total Users" value="10,532" percentage="+5.2% from last month" icon={Users}/></Link>
+                  <Link href="/admin/users?filter=lead"><StatCard title="Lead Users" value="1,234" percentage="+19% from last month" icon={UserPlus}/></Link>
+                  <Link href="/admin/users?filter=comment"><StatCard title="Comment Users" value="2" percentage="+2 from last month" icon={MessageSquare}/></Link>
+                  <Link href="/admin/referral-management"><StatCard title="Referral Users" value="573" percentage="+201 since last hour" icon={GitCommitVertical}/></Link>
                </div>
             </TabsContent>
             <TabsContent value="transactions">
