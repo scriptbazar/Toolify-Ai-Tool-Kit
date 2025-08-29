@@ -105,7 +105,7 @@ const initialTemplates = [
     title: 'New Feature Announcement',
     description: 'Inform users about a new feature or tool update.',
     subject: '🚀 New Feature Alert: {{featureName}} is Here!',
-    body: `Hi there,\n\nWe're constantly working to make ToolifyAI better, and we're excited to announce a brand new feature: {{featureName}}!\n\n{{featureDescription}}\n\nLog in now to give it a try and supercharge your workflow!\n\n<a href="{{featureLink}}" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Try it Now</a>\n\nCheers,\nThe ToolifyAI Team`,
+    body: `Hi {{name}},\n\nWe're constantly working to make ToolifyAI better, and we're excited to announce a brand new feature: {{featureName}}!\n\n{{featureDescription}}\n\nLog in now to give it a try and supercharge your workflow!\n\n<a href="{{featureLink}}" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Try it Now</a>\n\nCheers,\nThe ToolifyAI Team`,
   },
   {
     id: 'support-ticket',
