@@ -311,7 +311,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                  {profile.enable2FA && (
                     <Card className="p-4">
                         <Label className="text-base font-medium">Enabled 2FA Methods</Label>
-                        <p className="text-sm text-muted-foreground mb-4">Select the authentication methods you would like to enable.</p>
+                        <p className="text-sm text-muted-foreground mb-4">Click on a card to enable or disable a method. At least one method must be selected.</p>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <TwoFactorAuthOptionCard 
                                 icon={MailCheck}
@@ -332,6 +332,11 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                                 onCheckedChange={(checked) => handle2faMethodChange('mobileNumber', checked)}
                             />
                         </div>
+                        {profile.twoFactorAuthMethods?.mobileNumber && !profile.mobileNumber && (
+                          <div className="mt-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
+                            Please add and verify your mobile number in the 'Personal Information' section to use SMS-based authentication.
+                          </div>
+                        )}
                     </Card>
                 )}
              </div>
