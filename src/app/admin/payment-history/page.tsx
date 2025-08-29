@@ -216,8 +216,8 @@ export default function PaymentHistoryPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[250px]">Transaction ID</TableHead>
                   <TableHead>User</TableHead>
+                  <TableHead className="w-[250px]">Transaction ID</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Date</TableHead>
@@ -229,16 +229,7 @@ export default function PaymentHistoryPage() {
                 {filteredPayments.length > 0 ? (
                     filteredPayments.map((payment) => (
                         <TableRow key={payment.transactionId}>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-mono text-xs">
-                                    <span className="truncate">{payment.transactionId}</span>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(payment.transactionId)}>
-                                      <Copy className="h-3 w-3" />
-                                      <span className="sr-only">Copy Transaction ID</span>
-                                    </Button>
-                                </div>
-                            </TableCell>
-                            <TableCell>
+                             <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
                                         <AvatarImage src={payment.user.avatar} alt={payment.user.name} />
@@ -254,6 +245,15 @@ export default function PaymentHistoryPage() {
                                           </Button>
                                         </div>
                                     </div>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-2 font-mono text-xs">
+                                    <span className="truncate">{payment.transactionId}</span>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(payment.transactionId)}>
+                                      <Copy className="h-3 w-3" />
+                                      <span className="sr-only">Copy Transaction ID</span>
+                                    </Button>
                                 </div>
                             </TableCell>
                             <TableCell>{payment.plan}</TableCell>
@@ -298,20 +298,33 @@ export default function PaymentHistoryPage() {
                             </Avatar>
                             <div>
                                 <p>{selectedPayment.user.name}</p>
-                                <p className="text-sm text-muted-foreground">{selectedPayment.user.email}</p>
+                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                    {selectedPayment.user.email}
+                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(selectedPayment.user.email)}>
+                                        <Copy className="h-3 w-3" />
+                                        <span className="sr-only">Copy Email</span>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>
                      <Separator />
                     <div className="space-y-2">
                          <h4 className="font-semibold">Payment Details</h4>
-                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                            <span>Transaction ID:</span><span className="font-mono text-xs break-all">{selectedPayment.transactionId}</span>
-                            <span>Date:</span><span>{selectedPayment.date}</span>
-                            <span>Plan:</span><span>{selectedPayment.plan}</span>
-                            <span>Amount:</span><span className="font-medium">{selectedPayment.amount}</span>
-                            <span>Status:</span><span>{getStatusBadge(selectedPayment.status as FilterType)}</span>
-                            <span>Payment Method:</span><span>{selectedPayment.paymentMethod}</span>
+                         <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
+                            <span className="font-medium">Transaction ID:</span>
+                            <div className="flex items-center gap-1 font-mono text-xs break-all">
+                                {selectedPayment.transactionId}
+                                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(selectedPayment.transactionId)}>
+                                    <Copy className="h-3 w-3" />
+                                    <span className="sr-only">Copy Transaction ID</span>
+                                </Button>
+                            </div>
+                            <span className="font-medium">Date:</span><span>{selectedPayment.date}</span>
+                            <span className="font-medium">Plan:</span><span>{selectedPayment.plan}</span>
+                            <span className="font-medium">Amount:</span><span className="font-bold">{selectedPayment.amount}</span>
+                            <span className="font-medium">Status:</span><span>{getStatusBadge(selectedPayment.status as FilterType)}</span>
+                            <span className="font-medium">Payment Method:</span><span>{selectedPayment.paymentMethod}</span>
                          </div>
                     </div>
                 </div>
@@ -327,3 +340,4 @@ export default function PaymentHistoryPage() {
     </div>
   );
 }
+
