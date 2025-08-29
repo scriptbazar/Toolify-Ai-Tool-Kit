@@ -50,15 +50,20 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
 
               {tool.slug === 'case-converter' && (
                 <div className="prose prose-sm dark:prose-invert max-w-none mt-8 pt-6 border-t">
-                    <h2 className="text-2xl font-bold">Case Converter Description</h2>
-                    <p>The Case Converter tool is a versatile utility designed to make text manipulation effortless. Whether you're a writer, developer, or student, this tool helps you instantly switch your text between different case formats. With a simple click, you can convert your content to:</p>
+                    <h2 className="text-2xl font-bold">About the Case Converter Tool</h2>
+                    <p>Our Case Converter is a powerful and easy-to-use utility designed to make text manipulation effortless. Whether you are a writer, developer, designer, or student, this tool will help you instantly transform your text into the desired format with just a single click. It's built to save you time and streamline your workflow.</p>
+                    
+                    <h3 className="text-xl font-semibold mt-6">Key Features:</h3>
+                    <p>The tool supports a variety of text cases to suit your specific needs:</p>
                     <ul>
-                        <li><strong>Sentence case:</strong> Capitalizes the first letter of each sentence, perfect for standard writing.</li>
-                        <li><strong>lowercase:</strong> Converts all characters to their lowercase equivalents.</li>
-                        <li><strong>UPPERCASE:</strong> Transforms all characters into their uppercase form for emphasis or headlines.</li>
-                        <li><strong>Title Case:</strong> Capitalizes the first letter of every word, ideal for titles and headings.</li>
+                        <li><strong>Sentence case:</strong> Automatically capitalizes the first letter of each sentence. Ideal for standard writing and proofreading.</li>
+                        <li><strong>lowercase:</strong> Converts all characters in your text to their lowercase equivalents, perfect for standardizing data or text.</li>
+                        <li><strong>UPPERCASE:</strong> Transforms all characters into their uppercase form, which is great for creating headlines, titles, or for emphasis.</li>
+                        <li><strong>Title Case:</strong> Capitalizes the first letter of every word. This is particularly useful for formatting headlines, titles of articles, and headings in documents.</li>
                     </ul>
-                    <p>It also provides a real-time count of words and characters, helping you stay on top of your writing metrics. Simply type or paste your text, choose a conversion, and copy the result. It's that easy!</p>
+
+                    <h3 className="text-xl font-semibold mt-6">Why Use Our Tool?</h3>
+                    <p>In addition to the core conversion functions, the Case Converter provides a real-time count of words and characters, helping you stay on top of your writing metrics. The clean, intuitive interface ensures a seamless user experience—simply type or paste your text, choose a conversion, and copy the result. It's that easy!</p>
                 </div>
               )}
 
