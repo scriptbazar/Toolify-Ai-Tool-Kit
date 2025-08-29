@@ -41,6 +41,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 
 type FilterType = 'all' | 'completed' | 'pending' | 'failed';
@@ -167,6 +169,45 @@ export default function PaymentHistoryPage() {
     setSelectedPayment(payment);
     setIsDetailOpen(true);
   };
+  
+  const handleDownloadPdf = (payment: Payment) => {
+    const doc = new jsPDF();
+    
+    // Add header
+    doc.setFontSize(20);
+    doc.text('Invoice', 14, 22);
+    doc.setFontSize(12);
+    doc.text(`Transaction ID: ${payment.transactionId}`, 14, 32);
+    doc.text(`Date: ${new Date(payment.date).toLocaleDateString()}`, 14, 38);
+    
+    (doc as any).autoTable({
+        startY: 50,
+        head: [['User Information']],
+        body: [
+            [{ content: `Name: ${payment.user.name}\nEmail: ${payment.user.email}`, styles: { halign: 'left' }}],
+        ],
+        theme: 'striped',
+    });
+
+    (doc as any).autoTable({
+        startY: (doc as any).autoTable.previous.finalY + 10,
+        head: [['Payment Details']],
+        body: [
+            ['Plan', payment.plan],
+            ['Amount', payment.amount],
+            ['Status', payment.status],
+            ['Payment Method', payment.paymentMethod],
+        ],
+        theme: 'striped',
+        didParseCell: function (data: any) {
+            if (data.section === 'body' && data.column.index === 0) {
+                data.cell.styles.fontStyle = 'bold';
+            }
+        }
+    });
+
+    doc.save(`invoice-${payment.transactionId}.pdf`);
+  };
 
   return (
     <div className="space-y-6">
@@ -216,8 +257,8 @@ export default function PaymentHistoryPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[250px]">Transaction ID</TableHead>
                   <TableHead>User</TableHead>
+                  <TableHead className="w-[250px]">Transaction ID</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Date</TableHead>
@@ -229,15 +270,6 @@ export default function PaymentHistoryPage() {
                 {filteredPayments.length > 0 ? (
                     filteredPayments.map((payment) => (
                         <TableRow key={payment.transactionId}>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-mono text-xs">
-                                    <span className="truncate">{payment.transactionId}</span>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(payment.transactionId)}>
-                                      <Copy className="h-3 w-3" />
-                                      <span className="sr-only">Copy Transaction ID</span>
-                                    </Button>
-                                </div>
-                            </TableCell>
                              <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
@@ -254,6 +286,15 @@ export default function PaymentHistoryPage() {
                                           </Button>
                                         </div>
                                     </div>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-2 font-mono text-xs">
+                                    <span className="truncate">{payment.transactionId}</span>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(payment.transactionId)}>
+                                      <Copy className="h-3 w-3" />
+                                      <span className="sr-only">Copy Transaction ID</span>
+                                    </Button>
                                 </div>
                             </TableCell>
                             <TableCell>{payment.plan}</TableCell>
@@ -330,7 +371,7 @@ export default function PaymentHistoryPage() {
                 </div>
             )}
             <DialogFooter>
-                <Button variant="secondary" onClick={() => toast({title: "Coming soon!", description: "PDF generation is not yet implemented."})}>
+                <Button variant="secondary" onClick={() => selectedPayment && handleDownloadPdf(selectedPayment)}>
                     <Download className="mr-2 h-4 w-4" />
                     Download PDF
                 </Button>
