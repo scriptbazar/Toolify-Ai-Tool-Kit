@@ -8,14 +8,16 @@ import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, FileText, Trash2 } from 'lucide-react';
+import { Save, Loader2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { PageSettings, CustomPage } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { cn } from '@/lib/utils';
+
 
 const PageManagementFormSchema = z.object({
   pages: z.array(z.object({
@@ -39,6 +41,7 @@ const defaultPages: Omit<CustomPage, 'content'>[] = [
 export default function PageManagementPage() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
   const form = useForm<PageManagementFormValues>({
@@ -46,10 +49,10 @@ export default function PageManagementPage() {
     defaultValues: { pages: [] }
   });
 
-  const { fields, update } = useFieldArray({
+  const { fields } = useFieldArray({
     control: form.control,
     name: "pages",
-    keyName: "fieldId" // to avoid conflict with `id` field
+    keyName: "fieldId"
   });
 
   useEffect(() => {
@@ -100,6 +103,10 @@ export default function PageManagementPage() {
     }
   };
 
+  const handleToggle = (id: string) => {
+    setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -132,42 +139,64 @@ export default function PageManagementPage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {fields.map((field, index) => (
-            <Card key={field.fieldId}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <FileText />
-                    {defaultPages.find(p => p.id === field.id)?.title || 'Page'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name={`pages.${index}.title`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Page Title</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g., About Our Company" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`pages.${index}.content`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Page Content</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} placeholder="Enter the page content here. HTML is supported." className="min-h-[200px] font-mono" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
+            <Collapsible
+              key={field.fieldId}
+              open={openSections[field.id]}
+              onOpenChange={() => handleToggle(field.id)}
+              className="space-y-2"
+            >
+              <Card>
+                <CollapsibleTrigger asChild>
+                  <div className="flex w-full cursor-pointer items-center justify-between p-4">
+                    <div className="flex items-center gap-3">
+                       <FileText className="h-5 w-5" />
+                       <div>
+                         <CardTitle>{field.title}</CardTitle>
+                         <CardDescription className="mt-1">
+                           Manage the content for the /{field.slug} page.
+                         </CardDescription>
+                       </div>
+                    </div>
+                    <Button variant="ghost" size="icon">
+                      {openSections[field.id] ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                      <span className="sr-only">Toggle</span>
+                    </Button>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="border-t pt-6">
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`pages.${index}.title`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Page Title</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="e.g., About Our Company" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`pages.${index}.content`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Page Content</FormLabel>
+                            <FormControl>
+                              <Textarea {...field} placeholder="Enter the page content here. HTML is supported." className="min-h-[200px] font-mono" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           ))}
           <div className="flex justify-end pt-6">
             <Button type="submit" disabled={isSaving}>
