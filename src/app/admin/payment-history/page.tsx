@@ -35,7 +35,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDesc as DialogDescription,
+  DialogDesc,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Badge } from '@/components/ui/badge';
@@ -428,7 +428,7 @@ export default function PaymentHistoryPage() {
         <DialogContent className="sm:max-w-md">
             <DialogHeader>
                 <DialogTitle>Transaction Details</DialogTitle>
-                <DialogDescription>A detailed view of the transaction.</DialogDescription>
+                <DialogDesc>A detailed view of the transaction.</DialogDesc>
             </DialogHeader>
             {selectedPayment && (
                 <div className="space-y-4 py-4">
@@ -487,7 +487,7 @@ export default function PaymentHistoryPage() {
           <DialogContent>
               <DialogHeader>
                   <DialogTitle>Add Custom Transaction</DialogTitle>
-                  <DialogDescription>Manually add a new transaction record to the history.</DialogDescription>
+                  <DialogDesc>Manually add a new transaction record to the history.</DialogDesc>
               </DialogHeader>
               <form onSubmit={handleAddTransaction} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
