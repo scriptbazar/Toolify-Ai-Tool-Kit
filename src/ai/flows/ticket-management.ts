@@ -7,67 +7,16 @@
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
-
-
-// Schemas
-const TicketMessageSchema = z.object({
-  author: z.enum(['user', 'admin']),
-  name: z.string(),
-  avatar: z.string().url(),
-  text: z.string(),
-  timestamp: z.string().datetime({ offset: true }),
-});
-
-export const CreateTicketInputSchema = z.object({
-  ticketId: z.string(),
-  subject: z.string(),
-  priority: z.enum(['Low', 'Medium', 'High']),
-  message: z.string(),
-  userId: z.string(),
-  userName: z.string(),
-  userEmail: z.string().email(),
-  expiresAt: z.string().datetime({ offset: true }),
-});
-
-export const TicketSchema = z.object({
-  id: z.string(),
-  subject: z.string(),
-  priority: z.enum(['Low', 'Medium', 'High']),
-  status: z.enum(['Open', 'In Progress', 'Closed']),
-  userId: z.string(),
-  user: z.object({
-    name: z.string(),
-    email: z.string().email(),
-    avatar: z.string().url(),
-  }),
-  createdAt: z.string().datetime({ offset: true }),
-  lastUpdated: z.string().datetime({ offset: true }),
-  expiresAt: z.string().datetime({ offset: true }),
-  messages: z.array(TicketMessageSchema),
-});
-
-export const AddReplyInputSchema = z.object({
-    ticketId: z.string(),
-    message: TicketMessageSchema,
-});
-
-export const UpdateTicketDetailsInputSchema = z.object({
-    ticketId: z.string(),
-    status: z.enum(['Open', 'In Progress', 'Closed']).optional(),
-    priority: z.enum(['Low', 'Medium', 'High']).optional(),
-});
-
-
-// Types
-export type Ticket = z.infer<typeof TicketSchema>;
-export type TicketMessage = z.infer<typeof TicketMessageSchema>;
-export type CreateTicketInput = z.infer<typeof CreateTicketInputSchema>;
-export type AddReplyInput = z.infer<typeof AddReplyInputSchema>;
-export type UpdateTicketDetailsInput = z.infer<typeof UpdateTicketDetailsInputSchema>;
-export type TicketStatus = Ticket['status'];
-export type TicketPriority = Ticket['priority'];
-
-const TICKETS_COLLECTION = 'tickets';
+import { 
+    CreateTicketInputSchema, 
+    AddReplyInputSchema, 
+    UpdateTicketDetailsInputSchema,
+    type Ticket,
+    type TicketMessage,
+    type CreateTicketInput,
+    type AddReplyInput,
+    type UpdateTicketDetailsInput
+} from './ticket-management.types';
 
 
 /**
@@ -76,7 +25,7 @@ const TICKETS_COLLECTION = 'tickets';
 export async function createTicket(input: CreateTicketInput): Promise<{ success: boolean; message: string }> {
     try {
         const { ticketId, subject, priority, message, userId, userName, userEmail, expiresAt } = CreateTicketInputSchema.parse(input);
-        const ticketRef = adminDb.collection(TICKETS_COLLECTION).doc(ticketId);
+        const ticketRef = adminDb.collection('tickets').doc(ticketId);
         
         const initialMessage: TicketMessage = {
             author: 'user',
@@ -127,7 +76,7 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
 export async function getTickets(): Promise<Ticket[]> {
     try {
         const now = new Date();
-        const ticketsRef = adminDb.collection(TICKETS_COLLECTION);
+        const ticketsRef = adminDb.collection('tickets');
 
         // Delete expired tickets
         const expiredQuery = ticketsRef.where('expiresAt', '<=', now);
@@ -164,7 +113,7 @@ export async function getTickets(): Promise<Ticket[]> {
 export async function getTicketsByUser(userId: string): Promise<Ticket[]> {
     if (!userId) return [];
     try {
-        const snapshot = await adminDb.collection(TICKETS_COLLECTION)
+        const snapshot = await adminDb.collection('tickets')
             .where('userId', '==', userId)
             .orderBy('lastUpdated', 'desc')
             .get();
@@ -193,7 +142,7 @@ export async function getTicketsByUser(userId: string): Promise<Ticket[]> {
 export async function addTicketReply(input: AddReplyInput): Promise<{ success: boolean; message: string }> {
     try {
         const { ticketId, message } = AddReplyInputSchema.parse(input);
-        const ticketRef = adminDb.collection(TICKETS_COLLECTION).doc(ticketId);
+        const ticketRef = adminDb.collection('tickets').doc(ticketId);
 
         await ticketRef.update({
             messages: FieldValue.arrayUnion(message),
@@ -210,7 +159,7 @@ export async function addTicketReply(input: AddReplyInput): Promise<{ success: b
 /**
  * Updates the status or priority of a ticket.
  */
-export async function updateTicketDetails(input: Partial<UpdateTicketDetailsInput>): Promise<{ success: boolean; message: string }> {
+export async function updateTicketDetails(input: UpdateTicketDetailsInput): Promise<{ success: boolean; message: string }> {
    try {
         const { ticketId, ...updates } = UpdateTicketDetailsInputSchema.parse(input);
 
@@ -218,7 +167,7 @@ export async function updateTicketDetails(input: Partial<UpdateTicketDetailsInpu
             return { success: false, message: 'Ticket ID and at least one update field are required.' };
         }
 
-        const ticketRef = adminDb.collection(TICKETS_COLLECTION).doc(ticketId);
+        const ticketRef = adminDb.collection('tickets').doc(ticketId);
         
         const updatePayload: { [key: string]: any } = { ...updates, lastUpdated: FieldValue.serverTimestamp() };
 

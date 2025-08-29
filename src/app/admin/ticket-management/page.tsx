@@ -17,6 +17,7 @@ import {
   Loader2,
   Save,
   User,
+  X,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +29,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getTickets, addTicketReply, updateTicketDetails, type Ticket, type TicketMessage, TicketPriority, TicketStatus } from '@/ai/flows/ticket-management';
+import { getTickets, addTicketReply, updateTicketDetails } from '@/ai/flows/ticket-management';
+import type { Ticket, TicketMessage, TicketPriority, TicketStatus } from '@/ai/flows/ticket-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
@@ -115,12 +117,15 @@ export default function TicketManagementPage() {
 
         await addTicketReply({ ticketId: selectedTicket.id, message: newReply });
         
-        const updatedTicket = { ...selectedTicket, messages: [...selectedTicket.messages, newReply] };
+        let updatedTicket = { ...selectedTicket, messages: [...selectedTicket.messages, newReply] };
 
-        // If ticket is open, move it to in-progress
+        // If ticket is open, move it to in-progress and update its lastUpdated time
         if (updatedTicket.status === 'Open') {
           updatedTicket.status = 'In Progress';
-          await handleTicketUpdate(updatedTicket.id, 'status', 'In Progress');
+          updatedTicket.lastUpdated = new Date().toISOString();
+          await handleTicketUpdate(updatedTicket.id, { status: 'In Progress' });
+        } else {
+            updatedTicket.lastUpdated = new Date().toISOString();
         }
 
         setTickets(prev => prev.map(t => t.id === selectedTicket.id ? updatedTicket : t));
@@ -134,23 +139,29 @@ export default function TicketManagementPage() {
     }
   };
   
-  const handleTicketUpdate = async (ticketId: string, field: 'status' | 'priority', value: TicketStatus | TicketPriority) => {
+  const handleTicketUpdate = async (ticketId: string, updates: Partial<{status: TicketStatus, priority: TicketPriority}>) => {
     const originalTickets = [...tickets];
-    const updatedTickets = tickets.map(t => t.id === ticketId ? {...t, [field]: value} : t);
+    const updatedTickets = tickets.map(t => t.id === ticketId ? {...t, ...updates, lastUpdated: new Date().toISOString()} : t);
     setTickets(updatedTickets);
 
     if (selectedTicket && selectedTicket.id === ticketId) {
-        setSelectedTicket(prev => prev ? {...prev, [field]: value} : null);
+        setSelectedTicket(prev => prev ? {...prev, ...updates} : null);
     }
 
     try {
-        await updateTicketDetails({ ticketId, [field]: value });
+        await updateTicketDetails({ ticketId, ...updates });
         toast({ title: 'Ticket Updated', description: 'Changes have been saved.' });
     } catch (error: any) {
         setTickets(originalTickets); // Revert on error
         toast({ title: 'Update Failed', description: error.message, variant: 'destructive' });
     }
   }
+
+  const handleSaveChanges = async () => {
+    if (!selectedTicket) return;
+    await handleTicketUpdate(selectedTicket.id, { status: selectedTicket.status, priority: selectedTicket.priority });
+  };
+
 
   return (
     <div className="space-y-6">
@@ -233,7 +244,7 @@ export default function TicketManagementPage() {
                                   <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
                                     {selectedTicket && (
                                        <>
-                                        <DialogHeader className="p-6 pb-0">
+                                        <DialogHeader className="p-6 pb-4">
                                             <DialogTitle className="flex items-center gap-2">
                                                 <span className="text-muted-foreground">[{selectedTicket.id}]</span> 
                                                 {selectedTicket.subject}
@@ -242,39 +253,37 @@ export default function TicketManagementPage() {
                                                 Opened by {selectedTicket.user.name}
                                             </DialogDescription>
                                         </DialogHeader>
-                                        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 px-6 py-4 overflow-y-hidden">
+                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-6 pb-6 overflow-hidden flex-1">
                                             <div className="lg:col-span-2 flex flex-col space-y-4 h-full">
-                                              <Card className="flex-1 flex flex-col">
-                                                  <CardHeader>
-                                                      <CardTitle>Conversation</CardTitle>
-                                                  </CardHeader>
-                                                  <ScrollArea className="flex-grow px-6">
-                                                      <CardContent className="space-y-6">
-                                                          {selectedTicket.messages.map((message, index) => (
-                                                          <div key={index} className={cn("flex items-start gap-4", message.author === 'admin' && 'flex-row-reverse')}>
-                                                              <Avatar>
-                                                                  <AvatarImage src={message.avatar} alt={message.name} />
-                                                                  <AvatarFallback>{message.name.charAt(0)}</AvatarFallback>
-                                                              </Avatar>
-                                                              <div className={cn("rounded-lg p-4 max-w-xl", message.author === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                                                                  <p className="text-sm whitespace-pre-wrap">{message.text}</p>
-                                                                  <p className="text-xs text-right mt-2 opacity-70">{new Date(message.timestamp).toLocaleString()}</p>
+                                                <Card className="flex-1 flex flex-col">
+                                                    <CardHeader><CardTitle>Conversation</CardTitle></CardHeader>
+                                                    <CardContent className="p-0 flex-1">
+                                                        <ScrollArea className="h-full px-6">
+                                                          <div className="space-y-6 pb-6">
+                                                              {selectedTicket.messages.map((message, index) => (
+                                                              <div key={index} className={cn("flex items-start gap-4", message.author === 'admin' && 'flex-row-reverse')}>
+                                                                  <Avatar>
+                                                                      <AvatarImage src={message.avatar} alt={message.name} />
+                                                                      <AvatarFallback>{message.name.charAt(0)}</AvatarFallback>
+                                                                  </Avatar>
+                                                                  <div className={cn("rounded-lg p-4 max-w-xl", message.author === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                      <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                                                                      <p className="text-xs text-right mt-2 opacity-70">{new Date(message.timestamp).toLocaleString()}</p>
+                                                                  </div>
                                                               </div>
+                                                              ))}
                                                           </div>
-                                                          ))}
-                                                      </CardContent>
-                                                  </ScrollArea>
-                                              </Card>
+                                                        </ScrollArea>
+                                                    </CardContent>
+                                                </Card>
                                             </div>
-                                            <div className="lg:col-span-1 flex flex-col space-y-6 h-full overflow-y-hidden">
+                                            <div className="lg:col-span-1 flex flex-col space-y-6">
                                                 <Card>
-                                                    <CardHeader>
-                                                        <CardTitle>Ticket Details</CardTitle>
-                                                    </CardHeader>
+                                                    <CardHeader><CardTitle>Ticket Details</CardTitle></CardHeader>
                                                     <CardContent className="space-y-4">
                                                         <div className="flex items-center justify-between">
                                                             <span className="text-muted-foreground">Status</span>
-                                                            <Select value={selectedTicket.status} onValueChange={(value: TicketStatus) => handleTicketUpdate(selectedTicket.id, 'status', value)}>
+                                                            <Select value={selectedTicket.status} onValueChange={(value: TicketStatus) => setSelectedTicket(t => t ? {...t, status: value} : null)}>
                                                                 <SelectTrigger className="w-[180px]">
                                                                     <SelectValue placeholder="Set status" />
                                                                 </SelectTrigger>
@@ -287,7 +296,7 @@ export default function TicketManagementPage() {
                                                         </div>
                                                         <div className="flex items-center justify-between">
                                                             <span className="text-muted-foreground">Priority</span>
-                                                            <Select value={selectedTicket.priority} onValueChange={(value: TicketPriority) => handleTicketUpdate(selectedTicket.id, 'priority', value)}>
+                                                            <Select value={selectedTicket.priority} onValueChange={(value: TicketPriority) => setSelectedTicket(t => t ? {...t, priority: value} : null)}>
                                                                 <SelectTrigger className="w-[180px]">
                                                                     <SelectValue placeholder="Set priority" />
                                                                 </SelectTrigger>
@@ -298,12 +307,13 @@ export default function TicketManagementPage() {
                                                                 </SelectContent>
                                                             </Select>
                                                         </div>
+                                                          <DialogClose asChild>
+                                                            <Button className="w-full" onClick={handleSaveChanges}><Save className="mr-2 h-4 w-4" />Save Changes</Button>
+                                                          </DialogClose>
                                                     </CardContent>
                                                 </Card>
                                                 <Card>
-                                                    <CardHeader>
-                                                        <CardTitle>User Information</CardTitle>
-                                                    </CardHeader>
+                                                    <CardHeader><CardTitle>User Information</CardTitle></CardHeader>
                                                     <CardContent className="space-y-2">
                                                     <div className="flex items-center gap-3">
                                                         <Avatar>
@@ -322,20 +332,18 @@ export default function TicketManagementPage() {
                                                         </Button>
                                                     </CardContent>
                                                 </Card>
-                                                <Card className="flex flex-col">
-                                                    <CardHeader>
-                                                        <CardTitle>Add a Reply</CardTitle>
-                                                    </CardHeader>
-                                                    <CardContent className="flex-grow">
-                                                        <form onSubmit={handleReply} className="h-full flex flex-col">
+                                               <Card className="flex flex-col flex-1">
+                                                    <CardHeader><CardTitle>Add a Reply</CardTitle></CardHeader>
+                                                    <CardContent className="flex-1 flex flex-col">
+                                                        <form onSubmit={handleReply} className="flex-1 flex flex-col gap-2">
                                                             <Textarea 
                                                                 placeholder="Type your reply here..." 
-                                                                className="flex-grow min-h-[100px]"
+                                                                className="flex-1"
                                                                 value={replyText}
                                                                 onChange={(e) => setReplyText(e.target.value)}
                                                             />
-                                                            <div className="flex justify-between items-center gap-2 mt-2">
-                                                                <Button type="button" variant="outline"><Paperclip className="mr-2 h-4 w-4"/>Attach</Button>
+                                                            <div className="flex justify-between items-center gap-2">
+                                                                <Button type="button" variant="outline" size="icon"><Paperclip className="h-4 w-4"/></Button>
                                                                 <Button type="submit" disabled={isReplying || !replyText.trim()}>
                                                                     {isReplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
                                                                     Reply
