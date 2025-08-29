@@ -25,6 +25,7 @@ import {
   CalendarClock,
   Wand2,
   Loader2,
+  ThumbsUp,
 } from 'lucide-react';
 import {
   Dialog,
@@ -65,6 +66,14 @@ const initialTemplates = [
     description: 'Sent to new users to verify their email address.',
     subject: 'Verify Your Email Address for ToolifyAI',
     body: `Hi {{name}},\n\nPlease verify your email address to complete your registration and secure your account. Click the button below:\n\n<a href="{{verificationLink}}" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Verify Email Address</a>\n\nThis link will expire in 24 hours. If you did not sign up for ToolifyAI, please disregard this email.\n\nThanks,\nThe ToolifyAI Team`,
+  },
+    {
+    id: 'review-request',
+    icon: ThumbsUp,
+    title: 'Review Request',
+    description: 'Sent to users 7 days after signup to ask for a review.',
+    subject: 'Got a moment? Share your thoughts on ToolifyAI!',
+    body: `Hi {{name}},\n\nWe hope you're enjoying your first week with ToolifyAI! We're always working to improve our tools and would love to hear about your experience.\n\nIf you have a favorite tool or any feedback for us, please consider leaving a review. It only takes a minute and helps us immensely!\n\n<a href="{{reviewLink}}" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Leave a Review</a>\n\nYour feedback is incredibly valuable to us.\n\nBest,\nThe ToolifyAI Team`,
   },
   {
     id: 'password-changed',
