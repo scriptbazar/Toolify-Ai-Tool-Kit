@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { Logo } from './Logo';
 
 const topTools = [
-  { name: 'Age Calculator', href: '#' },
+  { name: 'Case Converter', href: '/case-converter' },
+  { name: 'Word Counter', href: '/word-counter' },
+  { name: 'Lorem Ipsum Generator', href: '/lorem-ipsum-generator' },
   { name: 'Password Generator', href: '#' },
   { name: 'JSON Formatter', href: '/json-formatter' },
   { name: 'Image Converter', href: '/image-converter' },

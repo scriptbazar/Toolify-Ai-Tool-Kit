@@ -1,5 +1,6 @@
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CaseConverter } from '@/components/tools/CaseConverter';
 import { tools } from '@/lib/constants';
 import { notFound } from 'next/navigation';
 
@@ -9,12 +10,18 @@ export async function generateStaticParams() {
   }));
 }
 
+const toolComponents: { [key: string]: React.ComponentType } = {
+  'case-converter': CaseConverter,
+};
+
 export default function ToolPage({ params }: { params: { slug: string } }) {
   const tool = tools.find((t) => t.slug === params.slug);
 
   if (!tool) {
     notFound();
   }
+
+  const ToolComponent = toolComponents[tool.slug];
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -29,10 +36,14 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-6">{tool.description}</p>
-              <div className="min-h-[300px] flex items-center justify-center rounded-lg bg-muted/50 p-8">
-                <p className="text-lg text-muted-foreground">
-                  Tool interface coming soon!
-                </p>
+              <div className="min-h-[300px] rounded-lg bg-muted/50 p-8">
+                {ToolComponent ? <ToolComponent /> : (
+                  <div className="flex h-full items-center justify-center">
+                    <p className="text-lg text-muted-foreground">
+                      Tool interface coming soon!
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
