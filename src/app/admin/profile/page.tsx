@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   Copy,
   Mail,
-  Smartphone,
   User as UserIcon,
   Phone,
   CheckCircle,
@@ -154,7 +153,6 @@ export default function AdminProfilePage() {
         <div className="mt-4 flex flex-wrap gap-2">
             <Badge variant="outline" className="p-2 justify-center bg-green-100 text-green-800 border-green-200"><CheckCircle className="h-4 w-4 mr-2"/>Active</Badge>
             <Badge variant="outline" className="p-2 justify-center"><UserCog className="h-4 w-4 mr-2"/>{profile.role}</Badge>
-            <Badge variant="outline" className="p-2 justify-center bg-red-100 text-red-800 border-red-200"><ShieldCheck className="h-4 w-4 mr-2"/>KYC: Not Started</Badge>
             <Badge variant="outline" className="p-2 justify-center"><CalendarDays className="h-4 w-4 mr-2"/>Joined {new Date(profile.createdAt.seconds * 1000).toLocaleDateString()}</Badge>
         </div>
         </CardContent>
