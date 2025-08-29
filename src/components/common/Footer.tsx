@@ -9,8 +9,6 @@ const topTools = [
   { name: 'Lorem Ipsum Generator', href: '/lorem-ipsum-generator' },
   { name: 'Password Generator', href: '#' },
   { name: 'JSON Formatter', href: '/json-formatter' },
-  { name: 'Image Converter', href: '/image-converter' },
-  { name: 'QR Code Generator', href: '#' },
 ];
 
 const quickLinks = [
