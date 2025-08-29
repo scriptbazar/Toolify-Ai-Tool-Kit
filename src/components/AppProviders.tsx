@@ -1,4 +1,3 @@
-
 'use server';
 
 import { headers } from 'next/headers';
@@ -6,7 +5,6 @@ import { ChatWidget } from './common/ChatWidget';
 import { cn } from '@/lib/utils';
 import Header from './common/Header';
 import Footer from './common/Footer';
-import type { GeneralSettings } from '@/ai/flows/settings-management.types';
 
 export async function AppProviders({ children }: { children: React.ReactNode }) {
   const pathname = headers().get('x-next-pathname') || '';
