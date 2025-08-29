@@ -27,13 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -198,8 +191,6 @@ export default function AdminAnalyticsPage() {
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'activity', label: 'Activity Log' },
-    { id: 'audience', label: 'Audience' },
-    { id: 'conversions', label: 'Conversions' },
   ];
 
   const renderOverview = () => {
@@ -427,26 +418,6 @@ export default function AdminAnalyticsPage() {
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'activity' && renderActivityLog()}
 
-        <Dialog
-          open={activeTab === 'audience' || activeTab === 'conversions'}
-          onOpenChange={(isOpen) => !isOpen && setActiveTab('overview')}
-        >
-           <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Feature Coming Soon</DialogTitle>
-              <DialogDescription>
-                This analytics section is under construction. Check back later for more
-                insights!
-              </DialogDescription>
-            </DialogHeader>
-            <div className="min-h-[200px] flex items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8">
-              <div className="text-center">
-                <Construction className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <p className="text-lg text-muted-foreground">More detailed analytics are coming soon!</p>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
