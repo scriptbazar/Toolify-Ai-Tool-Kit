@@ -2,7 +2,6 @@
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from './Logo';
-import type { GeneralSettings } from '@/ai/flows/settings-management.types';
 
 const topTools = [
   { name: 'Age Calculator', href: '#' },
@@ -36,14 +35,15 @@ const bestHostings = [
     { name: 'Hostwinds', href: '#' },
 ];
 
-export default function Footer({ settings }: { settings?: GeneralSettings }) {
-  const copyrightText = settings?.copyrightText?.replace('{year}', new Date().getFullYear().toString()) || `© ${new Date().getFullYear()} ToolifyAI. All rights reserved.`;
+export default function Footer() {
+  const copyrightText = `© ${new Date().getFullYear()} ToolifyAI. All rights reserved.`;
 
+  // Example social links. In a real app, these would come from a CMS or settings.
   const socialLinks = [
-    { name: 'Facebook', href: settings?.socialLinks?.facebook, icon: Facebook },
-    { name: 'Twitter', href: settings?.socialLinks?.twitter, icon: Twitter },
-    { name: 'Instagram', href: settings?.socialLinks?.instagram, icon: Instagram },
-    { name: 'YouTube', href: settings?.socialLinks?.youtube, icon: Youtube },
+    { name: 'Facebook', href: '#', icon: Facebook },
+    { name: 'Twitter', href: '#', icon: Twitter },
+    { name: 'Instagram', href: '#', icon: Instagram },
+    { name: 'YouTube', href: '#', icon: Youtube },
   ].filter(link => link.href);
 
   return (
@@ -53,10 +53,10 @@ export default function Footer({ settings }: { settings?: GeneralSettings }) {
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <Logo />
-              <span className="font-bold text-xl">{settings?.siteTitle || 'ToolifyAI'}</span>
+              <span className="font-bold text-xl">ToolifyAI</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-6">
-              {settings?.siteDescription || 'ToolifyAI is your go-to hub for powerful, easy-to-use online utilities that simplify everyday tasks. Whether you need converters, analyzers, or creative tools, ToolifyAI connects you to everything in one place.'}
+              ToolifyAI is your go-to hub for powerful, easy-to-use online utilities that simplify everyday tasks. Whether you need converters, analyzers, or creative tools, ToolifyAI connects you to everything in one place.
             </p>
             <h3 className="font-semibold mb-4">Follow Us</h3>
             <div className="flex space-x-3">

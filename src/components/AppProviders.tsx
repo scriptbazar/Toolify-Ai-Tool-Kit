@@ -8,7 +8,7 @@ import Header from './common/Header';
 import Footer from './common/Footer';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
 
-export async function AppProviders({ children, generalSettings }: { children: React.ReactNode, generalSettings?: GeneralSettings }) {
+export async function AppProviders({ children }: { children: React.ReactNode }) {
   const pathname = headers().get('x-next-pathname') || '';
   
   const authRoutes = ['/login', '/signup', '/admin/login', '/forgot-password'];
@@ -38,7 +38,7 @@ export async function AppProviders({ children, generalSettings }: { children: Re
       {showPublicLayout && <Header />}
       <main className="flex-1">{children}</main>
       {!isAdminRoute && <ChatWidget />}
-      {showPublicLayout && <Footer settings={generalSettings} />}
+      {showPublicLayout && <Footer />}
     </div>
   );
 }
