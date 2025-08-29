@@ -29,8 +29,7 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
 
   useEffect(() => {
     async function fetchData() {
-      setLoading(true);
-
+      // No need to set loading to true here as it's set initially
       try {
         const settings = await getSettings();
         setAdSettings(settings.advertisement || null);
@@ -47,11 +46,11 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
             if (userDocSnap.exists()) {
               setUserData(userDocSnap.data() as UserData);
             } else {
-              setUserData({ plan: 'Free', role: 'user' });
+              setUserData({ plan: 'Free', role: 'user' }); // Default if no doc
             }
           } catch (error) {
             console.error("Failed to fetch user data:", error);
-            setUserData({ plan: 'Free', role: 'user' });
+            setUserData({ plan: 'Free', role: 'user' }); // Default on error
           }
         } else {
           setUser(null);
@@ -74,22 +73,26 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
   const showAdsToPro = adSettings?.showAdsForPro ?? false;
   const adType = adSettings?.adType ?? 'none';
   
-  // Rule 1: Globally disabled ads show nothing.
+  // Rule 1: Ads are globally disabled.
   if (adType === 'none') {
     return null;
   }
   
   // Rule 2: Pro users don't see ads unless specifically enabled.
-  if (isProUser && !showAdsToPro) {
+  // Admins always see placeholders, so we bypass this check for them.
+  if (isProUser && !showAdsToPro && !isAdmin) {
       return null;
   }
   
-  // Rule 3: For 'manual' ad type, process the slot.
+  // Rule 3: Process manual ad slots.
   if (adType === 'manual' && adSlotId) {
     const slot = adSettings?.manualAdSlots?.find(s => s.id === adSlotId);
     
-    // If the slot has code, display it for everyone (respecting pro user rules).
+    // Case 3a: The slot has ad code.
     if (slot?.code) {
+      // If user is pro and ads are disabled for them, hide it. Admins still see it.
+      if(isProUser && !showAdsToPro && !isAdmin) return null;
+      
       return (
         <div
           className={cn('ad-slot-container', className)}
@@ -98,7 +101,7 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
       );
     }
     
-    // If the slot is defined but empty AND the user is an admin, show a placeholder.
+    // Case 3b: The slot is empty, and the user is an admin. Show the placeholder.
     if (slot && !slot.code && isAdmin) {
        return (
           <div
@@ -115,13 +118,13 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
         );
     }
 
-    // If the slot is empty and user is not admin, or slot is not defined, show nothing.
+    // For all other cases (slot not found, or user is not admin and slot is empty), show nothing.
     return null;
   }
 
-  // Fallback for non-specific ad slots or other conditions.
-  // This can also serve as a placeholder for admins if no slot ID is passed.
-  if (isAdmin) {
+  // Fallback for auto-ads, which are handled by a script in the header.
+  // This can show a general placeholder for admins if no specific slot ID is relevant.
+  if (adType === 'auto' && isAdmin) {
     return (
       <div
         className={cn(
@@ -131,7 +134,7 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
       >
         <div className="flex items-center gap-2 text-muted-foreground">
           <Megaphone className="h-5 w-5" />
-          <p className="text-sm font-medium">General Advertisement Area</p>
+          <p className="text-sm font-medium">Auto Ads Enabled</p>
         </div>
       </div>
     );
