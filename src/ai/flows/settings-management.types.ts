@@ -85,11 +85,75 @@ export const PlanSettingsSchema = z.object({
 });
 export type PlanSettings = z.infer<typeof PlanSettingsSchema>;
 
+export const StripeSettingsSchema = z.object({
+  isEnabled: z.boolean().default(false),
+  name: z.string().default('Stripe'),
+  publishableKey: z.string().optional(),
+  secretKey: z.string().optional(),
+});
+export type StripeSettings = z.infer<typeof StripeSettingsSchema>;
+
+export const PaypalSettingsSchema = z.object({
+  isEnabled: z.boolean().default(false),
+  name: z.string().default('PayPal'),
+  clientId: z.string().optional(),
+  clientSecret: z.string().optional(),
+  mode: z.enum(['sandbox', 'live']).default('sandbox'),
+});
+export type PaypalSettings = z.infer<typeof PaypalSettingsSchema>;
+
+export const RazorpaySettingsSchema = z.object({
+  isEnabled: z.boolean().default(false),
+  name: z.string().default('Razorpay'),
+  keyId: z.string().optional(),
+  keySecret: z.string().optional(),
+});
+export type RazorpaySettings = z.infer<typeof RazorpaySettingsSchema>;
+
+export const PayUSettingsSchema = z.object({
+  isEnabled: z.boolean().default(false),
+  name: z.string().default('PayU'),
+  merchantKey: z.string().optional(),
+  merchantSalt: z.string().optional(),
+  mode: z.enum(['test', 'live']).default('test'),
+});
+export type PayUSettings = z.infer<typeof PayUSettingsSchema>;
+
+export const CashfreeSettingsSchema = z.object({
+  isEnabled: z.boolean().default(false),
+  name: z.string().default('Cashfree'),
+  appId: z.string().optional(),
+  secretKey: z.string().optional(),
+  mode: z.enum(['sandbox', 'production']).default('sandbox'),
+});
+export type CashfreeSettings = z.infer<typeof CashfreeSettingsSchema>;
+
+export const PhonePeSettingsSchema = z.object({
+  isEnabled: z.boolean().default(false),
+  name: z.string().default('PhonePe'),
+  merchantId: z.string().optional(),
+  merchantUserId: z.string().optional(),
+  saltKey: z.string().optional(),
+  saltIndex: z.string().optional(),
+  mode: z.enum(['uat', 'production']).default('uat'),
+});
+export type PhonePeSettings = z.infer<typeof PhonePeSettingsSchema>;
+
+export const PaymentSettingsSchema = z.object({
+  stripe: StripeSettingsSchema.optional(),
+  paypal: PaypalSettingsSchema.optional(),
+  razorpay: RazorpaySettingsSchema.optional(),
+  payu: PayUSettingsSchema.optional(),
+  cashfree: CashfreeSettingsSchema.optional(),
+  phonepe: PhonePeSettingsSchema.optional(),
+});
+export type PaymentSettings = z.infer<typeof PaymentSettingsSchema>;
 
 export const AppSettingsSchema = z.object({
   advertisement: AdvertisementSettingsSchema.optional(),
   referral: ReferralSettingsSchema.optional(),
   general: GeneralSettingsSchema.optional(),
   plan: PlanSettingsSchema.optional(),
+  payment: PaymentSettingsSchema.optional(),
 });
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
