@@ -38,8 +38,18 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
             <CardContent>
               <p className="text-muted-foreground mb-6">{tool.description}</p>
               
+              <div className="min-h-[300px] rounded-lg bg-muted/50 p-8">
+                {ToolComponent ? <ToolComponent /> : (
+                  <div className="flex h-full items-center justify-center">
+                    <p className="text-lg text-muted-foreground">
+                      Tool interface coming soon!
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {tool.slug === 'case-converter' && (
-                <div className="prose prose-sm dark:prose-invert max-w-none mb-6">
+                <div className="prose prose-sm dark:prose-invert max-w-none mt-8 pt-6 border-t">
                     <p>The Case Converter tool is a versatile utility designed to make text manipulation effortless. Whether you're a writer, developer, or student, this tool helps you instantly switch your text between different case formats. With a simple click, you can convert your content to:</p>
                     <ul>
                         <li><strong>Sentence case:</strong> Capitalizes the first letter of each sentence, perfect for standard writing.</li>
@@ -51,15 +61,6 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
                 </div>
               )}
 
-              <div className="min-h-[300px] rounded-lg bg-muted/50 p-8">
-                {ToolComponent ? <ToolComponent /> : (
-                  <div className="flex h-full items-center justify-center">
-                    <p className="text-lg text-muted-foreground">
-                      Tool interface coming soon!
-                    </p>
-                  </div>
-                )}
-              </div>
             </CardContent>
           </Card>
         </div>
