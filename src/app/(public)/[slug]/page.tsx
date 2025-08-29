@@ -62,6 +62,13 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
                         <li><strong>Title Case:</strong> Capitalizes the first letter of every word. This is particularly useful for formatting headlines, titles of articles, and headings in documents.</li>
                     </ul>
 
+                    <h3 className="text-xl font-semibold mt-6">How to Use:</h3>
+                    <ol>
+                        <li><strong>Enter Text:</strong> Simply type or paste the text you want to convert into the provided text area.</li>
+                        <li><strong>Choose Conversion:</strong> Click one of the four conversion buttons (Sentence case, lowercase, UPPERCASE, Title Case) to instantly transform your text.</li>
+                        <li><strong>Copy Result:</strong> Use the copy button to grab your newly formatted text and use it wherever you need.</li>
+                    </ol>
+
                     <h3 className="text-xl font-semibold mt-6">Why Use Our Tool?</h3>
                     <p>In addition to the core conversion functions, the Case Converter provides a real-time count of words and characters, helping you stay on top of your writing metrics. The clean, intuitive interface ensures a seamless user experience—simply type or paste your text, choose a conversion, and copy the result. It's that easy!</p>
                 </div>
