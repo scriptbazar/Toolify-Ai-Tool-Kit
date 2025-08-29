@@ -62,6 +62,8 @@ const initialPayments = [
     date: '2023-07-15',
     status: 'completed',
     paymentMethod: 'Visa **** 4242',
+    subscribedFrom: '2023-07-15',
+    subscribedUntil: '2024-07-15',
   },
   {
     transactionId: 'txn_2HjP9u4fGhKlo3Dg4jM5Y6Z7',
@@ -75,6 +77,8 @@ const initialPayments = [
     date: '2023-07-14',
     status: 'completed',
     paymentMethod: 'N/A',
+    subscribedFrom: '2023-07-14',
+    subscribedUntil: 'N/A',
   },
     {
     transactionId: 'txn_3KlM0v6gHjLlo4Eh6kO7P8Q9',
@@ -88,6 +92,8 @@ const initialPayments = [
     date: '2023-07-13',
     status: 'pending',
     paymentMethod: 'PayPal',
+    subscribedFrom: '2023-07-13',
+    subscribedUntil: '2024-07-13',
   },
    {
     transactionId: 'txn_4NmB1w8hIkNlo5Fi7lP9R0S1',
@@ -101,6 +107,8 @@ const initialPayments = [
     date: '2023-07-12',
     status: 'failed',
     paymentMethod: 'Visa **** 1234',
+    subscribedFrom: '2023-07-12',
+    subscribedUntil: '2024-07-12',
   },
   {
     transactionId: 'txn_5PqA2x0jJkOlo6Gj8mQ1T2U3',
@@ -114,6 +122,8 @@ const initialPayments = [
     date: '2023-07-11',
     status: 'completed',
     paymentMethod: 'Mastercard **** 5678',
+    subscribedFrom: '2023-07-11',
+    subscribedUntil: '2024-07-11',
   },
 ];
 
@@ -235,6 +245,8 @@ export default function PaymentHistoryPage() {
                 ['Amount', payment.amount],
                 ['Status', payment.status],
                 ['Payment Method', payment.paymentMethod],
+                ['Subscription Start', new Date(payment.subscribedFrom).toLocaleDateString()],
+                ['Subscription End', payment.subscribedUntil === 'N/A' ? 'N/A' : new Date(payment.subscribedUntil).toLocaleDateString()],
             ],
             theme: 'striped',
             didParseCell: function (data: any) {
@@ -290,7 +302,9 @@ export default function PaymentHistoryPage() {
           amount: `$${formData.get('amount') as string}`,
           date: new Date().toISOString().split('T')[0],
           status: formData.get('status') as 'completed' | 'pending' | 'failed',
-          paymentMethod: formData.get('paymentMethod') as string
+          paymentMethod: formData.get('paymentMethod') as string,
+          subscribedFrom: new Date().toISOString().split('T')[0],
+          subscribedUntil: 'N/A'
       };
       setPayments([newTransaction, ...payments]);
       setIsAddOpen(false);
@@ -351,8 +365,8 @@ export default function PaymentHistoryPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
                   <TableHead className="w-[250px]">Transaction ID</TableHead>
+                  <TableHead>User</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Date</TableHead>
@@ -364,6 +378,15 @@ export default function PaymentHistoryPage() {
                 {filteredPayments.length > 0 ? (
                     filteredPayments.map((payment) => (
                         <TableRow key={payment.transactionId}>
+                            <TableCell>
+                                <div className="flex items-center gap-2 font-mono text-xs">
+                                    <span className="truncate">{payment.transactionId}</span>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(payment.transactionId)}>
+                                      <Copy className="h-3 w-3" />
+                                      <span className="sr-only">Copy Transaction ID</span>
+                                    </Button>
+                                </div>
+                            </TableCell>
                              <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
@@ -374,15 +397,6 @@ export default function PaymentHistoryPage() {
                                         <div className="font-medium">{payment.user.name}</div>
                                         <div className="text-sm text-muted-foreground">{payment.user.email}</div>
                                     </div>
-                                </div>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-mono text-xs">
-                                    <span className="truncate">{payment.transactionId}</span>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(payment.transactionId)}>
-                                      <Copy className="h-3 w-3" />
-                                      <span className="sr-only">Copy Transaction ID</span>
-                                    </Button>
                                 </div>
                             </TableCell>
                             <TableCell>{payment.plan}</TableCell>
@@ -454,6 +468,8 @@ export default function PaymentHistoryPage() {
                             <span className="font-medium">Amount:</span><span className="font-bold">{selectedPayment.amount}</span>
                             <span className="font-medium">Status:</span><span>{getStatusBadge(selectedPayment.status as FilterType)}</span>
                             <span className="font-medium">Payment Method:</span><span>{selectedPayment.paymentMethod}</span>
+                            <span className="font-medium">Subscription Start:</span><span>{new Date(selectedPayment.subscribedFrom).toLocaleDateString()}</span>
+                            <span className="font-medium">Subscription End:</span><span>{selectedPayment.subscribedUntil === 'N/A' ? 'N/A' : new Date(selectedPayment.subscribedUntil).toLocaleDateString()}</span>
                          </div>
                     </div>
                 </div>
