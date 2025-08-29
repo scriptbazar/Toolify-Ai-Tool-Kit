@@ -62,10 +62,34 @@ export const GeneralSettingsSchema = z.object({
 });
 export type GeneralSettings = z.infer<typeof GeneralSettingsSchema>;
 
+export const PlanFeatureSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+});
+export type PlanFeature = z.infer<typeof PlanFeatureSchema>;
+
+export const PlanSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1, 'Plan name is required.'),
+  description: z.string().optional(),
+  price: z.number().min(0, 'Price must be a positive number.'),
+  priceSuffix: z.string().default('/ month'),
+  features: z.array(PlanFeatureSchema).default([]),
+  isPopular: z.boolean().default(false),
+  status: z.enum(['active', 'disabled']).default('active'),
+});
+export type Plan = z.infer<typeof PlanSchema>;
+
+export const PlanSettingsSchema = z.object({
+  plans: z.array(PlanSchema).default([]),
+});
+export type PlanSettings = z.infer<typeof PlanSettingsSchema>;
+
 
 export const AppSettingsSchema = z.object({
   advertisement: AdvertisementSettingsSchema.optional(),
   referral: ReferralSettingsSchema.optional(),
   general: GeneralSettingsSchema.optional(),
+  plan: PlanSettingsSchema.optional(),
 });
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
