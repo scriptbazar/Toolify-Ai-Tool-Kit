@@ -32,7 +32,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogDesc,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Logo } from '@/components/common/Logo';
@@ -179,9 +179,9 @@ function FeatureAnnouncementEditor({ template, onUpdate, onClose }: { template: 
     <DialogContent className="sm:max-w-4xl">
       <DialogHeader>
         <DialogTitle>Edit: {template.title}</DialogTitle>
-        <DialogDescription>
+        <DialogDesc>
           Provide feature details to generate an announcement, or edit the content manually.
-        </DialogDescription>
+        </DialogDesc>
       </DialogHeader>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 max-h-[70vh] overflow-y-auto pr-4">
           <div className="space-y-4">
@@ -310,9 +310,9 @@ export default function EmailTemplatesPage() {
        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>{selectedTemplate?.title} Preview</DialogTitle>
-            <DialogDescription>
+            <DialogDesc>
               This is a preview of the "{selectedTemplate?.subject}" email.
-            </DialogDescription>
+            </DialogDesc>
           </DialogHeader>
           <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
             <div className="p-6 border rounded-lg bg-muted">
