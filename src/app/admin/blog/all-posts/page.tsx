@@ -28,15 +28,7 @@ import Link from 'next/link';
 
 type PostStatus = 'Published' | 'Draft' | 'Scheduled' | 'Trash';
 
-const allPosts = [
-    { title: 'The Future of AI', slug: 'the-future-of-ai', category: 'Artificial Intelligence', publishedDate: '2024-07-28', status: 'Published' },
-    { title: '10 Productivity Hacks for Developers', slug: 'productivity-hacks-dev', category: 'Productivity', publishedDate: '2024-07-25', status: 'Published' },
-    { title: 'Getting Started with Next.js 14', slug: 'getting-started-nextjs-14', category: 'Technology', publishedDate: '2024-07-22', status: 'Published' },
-    { title: 'A Guide to SaaS Marketing', slug: 'saas-marketing-guide', category: 'News', publishedDate: '2024-07-20', status: 'Draft' },
-    { title: 'Why Tailwind CSS is Overrated', slug: 'tailwind-css-overrated', category: 'Technology', publishedDate: '2024-07-18', status: 'Published' },
-    { title: 'The Ultimate Guide to API Design', slug: 'ultimate-api-design-guide', category: 'Technology', publishedDate: '2024-08-05', status: 'Scheduled' },
-    { title: 'My Journey into Entrepreneurship', slug: 'entrepreneurship-journey', category: 'News', publishedDate: '—', status: 'Draft' },
-];
+const allPosts: any[] = [];
 
 const ITEMS_PER_PAGE = 5;
 
@@ -55,7 +47,7 @@ export default function AllPostsPage() {
         }
     }
     return posts.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [allPosts, searchQuery, activeFilter]);
+  }, [searchQuery, activeFilter]);
   
   const paginatedPosts = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
