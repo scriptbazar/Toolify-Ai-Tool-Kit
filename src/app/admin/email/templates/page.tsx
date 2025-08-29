@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   UserX,
   CalendarClock,
+  Clock,
 } from 'lucide-react';
 import {
   Dialog,
@@ -106,12 +107,12 @@ const templates = [
     body: `Hello {{firstName}},\n\nYour account was just accessed from a new device or location. If this was you, you can safely ignore this email. If you do not recognize this activity, please change your password immediately and contact support.\n\nDevice: {{device}}\nLocation: {{location}}\n\nThanks,\nThe ToolifyAI Security Team`,
   },
   {
-    id: 'account-deactivation',
-    icon: UserX,
-    title: 'Account Deactivation',
-    description: 'Confirms a user\'s account has been deactivated.',
-    subject: 'Your ToolifyAI Account Has Been Deactivated',
-    body: `Hello {{firstName}},\n\nThis is to confirm that your ToolifyAI account has been successfully deactivated. We're sorry to see you go. Your data will be permanently deleted in 30 days. You can reactivate your account by logging in within this period.\n\nIf you have any feedback, we\'d love to hear it.\n\nBest,\nThe ToolifyAI Team`,
+    id: 'inactive-account',
+    icon: Clock,
+    title: 'Inactive Account Reminder',
+    description: 'Sent to users whose accounts have been inactive for a period (e.g., 6 months).',
+    subject: "We've Missed You at ToolifyAI!",
+    body: `Hello {{firstName}},\n\nIt's been a while since you last logged into your ToolifyAI account. We're constantly adding new tools and features to help you be more productive.\n\nLog in today to see what's new!\n\nIf you don't plan on using your account, you can deactivate it from your profile settings. For security, inactive accounts may be automatically deactivated after a long period of inactivity.\n\nBest,\nThe ToolifyAI Team`,
   },
    {
     id: 'renewal-reminder',

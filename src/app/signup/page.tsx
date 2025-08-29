@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Eye, EyeOff } from "lucide-react";
@@ -55,6 +55,9 @@ export default function SignupPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Send email verification
+      await sendEmailVerification(user);
+
       // Save user data to Firestore
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
@@ -68,7 +71,7 @@ export default function SignupPage() {
 
       toast({
         title: "Account created successfully!",
-        description: "You can now log in.",
+        description: "We've sent a verification link to your email address.",
       });
       router.push('/login');
     } catch (error: any) {
