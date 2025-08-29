@@ -12,12 +12,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Save, Loader2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
-import type { PageSettings, CustomPage } from '@/ai/flows/settings-management.types';
+import type { CustomPage } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
-
 
 const PageManagementFormSchema = z.object({
   pages: z.array(z.object({
@@ -41,7 +40,7 @@ const defaultPages: Omit<CustomPage, 'content'>[] = [
 export default function PageManagementPage() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [openSection, setOpenSection] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<PageManagementFormValues>({
@@ -63,7 +62,7 @@ export default function PageManagementPage() {
         const pageSettings = settings.page || { pages: [] };
         
         const mergedPages = defaultPages.map(defaultPage => {
-            const existingPage = pageSettings.pages.find(p => p.id === defaultPage.id);
+            const existingPage = pageSettings.pages?.find(p => p.id === defaultPage.id);
             return existingPage ? { ...defaultPage, ...existingPage } : { ...defaultPage, content: ''};
         });
 
@@ -104,8 +103,75 @@ export default function PageManagementPage() {
   };
 
   const handleToggle = (id: string) => {
-    setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
+    setOpenSection(prev => (prev === id ? null : id));
   };
+  
+  const renderPageCollapsible = (field: Record<"fieldId", string>, index: number) => {
+    const isOpen = openSection === field.id;
+    return (
+       <Collapsible
+          key={field.fieldId}
+          open={isOpen}
+          onOpenChange={() => handleToggle(field.id)}
+          className={cn(
+              "space-y-2 col-span-1",
+              isOpen ? "md:col-span-2" : "md:col-span-1"
+          )}
+        >
+          <Card>
+            <CollapsibleTrigger asChild>
+              <div className="flex w-full cursor-pointer items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                   <FileText className="h-5 w-5" />
+                   <div>
+                     <CardTitle>{field.title}</CardTitle>
+                     <CardDescription className="mt-1">
+                       Manage the content for the /{field.slug} page.
+                     </CardDescription>
+                   </div>
+                </div>
+                <Button variant="ghost" size="icon">
+                  {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                  <span className="sr-only">Toggle</span>
+                </Button>
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="border-t pt-6">
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name={`pages.${index}.title`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Page Title</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="e.g., About Our Company" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`pages.${index}.content`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Page Content</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} placeholder="Enter the page content here. HTML is supported." className="min-h-[200px] font-mono" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+    )
+  }
 
   if (loading) {
     return (
@@ -137,67 +203,18 @@ export default function PageManagementPage() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {fields.map((field, index) => (
-            <Collapsible
-              key={field.fieldId}
-              open={openSections[field.id]}
-              onOpenChange={() => handleToggle(field.id)}
-              className="space-y-2"
-            >
-              <Card>
-                <CollapsibleTrigger asChild>
-                  <div className="flex w-full cursor-pointer items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
-                       <FileText className="h-5 w-5" />
-                       <div>
-                         <CardTitle>{field.title}</CardTitle>
-                         <CardDescription className="mt-1">
-                           Manage the content for the /{field.slug} page.
-                         </CardDescription>
-                       </div>
-                    </div>
-                    <Button variant="ghost" size="icon">
-                      {openSections[field.id] ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                      <span className="sr-only">Toggle</span>
-                    </Button>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent className="border-t pt-6">
-                    <div className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name={`pages.${index}.title`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Page Title</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="e.g., About Our Company" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`pages.${index}.content`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Page Content</FormLabel>
-                            <FormControl>
-                              <Textarea {...field} placeholder="Enter the page content here. HTML is supported." className="min-h-[200px] font-mono" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
-          ))}
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {fields.map((field, index) => {
+              const anySectionOpen = openSection !== null;
+              const thisSectionOpen = openSection === field.id;
+              
+              if (anySectionOpen && !thisSectionOpen) {
+                  return null;
+              }
+              return renderPageCollapsible(field as any, index);
+            })}
+          </div>
           <div className="flex justify-end pt-6">
             <Button type="submit" disabled={isSaving}>
               {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
