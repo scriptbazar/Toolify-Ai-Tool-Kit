@@ -34,6 +34,7 @@ import { cn } from '@/lib/utils';
 import { countries } from '@/lib/countries';
 import { Combobox } from '@/components/ui/combobox';
 import { sendPasswordChangeEmail } from '@/ai/flows/send-email';
+import { useParams } from 'next/navigation';
 
 
 interface UserProfile {
@@ -78,8 +79,11 @@ const TwoFactorAuthOptionCard = ({
 };
 
 
-export default function UserDetailPage({ params }: { params: { id: string } }) {
+export default function UserDetailPage() {
   const { toast } = useToast();
+  const params = useParams();
+  const { id } = params;
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -92,7 +96,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser && firebaseUser.uid === params.id) {
+      if (firebaseUser && firebaseUser.uid === id) {
         setUser(firebaseUser);
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         try {
@@ -112,7 +116,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [params.id, toast]);
+  }, [id, toast]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -366,5 +370,3 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
-
-    
