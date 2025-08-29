@@ -47,7 +47,7 @@ type FilterType = 'all' | 'completed' | 'pending' | 'failed';
 
 const payments = [
   {
-    transactionId: 'txn_1LgR...f2hN',
+    transactionId: 'txn_1LgR8t2eZvKYlo2Cf2hN3X4Y',
     user: {
       name: 'Olivia Martin',
       email: 'olivia.martin@email.com',
@@ -60,7 +60,7 @@ const payments = [
     paymentMethod: 'Visa **** 4242',
   },
   {
-    transactionId: 'txn_2HjP...d3kM',
+    transactionId: 'txn_2HjP9u4fGhKlo3Dg4jM5Y6Z7',
     user: {
       name: 'Jackson Lee',
       email: 'jackson.lee@email.com',
@@ -73,7 +73,7 @@ const payments = [
     paymentMethod: 'N/A',
   },
     {
-    transactionId: 'txn_3KlM...g5lO',
+    transactionId: 'txn_3KlM0v6gHjLlo4Eh6kO7P8Q9',
     user: {
       name: 'Isabella Nguyen',
       email: 'isabella.nguyen@email.com',
@@ -86,7 +86,7 @@ const payments = [
     paymentMethod: 'PayPal',
   },
    {
-    transactionId: 'txn_4NmB...h8pO',
+    transactionId: 'txn_4NmB1w8hIkNlo5Fi7lP9R0S1',
     user: {
       name: 'William Kim',
       email: 'will@email.com',
@@ -99,7 +99,7 @@ const payments = [
     paymentMethod: 'Visa **** 1234',
   },
   {
-    transactionId: 'txn_5PqA...j9rS',
+    transactionId: 'txn_5PqA2x0jJkOlo6Gj8mQ1T2U3',
     user: {
       name: 'Sofia Davis',
       email: 'sofia.davis@email.com',
@@ -216,8 +216,8 @@ export default function PaymentHistoryPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[250px]">Transaction ID</TableHead>
                   <TableHead>User</TableHead>
-                  <TableHead>Transaction ID</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Date</TableHead>
@@ -229,6 +229,15 @@ export default function PaymentHistoryPage() {
                 {filteredPayments.length > 0 ? (
                     filteredPayments.map((payment) => (
                         <TableRow key={payment.transactionId}>
+                            <TableCell>
+                                <div className="flex items-center gap-2 font-mono text-xs">
+                                    <span className="truncate">{payment.transactionId}</span>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(payment.transactionId)}>
+                                      <Copy className="h-3 w-3" />
+                                      <span className="sr-only">Copy Transaction ID</span>
+                                    </Button>
+                                </div>
+                            </TableCell>
                             <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
@@ -245,15 +254,6 @@ export default function PaymentHistoryPage() {
                                           </Button>
                                         </div>
                                     </div>
-                                </div>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-mono text-xs">
-                                    {payment.transactionId}
-                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(payment.transactionId)}>
-                                      <Copy className="h-3 w-3" />
-                                      <span className="sr-only">Copy Transaction ID</span>
-                                    </Button>
                                 </div>
                             </TableCell>
                             <TableCell>{payment.plan}</TableCell>
@@ -306,7 +306,7 @@ export default function PaymentHistoryPage() {
                     <div className="space-y-2">
                          <h4 className="font-semibold">Payment Details</h4>
                          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                            <span>Transaction ID:</span><span className="font-mono text-xs">{selectedPayment.transactionId}</span>
+                            <span>Transaction ID:</span><span className="font-mono text-xs break-all">{selectedPayment.transactionId}</span>
                             <span>Date:</span><span>{selectedPayment.date}</span>
                             <span>Plan:</span><span>{selectedPayment.plan}</span>
                             <span>Amount:</span><span className="font-medium">{selectedPayment.amount}</span>
