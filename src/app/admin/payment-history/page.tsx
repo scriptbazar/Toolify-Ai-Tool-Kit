@@ -28,6 +28,7 @@ import {
   Copy,
   Eye,
   Download,
+  PlusCircle,
 } from 'lucide-react';
 import {
   Dialog,
@@ -41,13 +42,13 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
-import jsPDF from 'jspdf';
+import type { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
 
 type FilterType = 'all' | 'completed' | 'pending' | 'failed';
 
-const payments = [
+const initialPayments = [
   {
     transactionId: 'txn_1LgR8t2eZvKYlo2Cf2hN3X4Y',
     user: {
@@ -115,7 +116,7 @@ const payments = [
   },
 ];
 
-type Payment = typeof payments[0];
+type Payment = typeof initialPayments[0];
 
 
 const getStatusBadge = (status: FilterType) => {
@@ -132,9 +133,11 @@ const getStatusBadge = (status: FilterType) => {
 }
 
 export default function PaymentHistoryPage() {
+  const [payments, setPayments] = useState(initialPayments);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const { toast } = useToast();
 
@@ -170,7 +173,9 @@ export default function PaymentHistoryPage() {
     setIsDetailOpen(true);
   };
   
-  const handleDownloadPdf = (payment: Payment) => {
+  const handleDownloadPdf = async (payment: Payment) => {
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
     const doc = new jsPDF();
     
     // Add header
@@ -180,7 +185,7 @@ export default function PaymentHistoryPage() {
     doc.text(`Transaction ID: ${payment.transactionId}`, 14, 32);
     doc.text(`Date: ${new Date(payment.date).toLocaleDateString()}`, 14, 38);
     
-    (doc as any).autoTable({
+    autoTable(doc, {
         startY: 50,
         head: [['User Information']],
         body: [
@@ -189,7 +194,7 @@ export default function PaymentHistoryPage() {
         theme: 'striped',
     });
 
-    (doc as any).autoTable({
+    autoTable(doc, {
         startY: (doc as any).autoTable.previous.finalY + 10,
         head: [['Payment Details']],
         body: [
@@ -209,13 +214,40 @@ export default function PaymentHistoryPage() {
     doc.save(`invoice-${payment.transactionId}.pdf`);
   };
 
+  const handleAddTransaction = (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const newTransaction: Payment = {
+          transactionId: `txn_${Date.now()}`,
+          user: {
+              name: formData.get('userName') as string,
+              email: formData.get('userEmail') as string,
+              avatar: `https://i.pravatar.cc/150?u=${formData.get('userEmail') as string}`
+          },
+          plan: formData.get('plan') as string,
+          amount: `$${formData.get('amount') as string}`,
+          date: new Date().toISOString().split('T')[0],
+          status: formData.get('status') as 'completed' | 'pending' | 'failed',
+          paymentMethod: formData.get('paymentMethod') as string
+      };
+      setPayments([newTransaction, ...payments]);
+      setIsAddOpen(false);
+      toast({ title: "Transaction Added", description: "The new transaction has been added to the history." });
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Payment History</h1>
-        <p className="text-muted-foreground">
-          View and manage all payments and transactions.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Payment History</h1>
+          <p className="text-muted-foreground">
+            View and manage all payments and transactions.
+          </p>
+        </div>
+        <Button onClick={() => setIsAddOpen(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Transaction
+        </Button>
       </div>
 
       <Card>
@@ -257,8 +289,8 @@ export default function PaymentHistoryPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
                   <TableHead className="w-[250px]">Transaction ID</TableHead>
+                  <TableHead>User</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Date</TableHead>
@@ -270,6 +302,15 @@ export default function PaymentHistoryPage() {
                 {filteredPayments.length > 0 ? (
                     filteredPayments.map((payment) => (
                         <TableRow key={payment.transactionId}>
+                            <TableCell>
+                                <div className="flex items-center gap-2 font-mono text-xs">
+                                    <span className="truncate">{payment.transactionId}</span>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(payment.transactionId)}>
+                                      <Copy className="h-3 w-3" />
+                                      <span className="sr-only">Copy Transaction ID</span>
+                                    </Button>
+                                </div>
+                            </TableCell>
                              <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
@@ -278,23 +319,8 @@ export default function PaymentHistoryPage() {
                                     </Avatar>
                                     <div>
                                         <div className="font-medium">{payment.user.name}</div>
-                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                          {payment.user.email}
-                                          <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(payment.user.email)}>
-                                            <Copy className="h-3 w-3" />
-                                            <span className="sr-only">Copy Email</span>
-                                          </Button>
-                                        </div>
+                                        <div className="text-sm text-muted-foreground">{payment.user.email}</div>
                                     </div>
-                                </div>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-mono text-xs">
-                                    <span className="truncate">{payment.transactionId}</span>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(payment.transactionId)}>
-                                      <Copy className="h-3 w-3" />
-                                      <span className="sr-only">Copy Transaction ID</span>
-                                    </Button>
                                 </div>
                             </TableCell>
                             <TableCell>{payment.plan}</TableCell>
@@ -378,6 +404,38 @@ export default function PaymentHistoryPage() {
             </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <DialogContent>
+              <DialogHeader>
+                  <DialogTitle>Add Custom Transaction</DialogTitle>
+                  <DialogDescription>Manually add a new transaction record to the history.</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleAddTransaction} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                      <input type="text" name="userName" placeholder="User Name" required className="p-2 border rounded-md" />
+                      <input type="email" name="userEmail" placeholder="User Email" required className="p-2 border rounded-md" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                      <input type="text" name="plan" placeholder="Plan Name" required className="p-2 border rounded-md" />
+                      <input type="number" name="amount" placeholder="Amount" step="0.01" required className="p-2 border rounded-md" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                      <select name="status" required className="p-2 border rounded-md">
+                          <option value="completed">Completed</option>
+                          <option value="pending">Pending</option>
+                          <option value="failed">Failed</option>
+                      </select>
+                      <input type="text" name="paymentMethod" placeholder="Payment Method" required className="p-2 border rounded-md" />
+                  </div>
+                  <DialogFooter>
+                      <Button type="submit">Add Transaction</Button>
+                  </DialogFooter>
+              </form>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
+    
