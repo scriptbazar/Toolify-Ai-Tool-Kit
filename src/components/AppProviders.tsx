@@ -1,15 +1,15 @@
 
-'use client';
+'use server';
 
-import { usePathname } from 'next/navigation';
+import { headers } from 'next/headers';
 import { ChatWidget } from './common/ChatWidget';
 import { cn } from '@/lib/utils';
 import Header from './common/Header';
 import Footer from './common/Footer';
-import type { AppSettings } from '@/ai/flows/settings-management.types';
+import type { GeneralSettings } from '@/ai/flows/settings-management.types';
 
-export function AppProviders({ children, settings }: { children: React.ReactNode, settings: AppSettings }) {
-  const pathname = usePathname();
+export async function AppProviders({ children, generalSettings }: { children: React.ReactNode, generalSettings?: GeneralSettings }) {
+  const pathname = headers().get('x-next-pathname') || '';
   
   const authRoutes = ['/login', '/signup', '/admin/login', '/forgot-password'];
   const isAuthRoute = authRoutes.includes(pathname);
@@ -34,11 +34,11 @@ export function AppProviders({ children, settings }: { children: React.ReactNode
   const showPublicLayout = !isAuthRoute && !isAdminRoute && !isUserPanelRoute;
 
   return (
-    <div className={cn(showPublicLayout && "relative flex min-h-screen flex-col")}>
+    <div className={cn("relative flex min-h-screen flex-col")}>
       {showPublicLayout && <Header />}
       <main className="flex-1">{children}</main>
       {!isAdminRoute && <ChatWidget />}
-      {showPublicLayout && <Footer settings={settings.general} />}
+      {showPublicLayout && <Footer settings={generalSettings} />}
     </div>
   );
 }

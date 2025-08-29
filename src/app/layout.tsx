@@ -39,7 +39,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AppProviders settings={settings}>{children}</AppProviders>
+          <AppProviders generalSettings={settings.general}>{children}</AppProviders>
           <Toaster />
         </ThemeProvider>
       </body>

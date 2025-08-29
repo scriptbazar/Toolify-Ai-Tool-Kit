@@ -40,8 +40,8 @@ export async function getSettings(): Promise<AppSettings> {
       // If the document doesn't exist, return the default settings.
       return AppSettingsSchema.parse({});
     }
-  } catch (error) {
-    console.error("Error getting settings:", error);
+  } catch (error: any) {
+    console.error("Error getting settings:", error.message);
     // On error, return default settings to ensure app stability.
     return AppSettingsSchema.parse({});
   }
