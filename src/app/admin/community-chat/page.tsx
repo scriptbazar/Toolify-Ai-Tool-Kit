@@ -15,8 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getChatUsers } from '@/ai/flows/user-management';
 
 
 type Message = {
@@ -41,8 +40,8 @@ interface ChatUser {
     initials: string;
     name: string;
     username: string;
-    createdAt?: Timestamp;
-    lastActive?: Timestamp;
+    createdAt?: string | null;
+    lastActive?: string | null;
 }
 
 const initialMessages: Message[] = [
@@ -66,20 +65,7 @@ export default function CommunityChatPage() {
         async function fetchUsers() {
             setLoadingUsers(true);
             try {
-                const usersRef = collection(db, 'users');
-                const usersSnapshot = await getDocs(usersRef);
-                const usersList = usersSnapshot.docs.map(doc => {
-                    const data = doc.data();
-                    const name = `${data.firstName || ''} ${data.lastName || ''}`.trim();
-                    return {
-                        id: doc.id,
-                        initials: `${data.firstName?.[0] || ''}${data.lastName?.[0] || ''}` || 'U',
-                        name: name,
-                        username: data.userName,
-                        createdAt: data.createdAt,
-                        lastActive: data.lastActive,
-                    };
-                });
+                const usersList = await getChatUsers();
                 setAllUsers(usersList);
             } catch (error) {
                 console.error("Error fetching users:", error);
@@ -158,11 +144,11 @@ export default function CommunityChatPage() {
        if (activeUserFilter === 'all') return allUsers;
        if (activeUserFilter === 'live') {
            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-           return allUsers.filter(user => user.lastActive && user.lastActive.toDate() > fiveMinutesAgo);
+           return allUsers.filter(user => user.lastActive && new Date(user.lastActive) > fiveMinutesAgo);
        }
        if (activeUserFilter === 'new') {
             const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-            return allUsers.filter(user => user.createdAt && user.createdAt.toDate() > twentyFourHoursAgo);
+            return allUsers.filter(user => user.createdAt && new Date(user.createdAt) > twentyFourHoursAgo);
        }
        return [];
     }, [activeUserFilter, allUsers]);

@@ -8,10 +8,11 @@
  * - addLeadUser - Saves lead information from the chat widget.
  * - getAllEmails - Fetches all unique emails from both users and leads collections.
  * - updateUserActivity - Updates the last active timestamp for a user.
+ * - getChatUsers - Fetches a list of all signed-up users for the community chat.
  */
 
 import { z } from 'zod';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput } from './user-management.types';
 import { adminDb } from '@/lib/firebase-admin';
 
@@ -120,4 +121,34 @@ export async function updateUserActivity(userId: string): Promise<{ success: boo
     console.log(`Could not update activity for user ${userId}:`, error);
     return { success: false };
   }
+}
+
+
+/**
+ * Fetches all signed-up users for the community chat.
+ */
+export async function getChatUsers(): Promise<any[]> {
+    try {
+        const usersRef = adminDb.collection('users');
+        const usersSnapshot = await usersRef.get();
+        const usersList = usersSnapshot.docs.map(doc => {
+            const data = doc.data();
+            const name = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+            const createdAt = data.createdAt ? (data.createdAt as Timestamp).toDate().toISOString() : null;
+            const lastActive = data.lastActive ? (data.lastActive as Timestamp).toDate().toISOString() : null;
+
+            return {
+                id: doc.id,
+                initials: `${data.firstName?.[0] || ''}${data.lastName?.[0] || ''}` || 'U',
+                name: name,
+                username: data.userName,
+                createdAt,
+                lastActive,
+            };
+        });
+        return usersList;
+    } catch (error) {
+        console.error("Error fetching chat users:", error);
+        return []; // Return empty array on error to prevent crashing the client
+    }
 }
