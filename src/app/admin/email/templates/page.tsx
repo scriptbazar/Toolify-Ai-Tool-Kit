@@ -97,7 +97,7 @@ const initialTemplates = [
     title: 'Payment Receipt',
     description: 'Provides users with a receipt for their payment.',
     subject: 'Your ToolifyAI Receipt (Order #{{orderId}})',
-    body: `Hi {{name}},\n\nThank you for your payment. Here is the receipt for your recent purchase.\n\nPlan: {{planName}}\nAmount: {{amount}}\nDate: {{date}}\n\nYou can view your full billing history in your account settings.\n\nThanks for being a valued customer,\nThe ToolifyAI Team`,
+    body: `Hi {{name}},\n\nThank you for your payment. Here is the receipt for your recent purchase.\n\nPlan: {{planName}}\nSubscription Period: {{subscriptionStartDate}} to {{subscriptionEndDate}}\nAmount: {{amount}}\nDate: {{date}}\n\nYou can view your full billing history in your account settings.\n\nThanks for being a valued customer,\nThe ToolifyAI Team`,
   },
   {
     id: 'new-feature',
