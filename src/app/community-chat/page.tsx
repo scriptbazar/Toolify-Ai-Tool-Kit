@@ -238,52 +238,6 @@ export default function CommunityChatPage() {
                       </p>
                   </div>
                   <div className="space-y-1">
-                      <div className="grid grid-cols-2 gap-1">
-                          <Button variant="outline" onClick={() => setActiveUserFilter('all')}>
-                              <span className="flex items-center"><Users className="mr-2 h-4 w-4" /> All Members</span>
-                          </Button>
-                          <Dialog open={isPollModalOpen} onOpenChange={setIsPollModalOpen}>
-                              <DialogTrigger asChild>
-                                  <Button variant="outline">
-                                      <span className="flex items-center"><Vote className="mr-2 h-4 w-4" /> Create Poll</span>
-                                  </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                  <DialogHeader>
-                                      <DialogTitle>Create a New Poll</DialogTitle>
-                                      <DialogDescription>
-                                          Engage the community by creating a poll.
-                                      </DialogDescription>
-                                  </DialogHeader>
-                                  <form onSubmit={handleCreatePoll}>
-                                  <div className="space-y-4 py-4">
-                                      <div className="space-y-2">
-                                          <Label htmlFor="question">Poll Question</Label>
-                                          <Input id="question" name="question" placeholder="e.g., What's your favorite new feature?" required/>
-                                      </div>
-                                      <div className="space-y-2">
-                                          <Label>Poll Options</Label>
-                                          <div className="grid grid-cols-2 gap-2">
-                                              <Input name="option1" placeholder="Option 1" required />
-                                              <Input name="option2" placeholder="Option 2" required />
-                                              <Input name="option3" placeholder="Option 3" />
-                                              <Input name="option4" placeholder="Option 4" />
-                                          </div>
-                                      </div>
-                                      <div className="flex items-center space-x-2 pt-2">
-                                          <Switch id="allowCustomAnswer" name="allowCustomAnswer" />
-                                          <Label htmlFor="allowCustomAnswer">Allow custom answers</Label>
-                                      </div>
-                                  </div>
-                                  <DialogFooter>
-                                      <Button type="submit">
-                                          <Send className="mr-2 h-4 w-4" /> Post Poll
-                                      </Button>
-                                  </DialogFooter>
-                                  </form>
-                              </DialogContent>
-                          </Dialog>
-                      </div>
                       <div className="grid w-full grid-cols-2 gap-1">
                           <Button variant={activeUserFilter === 'live' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('live')}>
                              <span className="flex items-center"><Wifi className="mr-2 h-4 w-4"/>Live Users</span>
