@@ -62,9 +62,9 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="space-y-6">
-      <Link href="/admin/users" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+      <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" />
-        Back to All Users
+        Back to Dashboard
       </Link>
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -94,8 +94,6 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
         <TabsList>
           <TabsTrigger value="profile"><User className="mr-2 h-4 w-4" />Profile</TabsTrigger>
           <TabsTrigger value="security"><Lock className="mr-2 h-4 w-4" />Security</TabsTrigger>
-          <TabsTrigger value="transactions" disabled><CreditCard className="mr-2 h-4 w-4" />Transactions</TabsTrigger>
-          <TabsTrigger value="withdrawals" disabled><Landmark className="mr-2 h-4 w-4" />Withdrawals</TabsTrigger>
         </TabsList>
         <TabsContent value="profile" className="mt-6">
            <Card>
@@ -198,5 +196,3 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
-
-  
