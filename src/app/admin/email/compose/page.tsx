@@ -10,12 +10,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { composeEmail, type AiEmailComposerInput } from '@/ai/flows/ai-email-composer';
 import { Wand2, Send, Mail, Eye, Users } from 'lucide-react';
 import { z } from 'zod';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import Link from 'next/link';
 
@@ -255,9 +255,9 @@ export default function ComposeEmailPage() {
                     <DialogContent className="sm:max-w-[625px]">
                        <DialogHeader>
                         <DialogTitle>Email Preview</DialogTitle>
-                         <DialogDescription>
+                         <DialogDesc>
                           This is a preview of the email that will be sent to {form.getValues().recipient || '...'}
-                        </DialogDescription>
+                        </DialogDesc>
                       </DialogHeader>
                       <div className="space-y-4 py-4">
                          <h3 className="font-semibold">Subject: {form.getValues().subject || '...'}</h3>
