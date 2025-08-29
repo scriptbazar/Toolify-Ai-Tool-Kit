@@ -76,19 +76,7 @@ interface ActivityLog {
   ipAddress: string;
 }
 
-const dummyActivityLog: ActivityLog[] = [
-    { id: '1', action: 'Logged into the system', date: '2024-07-30 10:00 AM', ipAddress: '192.168.1.1' },
-    { id: '2', action: 'Updated Site Settings', date: '2024-07-30 09:55 AM', ipAddress: '192.168.1.1' },
-    { id: '3', action: 'Viewed Analytics Dashboard', date: '2024-07-30 09:50 AM', ipAddress: '192.168.1.1' },
-    { id: '4', action: 'Edited user profile: john@example.com', date: '2024-07-29 03:20 PM', ipAddress: '203.0.113.25' },
-    { id: '5', action: 'Added new plan: Enterprise', date: '2024-07-29 11:10 AM', ipAddress: '203.0.113.25' },
-    { id: '6', action: 'Logged out', date: '2024-07-28 05:00 PM', ipAddress: '198.51.100.10' },
-    { id: '7', action: 'Logged into the system', date: '2024-07-28 04:50 PM', ipAddress: '198.51.100.10' },
-    { id: '8', action: 'Deleted a blog post: "Old News"', date: '2024-07-27 01:15 PM', ipAddress: '198.51.100.10' },
-    { id: '9', action: 'Responded to support ticket #12345', date: '2024-07-27 10:00 AM', ipAddress: '198.51.100.10' },
-    { id: '10', action: 'Cleared application cache', date: '2024-07-26 08:00 AM', ipAddress: '198.51.100.10' },
-    { id: '11', action: 'Generated a new sitemap', date: '2024-07-25 02:00 PM', ipAddress: '198.51.100.10' },
-];
+const dummyActivityLog: ActivityLog[] = [];
 
 
 const lineChartConfig = {
@@ -369,36 +357,44 @@ export default function AdminAnalyticsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentActivityLog.map(log => (
+            {currentActivityLog.length > 0 ? currentActivityLog.map(log => (
               <TableRow key={log.id}>
                 <TableCell className="font-medium">{log.action}</TableCell>
                 <TableCell>{log.date}</TableCell>
                 <TableCell>{log.ipAddress}</TableCell>
               </TableRow>
-            ))}
+            )) : (
+              <TableRow>
+                <TableCell colSpan={3} className="h-24 text-center">
+                  No activity log found.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
-        <div className="flex items-center justify-end space-x-2 pt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            Next <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
+        {totalPages > 1 &&
+          <div className="flex items-center justify-end space-x-2 pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        }
       </CardContent>
     </Card>
   );
