@@ -81,7 +81,7 @@ export default function AdminAnalyticsPage() {
     totalUsers: 0,
     newUsers: 0,
     totalLeads: 0,
-    bounceRate: 23.5, // Static for now
+    activeUsers: 789, // Static for now
   });
   const [chartData, setChartData] = useState<ChartData[]>([]);
 
@@ -206,14 +206,14 @@ export default function AdminAnalyticsPage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Bounce Rate (Placeholder)
+                    Active Users (Placeholder)
                   </CardTitle>
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                  <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.bounceRate}%</div>
+                  <div className="text-2xl font-bold">{stats.activeUsers.toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground">
-                    -2.5% from last month
+                    +2.5% from last month
                   </p>
                 </CardContent>
               </Card>
