@@ -141,18 +141,15 @@ export default function CommunityChatPage() {
     };
 
     const filteredUsers = useMemo(() => {
-       if (activeUserFilter === 'all') {
-           return allUsers;
-       }
-       if (activeUserFilter === 'live') {
+        if (activeUserFilter === 'live') {
            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
            return allUsers.filter(user => user.lastActive && new Date(user.lastActive) > fiveMinutesAgo);
-       }
+        }
        if (activeUserFilter === 'new') {
             const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
             return allUsers.filter(user => user.createdAt && new Date(user.createdAt) > twentyFourHoursAgo);
        }
-       return [];
+       return allUsers;
     }, [activeUserFilter, allUsers]);
 
     const copyToClipboard = (text: string) => {
@@ -364,4 +361,5 @@ export default function CommunityChatPage() {
   );
 }
 
+    
     
