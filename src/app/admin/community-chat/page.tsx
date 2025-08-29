@@ -141,7 +141,9 @@ export default function CommunityChatPage() {
     };
 
     const filteredUsers = useMemo(() => {
-       if (activeUserFilter === 'all') return allUsers;
+       if (activeUserFilter === 'all') {
+           return allUsers;
+       }
        if (activeUserFilter === 'live') {
            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
            return allUsers.filter(user => user.lastActive && new Date(user.lastActive) > fiveMinutesAgo);
