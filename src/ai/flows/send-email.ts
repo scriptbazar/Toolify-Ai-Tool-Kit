@@ -13,14 +13,14 @@ import { z } from 'zod';
 import { ai } from '@/ai/genkit';
 // To use a real email service, you would uncomment the following lines
 // and install the necessary package, e.g., `npm install mailgun.js`
-// import formData from 'form-data';
-// import Mailgun from 'mailgun.js';
+import formData from 'form-data';
+import Mailgun from 'mailgun.js';
 
-// const mailgun = new Mailgun(formData);
-// const mg = mailgun.client({
-//   username: 'api',
-//   key: process.env.MAILGUN_API_KEY || '',
-// });
+const mailgun = new Mailgun(formData);
+const mg = mailgun.client({
+  username: 'api',
+  key: process.env.MAILGUN_API_KEY || '',
+});
 
 const SENDER_EMAIL = `ToolifyAI <no-reply@${process.env.MAILGUN_DOMAIN || 'example.com'}>`;
 
