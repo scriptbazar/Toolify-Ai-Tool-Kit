@@ -279,7 +279,7 @@ export default function TicketManagementPage() {
                                                                 value={replyText}
                                                                 onChange={(e) => setReplyText(e.target.value)}
                                                             />
-                                                            <div className="flex justify-between items-center">
+                                                            <div className="flex justify-end items-center gap-2">
                                                                 <Button type="button" variant="outline"><Paperclip className="mr-2 h-4 w-4"/>Attach File</Button>
                                                                 <Button type="submit" disabled={isReplying || !replyText.trim()}>
                                                                     {isReplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
