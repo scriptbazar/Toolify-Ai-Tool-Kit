@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp } from 'lucide-react';
+import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Switch } from '@/components/ui/switch';
 
 type CollapsibleSectionProps = {
   id: string;
@@ -82,7 +83,8 @@ export default function SiteSettingsPage() {
             faviconUrl: '',
             contactEmail: '',
             socialLinks: { facebook: '', twitter: '', instagram: '', youtube: '' },
-            webmaster: { googleSearchConsole: '', googleAnalytics: '', googleAdsense: '', yandexWebmaster: '', bingWebmaster: '', pinterest: '', baidu: '', yahooSearchConsole: '' }
+            webmaster: { googleSearchConsole: '', googleAnalytics: '', googleAdsense: '', yandexWebmaster: '', bingWebmaster: '', pinterest: '', baidu: '', yahooSearchConsole: '' },
+            security: { enableTwoFactorAuth: false, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '' },
         });
       } catch (error) {
         console.error('Failed to fetch settings:', error);
@@ -124,6 +126,15 @@ export default function SiteSettingsPage() {
       }
     } : null));
   };
+
+  const handleSecurityChange = (field: string, value: string | boolean) => {
+    setSettings(prev => {
+        if (!prev) return null;
+        const newSettings = { ...prev };
+        (newSettings.security as any)[field] = value;
+        return newSettings;
+    });
+};
 
   const handleSave = async () => {
     if (!settings) return;
@@ -174,6 +185,7 @@ export default function SiteSettingsPage() {
     { id: 'branding', title: 'Branding & Contact', description: "Customize your site's appearance and contact info." },
     { id: 'social', title: 'Social Media Links', description: 'Provide links to your social media profiles.' },
     { id: 'webmaster', title: 'Webmaster Tools', description: 'Add verification codes for webmaster tools.' },
+    { id: 'security', title: 'Security Settings', description: 'Manage site security features like 2FA and reCAPTCHA.' },
   ];
 
   return (
@@ -350,6 +362,61 @@ export default function SiteSettingsPage() {
                     <Input id="yahooSearchConsole" name="yahooSearchConsole" value={settings.webmaster?.yahooSearchConsole || ''} onChange={handleWebmasterInputChange} placeholder="Verification code" className="pl-10" />
                   </div>
               </div>
+            </div>
+        </CollapsibleSection>
+
+        <CollapsibleSection id="security" title="Security Settings" description="Manage site security features like 2FA and reCAPTCHA." isOpen={openSection === 'security'} onToggle={handleToggle} isFullWidth={openSection === 'security'}>
+            <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="enableTwoFactorAuth" className="text-base font-medium">Enable Two-Factor Authentication</Label>
+                            <p className="text-sm text-muted-foreground">Enhance account security for all users.</p>
+                        </div>
+                        <Switch
+                            id="enableTwoFactorAuth"
+                            checked={settings.security?.enableTwoFactorAuth || false}
+                            onCheckedChange={(checked) => handleSecurityChange('enableTwoFactorAuth', checked)}
+                        />
+                    </div>
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="enableRecaptcha" className="text-base font-medium">Enable Google reCAPTCHA</Label>
+                            <p className="text-sm text-muted-foreground">Protect your forms from spam and abuse.</p>
+                        </div>
+                        <Switch
+                            id="enableRecaptcha"
+                            checked={settings.security?.enableRecaptcha || false}
+                            onCheckedChange={(checked) => handleSecurityChange('enableRecaptcha', checked)}
+                        />
+                    </div>
+                </div>
+                {settings.security?.enableRecaptcha && (
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="recaptchaSiteKey">reCAPTCHA Site Key</Label>
+                            <div className="relative">
+                               <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                               <Input id="recaptchaSiteKey" name="recaptchaSiteKey" value={settings.security?.recaptchaSiteKey || ''} onChange={(e) => handleSecurityChange('recaptchaSiteKey', e.target.value)} placeholder="Your site key" className="pl-10" />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="recaptchaSecretKey">reCAPTCHA Secret Key</Label>
+                            <div className="relative">
+                               <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                               <Input id="recaptchaSecretKey" name="recaptchaSecretKey" value={settings.security?.recaptchaSecretKey || ''} onChange={(e) => handleSecurityChange('recaptchaSecretKey', e.target.value)} placeholder="Your secret key" className="pl-10" />
+                            </div>
+                        </div>
+                    </div>
+                )}
+                <div className="space-y-2 pt-4">
+                     <Label className="text-base font-medium">Site Maintenance</Label>
+                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <Button variant="outline" type="button"><Eraser className="mr-2 h-4 w-4" />Clear Cache</Button>
+                        <Button variant="outline" type="button"><FileCode className="mr-2 h-4 w-4" />Generate sitemap.xml</Button>
+                        <Button variant="outline" type="button"><FileText className="mr-2 h-4 w-4" />Generate robots.txt</Button>
+                     </div>
+                </div>
             </div>
         </CollapsibleSection>
       </div>

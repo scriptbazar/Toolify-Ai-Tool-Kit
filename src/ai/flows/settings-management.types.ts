@@ -48,6 +48,15 @@ export const WebmasterSettingsSchema = z.object({
 });
 export type WebmasterSettings = z.infer<typeof WebmasterSettingsSchema>;
 
+export const SecuritySettingsSchema = z.object({
+    enableTwoFactorAuth: z.boolean().default(false),
+    enableRecaptcha: z.boolean().default(false),
+    recaptchaSiteKey: z.string().optional(),
+    recaptchaSecretKey: z.string().optional(),
+});
+export type SecuritySettings = z.infer<typeof SecuritySettingsSchema>;
+
+
 export const GeneralSettingsSchema = z.object({
   siteTitle: z.string().default('ToolifyAI'),
   slogan: z.string().default('Your All-in-One Smart Toolkit'),
@@ -59,6 +68,7 @@ export const GeneralSettingsSchema = z.object({
   contactEmail: z.string().email().optional(),
   socialLinks: SocialLinksSchema.optional(),
   webmaster: WebmasterSettingsSchema.optional(),
+  security: SecuritySettingsSchema.optional(),
 });
 export type GeneralSettings = z.infer<typeof GeneralSettingsSchema>;
 
