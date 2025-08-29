@@ -15,9 +15,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { getAllEmails } from '@/ai/flows/user-management';
+import { getEmailLog, type EmailLog } from '@/ai/flows/send-email';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Mail, Search, Copy, AlertCircle, Eye, Inbox, Send, Ban, XCircle } from 'lucide-react';
+import { Mail, Search, Copy, AlertCircle, Eye, Inbox, Send, Ban, XCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
@@ -28,21 +28,9 @@ import {
   DialogDesc,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Skeleton } from '@/components/ui/skeleton';
 
-type EmailData = {
-  email: string;
-  source: string;
-  date: string;
-};
-
-// Dummy data structure for the sent email log view
-const sentEmails = [
-  { subject: 'Your Password Reset', recipient: 'user2@example.com', status: 'sent', date: 'July 28th, 2024 4:30 PM' },
-  { subject: 'Welcome to ToolifyAI!', recipient: 'user1@example.com', status: 'opened', date: 'July 28th, 2024 3:30 PM' },
-  { subject: 'New Feature Announcement', recipient: 'user3@example.com', status: 'failed', date: 'July 27th, 2024 2:30 PM' },
-  { subject: 'Your Weekly Digest', recipient: 'user4@example.com', status: 'opened', date: 'July 26th, 2024 7:30 PM' },
-  { subject: 'Security Alert', recipient: 'user5@example.com', status: 'blocked', date: 'July 26th, 2024 12:00 AM' },
-];
+type EmailStatus = 'sent' | 'opened' | 'failed' | 'blocked';
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -60,12 +48,12 @@ const getStatusBadge = (status: string) => {
 };
 
 export default function AllEmailsPage() {
-  const [emails, setEmails] = useState<EmailData[]>([]);
+  const [emails, setEmails] = useState<EmailLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const [selectedEmail, setSelectedEmail] = useState<any | null>(null);
+  const [selectedEmail, setSelectedEmail] = useState<EmailLog | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { toast } = useToast();
 
@@ -73,11 +61,11 @@ export default function AllEmailsPage() {
     async function fetchEmails() {
       setLoading(true);
       try {
-        const fetchedEmails = await getAllEmails();
+        const fetchedEmails = await getEmailLog();
         setEmails(fetchedEmails);
         setError(null);
       } catch (err: any) {
-        setError('Failed to load emails. Please try again later.');
+        setError('Failed to load email history. Please try again later.');
         console.error(err);
       } finally {
         setLoading(false);
@@ -93,15 +81,16 @@ export default function AllEmailsPage() {
     });
   };
   
-  const filteredEmails = useMemo(() => {
-    return emails.filter(email =>
-      email.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [emails, searchQuery]);
+  const counts = useMemo(() => ({
+    all: emails.length,
+    opened: emails.filter(e => e.status === 'opened').length,
+    failed: emails.filter(e => e.status === 'failed').length,
+    blocked: emails.filter(e => e.status === 'blocked').length,
+  }), [emails]);
 
-  const filteredSentEmails = useMemo(() => {
+  const filteredEmails = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
-    let filtered = sentEmails;
+    let filtered = emails;
     
     if (activeTab !== 'all') {
       filtered = filtered.filter(email => email.status === activeTab);
@@ -111,13 +100,13 @@ export default function AllEmailsPage() {
       email.subject.toLowerCase().includes(lowercasedQuery) ||
       email.recipient.toLowerCase().includes(lowercasedQuery)
     );
-  }, [sentEmails, searchQuery, activeTab]);
+  }, [emails, searchQuery, activeTab]);
 
   const tabs = [
-    { id: 'all', label: 'All Emails', icon: Mail, count: sentEmails.length },
-    { id: 'opened', label: 'Opened', icon: Inbox, count: sentEmails.filter(e => e.status === 'opened').length },
-    { id: 'failed', label: 'Failed', icon: XCircle, count: sentEmails.filter(e => e.status === 'failed').length },
-    { id: 'blocked', label: 'Blocked', icon: Ban, count: sentEmails.filter(e => e.status === 'blocked').length },
+    { id: 'all', label: 'All Emails', icon: Mail, count: counts.all },
+    { id: 'opened', label: 'Opened', icon: Inbox, count: counts.opened },
+    { id: 'failed', label: 'Failed', icon: XCircle, count: counts.failed },
+    { id: 'blocked', label: 'Blocked', icon: Ban, count: counts.blocked },
   ];
 
   return (
@@ -173,11 +162,11 @@ export default function AllEmailsPage() {
               </TableHeader>
               <TableBody>
                 {loading && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
+                    [...Array(5)].map((_, i) => (
+                        <TableRow key={i}>
+                            <TableCell colSpan={5}><Skeleton className="h-6 w-full" /></TableCell>
+                        </TableRow>
+                    ))
                 )}
                 {error && (
                   <TableRow>
@@ -190,15 +179,15 @@ export default function AllEmailsPage() {
                     </TableCell>
                   </TableRow>
                 )}
-                {!loading && !error && filteredSentEmails.length === 0 && (
+                {!loading && !error && filteredEmails.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                       No sent emails found.
                     </TableCell>
                   </TableRow>
                 )}
-                {!loading && !error && filteredSentEmails.map(email => (
-                  <TableRow key={email.recipient + email.subject}>
+                {!loading && !error && filteredEmails.map(email => (
+                  <TableRow key={email.id}>
                     <TableCell className="font-medium">{email.subject}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -210,7 +199,7 @@ export default function AllEmailsPage() {
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(email.status)}</TableCell>
-                    <TableCell>{email.date}</TableCell>
+                    <TableCell>{new Date(email.date).toLocaleString()}</TableCell>
                     <TableCell className="text-right">
                        <Button variant="outline" size="sm" onClick={() => { setSelectedEmail(email); setIsPreviewOpen(true); }}>
                         <Eye className="mr-2 h-4 w-4" />
