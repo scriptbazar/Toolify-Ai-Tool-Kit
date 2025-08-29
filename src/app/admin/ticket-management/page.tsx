@@ -82,6 +82,13 @@ const initialTickets: Ticket[] = [
                 avatar: 'https://i.pravatar.cc/150?u=john.doe',
                 text: 'Hi, I seem to have forgotten my password and the reset link is not working. Can you please help me regain access to my account? I have tried clearing my cache and using a different browser, but nothing seems to work. I need to access my files urgently.',
                 timestamp: '2024-07-31 09:45 AM',
+            },
+            {
+                author: 'admin' as const,
+                name: 'Admin',
+                avatar: 'https://i.pravatar.cc/150?u=admin',
+                text: 'Hello John Doe,\n\nThank you for reaching out. We have received your ticket and are looking into the issue. A member of our support team will get back to you as soon as possible. We appreciate your patience.',
+                timestamp: '2024-07-31 09:46 AM',
             }
         ]
     },
@@ -237,7 +244,7 @@ export default function TicketManagementPage() {
                                   <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
                                     {selectedTicket && (
                                        <>
-                                        <DialogHeader className="p-6">
+                                        <DialogHeader className="p-6 pb-0">
                                             <DialogTitle className="flex items-center gap-2">
                                                 <span className="text-muted-foreground">[{selectedTicket.id}]</span> 
                                                 {selectedTicket.subject}
@@ -246,9 +253,9 @@ export default function TicketManagementPage() {
                                                 Opened by {selectedTicket.user.name}
                                             </DialogDescription>
                                         </DialogHeader>
-                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-6 flex-1 overflow-y-auto">
+                                        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 px-6 py-4 overflow-y-auto">
                                             <div className="lg:col-span-2 flex flex-col space-y-4">
-                                                <Card className="flex-1 overflow-hidden flex flex-col">
+                                                <Card className="flex-1 flex flex-col">
                                                     <CardHeader>
                                                         <CardTitle>Conversation</CardTitle>
                                                     </CardHeader>
@@ -261,7 +268,7 @@ export default function TicketManagementPage() {
                                                                     <AvatarFallback>{message.name.charAt(0)}</AvatarFallback>
                                                                 </Avatar>
                                                                 <div className={cn("rounded-lg p-4 max-w-xl", message.author === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                                                                    <p className="text-sm">{message.text}</p>
+                                                                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                                                                     <p className="text-xs text-right mt-2 opacity-70">{message.timestamp}</p>
                                                                 </div>
                                                             </div>
@@ -330,26 +337,31 @@ export default function TicketManagementPage() {
                                                         </Button>
                                                     </CardContent>
                                                 </Card>
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Add a Reply</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <form onSubmit={handleReply}>
+                                                            <div className="grid w-full gap-2">
+                                                                <Textarea 
+                                                                    placeholder="Type your reply here..." 
+                                                                    className="min-h-[100px]"
+                                                                    value={replyText}
+                                                                    onChange={(e) => setReplyText(e.target.value)}
+                                                                />
+                                                                <div className="flex justify-between items-center gap-2">
+                                                                    <Button type="button" variant="outline"><Paperclip className="mr-2 h-4 w-4"/>Attach</Button>
+                                                                    <Button type="submit" disabled={isReplying || !replyText.trim()}>
+                                                                        {isReplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
+                                                                        Reply
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </CardContent>
+                                                </Card>
                                             </div>
-                                        </div>
-                                        <div className="p-6 border-t bg-background">
-                                            <form onSubmit={handleReply}>
-                                                <div className="grid w-full gap-2">
-                                                    <Textarea 
-                                                        placeholder="Type your reply here..." 
-                                                        className="min-h-[100px]"
-                                                        value={replyText}
-                                                        onChange={(e) => setReplyText(e.target.value)}
-                                                    />
-                                                    <div className="flex justify-end items-center gap-2">
-                                                        <Button type="button" variant="outline"><Paperclip className="mr-2 h-4 w-4"/>Attach File</Button>
-                                                        <Button type="submit" disabled={isReplying || !replyText.trim()}>
-                                                            {isReplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
-                                                            Send Reply
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </form>
                                         </div>
                                        </>
                                     )}
