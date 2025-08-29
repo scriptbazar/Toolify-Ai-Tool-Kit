@@ -54,8 +54,8 @@ interface User {
   id: string;
   name: string;
   email: string;
-  plan: string; // e.g., 'Free', 'Pro'
-  status: string; // e.g., 'Approved', 'Active'
+  plan: string;
+  status: string;
   date: string;
   amount: string;
 }
@@ -64,17 +64,13 @@ interface UserCounts {
     all: number;
     signup: number;
     lead: number;
-    referral: number; // Placeholder for now
+    referral: number;
 }
 
-const chartData = [
-  { month: 'January', users: 186 },
-  { month: 'February', users: 305 },
-  { month: 'March', users: 237 },
-  { month: 'April', users: 273 },
-  { month: 'May', users: 209 },
-  { month: 'June', users: 214 },
-];
+interface ChartData {
+  month: string;
+  users: number;
+}
 
 const chartConfig = {
   users: {
@@ -86,6 +82,7 @@ const chartConfig = {
 export default function AdminDashboard() {
   const [recentUsers, setRecentUsers] = useState<User[]>([]);
   const [userCounts, setUserCounts] = useState<UserCounts>({ all: 0, signup: 0, lead: 0, referral: 573 });
+  const [chartData, setChartData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -93,11 +90,38 @@ export default function AdminDashboard() {
     async function fetchDashboardData() {
       setLoading(true);
       try {
-        // Fetch recent users for the table
+        // Fetch all users for counts and chart data
         const usersRef = collection(db, 'users');
-        const q = query(usersRef, orderBy('createdAt', 'desc'), limit(5));
-        const querySnapshot = await getDocs(q);
-        const usersList = querySnapshot.docs.map(doc => {
+        const usersQuery = query(usersRef, orderBy('createdAt', 'desc'));
+        const usersSnapshot = await getDocs(usersQuery);
+        const allUsersList = usersSnapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id,
+        }));
+
+        // --- Process Chart Data ---
+        const monthlySignups: { [key: string]: number } = {};
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        allUsersList.forEach(user => {
+            if (user.createdAt && user.createdAt.seconds) {
+                const date = new Date(user.createdAt.seconds * 1000);
+                const month = monthNames[date.getMonth()];
+                monthlySignups[month] = (monthlySignups[month] || 0) + 1;
+            }
+        });
+        
+        const generatedChartData: ChartData[] = monthNames.map(month => ({
+            month: month.slice(0, 3), // e.g., Jan, Feb
+            users: monthlySignups[month] || 0,
+        })).filter(data => data.users > 0); // Only show months with signups or adjust as needed
+
+        if (generatedChartData.length > 0) {
+            setChartData(generatedChartData);
+        }
+
+        // --- Process Recent Users Table (first 5) ---
+        const recentUsersList = usersSnapshot.docs.slice(0, 5).map(doc => {
           const data = doc.data();
           return {
             id: doc.id,
@@ -109,11 +133,11 @@ export default function AdminDashboard() {
             amount: '$0.00', // Placeholder
           };
         });
-        setRecentUsers(usersList);
+        setRecentUsers(recentUsersList);
 
-        // Fetch counts for the stat cards
+        // --- Process Stat Cards ---
         const leadsSnapshot = await getDocs(collection(db, 'leads'));
-        const signupCount = querySnapshot.size; // From the 'users' collection
+        const signupCount = usersSnapshot.size;
         const leadCount = leadsSnapshot.size;
         
         setUserCounts(prev => ({
@@ -153,7 +177,7 @@ export default function AdminDashboard() {
       </div>
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
         <Link href="/admin/users?filter=all">
-          <Card>
+          <Card className="hover:bg-muted/50 transition-colors">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">All Users</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
@@ -167,7 +191,7 @@ export default function AdminDashboard() {
           </Card>
         </Link>
         <Link href="/admin/users?filter=signup">
-          <Card>
+          <Card className="hover:bg-muted/50 transition-colors">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Signup Users</CardTitle>
               <UserPlus className="h-4 w-4 text-muted-foreground" />
@@ -181,7 +205,7 @@ export default function AdminDashboard() {
           </Card>
         </Link>
         <Link href="/admin/users?filter=lead">
-          <Card>
+          <Card className="hover:bg-muted/50 transition-colors">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Lead Users</CardTitle>
               <UserCheck className="h-4 w-4 text-muted-foreground" />
@@ -195,7 +219,7 @@ export default function AdminDashboard() {
           </Card>
         </Link>
         <Link href="/admin/referral-management">
-          <Card>
+          <Card className="hover:bg-muted/50 transition-colors">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Referral Users</CardTitle>
               <UserRound className="h-4 w-4 text-muted-foreground" />
@@ -314,6 +338,7 @@ export default function AdminDashboard() {
                   axisLine={false}
                   tickMargin={8}
                   tickCount={6}
+                  allowDecimals={false}
                 />
                 <ChartTooltip
                   cursor={false}
