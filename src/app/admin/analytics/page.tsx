@@ -34,6 +34,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Line,
   LineChart as RechartsLineChart,
+  Pie,
+  PieChart,
+  Cell,
+  Legend,
   XAxis,
   YAxis,
   Tooltip,
@@ -52,48 +56,31 @@ interface ChartData {
   users: number;
 }
 
-const chartConfig = {
+interface PieChartData {
+  name: string;
+  value: number;
+}
+
+const lineChartConfig = {
   users: {
     label: 'Users',
     color: 'hsl(var(--primary))',
   },
 };
 
-const ComingSoonDialogContent = () => (
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Feature Coming Soon</DialogTitle>
-      <DialogDescription>
-        This analytics section is under construction. Check back later for more
-        insights!
-      </DialogDescription>
-    </DialogHeader>
-    <div className="min-h-[200px] flex items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8">
-      <div className="text-center">
-        <Construction className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-        <p className="text-lg text-muted-foreground">More detailed analytics are coming soon!</p>
-      </div>
-    </div>
-  </DialogContent>
-);
+const pieChartConfig = {
+  "Signup Users": {
+    label: 'Signup Users',
+    color: 'hsl(var(--primary))',
+  },
+  "Lead Users": {
+     label: 'Lead Users',
+     color: 'hsl(var(--chart-2))',
+  }
+};
 
-const AnalyticsPlaceholder = ({ title, icon: Icon }: { title: string, icon: React.ElementType }) => (
-    <Card>
-        <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
-                <Icon className="h-5 w-5" />
-                {title}
-            </CardTitle>
-        </CardHeader>
-        <CardContent className="h-[300px] flex flex-col items-center justify-center text-center p-4">
-             <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg w-full">
-                <BarChart3 className="w-12 h-12 text-muted-foreground mb-4" />
-                <p className="text-sm font-medium text-muted-foreground">Data not available</p>
-                <p className="text-xs text-muted-foreground">Please configure your analytics provider in the settings.</p>
-            </div>
-        </CardContent>
-    </Card>
-);
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))'];
+
 
 export default function AdminAnalyticsPage() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -104,7 +91,8 @@ export default function AdminAnalyticsPage() {
     totalLeads: 0,
     activeUsers: 0,
   });
-  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [lineChartData, setLineChartData] = useState<ChartData[]>([]);
+  const [pieChartData, setPieChartData] = useState<PieChartData[]>([]);
 
   useEffect(() => {
     async function fetchAnalyticsData() {
@@ -113,7 +101,6 @@ export default function AdminAnalyticsPage() {
         const usersRef = collection(db, 'users');
         const leadsRef = collection(db, 'leads');
 
-        // --- Fetch all data in parallel ---
         const [usersSnapshot, leadsSnapshot] = await Promise.all([
             getDocs(usersRef),
             getDocs(leadsRef)
@@ -123,14 +110,12 @@ export default function AdminAnalyticsPage() {
         const totalLeads = leadsSnapshot.size;
         const allUsersList = usersSnapshot.docs.map(doc => doc.data());
 
-        // --- Calculate New Users (last 30 days) ---
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const newUsersCount = allUsersList.filter(user => 
             user.createdAt && user.createdAt.toDate() >= thirtyDaysAgo
         ).length;
 
-        // --- Calculate Active Users (last 5 minutes) ---
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         const activeUsersCount = allUsersList.filter(user =>
           user.lastActive && user.lastActive.toDate() >= fiveMinutesAgo
@@ -143,7 +128,6 @@ export default function AdminAnalyticsPage() {
             activeUsers: activeUsersCount
         });
 
-        // --- Chart Data (monthly signups for current year) ---
         const monthlySignups: { [key: string]: number } = {};
         allUsersList.forEach(user => {
           if (user.createdAt && user.createdAt.seconds) {
@@ -166,7 +150,13 @@ export default function AdminAnalyticsPage() {
             users: monthlySignups[monthKey] || 0,
           });
         }
-        setChartData(fullYearData);
+        setLineChartData(fullYearData);
+        
+        setPieChartData([
+            { name: 'Signup Users', value: totalUsers },
+            { name: 'Lead Users', value: totalLeads },
+        ]);
+
 
       } catch (error) {
         console.error("Error fetching analytics data:", error);
@@ -175,7 +165,6 @@ export default function AdminAnalyticsPage() {
       }
     }
     fetchAnalyticsData();
-     // Refresh active users every 30 seconds
     const interval = setInterval(fetchAnalyticsData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -189,7 +178,10 @@ export default function AdminAnalyticsPage() {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28" />)}
                 </div>
-                <Skeleton className="h-96" />
+                <div className="grid gap-4 md:grid-cols-2">
+                    <Skeleton className="h-96" />
+                    <Skeleton className="h-96" />
+                </div>
             </div>
         )
      }
@@ -251,28 +243,69 @@ export default function AdminAnalyticsPage() {
                 </CardContent>
               </Card>
             </div>
-            <Card>
-                <CardHeader>
-                    <CardTitle>User Growth This Year</CardTitle>
-                    <CardDescription>
-                        A chart showing new user signups per month.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                        <RechartsLineChart
-                            data={chartData}
-                            margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
-                        >
-                             <CartesianGrid vertical={false} />
-                             <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
-                             <YAxis tickLine={false} axisLine={false} tickMargin={8} allowDecimals={false}/>
-                             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                             <Line dataKey="users" type="monotone" stroke="hsl(var(--primary))" strokeWidth={2} dot={true} />
-                        </RechartsLineChart>
-                    </ChartContainer>
-                </CardContent>
-            </Card>
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                  <CardHeader>
+                      <CardTitle>User Growth This Year</CardTitle>
+                      <CardDescription>
+                          A chart showing new user signups per month.
+                      </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <ChartContainer config={lineChartConfig} className="h-[300px] w-full">
+                          <RechartsLineChart
+                              data={lineChartData}
+                              margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+                          >
+                               <CartesianGrid vertical={false} />
+                               <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+                               <YAxis tickLine={false} axisLine={false} tickMargin={8} allowDecimals={false}/>
+                               <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                               <Line dataKey="users" type="monotone" stroke="hsl(var(--primary))" strokeWidth={2} dot={true} />
+                          </RechartsLineChart>
+                      </ChartContainer>
+                  </CardContent>
+              </Card>
+              <Card>
+                  <CardHeader>
+                      <CardTitle>Users by Source</CardTitle>
+                      <CardDescription>
+                          A breakdown of user acquisition channels.
+                      </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <ChartContainer config={pieChartConfig} className="h-[300px] w-full">
+                           <PieChart>
+                            <Tooltip content={<ChartTooltipContent />} />
+                            <Pie
+                              data={pieChartData}
+                              dataKey="value"
+                              nameKey="name"
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={100}
+                              labelLine={false}
+                              label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+                                const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                                const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
+                                const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
+                                return (
+                                  <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central">
+                                    {`${(percent * 100).toFixed(0)}%`}
+                                  </text>
+                                );
+                              }}
+                            >
+                              {pieChartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Legend />
+                          </PieChart>
+                      </ChartContainer>
+                  </CardContent>
+              </Card>
+            </div>
           </div>
       )
   }
@@ -308,7 +341,21 @@ export default function AdminAnalyticsPage() {
           open={activeTab !== 'overview'}
           onOpenChange={(isOpen) => !isOpen && setActiveTab('overview')}
         >
-          <ComingSoonDialogContent />
+           <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Feature Coming Soon</DialogTitle>
+              <DialogDescription>
+                This analytics section is under construction. Check back later for more
+                insights!
+              </DialogDescription>
+            </DialogHeader>
+            <div className="min-h-[200px] flex items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-8">
+              <div className="text-center">
+                <Construction className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <p className="text-lg text-muted-foreground">More detailed analytics are coming soon!</p>
+              </div>
+            </div>
+          </DialogContent>
         </Dialog>
       </div>
     </div>
