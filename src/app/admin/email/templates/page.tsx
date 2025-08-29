@@ -182,7 +182,7 @@ function FeatureAnnouncementEditor({ template, onUpdate, onClose }: { template: 
           Provide feature details to generate an announcement, or edit the content manually.
         </DialogDescription>
       </DialogHeader>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 max-h-[70vh] overflow-y-auto pr-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 max-h-[70vh] overflow-y-auto pr-4">
           <div className="space-y-4">
               <h3 className="font-semibold text-lg">AI Content Generation</h3>
               <div className="space-y-2">
