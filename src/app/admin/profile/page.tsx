@@ -127,7 +127,7 @@ export default function AdminProfilePage() {
                 </Avatar>
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">{profile.firstName} {profile.lastName}</h1>
-                    <p className="text-sm text-muted-foreground"># {user.uid.slice(0, 15)}... <Copy className="h-3 w-3 inline cursor-pointer" onClick={() => copyToClipboard(user.uid)} /></p>
+                    <p className="text-sm text-muted-foreground"># {user.uid} ({profile.userName}) <Copy className="h-3 w-3 inline cursor-pointer" onClick={() => copyToClipboard(user.uid)} /></p>
 
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-muted-foreground">
                         <div className="flex items-center gap-2">
