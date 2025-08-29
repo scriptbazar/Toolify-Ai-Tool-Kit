@@ -39,11 +39,11 @@ const initialMessages: Message[] = [
 ];
 
 const allUsers = [
-    { initials: 'GK', name: 'Ganesh Kumar', status: 'live' },
-    { initials: 'SB', name: 'Script Bazar', status: 'live' },
-    { initials: 'JD', name: 'John Doe', status: 'new' },
-    { initials: 'EM', name: 'Elon Musk', status: 'live' },
-    { initials: 'TJ', name: 'Thomas Jefferson', status: 'new' },
+    { initials: 'GK', name: 'Ganesh Kumar', username: 'ganesh', status: 'live' },
+    { initials: 'SB', name: 'Script Bazar', username: 'scriptbazar', status: 'live' },
+    { initials: 'JD', name: 'John Doe', username: 'johndoe', status: 'new' },
+    { initials: 'EM', name: 'Elon Musk', username: 'elon', status: 'live' },
+    { initials: 'TJ', name: 'Thomas Jefferson', username: 'thomasj', status: 'new' },
 ];
 
 export default function CommunityChatPage() {
@@ -287,7 +287,10 @@ export default function CommunityChatPage() {
                                   <Avatar>
                                       <AvatarFallback>{user.initials}</AvatarFallback>
                                   </Avatar>
-                                  <p className="font-medium">{user.name}</p>
+                                   <div>
+                                      <p className="font-medium">{user.name}</p>
+                                      <p className="text-sm text-muted-foreground">@{user.username}</p>
+                                    </div>
                               </div>
                               {user.status === 'live' && <Badge className="bg-green-500 hover:bg-green-600 text-white">online</Badge>}
                           </div>
