@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { headers } from 'next/headers';
@@ -6,6 +7,8 @@ import { ChatWidget } from './common/ChatWidget';
 import { cn } from '@/lib/utils';
 import Header from './common/Header';
 import Footer from './common/Footer';
+import UserPanelLayout from '@/app/dashboard/layout';
+import AdminLayout from '@/app/admin/layout';
 
 export async function AppProviders({ children }: { children: React.ReactNode }) {
   const pathname = headers().get('x-next-pathname') || '';
@@ -31,11 +34,21 @@ export async function AppProviders({ children }: { children: React.ReactNode }) 
   const isAuthPage = authRoutes.includes(pathname);
   const showPublicLayout = !isAuthPage && !isAdminRoute && !isUserPanelRoute;
 
+  if (isAdminRoute) {
+    if (isAuthPage) return <>{children}</>;
+    return <AdminLayout>{children}</AdminLayout>;
+  }
+
+  if (isUserPanelRoute) {
+    if (isAuthPage) return <>{children}</>;
+    return <UserPanelLayout>{children}</UserPanelLayout>;
+  }
+
   return (
     <div className={cn("relative flex min-h-screen flex-col")}>
       {showPublicLayout && <Header />}
       <main className="flex-1">{children}</main>
-      {!isAdminRoute && !isUserPanelRoute && !isAuthPage && <ChatWidget />}
+      <ChatWidget />
       {showPublicLayout && <Footer />}
     </div>
   );
