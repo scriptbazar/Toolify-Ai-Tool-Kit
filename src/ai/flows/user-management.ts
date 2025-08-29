@@ -91,7 +91,8 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
     return allEmails;
   } catch (error: any) {
     console.error("Error fetching all emails:", error);
-    // Throw the error so the client-side can handle it
-    throw new Error(`Failed to fetch emails: ${error.message}`);
+    // Instead of throwing, return an empty array to allow the UI to render gracefully.
+    // The error is logged on the server for debugging.
+    return [];
   }
 }
