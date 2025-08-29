@@ -4,8 +4,11 @@
 import { usePathname } from 'next/navigation';
 import { ChatWidget } from './common/ChatWidget';
 import { cn } from '@/lib/utils';
+import Header from './common/Header';
+import Footer from './common/Footer';
+import type { AppSettings } from '@/ai/flows/settings-management.types';
 
-export function AppProviders({ children }: { children: React.ReactNode }) {
+export function AppProviders({ children, settings }: { children: React.ReactNode, settings: AppSettings }) {
   const pathname = usePathname();
   
   const authRoutes = ['/login', '/signup', '/admin/login', '/forgot-password'];
@@ -32,9 +35,10 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={cn(showPublicLayout && "relative flex min-h-screen flex-col")}>
-      {children}
-      {/* Show chat widget on non-admin pages */}
+      {showPublicLayout && <Header />}
+      <main className="flex-1">{children}</main>
       {!isAdminRoute && <ChatWidget />}
+      {showPublicLayout && <Footer settings={settings.general} />}
     </div>
   );
 }

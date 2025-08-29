@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/common/ThemeProvider';
 import { AppProviders } from '@/components/AppProviders';
 import { headers } from 'next/headers';
+import { getSettings } from '@/ai/flows/settings-management';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -16,11 +17,13 @@ export const metadata: Metadata = {
     'Over 100 smart utility tools and AI-powered solutions for text, PDF, images, SEO, development, and productivity. Boost your workflow with ToolifyAI.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getSettings();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
@@ -36,7 +39,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AppProviders>{children}</AppProviders>
+          <AppProviders settings={settings}>{children}</AppProviders>
           <Toaster />
         </ThemeProvider>
       </body>

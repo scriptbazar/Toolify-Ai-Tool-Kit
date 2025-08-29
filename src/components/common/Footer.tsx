@@ -1,7 +1,8 @@
+
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from './Logo';
-import { getSettings } from '@/ai/flows/settings-management';
+import type { GeneralSettings } from '@/ai/flows/settings-management.types';
 
 const topTools = [
   { name: 'Age Calculator', href: '#' },
@@ -35,16 +36,14 @@ const bestHostings = [
     { name: 'Hostwinds', href: '#' },
 ];
 
-export default async function Footer() {
-  const settings = await getSettings();
-  const generalSettings = settings.general;
-  const copyrightText = generalSettings?.copyrightText?.replace('{year}', new Date().getFullYear().toString()) || `© ${new Date().getFullYear()} ToolifyAI. All rights reserved.`;
+export default function Footer({ settings }: { settings?: GeneralSettings }) {
+  const copyrightText = settings?.copyrightText?.replace('{year}', new Date().getFullYear().toString()) || `© ${new Date().getFullYear()} ToolifyAI. All rights reserved.`;
 
   const socialLinks = [
-    { name: 'Facebook', href: generalSettings?.socialLinks?.facebook, icon: Facebook },
-    { name: 'Twitter', href: generalSettings?.socialLinks?.twitter, icon: Twitter },
-    { name: 'Instagram', href: generalSettings?.socialLinks?.instagram, icon: Instagram },
-    { name: 'YouTube', href: generalSettings?.socialLinks?.youtube, icon: Youtube },
+    { name: 'Facebook', href: settings?.socialLinks?.facebook, icon: Facebook },
+    { name: 'Twitter', href: settings?.socialLinks?.twitter, icon: Twitter },
+    { name: 'Instagram', href: settings?.socialLinks?.instagram, icon: Instagram },
+    { name: 'YouTube', href: settings?.socialLinks?.youtube, icon: Youtube },
   ].filter(link => link.href);
 
   return (
@@ -54,10 +53,10 @@ export default async function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <Logo />
-              <span className="font-bold text-xl">{generalSettings?.siteTitle || 'ToolifyAI'}</span>
+              <span className="font-bold text-xl">{settings?.siteTitle || 'ToolifyAI'}</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-6">
-              {generalSettings?.siteDescription || 'ToolifyAI is your go-to hub for powerful, easy-to-use online utilities that simplify everyday tasks. Whether you need converters, analyzers, or creative tools, ToolifyAI connects you to everything in one place.'}
+              {settings?.siteDescription || 'ToolifyAI is your go-to hub for powerful, easy-to-use online utilities that simplify everyday tasks. Whether you need converters, analyzers, or creative tools, ToolifyAI connects you to everything in one place.'}
             </p>
             <h3 className="font-semibold mb-4">Follow Us</h3>
             <div className="flex space-x-3">
