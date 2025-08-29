@@ -20,9 +20,9 @@ import {
   ShieldCheck,
   Receipt,
   AlertTriangle,
+  Clock,
   UserX,
   CalendarClock,
-  Clock,
 } from 'lucide-react';
 import {
   Dialog,
@@ -30,8 +30,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
+import { Logo } from '@/components/common/Logo';
 
 const templates = [
   {
@@ -40,7 +40,7 @@ const templates = [
     title: 'Welcome Email',
     description: 'Sent to new users upon successful registration.',
     subject: 'Welcome to ToolifyAI!',
-    body: `Hi {{firstName}},\n\nWelcome to ToolifyAI! We're thrilled to have you on board.\n\nExplore our suite of over 100 smart tools designed to boost your productivity. To get started, check out our most popular tools on the homepage.\n\nIf you have any questions, feel free to contact our support team.\n\nBest regards,\nThe ToolifyAI Team`,
+    body: `Hi {{name}},\n\nWelcome to ToolifyAI! We're thrilled to have you on board and can't wait for you to explore our suite of over 100 smart tools designed to boost your productivity.\n\nTo get started, we recommend checking out our most popular tools on the homepage. If you have any questions or need assistance, our support team is always here to help.\n\nBest regards,\nThe ToolifyAI Team`,
   },
   {
     id: 'forgot-password',
@@ -48,7 +48,7 @@ const templates = [
     title: 'Forgot Password',
     description: 'Sent when a user requests to reset their password.',
     subject: 'Reset Your ToolifyAI Password',
-    body: `Hello {{firstName}},\n\nSomeone has requested a password reset for your ToolifyAI account. If this was you, please click the link below to set a new password:\n\n[Reset Password Link]\n\nIf you did not request this, you can safely ignore this email.\n\nThanks,\nThe ToolifyAI Team`,
+    body: `Hello {{name}},\n\nA password reset was requested for your ToolifyAI account. If this was you, please click the link below to set a new password. The link will expire in 1 hour for your security.\n\n[Reset Password Link]\n\nIf you did not request this, you can safely ignore this email. No changes have been made to your account.\n\nThanks,\nThe ToolifyAI Team`,
   },
   {
     id: 'email-verification',
@@ -56,7 +56,7 @@ const templates = [
     title: 'Email Address Verification',
     description: 'Sent to new users to verify their email address.',
     subject: 'Verify Your Email Address for ToolifyAI',
-    body: `Hi {{firstName}},\n\nPlease verify your email address by clicking the link below:\n\n[Verification Link]\n\nThis link will expire in 24 hours. If you did not sign up for ToolifyAI, please disregard this email.\n\nThanks,\nThe ToolifyAI Team`,
+    body: `Hi {{name}},\n\nPlease verify your email address to complete your registration and secure your account. Click the link below:\n\n[Verification Link]\n\nThis link will expire in 24 hours. If you did not sign up for ToolifyAI, please disregard this email.\n\nThanks,\nThe ToolifyAI Team`,
   },
   {
     id: 'password-changed',
@@ -64,7 +64,7 @@ const templates = [
     title: 'Password Change Notification',
     description: 'Confirms that a user\'s password has been changed.',
     subject: 'Your ToolifyAI Password Has Been Changed',
-    body: `Hello {{firstName}},\n\nThis is a confirmation that the password for your ToolifyAI account has been successfully changed.\n\nIf you did not make this change, please contact our support team immediately.\n\nBest,\nThe ToolifyAI Team`,
+    body: `Hello {{name}},\n\nThis is a confirmation that the password for your ToolifyAI account was successfully changed. \n\nIf you did not make this change, please reset your password immediately and contact our support team.\n\nBest,\nThe ToolifyAI Team`,
   },
   {
     id: 'subscription-confirmation',
@@ -72,7 +72,7 @@ const templates = [
     title: 'Subscription Confirmation',
     description: 'Confirms a user\'s successful subscription to a plan.',
     subject: 'Your ToolifyAI Subscription is Confirmed!',
-    body: `Hi {{firstName}},\n\nYour subscription to the {{planName}} plan is now active! Thank you for upgrading.\n\nYou now have access to all the premium features included in your plan. You can manage your subscription at any time from your account dashboard.\n\nWe're excited to see what you create!\n\nBest,\nThe ToolifyAI Team`,
+    body: `Hi {{name}},\n\nYour subscription to the {{planName}} plan is now active! Thank you for upgrading. You now have access to all the premium features included in your plan.\n\nYou can manage your subscription and view billing details at any time from your account dashboard.\n\nWe're excited to see what you create!\n\nBest,\nThe ToolifyAI Team`,
   },
   {
     id: 'payment-receipt',
@@ -80,7 +80,7 @@ const templates = [
     title: 'Payment Receipt',
     description: 'Provides users with a receipt for their payment.',
     subject: 'Your ToolifyAI Receipt (Order #{{orderId}})',
-    body: `Hi {{firstName}},\n\nThank you for your payment. Here is the receipt for your recent purchase.\n\nPlan: {{planName}}\nAmount: {{amount}}\nDate: {{date}}\n\nYou can view your full billing history in your account settings.\n\nThanks,\nThe ToolifyAI Team`,
+    body: `Hi {{name}},\n\nThank you for your payment. Here is the receipt for your recent purchase.\n\nPlan: {{planName}}\nAmount: {{amount}}\nDate: {{date}}\n\nYou can view your full billing history in your account settings.\n\nThanks for being a valued customer,\nThe ToolifyAI Team`,
   },
   {
     id: 'new-feature',
@@ -88,7 +88,7 @@ const templates = [
     title: 'New Feature Announcement',
     description: 'Inform users about a new feature or tool update.',
     subject: '🚀 New Feature Alert: {{featureName}} is Here!',
-    body: `Hi there,\n\nWe're constantly working to make ToolifyAI better, and we're excited to announce a brand new feature: {{featureName}}!\n\n{{featureDescription}}\n\nLog in now to give it a try!\n\nCheers,\nThe ToolifyAI Team`,
+    body: `Hi there,\n\nWe're constantly working to make ToolifyAI better, and we're excited to announce a brand new feature: {{featureName}}!\n\n{{featureDescription}}\n\nLog in now to give it a try and supercharge your workflow!\n\nCheers,\nThe ToolifyAI Team`,
   },
   {
     id: 'support-ticket',
@@ -96,7 +96,7 @@ const templates = [
     title: 'Support Ticket Confirmation',
     description: 'Confirms receipt of a user\'s support ticket.',
     subject: 'We\'ve Received Your Support Request (Ticket #{{ticketId}})',
-    body: `Hello {{firstName}},\n\nThanks for reaching out! This email is to confirm that we have received your support request (Ticket #{{ticketId}}). Our team will review it and get back to you as soon as possible.\n\nYou can view the status of your ticket in your user dashboard.\n\nBest regards,\nThe ToolifyAI Support Team`,
+    body: `Hello {{name}},\n\nThanks for reaching out! This email is to confirm that we have received your support request (Ticket #{{ticketId}}). Our team will review it and get back to you as soon as possible, typically within 24 hours.\n\nYou can view the status of your ticket in your user dashboard.\n\nBest regards,\nThe ToolifyAI Support Team`,
   },
    {
     id: 'security-alert',
@@ -104,15 +104,15 @@ const templates = [
     title: 'Security Alert',
     description: 'Alerts users of a login from a new device or location.',
     subject: 'Security Alert: New Login to Your ToolifyAI Account',
-    body: `Hello {{firstName}},\n\nYour account was just accessed from a new device or location. If this was you, you can safely ignore this email. If you do not recognize this activity, please change your password immediately and contact support.\n\nDevice: {{device}}\nLocation: {{location}}\n\nThanks,\nThe ToolifyAI Security Team`,
+    body: `Hello {{name}},\n\nYour account was just accessed from a new device or location. If this was you, you can safely ignore this email.\n\nDevice: {{device}}\nLocation: {{location}}\n\nIf you do not recognize this activity, please change your password immediately and contact support. We recommend enabling Two-Factor Authentication for enhanced security.\n\nThanks,\nThe ToolifyAI Security Team`,
   },
   {
     id: 'inactive-account',
     icon: Clock,
     title: 'Inactive Account Reminder',
-    description: 'Sent to users whose accounts have been inactive for a period (e.g., 6 months).',
+    description: 'Sent to users whose accounts have been inactive for a period.',
     subject: "We've Missed You at ToolifyAI!",
-    body: `Hello {{firstName}},\n\nIt's been a while since you last logged into your ToolifyAI account. We're constantly adding new tools and features to help you be more productive.\n\nLog in today to see what's new!\n\nIf you don't plan on using your account, you can deactivate it from your profile settings. For security, inactive accounts may be automatically deactivated after a long period of inactivity.\n\nBest,\nThe ToolifyAI Team`,
+    body: `Hello {{name}},\n\nIt's been a while since you last logged into your ToolifyAI account. We're constantly adding new tools and features to help you be more productive.\n\nLog in today to see what's new!\n\nIf you don't plan on using your account, you can deactivate it from your profile settings. For security, inactive accounts may be automatically deactivated after a long period of inactivity.\n\nBest,\nThe ToolifyAI Team`,
   },
    {
     id: 'renewal-reminder',
@@ -120,7 +120,15 @@ const templates = [
     title: 'Subscription Renewal Reminder',
     description: 'Reminds users that their subscription is about to renew.',
     subject: 'Your ToolifyAI Subscription is Renewing Soon',
-    body: `Hi {{firstName}},\n\nJust a friendly reminder that your subscription for the {{planName}} plan will automatically renew on {{renewalDate}}.\n\nIf you need to make any changes to your subscription or billing information, please visit your account dashboard.\n\nThanks for being a valued member!\n\nThe ToolifyAI Team`,
+    body: `Hi {{name}},\n\nThis is a friendly reminder that your subscription for the {{planName}} plan will automatically renew on {{renewalDate}}.\n\nIf you need to make any changes to your subscription or billing information, please visit your account dashboard. No action is required to continue your subscription.\n\nThanks for being a valued member!\n\nThe ToolifyAI Team`,
+  },
+  {
+    id: 'subscription-cancellation',
+    icon: UserX,
+    title: 'Subscription Cancellation',
+    description: 'Confirms that a user\'s subscription has been cancelled.',
+    subject: 'Your ToolifyAI Subscription Has Been Cancelled',
+    body: `Hi {{name}},\n\nThis email confirms that your subscription to the {{planName}} plan has been successfully cancelled. You will retain access to premium features until the end of your current billing period on {{endDate}}.\n\nWe're sorry to see you go! If you have a moment, we'd love to hear your feedback on why you cancelled. You can resubscribe at any time from your account dashboard.\n\nBest,\nThe ToolifyAI Team`,
   },
 ];
 
@@ -222,9 +230,15 @@ export default function EmailTemplatesPage() {
               This is a preview of the "{selectedTemplate?.subject}" email.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-            <div className="p-4 border rounded-lg bg-muted text-sm">
-                <p className="whitespace-pre-wrap font-sans">{selectedTemplate?.body}</p>
+          <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
+            <div className="p-6 border rounded-lg bg-muted">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b">
+                    <Logo className="h-8 w-8 text-primary"/>
+                    <span className="text-xl font-bold text-foreground">ToolifyAI</span>
+                </div>
+                <div className="text-sm text-foreground whitespace-pre-wrap font-sans">
+                  {selectedTemplate?.body}
+                </div>
             </div>
           </div>
         </DialogContent>
@@ -232,3 +246,5 @@ export default function EmailTemplatesPage() {
     </div>
   );
 }
+
+    

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
   UploadCloud,
@@ -15,6 +15,7 @@ import {
   MailCheck,
   Smartphone,
   MessageSquare,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -26,12 +27,13 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { onAuthStateChanged, updatePassword, type User as FirebaseUser } from 'firebase/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { countries } from '@/lib/countries';
 import { Combobox } from '@/components/ui/combobox';
+import { sendPasswordChangeEmail } from '@/ai/flows/send-email';
 
 
 interface UserProfile {
@@ -82,8 +84,11 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -137,15 +142,31 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
 
   const handleSaveChanges = async () => {
     if (!user || !profile) return;
+    
+    if (newPassword && newPassword !== confirmPassword) {
+        toast({ title: 'Error', description: 'New passwords do not match.', variant: 'destructive' });
+        return;
+    }
+
     setIsSaving(true);
     try {
+      // Update profile in Firestore
       const userDocRef = doc(db, 'users', user.uid);
-      
-      const { ...profileData } = profile;
+      await updateDoc(userDocRef, { ...profile });
 
-      await updateDoc(userDocRef, {
-        ...profileData
-      });
+      // Update password in Firebase Auth if a new one is provided
+      if (newPassword) {
+        await updatePassword(user, newPassword);
+        
+        // Send password change notification email
+        await sendPasswordChangeEmail({
+            to: profile.email,
+            name: profile.firstName
+        });
+        
+        setNewPassword('');
+        setConfirmPassword('');
+      }
 
        toast({
         title: 'Profile Updated',
@@ -206,7 +227,8 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                    <Avatar className="h-40 w-40 text-6xl">
                      <AvatarFallback>{profile.firstName?.[0]?.toUpperCase()}</AvatarFallback>
                    </Avatar>
-                   <Button variant="outline" className="w-full">
+                   <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+                   <Button variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()}>
                        <UploadCloud className="mr-2 h-4 w-4" />
                        Upload Profile
                    </Button>
@@ -279,7 +301,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                   <div className="space-y-2">
                     <Label htmlFor="new-password">New Password</Label>
                     <div className="relative">
-                        <Input id="new-password" type={showPassword ? 'text' : 'password'} placeholder="Enter new password" />
+                        <Input id="new-password" type={showPassword ? 'text' : 'password'} placeholder="Enter new password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
                         <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowPassword(!showPassword)}>
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
@@ -288,7 +310,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                    <div className="space-y-2">
                     <Label htmlFor="confirm-password">Confirm New Password</Label>
                     <div className="relative">
-                        <Input id="confirm-password" type={showConfirmPassword ? 'text' : 'password'} placeholder="Confirm new password" />
+                        <Input id="confirm-password" type={showConfirmPassword ? 'text' : 'password'} placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                          <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                             {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
@@ -331,8 +353,9 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                             />
                         </div>
                         {profile.twoFactorAuthMethods?.mobileNumber && !profile.mobileNumber && (
-                          <div className="mt-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
-                            Please add and verify your mobile number in the 'Personal Information' section to use SMS-based authentication.
+                          <div className="mt-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4"/>
+                            <span>Please add and verify your mobile number in 'Personal Information' to use SMS-based authentication.</span>
                           </div>
                         )}
                     </Card>
@@ -343,3 +366,5 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
+
+    
