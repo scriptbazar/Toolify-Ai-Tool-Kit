@@ -2,6 +2,7 @@ import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { tools } from '@/lib/constants';
 import { notFound } from 'next/navigation';
+import PublicLayout from '../layout';
 
 export async function generateStaticParams() {
   return tools.map((tool) => ({
@@ -17,6 +18,7 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
   }
 
   return (
+    <PublicLayout>
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="flex flex-col lg:flex-row lg:gap-8">
           <div className="flex-1">
@@ -42,5 +44,6 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
           </aside>
         </div>
       </div>
+    </PublicLayout>
   );
 }
