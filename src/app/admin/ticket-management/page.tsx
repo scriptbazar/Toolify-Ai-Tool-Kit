@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo, type FormEvent } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,21 +12,12 @@ import {
   RefreshCw,
   CheckCircle,
   Search,
-  MoreHorizontal,
   Paperclip,
   Send,
   Loader2,
-  Trash2,
   Save,
   User,
 } from 'lucide-react';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -37,62 +28,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { getTickets, addTicketReply, updateTicketDetails, type Ticket, type TicketMessage, TicketPriority, TicketStatus } from '@/ai/flows/ticket-management';
+import { Skeleton } from '@/components/ui/skeleton';
 
-type FilterType = 'all' | 'open' | 'in-progress' | 'closed';
-type TicketStatus = 'Open' | 'In Progress' | 'Closed';
-type TicketPriority = 'High' | 'Medium' | 'Low';
-type Message = {
-    author: 'user' | 'admin';
-    name: string;
-    avatar: string;
-    text: string;
-    timestamp: string;
-};
-
-type Ticket = {
-  id: string;
-  subject: string;
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-  priority: TicketPriority;
-  status: TicketStatus;
-  lastUpdated: string;
-  messages: Message[];
-};
-
-const initialTickets: Ticket[] = [
-    {
-        id: 'TKT-001',
-        subject: 'Cannot login to my account',
-        user: {
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-            avatar: 'https://i.pravatar.cc/150?u=john.doe',
-        },
-        priority: 'High',
-        status: 'Open',
-        lastUpdated: '2024-07-31 10:00 AM',
-        messages: [
-            {
-                author: 'user' as const,
-                name: 'John Doe',
-                avatar: 'https://i.pravatar.cc/150?u=john.doe',
-                text: 'Hi, I seem to have forgotten my password and the reset link is not working. Can you please help me regain access to my account? I have tried clearing my cache and using a different browser, but nothing seems to work. I need to access my files urgently.',
-                timestamp: '2024-07-31 09:45 AM',
-            },
-            {
-                author: 'admin' as const,
-                name: 'Admin',
-                avatar: 'https://i.pravatar.cc/150?u=admin',
-                text: 'Hello John Doe,\n\nThank you for reaching out. We have received your ticket and are looking into the issue. A member of our support team will get back to you as soon as possible. We appreciate your patience.',
-                timestamp: '2024-07-31 09:46 AM',
-            }
-        ]
-    },
-];
 
 const getStatusBadge = (status: TicketStatus) => {
     switch (status) {
@@ -118,54 +56,100 @@ const getPriorityBadge = (priority: TicketPriority) => {
 
 
 export default function TicketManagementPage() {
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [activeFilter, setActiveFilter] = useState<TicketStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [tickets, setTickets] = useState(initialTickets);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [replyText, setReplyText] = useState('');
   const [isReplying, setIsReplying] = useState(false);
   const { toast } = useToast();
 
-  const tabs: { id: FilterType; label: string; icon: React.ElementType }[] = [
-    { id: 'all', label: 'All', icon: Inbox },
-    { id: 'open', label: 'Open', icon: CircleDotDashed },
-    { id: 'in-progress', label: 'In Progress', icon: RefreshCw },
-    { id: 'closed', label: 'Closed', icon: CheckCircle },
-  ];
+  const fetchTickets = async () => {
+    setLoading(true);
+    try {
+        const fetchedTickets = await getTickets();
+        setTickets(fetchedTickets);
+    } catch (error) {
+        console.error("Failed to fetch tickets:", error);
+        toast({ title: 'Error', description: 'Could not load tickets.', variant: 'destructive' });
+    } finally {
+        setLoading(false);
+    }
+  }
 
-  const handleReply = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const tabs: { id: TicketStatus | 'all'; label: string; icon: React.ElementType }[] = [
+    { id: 'all', label: 'All', icon: Inbox },
+    { id: 'Open', label: 'Open', icon: CircleDotDashed },
+    { id: 'In Progress', label: 'In Progress', icon: RefreshCw },
+    { id: 'Closed', label: 'Closed', icon: CheckCircle },
+  ];
+  
+  const filteredTickets = useMemo(() => {
+    return tickets.filter(ticket => {
+        const filterMatch = activeFilter === 'all' || ticket.status === activeFilter;
+        const searchMatch = ticket.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            ticket.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            ticket.user.email.toLowerCase().includes(searchQuery.toLowerCase());
+        return filterMatch && searchMatch;
+    });
+  }, [tickets, activeFilter, searchQuery]);
+
+  const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!replyText.trim() || !selectedTicket) return;
 
     setIsReplying(true);
-    setTimeout(() => {
-        const newReply: Message = {
+    try {
+        const newReply: TicketMessage = {
             author: 'admin',
             name: 'Admin',
             avatar: 'https://i.pravatar.cc/150?u=admin',
             text: replyText,
-            timestamp: new Date().toLocaleString(),
+            timestamp: new Date().toISOString(),
         };
 
-        const updatedTicket = {
-            ...selectedTicket,
-            messages: [...selectedTicket.messages, newReply],
-            status: 'In Progress' as TicketStatus,
-            lastUpdated: new Date().toLocaleString()
-        };
+        await addTicketReply({ ticketId: selectedTicket.id, message: newReply });
+        
+        const updatedTicket = { ...selectedTicket, messages: [...selectedTicket.messages, newReply] };
+
+        // If ticket is open, move it to in-progress
+        if (updatedTicket.status === 'Open') {
+          updatedTicket.status = 'In Progress';
+          await handleTicketUpdate(updatedTicket.id, 'status', 'In Progress');
+        }
 
         setTickets(prev => prev.map(t => t.id === selectedTicket.id ? updatedTicket : t));
         setSelectedTicket(updatedTicket);
         setReplyText('');
-        setIsReplying(false);
         toast({ title: 'Reply Sent!', description: 'Your reply has been added to the ticket.' });
-    }, 1000);
+    } catch (error: any) {
+         toast({ title: 'Error Sending Reply', description: error.message, variant: 'destructive' });
+    } finally {
+        setIsReplying(false);
+    }
   };
   
-  const handleTicketUpdate = () => {
-    if (!selectedTicket) return;
-    setTickets(prev => prev.map(t => t.id === selectedTicket.id ? selectedTicket : t));
-    toast({ title: 'Ticket Updated', description: 'Changes have been saved.' });
+  const handleTicketUpdate = async (ticketId: string, field: 'status' | 'priority', value: TicketStatus | TicketPriority) => {
+    const originalTickets = [...tickets];
+    const updatedTickets = tickets.map(t => t.id === ticketId ? {...t, [field]: value} : t);
+    setTickets(updatedTickets);
+
+    if (selectedTicket && selectedTicket.id === ticketId) {
+        setSelectedTicket(prev => prev ? {...prev, [field]: value} : null);
+    }
+
+    try {
+        await updateTicketDetails({ ticketId, [field]: value });
+        toast({ title: 'Ticket Updated', description: 'Changes have been saved.' });
+    } catch (error: any) {
+        setTickets(originalTickets); // Revert on error
+        toast({ title: 'Update Failed', description: error.message, variant: 'destructive' });
+    }
   }
 
   return (
@@ -181,7 +165,7 @@ export default function TicketManagementPage() {
         <CardHeader>
           <CardTitle>All Tickets</CardTitle>
           <CardDescription>
-            Here are all the support tickets from your users.
+            Here are all the support tickets from your users. Tickets are automatically deleted after 30 days.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -195,7 +179,7 @@ export default function TicketManagementPage() {
                   className="shrink-0"
                 >
                   <tab.icon className="mr-2 h-4 w-4" />
-                  {tab.label} ({tickets.filter(t => tab.id === 'all' || t.status.toLowerCase().replace(' ','-') === tab.id).length})
+                  {tab.label} ({tickets.filter(t => tab.id === 'all' || t.status === tab.id).length})
                 </Button>
               ))}
             </div>
@@ -225,8 +209,13 @@ export default function TicketManagementPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tickets.length > 0 ? (
-                    tickets.map((ticket) => (
+                {loading && [...Array(5)].map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell colSpan={6}><Skeleton className="h-6 w-full" /></TableCell>
+                  </TableRow>
+                ))}
+                {!loading && filteredTickets.length > 0 ? (
+                    filteredTickets.map((ticket) => (
                         <TableRow key={ticket.id}>
                             <TableCell className="font-medium">{ticket.subject}</TableCell>
                             <TableCell>
@@ -235,7 +224,7 @@ export default function TicketManagementPage() {
                             </TableCell>
                             <TableCell>{getPriorityBadge(ticket.priority)}</TableCell>
                             <TableCell>{getStatusBadge(ticket.status)}</TableCell>
-                            <TableCell>{ticket.lastUpdated}</TableCell>
+                            <TableCell>{new Date(ticket.lastUpdated).toLocaleString()}</TableCell>
                             <TableCell className="text-right">
                                <Dialog onOpenChange={(open) => !open && setSelectedTicket(null)}>
                                   <DialogTrigger asChild>
@@ -253,31 +242,31 @@ export default function TicketManagementPage() {
                                                 Opened by {selectedTicket.user.name}
                                             </DialogDescription>
                                         </DialogHeader>
-                                        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 px-6 py-4 overflow-y-auto">
-                                            <div className="lg:col-span-2 flex flex-col space-y-4">
-                                                <Card className="flex-1 flex flex-col">
-                                                    <CardHeader>
-                                                        <CardTitle>Conversation</CardTitle>
-                                                    </CardHeader>
-                                                     <ScrollArea className="flex-grow px-6">
-                                                        <CardContent className="space-y-6">
-                                                            {selectedTicket.messages.map((message, index) => (
-                                                            <div key={index} className={cn("flex items-start gap-4", message.author === 'admin' && 'flex-row-reverse')}>
-                                                                <Avatar>
-                                                                    <AvatarImage src={message.avatar} alt={message.name} />
-                                                                    <AvatarFallback>{message.name.charAt(0)}</AvatarFallback>
-                                                                </Avatar>
-                                                                <div className={cn("rounded-lg p-4 max-w-xl", message.author === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                                                                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
-                                                                    <p className="text-xs text-right mt-2 opacity-70">{message.timestamp}</p>
-                                                                </div>
-                                                            </div>
-                                                            ))}
-                                                        </CardContent>
-                                                    </ScrollArea>
-                                                </Card>
+                                        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 px-6 py-4 overflow-y-hidden">
+                                            <div className="lg:col-span-2 flex flex-col space-y-4 h-full">
+                                              <Card className="flex-1 flex flex-col">
+                                                  <CardHeader>
+                                                      <CardTitle>Conversation</CardTitle>
+                                                  </CardHeader>
+                                                  <ScrollArea className="flex-grow px-6">
+                                                      <CardContent className="space-y-6">
+                                                          {selectedTicket.messages.map((message, index) => (
+                                                          <div key={index} className={cn("flex items-start gap-4", message.author === 'admin' && 'flex-row-reverse')}>
+                                                              <Avatar>
+                                                                  <AvatarImage src={message.avatar} alt={message.name} />
+                                                                  <AvatarFallback>{message.name.charAt(0)}</AvatarFallback>
+                                                              </Avatar>
+                                                              <div className={cn("rounded-lg p-4 max-w-xl", message.author === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                                  <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                                                                  <p className="text-xs text-right mt-2 opacity-70">{new Date(message.timestamp).toLocaleString()}</p>
+                                                              </div>
+                                                          </div>
+                                                          ))}
+                                                      </CardContent>
+                                                  </ScrollArea>
+                                              </Card>
                                             </div>
-                                            <div className="lg:col-span-1 space-y-6">
+                                            <div className="lg:col-span-1 flex flex-col space-y-6 h-full overflow-y-hidden">
                                                 <Card>
                                                     <CardHeader>
                                                         <CardTitle>Ticket Details</CardTitle>
@@ -285,7 +274,7 @@ export default function TicketManagementPage() {
                                                     <CardContent className="space-y-4">
                                                         <div className="flex items-center justify-between">
                                                             <span className="text-muted-foreground">Status</span>
-                                                            <Select value={selectedTicket.status} onValueChange={(value: TicketStatus) => setSelectedTicket(prev => prev ? {...prev, status: value} : null)}>
+                                                            <Select value={selectedTicket.status} onValueChange={(value: TicketStatus) => handleTicketUpdate(selectedTicket.id, 'status', value)}>
                                                                 <SelectTrigger className="w-[180px]">
                                                                     <SelectValue placeholder="Set status" />
                                                                 </SelectTrigger>
@@ -298,7 +287,7 @@ export default function TicketManagementPage() {
                                                         </div>
                                                         <div className="flex items-center justify-between">
                                                             <span className="text-muted-foreground">Priority</span>
-                                                            <Select value={selectedTicket.priority} onValueChange={(value: TicketPriority) => setSelectedTicket(prev => prev ? {...prev, priority: value} : null)}>
+                                                            <Select value={selectedTicket.priority} onValueChange={(value: TicketPriority) => handleTicketUpdate(selectedTicket.id, 'priority', value)}>
                                                                 <SelectTrigger className="w-[180px]">
                                                                     <SelectValue placeholder="Set priority" />
                                                                 </SelectTrigger>
@@ -309,10 +298,6 @@ export default function TicketManagementPage() {
                                                                 </SelectContent>
                                                             </Select>
                                                         </div>
-                                                        <Separator />
-                                                        <DialogClose asChild>
-                                                            <Button className="w-full" onClick={handleTicketUpdate}><Save className="mr-2 h-4 w-4"/>Save Changes</Button>
-                                                        </DialogClose>
                                                     </CardContent>
                                                 </Card>
                                                 <Card>
@@ -331,32 +316,30 @@ export default function TicketManagementPage() {
                                                         </div>
                                                     </div>
                                                         <Button variant="outline" className="w-full mt-2" asChild>
-                                                            <Link href={`/admin/users/placeholder-id`} className="flex items-center">
+                                                            <Link href={`/admin/users/${selectedTicket.userId}`}>
                                                                 <User className="mr-2 h-4 w-4"/>View User Profile
                                                             </Link>
                                                         </Button>
                                                     </CardContent>
                                                 </Card>
-                                                <Card>
+                                                <Card className="flex flex-col">
                                                     <CardHeader>
                                                         <CardTitle>Add a Reply</CardTitle>
                                                     </CardHeader>
-                                                    <CardContent>
-                                                        <form onSubmit={handleReply}>
-                                                            <div className="grid w-full gap-2">
-                                                                <Textarea 
-                                                                    placeholder="Type your reply here..." 
-                                                                    className="min-h-[100px]"
-                                                                    value={replyText}
-                                                                    onChange={(e) => setReplyText(e.target.value)}
-                                                                />
-                                                                <div className="flex justify-between items-center gap-2">
-                                                                    <Button type="button" variant="outline"><Paperclip className="mr-2 h-4 w-4"/>Attach</Button>
-                                                                    <Button type="submit" disabled={isReplying || !replyText.trim()}>
-                                                                        {isReplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
-                                                                        Reply
-                                                                    </Button>
-                                                                </div>
+                                                    <CardContent className="flex-grow">
+                                                        <form onSubmit={handleReply} className="h-full flex flex-col">
+                                                            <Textarea 
+                                                                placeholder="Type your reply here..." 
+                                                                className="flex-grow min-h-[100px]"
+                                                                value={replyText}
+                                                                onChange={(e) => setReplyText(e.target.value)}
+                                                            />
+                                                            <div className="flex justify-between items-center gap-2 mt-2">
+                                                                <Button type="button" variant="outline"><Paperclip className="mr-2 h-4 w-4"/>Attach</Button>
+                                                                <Button type="submit" disabled={isReplying || !replyText.trim()}>
+                                                                    {isReplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
+                                                                    Reply
+                                                                </Button>
                                                             </div>
                                                         </form>
                                                     </CardContent>
