@@ -30,6 +30,8 @@ import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { countries } from '@/lib/countries';
 
 
 interface UserProfile {
@@ -111,6 +113,10 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
     setProfile(prev => prev ? { ...prev, [id]: value } : null);
   };
   
+  const handleSelectChange = (id: string, value: string) => {
+    setProfile(prev => prev ? { ...prev, [id]: value } : null);
+  }
+
   const handleSwitchChange = (id: string, checked: boolean) => {
      setProfile(prev => prev ? { ...prev, [id]: checked } : null);
   };
@@ -234,12 +240,24 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                     </div>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="mobileNumber">Mobile Number</Label>
-                            <Input id="mobileNumber" value={profile.mobileNumber || ''} onChange={handleInputChange} placeholder="Enter mobile number" />
+                          <Label htmlFor="countryCode">Country Code</Label>
+                          <Select value={profile.countryCode || ''} onValueChange={(value) => handleSelectChange('countryCode', value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select country..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {countries.map(country => (
+                                <SelectItem key={country.code} value={country.dial_code}>
+                                  <span className="mr-2">{country.flag}</span>
+                                  {country.name} ({country.dial_code})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="countryCode">Country Code</Label>
-                            <Input id="countryCode" value={profile.countryCode || ''} onChange={handleInputChange} placeholder="e.g., +91" />
+                          <Label htmlFor="mobileNumber">Mobile Number</Label>
+                          <Input id="mobileNumber" value={profile.mobileNumber || ''} onChange={handleInputChange} placeholder="Enter mobile number" />
                         </div>
                     </div>
                 </CardContent>
