@@ -89,7 +89,7 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
     const slot = adSettings?.manualAdSlots?.find(s => s.id === adSlotId);
     
     // If the slot has code, display it for everyone (respecting pro user rules).
-    if (slot && slot.code) {
+    if (slot?.code) {
       return (
         <div
           className={cn('ad-slot-container', className)}
@@ -98,8 +98,8 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
       );
     }
     
-    // If the slot is empty BUT the user is an admin, show a placeholder.
-    if (isAdmin) {
+    // If the slot is defined but empty AND the user is an admin, show a placeholder.
+    if (slot && !slot.code && isAdmin) {
        return (
           <div
             className={cn(
@@ -115,7 +115,7 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
         );
     }
 
-    // If the slot is empty and user is not admin, show nothing.
+    // If the slot is empty and user is not admin, or slot is not defined, show nothing.
     return null;
   }
 
