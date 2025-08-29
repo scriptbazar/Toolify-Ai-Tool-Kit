@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -198,20 +199,6 @@ export default function UserPanelLayout({
               ))}
             </nav>
           </ScrollArea>
-          <div className="mt-auto p-4 border-t">
-              <div className="flex gap-2">
-                 <Button asChild className="flex-1">
-                  <Link href="/profile">
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
-                  </Link>
-                </Button>
-                 <Button variant="destructive" onClick={handleLogout} className="flex-1">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </Button>
-              </div>
-          </div>
         </div>
       </div>
       <div className="flex flex-col">

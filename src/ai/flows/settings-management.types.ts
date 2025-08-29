@@ -48,11 +48,21 @@ export const WebmasterSettingsSchema = z.object({
 });
 export type WebmasterSettings = z.infer<typeof WebmasterSettingsSchema>;
 
+export const TwoFactorAuthMethodsSchema = z.object({
+    email: z.boolean().default(true),
+    authenticatorApp: z.boolean().default(false),
+    mobileNumber: z.boolean().default(false),
+});
+export type TwoFactorAuthMethods = z.infer<typeof TwoFactorAuthMethodsSchema>;
+
+
 export const SecuritySettingsSchema = z.object({
     enableTwoFactorAuth: z.boolean().default(false),
+    twoFactorAuthMethods: TwoFactorAuthMethodsSchema.optional(),
     enableRecaptcha: z.boolean().default(false),
     recaptchaSiteKey: z.string().optional(),
     recaptchaSecretKey: z.string().optional(),
+    maintenanceMode: z.boolean().default(false),
 });
 export type SecuritySettings = z.infer<typeof SecuritySettingsSchema>;
 

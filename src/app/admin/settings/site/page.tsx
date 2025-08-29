@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText } from 'lucide-react';
+import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
@@ -16,6 +17,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type CollapsibleSectionProps = {
   id: string;
@@ -84,7 +86,7 @@ export default function SiteSettingsPage() {
             contactEmail: '',
             socialLinks: { facebook: '', twitter: '', instagram: '', youtube: '' },
             webmaster: { googleSearchConsole: '', googleAnalytics: '', googleAdsense: '', yandexWebmaster: '', bingWebmaster: '', pinterest: '', baidu: '', yahooSearchConsole: '' },
-            security: { enableTwoFactorAuth: false, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '' },
+            security: { enableTwoFactorAuth: false, twoFactorAuthMethods: {email: true, authenticatorApp: false, mobileNumber: false}, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '', maintenanceMode: false },
         });
       } catch (error) {
         console.error('Failed to fetch settings:', error);
@@ -110,7 +112,7 @@ export default function SiteSettingsPage() {
     setSettings(prev => (prev ? { 
         ...prev, 
         socialLinks: {
-            ...prev.socialLinks,
+            ...(prev.socialLinks || {}),
             [name]: value
         }
     } : null));
@@ -121,7 +123,7 @@ export default function SiteSettingsPage() {
     setSettings(prev => (prev ? {
       ...prev,
       webmaster: {
-        ...prev.webmaster,
+        ...(prev.webmaster || {}),
         [name]: value
       }
     } : null));
@@ -134,7 +136,23 @@ export default function SiteSettingsPage() {
         (newSettings.security as any)[field] = value;
         return newSettings;
     });
-};
+  };
+  
+  const handle2faMethodChange = (method: 'email' | 'authenticatorApp' | 'mobileNumber', checked: boolean) => {
+     setSettings(prev => {
+        if (!prev) return null;
+        return {
+            ...prev,
+            security: {
+                ...(prev.security || {}),
+                twoFactorAuthMethods: {
+                    ...(prev.security?.twoFactorAuthMethods || {}),
+                    [method]: checked,
+                }
+            }
+        }
+     });
+  };
 
   const handleSave = async () => {
     if (!settings) return;
@@ -367,29 +385,47 @@ export default function SiteSettingsPage() {
 
         <CollapsibleSection id="security" title="Security Settings" description="Manage site security features like 2FA and reCAPTCHA." isOpen={openSection === 'security'} onToggle={handleToggle} isFullWidth={openSection === 'security'}>
             <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                            <Label htmlFor="enableTwoFactorAuth" className="text-base font-medium">Enable Two-Factor Authentication</Label>
-                            <p className="text-sm text-muted-foreground">Enhance account security for all users.</p>
-                        </div>
-                        <Switch
-                            id="enableTwoFactorAuth"
-                            checked={settings.security?.enableTwoFactorAuth || false}
-                            onCheckedChange={(checked) => handleSecurityChange('enableTwoFactorAuth', checked)}
-                        />
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                        <Label htmlFor="enableTwoFactorAuth" className="text-base font-medium">Enable Two-Factor Authentication</Label>
+                        <p className="text-sm text-muted-foreground">Enhance account security for all users.</p>
                     </div>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                            <Label htmlFor="enableRecaptcha" className="text-base font-medium">Enable Google reCAPTCHA</Label>
-                            <p className="text-sm text-muted-foreground">Protect your forms from spam and abuse.</p>
+                    <Switch
+                        id="enableTwoFactorAuth"
+                        checked={settings.security?.enableTwoFactorAuth || false}
+                        onCheckedChange={(checked) => handleSecurityChange('enableTwoFactorAuth', checked)}
+                    />
+                </div>
+                 {settings.security?.enableTwoFactorAuth && (
+                    <Card className="p-4">
+                        <Label className="text-base font-medium">Enabled 2FA Methods</Label>
+                        <p className="text-sm text-muted-foreground mb-4">Select which methods users can choose from.</p>
+                        <div className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                                <Checkbox id="2fa-email" checked={settings.security?.twoFactorAuthMethods?.email} onCheckedChange={(checked) => handle2faMethodChange('email', checked as boolean)} />
+                                <Label htmlFor="2fa-email" className="flex items-center gap-2 font-normal"><MailCheck className="h-4 w-4"/> Email Authentication</Label>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <Checkbox id="2fa-app" checked={settings.security?.twoFactorAuthMethods?.authenticatorApp} onCheckedChange={(checked) => handle2faMethodChange('authenticatorApp', checked as boolean)} />
+                                <Label htmlFor="2fa-app" className="flex items-center gap-2 font-normal"><Smartphone className="h-4 w-4"/> Authenticator App</Label>
+                            </div>
+                             <div className="flex items-center space-x-3">
+                                <Checkbox id="2fa-sms" checked={settings.security?.twoFactorAuthMethods?.mobileNumber} onCheckedChange={(checked) => handle2faMethodChange('mobileNumber', checked as boolean)} />
+                                <Label htmlFor="2fa-sms" className="flex items-center gap-2 font-normal"><MessageSquare className="h-4 w-4"/> Mobile Number (SMS)</Label>
+                            </div>
                         </div>
-                        <Switch
-                            id="enableRecaptcha"
-                            checked={settings.security?.enableRecaptcha || false}
-                            onCheckedChange={(checked) => handleSecurityChange('enableRecaptcha', checked)}
-                        />
+                    </Card>
+                )}
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                        <Label htmlFor="enableRecaptcha" className="text-base font-medium">Enable Google reCAPTCHA</Label>
+                        <p className="text-sm text-muted-foreground">Protect your forms from spam and abuse.</p>
                     </div>
+                    <Switch
+                        id="enableRecaptcha"
+                        checked={settings.security?.enableRecaptcha || false}
+                        onCheckedChange={(checked) => handleSecurityChange('enableRecaptcha', checked)}
+                    />
                 </div>
                 {settings.security?.enableRecaptcha && (
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -410,8 +446,19 @@ export default function SiteSettingsPage() {
                     </div>
                 )}
                 <div className="space-y-2 pt-4">
-                     <Label className="text-base font-medium">Site Maintenance</Label>
-                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <Label className="text-base font-medium">Maintenance</Label>
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="maintenanceMode" className="text-base font-medium">Enable Maintenance Mode</Label>
+                            <p className="text-sm text-muted-foreground">Temporarily take your site offline for visitors.</p>
+                        </div>
+                        <Switch
+                            id="maintenanceMode"
+                            checked={settings.security?.maintenanceMode || false}
+                            onCheckedChange={(checked) => handleSecurityChange('maintenanceMode', checked)}
+                        />
+                    </div>
+                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
                         <Button variant="outline" type="button"><Eraser className="mr-2 h-4 w-4" />Clear Cache</Button>
                         <Button variant="outline" type="button"><FileCode className="mr-2 h-4 w-4" />Generate sitemap.xml</Button>
                         <Button variant="outline" type="button"><FileText className="mr-2 h-4 w-4" />Generate robots.txt</Button>

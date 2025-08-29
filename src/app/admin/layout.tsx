@@ -124,6 +124,7 @@ export default function AdminLayout({
 
   const navLinks = [
     { href: '/admin/dashboard', icon: Home, label: 'Dashboard' },
+    { href: '/admin/profile', icon: User, label: 'Profile' },
     { href: '/admin/users', icon: Users, label: 'User Management' },
     { href: '/admin/tools', icon: Package, label: 'Tool Management' },
     { href: '/admin/analytics', icon: LineChart, label: 'Analytics' },
@@ -419,20 +420,6 @@ export default function AdminLayout({
               </Accordion>
             </nav>
           </ScrollArea>
-          <div className="mt-auto p-4 border-t">
-              <div className="flex gap-2">
-                <Button asChild className="flex-1">
-                  <Link href="/admin/profile">
-                    <User className="h-4 w-4" />
-                    Profile
-                  </Link>
-                </Button>
-                <Button variant="destructive" onClick={handleLogout} className="flex-1">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </Button>
-              </div>
-          </div>
         </div>
       </div>
       <div className="flex flex-col">
