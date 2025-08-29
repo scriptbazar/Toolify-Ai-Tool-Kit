@@ -118,9 +118,9 @@ export default function AdminProfilePage() {
 
   return (
     <div className="space-y-6">
-      <Link href="/admin/users" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+      <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" />
-        Back to All Users
+        Back To Dashboard
       </Link>
       
       <Card>
@@ -132,6 +132,7 @@ export default function AdminProfilePage() {
                 </Avatar>
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">{profile.firstName} {profile.lastName} <Badge variant="outline" className="p-1 justify-center text-sm"><UserCog className="h-3 w-3 mr-1"/>{profile.role}</Badge></h1>
+                    
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>@{profile.userName}</span>
                         <Copy className="h-3 w-3 cursor-pointer" onClick={() => copyToClipboard(profile.userName)} />
