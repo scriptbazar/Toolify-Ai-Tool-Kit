@@ -163,6 +163,28 @@ export default function AdminLayout({
   const isBlogRouteActive = pathname.startsWith('/admin/blog');
   const isEmailRouteActive = pathname.startsWith('/admin/email');
   const isSettingsRouteActive = pathname.startsWith('/admin/settings');
+  
+  const SubmenuItems = ({ links }: { links: { href: string; icon: React.ElementType; label: string }[] }) => (
+     <nav className="grid gap-0">
+      {links.map((link, index) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className={cn(
+            'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground relative',
+            pathname === link.href && 'bg-accent text-accent-foreground'
+          )}
+        >
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-full w-[22px] flex justify-center">
+            {index !== links.length - 1 && <div className="w-px h-full bg-border" />}
+          </div>
+           <div className="absolute left-[22px] top-1/2 -translate-y-1/2 w-3 h-px bg-border"/>
+          <link.icon className="h-4 w-4 ml-8" />
+          {link.label}
+        </Link>
+      ))}
+    </nav>
+  );
 
   const mobileNavContent = (
     <>
@@ -202,22 +224,8 @@ export default function AdminLayout({
                   <span>Email Management</span>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="pl-12 pt-1">
-                <nav className="grid gap-1">
-                {emailManagementLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                      pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                    )}
-                  >
-                    <link.icon className="h-4 w-4" />
-                    {link.label}
-                  </Link>
-                ))}
-                </nav>
+              <AccordionContent className="pl-4 pt-1">
+                 <SubmenuItems links={emailManagementLinks} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -232,22 +240,8 @@ export default function AdminLayout({
                   <span>Blog Management</span>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="pl-12 pt-1">
-                <nav className="grid gap-1">
-                {blogManagementLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                      pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                    )}
-                  >
-                    <link.icon className="h-4 w-4" />
-                    {link.label}
-                  </Link>
-                ))}
-                </nav>
+              <AccordionContent className="pl-4 pt-1">
+                 <SubmenuItems links={blogManagementLinks} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -262,22 +256,8 @@ export default function AdminLayout({
                   <span>Settings</span>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="pl-12 pt-1">
-                <nav className="grid gap-1">
-                {settingsLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                      pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                    )}
-                  >
-                    <link.icon className="h-4 w-4" />
-                    {link.label}
-                  </Link>
-                ))}
-                </nav>
+              <AccordionContent className="pl-4 pt-1">
+                 <SubmenuItems links={settingsLinks} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -343,22 +323,8 @@ export default function AdminLayout({
                       <span>Email Management</span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="pl-8 pt-1">
-                    <nav className="grid gap-1">
-                    {emailManagementLinks.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                          pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                        )}
-                      >
-                        <link.icon className="h-4 w-4" />
-                        {link.label}
-                      </Link>
-                    ))}
-                    </nav>
+                  <AccordionContent className="pt-1 pl-4">
+                     <SubmenuItems links={emailManagementLinks} />
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -373,22 +339,8 @@ export default function AdminLayout({
                       <span>Blog Management</span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="pl-8 pt-1">
-                    <nav className="grid gap-1">
-                    {blogManagementLinks.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                          pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                        )}
-                      >
-                        <link.icon className="h-4 w-4" />
-                        {link.label}
-                      </Link>
-                    ))}
-                    </nav>
+                  <AccordionContent className="pt-1 pl-4">
+                     <SubmenuItems links={blogManagementLinks} />
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -403,22 +355,8 @@ export default function AdminLayout({
                       <span>Settings</span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="pl-8 pt-1">
-                    <nav className="grid gap-1">
-                    {settingsLinks.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                          pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                        )}
-                      >
-                        <link.icon className="h-4 w-4" />
-                        {link.label}
-                      </Link>
-                    ))}
-                    </nav>
+                  <AccordionContent className="pt-1 pl-4">
+                     <SubmenuItems links={settingsLinks} />
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>

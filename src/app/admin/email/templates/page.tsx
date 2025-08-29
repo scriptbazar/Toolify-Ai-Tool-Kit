@@ -396,7 +396,7 @@ export default function EmailTemplatesPage() {
                       <Eye className="mr-2 h-4 w-4" />
                       View
                     </Button>
-                    <Button className="w-full" disabled>
+                    <Button className="w-full" onClick={() => handlePreview(template)}>
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
                     </Button>
