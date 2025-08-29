@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -17,6 +18,8 @@ import {
   Settings,
   MoreVertical,
   Briefcase,
+  Edit,
+  History,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -29,6 +32,7 @@ import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 
 interface UserProfile {
@@ -128,7 +132,10 @@ export default function AdminProfilePage() {
                 </Avatar>
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">{profile.firstName} {profile.lastName} <Badge variant="outline" className="p-1 justify-center text-sm"><UserCog className="h-3 w-3 mr-1"/>{profile.role}</Badge></h1>
-                    <p className="text-sm text-muted-foreground">@{profile.userName}</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>@{profile.userName}</span>
+                        <Copy className="h-3 w-3 cursor-pointer" onClick={() => copyToClipboard(profile.userName)} />
+                    </div>
 
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-muted-foreground">
                         <div className="flex items-center gap-2">
@@ -147,19 +154,36 @@ export default function AdminProfilePage() {
                 </div>
             </div>
             <div className="flex gap-2">
-                <Button variant="outline"><Settings className="mr-2 h-4 w-4"/>Actions</Button>
-                <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline"><Settings className="mr-2 h-4 w-4"/>Actions</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Admin Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href={`/admin/users/${user.uid}`}>
+                        <Edit className="mr-2 h-4 w-4" /> Edit Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <History className="mr-2 h-4 w-4" /> View Activity Log
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
             <Badge variant="outline" className="p-2 justify-center bg-green-100 text-green-800 border-green-200"><CheckCircle className="h-4 w-4 mr-2"/>Active</Badge>
             <Badge variant="outline" className="p-2 justify-center"><Briefcase className="h-4 w-4 mr-2"/>Pro Plan</Badge>
-            <Badge variant="outline" className="p-2 justify-center">
-                <CalendarDays className="h-4 w-4 mr-2"/>Joined {new Date(profile.createdAt.seconds * 1000).toLocaleDateString()}
-            </Badge>
-            <Badge variant="outline" className="p-2 justify-center text-xs text-muted-foreground">
-                <span className="mr-1">UID:</span> {user.uid} <Copy className="h-3 w-3 inline cursor-pointer ml-1" onClick={() => copyToClipboard(user.uid)} />
-            </Badge>
+            <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="p-2 justify-center">
+                    <CalendarDays className="h-4 w-4 mr-2"/>Joined {new Date(profile.createdAt.seconds * 1000).toLocaleDateString()}
+                </Badge>
+                <Badge variant="outline" className="p-2 justify-center text-xs text-muted-foreground">
+                    <span className="mr-1">UID:</span> {user.uid} <Copy className="h-3 w-3 inline cursor-pointer ml-1" onClick={() => copyToClipboard(user.uid)} />
+                </Badge>
+            </div>
         </div>
         </CardContent>
       </Card>
