@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 
 type Message = {
@@ -34,18 +36,20 @@ type Message = {
     }
 };
 
+interface ChatUser {
+    id: string;
+    initials: string;
+    name: string;
+    username: string;
+    createdAt?: Timestamp;
+    lastActive?: Timestamp;
+}
+
 const initialMessages: Message[] = [
     { id: 1, from: 'AA', text: 'Welcome to the community chat admin view! You can monitor conversations here.', type: 'assistant' },
     { id: 2, from: 'SB', text: 'hello', type: 'user' },
 ];
 
-const allUsers = [
-    { initials: 'GK', name: 'Ganesh Kumar', username: 'ganesh', status: 'live' },
-    { initials: 'SB', name: 'Script Bazar', username: 'scriptbazar', status: 'live' },
-    { initials: 'JD', name: 'John Doe', username: 'johndoe', status: 'new' },
-    { initials: 'EM', name: 'Elon Musk', username: 'elon', status: 'live' },
-    { initials: 'TJ', name: 'Thomas Jefferson', username: 'thomasj', status: 'new' },
-];
 
 export default function CommunityChatPage() {
     const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -55,6 +59,37 @@ export default function CommunityChatPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
+    const [allUsers, setAllUsers] = useState<ChatUser[]>([]);
+    const [loadingUsers, setLoadingUsers] = useState(true);
+    
+    useEffect(() => {
+        async function fetchUsers() {
+            setLoadingUsers(true);
+            try {
+                const usersRef = collection(db, 'users');
+                const usersSnapshot = await getDocs(usersRef);
+                const usersList = usersSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    const name = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+                    return {
+                        id: doc.id,
+                        initials: `${data.firstName?.[0] || ''}${data.lastName?.[0] || ''}` || 'U',
+                        name: name,
+                        username: data.userName,
+                        createdAt: data.createdAt,
+                        lastActive: data.lastActive,
+                    };
+                });
+                setAllUsers(usersList);
+            } catch (error) {
+                console.error("Error fetching users:", error);
+                toast({ title: "Error", description: "Could not load community members.", variant: "destructive" });
+            } finally {
+                setLoadingUsers(false);
+            }
+        }
+        fetchUsers();
+    }, [toast]);
     
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -120,9 +155,17 @@ export default function CommunityChatPage() {
     };
 
     const filteredUsers = useMemo(() => {
-        if (activeUserFilter === 'all') return allUsers;
-        return allUsers.filter(user => user.status === activeUserFilter);
-    }, [activeUserFilter]);
+       if (activeUserFilter === 'all') return allUsers;
+       if (activeUserFilter === 'live') {
+           const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+           return allUsers.filter(user => user.lastActive && user.lastActive.toDate() > fiveMinutesAgo);
+       }
+       if (activeUserFilter === 'new') {
+            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            return allUsers.filter(user => user.createdAt && user.createdAt.toDate() > twentyFourHoursAgo);
+       }
+       return [];
+    }, [activeUserFilter, allUsers]);
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -238,7 +281,7 @@ export default function CommunityChatPage() {
                   </div>
                   <div className="space-y-1">
                       <div className="grid grid-cols-2 gap-1">
-                          <Button variant="outline" onClick={() => setActiveUserFilter('all')}>
+                          <Button variant={activeUserFilter === 'all' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('all')}>
                               <span className="flex items-center"><Users className="mr-2 h-4 w-4" /> All Members</span>
                           </Button>
                           <Dialog open={isPollModalOpen} onOpenChange={setIsPollModalOpen}>
@@ -295,33 +338,35 @@ export default function CommunityChatPage() {
               </CardHeader>
               <CardContent className="flex-grow">
                   <ScrollArea className="h-full max-h-[calc(100vh-26rem)] pr-4">
-                      <div className="space-y-4">
-                      {filteredUsers.map(user => (
-                          <div key={user.name} className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                  <Avatar>
-                                      <AvatarFallback>{user.initials}</AvatarFallback>
-                                  </Avatar>
-                                   <div>
-                                      <p className="font-medium">{user.name}</p>
-                                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                        <span>@{user.username}</span>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-5 w-5"
-                                            onClick={() => copyToClipboard(user.username)}
-                                        >
-                                            <Copy className="h-3 w-3" />
-                                            <span className="sr-only">Copy username</span>
-                                        </Button>
-                                      </div>
-                                    </div>
+                      {loadingUsers ? <p>Loading members...</p> : (
+                          <div className="space-y-4">
+                          {filteredUsers.map(user => (
+                              <div key={user.id} className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                      <Avatar>
+                                          <AvatarFallback>{user.initials}</AvatarFallback>
+                                      </Avatar>
+                                       <div>
+                                          <p className="font-medium">{user.name}</p>
+                                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                            <span>@{user.username}</span>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-5 w-5"
+                                                onClick={() => copyToClipboard(user.username)}
+                                            >
+                                                <Copy className="h-3 w-3" />
+                                                <span className="sr-only">Copy username</span>
+                                            </Button>
+                                          </div>
+                                        </div>
+                                  </div>
+                                  {activeUserFilter === 'live' && <Badge className="bg-green-500 hover:bg-green-600 text-white">online</Badge>}
                               </div>
-                              {user.status === 'live' && <Badge className="bg-green-500 hover:bg-green-600 text-white">online</Badge>}
+                          ))}
                           </div>
-                      ))}
-                      </div>
+                      )}
                    </ScrollArea>
               </CardContent>
            </Card>
@@ -330,3 +375,5 @@ export default function CommunityChatPage() {
     </div>
   );
 }
+
+    
