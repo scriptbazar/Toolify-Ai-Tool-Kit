@@ -166,7 +166,7 @@ export default function AdminLayout({
   const isSettingsRouteActive = pathname.startsWith('/admin/settings');
   
   const SubmenuItems = ({ links }: { links: { href: string; icon: React.ElementType; label: string }[] }) => (
-     <nav className="grid gap-0">
+     <nav className="grid gap-1">
       {links.map((link, index) => (
         <Link
           key={link.href}
