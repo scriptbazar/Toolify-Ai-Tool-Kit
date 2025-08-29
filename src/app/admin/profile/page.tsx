@@ -12,11 +12,7 @@ import {
   ShieldCheck,
   CalendarDays,
   UserCog,
-  DollarSign,
-  CheckCheck,
   Settings,
-  MoreVertical,
-  Briefcase,
   Edit,
   History,
   Users,
@@ -51,17 +47,19 @@ interface UserProfile {
   }
 }
 
-const StatCard = ({ title, value, percentage, icon: Icon }: { title: string, value: string, percentage: string, icon: React.ElementType }) => (
-    <Card className="hover:bg-muted/50 transition-colors">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-            <div className="text-2xl font-bold">{value}</div>
-            <p className="text-xs text-muted-foreground">{percentage}</p>
-        </CardContent>
-    </Card>
+const StatCard = ({ title, value, percentage, icon: Icon, href }: { title: string, value: string, percentage: string, icon: React.ElementType, href: string }) => (
+    <Link href={href}>
+        <Card className="hover:bg-muted/50 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                <Icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{value}</div>
+                <p className="text-xs text-muted-foreground">{percentage}</p>
+            </CardContent>
+        </Card>
+    </Link>
 );
 
 export default function AdminProfilePage() {
@@ -151,7 +149,7 @@ export default function AdminProfilePage() {
                             <div className="flex items-center gap-2">
                                 <Phone className="h-4 w-4"/>
                                 <span className="text-sm">{profile.countryCode} {profile.mobileNumber}</span>
-                                <Copy className="h-3 w-3 cursor-pointer" onClick={() => copyToClipboard(`${profile.countryCode} ${profile.mobileNumber}`)} />
+                                <Copy className="h-3 w-3 cursor-pointer" onClick={() => copyToClipboard(`${profile.countryCode || ''} ${profile.mobileNumber}`)} />
                             </div>
                         )}
                     </div>
@@ -201,10 +199,10 @@ export default function AdminProfilePage() {
             </TabsList>
             <TabsContent value="overview" className="mt-6">
                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <Link href="/admin/users?filter=all"><StatCard title="Total Users" value="10,532" percentage="+5.2% from last month" icon={Users}/></Link>
-                  <Link href="/admin/users?filter=lead"><StatCard title="Lead Users" value="1,234" percentage="+19% from last month" icon={UserPlus}/></Link>
-                  <Link href="/admin/users?filter=comment"><StatCard title="Comment Users" value="2" percentage="+2 from last month" icon={MessageSquare}/></Link>
-                  <Link href="/admin/referral-management"><StatCard title="Referral Users" value="573" percentage="+201 since last hour" icon={GitCommitVertical}/></Link>
+                  <StatCard href="/admin/users?filter=all" title="Total Users" value="10,532" percentage="+5.2% from last month" icon={Users}/>
+                  <StatCard href="/admin/users?filter=lead" title="Lead Users" value="1,234" percentage="+19% from last month" icon={UserPlus}/>
+                  <StatCard href="/admin/users?filter=comment" title="Comment Users" value="2" percentage="+2 from last month" icon={MessageSquare}/>
+                  <StatCard href="/admin/referral-management" title="Referral Users" value="573" percentage="+201 since last hour" icon={GitCommitVertical}/>
                </div>
             </TabsContent>
             <TabsContent value="transactions">
