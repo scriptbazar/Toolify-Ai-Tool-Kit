@@ -175,7 +175,7 @@ export default function ReviewManagementPage() {
                             </div>
                         </TableCell>
                         <TableCell className="max-w-sm">
-                            <p className="truncate">{review.comment.length > 35 ? `${review.comment.substring(0, 35)}...` : review.comment}</p>
+                            <p className="truncate">{review.comment.length > 30 ? `${review.comment.substring(0, 30)}...` : review.comment}</p>
                         </TableCell>
                         <TableCell>
                            <StarRating rating={review.rating} />
