@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search, MessageSquare } from 'lucide-react';
+import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search, MessageSquare, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { updateUserRole, type UpdateUserRoleInput } from '@/ai/flows/user-management';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import Link from 'next/link';
 
 
 interface User {
@@ -265,7 +266,7 @@ export default function AdminUsersPage() {
                 <TableBody>
                   {paginatedUsers.length > 0 ? (
                     paginatedUsers.map(user => (
-                      <TableRow key={user.id}>
+                      <TableRow key={user.id} className="cursor-pointer" onClick={() => window.location.href = `/admin/users/${user.id}`}>
                         <TableCell className="font-medium">
                            <div className="flex items-center gap-2">
                              <Avatar className="h-8 w-8">
@@ -283,19 +284,11 @@ export default function AdminUsersPage() {
                         </TableCell>
                         <TableCell>{formatDate(user.createdAt)}</TableCell>
                          <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button aria-haspopup="true" size="icon" variant="ghost" disabled={user.type === 'Lead' || user.type === 'Comment'}>
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => handleEditClick(user)}>Edit</DropdownMenuItem>
-                              <DropdownMenuItem>Delete</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <Link href={`/admin/users/${user.id}`} passHref>
+                            <Button variant="ghost" size="icon" aria-label="View user details">
+                                <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
                         </TableCell>
                       </TableRow>
                     ))
@@ -315,7 +308,7 @@ export default function AdminUsersPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={(e) => { e.stopPropagation(); setCurrentPage(prev => Math.max(prev - 1, 1)); }}
                 disabled={currentPage === 1}
               >
                 Previous
@@ -326,7 +319,7 @@ export default function AdminUsersPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={(e) => { e.stopPropagation(); setCurrentPage(prev => Math.min(prev + 1, totalPages)); }}
                 disabled={currentPage === totalPages}
               >
                 Next
@@ -339,7 +332,7 @@ export default function AdminUsersPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle>Edit User Role</DialogTitle>
             <DialogDescription>
               Change the role for {selectedUser?.email}.
             </DialogDescription>
