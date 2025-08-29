@@ -29,6 +29,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
@@ -65,6 +66,7 @@ export default function EmailReportsPage() {
     const [stats, setStats] = useState<ReportStats>({ totalSent: 0, openRate: 0, clickRate: 0, unsubscribeRate: 0 });
     const [engagementData, setEngagementData] = useState<EngagementData[]>([]);
     const [topEmails, setTopEmails] = useState<TopEmail[]>([]);
+    const [timeRange, setTimeRange] = useState('7d');
 
     useEffect(() => {
         async function fetchReportData() {
@@ -77,23 +79,25 @@ export default function EmailReportsPage() {
                 // Note: Open/Click/Unsubscribe rates require webhooks and are placeholders for now.
                 setStats({ totalSent, openRate: 48.6, clickRate: 15.2, unsubscribeRate: 1.2 });
 
-                // Process Engagement Data for the last 7 days
-                const last7Days: { [key: string]: number } = {};
-                for (let i = 6; i >= 0; i--) {
+                // Process Engagement Data for the selected time range
+                const days = parseInt(timeRange);
+                const dateCounts: { [key: string]: number } = {};
+                
+                for (let i = days - 1; i >= 0; i--) {
                     const d = new Date();
                     d.setDate(d.getDate() - i);
                     const key = d.toISOString().split('T')[0];
-                    last7Days[key] = 0;
+                    dateCounts[key] = 0;
                 }
 
                 emails.forEach(email => {
                     const emailDate = new Date(email.date).toISOString().split('T')[0];
-                    if (emailDate in last7Days) {
-                        last7Days[emailDate]++;
+                    if (emailDate in dateCounts) {
+                        dateCounts[emailDate]++;
                     }
                 });
 
-                const chartData = Object.entries(last7Days).map(([date, sent]) => ({ date, sent }));
+                const chartData = Object.entries(dateCounts).map(([date, sent]) => ({ date, sent }));
                 setEngagementData(chartData);
 
                 // Process Top Emails (by subject count)
@@ -117,7 +121,7 @@ export default function EmailReportsPage() {
             }
         }
         fetchReportData();
-    }, []);
+    }, [timeRange]);
 
   if (loading) {
     return (
@@ -197,9 +201,21 @@ export default function EmailReportsPage() {
       </div>
 
        <Card>
-          <CardHeader>
-            <CardTitle>Email Engagement Over Time</CardTitle>
-            <CardDescription>A chart showing emails sent over the last 7 days.</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Email Engagement Over Time</CardTitle>
+              <CardDescription>A chart showing emails sent over the selected period.</CardDescription>
+            </div>
+             <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select time range" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                    <SelectItem value="30d">Last 30 days</SelectItem>
+                    <SelectItem value="90d">Last 90 days</SelectItem>
+                </SelectContent>
+            </Select>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
