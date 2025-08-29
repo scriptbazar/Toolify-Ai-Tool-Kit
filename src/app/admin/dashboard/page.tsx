@@ -79,7 +79,7 @@ const chartData = [
 const chartConfig = {
   users: {
     label: 'Users',
-    color: 'hsl(var(--chart-1))',
+    color: 'hsl(var(--primary))',
   },
 };
 
@@ -291,8 +291,9 @@ export default function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-             <ResponsiveContainer width="100%" height={300}>
+             <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <RechartsLineChart
+                accessibilityLayer
                 data={chartData}
                 margin={{
                   top: 5,
@@ -326,7 +327,7 @@ export default function AdminDashboard() {
                   dot={true}
                 />
               </RechartsLineChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
