@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare } from 'lucide-react';
+import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare, UserX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
@@ -86,7 +86,7 @@ export default function SiteSettingsPage() {
             contactEmail: '',
             socialLinks: { facebook: '', twitter: '', instagram: '', youtube: '' },
             webmaster: { googleSearchConsole: '', googleAnalytics: '', googleAdsense: '', yandexWebmaster: '', bingWebmaster: '', pinterest: '', baidu: '', yahooSearchConsole: '' },
-            security: { enableTwoFactorAuth: false, twoFactorAuthMethods: {email: true, authenticatorApp: false, mobileNumber: false}, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '', maintenanceMode: false },
+            security: { enableTwoFactorAuth: false, twoFactorAuthMethods: {email: true, authenticatorApp: false, mobileNumber: false}, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '', maintenanceMode: false, enableAccountDeletion: true },
         });
       } catch (error) {
         console.error('Failed to fetch settings:', error);
@@ -385,17 +385,31 @@ export default function SiteSettingsPage() {
 
         <CollapsibleSection id="security" title="Security Settings" description="Manage site security features like 2FA and reCAPTCHA." isOpen={openSection === 'security'} onToggle={handleToggle} isFullWidth={openSection === 'security'}>
             <div className="space-y-6">
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                        <Label htmlFor="enableTwoFactorAuth" className="text-base font-medium">Enable Two-Factor Authentication</Label>
-                        <p className="text-sm text-muted-foreground">Enhance account security for all users.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex items-start justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="enableTwoFactorAuth" className="font-medium">Enable Two-Factor Authentication</Label>
+                            <p className="text-sm text-muted-foreground">Enhance account security for all users.</p>
+                        </div>
+                        <Switch
+                            id="enableTwoFactorAuth"
+                            checked={settings.security?.enableTwoFactorAuth || false}
+                            onCheckedChange={(checked) => handleSecurityChange('enableTwoFactorAuth', checked)}
+                        />
                     </div>
-                    <Switch
-                        id="enableTwoFactorAuth"
-                        checked={settings.security?.enableTwoFactorAuth || false}
-                        onCheckedChange={(checked) => handleSecurityChange('enableTwoFactorAuth', checked)}
-                    />
+                    <div className="flex items-start justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="enableRecaptcha" className="font-medium">Enable Google reCAPTCHA</Label>
+                            <p className="text-sm text-muted-foreground">Protect your forms from spam and abuse.</p>
+                        </div>
+                        <Switch
+                            id="enableRecaptcha"
+                            checked={settings.security?.enableRecaptcha || false}
+                            onCheckedChange={(checked) => handleSecurityChange('enableRecaptcha', checked)}
+                        />
+                    </div>
                 </div>
+
                  {settings.security?.enableTwoFactorAuth && (
                     <Card className="p-4">
                         <Label className="text-base font-medium">Enabled 2FA Methods</Label>
@@ -416,17 +430,7 @@ export default function SiteSettingsPage() {
                         </div>
                     </Card>
                 )}
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                        <Label htmlFor="enableRecaptcha" className="text-base font-medium">Enable Google reCAPTCHA</Label>
-                        <p className="text-sm text-muted-foreground">Protect your forms from spam and abuse.</p>
-                    </div>
-                    <Switch
-                        id="enableRecaptcha"
-                        checked={settings.security?.enableRecaptcha || false}
-                        onCheckedChange={(checked) => handleSecurityChange('enableRecaptcha', checked)}
-                    />
-                </div>
+                
                 {settings.security?.enableRecaptcha && (
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
@@ -446,18 +450,31 @@ export default function SiteSettingsPage() {
                     </div>
                 )}
                 <div className="space-y-2 pt-4">
-                    <Label className="text-base font-medium">Maintenance</Label>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                            <Label htmlFor="maintenanceMode" className="text-base font-medium">Enable Maintenance Mode</Label>
-                            <p className="text-sm text-muted-foreground">Temporarily take your site offline for visitors.</p>
+                    <Label className="text-base font-medium">Maintenance &amp; Utilities</Label>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <Label htmlFor="maintenanceMode" className="font-medium">Enable Maintenance Mode</Label>
+                                <p className="text-sm text-muted-foreground">Temporarily take your site offline for visitors.</p>
+                            </div>
+                            <Switch
+                                id="maintenanceMode"
+                                checked={settings.security?.maintenanceMode || false}
+                                onCheckedChange={(checked) => handleSecurityChange('maintenanceMode', checked)}
+                            />
                         </div>
-                        <Switch
-                            id="maintenanceMode"
-                            checked={settings.security?.maintenanceMode || false}
-                            onCheckedChange={(checked) => handleSecurityChange('maintenanceMode', checked)}
-                        />
-                    </div>
+                         <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <Label htmlFor="enableAccountDeletion" className="font-medium">Enable Account Deletion</Label>
+                                <p className="text-sm text-muted-foreground">Allow users to delete their own accounts.</p>
+                            </div>
+                            <Switch
+                                id="enableAccountDeletion"
+                                checked={settings.security?.enableAccountDeletion || false}
+                                onCheckedChange={(checked) => handleSecurityChange('enableAccountDeletion', checked)}
+                            />
+                        </div>
+                     </div>
                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
                         <Button variant="outline" type="button"><Eraser className="mr-2 h-4 w-4" />Clear Cache</Button>
                         <Button variant="outline" type="button"><FileCode className="mr-2 h-4 w-4" />Generate sitemap.xml</Button>

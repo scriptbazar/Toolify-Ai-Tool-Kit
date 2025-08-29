@@ -63,6 +63,7 @@ export const SecuritySettingsSchema = z.object({
     recaptchaSiteKey: z.string().optional(),
     recaptchaSecretKey: z.string().optional(),
     maintenanceMode: z.boolean().default(false),
+    enableAccountDeletion: z.boolean().default(true),
 });
 export type SecuritySettings = z.infer<typeof SecuritySettingsSchema>;
 
