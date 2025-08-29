@@ -97,11 +97,12 @@ export default function AdminLayout({
       } else {
         setUser(null);
         setUserData(null);
+        router.push('/admin/login');
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
 
   const handleLogout = async () => {
@@ -198,21 +199,19 @@ export default function AdminLayout({
       </SheetHeader>
       <ScrollArea className="flex-1">
         <nav className="grid gap-2 text-base font-medium p-4 py-4">
-          {navLinks.map((link) => {
-            const href = link.href === '/admin/administrators' ? `/admin/users` : link.href;
-            return(
+          {navLinks.map((link) => (
             <Link
               key={link.href}
-              href={href}
+              href={link.href}
               className={cn(
                 'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                pathname === href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
               )}
             >
               <link.icon className="h-5 w-5" />
               {link.label}
             </Link>
-          )})}
+          ))}
           <Accordion type="single" collapsible defaultValue={isEmailRouteActive ? 'email-management' : undefined} className="w-full">
             <AccordionItem value="email-management" className="border-b-0">
               <AccordionTrigger className={cn(
@@ -296,22 +295,19 @@ export default function AdminLayout({
           </div>
           <ScrollArea className="flex-1">
             <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4 py-4">
-              {navLinks.map((link) => {
-                 const href = link.href === '/admin/administrators' ? `/admin/users` : link.href;
-                 return (
-                    <Link
-                      key={link.href}
-                      href={href}
-                      className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                        pathname === href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                      )}
-                    >
-                      <link.icon className="h-4 w-4" />
-                      {link.label}
-                    </Link>
-                  )
-              })}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                    pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                  )}
+                >
+                  <link.icon className="h-4 w-4" />
+                  {link.label}
+                </Link>
+              ))}
               <Accordion type="single" collapsible defaultValue={isEmailRouteActive ? 'email-management' : undefined}>
                 <AccordionItem value="email-management" className="border-b-0">
                   <AccordionTrigger className={cn(

@@ -84,7 +84,7 @@ export default function EditUserDetailPage() {
   const { toast } = useToast();
   const router = useRouter();
   const params = useParams();
-  const { id } = params;
+  const id = params.id as string;
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -97,14 +97,26 @@ export default function EditUserDetailPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser && firebaseUser.uid === id) {
-        setUser(firebaseUser);
-        const userDocRef = doc(db, 'users', firebaseUser.uid);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      // Ensure there's a logged-in admin to perform edits
+      if (currentUser) {
+         // Now fetch the profile of the user being edited
+        const userDocRef = doc(db, 'users', id);
         try {
           const userDocSnap = await getDoc(userDocRef);
           if (userDocSnap.exists()) {
              setProfile(userDocSnap.data() as UserProfile);
+             // Find the user object in auth if needed, though not required for profile edits
+             // For password changes, we need to re-authenticate the admin, which is complex and risky.
+             // We will handle password changes via a separate, more secure flow.
+             // For now, let's assume the admin can edit profile data.
+             const authUser = auth.currentUser;
+             if (authUser && authUser.uid === id) {
+                setUser(authUser);
+             }
+
+          } else {
+            toast({ title: "User not found", variant: "destructive" });
           }
         } catch (error) {
           console.error("Error fetching user document:", error);
@@ -114,11 +126,13 @@ export default function EditUserDetailPage() {
             variant: "destructive",
           });
         }
+      } else {
+        router.push('/admin/login');
       }
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [id, toast]);
+  }, [id, toast, router]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -147,21 +161,25 @@ export default function EditUserDetailPage() {
   };
 
   const handleSaveChanges = async () => {
-    if (!user || !profile) return;
+    if (!id || !profile) return;
     
     if (newPassword && newPassword !== confirmPassword) {
         toast({ title: 'Error', description: 'New passwords do not match.', variant: 'destructive' });
+        return;
+    }
+     if (newPassword && !user) {
+        toast({ title: 'Error', description: 'You can only change your own password.', variant: 'destructive' });
         return;
     }
 
     setIsSaving(true);
     try {
       // Update profile in Firestore
-      const userDocRef = doc(db, 'users', user.uid);
+      const userDocRef = doc(db, 'users', id);
       await updateDoc(userDocRef, { ...profile });
 
       // Update password in Firebase Auth if a new one is provided
-      if (newPassword) {
+      if (newPassword && user) {
         await updatePassword(user, newPassword);
         
         // Send password change notification email
@@ -176,12 +194,12 @@ export default function EditUserDetailPage() {
 
        toast({
         title: 'Profile Updated',
-        description: 'Your profile has been saved successfully.',
+        description: 'User profile has been saved successfully.',
       });
     } catch (error: any) {
         toast({
             title: 'Error',
-            description: error.message || 'Could not save your profile.',
+            description: error.message || 'Could not save user profile.',
             variant: 'destructive',
         });
     } finally {
@@ -210,15 +228,15 @@ export default function EditUserDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Link href="/admin/profile" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+      <Link href="/admin/users" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" />
-        Back to Profile
+        Back to All Users
       </Link>
       
       <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">Edit Admin Profile</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Edit User Profile</h1>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push('/admin/profile')}>
+            <Button variant="outline" onClick={() => router.back()}>
                 <X className="mr-2 h-4 w-4"/>
                 Cancel
             </Button>

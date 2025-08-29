@@ -18,12 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search, MessageSquare, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { updateUserRole, type UpdateUserRoleInput } from '@/ai/flows/user-management';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
 
@@ -52,9 +47,6 @@ export default function AdminUsersPage() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'signup' | 'lead' | 'comment'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -141,15 +133,6 @@ export default function AdminUsersPage() {
     comment: allUsers.filter(u => u.type === 'Comment').length,
   }), [allUsers]);
 
-  const handleEditClick = (user: User) => {
-    if (user.type === 'Lead' || user.type === 'Comment') {
-        toast({ title: "Info", description: "This user type cannot be edited." });
-        return;
-    }
-    setSelectedUser(user);
-    setIsEditDialogOpen(true);
-  };
-  
   const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment') => {
       setActiveFilter(filter);
       setCurrentPage(1);
@@ -159,35 +142,6 @@ export default function AdminUsersPage() {
       setSearchQuery(e.target.value);
       setCurrentPage(1);
   };
-
-  const handleRoleChange = async () => {
-    if (!selectedUser) return;
-    
-    setIsUpdating(true);
-    try {
-      const input: UpdateUserRoleInput = {
-        userId: selectedUser.id,
-        newRole: selectedUser.role as 'user' | 'admin', // Cast here
-      };
-      await updateUserRole(input);
-      toast({
-        title: 'Success!',
-        description: `User role for ${selectedUser.email} has been updated.`,
-      });
-      await fetchUsersAndLeads();
-      setIsEditDialogOpen(false);
-    } catch (error: any) {
-      console.error("Failed to update role:", error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Could not update user role.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
 
   const formatDate = (timestamp?: { seconds: number; nanoseconds: number; }) => {
     if (!timestamp || typeof timestamp.seconds !== 'number') {
@@ -214,19 +168,19 @@ export default function AdminUsersPage() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
                 <Button variant={activeFilter === 'all' ? 'default' : 'outline'} onClick={() => handleFilterChange('all')}>
-                    <Users />
+                    <Users className="mr-2 h-4 w-4"/>
                     All Users ({counts.all})
                 </Button>
                 <Button variant={activeFilter === 'signup' ? 'default' : 'outline'} onClick={() => handleFilterChange('signup')}>
-                    <UserPlus />
+                    <UserPlus className="mr-2 h-4 w-4"/>
                     Signup Users ({counts.signup})
                 </Button>
                 <Button variant={activeFilter === 'lead' ? 'default' : 'outline'} onClick={() => handleFilterChange('lead')}>
-                    <User />
+                    <User className="mr-2 h-4 w-4"/>
                     Lead Users ({counts.lead})
                 </Button>
                 <Button variant={activeFilter === 'comment' ? 'default' : 'outline'} onClick={() => handleFilterChange('comment')}>
-                    <MessageSquare />
+                    <MessageSquare className="mr-2 h-4 w-4"/>
                     Comment Users ({counts.comment})
                 </Button>
             </div>
@@ -266,7 +220,7 @@ export default function AdminUsersPage() {
                 <TableBody>
                   {paginatedUsers.length > 0 ? (
                     paginatedUsers.map(user => (
-                      <TableRow key={user.id} className="cursor-pointer" onClick={() => window.location.href = `/admin/users/${user.id}`}>
+                      <TableRow key={user.id}>
                         <TableCell className="font-medium">
                            <div className="flex items-center gap-2">
                              <Avatar className="h-8 w-8">
@@ -284,11 +238,12 @@ export default function AdminUsersPage() {
                         </TableCell>
                         <TableCell>{formatDate(user.createdAt)}</TableCell>
                          <TableCell className="text-right">
-                          <Link href={`/admin/users/${user.id}`} passHref>
-                            <Button variant="ghost" size="icon" aria-label="View user details">
-                                <Edit className="h-4 w-4" />
-                            </Button>
-                          </Link>
+                          <Button asChild variant="outline" size="sm">
+                            <Link href={`/admin/users/${user.id}`}>
+                                <Edit className="mr-2 h-4 w-4"/>
+                                Manage
+                            </Link>
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))
@@ -328,50 +283,6 @@ export default function AdminUsersPage() {
           )}
         </CardContent>
       </Card>
-      
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit User Role</DialogTitle>
-            <DialogDescription>
-              Change the role for {selectedUser?.email}.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedUser && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="role" className="text-right">
-                  Role
-                </Label>
-                <Select
-                  value={selectedUser.role}
-                  onValueChange={(value: 'user' | 'admin') => 
-                    setSelectedUser(prev => prev ? { ...prev, role: value } : null)
-                  }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button type="button" onClick={handleRoleChange} disabled={isUpdating}>
-              {isUpdating ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
