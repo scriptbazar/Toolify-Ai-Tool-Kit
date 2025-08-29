@@ -18,6 +18,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  ResponsiveContainer
 } from 'recharts';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -46,6 +47,7 @@ import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 interface User {
@@ -56,6 +58,13 @@ interface User {
   status: string; // e.g., 'Approved', 'Active'
   date: string;
   amount: string;
+}
+
+interface UserCounts {
+    all: number;
+    signup: number;
+    lead: number;
+    referral: number; // Placeholder for now
 }
 
 const chartData = [
@@ -76,13 +85,15 @@ const chartConfig = {
 
 export default function AdminDashboard() {
   const [recentUsers, setRecentUsers] = useState<User[]>([]);
+  const [userCounts, setUserCounts] = useState<UserCounts>({ all: 0, signup: 0, lead: 0, referral: 573 });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    async function fetchRecentUsers() {
+    async function fetchDashboardData() {
       setLoading(true);
       try {
+        // Fetch recent users for the table
         const usersRef = collection(db, 'users');
         const q = query(usersRef, orderBy('createdAt', 'desc'), limit(5));
         const querySnapshot = await getDocs(q);
@@ -99,18 +110,31 @@ export default function AdminDashboard() {
           };
         });
         setRecentUsers(usersList);
+
+        // Fetch counts for the stat cards
+        const leadsSnapshot = await getDocs(collection(db, 'leads'));
+        const signupCount = querySnapshot.size; // From the 'users' collection
+        const leadCount = leadsSnapshot.size;
+        
+        setUserCounts(prev => ({
+            ...prev,
+            signup: signupCount,
+            lead: leadCount,
+            all: signupCount + leadCount
+        }));
+
       } catch (error) {
-        console.error("Error fetching recent users:", error);
+        console.error("Error fetching dashboard data:", error);
         toast({
             title: "Error",
-            description: "Could not load recent signups.",
+            description: "Could not load dashboard data.",
             variant: "destructive"
         });
       } finally {
         setLoading(false);
       }
     }
-    fetchRecentUsers();
+    fetchDashboardData();
   }, [toast]);
   
   const copyToClipboard = (text: string, fieldName: string) => {
@@ -135,7 +159,7 @@ export default function AdminDashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">10,532</div>
+              <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-20" /> : userCounts.all.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
                 +5.2% from last month
               </p>
@@ -149,7 +173,7 @@ export default function AdminDashboard() {
               <UserPlus className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+2350</div>
+              <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-20" /> : `+${userCounts.signup.toLocaleString()}`}</div>
               <p className="text-xs text-muted-foreground">
                 +180.1% from last month
               </p>
@@ -163,7 +187,7 @@ export default function AdminDashboard() {
               <UserCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+1,234</div>
+              <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-20" /> : `+${userCounts.lead.toLocaleString()}`}</div>
               <p className="text-xs text-muted-foreground">
                 +19% from last month
               </p>
@@ -177,7 +201,7 @@ export default function AdminDashboard() {
               <UserRound className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+573</div>
+              <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-20" /> : `+${userCounts.referral.toLocaleString()}`}</div>
               <p className="text-xs text-muted-foreground">
                 +201 since last hour
               </p>
@@ -267,7 +291,7 @@ export default function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartConfig}>
+             <ResponsiveContainer width="100%" height={300}>
               <RechartsLineChart
                 data={chartData}
                 margin={{
@@ -297,12 +321,12 @@ export default function AdminDashboard() {
                 <Line
                   dataKey="users"
                   type="monotone"
-                  stroke="var(--color-users)"
+                  stroke="hsl(var(--primary))"
                   strokeWidth={2}
                   dot={true}
                 />
               </RechartsLineChart>
-            </ChartContainer>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>

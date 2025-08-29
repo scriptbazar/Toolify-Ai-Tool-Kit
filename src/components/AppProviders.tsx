@@ -11,7 +11,6 @@ export async function AppProviders({ children }: { children: React.ReactNode }) 
   const pathname = headers().get('x-next-pathname') || '';
   
   const authRoutes = ['/login', '/signup', '/admin/login', '/forgot-password'];
-  const isAuthRoute = authRoutes.includes(pathname);
   const isAdminRoute = pathname.startsWith('/admin');
   const isUserPanelRoute = [
     '/dashboard',
@@ -29,13 +28,14 @@ export async function AppProviders({ children }: { children: React.ReactNode }) 
   ].some(route => pathname.startsWith(route));
 
   // Determine if the public layout should be shown
-  const showPublicLayout = !isAuthRoute && !isAdminRoute && !isUserPanelRoute;
+  const isAuthPage = authRoutes.includes(pathname);
+  const showPublicLayout = !isAuthPage && !isAdminRoute && !isUserPanelRoute;
 
   return (
     <div className={cn("relative flex min-h-screen flex-col")}>
       {showPublicLayout && <Header />}
       <main className="flex-1">{children}</main>
-      {!isAdminRoute && <ChatWidget />}
+      {!isAdminRoute && !isUserPanelRoute && !isAuthPage && <ChatWidget />}
       {showPublicLayout && <Footer />}
     </div>
   );
