@@ -134,10 +134,10 @@ const initialTemplates = [
    {
     id: 'renewal-reminder',
     icon: CalendarClock,
-    title: 'Subscription Renewal Reminder',
-    description: 'Reminds users that their subscription is about to renew.',
-    subject: 'Your ToolifyAI Subscription is Renewing Soon',
-    body: `Hi {{name}},\n\nThis is a friendly reminder that your subscription for the {{planName}} plan will automatically renew on {{renewalDate}}.\n\nIf you need to make any changes to your subscription or billing information, please visit your account dashboard. No action is required to continue your subscription.\n\n<a href="{{dashboardLink}}" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Manage Subscription</a>\n\nThanks for being a valued member!\n\nThe ToolifyAI Team`,
+    title: 'Subscription Expiration Reminder',
+    description: 'Reminds users that their subscription is about to expire.',
+    subject: 'Action Required: Your ToolifyAI Subscription is Expiring Soon!',
+    body: `Hi {{name}},\n\nThis is a friendly reminder that your subscription for the {{planName}} plan is set to expire on {{renewalDate}}.\n\nTo avoid losing access to your Pro features, please renew your subscription. If your plan expires, your account will be reverted to the Free plan.\n\n<a href="{{dashboardLink}}" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Renew Your Subscription</a>\n\nThanks for being a valued member!\n\nThe ToolifyAI Team`,
   },
 ];
 
