@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -56,8 +57,7 @@ export default function SubscribersPage() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: 'Copied!',
-      description: 'Email address copied to clipboard.',
+      description: `Copied: ${text}`,
     });
   };
 

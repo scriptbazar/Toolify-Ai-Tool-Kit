@@ -132,7 +132,7 @@ export default function PaymentHistoryPage() {
   
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({ description: 'Copied to clipboard!' });
+    toast({ description: `Copied: ${text}` });
   };
 
   const tabs: { id: FilterType; label: string; icon: React.ElementType; count: number }[] = [

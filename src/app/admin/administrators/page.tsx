@@ -73,7 +73,7 @@ export default function AdministratorsPage() {
   
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({ description: 'Copied to clipboard!' });
+    toast({ description: `Copied: ${text}` });
   };
 
   const formatDate = (timestamp?: { seconds: number; nanoseconds: number; }) => {

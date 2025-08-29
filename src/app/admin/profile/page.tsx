@@ -20,6 +20,7 @@ import {
   MessageSquare,
   GitCommitVertical,
   Briefcase,
+  DollarSign,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -129,7 +130,7 @@ export default function AdminProfilePage() {
   
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({ description: 'Copied to clipboard!' });
+    toast({ description: `Copied: ${text}` });
   };
   
   if (loading || !profile || !user) {

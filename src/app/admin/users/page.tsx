@@ -114,7 +114,7 @@ export default function AdminUsersPage() {
   
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({ description: 'Copied to clipboard!' });
+    toast({ description: `Copied: ${text}` });
   };
   
   const filteredUsers = useMemo(() => {
