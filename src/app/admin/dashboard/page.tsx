@@ -101,24 +101,29 @@ export default function AdminDashboard() {
 
         // --- Process Chart Data ---
         const monthlySignups: { [key: string]: number } = {};
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
         allUsersList.forEach(user => {
-            if (user.createdAt && user.createdAt.seconds) {
-                const date = new Date(user.createdAt.seconds * 1000);
-                const month = monthNames[date.getMonth()];
-                monthlySignups[month] = (monthlySignups[month] || 0) + 1;
-            }
+          if (user.createdAt && user.createdAt.seconds) {
+            const date = new Date(user.createdAt.seconds * 1000);
+            const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+            monthlySignups[monthKey] = (monthlySignups[monthKey] || 0) + 1;
+          }
         });
-        
-        const generatedChartData: ChartData[] = monthNames.map(month => ({
-            month: month.slice(0, 3), // e.g., Jan, Feb
-            users: monthlySignups[month] || 0,
-        })).filter(data => data.users > 0); // Only show months with signups or adjust as needed
 
-        if (generatedChartData.length > 0) {
-            setChartData(generatedChartData);
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const today = new Date();
+        const last12MonthsData: ChartData[] = [];
+
+        for (let i = 11; i >= 0; i--) {
+          const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+          const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
+          const monthName = monthNames[d.getMonth()];
+          last12MonthsData.push({
+            month: monthName,
+            users: monthlySignups[monthKey] || 0,
+          });
         }
+        setChartData(last12MonthsData);
+
 
         // --- Process Recent Users Table (first 5) ---
         const recentUsersList = usersSnapshot.docs.slice(0, 5).map(doc => {
@@ -359,3 +364,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
