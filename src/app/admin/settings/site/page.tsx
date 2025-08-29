@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare, UserX } from 'lucide-react';
+import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
@@ -86,7 +86,7 @@ export default function SiteSettingsPage() {
             contactEmail: '',
             socialLinks: { facebook: '', twitter: '', instagram: '', youtube: '' },
             webmaster: { googleSearchConsole: '', googleAnalytics: '', googleAdsense: '', yandexWebmaster: '', bingWebmaster: '', pinterest: '', baidu: '', yahooSearchConsole: '' },
-            security: { enableTwoFactorAuth: false, twoFactorAuthMethods: {email: true, authenticatorApp: false, mobileNumber: false}, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '', maintenanceMode: false, enableAccountDeletion: true },
+            security: { enableTwoFactorAuth: false, twoFactorAuthMethods: {email: true, authenticatorApp: false, mobileNumber: false}, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '', maintenanceMode: false, enableNewLoginAlerts: true },
         });
       } catch (error) {
         console.error('Failed to fetch settings:', error);
@@ -173,6 +173,14 @@ export default function SiteSettingsPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleUtilityClick = (action: string) => {
+    // Simulate API call for utility actions
+    toast({
+      title: 'Action Triggered!',
+      description: `The "${action}" process has been initiated successfully.`,
+    });
   };
 
   const handleToggle = (id: string) => {
@@ -465,20 +473,20 @@ export default function SiteSettingsPage() {
                         </div>
                          <div className="flex items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                                <Label htmlFor="enableAccountDeletion" className="font-medium">Enable Account Deletion</Label>
-                                <p className="text-sm text-muted-foreground">Allow users to delete their own accounts.</p>
+                                <Label htmlFor="enableNewLoginAlerts" className="font-medium">Enable New Login Alerts</Label>
+                                <p className="text-sm text-muted-foreground">Notify users of logins from new devices.</p>
                             </div>
                             <Switch
-                                id="enableAccountDeletion"
-                                checked={settings.security?.enableAccountDeletion || false}
-                                onCheckedChange={(checked) => handleSecurityChange('enableAccountDeletion', checked)}
+                                id="enableNewLoginAlerts"
+                                checked={settings.security?.enableNewLoginAlerts || false}
+                                onCheckedChange={(checked) => handleSecurityChange('enableNewLoginAlerts', checked)}
                             />
                         </div>
                      </div>
                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                        <Button variant="outline" type="button"><Eraser className="mr-2 h-4 w-4" />Clear Cache</Button>
-                        <Button variant="outline" type="button"><FileCode className="mr-2 h-4 w-4" />Generate sitemap.xml</Button>
-                        <Button variant="outline" type="button"><FileText className="mr-2 h-4 w-4" />Generate robots.txt</Button>
+                        <Button variant="outline" type="button" onClick={() => handleUtilityClick('Clear Cache')}><Eraser className="mr-2 h-4 w-4" />Clear Cache</Button>
+                        <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Sitemap')}><FileCode className="mr-2 h-4 w-4" />Generate sitemap.xml</Button>
+                        <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Robots.txt')}><FileText className="mr-2 h-4 w-4" />Generate robots.txt</Button>
                      </div>
                 </div>
             </div>
