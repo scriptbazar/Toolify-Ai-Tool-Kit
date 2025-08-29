@@ -478,7 +478,7 @@ export default function AdminLayout({
                 <DropdownMenuSeparator />
                  <DropdownMenuItem onClick={() => router.push(`/admin/users/${user?.uid}`)}>
                   <Shield className="mr-2 h-4 w-4" />
-                  <span>Admin Panel</span>
+                  <span>Edit Admin Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push(`/admin/users/${user?.uid}`)}>
                   <UserCog className="mr-2 h-4 w-4" />
