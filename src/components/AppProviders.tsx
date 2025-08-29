@@ -30,26 +30,28 @@ export async function AppProviders({ children }: { children: React.ReactNode }) 
     '/community-chat',
   ].some(route => pathname.startsWith(route));
 
-  // Determine if the public layout should be shown
-  const isAuthPage = authRoutes.includes(pathname);
-  const showPublicLayout = !isAuthPage && !isAdminRoute && !isUserPanelRoute;
-
+  // If it's an authentication page, render it without any layout.
+  if (authRoutes.includes(pathname)) {
+    return <>{children}</>;
+  }
+  
+  // If it's an admin route, render with the AdminLayout.
   if (isAdminRoute) {
-    if (isAuthPage) return <>{children}</>;
     return <AdminLayout>{children}</AdminLayout>;
   }
 
+  // If it's a user panel route, render with the UserPanelLayout.
   if (isUserPanelRoute) {
-    if (isAuthPage) return <>{children}</>;
     return <UserPanelLayout>{children}</UserPanelLayout>;
   }
 
+  // Otherwise, it's a public page. Render with the public header, footer, and chat widget.
   return (
     <div className={cn("relative flex min-h-screen flex-col")}>
-      {showPublicLayout && <Header />}
+      <Header />
       <main className="flex-1">{children}</main>
       <ChatWidget />
-      {showPublicLayout && <Footer />}
+      <Footer />
     </div>
   );
 }
