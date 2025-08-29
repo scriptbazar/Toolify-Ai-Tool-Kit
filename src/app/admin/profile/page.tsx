@@ -16,6 +16,7 @@ import {
   CheckCheck,
   Settings,
   MoreVertical,
+  Briefcase,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -126,8 +127,8 @@ export default function AdminProfilePage() {
                     <AvatarFallback>{profile.firstName?.[0]?.toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{profile.firstName} {profile.lastName}</h1>
-                    <p className="text-sm text-muted-foreground"># {user.uid} ({profile.userName}) <Copy className="h-3 w-3 inline cursor-pointer" onClick={() => copyToClipboard(user.uid)} /></p>
+                    <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">{profile.firstName} {profile.lastName} <Badge variant="outline" className="p-1 justify-center text-sm"><UserCog className="h-3 w-3 mr-1"/>{profile.role}</Badge></h1>
+                    <p className="text-sm text-muted-foreground">@{profile.userName}</p>
 
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-muted-foreground">
                         <div className="flex items-center gap-2">
@@ -152,8 +153,13 @@ export default function AdminProfilePage() {
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
             <Badge variant="outline" className="p-2 justify-center bg-green-100 text-green-800 border-green-200"><CheckCircle className="h-4 w-4 mr-2"/>Active</Badge>
-            <Badge variant="outline" className="p-2 justify-center"><UserCog className="h-4 w-4 mr-2"/>{profile.role}</Badge>
-            <Badge variant="outline" className="p-2 justify-center"><CalendarDays className="h-4 w-4 mr-2"/>Joined {new Date(profile.createdAt.seconds * 1000).toLocaleDateString()}</Badge>
+            <Badge variant="outline" className="p-2 justify-center"><Briefcase className="h-4 w-4 mr-2"/>Pro Plan</Badge>
+            <Badge variant="outline" className="p-2 justify-center">
+                <CalendarDays className="h-4 w-4 mr-2"/>Joined {new Date(profile.createdAt.seconds * 1000).toLocaleDateString()}
+            </Badge>
+            <Badge variant="outline" className="p-2 justify-center text-xs text-muted-foreground">
+                <span className="mr-1">UID:</span> {user.uid} <Copy className="h-3 w-3 inline cursor-pointer ml-1" onClick={() => copyToClipboard(user.uid)} />
+            </Badge>
         </div>
         </CardContent>
       </Card>
@@ -175,6 +181,12 @@ export default function AdminProfilePage() {
             </TabsContent>
             <TabsContent value="transactions">
                 <p className="text-muted-foreground">Transactions data will be displayed here.</p>
+            </TabsContent>
+             <TabsContent value="withdrawals">
+                <p className="text-muted-foreground">Withdrawals data will be displayed here.</p>
+            </TabsContent>
+             <TabsContent value="wallet">
+                <p className="text-muted-foreground">Wallet Management data will be displayed here.</p>
             </TabsContent>
         </Tabs>
     </div>
