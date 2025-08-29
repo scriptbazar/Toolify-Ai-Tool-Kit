@@ -44,6 +44,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import type { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import { getSettings } from '@/ai/flows/settings-management';
 
 
 type FilterType = 'all' | 'completed' | 'pending' | 'failed';
@@ -176,42 +177,103 @@ export default function PaymentHistoryPage() {
   const handleDownloadPdf = async (payment: Payment) => {
     const { default: jsPDF } = await import('jspdf');
     const { default: autoTable } = await import('jspdf-autotable');
-    const doc = new jsPDF();
     
-    // Add header
-    doc.setFontSize(20);
-    doc.text('Invoice', 14, 22);
-    doc.setFontSize(12);
-    doc.text(`Transaction ID: ${payment.transactionId}`, 14, 32);
-    doc.text(`Date: ${new Date(payment.date).toLocaleDateString()}`, 14, 38);
-    
-    autoTable(doc, {
-        startY: 50,
-        head: [['User Information']],
-        body: [
-            [{ content: `Name: ${payment.user.name}\nEmail: ${payment.user.email}`, styles: { halign: 'left' }}],
-        ],
-        theme: 'striped',
-    });
+    try {
+        const settings = await getSettings();
+        const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
+        const logoUrl = settings.general?.logoUrl;
+        const socialLinks = settings.general?.socialLinks || {};
+        
+        const doc = new jsPDF();
+        let finalY = 10;
 
-    autoTable(doc, {
-        startY: (doc as any).autoTable.previous.finalY + 10,
-        head: [['Payment Details']],
-        body: [
-            ['Plan', payment.plan],
-            ['Amount', payment.amount],
-            ['Status', payment.status],
-            ['Payment Method', payment.paymentMethod],
-        ],
-        theme: 'striped',
-        didParseCell: function (data: any) {
-            if (data.section === 'body' && data.column.index === 0) {
-                data.cell.styles.fontStyle = 'bold';
+        // --- Header ---
+        if (logoUrl) {
+            try {
+                // This is a simplified approach. A more robust solution would handle CORS and different image types.
+                // For this example, we assume a public, accessible image URL.
+                const response = await fetch(logoUrl);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                const dataUrl = await new Promise<string>(resolve => {
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.readAsDataURL(blob);
+                });
+                doc.addImage(dataUrl, 'PNG', 14, 15, 20, 20);
+                doc.setFontSize(22);
+                doc.text(siteTitle, 40, 28);
+            } catch (e) {
+                 console.error("Could not add logo to PDF:", e);
+                 doc.setFontSize(22);
+                 doc.text(siteTitle, 14, 22);
             }
+        } else {
+             doc.setFontSize(22);
+             doc.text(siteTitle, 14, 22);
         }
-    });
 
-    doc.save(`invoice-${payment.transactionId}.pdf`);
+        doc.setFontSize(12);
+        doc.text(`Transaction ID: ${payment.transactionId}`, 14, 45);
+        doc.text(`Date: ${new Date(payment.date).toLocaleDateString()}`, 14, 52);
+        finalY = 52;
+        
+        // --- User and Payment Tables ---
+        autoTable(doc, {
+            startY: finalY + 10,
+            head: [['User Information']],
+            body: [
+                [{ content: `Name: ${payment.user.name}\nEmail: ${payment.user.email}`, styles: { halign: 'left' }}],
+            ],
+            theme: 'striped',
+        });
+
+        autoTable(doc, {
+            startY: (doc as any).autoTable.previous.finalY + 10,
+            head: [['Payment Details']],
+            body: [
+                ['Plan', payment.plan],
+                ['Amount', payment.amount],
+                ['Status', payment.status],
+                ['Payment Method', payment.paymentMethod],
+            ],
+            theme: 'striped',
+            didParseCell: function (data: any) {
+                if (data.section === 'body' && data.column.index === 0) {
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            }
+        });
+        finalY = (doc as any).autoTable.previous.finalY;
+
+
+        // --- Footer with Social Links ---
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const activeSocials = Object.entries(socialLinks).filter(([_, url]) => url);
+        
+        if (activeSocials.length > 0) {
+            let socialY = pageHeight - 15 - (activeSocials.length * 5);
+            doc.setFontSize(10);
+            doc.text("Follow Us:", 14, socialY);
+            socialY += 5;
+
+            activeSocials.forEach(([name, url]) => {
+                const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+                doc.setTextColor(40, 52, 152); // Link color
+                doc.textWithLink(`${capitalizedName}: ${url}`, 14, socialY, { url });
+                socialY += 5;
+            });
+        }
+        
+        doc.save(`invoice-${payment.transactionId}.pdf`);
+
+    } catch (error) {
+        console.error("PDF Generation Error:", error);
+        toast({
+            title: "Error Generating PDF",
+            description: "Could not generate the PDF invoice. Please try again.",
+            variant: "destructive"
+        });
+    }
   };
 
   const handleAddTransaction = (e: React.FormEvent<HTMLFormElement>) => {
@@ -289,8 +351,8 @@ export default function PaymentHistoryPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[250px]">Transaction ID</TableHead>
                   <TableHead>User</TableHead>
+                  <TableHead className="w-[250px]">Transaction ID</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Date</TableHead>
@@ -302,15 +364,6 @@ export default function PaymentHistoryPage() {
                 {filteredPayments.length > 0 ? (
                     filteredPayments.map((payment) => (
                         <TableRow key={payment.transactionId}>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-mono text-xs">
-                                    <span className="truncate">{payment.transactionId}</span>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(payment.transactionId)}>
-                                      <Copy className="h-3 w-3" />
-                                      <span className="sr-only">Copy Transaction ID</span>
-                                    </Button>
-                                </div>
-                            </TableCell>
                              <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
@@ -321,6 +374,15 @@ export default function PaymentHistoryPage() {
                                         <div className="font-medium">{payment.user.name}</div>
                                         <div className="text-sm text-muted-foreground">{payment.user.email}</div>
                                     </div>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-2 font-mono text-xs">
+                                    <span className="truncate">{payment.transactionId}</span>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(payment.transactionId)}>
+                                      <Copy className="h-3 w-3" />
+                                      <span className="sr-only">Copy Transaction ID</span>
+                                    </Button>
                                 </div>
                             </TableCell>
                             <TableCell>{payment.plan}</TableCell>
@@ -437,5 +499,3 @@ export default function PaymentHistoryPage() {
     </div>
   );
 }
-
-    
