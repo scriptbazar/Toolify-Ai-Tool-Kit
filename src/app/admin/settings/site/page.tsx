@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
+import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
@@ -34,7 +34,8 @@ export default function SiteSettingsPage() {
             logoUrl: '',
             faviconUrl: '',
             contactEmail: '',
-            socialLinks: { facebook: '', twitter: '', instagram: '', youtube: '' }
+            socialLinks: { facebook: '', twitter: '', instagram: '', youtube: '' },
+            webmaster: { googleSearchConsole: '', googleAnalytics: '', googleAdsense: '', yandexWebmaster: '', bingWebmaster: '', pinterest: '', baidu: '', yahooSearchConsole: '' }
         });
       } catch (error) {
         console.error('Failed to fetch settings:', error);
@@ -63,6 +64,17 @@ export default function SiteSettingsPage() {
             ...prev.socialLinks,
             [name]: value
         }
+    } : null));
+  };
+
+  const handleWebmasterInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSettings(prev => (prev ? {
+      ...prev,
+      webmaster: {
+        ...prev.webmaster,
+        [name]: value
+      }
     } : null));
   };
 
@@ -308,6 +320,129 @@ export default function SiteSettingsPage() {
         </CardContent>
       </Card>
       
+      <Card>
+        <CardHeader>
+          <CardTitle>Webmaster Tools</CardTitle>
+          <CardDescription>
+            Add verification codes for various webmaster tools.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+                <Label htmlFor="googleSearchConsole">Google Search Console</Label>
+                 <div className="relative">
+                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="googleSearchConsole" 
+                      name="googleSearchConsole"
+                      value={settings.webmaster?.googleSearchConsole || ''} 
+                      onChange={handleWebmasterInputChange}
+                      placeholder="Verification code"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="googleAnalytics">Google Analytics</Label>
+                 <div className="relative">
+                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="googleAnalytics" 
+                      name="googleAnalytics"
+                      value={settings.webmaster?.googleAnalytics || ''} 
+                      onChange={handleWebmasterInputChange}
+                      placeholder="Tracking ID (e.g., G-XXXXXXXXXX)"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="googleAdsense">Google AdSense</Label>
+                 <div className="relative">
+                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="googleAdsense" 
+                      name="googleAdsense"
+                      value={settings.webmaster?.googleAdsense || ''} 
+                      onChange={handleWebmasterInputChange}
+                      placeholder="Publisher ID (e.g., pub-xxxxxxxxxxxxxxxx)"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="bingWebmaster">Bing Webmaster Tools</Label>
+                 <div className="relative">
+                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="bingWebmaster" 
+                      name="bingWebmaster"
+                      value={settings.webmaster?.bingWebmaster || ''} 
+                      onChange={handleWebmasterInputChange}
+                      placeholder="Verification code"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="yandexWebmaster">Yandex Webmaster Tools</Label>
+                 <div className="relative">
+                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="yandexWebmaster" 
+                      name="yandexWebmaster"
+                      value={settings.webmaster?.yandexWebmaster || ''} 
+                      onChange={handleWebmasterInputChange}
+                      placeholder="Verification code"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="baidu">Baidu Webmaster Tools</Label>
+                 <div className="relative">
+                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="baidu" 
+                      name="baidu"
+                      value={settings.webmaster?.baidu || ''} 
+                      onChange={handleWebmasterInputChange}
+                      placeholder="Verification code"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="pinterest">Pinterest</Label>
+                 <div className="relative">
+                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="pinterest" 
+                      name="pinterest"
+                      value={settings.webmaster?.pinterest || ''} 
+                      onChange={handleWebmasterInputChange}
+                      placeholder="Verification code"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="yahooSearchConsole">Yahoo Search Console</Label>
+                 <div className="relative">
+                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      id="yahooSearchConsole" 
+                      name="yahooSearchConsole"
+                      value={settings.webmaster?.yahooSearchConsole || ''} 
+                      onChange={handleWebmasterInputChange}
+                      placeholder="Verification code"
+                      className="pl-10"
+                  />
+                 </div>
+            </div>
+        </CardContent>
+      </Card>
+
       <div className="flex justify-end pt-6">
         <Button onClick={handleSave} disabled={isSaving}>
           {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}

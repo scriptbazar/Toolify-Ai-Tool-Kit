@@ -36,6 +36,18 @@ export const SocialLinksSchema = z.object({
 });
 export type SocialLinks = z.infer<typeof SocialLinksSchema>;
 
+export const WebmasterSettingsSchema = z.object({
+    googleSearchConsole: z.string().optional(),
+    googleAnalytics: z.string().optional(),
+    googleAdsense: z.string().optional(),
+    yandexWebmaster: z.string().optional(),
+    bingWebmaster: z.string().optional(),
+    pinterest: z.string().optional(),
+    baidu: z.string().optional(),
+    yahooSearchConsole: z.string().optional(),
+});
+export type WebmasterSettings = z.infer<typeof WebmasterSettingsSchema>;
+
 export const GeneralSettingsSchema = z.object({
   siteTitle: z.string().default('ToolifyAI'),
   slogan: z.string().default('Your All-in-One Smart Toolkit'),
@@ -46,6 +58,7 @@ export const GeneralSettingsSchema = z.object({
   faviconUrl: z.string().optional(),
   contactEmail: z.string().email().optional(),
   socialLinks: SocialLinksSchema.optional(),
+  webmaster: WebmasterSettingsSchema.optional(),
 });
 export type GeneralSettings = z.infer<typeof GeneralSettingsSchema>;
 
