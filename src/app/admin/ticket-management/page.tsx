@@ -25,6 +25,45 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
 type FilterType = 'all' | 'open' | 'in-progress' | 'closed';
+type TicketStatus = 'Open' | 'In Progress' | 'Closed';
+type TicketPriority = 'High' | 'Medium' | 'Low';
+
+const dummyTickets = [
+    {
+        id: 'TKT-001',
+        subject: 'Cannot login to my account',
+        user: {
+            name: 'John Doe',
+            email: 'john.doe@example.com',
+        },
+        priority: 'High' as TicketPriority,
+        status: 'Open' as TicketStatus,
+        lastUpdated: '2024-07-31 10:00 AM',
+    },
+];
+
+const getStatusBadge = (status: TicketStatus) => {
+    switch (status) {
+      case 'Open':
+        return <Badge variant="destructive">Open</Badge>;
+      case 'In Progress':
+        return <Badge variant="secondary" className="bg-yellow-500 text-white hover:bg-yellow-600">In Progress</Badge>;
+      case 'Closed':
+        return <Badge variant="default" className="bg-green-500 hover:bg-green-600">Closed</Badge>;
+    }
+  };
+
+  const getPriorityBadge = (priority: TicketPriority) => {
+    switch (priority) {
+      case 'High':
+        return <Badge variant="destructive">High</Badge>;
+      case 'Medium':
+        return <Badge variant="secondary" className="bg-yellow-500 text-white hover:bg-yellow-600">Medium</Badge>;
+      case 'Low':
+        return <Badge variant="outline">Low</Badge>;
+    }
+  };
+
 
 export default function TicketManagementPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -64,7 +103,7 @@ export default function TicketManagementPage() {
                   className="shrink-0"
                 >
                   <tab.icon className="mr-2 h-4 w-4" />
-                  {tab.label} (0)
+                  {tab.label} ({tab.id === 'all' || tab.id === 'open' ? 1 : 0})
                 </Button>
               ))}
             </div>
@@ -94,11 +133,41 @@ export default function TicketManagementPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell colSpan={6} className="h-48 text-center">
-                    No tickets found.
-                  </TableCell>
-                </TableRow>
+                {dummyTickets.length > 0 ? (
+                    dummyTickets.map((ticket) => (
+                        <TableRow key={ticket.id}>
+                            <TableCell className="font-medium">{ticket.subject}</TableCell>
+                            <TableCell>
+                                <div>{ticket.user.name}</div>
+                                <div className="text-xs text-muted-foreground">{ticket.user.email}</div>
+                            </TableCell>
+                            <TableCell>{getPriorityBadge(ticket.priority)}</TableCell>
+                            <TableCell>{getStatusBadge(ticket.status)}</TableCell>
+                            <TableCell>{ticket.lastUpdated}</TableCell>
+                            <TableCell className="text-right">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button size="icon" variant="ghost">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                        <DropdownMenuItem>View/Reply</DropdownMenuItem>
+                                        <DropdownMenuItem>Mark as In Progress</DropdownMenuItem>
+                                        <DropdownMenuItem>Close Ticket</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </TableCell>
+                        </TableRow>
+                    ))
+                ) : (
+                    <TableRow>
+                        <TableCell colSpan={6} className="h-48 text-center">
+                            No tickets found.
+                        </TableCell>
+                    </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
