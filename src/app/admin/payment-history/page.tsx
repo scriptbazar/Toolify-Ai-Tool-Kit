@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -26,19 +25,23 @@ import {
   XCircle,
   Clock,
   Search,
-  MoreHorizontal,
   Copy,
+  Eye,
+  Download,
 } from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
+
 
 type FilterType = 'all' | 'completed' | 'pending' | 'failed';
 
@@ -54,6 +57,7 @@ const payments = [
     amount: '$19.99',
     date: '2023-07-15',
     status: 'completed',
+    paymentMethod: 'Visa **** 4242',
   },
   {
     transactionId: 'txn_2HjP...d3kM',
@@ -66,6 +70,7 @@ const payments = [
     amount: '$0.00',
     date: '2023-07-14',
     status: 'completed',
+    paymentMethod: 'N/A',
   },
     {
     transactionId: 'txn_3KlM...g5lO',
@@ -78,6 +83,7 @@ const payments = [
     amount: '$19.99',
     date: '2023-07-13',
     status: 'pending',
+    paymentMethod: 'PayPal',
   },
    {
     transactionId: 'txn_4NmB...h8pO',
@@ -90,6 +96,7 @@ const payments = [
     amount: '$19.99',
     date: '2023-07-12',
     status: 'failed',
+    paymentMethod: 'Visa **** 1234',
   },
   {
     transactionId: 'txn_5PqA...j9rS',
@@ -102,8 +109,12 @@ const payments = [
     amount: '$49.99',
     date: '2023-07-11',
     status: 'completed',
+    paymentMethod: 'Mastercard **** 5678',
   },
 ];
+
+type Payment = typeof payments[0];
+
 
 const getStatusBadge = (status: FilterType) => {
   switch (status) {
@@ -121,6 +132,8 @@ const getStatusBadge = (status: FilterType) => {
 export default function PaymentHistoryPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const { toast } = useToast();
 
   const counts = useMemo(() => ({
@@ -149,6 +162,11 @@ export default function PaymentHistoryPage() {
                         p.transactionId.toLowerCase().includes(searchQuery.toLowerCase());
     return filterMatch && searchMatch;
   })
+
+  const handleViewDetails = (payment: Payment) => {
+    setSelectedPayment(payment);
+    setIsDetailOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -198,8 +216,8 @@ export default function PaymentHistoryPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
                   <TableHead>Transaction ID</TableHead>
+                  <TableHead>User</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Date</TableHead>
@@ -211,6 +229,15 @@ export default function PaymentHistoryPage() {
                 {filteredPayments.length > 0 ? (
                     filteredPayments.map((payment) => (
                         <TableRow key={payment.transactionId}>
+                             <TableCell>
+                                <div className="flex items-center gap-2 font-mono text-xs">
+                                    {payment.transactionId}
+                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(payment.transactionId)}>
+                                      <Copy className="h-3 w-3" />
+                                      <span className="sr-only">Copy Transaction ID</span>
+                                    </Button>
+                                </div>
+                            </TableCell>
                             <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
@@ -229,32 +256,15 @@ export default function PaymentHistoryPage() {
                                     </div>
                                 </div>
                             </TableCell>
-                            <TableCell>
-                                <div className="flex items-center gap-2 font-mono text-xs">
-                                    {payment.transactionId}
-                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(payment.transactionId)}>
-                                      <Copy className="h-3 w-3" />
-                                      <span className="sr-only">Copy Transaction ID</span>
-                                    </Button>
-                                </div>
-                            </TableCell>
                             <TableCell>{payment.plan}</TableCell>
                             <TableCell>{payment.amount}</TableCell>
                             <TableCell>{payment.date}</TableCell>
                             <TableCell>{getStatusBadge(payment.status as FilterType)}</TableCell>
                             <TableCell className="text-right">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button size="icon" variant="ghost">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                            <span className="sr-only">Actions</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
+                                <Button variant="outline" size="sm" onClick={() => handleViewDetails(payment)}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Details
+                                </Button>
                             </TableCell>
                         </TableRow>
                     ))
@@ -270,8 +280,50 @@ export default function PaymentHistoryPage() {
           </div>
         </CardContent>
       </Card>
+      
+      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>Transaction Details</DialogTitle>
+                <DialogDescription>A detailed view of the transaction.</DialogDescription>
+            </DialogHeader>
+            {selectedPayment && (
+                <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <h4 className="font-semibold">User Information</h4>
+                        <div className="flex items-center gap-3 rounded-md border p-3">
+                            <Avatar>
+                                <AvatarImage src={selectedPayment.user.avatar} alt={selectedPayment.user.name} />
+                                <AvatarFallback>{selectedPayment.user.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p>{selectedPayment.user.name}</p>
+                                <p className="text-sm text-muted-foreground">{selectedPayment.user.email}</p>
+                            </div>
+                        </div>
+                    </div>
+                     <Separator />
+                    <div className="space-y-2">
+                         <h4 className="font-semibold">Payment Details</h4>
+                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                            <span>Transaction ID:</span><span className="font-mono text-xs">{selectedPayment.transactionId}</span>
+                            <span>Date:</span><span>{selectedPayment.date}</span>
+                            <span>Plan:</span><span>{selectedPayment.plan}</span>
+                            <span>Amount:</span><span className="font-medium">{selectedPayment.amount}</span>
+                            <span>Status:</span><span>{getStatusBadge(selectedPayment.status as FilterType)}</span>
+                            <span>Payment Method:</span><span>{selectedPayment.paymentMethod}</span>
+                         </div>
+                    </div>
+                </div>
+            )}
+            <DialogFooter>
+                <Button variant="secondary" onClick={() => toast({title: "Coming soon!", description: "PDF generation is not yet implemented."})}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download PDF
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-
-    
