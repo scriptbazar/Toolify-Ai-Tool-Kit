@@ -1,3 +1,4 @@
+
 import {
   Bot,
   BrainCircuit,
@@ -24,6 +25,11 @@ import {
   Cpu,
   MonitorPlay,
   Component,
+  KeyRound,
+  Calculator,
+  AudioLines,
+  Ruler,
+  Palette,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -150,6 +156,13 @@ export const tools: Tool[] = [
     slug: 'ai-image-generator',
     category: 'ai',
   },
+  {
+    name: 'Text to Speech',
+    description: 'Convert written text into natural-sounding audio.',
+    Icon: AudioLines,
+    slug: 'text-to-speech',
+    category: 'ai',
+  },
   // Developer Tools
   {
     name: 'Code Helper',
@@ -163,6 +176,13 @@ export const tools: Tool[] = [
     description: 'Format and validate your JSON data.',
     Icon: FileJson2,
     slug: 'json-formatter',
+    category: 'dev',
+  },
+  {
+    name: 'Password Generator',
+    description: 'Create strong, secure, and random passwords.',
+    Icon: KeyRound,
+    slug: 'password-generator',
     category: 'dev',
   },
   {
@@ -194,6 +214,13 @@ export const tools: Tool[] = [
     slug: 'image-flipper',
     category: 'image',
   },
+  {
+    name: 'Color Picker',
+    description: 'Pick colors from your screen or an image.',
+    Icon: Palette,
+    slug: 'color-picker',
+    category: 'image',
+  },
   // SEO Tools
   {
     name: 'Meta Tag Generator',
@@ -215,5 +242,20 @@ export const tools: Tool[] = [
     Icon: LinkIcon,
     slug: 'url-redirect-checker',
     category: 'seo',
+  },
+   // Other/Utility Tools - can be a new category if needed
+  {
+    name: 'BMI Calculator',
+    description: 'Calculate your Body Mass Index (BMI).',
+    Icon: Calculator,
+    slug: 'bmi-calculator',
+    category: 'text', // No "Health" category, placing in 'text' for now
+  },
+  {
+    name: 'Unit Converter',
+    description: 'Convert between different units of measurement.',
+    Icon: Ruler,
+    slug: 'unit-converter',
+    category: 'text',
   },
 ];

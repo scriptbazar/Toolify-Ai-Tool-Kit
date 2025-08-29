@@ -7,7 +7,7 @@ const topTools = [
   { name: 'Case Converter', href: '/case-converter' },
   { name: 'Word Counter', href: '/word-counter' },
   { name: 'Lorem Ipsum Generator', href: '/lorem-ipsum-generator' },
-  { name: 'Password Generator', href: '#' },
+  { name: 'Password Generator', href: '/password-generator' },
   { name: 'JSON Formatter', href: '/json-formatter' },
 ];
 
@@ -20,11 +20,11 @@ const quickLinks = [
 ];
 
 const moreTools = [
-  { name: 'BMI Calculator', href: '#' },
-  { name: 'Text to Speech', href: '#' },
+  { name: 'BMI Calculator', href: '/bmi-calculator' },
+  { name: 'Text to Speech', href: '/text-to-speech' },
   { name: 'PDF Merger', href: '/merge-pdf' },
-  { name: 'Unit Converter', href: '#' },
-  { name: 'Color Picker', href: '#' },
+  { name: 'Unit Converter', href: '/unit-converter' },
+  { name: 'Color Picker', href: '/color-picker' },
 ];
 
 const bestHostings = [
