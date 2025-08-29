@@ -253,7 +253,6 @@ export default function PaymentHistoryPage() {
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                         <DropdownMenuItem>View Details</DropdownMenuItem>
-                                        <DropdownMenuItem>Refund</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>
