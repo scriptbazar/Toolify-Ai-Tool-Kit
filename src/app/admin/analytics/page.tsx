@@ -261,11 +261,6 @@ export default function AdminAnalyticsPage() {
                     </ChartContainer>
                 </CardContent>
             </Card>
-             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <AnalyticsPlaceholder title="Visitors by Browser" icon={Chrome} />
-                <AnalyticsPlaceholder title="Visitors by Country" icon={Globe} />
-                <AnalyticsPlaceholder title="Top Referrers" icon={LinkIcon} />
-            </div>
           </div>
       )
   }
