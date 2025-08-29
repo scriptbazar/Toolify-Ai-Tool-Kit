@@ -200,54 +200,56 @@ export default function AdvertisementPage() {
           </CardContent>
         </Card>
 
-        <div className={cn('lg:col-span-2 transition-opacity duration-300', settings.adType !== 'auto' && 'opacity-50 pointer-events-none hidden')}>
-           <Card>
-            <CardHeader>
-              <CardTitle>Auto Ads Script</CardTitle>
-              <CardDescription>
-                Paste your ad script here. It will be added to your site's header.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                  id="auto-ads-script"
-                  placeholder='<script async src="..."></script>'
-                  value={settings.autoAdsScript || ''}
-                  onChange={(e) => setSettings(prev => prev ? { ...prev, autoAdsScript: e.target.value } : null)}
-                  className="min-h-[150px] font-mono"
-                  disabled={settings.adType !== 'auto'}
-                />
-            </CardContent>
-          </Card>
-        </div>
+        {settings.adType === 'auto' && (
+           <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Auto Ads Script</CardTitle>
+                <CardDescription>
+                  Paste your ad script here. It will be added to your site's header.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                    id="auto-ads-script"
+                    placeholder='<script async src="..."></script>'
+                    value={settings.autoAdsScript || ''}
+                    onChange={(e) => setSettings(prev => prev ? { ...prev, autoAdsScript: e.target.value } : null)}
+                    className="min-h-[150px] font-mono"
+                  />
+              </CardContent>
+            </Card>
+          </div>
+        )}
         
-         <div className={cn('lg:col-span-2 transition-opacity duration-300', settings.adType !== 'manual' && 'opacity-50 pointer-events-none hidden')}>
-           <Card>
-            <CardHeader>
-              <CardTitle>Manual Ad Slots</CardTitle>
-              <CardDescription>
-                Place specific ads in predefined locations.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {settings.manualAdSlots?.map((slot) => (
-                  <div key={slot.id} className="space-y-2">
-                    <Label htmlFor={`manual-ad-${slot.id}`}>{slot.name}</Label>
-                    <Textarea
-                      id={`manual-ad-${slot.id}`}
-                      placeholder={`Paste ad code for ${slot.name}`}
-                      value={slot.code || ''}
-                      onChange={(e) => handleManualAdSlotChange(slot.id, e.target.value)}
-                      className="min-h-[100px] font-mono text-xs"
-                      disabled={settings.adType !== 'manual'}
-                    />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-         </div>
+        {settings.adType === 'manual' && (
+           <div className='lg:col-span-2'>
+            <Card>
+              <CardHeader>
+                <CardTitle>Manual Ad Slots</CardTitle>
+                <CardDescription>
+                  Place specific ads in predefined locations.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {settings.manualAdSlots?.map((slot) => (
+                    <div key={slot.id} className="space-y-2">
+                      <Label htmlFor={`manual-ad-${slot.id}`}>{slot.name}</Label>
+                      <Textarea
+                        id={`manual-ad-${slot.id}`}
+                        placeholder={`Paste ad code for ${slot.name}`}
+                        value={slot.code || ''}
+                        onChange={(e) => handleManualAdSlotChange(slot.id, e.target.value)}
+                        className="min-h-[100px] font-mono text-xs"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+           </div>
+        )}
       </div>
 
       <div className="flex justify-end pt-6">

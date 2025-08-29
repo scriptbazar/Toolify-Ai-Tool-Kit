@@ -18,6 +18,7 @@ type AdPlaceholderProps = {
 
 interface UserData {
   plan?: 'Free' | 'Pro' | 'Team';
+  role?: 'user' | 'admin';
 }
 
 export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
@@ -30,7 +31,6 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
     async function fetchData() {
       setLoading(true);
 
-      // Fetch ad settings first
       try {
         const settings = await getSettings();
         setAdSettings(settings.advertisement || null);
@@ -38,7 +38,6 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
         console.error("Failed to fetch ad settings:", error);
       }
 
-      // Then check auth state
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
           setUser(firebaseUser);
@@ -48,11 +47,11 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
             if (userDocSnap.exists()) {
               setUserData(userDocSnap.data() as UserData);
             } else {
-              setUserData({ plan: 'Free' });
+              setUserData({ plan: 'Free', role: 'user' });
             }
           } catch (error) {
             console.error("Failed to fetch user data:", error);
-            setUserData({ plan: 'Free' });
+            setUserData({ plan: 'Free', role: 'user' });
           }
         } else {
           setUser(null);
@@ -71,22 +70,25 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
   }
   
   const isProUser = userData?.plan === 'Pro' || userData?.plan === 'Team';
+  const isAdmin = userData?.role === 'admin';
   const showAdsToPro = adSettings?.showAdsForPro ?? false;
   const adType = adSettings?.adType ?? 'none';
   
-  // If ads are disabled globally, show nothing.
+  // Rule 1: Globally disabled ads show nothing.
   if (adType === 'none') {
     return null;
   }
   
-  // If the user is Pro and we are not showing ads to Pro users, show nothing.
+  // Rule 2: Pro users don't see ads unless specifically enabled.
   if (isProUser && !showAdsToPro) {
       return null;
   }
-
-  // Handle manual ad slots
+  
+  // Rule 3: For 'manual' ad type, process the slot.
   if (adType === 'manual' && adSlotId) {
     const slot = adSettings?.manualAdSlots?.find(s => s.id === adSlotId);
+    
+    // If the slot has code, display it for everyone (respecting pro user rules).
     if (slot && slot.code) {
       return (
         <div
@@ -95,12 +97,31 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
         />
       );
     }
-    // If no code for this manual slot, render nothing.
+    
+    // If the slot is empty BUT the user is an admin, show a placeholder.
+    if (isAdmin) {
+       return (
+          <div
+            className={cn(
+              'flex w-full min-h-[100px] items-center justify-center rounded-lg border-2 border-dashed border-primary/50 bg-primary/10 p-4 text-center text-primary',
+              className
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <Megaphone className="h-5 w-5" />
+              <p className="text-sm font-medium">Ad Slot: '{adSlotId}'</p>
+            </div>
+          </div>
+        );
+    }
+
+    // If the slot is empty and user is not admin, show nothing.
     return null;
   }
-  
-  // Fallback for non-specific ad slots (like the original sidebar one)
-  if (!adSlotId) {
+
+  // Fallback for non-specific ad slots or other conditions.
+  // This can also serve as a placeholder for admins if no slot ID is passed.
+  if (isAdmin) {
     return (
       <div
         className={cn(
@@ -110,7 +131,7 @@ export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
       >
         <div className="flex items-center gap-2 text-muted-foreground">
           <Megaphone className="h-5 w-5" />
-          <p className="text-sm font-medium">Advertisement</p>
+          <p className="text-sm font-medium">General Advertisement Area</p>
         </div>
       </div>
     );
