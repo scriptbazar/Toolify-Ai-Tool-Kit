@@ -10,10 +10,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User } from 'lucide-react';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
 
 
 type Message = {
@@ -53,6 +54,7 @@ export default function CommunityChatPage() {
     const [isPollModalOpen, setIsPollModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const { toast } = useToast();
     
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -121,6 +123,13 @@ export default function CommunityChatPage() {
         if (activeUserFilter === 'all') return allUsers;
         return allUsers.filter(user => user.status === activeUserFilter);
     }, [activeUserFilter]);
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        toast({
+        description: `Copied username: @${text}`,
+        });
+    };
 
 
   return (
@@ -297,6 +306,15 @@ export default function CommunityChatPage() {
                                       <p className="font-medium">{user.name}</p>
                                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                         <span>@{user.username}</span>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-5 w-5"
+                                            onClick={() => copyToClipboard(user.username)}
+                                        >
+                                            <Copy className="h-3 w-3" />
+                                            <span className="sr-only">Copy username</span>
+                                        </Button>
                                       </div>
                                     </div>
                               </div>
