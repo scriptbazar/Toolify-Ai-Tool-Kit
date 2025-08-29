@@ -35,8 +35,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Logo } from '@/components/common/Logo';
-import { regenerateEmailTemplate } from '@/ai/flows/ai-email-composer';
+import { regenerateEmailTemplate, generateFeatureAnnouncementEmail } from '@/ai/flows/ai-email-composer';
 import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 
 const initialTemplates = [
@@ -138,6 +140,98 @@ const initialTemplates = [
   },
 ];
 
+
+function FeatureAnnouncementEditor({ template, onUpdate, onClose }: { template: any, onUpdate: (updatedTemplate: any) => void, onClose: () => void }) {
+  const [featureName, setFeatureName] = useState('');
+  const [featureDescription, setFeatureDescription] = useState('');
+  const [emailBody, setEmailBody] = useState(template.body);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
+
+  const handleGenerate = async () => {
+    if (!featureName || !featureDescription) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide a feature name and description to generate the announcement.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const result = await generateFeatureAnnouncementEmail({ featureName, featureDescription });
+      setEmailBody(result.emailBody);
+      toast({ title: "Content Generated!", description: "AI has drafted the announcement email." });
+    } catch (error: any) {
+      toast({ title: "Generation Failed", description: error.message || "Could not generate content.", variant: "destructive" });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSaveChanges = () => {
+    onUpdate({ ...template, body: emailBody });
+    onClose();
+  };
+
+  return (
+    <DialogContent className="sm:max-w-4xl">
+      <DialogHeader>
+        <DialogTitle>Edit: {template.title}</DialogTitle>
+        <DialogDescription>
+          Provide feature details to generate an announcement, or edit the content manually.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 max-h-[70vh] overflow-y-auto">
+          <div className="space-y-4">
+              <h3 className="font-semibold text-lg">AI Content Generation</h3>
+              <div className="space-y-2">
+                  <Label htmlFor="featureName">Feature Name</Label>
+                  <Input id="featureName" value={featureName} onChange={(e) => setFeatureName(e.target.value)} placeholder="e.g., AI Image Generation"/>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="featureDescription">Feature Description</Label>
+                  <Textarea id="featureDescription" value={featureDescription} onChange={(e) => setFeatureDescription(e.target.value)} placeholder="e.g., Users can now create unique images from text prompts."/>
+              </div>
+              <Button onClick={handleGenerate} disabled={isGenerating}>
+                 {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                Generate with AI
+              </Button>
+               <h3 className="font-semibold text-lg pt-4">Email Body</h3>
+               <Textarea 
+                 value={emailBody}
+                 onChange={(e) => setEmailBody(e.target.value)}
+                 className="min-h-[250px] font-mono"
+                 placeholder="Your email content will appear here..."
+               />
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-semibold text-lg">Live Preview</h3>
+             <div className="p-6 border rounded-lg bg-muted h-full">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b">
+                    <Logo className="h-8 w-8 text-primary"/>
+                    <span className="text-xl font-bold text-foreground">ToolifyAI</span>
+                </div>
+                <div 
+                    className="text-sm text-foreground whitespace-pre-wrap font-sans"
+                    dangerouslySetInnerHTML={{ __html: emailBody.replace(/\n/g, '<br />') || '' }}
+                 />
+            </div>
+          </div>
+      </div>
+       <DialogFooter>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSaveChanges}>
+            Save Changes
+          </Button>
+        </DialogFooter>
+    </DialogContent>
+  )
+}
+
+
 export default function EmailTemplatesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [templates, setTemplates] = useState(initialTemplates);
@@ -191,6 +285,58 @@ export default function EmailTemplatesPage() {
       setIsGenerating(false);
     }
   };
+
+  const handleTemplateUpdate = (updatedTemplate: any) => {
+    setTemplates(currentTemplates =>
+        currentTemplates.map(t =>
+            t.id === updatedTemplate.id ? updatedTemplate : t
+        )
+    );
+    toast({
+        title: "Template Saved!",
+        description: `The "${updatedTemplate.title}" template has been updated.`,
+    });
+  };
+
+  const currentDialog = () => {
+    if (!selectedTemplate) return null;
+
+    if (selectedTemplate.id === 'new-feature') {
+      return <FeatureAnnouncementEditor template={selectedTemplate} onUpdate={handleTemplateUpdate} onClose={() => setIsPreviewOpen(false)} />;
+    }
+
+    return (
+       <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{selectedTemplate?.title} Preview</DialogTitle>
+            <DialogDescription>
+              This is a preview of the "{selectedTemplate?.subject}" email.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
+            <div className="p-6 border rounded-lg bg-muted">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b">
+                    <Logo className="h-8 w-8 text-primary"/>
+                    <span className="text-xl font-bold text-foreground">ToolifyAI</span>
+                </div>
+                <div 
+                    className="text-sm text-foreground whitespace-pre-wrap font-sans"
+                    dangerouslySetInnerHTML={{ __html: selectedTemplate?.body.replace(/\n/g, '<br />') || '' }}
+                 />
+            </div>
+          </div>
+           <DialogFooter className="sm:justify-between gap-2">
+              <Button onClick={handleRegenerate} disabled={isGenerating}>
+                {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                Regenerate with AI
+              </Button>
+              <Button type="button" variant="secondary" onClick={() => setIsPreviewOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+        </DialogContent>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -267,35 +413,7 @@ export default function EmailTemplatesPage() {
       </Card>
       
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{selectedTemplate?.title} Preview</DialogTitle>
-            <DialogDescription>
-              This is a preview of the "{selectedTemplate?.subject}" email.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
-            <div className="p-6 border rounded-lg bg-muted">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b">
-                    <Logo className="h-8 w-8 text-primary"/>
-                    <span className="text-xl font-bold text-foreground">ToolifyAI</span>
-                </div>
-                <div 
-                    className="text-sm text-foreground whitespace-pre-wrap font-sans"
-                    dangerouslySetInnerHTML={{ __html: selectedTemplate?.body.replace(/\n/g, '<br />') || '' }}
-                 />
-            </div>
-          </div>
-           <DialogFooter className="sm:justify-between gap-2">
-              <Button onClick={handleRegenerate} disabled={isGenerating}>
-                {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                Regenerate with AI
-              </Button>
-              <Button type="button" variant="secondary" onClick={() => setIsPreviewOpen(false)}>
-                Close
-              </Button>
-            </DialogFooter>
-        </DialogContent>
+        {currentDialog()}
       </Dialog>
     </div>
   );

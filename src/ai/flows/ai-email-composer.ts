@@ -6,12 +6,13 @@
  *
  * - composeEmail - A function that generates an email body using AI.
  * - AiEmailComposerInput - The input type for the composeEmail function.
- * - AiEmailComposerOutput - The return type for the composeEmail function.
+ * - AiEmailcomposerOutput - The return type for the composeEmail function.
  * - regenerateEmailTemplate - A function that regenerates an email template.
+ * - generateFeatureAnnouncementEmail - A function that generates a new feature announcement email.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 
 export const AiEmailComposerInputSchema = z.object({
   subject: z.string().describe('The subject line of the email.'),
@@ -100,6 +101,52 @@ const regenerateEmailTemplateFlow = ai.defineFlow(
     const {output} = await regeneratePrompt(input);
     if (!output) {
       throw new Error('Failed to regenerate email template.');
+    }
+    return { emailBody: output.emailBody };
+  }
+);
+
+
+// Schema for generating a new feature announcement
+const GenerateFeatureAnnouncementInputSchema = z.object({
+  featureName: z.string().describe('The name of the new feature.'),
+  featureDescription: z.string().describe('A brief description of what the new feature does.'),
+});
+type GenerateFeatureAnnouncementInput = z.infer<typeof GenerateFeatureAnnouncementInputSchema>;
+
+export async function generateFeatureAnnouncementEmail(input: GenerateFeatureAnnouncementInput): Promise<AiEmailComposerOutput> {
+  return generateFeatureAnnouncementFlow(input);
+}
+
+const featureAnnouncementPrompt = ai.definePrompt({
+  name: 'featureAnnouncementPrompt',
+  input: {schema: GenerateFeatureAnnouncementInputSchema},
+  output: {schema: AiEmailComposerOutputSchema},
+  prompt: `You are an expert marketing copywriter specializing in software feature announcements. Your task is to write an engaging and exciting email announcing a new feature.
+
+Feature Name: {{{featureName}}}
+Feature Description: {{{featureDescription}}}
+
+Instructions:
+- Start with a catchy and exciting opening.
+- Clearly explain what the new feature is and its main benefits for the user.
+- Encourage users to try out the new feature.
+- Include a call-to-action button with the placeholder {{featureLink}}. The button must be a styled HTML anchor tag: style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;"
+- Maintain an enthusiastic and friendly tone.
+- Generate only the body of the email.
+`,
+});
+
+const generateFeatureAnnouncementFlow = ai.defineFlow(
+  {
+    name: 'generateFeatureAnnouncementFlow',
+    inputSchema: GenerateFeatureAnnouncementInputSchema,
+    outputSchema: AiEmailComposerOutputSchema,
+  },
+  async (input) => {
+    const {output} = await featureAnnouncementPrompt(input);
+     if (!output) {
+      throw new Error('Failed to generate feature announcement email.');
     }
     return { emailBody: output.emailBody };
   }
