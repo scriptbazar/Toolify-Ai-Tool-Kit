@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -26,6 +27,7 @@ import {
   Clock,
   Search,
   MoreHorizontal,
+  Copy,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -36,6 +38,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
 
 type FilterType = 'all' | 'completed' | 'pending' | 'failed';
 
@@ -118,6 +121,7 @@ const getStatusBadge = (status: FilterType) => {
 export default function PaymentHistoryPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const { toast } = useToast();
 
   const counts = useMemo(() => ({
     all: payments.length,
@@ -125,6 +129,11 @@ export default function PaymentHistoryPage() {
     pending: payments.filter(p => p.status === 'pending').length,
     failed: payments.filter(p => p.status === 'failed').length,
   }), [payments]);
+  
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ description: 'Copied to clipboard!' });
+  };
 
   const tabs: { id: FilterType; label: string; icon: React.ElementType; count: number }[] = [
     { id: 'all', label: 'All Transactions', icon: FileText, count: counts.all },
@@ -202,7 +211,15 @@ export default function PaymentHistoryPage() {
                 {filteredPayments.length > 0 ? (
                     filteredPayments.map((payment) => (
                         <TableRow key={payment.transactionId}>
-                            <TableCell className="font-mono text-xs">{payment.transactionId}</TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-2 font-mono text-xs">
+                                    {payment.transactionId}
+                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(payment.transactionId)}>
+                                      <Copy className="h-3 w-3" />
+                                      <span className="sr-only">Copy Transaction ID</span>
+                                    </Button>
+                                </div>
+                            </TableCell>
                             <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
@@ -211,7 +228,13 @@ export default function PaymentHistoryPage() {
                                     </Avatar>
                                     <div>
                                         <div className="font-medium">{payment.user.name}</div>
-                                        <div className="text-sm text-muted-foreground">{payment.user.email}</div>
+                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                          {payment.user.email}
+                                          <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(payment.user.email)}>
+                                            <Copy className="h-3 w-3" />
+                                            <span className="sr-only">Copy Email</span>
+                                          </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </TableCell>

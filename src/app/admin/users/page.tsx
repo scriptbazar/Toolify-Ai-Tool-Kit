@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -15,7 +16,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search, MessageSquare, Edit } from 'lucide-react';
+import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search, MessageSquare, Edit, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -110,6 +111,11 @@ export default function AdminUsersPage() {
   useEffect(() => {
     fetchUsersAndLeads();
   }, []);
+  
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ description: 'Copied to clipboard!' });
+  };
   
   const filteredUsers = useMemo(() => {
     return allUsers.filter(user => {
@@ -229,8 +235,26 @@ export default function AdminUsersPage() {
                              <span>{user.name}</span>
                            </div>
                         </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.userName || '—'}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {user.email}
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(user.email)}>
+                              <Copy className="h-3 w-3" />
+                              <span className="sr-only">Copy email</span>
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {user.userName ? (
+                            <div className="flex items-center gap-2">
+                              @{user.userName}
+                               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(user.userName!)}>
+                                <Copy className="h-3 w-3" />
+                                <span className="sr-only">Copy username</span>
+                              </Button>
+                            </div>
+                          ) : '—'}
+                        </TableCell>
                         <TableCell>
                           <Badge variant={user.role === 'admin' ? 'default' : (user.role === 'user' ? 'secondary' : 'outline')}>
                             {user.role}

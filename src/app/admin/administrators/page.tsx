@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, Edit, UserCog } from 'lucide-react';
+import { AlertCircle, Edit, UserCog, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -70,6 +70,11 @@ export default function AdministratorsPage() {
   useEffect(() => {
     fetchAdmins();
   }, []);
+  
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ description: 'Copied to clipboard!' });
+  };
 
   const formatDate = (timestamp?: { seconds: number; nanoseconds: number; }) => {
     if (!timestamp || typeof timestamp.seconds !== 'number') {
@@ -125,7 +130,15 @@ export default function AdministratorsPage() {
                              <span>{user.name}</span>
                            </div>
                         </TableCell>
-                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {user.email}
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(user.email)}>
+                              <Copy className="h-3 w-3" />
+                              <span className="sr-only">Copy email</span>
+                            </Button>
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <Badge>
                             <UserCog className="mr-2 h-3 w-3"/>
