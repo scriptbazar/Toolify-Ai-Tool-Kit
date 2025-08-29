@@ -12,11 +12,11 @@ const topTools = [
 ];
 
 const quickLinks = [
-  { name: 'About Us', href: '#' },
-  { name: 'Contact Us', href: '#' },
-  { name: 'Privacy Policy', href: '#' },
-  { name: 'Terms & Conditions', href: '#' },
-  { name: 'DMCA', href: '#' },
+  { name: 'About Us', href: '/pages/about-us' },
+  { name: 'Contact Us', href: '/pages/contact-us' },
+  { name: 'Privacy Policy', href: '/pages/privacy-policy' },
+  { name: 'Terms & Conditions', href: '/pages/terms-conditions' },
+  { name: 'DMCA', href: '/pages/dmca' },
 ];
 
 const moreTools = [

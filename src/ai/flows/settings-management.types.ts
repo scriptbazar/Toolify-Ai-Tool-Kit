@@ -149,11 +149,25 @@ export const PaymentSettingsSchema = z.object({
 });
 export type PaymentSettings = z.infer<typeof PaymentSettingsSchema>;
 
+export const CustomPageSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  content: z.string().optional(),
+});
+export type CustomPage = z.infer<typeof CustomPageSchema>;
+
+export const PageSettingsSchema = z.object({
+  pages: z.array(CustomPageSchema).default([]),
+});
+export type PageSettings = z.infer<typeof PageSettingsSchema>;
+
 export const AppSettingsSchema = z.object({
   advertisement: AdvertisementSettingsSchema.optional(),
   referral: ReferralSettingsSchema.optional(),
   general: GeneralSettingsSchema.optional(),
   plan: PlanSettingsSchema.optional(),
   payment: PaymentSettingsSchema.optional(),
+  page: PageSettingsSchema.optional(),
 });
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
