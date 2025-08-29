@@ -7,17 +7,64 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search } from 'lucide-react';
+import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+type CollapsibleSectionProps = {
+  id: string;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+  isOpen: boolean;
+  onToggle: (id: string) => void;
+  isFullWidth: boolean;
+};
+
+const CollapsibleSection = ({ id, title, description, children, isOpen, onToggle, isFullWidth }: CollapsibleSectionProps) => {
+  return (
+    <Collapsible
+      open={isOpen}
+      onOpenChange={() => onToggle(id)}
+      className={cn(
+        "space-y-2 transition-all duration-300",
+        isFullWidth ? "col-span-1 md:col-span-2" : "col-span-1"
+      )}
+    >
+      <Card>
+        <CollapsibleTrigger asChild>
+            <div className="flex w-full cursor-pointer items-center justify-between p-4">
+                <div>
+                    <CardTitle>{title}</CardTitle>
+                    <CardDescription className="mt-1">{description}</CardDescription>
+                </div>
+                <Button variant="ghost" size="icon">
+                    {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                    <span className="sr-only">Toggle</span>
+                </Button>
+            </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+            <CardContent>
+                {children}
+            </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  )
+}
+
 
 export default function SiteSettingsPage() {
   const [settings, setSettings] = useState<GeneralSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [openSection, setOpenSection] = useState<string | null>('general');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -99,6 +146,10 @@ export default function SiteSettingsPage() {
     }
   };
 
+  const handleToggle = (id: string) => {
+    setOpenSection(prev => (prev === id ? null : id));
+  };
+
   if (loading || !settings) {
     return (
       <div className="space-y-6">
@@ -118,6 +169,12 @@ export default function SiteSettingsPage() {
     );
   }
 
+  const sections = [
+    { id: 'general', title: 'General Settings', description: "Update your site's title, description, etc." },
+    { id: 'branding', title: 'Branding & Contact', description: "Customize your site's appearance and contact info." },
+    { id: 'social', title: 'Social Media Links', description: 'Provide links to your social media profiles.' },
+    { id: 'webmaster', title: 'Webmaster Tools', description: 'Add verification codes for webmaster tools.' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -128,321 +185,175 @@ export default function SiteSettingsPage() {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>General Settings</CardTitle>
-          <CardDescription>
-            Update your site's title, description, and other general information.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="siteTitle">Site Title</Label>
-              <Input 
-                id="siteTitle" 
-                name="siteTitle"
-                value={settings.siteTitle} 
-                onChange={handleInputChange}
-                placeholder="e.g., ToolifyAI"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="slogan">Slogan</Label>
-              <Input 
-                id="slogan"
-                name="slogan" 
-                value={settings.slogan}
-                onChange={handleInputChange}
-                placeholder="e.g., Your All-in-One Smart Toolkit"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="siteDescription">Site Description</Label>
-              <Textarea 
-                id="siteDescription" 
-                name="siteDescription"
-                value={settings.siteDescription}
-                onChange={handleInputChange}
-                placeholder="A brief description of your site." 
-                className="min-h-[100px]"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="metaKeywords">Meta Keywords</Label>
-              <Textarea 
-                id="metaKeywords" 
-                name="metaKeywords"
-                value={settings.metaKeywords}
-                onChange={handleInputChange}
-                placeholder="e.g., ai tools, productivity, seo" 
-                className="min-h-[100px]"
-              />
-               <p className="text-sm text-muted-foreground">Separate keywords with commas.</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Branding &amp; Contact</CardTitle>
-          <CardDescription>
-            Customize your site's appearance and contact information.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-            <div className="space-y-2">
-              <Label>Logo</Label>
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 flex items-center justify-center rounded-lg border bg-muted">
-                    {settings.logoUrl ? <Image src={settings.logoUrl} alt="Logo Preview" width={64} height={64} className="object-contain" /> : <ImageIcon className="h-8 w-8 text-muted-foreground" />}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+         <CollapsibleSection id="general" title="General Settings" description="Update your site's title, description, etc." isOpen={openSection === 'general'} onToggle={handleToggle} isFullWidth={openSection === 'general'}>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="siteTitle">Site Title</Label>
+                    <Input id="siteTitle" name="siteTitle" value={settings.siteTitle} onChange={handleInputChange} placeholder="e.g., ToolifyAI" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="slogan">Slogan</Label>
+                    <Input id="slogan" name="slogan" value={settings.slogan} onChange={handleInputChange} placeholder="e.g., Your All-in-One Smart Toolkit" />
+                  </div>
                 </div>
-                <Button variant="outline" type="button">
-                    <UploadCloud className="mr-2 h-4 w-4" />
-                    Upload Logo
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground">Recommended size: 256x256 pixels.</p>
-            </div>
-             <div className="space-y-2">
-              <Label>Favicon</Label>
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 flex items-center justify-center rounded-lg border bg-muted">
-                    {settings.faviconUrl ? <Image src={settings.faviconUrl} alt="Favicon Preview" width={64} height={64} className="object-contain" /> : <ImageIcon className="h-8 w-8 text-muted-foreground" />}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="siteDescription">Site Description</Label>
+                    <Textarea id="siteDescription" name="siteDescription" value={settings.siteDescription} onChange={handleInputChange} placeholder="A brief description of your site." className="min-h-[100px]" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="metaKeywords">Meta Keywords</Label>
+                    <Textarea id="metaKeywords" name="metaKeywords" value={settings.metaKeywords} onChange={handleInputChange} placeholder="e.g., ai tools, productivity, seo" className="min-h-[100px]" />
+                    <p className="text-sm text-muted-foreground">Separate keywords with commas.</p>
+                  </div>
                 </div>
-                <Button variant="outline" type="button">
-                    <UploadCloud className="mr-2 h-4 w-4" />
-                    Upload Favicon
-                </Button>
               </div>
-              <p className="text-sm text-muted-foreground">Must be a .ico or .png file. Recommended size: 32x32 pixels.</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-                <Label htmlFor="contactEmail">Contact Email</Label>
-                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="contactEmail" 
-                      name="contactEmail"
-                      type="email"
-                      value={settings.contactEmail || ''} 
-                      onChange={handleInputChange}
-                      placeholder="e.g., contact@toolifyai.com"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="copyrightText">Copyright Text</Label>
-                <Input 
-                    id="copyrightText" 
-                    name="copyrightText"
-                    value={settings.copyrightText} 
-                    onChange={handleInputChange}
-                    placeholder="e.g., © 2024 Your Company. All rights reserved."
-                  />
-                  <p className="text-sm text-muted-foreground">Use {'{year}'} to automatically insert the current year.</p>
-              </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Social Media Links</CardTitle>
-          <CardDescription>
-            Provide links to your social media profiles.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-                <Label htmlFor="facebook">Facebook</Label>
-                 <div className="relative">
-                  <Facebook className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="facebook" 
-                      name="facebook"
-                      value={settings.socialLinks?.facebook || ''} 
-                      onChange={handleSocialLinkChange}
-                      placeholder="https://facebook.com/your-page"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="twitter">Twitter (X)</Label>
-                 <div className="relative">
-                  <Twitter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="twitter" 
-                      name="twitter"
-                      value={settings.socialLinks?.twitter || ''} 
-                      onChange={handleSocialLinkChange}
-                      placeholder="https://x.com/your-profile"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="instagram">Instagram</Label>
-                 <div className="relative">
-                  <Instagram className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="instagram" 
-                      name="instagram"
-                      value={settings.socialLinks?.instagram || ''} 
-                      onChange={handleSocialLinkChange}
-                      placeholder="https://instagram.com/your-profile"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="youtube">YouTube</Label>
-                 <div className="relative">
-                  <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="youtube" 
-                      name="youtube"
-                      value={settings.socialLinks?.youtube || ''} 
-                      onChange={handleSocialLinkChange}
-                      placeholder="https://youtube.com/your-channel"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Webmaster Tools</CardTitle>
-          <CardDescription>
-            Add verification codes for various webmaster tools.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-                <Label htmlFor="googleSearchConsole">Google Search Console</Label>
-                 <div className="relative">
-                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="googleSearchConsole" 
-                      name="googleSearchConsole"
-                      value={settings.webmaster?.googleSearchConsole || ''} 
-                      onChange={handleWebmasterInputChange}
-                      placeholder="Verification code"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="googleAnalytics">Google Analytics</Label>
-                 <div className="relative">
-                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="googleAnalytics" 
-                      name="googleAnalytics"
-                      value={settings.webmaster?.googleAnalytics || ''} 
-                      onChange={handleWebmasterInputChange}
-                      placeholder="Tracking ID (e.g., G-XXXXXXXXXX)"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="googleAdsense">Google AdSense</Label>
-                 <div className="relative">
-                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="googleAdsense" 
-                      name="googleAdsense"
-                      value={settings.webmaster?.googleAdsense || ''} 
-                      onChange={handleWebmasterInputChange}
-                      placeholder="Publisher ID (e.g., pub-xxxxxxxxxxxxxxxx)"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="bingWebmaster">Bing Webmaster Tools</Label>
-                 <div className="relative">
-                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="bingWebmaster" 
-                      name="bingWebmaster"
-                      value={settings.webmaster?.bingWebmaster || ''} 
-                      onChange={handleWebmasterInputChange}
-                      placeholder="Verification code"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="yandexWebmaster">Yandex Webmaster Tools</Label>
-                 <div className="relative">
-                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="yandexWebmaster" 
-                      name="yandexWebmaster"
-                      value={settings.webmaster?.yandexWebmaster || ''} 
-                      onChange={handleWebmasterInputChange}
-                      placeholder="Verification code"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="baidu">Baidu Webmaster Tools</Label>
-                 <div className="relative">
-                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="baidu" 
-                      name="baidu"
-                      value={settings.webmaster?.baidu || ''} 
-                      onChange={handleWebmasterInputChange}
-                      placeholder="Verification code"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="pinterest">Pinterest</Label>
-                 <div className="relative">
-                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="pinterest" 
-                      name="pinterest"
-                      value={settings.webmaster?.pinterest || ''} 
-                      onChange={handleWebmasterInputChange}
-                      placeholder="Verification code"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="yahooSearchConsole">Yahoo Search Console</Label>
-                 <div className="relative">
-                  <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                      id="yahooSearchConsole" 
-                      name="yahooSearchConsole"
-                      value={settings.webmaster?.yahooSearchConsole || ''} 
-                      onChange={handleWebmasterInputChange}
-                      placeholder="Verification code"
-                      className="pl-10"
-                  />
-                 </div>
-            </div>
-        </CardContent>
-      </Card>
+         </CollapsibleSection>
 
+        <CollapsibleSection id="branding" title="Branding & Contact" description="Customize your site's appearance and contact info." isOpen={openSection === 'branding'} onToggle={handleToggle} isFullWidth={openSection === 'branding'}>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                <div className="space-y-2">
+                  <Label>Logo</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 flex items-center justify-center rounded-lg border bg-muted">
+                        {settings.logoUrl ? <Image src={settings.logoUrl} alt="Logo Preview" width={64} height={64} className="object-contain" /> : <ImageIcon className="h-8 w-8 text-muted-foreground" />}
+                    </div>
+                    <Button variant="outline" type="button">
+                        <UploadCloud className="mr-2 h-4 w-4" />
+                        Upload Logo
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Recommended size: 256x256 pixels.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Favicon</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 flex items-center justify-center rounded-lg border bg-muted">
+                        {settings.faviconUrl ? <Image src={settings.faviconUrl} alt="Favicon Preview" width={64} height={64} className="object-contain" /> : <ImageIcon className="h-8 w-8 text-muted-foreground" />}
+                    </div>
+                    <Button variant="outline" type="button">
+                        <UploadCloud className="mr-2 h-4 w-4" />
+                        Upload Favicon
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Must be a .ico or .png file. Recommended size: 32x32 pixels.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <Label htmlFor="contactEmail">Contact Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="contactEmail" name="contactEmail" type="email" value={settings.contactEmail || ''} onChange={handleInputChange} placeholder="e.g., contact@toolifyai.com" className="pl-10" />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="copyrightText">Copyright Text</Label>
+                    <Input id="copyrightText" name="copyrightText" value={settings.copyrightText} onChange={handleInputChange} placeholder="e.g., © 2024 Your Company. All rights reserved." />
+                    <p className="text-sm text-muted-foreground">Use {'{year}'} to automatically insert the current year.</p>
+                </div>
+              </div>
+            </div>
+        </CollapsibleSection>
+
+        <CollapsibleSection id="social" title="Social Media Links" description="Provide links to your social media profiles." isOpen={openSection === 'social'} onToggle={handleToggle} isFullWidth={openSection === 'social'}>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <Label htmlFor="facebook">Facebook</Label>
+                    <div className="relative">
+                      <Facebook className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="facebook" name="facebook" value={settings.socialLinks?.facebook || ''} onChange={handleSocialLinkChange} placeholder="https://facebook.com/your-page" className="pl-10" />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="twitter">Twitter (X)</Label>
+                    <div className="relative">
+                      <Twitter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="twitter" name="twitter" value={settings.socialLinks?.twitter || ''} onChange={handleSocialLinkChange} placeholder="https://x.com/your-profile" className="pl-10" />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="instagram">Instagram</Label>
+                    <div className="relative">
+                      <Instagram className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="instagram" name="instagram" value={settings.socialLinks?.instagram || ''} onChange={handleSocialLinkChange} placeholder="https://instagram.com/your-profile" className="pl-10" />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="youtube">YouTube</Label>
+                    <div className="relative">
+                      <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="youtube" name="youtube" value={settings.socialLinks?.youtube || ''} onChange={handleSocialLinkChange} placeholder="https://youtube.com/your-channel" className="pl-10" />
+                    </div>
+                </div>
+            </div>
+        </CollapsibleSection>
+        
+        <CollapsibleSection id="webmaster" title="Webmaster Tools" description="Add verification codes for webmaster tools." isOpen={openSection === 'webmaster'} onToggle={handleToggle} isFullWidth={openSection === 'webmaster'}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                  <Label htmlFor="googleSearchConsole">Google Search Console</Label>
+                  <div className="relative">
+                    <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="googleSearchConsole" name="googleSearchConsole" value={settings.webmaster?.googleSearchConsole || ''} onChange={handleWebmasterInputChange} placeholder="Verification code" className="pl-10" />
+                  </div>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="googleAnalytics">Google Analytics</Label>
+                  <div className="relative">
+                    <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="googleAnalytics" name="googleAnalytics" value={settings.webmaster?.googleAnalytics || ''} onChange={handleWebmasterInputChange} placeholder="Tracking ID (e.g., G-XXXXXXXXXX)" className="pl-10" />
+                  </div>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="googleAdsense">Google AdSense</Label>
+                  <div className="relative">
+                    <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="googleAdsense" name="googleAdsense" value={settings.webmaster?.googleAdsense || ''} onChange={handleWebmasterInputChange} placeholder="Publisher ID (e.g., pub-xxxxxxxxxxxxxxxx)" className="pl-10" />
+                  </div>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="bingWebmaster">Bing Webmaster Tools</Label>
+                  <div className="relative">
+                    <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="bingWebmaster" name="bingWebmaster" value={settings.webmaster?.bingWebmaster || ''} onChange={handleWebmasterInputChange} placeholder="Verification code" className="pl-10" />
+                  </div>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="yandexWebmaster">Yandex Webmaster Tools</Label>
+                  <div className="relative">
+                    <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="yandexWebmaster" name="yandexWebmaster" value={settings.webmaster?.yandexWebmaster || ''} onChange={handleWebmasterInputChange} placeholder="Verification code" className="pl-10" />
+                  </div>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="baidu">Baidu Webmaster Tools</Label>
+                  <div className="relative">
+                    <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="baidu" name="baidu" value={settings.webmaster?.baidu || ''} onChange={handleWebmasterInputChange} placeholder="Verification code" className="pl-10" />
+                  </div>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="pinterest">Pinterest</Label>
+                  <div className="relative">
+                    <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="pinterest" name="pinterest" value={settings.webmaster?.pinterest || ''} onChange={handleWebmasterInputChange} placeholder="Verification code" className="pl-10" />
+                  </div>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="yahooSearchConsole">Yahoo Search Console</Label>
+                  <div className="relative">
+                    <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="yahooSearchConsole" name="yahooSearchConsole" value={settings.webmaster?.yahooSearchConsole || ''} onChange={handleWebmasterInputChange} placeholder="Verification code" className="pl-10" />
+                  </div>
+              </div>
+            </div>
+        </CollapsibleSection>
+      </div>
+      
       <div className="flex justify-end pt-6">
         <Button onClick={handleSave} disabled={isSaving}>
           {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
