@@ -13,17 +13,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { composeEmail, type AiEmailComposerInput } from '@/ai/flows/ai-email-composer';
-import { Wand2, Send, Mail, Eye } from 'lucide-react';
+import { Wand2, Send, Mail, Eye, Users } from 'lucide-react';
 import { z } from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
 
 
 // Re-define the base schema on the client and then extend it.
 const formSchema = z.object({
-  subject: z.string().describe('The subject line of the email.'),
-  keyPoints: z.string().describe('The key points or message to convey in the email. This can be a simple sentence or a list of bullet points.'),
-  tone: z.enum(['Formal', 'Casual', 'Friendly', 'Professional', 'Humorous']).describe('The desired tone of voice for the email.'),
-  recipient: z.string().email({ message: 'Please enter a valid email address.' }),
+  subject: z.string().min(1, 'Subject is required.'),
+  keyPoints: z.string().min(1, 'Email content or key points are required.'),
+  tone: z.enum(['Formal', 'Casual', 'Friendly', 'Professional', 'Humorous']),
+  recipient: z.string().optional(),
 });
 
 
@@ -34,6 +35,7 @@ export default function ComposeEmailPage() {
   const [isSending, setIsSending] = useState(false);
   const [generatedBody, setGeneratedBody] = useState('');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [sendToAll, setSendToAll] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<ComposeFormValues>({
@@ -45,6 +47,19 @@ export default function ComposeEmailPage() {
       tone: 'Professional',
     },
   });
+  
+  // Watch the sendToAll state to update validation rules
+  useEffect(() => {
+    if (sendToAll) {
+      form.clearErrors('recipient');
+    } else {
+        const recipientValue = form.getValues('recipient');
+        if (!recipientValue) {
+             form.setError('recipient', { type: 'manual', message: 'At least one recipient email is required.' });
+        }
+    }
+  }, [sendToAll, form]);
+
 
   const handleGenerate = async () => {
     const { subject, keyPoints, tone } = form.getValues();
@@ -79,13 +94,19 @@ export default function ComposeEmailPage() {
   };
   
   const handleSend = async (values: ComposeFormValues) => {
+    if (!sendToAll && !values.recipient) {
+      form.setError('recipient', { type: 'manual', message: 'Please provide at least one recipient email.' });
+      return;
+    }
+    
     setIsSending(true);
     // This is a placeholder for the actual email sending logic
-    console.log('Sending email:', values);
+    const recipientDescription = sendToAll ? 'all users' : values.recipient;
+    console.log('Sending email to:', recipientDescription, 'with content:', values);
     await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
     toast({
       title: 'Email Sent (Simulated)',
-      description: `Your email to ${values.recipient} has been sent.`,
+      description: `Your email has been queued for sending to ${recipientDescription}.`,
     });
     setIsSending(false);
     // form.reset();
@@ -119,63 +140,81 @@ export default function ComposeEmailPage() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSend)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <FormField
-                    control={form.control}
-                    name="recipient"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Recipient Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="user@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <FormField
-                    control={form.control}
-                    name="subject"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Subject</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Regarding your recent inquiry" {...field} />
-                        </FormControl>
-                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <FormField
+                 <FormField
                   control={form.control}
-                  name="tone"
+                  name="recipient"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tone of Voice</FormLabel>
-                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a tone" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Professional">Professional</SelectItem>
-                          <SelectItem value="Casual">Casual</SelectItem>
-                          <SelectItem value="Friendly">Friendly</SelectItem>
-                          <SelectItem value="Formal">Formal</SelectItem>
-                          <SelectItem value="Humorous">Humorous</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Recipient(s)</FormLabel>
+                      <FormControl>
+                        <Input 
+                            placeholder="user@example.com, another@example.com" 
+                            {...field} 
+                            disabled={sendToAll}
+                            value={field.value || ''}
+                         />
+                      </FormControl>
+                      <FormDescription>Separate multiple emails with commas.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                 <FormField
+                  control={form.control}
+                  name="subject"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Subject</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Regarding your recent inquiry" {...field} />
+                      </FormControl>
+                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                 <FormField
+                    control={form.control}
+                    name="tone"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Tone of Voice</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a tone" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                            <SelectItem value="Professional">Professional</SelectItem>
+                            <SelectItem value="Casual">Casual</SelectItem>
+                            <SelectItem value="Friendly">Friendly</SelectItem>
+                            <SelectItem value="Formal">Formal</SelectItem>
+                            <SelectItem value="Humorous">Humorous</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                 />
+                 <div className="flex items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="send-to-all" className="text-base font-medium flex items-center">
+                            <Users className="mr-2 h-5 w-5"/>
+                             Send to All Users
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                            Overrides the recipient list and sends to all subscribers.
+                        </p>
+                      </div>
+                      <Switch 
+                        id="send-to-all" 
+                        checked={sendToAll}
+                        onCheckedChange={setSendToAll}
+                       />
+                 </div>
               </div>
 
               <div className="space-y-2">
