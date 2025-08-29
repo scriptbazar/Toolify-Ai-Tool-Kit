@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -40,9 +41,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { CircleUser, Menu } from 'lucide-react';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { Menu } from 'lucide-react';
+import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -50,6 +51,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
+import { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+
+interface AppUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 
 export default function UserPanelLayout({
   children,
@@ -59,6 +69,26 @@ export default function UserPanelLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [userData, setUserData] = useState<AppUser | null>(null);
+
+   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          setUserData(userDocSnap.data() as AppUser);
+        }
+      } else {
+        setUser(null);
+        setUserData(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -186,14 +216,15 @@ export default function UserPanelLayout({
       </div>
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-50">
-           <div className="flex-1 md:hidden">
+           <div className="flex-1 md:hidden pt-1.5">
              <Link href="/" className="flex items-center gap-2 font-semibold">
                 <Logo />
                 <span className="text-lg">ToolifyAI</span>
              </Link>
            </div>
           <div className="w-full flex-1 hidden md:block">&nbsp;</div>
-          <div className="flex-1 flex justify-end md:hidden">
+          <div className="flex-1 flex justify-end items-center gap-2 md:hidden">
+             <ModeToggle />
             <Sheet>
               <SheetTrigger asChild>
                 <Button
@@ -216,13 +247,22 @@ export default function UserPanelLayout({
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
                   <Avatar className="h-8 w-8">
-                     <AvatarFallback>U</AvatarFallback>
+                     <AvatarFallback>{userData?.firstName?.[0] || 'U'}</AvatarFallback>
                   </Avatar>
                   <span className="sr-only">Toggle user menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {userData ? `${userData.firstName} ${userData.lastName}` : 'User'}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {userData?.email || 'user@example.com'}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push('/profile')}>Profile</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/settings')}>Settings</DropdownMenuItem>
