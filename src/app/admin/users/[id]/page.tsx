@@ -30,8 +30,8 @@ import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { countries } from '@/lib/countries';
+import { Combobox } from '@/components/ui/combobox';
 
 
 interface UserProfile {
@@ -242,19 +242,17 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <Label htmlFor="countryCode">Country Code</Label>
-                          <Select value={profile.countryCode || ''} onValueChange={(value) => handleSelectChange('countryCode', value)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select country..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {countries.map(country => (
-                                <SelectItem key={country.code} value={country.dial_code}>
-                                  <span className="mr-2">{country.flag}</span>
-                                  {country.name} ({country.dial_code})
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                           <Combobox
+                                items={countries.map(country => ({
+                                    value: country.dial_code,
+                                    label: `${country.flag} ${country.name} (${country.dial_code})`,
+                                }))}
+                                value={profile.countryCode || ''}
+                                onValueChange={(value) => handleSelectChange('countryCode', value)}
+                                placeholder="Select country..."
+                                searchPlaceholder="Search country..."
+                                notFoundMessage="No country found."
+                            />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="mobileNumber">Mobile Number</Label>
