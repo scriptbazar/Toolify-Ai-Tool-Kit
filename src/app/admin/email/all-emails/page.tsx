@@ -25,7 +25,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogDesc,
   DialogFooter,
 } from "@/components/ui/dialog";
 
@@ -229,9 +229,9 @@ export default function AllEmailsPage() {
         <DialogContent className="sm:max-w-[625px]">
           <DialogHeader>
             <DialogTitle>Email Preview</DialogTitle>
-            <DialogDescription>
+            <DialogDesc>
               A preview of the email sent to {selectedEmail?.recipient}.
-            </DialogDescription>
+            </DialogDesc>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="font-medium">Subject: {selectedEmail?.subject}</div>
