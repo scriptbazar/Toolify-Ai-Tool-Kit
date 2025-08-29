@@ -105,7 +105,7 @@ export default function PaymentSettingsPage() {
             />
           </div>
         </CardHeader>
-        <CardContent className={cn('space-y-4', !gatewaySettings?.isEnabled && 'opacity-50 pointer-events-none')}>
+        <CardContent className={cn('space-y-4', !gatewaySettings?.isEnabled && 'hidden')}>
           {fields.map(field => (
             <div key={field.id} className="space-y-2">
               <Label htmlFor={`${gatewayKey}-${field.id}`}>{field.label}</Label>
