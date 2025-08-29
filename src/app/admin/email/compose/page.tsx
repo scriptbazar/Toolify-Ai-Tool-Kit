@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +17,7 @@ import { Wand2, Send, Mail, Eye, Users } from 'lucide-react';
 import { z } from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
+import Link from 'next/link';
 
 
 // Re-define the base schema on the client and then extend it.
@@ -123,9 +124,11 @@ export default function ComposeEmailPage() {
               Create and send emails with the help of AI.
             </p>
         </div>
-        <Button variant="outline" disabled>
+        <Button variant="outline" asChild>
+           <Link href="/admin/email/all-emails">
             <Mail className="mr-2 h-4 w-4" />
             View Sent Emails
+           </Link>
         </Button>
       </div>
 
