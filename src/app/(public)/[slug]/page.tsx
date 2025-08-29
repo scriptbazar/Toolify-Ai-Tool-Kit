@@ -62,6 +62,11 @@ export default function ToolPage({ params }: { params: { slug:string } }) {
                         <li><strong>Word & Character Count:</strong> Get a real-time count of words and characters as you type, helping you stay on top of your writing metrics.</li>
                     </ul>
 
+                    {/* Placeholder for future in-description ad */}
+                    <div className="my-6">
+                        <AdPlaceholder adSlotId="toolpage-in-description" />
+                    </div>
+
                     <h3 className="text-xl font-semibold mt-6">🚀 How to Use:</h3>
                     <ol>
                         <li><strong>Enter Text:</strong> Simply type or paste the text you want to convert into the provided text area.</li>
@@ -78,7 +83,7 @@ export default function ToolPage({ params }: { params: { slug:string } }) {
           </Card>
         </div>
         <aside className="w-full lg:w-80 mt-8 lg:mt-0">
-          <AdPlaceholder />
+          <AdPlaceholder adSlotId="toolpage-sidebar" />
         </aside>
       </div>
     </div>

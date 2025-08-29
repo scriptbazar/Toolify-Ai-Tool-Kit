@@ -23,6 +23,7 @@ const defaultManualAdSlots: ManualAdSlot[] = [
     { id: 'toolpage-sidebar', name: 'Tool Page: Sidebar', code: '' },
     { id: 'toolpage-banner-top', name: 'Tool Page: Top Banner', code: '' },
     { id: 'toolpage-banner-bottom', name: 'Tool Page: Bottom Banner', code: '' },
+    { id: 'toolpage-in-description', name: 'Tool Page: In-description Ad', code: '' },
     { id: 'blog-post-sidebar', name: 'Blog Post: Sidebar', code: '' },
     { id: 'blog-post-in-content', name: 'Blog Post: In-content Ad', code: '' },
 ];
