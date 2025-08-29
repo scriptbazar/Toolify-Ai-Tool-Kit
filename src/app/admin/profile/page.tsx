@@ -33,6 +33,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { getAllEmails } from '@/ai/flows/user-management';
 
 
 interface UserProfile {
@@ -46,6 +47,13 @@ interface UserProfile {
   createdAt: {
       seconds: number;
   }
+}
+
+interface UserCounts {
+    total: number;
+    leads: number;
+    comments: number;
+    referrals: number;
 }
 
 const StatCard = ({ title, value, percentage, icon: Icon, href }: { title: string, value: string, percentage: string, icon: React.ElementType, href: string }) => (
@@ -68,6 +76,8 @@ export default function AdminProfilePage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userCounts, setUserCounts] = useState<UserCounts>({ total: 0, leads: 0, comments: 2, referrals: 573 });
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -90,6 +100,30 @@ export default function AdminProfilePage() {
       }
       setLoading(false);
     });
+
+     async function fetchUserCounts() {
+      try {
+        const allEmails = await getAllEmails();
+        const leadCount = allEmails.filter(e => e.source === 'Lead').length;
+        // Note: Comment and Referral counts are currently static placeholders.
+        // These would need dedicated backend functions to be dynamic.
+        setUserCounts(prev => ({
+            ...prev,
+            total: allEmails.length + 2, // Adding 2 dummy comment users for now
+            leads: leadCount,
+        }));
+      } catch (error) {
+        console.error("Could not fetch user counts", error);
+         toast({
+            title: "Error",
+            description: "Could not load user statistics.",
+            variant: "destructive",
+          });
+      }
+    }
+
+    fetchUserCounts();
+
     return () => unsubscribe();
   }, [toast]);
   
@@ -135,7 +169,7 @@ export default function AdminProfilePage() {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">{profile.firstName} {profile.lastName} <Badge variant="outline" className="p-1 justify-center text-sm"><UserCog className="h-3 w-3 mr-1"/>{profile.role}</Badge></h1>
                     
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>@{profile.userName}</span>
                         <Copy className="h-3 w-3 cursor-pointer" onClick={() => copyToClipboard(profile.userName)} />
                     </div>
@@ -200,10 +234,10 @@ export default function AdminProfilePage() {
             </TabsList>
             <TabsContent value="overview" className="mt-6">
                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <StatCard href="/admin/users?filter=all" title="Total Users" value="10,532" percentage="+5.2% from last month" icon={Users}/>
-                  <StatCard href="/admin/users?filter=lead" title="Lead Users" value="1,234" percentage="+19% from last month" icon={UserPlus}/>
-                  <StatCard href="/admin/users?filter=comment" title="Comment Users" value="2" percentage="+2 from last month" icon={MessageSquare}/>
-                  <StatCard href="/admin/referral-management" title="Referral Users" value="573" percentage="+201 since last hour" icon={GitCommitVertical}/>
+                  <StatCard href="/admin/users?filter=all" title="Total Users" value={userCounts.total.toLocaleString()} percentage="+5.2% from last month" icon={Users}/>
+                  <StatCard href="/admin/users?filter=lead" title="Lead Users" value={userCounts.leads.toLocaleString()} percentage="+19% from last month" icon={UserPlus}/>
+                  <StatCard href="/admin/users?filter=comment" title="Comment Users" value={userCounts.comments.toLocaleString()} percentage="+2 from last month" icon={MessageSquare}/>
+                  <StatCard href="/admin/referral-management" title="Referral Users" value={userCounts.referrals.toLocaleString()} percentage="+201 since last hour" icon={GitCommitVertical}/>
                </div>
             </TabsContent>
             <TabsContent value="transactions">
