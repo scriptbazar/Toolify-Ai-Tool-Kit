@@ -153,7 +153,9 @@ export default function TicketManagementPage() {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                        <DropdownMenuItem>View/Reply</DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                          <Link href={`/admin/ticket-management/${ticket.id}`}>View/Reply</Link>
+                                        </DropdownMenuItem>
                                         <DropdownMenuItem>Mark as In Progress</DropdownMenuItem>
                                         <DropdownMenuItem>Close Ticket</DropdownMenuItem>
                                     </DropdownMenuContent>
