@@ -1,6 +1,4 @@
 
-'use client';
-
 import { ChatWidget } from '@/components/common/ChatWidget';
 import Footer from '@/components/common/Footer';
 import Header from '@/components/common/Header';

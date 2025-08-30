@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -135,7 +134,7 @@ export default function AdminUsersPage() {
     comment: allUsers.filter(u => u.type === 'Comment').length,
   }), [allUsers]);
 
-  const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment'>) => {
+  const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment') => {
       setActiveFilter(filter);
       setCurrentPage(1);
   };
