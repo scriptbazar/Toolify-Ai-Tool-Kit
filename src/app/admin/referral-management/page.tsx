@@ -20,13 +20,20 @@ import {
   Cookie,
   CircleDollarSign,
   Loader2,
+  Check,
+  X,
+  UserCheck,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
-import type { ReferralSettings } from '@/ai/flows/settings-management.types';
+import { getReferralRequests, updateReferralRequestStatus } from '@/ai/flows/user-management';
+import type { ReferralSettings, ReferralRequest } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+
 
 type FilterType = 'all' | 'direct' | 'team' | 'pending';
 type StatusType = 'Completed' | 'Pending';
@@ -45,6 +52,7 @@ const ITEMS_PER_PAGE = 5;
 
 export default function ReferralManagementPage() {
   const [settings, setSettings] = useState<ReferralSettings | null>(null);
+  const [requests, setRequests] = useState<ReferralRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -53,29 +61,37 @@ export default function ReferralManagementPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    async function fetchSettings() {
+    async function fetchData() {
       setLoading(true);
       try {
-        const appSettings = await getSettings();
+        const [appSettings, referralRequests] = await Promise.all([
+          getSettings(),
+          getReferralRequests()
+        ]);
+        
         setSettings(appSettings.referral || {
           isReferralEnabled: true,
           commissionRate: 20,
           cookieDuration: 30,
           payoutThreshold: 50,
           isMultiLevel: false,
+          referralProgramDescription: '',
         });
+
+        setRequests(referralRequests);
+
       } catch (error) {
-        console.error('Failed to fetch settings:', error);
+        console.error('Failed to fetch data:', error);
         toast({
           title: 'Error',
-          description: 'Could not load referral settings.',
+          description: 'Could not load referral data.',
           variant: 'destructive',
         });
       } finally {
         setLoading(false);
       }
     }
-    fetchSettings();
+    fetchData();
   }, [toast]);
   
   const handleInputChange = (field: keyof ReferralSettings, value: string | number | boolean) => {
@@ -104,6 +120,23 @@ export default function ReferralManagementPage() {
     }
   };
   
+   const handleRequestUpdate = async (requestId: string, status: 'approved' | 'rejected') => {
+    try {
+      await updateReferralRequestStatus({ requestId, status });
+      setRequests(prev => prev.filter(req => req.id !== requestId));
+      toast({
+        title: `Request ${status}`,
+        description: 'The user has been notified.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Update Failed',
+        description: error.message || 'Could not update the request status.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const tabs: { id: FilterType; label: string; icon: React.ElementType }[] = [
     { id: 'all', label: 'All', icon: Users },
     { id: 'direct', label: 'Direct', icon: UserPlus },
@@ -167,6 +200,56 @@ export default function ReferralManagementPage() {
       </div>
 
       <div className="space-y-6">
+           <Card>
+            <CardHeader>
+                <CardTitle>Referral Join Requests</CardTitle>
+                <CardDescription>Approve or reject users who want to join your referral program.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>User</TableHead>
+                            <TableHead>Date Requested</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {requests.length > 0 ? requests.map(req => (
+                            <TableRow key={req.id}>
+                                <TableCell>
+                                    <div className="flex items-center gap-3">
+                                       <Avatar>
+                                            <AvatarFallback>{req.userName.charAt(0)}</AvatarFallback>
+                                       </Avatar>
+                                       <div>
+                                          <p className="font-medium">{req.userName}</p>
+                                          <p className="text-sm text-muted-foreground">{req.userEmail}</p>
+                                       </div>
+                                    </div>
+                                </TableCell>
+                                <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
+                                <TableCell className="text-right">
+                                    <div className="flex gap-2 justify-end">
+                                      <Button size="sm" variant="outline" className="text-green-600 border-green-600 hover:bg-green-100 hover:text-green-700" onClick={() => handleRequestUpdate(req.id, 'approved')}>
+                                        <Check className="mr-2 h-4 w-4" /> Approve
+                                      </Button>
+                                      <Button size="sm" variant="destructive" onClick={() => handleRequestUpdate(req.id, 'rejected')}>
+                                        <X className="mr-2 h-4 w-4" /> Reject
+                                      </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        )) : (
+                           <TableRow>
+                                <TableCell colSpan={3} className="h-24 text-center">No pending requests.</TableCell>
+                           </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+           </Card>
+
           <Card>
               <CardHeader>
               <CardTitle>All Referrals</CardTitle>
@@ -285,6 +368,16 @@ export default function ReferralManagementPage() {
                       </div>
 
                       <div className={cn('space-y-6 transition-opacity duration-300', !settings.isReferralEnabled && 'opacity-50 pointer-events-none')}>
+                          <div className="space-y-2">
+                             <Label htmlFor="referralProgramDescription">Referral Program Description</Label>
+                              <Textarea 
+                                id="referralProgramDescription"
+                                placeholder="Describe your referral program here. Explain the benefits, commission rates, and rules. This will be shown to users."
+                                value={settings.referralProgramDescription || ''}
+                                onChange={(e) => handleInputChange('referralProgramDescription', e.target.value)}
+                                className="min-h-[150px]"
+                              />
+                          </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div className="space-y-2">
                                   <Label htmlFor="commission-rate">Commission Rate</Label>

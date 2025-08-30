@@ -8,7 +8,7 @@ export default function CommentsRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/admin/dashboard/blog/comments');
+    router.replace('/admin/blog/comments');
   }, [router]);
 
   return null;

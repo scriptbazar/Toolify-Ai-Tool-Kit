@@ -8,7 +8,7 @@ export default function BackupRestoreRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/admin/dashboard/backup-restore');
+    router.replace('/admin/backup-restore');
   }, [router]);
 
   return null;

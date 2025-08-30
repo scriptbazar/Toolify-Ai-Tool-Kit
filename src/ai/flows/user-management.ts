@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -13,8 +14,9 @@
 
 import { z } from 'zod';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput } from './user-management.types';
+import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, type ReferralStatus } from './user-management.types';
 import { adminDb } from '@/lib/firebase-admin';
+import crypto from 'crypto';
 
 
 export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ success: boolean; message: string }> {
@@ -151,4 +153,97 @@ export async function getChatUsers(): Promise<any[]> {
         console.error("Error fetching chat users:", error);
         return []; // Return empty array on error to prevent crashing the client
     }
+}
+
+/**
+ * Creates a request for a user to join the referral program.
+ */
+export async function requestToJoinReferralProgram(input: { userId: string, userName: string, userEmail: string }): Promise<{ success: boolean }> {
+    const { userId, userName, userEmail } = input;
+    
+    // Check if a request already exists for this user
+    const existingRequest = await adminDb.collection('referralRequests').where('userId', '==', userId).limit(1).get();
+    if (!existingRequest.empty) {
+        throw new Error("You have already submitted a request to join the program.");
+    }
+    
+    await adminDb.collection('referralRequests').add({
+        userId,
+        userName,
+        userEmail,
+        status: 'pending',
+        createdAt: FieldValue.serverTimestamp(),
+    });
+    return { success: true };
+}
+
+
+/**
+ * Fetches the referral status for a specific user.
+ */
+export async function getReferralStatus(userId: string): Promise<ReferralStatus> {
+  const userDoc = await adminDb.collection('users').doc(userId).get();
+  if (userDoc.exists() && userDoc.data()?.referralCode) {
+    return { status: 'approved', referralCode: userDoc.data()?.referralCode };
+  }
+
+  const requestSnapshot = await adminDb.collection('referralRequests')
+    .where('userId', '==', userId)
+    .orderBy('createdAt', 'desc')
+    .limit(1)
+    .get();
+
+  if (!requestSnapshot.empty) {
+    const requestData = requestSnapshot.docs[0].data();
+    return { status: requestData.status }; // 'pending' or 'rejected'
+  }
+  
+  return { status: 'not_joined' };
+}
+
+/**
+ * Fetches all pending referral requests for the admin panel.
+ */
+export async function getReferralRequests(): Promise<ReferralRequest[]> {
+    const snapshot = await adminDb.collection('referralRequests').where('status', '==', 'pending').orderBy('createdAt', 'desc').get();
+    return snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            userId: data.userId,
+            userName: data.userName,
+            userEmail: data.userEmail,
+            createdAt: (data.createdAt as Timestamp).toDate().toISOString(),
+        }
+    });
+}
+
+/**
+ * Updates the status of a referral request (approve/reject).
+ */
+export async function updateReferralRequestStatus(input: { requestId: string; status: 'approved' | 'rejected' }): Promise<{ success: boolean }> {
+    const { requestId, status } = input;
+    const requestRef = adminDb.collection('referralRequests').doc(requestId);
+    const requestDoc = await requestRef.get();
+
+    if (!requestDoc.exists) {
+        throw new Error('Referral request not found.');
+    }
+
+    if (status === 'approved') {
+        const userId = requestDoc.data()!.userId;
+        const referralCode = crypto.randomBytes(4).toString('hex'); // e.g., 'a4f5d6e7'
+        
+        const userRef = adminDb.collection('users').doc(userId);
+        
+        await adminDb.runTransaction(async (transaction) => {
+            transaction.update(userRef, { referralCode });
+            transaction.update(requestRef, { status: 'approved' });
+        });
+        
+    } else { // 'rejected'
+        await requestRef.update({ status: 'rejected' });
+    }
+
+    return { success: true };
 }

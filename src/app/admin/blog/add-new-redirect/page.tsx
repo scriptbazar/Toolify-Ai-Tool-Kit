@@ -8,7 +8,7 @@ export default function AddNewPostRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/admin/dashboard/blog/add-new');
+    router.replace('/admin/blog/add-new');
   }, [router]);
 
   return null;

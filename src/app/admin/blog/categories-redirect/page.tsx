@@ -8,7 +8,7 @@ export default function CategoriesRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/admin/dashboard/blog/categories');
+    router.replace('/admin/blog/categories');
   }, [router]);
 
   return null;

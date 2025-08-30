@@ -1,7 +1,10 @@
+
 /**
  * @fileOverview Types and Zod schemas for application settings management.
  */
 import { z } from 'zod';
+import { type ReferralRequestSchema, type ReferralStatusSchema } from './user-management.types';
+
 
 export const ManualAdSlotSchema = z.object({
   id: z.string(),
@@ -25,6 +28,7 @@ export const ReferralSettingsSchema = z.object({
   cookieDuration: z.number().min(1).default(30),
   payoutThreshold: z.number().min(0).default(50),
   isMultiLevel: z.boolean().default(false),
+  referralProgramDescription: z.string().optional(),
 });
 export type ReferralSettings = z.infer<typeof ReferralSettingsSchema>;
 
@@ -194,3 +198,6 @@ export const AppSettingsSchema = z.object({
   page: PageSettingsSchema.optional(),
 });
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
+
+export type ReferralRequest = z.infer<typeof ReferralRequestSchema>;
+export type ReferralStatus = z.infer<typeof ReferralStatusSchema>;

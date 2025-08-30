@@ -8,7 +8,7 @@ export default function CommunityChatRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/admin/dashboard/community-chat');
+    router.replace('/admin/community-chat');
   }, [router]);
 
   return null;
