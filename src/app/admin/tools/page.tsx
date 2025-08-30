@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -12,11 +12,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { tools, toolCategories, type Tool } from '@/lib/constants';
+import { toolCategories } from '@/lib/constants';
+import { getTools, upsertTool } from '@/ai/flows/tool-management';
+import { type Tool } from '@/ai/flows/tool-management.types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Sparkles, CheckCircle, XCircle, Package, MoreHorizontal } from 'lucide-react';
+import { Search, Star, Sparkles, CheckCircle, XCircle, Package, MoreHorizontal, Edit, PlusCircle } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -31,33 +33,41 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-
-// Extend tool type for filtering demo
-type ToolWithStatus = Tool & {
-  plan: 'Free' | 'Pro';
-  isNew: boolean;
-  status: 'Active' | 'Disabled';
-};
-
-// Add dummy data for demonstration
-const initialToolsWithStatus: ToolWithStatus[] = tools.map((tool, index) => ({
-  ...tool,
-  plan: index % 3 === 0 ? 'Pro' : 'Free',
-  isNew: index < 3, // Make first 3 tools new
-  status: 'Active',
-}));
+import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
 
 type FilterType = 'all' | 'pro' | 'free' | 'new' | 'active' | 'disabled';
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 export default function AdminToolsPage() {
-  const [toolsList, setToolsList] = useState<ToolWithStatus[]>(initialToolsWithStatus);
+  const [toolsList, setToolsList] = useState<Tool[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
+  
+  const fetchTools = async () => {
+    setLoading(true);
+    try {
+      const tools = await getTools();
+      setToolsList(tools);
+    } catch (error) {
+      toast({
+        title: 'Error fetching tools',
+        description: 'Could not load tools from the database.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTools();
+  }, [toast]);
 
   const getCategoryName = (categoryId: string) => {
     return toolCategories.find(c => c.id === categoryId)?.name || 'Unknown';
@@ -99,16 +109,34 @@ export default function AdminToolsPage() {
 
   const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
   
-  const handleUpdateTool = (slug: string, updates: Partial<ToolWithStatus>) => {
-    setToolsList(prevList =>
-      prevList.map(tool =>
-        tool.slug === slug ? { ...tool, ...updates } : tool
-      )
+  const handleUpdateTool = async (toolId: string, updates: Partial<Tool>) => {
+    const originalTools = [...toolsList];
+    const updatedTools = toolsList.map(tool =>
+        tool.id === toolId ? { ...tool, ...updates } : tool
     );
-    toast({
-      title: "Tool Updated",
-      description: `The tool "${tools.find(t => t.slug === slug)?.name}" has been updated.`,
-    });
+    setToolsList(updatedTools);
+    
+    try {
+        const toolToUpdate = updatedTools.find(t => t.id === toolId);
+        if (!toolToUpdate) throw new Error("Tool not found");
+
+        const result = await upsertTool(toolToUpdate);
+        if (result.success) {
+            toast({
+                title: "Tool Updated",
+                description: `The tool "${toolToUpdate.name}" has been updated.`,
+            });
+        } else {
+             throw new Error(result.message);
+        }
+    } catch (error: any) {
+        setToolsList(originalTools);
+        toast({
+            title: "Update Failed",
+            description: error.message || 'Could not update the tool.',
+            variant: 'destructive',
+        });
+    }
   };
 
   const handleFilterChange = (filter: FilterType) => {
@@ -137,11 +165,18 @@ export default function AdminToolsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Tool Management</h1>
-        <p className="text-muted-foreground">
-          View, manage, and filter all available tools.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Tool Management</h1>
+          <p className="text-muted-foreground">
+            View, manage, and filter all available tools.
+          </p>
+        </div>
+        <Button asChild>
+            <Link href="/admin/tools/new">
+                <PlusCircle className="mr-2 h-4 w-4" /> Add Tool
+            </Link>
+        </Button>
       </div>
       <Card>
         <CardHeader>
@@ -156,8 +191,8 @@ export default function AdminToolsPage() {
                   key={tab.id}
                   variant={activeFilter === tab.id ? 'default' : 'outline'}
                   onClick={() => handleFilterChange(tab.id)}
-                  size="lg"
-                  className="shrink-0 gap-1.5 px-4"
+                  size="sm"
+                  className="shrink-0 gap-1.5 px-3"
                 >
                   <tab.icon className="h-4 w-4" />
                   {tab.label} ({tab.count})
@@ -171,11 +206,11 @@ export default function AdminToolsPage() {
                     placeholder="Search tools..."
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    className="pl-9 w-full sm:max-w-xs h-11"
+                    className="pl-9 w-full sm:max-w-xs h-10"
                 />
                 </div>
                 <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                    <SelectTrigger className="w-full sm:w-auto h-11">
+                    <SelectTrigger className="w-full sm:w-auto h-10">
                     <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
@@ -188,87 +223,95 @@ export default function AdminToolsPage() {
             </div>
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Tool Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedTools.map(tool => (
-                <TableRow key={tool.slug}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <tool.Icon className="h-4 w-4 text-muted-foreground" />
-                      <span>{tool.name}</span>
-                       {tool.isNew && <Badge variant="outline" className="text-primary border-primary">New</Badge>}
-                    </div>
-                  </TableCell>
-                  <TableCell>{getCategoryName(tool.category)}</TableCell>
-                   <TableCell>
-                    <Badge variant={tool.plan === 'Pro' ? 'secondary' : 'outline'}>{tool.plan}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={tool.status === 'Active' ? 'default' : 'destructive'} className={cn(tool.status === 'Active' && 'bg-green-500 hover:bg-green-600')}>{tool.status}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Actions for {tool.name}</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuSub>
-                           <DropdownMenuSubTrigger>Change Plan</DropdownMenuSubTrigger>
-                           <DropdownMenuSubContent>
-                                <DropdownMenuItem onClick={() => handleUpdateTool(tool.slug, { plan: 'Free' })}>
-                                    Free
+           {loading ? (
+                <div className="space-y-2">
+                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+                </div>
+            ) : (
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Tool Name</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Plan</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {paginatedTools.map(tool => (
+                        <TableRow key={tool.id}>
+                        <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                            <span>{tool.name}</span>
+                            {tool.isNew && <Badge variant="outline" className="text-primary border-primary">New</Badge>}
+                            </div>
+                        </TableCell>
+                        <TableCell>{getCategoryName(tool.category)}</TableCell>
+                        <TableCell>
+                            <Badge variant={tool.plan === 'Pro' ? 'secondary' : 'outline'}>{tool.plan}</Badge>
+                        </TableCell>
+                        <TableCell>
+                            <Badge variant={tool.status === 'Active' ? 'default' : 'destructive'} className={cn(tool.status === 'Active' && 'bg-green-500 hover:bg-green-600')}>{tool.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                            <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Actions for {tool.name}</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem asChild>
+                                    <Link href={`/admin/tools/${tool.id}`}><Edit className="mr-2 h-4 w-4" />Edit</Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleUpdateTool(tool.slug, { plan: 'Pro' })}>
-                                    Pro
-                                </DropdownMenuItem>
-                           </DropdownMenuSubContent>
-                        </DropdownMenuSub>
-                        <DropdownMenuSub>
-                           <DropdownMenuSubTrigger>Change Status</DropdownMenuSubTrigger>
-                           <DropdownMenuSubContent>
-                                <DropdownMenuItem onClick={() => handleUpdateTool(tool.slug, { status: 'Active' })}>
-                                    Active
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleUpdateTool(tool.slug, { status: 'Disabled' })}>
-                                    Disabled
-                                </DropdownMenuItem>
-                           </DropdownMenuSubContent>
-                        </DropdownMenuSub>
-                        <DropdownMenuSeparator />
-                         <DropdownMenuCheckboxItem
-                            checked={tool.isNew}
-                            onCheckedChange={(checked) => handleUpdateTool(tool.slug, { isNew: checked })}
-                         >
-                            Mark as New
-                         </DropdownMenuCheckboxItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-               {paginatedTools.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    No tools found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>Change Plan</DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent>
+                                        <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { plan: 'Free' })}>
+                                            Free
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { plan: 'Pro' })}>
+                                            Pro
+                                        </DropdownMenuItem>
+                                </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                                <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>Change Status</DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent>
+                                        <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { status: 'Active' })}>
+                                            Active
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { status: 'Disabled' })}>
+                                            Disabled
+                                        </DropdownMenuItem>
+                                </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuCheckboxItem
+                                    checked={tool.isNew}
+                                    onCheckedChange={(checked) => handleUpdateTool(tool.id, { isNew: !!checked })}
+                                >
+                                    Mark as New
+                                </DropdownMenuCheckboxItem>
+                            </DropdownMenuContent>
+                            </DropdownMenu>
+                        </TableCell>
+                        </TableRow>
+                    ))}
+                    {paginatedTools.length === 0 && (
+                        <TableRow>
+                        <TableCell colSpan={5} className="h-24 text-center">
+                            No tools found.
+                        </TableCell>
+                        </TableRow>
+                    )}
+                    </TableBody>
+                </Table>
+            )}
 
            {totalPages > 1 && (
             <div className="flex items-center justify-end space-x-2 pt-4">
