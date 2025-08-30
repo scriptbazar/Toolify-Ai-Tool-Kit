@@ -19,7 +19,7 @@ import {
   User,
   X,
 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
@@ -249,9 +249,9 @@ export default function TicketManagementPage() {
                                                 <span className="text-muted-foreground">[{selectedTicket.id}]</span> 
                                                 {selectedTicket.subject}
                                             </DialogTitle>
-                                            <DialogDescription>
+                                            <DialogDesc>
                                                 Opened by {selectedTicket.user.name}
-                                            </DialogDescription>
+                                            </DialogDesc>
                                         </DialogHeader>
                                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-6 pb-6 overflow-hidden flex-1">
                                             <div className="lg:col-span-2 flex flex-col space-y-4 h-full">
@@ -376,3 +376,5 @@ export default function TicketManagementPage() {
     </div>
   );
 }
+
+    
