@@ -10,10 +10,25 @@ function initializeFirebaseAdmin(): App {
     return getApps()[0];
   }
   
-  // Use Application Default Credentials. This is the recommended way for most environments,
-  // including local development and Firebase/Google Cloud hosting.
-  // It automatically finds credentials from the environment.
-  return initializeApp();
+  const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+
+  if (serviceAccountKey) {
+    try {
+      const serviceAccount: ServiceAccount = JSON.parse(serviceAccountKey);
+      return initializeApp({
+        credential: cert(serviceAccount),
+      });
+    } catch (error) {
+      console.error('Error parsing FIREBASE_SERVICE_ACCOUNT_KEY:', error);
+      // Fallback to default credentials if parsing fails
+      return initializeApp();
+    }
+  } else {
+    // Use Application Default Credentials if the environment variable is not set.
+    // This is useful for local development when authenticated via gcloud CLI.
+    console.warn("FIREBASE_SERVICE_ACCOUNT_KEY not found. Falling back to Application Default Credentials.");
+    return initializeApp();
+  }
 }
 
 const adminApp: App = initializeFirebaseAdmin();
