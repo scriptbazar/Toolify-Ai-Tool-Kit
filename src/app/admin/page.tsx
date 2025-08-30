@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -22,6 +23,7 @@ export default function AdminPage() {
         } else {
           // User is not an admin, redirect to the admin login page.
           // You might want to sign them out here as well.
+          await auth.signOut();
           router.replace('/admin/login');
         }
       } else {

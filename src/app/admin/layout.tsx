@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -86,6 +85,8 @@ export default function AdminLayout({
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userData, setUserData] = useState<AppUser | null>(null);
 
+  const isLoginPage = pathname === '/admin/login';
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -96,7 +97,7 @@ export default function AdminLayout({
         if (userDocSnap.exists()) {
           setUserData(userDocSnap.data() as AppUser);
         }
-      } else {
+      } else if (!isLoginPage) {
         setUser(null);
         setUserData(null);
         router.push('/admin/login');
@@ -104,7 +105,7 @@ export default function AdminLayout({
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, isLoginPage]);
 
 
   const handleLogout = async () => {
@@ -124,6 +125,10 @@ export default function AdminLayout({
       });
     }
   };
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   const navLinks = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: Home },
