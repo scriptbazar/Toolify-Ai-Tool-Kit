@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -30,6 +30,7 @@ import {
   Eye,
   Download,
   PlusCircle,
+  AlertCircle,
 } from 'lucide-react';
 import {
   Dialog,
@@ -40,104 +41,24 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import type { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { getSettings } from '@/ai/flows/settings-management';
+import { getPayments, type Payment, type PaymentStatus } from '@/ai/flows/payment-management';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 
-type FilterType = 'all' | 'completed' | 'pending' | 'failed';
-
-const initialPayments = [
-  {
-    transactionId: 'txn_1LgR8t2eZvKYlo2Cf2hN3X4Y',
-    user: {
-      name: 'Olivia Martin',
-      email: 'olivia.martin@email.com',
-      avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
-    },
-    plan: 'Pro Plan',
-    amount: '$19.99',
-    date: '2023-07-15',
-    status: 'completed',
-    paymentMethod: 'Visa **** 4242',
-    subscribedFrom: '2023-07-15',
-    subscribedUntil: '2024-07-15',
-  },
-  {
-    transactionId: 'txn_2HjP9u4fGhKlo3Dg4jM5Y6Z7',
-    user: {
-      name: 'Jackson Lee',
-      email: 'jackson.lee@email.com',
-      avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026705d',
-    },
-    plan: 'Free Plan',
-    amount: '$0.00',
-    date: '2023-07-14',
-    status: 'completed',
-    paymentMethod: 'N/A',
-    subscribedFrom: '2023-07-14',
-    subscribedUntil: 'N/A',
-  },
-    {
-    transactionId: 'txn_3KlM0v6gHjLlo4Eh6kO7P8Q9',
-    user: {
-      name: 'Isabella Nguyen',
-      email: 'isabella.nguyen@email.com',
-      avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026706d',
-    },
-    plan: 'Pro Plan',
-    amount: '$19.99',
-    date: '2023-07-13',
-    status: 'pending',
-    paymentMethod: 'PayPal',
-    subscribedFrom: '2023-07-13',
-    subscribedUntil: '2024-07-13',
-  },
-   {
-    transactionId: 'txn_4NmB1w8hIkNlo5Fi7lP9R0S1',
-    user: {
-      name: 'William Kim',
-      email: 'will@email.com',
-      avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026707d',
-    },
-    plan: 'Pro Plan',
-    amount: '$19.99',
-    date: '2023-07-12',
-    status: 'failed',
-    paymentMethod: 'Visa **** 1234',
-    subscribedFrom: '2023-07-12',
-    subscribedUntil: '2024-07-12',
-  },
-  {
-    transactionId: 'txn_5PqA2x0jJkOlo6Gj8mQ1T2U3',
-    user: {
-      name: 'Sofia Davis',
-      email: 'sofia.davis@email.com',
-      avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026708d',
-    },
-    plan: 'Team Plan',
-    amount: '$49.99',
-    date: '2023-07-11',
-    status: 'completed',
-    paymentMethod: 'Mastercard **** 5678',
-    subscribedFrom: '2023-07-11',
-    subscribedUntil: '2024-07-11',
-  },
-];
-
-type Payment = typeof initialPayments[0];
-
-
-const getStatusBadge = (status: FilterType) => {
+const getStatusBadge = (status: PaymentStatus) => {
   switch (status) {
-    case 'completed':
+    case 'Completed':
       return <Badge variant="default" className="bg-green-500 hover:bg-green-600"><CheckCircle2 className="mr-1 h-3 w-3"/>Completed</Badge>;
-    case 'pending':
+    case 'Pending':
       return <Badge variant="secondary" className="bg-yellow-500 text-white hover:bg-yellow-600"><Clock className="mr-1 h-3 w-3"/>Pending</Badge>;
-    case 'failed':
+    case 'Failed':
       return <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3"/>Failed</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
@@ -145,19 +66,37 @@ const getStatusBadge = (status: FilterType) => {
 }
 
 export default function PaymentHistoryPage() {
-  const [payments, setPayments] = useState(initialPayments);
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<PaymentStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    async function fetchPayments() {
+        setLoading(true);
+        try {
+            const fetchedPayments = await getPayments();
+            setPayments(fetchedPayments);
+        } catch (err: any) {
+            console.error("Failed to fetch payments:", err);
+            setError("Could not load payment history. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    }
+    fetchPayments();
+  }, []);
 
   const counts = useMemo(() => ({
     all: payments.length,
-    completed: payments.filter(p => p.status === 'completed').length,
-    pending: payments.filter(p => p.status === 'pending').length,
-    failed: payments.filter(p => p.status === 'failed').length,
+    Completed: payments.filter(p => p.status === 'Completed').length,
+    Pending: payments.filter(p => p.status === 'Pending').length,
+    Failed: payments.filter(p => p.status === 'Failed').length,
   }), [payments]);
   
   const copyToClipboard = (text: string) => {
@@ -165,17 +104,17 @@ export default function PaymentHistoryPage() {
     toast({ description: `Copied: ${text}` });
   };
 
-  const tabs: { id: FilterType; label: string; icon: React.ElementType; count: number }[] = [
+  const tabs: { id: PaymentStatus | 'all'; label: string; icon: React.ElementType; count: number }[] = [
     { id: 'all', label: 'All Transactions', icon: FileText, count: counts.all },
-    { id: 'completed', label: 'Completed', icon: CheckCircle2, count: counts.completed },
-    { id: 'pending', label: 'Pending', icon: Clock, count: counts.pending },
-    { id: 'failed', label: 'Failed', icon: XCircle, count: counts.failed },
+    { id: 'Completed', label: 'Completed', icon: CheckCircle2, count: counts.Completed },
+    { id: 'Pending', label: 'Pending', icon: Clock, count: counts.Pending },
+    { id: 'Failed', label: 'Failed', icon: XCircle, count: counts.Failed },
   ];
   
   const filteredPayments = payments.filter(p => {
     const filterMatch = activeFilter === 'all' || p.status === activeFilter;
-    const searchMatch = p.user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                        p.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const searchMatch = p.userName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        p.userEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         p.transactionId.toLowerCase().includes(searchQuery.toLowerCase());
     return filterMatch && searchMatch;
   })
@@ -233,7 +172,7 @@ export default function PaymentHistoryPage() {
             startY: finalY + 10,
             head: [['User Information']],
             body: [
-                [{ content: `Name: ${payment.user.name}\nEmail: ${payment.user.email}`, styles: { halign: 'left' }}],
+                [{ content: `Name: ${payment.userName}\nEmail: ${payment.userEmail}`, styles: { halign: 'left' }}],
             ],
             theme: 'striped',
         });
@@ -243,11 +182,9 @@ export default function PaymentHistoryPage() {
             head: [['Payment Details']],
             body: [
                 ['Plan', payment.plan],
-                ['Amount', payment.amount],
+                ['Amount', `$${payment.amount.toFixed(2)}`],
                 ['Status', payment.status],
                 ['Payment Method', payment.paymentMethod],
-                ['Subscription Start', new Date(payment.subscribedFrom).toLocaleDateString()],
-                ['Subscription End', payment.subscribedUntil === 'N/A' ? 'N/A' : new Date(payment.subscribedUntil).toLocaleDateString()],
             ],
             theme: 'striped',
             didParseCell: function (data: any) {
@@ -291,25 +228,8 @@ export default function PaymentHistoryPage() {
 
   const handleAddTransaction = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const formData = new FormData(e.currentTarget);
-      const newTransaction: Payment = {
-          transactionId: `txn_${Date.now()}`,
-          user: {
-              name: formData.get('userName') as string,
-              email: formData.get('userEmail') as string,
-              avatar: `https://i.pravatar.cc/150?u=${formData.get('userEmail') as string}`
-          },
-          plan: formData.get('plan') as string,
-          amount: `$${formData.get('amount') as string}`,
-          date: new Date().toISOString().split('T')[0],
-          status: formData.get('status') as 'completed' | 'pending' | 'failed',
-          paymentMethod: formData.get('paymentMethod') as string,
-          subscribedFrom: new Date().toISOString().split('T')[0],
-          subscribedUntil: 'N/A'
-      };
-      setPayments([newTransaction, ...payments]);
-      setIsAddOpen(false);
-      toast({ title: "Transaction Added", description: "The new transaction has been added to the history." });
+      // This is now a placeholder as real transactions should come from a payment gateway.
+      toast({ title: "Action Not Available", description: "Manual transaction addition is disabled. Transactions should be created via your payment gateway." });
   }
 
   return (
@@ -376,7 +296,23 @@ export default function PaymentHistoryPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPayments.length > 0 ? (
+                {loading ? (
+                    [...Array(5)].map((_, i) => (
+                        <TableRow key={i}>
+                            <TableCell colSpan={7}><Skeleton className="h-8 w-full"/></TableCell>
+                        </TableRow>
+                    ))
+                ) : error ? (
+                    <TableRow>
+                        <TableCell colSpan={7}>
+                             <Alert variant="destructive">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertTitle>Error</AlertTitle>
+                                <AlertDescription>{error}</AlertDescription>
+                            </Alert>
+                        </TableCell>
+                    </TableRow>
+                ) : filteredPayments.length > 0 ? (
                     filteredPayments.map((payment) => (
                         <TableRow key={payment.transactionId}>
                             <TableCell>
@@ -391,19 +327,18 @@ export default function PaymentHistoryPage() {
                              <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
-                                        <AvatarImage src={payment.user.avatar} alt={payment.user.name} />
-                                        <AvatarFallback>{payment.user.name.charAt(0)}</AvatarFallback>
+                                        <AvatarFallback>{payment.userName.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <div className="font-medium">{payment.user.name}</div>
-                                        <div className="text-sm text-muted-foreground">{payment.user.email}</div>
+                                        <div className="font-medium">{payment.userName}</div>
+                                        <div className="text-sm text-muted-foreground">{payment.userEmail}</div>
                                     </div>
                                 </div>
                             </TableCell>
                             <TableCell>{payment.plan}</TableCell>
-                            <TableCell>{payment.amount}</TableCell>
-                            <TableCell>{payment.date}</TableCell>
-                            <TableCell>{getStatusBadge(payment.status as FilterType)}</TableCell>
+                            <TableCell>${payment.amount.toFixed(2)}</TableCell>
+                            <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
+                            <TableCell>{getStatusBadge(payment.status)}</TableCell>
                             <TableCell className="text-right">
                                 <Button variant="outline" size="sm" onClick={() => handleViewDetails(payment)}>
                                   <Eye className="mr-2 h-4 w-4" />
@@ -437,14 +372,13 @@ export default function PaymentHistoryPage() {
                         <h4 className="font-semibold">User Information</h4>
                         <div className="flex items-center gap-3 rounded-md border p-3">
                             <Avatar>
-                                <AvatarImage src={selectedPayment.user.avatar} alt={selectedPayment.user.name} />
-                                <AvatarFallback>{selectedPayment.user.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{selectedPayment.userName.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <p>{selectedPayment.user.name}</p>
+                                <p>{selectedPayment.userName}</p>
                                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                    {selectedPayment.user.email}
-                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(selectedPayment.user.email)}>
+                                    {selectedPayment.userEmail}
+                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(selectedPayment.userEmail)}>
                                         <Copy className="h-3 w-3" />
                                         <span className="sr-only">Copy Email</span>
                                     </Button>
@@ -464,13 +398,11 @@ export default function PaymentHistoryPage() {
                                     <span className="sr-only">Copy Transaction ID</span>
                                 </Button>
                             </div>
-                            <span className="font-medium">Date:</span><span>{selectedPayment.date}</span>
+                            <span className="font-medium">Date:</span><span>{new Date(selectedPayment.date).toLocaleDateString()}</span>
                             <span className="font-medium">Plan:</span><span>{selectedPayment.plan}</span>
-                            <span className="font-medium">Amount:</span><span className="font-bold">{selectedPayment.amount}</span>
-                            <span className="font-medium">Status:</span><span>{getStatusBadge(selectedPayment.status as FilterType)}</span>
+                            <span className="font-medium">Amount:</span><span className="font-bold">${selectedPayment.amount.toFixed(2)}</span>
+                            <span className="font-medium">Status:</span><span>{getStatusBadge(selectedPayment.status)}</span>
                             <span className="font-medium">Payment Method:</span><span>{selectedPayment.paymentMethod}</span>
-                            <span className="font-medium">Subscription Start:</span><span>{new Date(selectedPayment.subscribedFrom).toLocaleDateString()}</span>
-                            <span className="font-medium">Subscription End:</span><span>{selectedPayment.subscribedUntil === 'N/A' ? 'N/A' : new Date(selectedPayment.subscribedUntil).toLocaleDateString()}</span>
                          </div>
                     </div>
                 </div>
@@ -501,9 +433,9 @@ export default function PaymentHistoryPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                       <select name="status" required className="p-2 border rounded-md">
-                          <option value="completed">Completed</option>
-                          <option value="pending">Pending</option>
-                          <option value="failed">Failed</option>
+                          <option value="Completed">Completed</option>
+                          <option value="Pending">Pending</option>
+                          <option value="Failed">Failed</option>
                       </select>
                       <input type="text" name="paymentMethod" placeholder="Payment Method" required className="p-2 border rounded-md" />
                   </div>
@@ -516,5 +448,3 @@ export default function PaymentHistoryPage() {
     </div>
   );
 }
-
-    
