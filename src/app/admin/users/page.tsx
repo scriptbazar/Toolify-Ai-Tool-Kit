@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 interface User {
@@ -52,9 +53,9 @@ export default function AdminUsersPage() {
   const fetchUsersAndLeads = async () => {
     setLoading(true);
     try {
-      // Fetch registered users
       const usersCollection = collection(db, 'users');
-      const usersSnapshot = await getDocs(usersCollection);
+      const usersQuery = query(usersCollection, orderBy('createdAt', 'desc'));
+      const usersSnapshot = await getDocs(usersQuery);
       const usersList: User[] = usersSnapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -68,8 +69,8 @@ export default function AdminUsersPage() {
         };
       });
 
-      // Fetch leads
-      const leadsQuery = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
+      const leadsCollection = collection(db, 'leads');
+      const leadsQuery = query(leadsCollection, orderBy('createdAt', 'desc'));
       const leadsSnapshot = await getDocs(leadsQuery);
       const leadsList: User[] = leadsSnapshot.docs.map(doc => {
         const data = doc.data();
@@ -83,7 +84,6 @@ export default function AdminUsersPage() {
         };
       });
 
-      // Combine and sort by date
       const combinedList = [...usersList, ...leadsList].sort((a, b) => {
         const dateA = a.createdAt?.seconds ?? 0;
         const dateB = b.createdAt?.seconds ?? 0;
@@ -135,7 +135,7 @@ export default function AdminUsersPage() {
     comment: allUsers.filter(u => u.type === 'Comment').length,
   }), [allUsers]);
 
-  const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment') => {
+  const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment'>) => {
       setActiveFilter(filter);
       setCurrentPage(1);
   };
@@ -196,7 +196,11 @@ export default function AdminUsersPage() {
                 />
             </div>
           </div>
-          {loading && <p>Loading users...</p>}
+          {loading && (
+             <div className="space-y-2">
+                {[...Array(ITEMS_PER_PAGE)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+             </div>
+          )}
           {error && (
              <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
