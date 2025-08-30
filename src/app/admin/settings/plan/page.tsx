@@ -35,7 +35,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogDesc,
   DialogFooter,
   DialogTrigger,
   DialogClose,
@@ -260,9 +260,9 @@ export default function PlanManagementPage() {
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editingPlan ? 'Edit Plan' : 'Add New Plan'}</DialogTitle>
-            <DialogDescription>
+            <DialogDesc>
               {editingPlan ? `Editing the "${editingPlan.name}" plan.` : 'Create a new subscription plan for your users.'}
-            </DialogDescription>
+            </DialogDesc>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
