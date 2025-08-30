@@ -1,5 +1,4 @@
 
-import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CaseConverter } from '@/components/tools/CaseConverter';
 import { WordCounter } from '@/components/tools/WordCounter';
@@ -14,7 +13,6 @@ import { ColorPicker } from '@/components/tools/ColorPicker';
 import { getTools } from '@/ai/flows/tool-management';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { getSettings } from '@/ai/flows/settings-management';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -39,8 +37,6 @@ const toolComponents: { [key: string]: React.ComponentType } = {
 export default async function ToolPage({ params }: { params: { slug:string } }) {
   const tools = await getTools();
   const tool = tools.find((t) => t.slug === params.slug);
-  const settings = await getSettings();
-  const adSettings = settings.advertisement || null;
 
   if (!tool) {
     notFound();
@@ -87,11 +83,6 @@ export default async function ToolPage({ params }: { params: { slug:string } }) 
                         <li><strong>Word & Character Count:</strong> Get a real-time count of words and characters as you type, helping you stay on top of your writing metrics.</li>
                     </ul>
 
-                    {/* Placeholder for future in-description ad */}
-                    <div className="my-6">
-                        <AdPlaceholder adSettings={adSettings} adSlotId="toolpage-in-description" />
-                    </div>
-
                     <h3 className="text-xl font-semibold mt-6">🚀 How to Use:</h3>
                     <ol>
                         <li><strong>Enter Text:</strong> Simply type or paste the text you want to convert into the provided text area.</li>
@@ -107,9 +98,6 @@ export default async function ToolPage({ params }: { params: { slug:string } }) 
             </CardContent>
           </Card>
         </div>
-        <aside className="w-full lg:w-80 mt-8 lg:mt-0">
-          <AdPlaceholder adSettings={adSettings} adSlotId="toolpage-sidebar" />
-        </aside>
       </div>
     </div>
   );
