@@ -57,14 +57,29 @@ export async function getSettings(): Promise<AppSettings> {
  */
 export async function updateSettings(newSettings: AppSettings): Promise<{ success: boolean; message: string }> {
   try {
-    // Validate the input to ensure it conforms to the schema.
-    const validatedSettings = AppSettingsSchema.parse(newSettings);
+    // 1. Fetch the current settings from Firestore.
+    const currentSettings = await getSettings();
+
+    // 2. Perform a deep merge of current settings with new settings.
+    const mergedSettings = {
+        ...currentSettings,
+        ...newSettings,
+        general: { ...currentSettings.general, ...newSettings.general },
+        referral: { ...currentSettings.referral, ...newSettings.referral },
+        advertisement: { ...currentSettings.advertisement, ...newSettings.advertisement },
+        plan: { ...currentSettings.plan, ...newSettings.plan },
+        payment: { ...currentSettings.payment, ...newSettings.payment },
+        page: { ...currentSettings.page, ...newSettings.page },
+    };
+
+    // 3. Validate the merged data to ensure it conforms to the schema.
+    const validatedSettings = AppSettingsSchema.parse(mergedSettings);
     
-    // Save settings to Firestore
+    // 4. Save the fully merged and validated settings to Firestore.
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
     await docRef.set(validatedSettings, { merge: true });
     
-    // Write API keys to .env.local if they exist
+    // 5. Write API keys to .env.local if they exist
     const geminiApiKey = validatedSettings.general?.apiKeys?.gemini;
     if (geminiApiKey) {
       const envLocalPath = path.resolve(process.cwd(), '.env.local');
