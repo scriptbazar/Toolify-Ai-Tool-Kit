@@ -205,23 +205,29 @@ export async function getReferralStatus(userId: string): Promise<ReferralStatus>
  * Fetches all pending referral requests for the admin panel.
  */
 export async function getReferralRequests(): Promise<ReferralRequest[]> {
-    const snapshot = await adminDb.collection('referralRequests').get();
-    const requests = snapshot.docs
-        .map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                userId: data.userId,
-                userName: data.userName,
-                userEmail: data.userEmail,
-                status: data.status,
-                createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-            };
-        })
-        .filter(req => req.status === 'pending');
+    try {
+        const snapshot = await adminDb.collection('referralRequests').get();
+        const requests = snapshot.docs
+            .map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    userId: data.userId,
+                    userName: data.userName,
+                    userEmail: data.userEmail,
+                    status: data.status,
+                    createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+                };
+            })
+            .filter(req => req.status === 'pending');
 
-    // Sort by date in descending order (newest first) after fetching
-    return requests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        // Sort by date in descending order (newest first) after fetching
+        return requests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } catch (error) {
+        console.error("Error fetching referral requests:", error);
+        // On failure, return an empty array to prevent the app from crashing.
+        return [];
+    }
 }
 
 /**
