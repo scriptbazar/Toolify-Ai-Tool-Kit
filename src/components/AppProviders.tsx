@@ -1,7 +1,7 @@
 
-'use server';
+'use client';
 
-import { headers } from 'next/headers';
+import { usePathname } from 'next/navigation';
 import { ChatWidget } from './common/ChatWidget';
 import { cn } from '@/lib/utils';
 import Header from './common/Header';
@@ -10,8 +10,8 @@ import UserPanelLayout from '@/app/dashboard/layout';
 import AdminLayout from '@/app/admin/layout';
 import PublicLayout from '@/app/(public)/layout';
 
-export async function AppProviders({ children }: { children: React.ReactNode }) {
-  const pathname = headers().get('x-next-pathname') || '';
+export function AppProviders({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname() || '';
   
   const authRoutes = ['/login', '/signup', '/admin/login', '/forgot-password'];
   const isAdminRoute = pathname.startsWith('/admin');
