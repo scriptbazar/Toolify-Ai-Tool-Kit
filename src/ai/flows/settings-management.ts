@@ -11,6 +11,8 @@
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase-admin';
 import { AppSettingsSchema, type AppSettings } from './settings-management.types';
+import fs from 'fs/promises';
+import path from 'path';
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
@@ -48,8 +50,8 @@ export async function getSettings(): Promise<AppSettings> {
 }
 
 /**
- * Updates the application settings in Firestore.
- * It performs a deep merge to only update the provided fields.
+ * Updates the application settings in Firestore and writes API keys to .env.local.
+ * It performs a deep merge to only update the provided fields in Firestore.
  * @param {AppSettings} newSettings - The new settings values to save.
  * @returns {Promise<{ success: boolean; message: string }>} Result of the operation.
  */
@@ -58,8 +60,32 @@ export async function updateSettings(newSettings: AppSettings): Promise<{ succes
     // Validate the input to ensure it conforms to the schema.
     const validatedSettings = AppSettingsSchema.parse(newSettings);
     
+    // Save settings to Firestore
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
     await docRef.set(validatedSettings, { merge: true });
+    
+    // Write API keys to .env.local if they exist
+    const geminiApiKey = validatedSettings.general?.apiKeys?.gemini;
+    if (geminiApiKey) {
+      const envLocalPath = path.resolve(process.cwd(), '.env.local');
+      let envContent = '';
+      try {
+        envContent = await fs.readFile(envLocalPath, 'utf-8');
+      } catch (e: any) {
+        if (e.code !== 'ENOENT') throw e; // Ignore if file doesn't exist
+      }
+
+      const key = 'GEMINI_API_KEY';
+      const value = geminiApiKey;
+
+      if (envContent.includes(`${key}=`)) {
+        envContent = envContent.replace(new RegExp(`^${key}=.*$`, 'm'), `${key}=${value}`);
+      } else {
+        envContent += `\n${key}=${value}`;
+      }
+      
+      await fs.writeFile(envLocalPath, envContent.trim());
+    }
 
     return { success: true, message: 'Settings updated successfully.' };
   } catch (error: any) {

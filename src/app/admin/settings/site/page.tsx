@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare, AlertTriangle, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare, AlertTriangle, Calendar as CalendarIcon, Clock, Cpu } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
@@ -80,7 +80,6 @@ export default function SiteSettingsPage() {
         const appSettings = await getSettings();
         const generalData = appSettings.general || {};
         
-        // Ensure date fields are Date objects if they exist
         if (generalData.security?.maintenanceModeUntil && typeof generalData.security.maintenanceModeUntil === 'string') {
           generalData.security.maintenanceModeUntil = new Date(generalData.security.maintenanceModeUntil);
         }
@@ -96,6 +95,7 @@ export default function SiteSettingsPage() {
             contactEmail: '',
             socialLinks: { facebook: '', twitter: '', instagram: '', youtube: '' },
             webmaster: { googleSearchConsole: '', googleAnalytics: '', googleAdsense: '', yandexWebmaster: '', bingWebmaster: '', pinterest: '', baidu: '', yahooSearchConsole: '' },
+            apiKeys: { gemini: '' },
             security: { enableTwoFactorAuth: false, twoFactorAuthMethods: {email: true, authenticatorApp: false, mobileNumber: false}, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '', maintenanceMode: false, maintenanceModeMessage: '', maintenanceModeUntil: undefined, enableNewLoginAlerts: true },
             ...generalData,
         });
@@ -139,6 +139,17 @@ export default function SiteSettingsPage() {
       }
     } : null));
   };
+  
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSettings(prev => (prev ? {
+      ...prev,
+      apiKeys: {
+        ...(prev.apiKeys || {}),
+        [name]: value
+      }
+    } : null));
+  };
 
   const handleSecurityChange = (field: string, value: any) => {
     setSettings(prev => {
@@ -171,7 +182,7 @@ export default function SiteSettingsPage() {
       await updateSettings({ general: settings });
       toast({
         title: 'Success!',
-        description: 'Site settings have been saved.',
+        description: 'Site settings have been saved. API key changes may require a server restart to take effect.',
       });
     } catch (error: any) {
       console.error('Failed to save settings:', error);
@@ -186,7 +197,6 @@ export default function SiteSettingsPage() {
   };
 
   const handleUtilityClick = (action: string) => {
-    // Simulate API call for utility actions
     toast({
       title: 'Action Triggered!',
       description: `The "${action}" process has been initiated successfully.`,
@@ -219,6 +229,7 @@ export default function SiteSettingsPage() {
   const sections = [
     { id: 'general', title: 'General Settings', description: "Update your site's title, description, etc." },
     { id: 'branding', title: 'Branding & Contact', description: "Customize your site's appearance and contact info." },
+    { id: 'apiKeys', title: 'API Key Management', description: 'Manage third-party API keys for your application.' },
     { id: 'social', title: 'Social Media Links', description: 'Provide links to your social media profiles.' },
     { id: 'webmaster', title: 'Webmaster Tools', description: 'Add verification codes for webmaster tools.' },
     { id: 'security', title: 'Security Settings', description: 'Manage site security features like 2FA and reCAPTCHA.' },
@@ -303,6 +314,19 @@ export default function SiteSettingsPage() {
                     <Input id="copyrightText" name="copyrightText" value={settings.copyrightText} onChange={handleInputChange} placeholder="e.g., © 2024 Your Company. All rights reserved." />
                     <p className="text-sm text-muted-foreground">Use {'{year}'} to automatically insert the current year.</p>
                 </div>
+              </div>
+            </div>
+        </CollapsibleSection>
+        
+        <CollapsibleSection id="apiKeys" title="API Key Management" description="Manage third-party API keys." isOpen={openSection === 'apiKeys'} onToggle={handleToggle} isFullWidth={openSection === 'apiKeys'}>
+            <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="gemini">Google Gemini API Key</Label>
+                  <div className="relative">
+                    <Cpu className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="gemini" name="gemini" value={settings.apiKeys?.gemini || ''} onChange={handleApiKeyChange} placeholder="Enter your Gemini API key" className="pl-10" />
+                  </div>
+                   <p className="text-sm text-muted-foreground">This key will be used for all AI-powered features. Changes may require a server restart.</p>
               </div>
             </div>
         </CollapsibleSection>
