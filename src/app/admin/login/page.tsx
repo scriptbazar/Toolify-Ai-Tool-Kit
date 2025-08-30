@@ -49,8 +49,8 @@ export default function AdminLoginPage() {
       if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
         // 3. If user is an admin, redirect to dashboard
         toast({
-          title: "Admin logged in successfully!",
-          description: "Redirecting to admin panel...",
+          title: "Admin login successful!",
+          description: "Redirecting to the admin panel...",
         });
         router.push('/admin/dashboard');
       } else {
@@ -71,7 +71,7 @@ export default function AdminLoginPage() {
         description = error.message;
       }
       toast({
-        title: "Uh oh! Something went wrong.",
+        title: "Login Failed",
         description,
         variant: "destructive",
       });
@@ -92,7 +92,7 @@ export default function AdminLoginPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="email"
