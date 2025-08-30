@@ -10,25 +10,23 @@ function initializeFirebaseAdmin(): App {
     return getApps()[0];
   }
   
-  const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+  // Directly use environment variables to construct the service account object.
+  // This is a more direct approach to avoid issues with parsing JSON strings from env vars.
+  const serviceAccount = {
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  };
 
-  if (serviceAccountKey) {
-    try {
-      const serviceAccount: ServiceAccount = JSON.parse(serviceAccountKey);
-      return initializeApp({
-        credential: cert(serviceAccount),
+  if (serviceAccount.projectId && serviceAccount.clientEmail && serviceAccount.privateKey) {
+     return initializeApp({
+        credential: cert(serviceAccount as ServiceAccount),
       });
-    } catch (error) {
-      console.error('Error parsing FIREBASE_SERVICE_ACCOUNT_KEY:', error);
-      // Fallback to default credentials if parsing fails
-      return initializeApp();
-    }
-  } else {
-    // Use Application Default Credentials if the environment variable is not set.
-    // This is useful for local development when authenticated via gcloud CLI.
-    console.warn("FIREBASE_SERVICE_ACCOUNT_KEY not found. Falling back to Application Default Credentials.");
-    return initializeApp();
   }
+  
+  // Fallback for local development or environments where ADC is preferred.
+  console.warn("Firebase Admin credentials not fully set. Falling back to Application Default Credentials.");
+  return initializeApp();
 }
 
 const adminApp: App = initializeFirebaseAdmin();
