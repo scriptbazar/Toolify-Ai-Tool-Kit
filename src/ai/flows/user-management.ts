@@ -205,8 +205,8 @@ export async function getReferralStatus(userId: string): Promise<ReferralStatus>
  * Fetches all pending referral requests for the admin panel.
  */
 export async function getReferralRequests(): Promise<ReferralRequest[]> {
-    const snapshot = await adminDb.collection('referralRequests').where('status', '==', 'pending').orderBy('createdAt', 'desc').get();
-    return snapshot.docs.map(doc => {
+    const snapshot = await adminDb.collection('referralRequests').where('status', '==', 'pending').get();
+    const requests = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
             id: doc.id,
@@ -216,6 +216,9 @@ export async function getReferralRequests(): Promise<ReferralRequest[]> {
             createdAt: (data.createdAt as Timestamp).toDate().toISOString(),
         }
     });
+
+    // Sort by date in descending order (newest first) after fetching
+    return requests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 /**
