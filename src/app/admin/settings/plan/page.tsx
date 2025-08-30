@@ -45,13 +45,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 
-const dummySubscribers = [
-  { id: 'user-1', name: 'Ganesh Kumar', email: 'ganesh@example.com', planId: 'pro' },
-  { id: 'user-2', name: 'Script Bazar', email: 'script@example.com', planId: 'pro' },
-  { id: 'user-3', name: 'John Doe', email: 'john@example.com', planId: 'team' },
-  { id: 'user-4', name: 'Elon Musk', email: 'elon@example.com', planId: 'free' },
-  { id: 'user-5', name: 'Thomas Jefferson', email: 'thomas@example.com', planId: 'pro' },
-];
+const dummySubscribers: any[] = [];
 
 const PlanFormSchema = z.object({
   name: z.string().min(1, 'Plan name is required'),

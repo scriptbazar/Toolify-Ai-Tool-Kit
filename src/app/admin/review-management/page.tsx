@@ -29,44 +29,7 @@ import { tools } from '@/lib/constants';
 
 type ReviewStatus = 'Approved' | 'Pending' | 'Rejected';
 
-const dummyReviews = [
-    {
-        id: 'rev-1',
-        user: { name: 'Ganesh Kumar', avatar: 'https://i.pravatar.cc/150?u=ganesh' },
-        toolSlug: 'ai-image-generator',
-        rating: 5,
-        comment: 'Absolutely fantastic tool! Saved me hours of work. The AI is incredibly smart.',
-        date: '2024-07-30',
-        status: 'Approved',
-    },
-    {
-        id: 'rev-2',
-        user: { name: 'Script Bazar', avatar: 'https://i.pravatar.cc/150?u=script' },
-        toolSlug: 'youtube-summarizer',
-        rating: 4,
-        comment: 'Pretty good for getting quick summaries. Sometimes misses a few nuances but overall very helpful.',
-        date: '2024-07-29',
-        status: 'Approved',
-    },
-    {
-        id: 'rev-3',
-        user: { name: 'John Doe', avatar: 'https://i.pravatar.cc/150?u=john' },
-        toolSlug: 'pdf-q-and-a',
-        rating: 3,
-        comment: 'It works, but it can be a bit slow with large documents. Needs improvement.',
-        date: '2024-07-28',
-        status: 'Pending',
-    },
-     {
-        id: 'rev-4',
-        user: { name: 'Elon Musk', avatar: 'https://i.pravatar.cc/150?u=elon' },
-        toolSlug: 'code-helper',
-        rating: 5,
-        comment: 'This is the future of coding. 10/10.',
-        date: '2024-07-27',
-        status: 'Rejected',
-    },
-];
+const allReviews: any[] = [];
 
 const getStatusBadge = (status: ReviewStatus) => {
     switch (status) {
@@ -92,7 +55,7 @@ const StarRating = ({ rating }: { rating: number }) => (
 
 
 export default function ReviewManagementPage() {
-    const [reviews, setReviews] = useState(dummyReviews);
+    const [reviews, setReviews] = useState(allReviews);
     const [activeFilter, setActiveFilter] = useState<ReviewStatus | 'all'>('all');
     const [searchQuery, setSearchQuery] = useState('');
 
