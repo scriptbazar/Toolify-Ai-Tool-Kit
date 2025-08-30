@@ -1,35 +1,11 @@
 
 import {
-  Bot,
-  BrainCircuit,
-  CaseSensitive,
-  Code,
-  Combine,
-  Crop,
-  Database,
-  FileJson2,
-  FileText,
-  FlipHorizontal,
-  GitBranch,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  MessageSquareQuote,
-  Paintbrush,
-  Pilcrow,
-  ScanSearch,
-  Search,
-  Youtube,
-  FileUp,
   Type,
   File,
   Cpu,
-  MonitorPlay,
   Component,
-  KeyRound,
-  Calculator,
-  AudioLines,
-  Ruler,
-  Palette,
+  ImageIcon,
+  Search,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -40,14 +16,6 @@ export interface ToolCategoryDetails {
   name: string;
   description: string;
   Icon: LucideIcon;
-}
-
-export interface Tool {
-  name: string;
-  description: string;
-  Icon: LucideIcon;
-  slug: string;
-  category: ToolCategory;
 }
 
 export const toolCategories: ToolCategoryDetails[] = [
@@ -86,176 +54,5 @@ export const toolCategories: ToolCategoryDetails[] = [
     name: 'SEO Tools',
     description: 'Optimize your content for search engines.',
     Icon: Search,
-  },
-];
-
-export const tools: Tool[] = [
-  // Text Tools
-  {
-    name: 'Case Converter',
-    description: 'Change text to uppercase, lowercase, sentence case, etc.',
-    Icon: CaseSensitive,
-    slug: 'case-converter',
-    category: 'text',
-  },
-  {
-    name: 'Word Counter',
-    description: 'Count words, characters, and paragraphs in your text.',
-    Icon: Pilcrow,
-    slug: 'word-counter',
-    category: 'text',
-  },
-  {
-    name: 'Lorem Ipsum Generator',
-    description: 'Generate placeholder text for your designs.',
-    Icon: FileText,
-    slug: 'lorem-ipsum-generator',
-    category: 'text',
-  },
-  // PDF Tools
-  {
-    name: 'PDF Q&A',
-    description: 'Ask questions about the content of your PDF file.',
-    Icon: MessageSquareQuote,
-    slug: 'pdf-q-and-a',
-    category: 'pdf',
-  },
-  {
-    name: 'Merge PDF',
-    description: 'Combine multiple PDF files into one document.',
-    Icon: Combine,
-    slug: 'merge-pdf',
-    category: 'pdf',
-  },
-  // AI Tools
-  {
-    name: 'AI Writer',
-    description: 'Generate articles, blog posts, and more with AI.',
-    Icon: Bot,
-    slug: 'ai-writer',
-    category: 'ai',
-  },
-  {
-    name: 'AI Resume Builder',
-    description: 'Create a professional resume with AI assistance.',
-    Icon: BrainCircuit,
-    slug: 'ai-resume-builder',
-    category: 'ai',
-  },
-  {
-    name: 'YouTube Summarizer',
-    description: 'Get a concise summary of any YouTube video.',
-    Icon: Youtube,
-    slug: 'youtube-summarizer',
-    category: 'ai',
-  },
-  {
-    name: 'AI Image Generator',
-    description: 'Create unique images from text prompts.',
-    Icon: Paintbrush,
-    slug: 'ai-image-generator',
-    category: 'ai',
-  },
-  {
-    name: 'Text to Speech',
-    description: 'Convert written text into natural-sounding audio.',
-    Icon: AudioLines,
-    slug: 'text-to-speech',
-    category: 'ai',
-  },
-  // Developer Tools
-  {
-    name: 'Code Helper',
-    description: 'Get help with your code, from snippets to debugging.',
-    Icon: Code,
-    slug: 'code-helper',
-    category: 'dev',
-  },
-  {
-    name: 'JSON Formatter',
-    description: 'Format and validate your JSON data.',
-    Icon: FileJson2,
-    slug: 'json-formatter',
-    category: 'dev',
-  },
-  {
-    name: 'Password Generator',
-    description: 'Create strong, secure, and random passwords.',
-    Icon: KeyRound,
-    slug: 'password-generator',
-    category: 'dev',
-  },
-  {
-    name: 'SQL Query Builder',
-    description: 'Visually build complex SQL queries.',
-    Icon: Database,
-    slug: 'sql-query-builder',
-    category: 'dev',
-  },
-  // Image Tools
-  {
-    name: 'Image Converter',
-    description: 'Convert images between formats like PNG, JPG, WEBP.',
-    Icon: ImageIcon,
-    slug: 'image-converter',
-    category: 'image',
-  },
-  {
-    name: 'Image Cropper',
-    description: 'Crop images to a specific size or aspect ratio.',
-    Icon: Crop,
-    slug: 'image-cropper',
-    category: 'image',
-  },
-  {
-    name: 'Image Flipper',
-    description: 'Flip images horizontally or vertically.',
-    Icon: FlipHorizontal,
-    slug: 'image-flipper',
-    category: 'image',
-  },
-  {
-    name: 'Color Picker',
-    description: 'Pick colors from your screen or an image.',
-    Icon: Palette,
-    slug: 'color-picker',
-    category: 'image',
-  },
-  // SEO Tools
-  {
-    name: 'Meta Tag Generator',
-    description: 'Create SEO-friendly meta tags for your website.',
-    Icon: Search,
-    slug: 'meta-tag-generator',
-    category: 'seo',
-  },
-  {
-    name: 'Keyword Extractor',
-    description: 'Extract keywords from a block of text.',
-    Icon: ScanSearch,
-    slug: 'keyword-extractor',
-    category: 'seo',
-  },
-  {
-    name: 'URL Redirect Checker',
-    description: 'Check the redirect chain of a URL.',
-    Icon: LinkIcon,
-    slug: 'url-redirect-checker',
-    category: 'seo',
-  },
-   // Other/Utility Tools - can be a new category if needed
-  {
-    name: 'BMI Calculator',
-    description: 'Calculate your Body Mass Index (BMI).',
-    Icon: Calculator,
-    slug: 'bmi-calculator',
-    category: 'text', // No "Health" category, placing in 'text' for now
-  },
-  {
-    name: 'Unit Converter',
-    description: 'Convert between different units of measurement.',
-    Icon: Ruler,
-    slug: 'unit-converter',
-    category: 'text',
   },
 ];

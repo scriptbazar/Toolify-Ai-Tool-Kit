@@ -1,5 +1,6 @@
+
 import { ToolCard } from './ToolCard';
-import type { Tool } from '@/lib/constants';
+import type { Tool } from '@/ai/flows/tool-management.types';
 
 type ToolGridProps = {
   tools: Tool[];

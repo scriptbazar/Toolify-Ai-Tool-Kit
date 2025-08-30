@@ -2,10 +2,12 @@
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CaseConverter } from '@/components/tools/CaseConverter';
-import { tools } from '@/lib/constants';
+import { getTools } from '@/ai/flows/tool-management';
+import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
 
 export async function generateStaticParams() {
+  const tools = await getTools();
   return tools.map((tool) => ({
     slug: tool.slug,
   }));
@@ -15,7 +17,8 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'case-converter': CaseConverter,
 };
 
-export default function ToolPage({ params }: { params: { slug:string } }) {
+export default async function ToolPage({ params }: { params: { slug:string } }) {
+  const tools = await getTools();
   const tool = tools.find((t) => t.slug === params.slug);
 
   if (!tool) {
@@ -23,6 +26,7 @@ export default function ToolPage({ params }: { params: { slug:string } }) {
   }
 
   const ToolComponent = toolComponents[tool.slug];
+  const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -31,7 +35,7 @@ export default function ToolPage({ params }: { params: { slug:string } }) {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-4">
-                <tool.Icon className="h-8 w-8 text-primary" />
+                <Icon className="h-8 w-8 text-primary" />
                 <CardTitle className="text-3xl font-bold">{tool.name}</CardTitle>
               </div>
             </CardHeader>

@@ -25,11 +25,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { tools } from '@/lib/constants';
+// import { tools } from '@/lib/constants'; // This will be fetched dynamically
 
 type ReviewStatus = 'Approved' | 'Pending' | 'Rejected';
 
-const allReviews: any[] = [];
+const allReviews: any[] = []; // Data should be fetched from a database in a real app
 
 const getStatusBadge = (status: ReviewStatus) => {
     switch (status) {
@@ -58,12 +58,13 @@ export default function ReviewManagementPage() {
     const [reviews, setReviews] = useState(allReviews);
     const [activeFilter, setActiveFilter] = useState<ReviewStatus | 'all'>('all');
     const [searchQuery, setSearchQuery] = useState('');
+    // const [tools, setTools] = useState([]); // In a real app, fetch tools
 
     const filteredReviews = reviews.filter(review => {
         const filterMatch = activeFilter === 'all' || review.status === activeFilter;
+        // The search for tool name would need the tools list to be fetched
         const searchMatch = review.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            review.comment.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            tools.find(t => t.slug === review.toolSlug)?.name.toLowerCase().includes(searchQuery.toLowerCase());
+                            review.comment.toLowerCase().includes(searchQuery.toLowerCase());
         return filterMatch && searchMatch;
     });
 
@@ -145,7 +146,7 @@ export default function ReviewManagementPage() {
                         </TableCell>
                         <TableCell>
                             <Link href={`/${review.toolSlug}`} className="text-primary hover:underline">
-                               {tools.find(t => t.slug === review.toolSlug)?.name}
+                               {review.toolSlug}
                             </Link>
                         </TableCell>
                         <TableCell>{review.date}</TableCell>

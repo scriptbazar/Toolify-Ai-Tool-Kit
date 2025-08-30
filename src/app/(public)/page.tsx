@@ -1,8 +1,13 @@
+
 import { ToolGrid } from '@/components/tools/ToolGrid';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
-import { toolCategories, tools } from '@/lib/constants';
+import { toolCategories } from '@/lib/constants';
+import { getTools } from '@/ai/flows/tool-management';
 
-export default function Home() {
+export default async function Home() {
+  const tools = await getTools();
+  const activeTools = tools.filter(tool => tool.status === 'Active');
+
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <header className="text-center mb-12">
@@ -21,7 +26,7 @@ export default function Home() {
               <h2 className="text-3xl font-bold tracking-tight">{category.name}</h2>
               <p className="mt-2 text-muted-foreground">{category.description}</p>
             </div>
-            <ToolGrid tools={tools.filter(tool => tool.category === category.id)} />
+            <ToolGrid tools={activeTools.filter(tool => tool.category === category.id)} />
             {index === 1 && <AdPlaceholder className="mt-12" />}
           </div>
         ))}

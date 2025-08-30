@@ -1,13 +1,17 @@
+
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Tool } from '@/lib/constants';
+import type { Tool } from '@/ai/flows/tool-management.types';
+import * as Icons from 'lucide-react';
 
 type ToolCardProps = {
   tool: Tool;
 };
 
 export function ToolCard({ tool }: ToolCardProps) {
-  const { name, description, Icon, slug } = tool;
+  const { name, description, slug } = tool;
+  const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
+
 
   return (
     <Link href={`/${slug}`} className="group block h-full">
