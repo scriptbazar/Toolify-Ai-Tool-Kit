@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Initializes and exports the Firebase Admin SDK instances.
  */
@@ -8,24 +9,11 @@ function initializeFirebaseAdmin(): App {
   if (getApps().length) {
     return getApps()[0];
   }
-
-  const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-
-  if (serviceAccountKey) {
-    try {
-      const serviceAccount: ServiceAccount = JSON.parse(serviceAccountKey);
-      return initializeApp({
-        credential: cert(serviceAccount),
-      });
-    } catch (error) {
-      console.error('Error parsing Firebase service account key:', error);
-      // Fallback to default initialization if parsing fails
-      return initializeApp();
-    }
-  } else {
-    // Use Application Default Credentials if the service account key is not provided
-    return initializeApp();
-  }
+  
+  // Use Application Default Credentials. This is the recommended way for most environments,
+  // including local development and Firebase/Google Cloud hosting.
+  // It automatically finds credentials from the environment.
+  return initializeApp();
 }
 
 const adminApp: App = initializeFirebaseAdmin();
