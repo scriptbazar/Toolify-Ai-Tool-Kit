@@ -21,7 +21,7 @@ import crypto from 'crypto';
 
 export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ success: boolean; message: string }> {
   try {
-    const { userId, newRole } = UpdateUserRoleRoleSchema.parse(input);
+    const { userId, newRole } = UpdateUserRoleInputSchema.parse(input);
     const userRef = adminDb.collection('users').doc(userId);
     await userRef.update({ role: newRole });
     return { success: true, message: 'User role updated successfully.' };
@@ -198,7 +198,7 @@ export async function getReferralStatus(userId: string): Promise<ReferralStatus>
 
   if (!requestSnapshot.empty) {
     const requestData = requestSnapshot.docs[0].data();
-    return { status: requestData.status }; // 'pending' or 'rejected'
+    return { status: requestData.status as any }; // 'pending' or 'rejected'
   }
   
   return { status: 'not_joined' };
@@ -220,7 +220,7 @@ export async function getReferralRequests(): Promise<ReferralRequest[]> {
                     userEmail: data.userEmail,
                     status: data.status,
                     createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-                };
+                } as ReferralRequest
             });
         
         return requests;

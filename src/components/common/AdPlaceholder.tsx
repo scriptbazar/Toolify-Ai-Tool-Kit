@@ -8,12 +8,12 @@ import { auth, db } from '@/lib/firebase';
 import { cn } from '@/lib/utils';
 import { Megaphone } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
-import { getSettings } from '@/ai/flows/settings-management';
 import type { AdvertisementSettings } from '@/ai/flows/settings-management.types';
 
 type AdPlaceholderProps = {
   className?: string;
   adSlotId?: string;
+  adSettings: AdvertisementSettings | null;
 };
 
 interface UserData {
@@ -21,47 +21,35 @@ interface UserData {
   role?: 'user' | 'admin';
 }
 
-export function AdPlaceholder({ className, adSlotId }: AdPlaceholderProps) {
+export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [adSettings, setAdSettings] = useState<AdvertisementSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      // No need to set loading to true here as it's set initially
-      try {
-        const settings = await getSettings();
-        setAdSettings(settings.advertisement || null);
-      } catch (error) {
-        console.error("Failed to fetch ad settings:", error);
-      }
-
-      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-        if (firebaseUser) {
-          setUser(firebaseUser);
-          const userDocRef = doc(db, 'users', firebaseUser.uid);
-          try {
-            const userDocSnap = await getDoc(userDocRef);
-            if (userDocSnap.exists()) {
-              setUserData(userDocSnap.data() as UserData);
-            } else {
-              setUserData({ plan: 'Free', role: 'user' }); // Default if no doc
-            }
-          } catch (error) {
-            console.error("Failed to fetch user data:", error);
-            setUserData({ plan: 'Free', role: 'user' }); // Default on error
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        try {
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            setUserData(userDocSnap.data() as UserData);
+          } else {
+            setUserData({ plan: 'Free', role: 'user' }); // Default if no doc
           }
-        } else {
-          setUser(null);
-          setUserData(null);
+        } catch (error) {
+          console.error("Failed to fetch user data:", error);
+          setUserData({ plan: 'Free', role: 'user' }); // Default on error
         }
-        setLoading(false);
-      });
+      } else {
+        setUser(null);
+        setUserData(null);
+      }
+      setLoading(false);
+    });
 
-      return () => unsubscribe();
-    }
-    fetchData();
+    return () => unsubscribe();
   }, []);
 
   if (loading) {

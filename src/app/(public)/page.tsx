@@ -3,9 +3,12 @@ import { ToolGrid } from '@/components/tools/ToolGrid';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { toolCategories } from '@/lib/constants';
 import { getTools } from '@/ai/flows/tool-management';
+import { getSettings } from '@/ai/flows/settings-management';
 
 export default async function Home() {
   const tools = await getTools();
+  const settings = await getSettings();
+  const adSettings = settings.advertisement || null;
   const activeTools = tools.filter(tool => tool.status === 'Active');
 
   return (
@@ -27,12 +30,12 @@ export default async function Home() {
               <p className="mt-2 text-muted-foreground">{category.description}</p>
             </div>
             <ToolGrid tools={activeTools.filter(tool => tool.category === category.id)} />
-            {index === 1 && <AdPlaceholder className="mt-12" />}
+            {index === 1 && <AdPlaceholder adSettings={adSettings} className="mt-12" />}
           </div>
         ))}
       </section>
 
-      <AdPlaceholder className="mt-16" />
+      <AdPlaceholder adSettings={adSettings} className="mt-16" />
     </div>
   );
 }

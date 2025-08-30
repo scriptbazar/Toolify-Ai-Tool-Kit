@@ -22,6 +22,7 @@ export const ReferralRequestSchema = z.object({
     userId: z.string(),
     userName: z.string(),
     userEmail: z.string().email(),
+    status: z.enum(['pending', 'approved', 'rejected']),
     createdAt: z.string().datetime(),
 });
 export type ReferralRequest = z.infer<typeof ReferralRequestSchema>;
