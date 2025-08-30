@@ -21,7 +21,7 @@ import crypto from 'crypto';
 
 export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ success: boolean; message: string }> {
   try {
-    const { userId, newRole } = UpdateUserRoleInputSchema.parse(input);
+    const { userId, newRole } = UpdateUserRoleRoleSchema.parse(input);
     const userRef = adminDb.collection('users').doc(userId);
     await userRef.update({ role: newRole });
     return { success: true, message: 'User role updated successfully.' };
@@ -205,11 +205,11 @@ export async function getReferralStatus(userId: string): Promise<ReferralStatus>
 }
 
 /**
- * Fetches all pending referral requests for the admin panel.
+ * Fetches all referral requests for the admin panel.
  */
 export async function getReferralRequests(): Promise<ReferralRequest[]> {
     try {
-        const snapshot = await adminDb.collection('referralRequests').get();
+        const snapshot = await adminDb.collection('referralRequests').orderBy('createdAt', 'desc').get();
         const requests = snapshot.docs
             .map(doc => {
                 const data = doc.data();
@@ -221,11 +221,9 @@ export async function getReferralRequests(): Promise<ReferralRequest[]> {
                     status: data.status,
                     createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
                 };
-            })
-            .filter(req => req.status === 'pending');
-
-        // Sort by date in descending order (newest first) after fetching
-        return requests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            });
+        
+        return requests;
     } catch (error) {
         console.error("Error fetching referral requests:", error);
         // On failure, return an empty array to prevent the app from crashing.

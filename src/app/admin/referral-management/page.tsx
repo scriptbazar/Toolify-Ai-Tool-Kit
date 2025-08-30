@@ -11,9 +11,6 @@ import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Users,
-  UserPlus,
-  GitBranch,
-  History,
   Search,
   Save,
   Percent,
@@ -22,7 +19,8 @@ import {
   Loader2,
   Check,
   X,
-  UserCheck,
+  Clock,
+  CheckCircle,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -35,18 +33,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 
-type FilterType = 'all' | 'direct' | 'team' | 'pending';
-type StatusType = 'Completed' | 'Pending';
+type FilterType = 'all' | 'pending' | 'approved' | 'rejected';
 
-const allReferrals = [
-    { referrer: 'olivia.martin@email.com', referredUser: 'liam@example.com', date: '2024-07-30', status: 'Completed', commission: '$5.00' },
-    { referrer: 'jackson.lee@email.com', referredUser: 'noah@example.com', date: '2024-07-29', status: 'Completed', commission: '$5.00' },
-    { referrer: 'olivia.martin@email.com', referredUser: 'emma@example.com', date: '2024-07-28', status: 'Pending', commission: '$0.00' },
-    { referrer: 'isabella.nguyen@email.com', referredUser: 'ava@example.com', date: '2024-07-27', status: 'Completed', commission: '$5.00' },
-    { referrer: 'will@email.com', referredUser: 'mason@example.com', date: '2024-07-26', status: 'Completed', commission: '$5.00' },
-    { referrer: 'sofia.davis@email.com', referredUser: 'james@example.com', date: '2024-07-25', status: 'Pending', commission: '$0.00' },
-    { referrer: 'jackson.lee@email.com', referredUser: 'logan@example.com', date: '2024-07-24', status: 'Completed', commission: '$5.00' },
-];
+const getStatusBadge = (status: FilterType) => {
+    switch (status) {
+        case 'approved':
+            return <Badge className="bg-green-500 hover:bg-green-600"><CheckCircle className="mr-1 h-3 w-3"/>Approved</Badge>;
+        case 'pending':
+            return <Badge variant="secondary" className="bg-yellow-500 hover:bg-yellow-600 text-white"><Clock className="mr-1 h-3 w-3"/>Pending</Badge>;
+        case 'rejected':
+            return <Badge variant="destructive"><X className="mr-1 h-3 w-3"/>Rejected</Badge>;
+        default:
+            return <Badge variant='outline'>{status}</Badge>;
+    }
+};
 
 const ITEMS_PER_PAGE = 5;
 
@@ -123,7 +123,7 @@ export default function ReferralManagementPage() {
    const handleRequestUpdate = async (requestId: string, status: 'approved' | 'rejected') => {
     try {
       await updateReferralRequestStatus({ requestId, status });
-      setRequests(prev => prev.filter(req => req.id !== requestId));
+      setRequests(prev => prev.map(req => req.id === requestId ? { ...req, status } : req));
       toast({
         title: `Request ${status}`,
         description: 'The user has been notified.',
@@ -139,39 +139,33 @@ export default function ReferralManagementPage() {
 
   const tabs: { id: FilterType; label: string; icon: React.ElementType }[] = [
     { id: 'all', label: 'All', icon: Users },
-    { id: 'direct', label: 'Direct', icon: UserPlus },
-    { id: 'team', label: 'Team', icon: GitBranch },
-    { id: 'pending', label: 'Pending', icon: History },
+    { id: 'pending', label: 'Pending', icon: Clock },
+    { id: 'approved', label: 'Approved', icon: CheckCircle },
+    { id: 'rejected', label: 'Rejected', icon: X },
   ];
 
-  const filteredReferrals = useMemo(() => {
-      let referrals = allReferrals;
-      if (activeFilter === 'pending') {
-          referrals = referrals.filter(r => r.status === 'Pending');
-      }
-      return referrals.filter(r => 
-        r.referrer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.referredUser.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-  }, [searchQuery, activeFilter]);
-
-  const paginatedReferrals = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredReferrals.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredReferrals, currentPage]);
-
-  const totalPages = Math.ceil(filteredReferrals.length / ITEMS_PER_PAGE);
-
-  const getStatusBadge = (status: StatusType) => {
-    switch (status) {
-        case 'Completed':
-            return <Badge variant='default' className="bg-green-500 hover:bg-green-600">Completed</Badge>;
-        case 'Pending':
-            return <Badge variant='secondary'>Pending</Badge>;
-        default:
-            return <Badge variant='outline'>{status}</Badge>;
+  const filteredRequests = useMemo(() => {
+    let filtered = requests;
+    if (activeFilter !== 'all') {
+      filtered = filtered.filter(r => r.status === activeFilter);
     }
-  };
+    return filtered.filter(r => 
+      r.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, activeFilter, requests]);
+  
+  const paginatedRequests = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredRequests.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredRequests, currentPage]);
+
+  const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);
+  
+  const getCount = (status: FilterType) => {
+    if (status === 'all') return requests.length;
+    return requests.filter(r => r.status === status).length;
+  }
 
   if (loading || !settings) {
     return (
@@ -200,61 +194,11 @@ export default function ReferralManagementPage() {
       </div>
 
       <div className="space-y-6">
-           <Card>
-            <CardHeader>
-                <CardTitle>Referral Join Requests</CardTitle>
-                <CardDescription>Approve or reject users who want to join your referral program.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>User</TableHead>
-                            <TableHead>Date Requested</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {requests.length > 0 ? requests.map(req => (
-                            <TableRow key={req.id}>
-                                <TableCell>
-                                    <div className="flex items-center gap-3">
-                                       <Avatar>
-                                            <AvatarFallback>{req.userName.charAt(0)}</AvatarFallback>
-                                       </Avatar>
-                                       <div>
-                                          <p className="font-medium">{req.userName}</p>
-                                          <p className="text-sm text-muted-foreground">{req.userEmail}</p>
-                                       </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex gap-2 justify-end">
-                                      <Button size="sm" variant="outline" className="text-green-600 border-green-600 hover:bg-green-100 hover:text-green-700" onClick={() => handleRequestUpdate(req.id, 'approved')}>
-                                        <Check className="mr-2 h-4 w-4" /> Approve
-                                      </Button>
-                                      <Button size="sm" variant="destructive" onClick={() => handleRequestUpdate(req.id, 'rejected')}>
-                                        <X className="mr-2 h-4 w-4" /> Reject
-                                      </Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )) : (
-                           <TableRow>
-                                <TableCell colSpan={3} className="h-24 text-center">No pending requests.</TableCell>
-                           </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </CardContent>
-           </Card>
-
           <Card>
               <CardHeader>
-              <CardTitle>All Referrals</CardTitle>
+              <CardTitle>All Referral Requests</CardTitle>
               <CardDescription>
-                  A complete log of all referral activities.
+                  A complete log of all users requesting to join the referral program.
               </CardDescription>
               </CardHeader>
               <CardContent>
@@ -271,14 +215,14 @@ export default function ReferralManagementPage() {
                       className="shrink-0"
                       >
                       <tab.icon className="mr-2 h-4 w-4" />
-                      {tab.label} ({tab.id === 'pending' ? allReferrals.filter(r => r.status === 'Pending').length : (tab.id === 'all' ? allReferrals.length : 0)})
+                      {tab.label} ({getCount(tab.id)})
                       </Button>
                   ))}
                   </div>
                   <div className="relative w-full sm:w-auto">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                      placeholder="Search referrals..."
+                      placeholder="Search requests..."
                       value={searchQuery}
                       onChange={(e) => {
                         setSearchQuery(e.target.value);
@@ -293,28 +237,47 @@ export default function ReferralManagementPage() {
                   <Table>
                   <TableHeader>
                       <TableRow>
-                      <TableHead>Referrer</TableHead>
-                      <TableHead>Referred User</TableHead>
-                      <TableHead>Date</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Date Requested</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Commission</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                   </TableHeader>
                   <TableBody>
-                      {paginatedReferrals.length > 0 ? (
-                        paginatedReferrals.map((referral, index) => (
-                          <TableRow key={index}>
-                            <TableCell>{referral.referrer}</TableCell>
-                            <TableCell>{referral.referredUser}</TableCell>
-                            <TableCell>{referral.date}</TableCell>
-                            <TableCell>{getStatusBadge(referral.status as StatusType)}</TableCell>
-                            <TableCell className="text-right">{referral.commission}</TableCell>
+                      {paginatedRequests.length > 0 ? (
+                        paginatedRequests.map((req) => (
+                          <TableRow key={req.id}>
+                                <TableCell>
+                                    <div className="flex items-center gap-3">
+                                       <Avatar>
+                                            <AvatarFallback>{req.userName.charAt(0)}</AvatarFallback>
+                                       </Avatar>
+                                       <div>
+                                          <p className="font-medium">{req.userName}</p>
+                                          <p className="text-sm text-muted-foreground">{req.userEmail}</p>
+                                       </div>
+                                    </div>
+                                </TableCell>
+                            <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
+                            <TableCell>{getStatusBadge(req.status as FilterType)}</TableCell>
+                            <TableCell className="text-right">
+                                {req.status === 'pending' && (
+                                    <div className="flex gap-2 justify-end">
+                                      <Button size="sm" variant="outline" className="text-green-600 border-green-600 hover:bg-green-100 hover:text-green-700" onClick={() => handleRequestUpdate(req.id, 'approved')}>
+                                        <Check className="mr-2 h-4 w-4" /> Approve
+                                      </Button>
+                                      <Button size="sm" variant="destructive" onClick={() => handleRequestUpdate(req.id, 'rejected')}>
+                                        <X className="mr-2 h-4 w-4" /> Reject
+                                      </Button>
+                                    </div>
+                                )}
+                            </TableCell>
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={5} className="h-48 text-center">
-                              No referral data found.
+                          <TableCell colSpan={4} className="h-48 text-center">
+                              No referral requests found for the current filter.
                           </TableCell>
                         </TableRow>
                       )}
