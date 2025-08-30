@@ -10,7 +10,7 @@ export default function AnalyticsRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/admin/dashboard/analytics');
+    router.replace('/admin/analytics');
   }, [router]);
 
   return null;
