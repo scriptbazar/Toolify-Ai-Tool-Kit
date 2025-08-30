@@ -113,14 +113,17 @@ export async function updateUserActivity(userId: string): Promise<{ success: boo
   }
   try {
     const userRef = adminDb.collection('users').doc(userId);
-    await userRef.update({
+    // Use .set with merge: true to avoid errors if the document doesn't exist yet.
+    // This can happen if a user signs up but their Firestore document hasn't been created
+    // by the time the first activity update is triggered.
+    await userRef.set({
       lastActive: FieldValue.serverTimestamp(),
-    });
+    }, { merge: true });
     return { success: true };
   } catch (error) {
-    // It's okay if this fails silently (e.g., user doc doesn't exist),
-    // as it's just a background heartbeat.
-    console.log(`Could not update activity for user ${userId}:`, error);
+    // This is a background task, so it's better to log the error than to crash.
+    // The user can continue using the app even if this fails.
+    console.error(`Could not update activity for user ${userId}:`, error);
     return { success: false };
   }
 }
