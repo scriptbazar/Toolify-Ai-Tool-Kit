@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { headers } from 'next/headers';
@@ -9,6 +8,7 @@ import Header from './common/Header';
 import Footer from './common/Footer';
 import UserPanelLayout from '@/app/dashboard/layout';
 import AdminLayout from '@/app/admin/layout';
+import PublicLayout from '@/app/(public)/layout';
 
 export async function AppProviders({ children }: { children: React.ReactNode }) {
   const pathname = headers().get('x-next-pathname') || '';
@@ -29,9 +29,10 @@ export async function AppProviders({ children }: { children: React.ReactNode }) 
     '/create-ticket',
     '/community-chat',
   ].some(route => pathname.startsWith(route));
+  const isMaintenanceRoute = pathname === '/maintenance';
 
-  // If it's an authentication page, render it without any layout.
-  if (authRoutes.includes(pathname)) {
+  // If it's an authentication or maintenance page, render it without any layout.
+  if (authRoutes.includes(pathname) || isMaintenanceRoute) {
     return <>{children}</>;
   }
   
@@ -45,13 +46,8 @@ export async function AppProviders({ children }: { children: React.ReactNode }) 
     return <UserPanelLayout>{children}</UserPanelLayout>;
   }
 
-  // Otherwise, it's a public page. Render with the public header, footer, and chat widget.
+  // Otherwise, it's a public page. Render with the public layout.
   return (
-    <div className={cn("relative flex min-h-screen flex-col")}>
-      <Header />
-      <main className="flex-1">{children}</main>
-      <ChatWidget />
-      <Footer />
-    </div>
+    <PublicLayout>{children}</PublicLayout>
   );
 }

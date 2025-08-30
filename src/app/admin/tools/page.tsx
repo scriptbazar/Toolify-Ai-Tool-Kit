@@ -172,11 +172,6 @@ export default function AdminToolsPage() {
             View, manage, and filter all available tools.
           </p>
         </div>
-        <Button asChild>
-            <Link href="/admin/tools/new">
-                <PlusCircle className="mr-2 h-4 w-4" /> Add Tool
-            </Link>
-        </Button>
       </div>
       <Card>
         <CardHeader>

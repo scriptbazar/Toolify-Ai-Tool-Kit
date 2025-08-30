@@ -10,16 +10,42 @@ import { type Tool, ToolSchema, UpsertToolInputSchema } from './tool-management.
 
 const TOOLS_COLLECTION = 'tools';
 
+const initialTools: Omit<Tool, 'id' | 'slug'>[] = [
+    { name: 'Case Converter', description: 'Convert text between different letter cases.', icon: 'CaseSensitive', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Word Counter', description: 'Count words and characters in your text.', icon: 'Calculator', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Lorem Ipsum Generator', description: 'Generate placeholder text.', icon: 'FileText', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Password Generator', description: 'Create strong, secure passwords.', icon: 'KeyRound', category: 'dev', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'JSON Formatter', description: 'Format and validate JSON data.', icon: 'Braces', category: 'dev', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'BMI Calculator', description: 'Calculate your Body Mass Index.', icon: 'HeartPulse', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Text to Speech', description: 'Convert text into spoken audio.', icon: 'Volume2', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'PDF Merger', description: 'Combine multiple PDF files into one.', icon: 'FilePlus2', category: 'pdf', plan: 'Pro', isNew: false, status: 'Active' },
+    { name: 'Unit Converter', description: 'Convert between different units of measurement.', icon: 'Ruler', category: 'dev', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Color Picker', description: 'Pick colors from a color wheel.', icon: 'Pipette', category: 'image', plan: 'Free', isNew: false, status: 'Active' },
+];
+
 /**
  * Fetches all tools from Firestore, ordered by name.
+ * If the collection is empty, it populates it with initial tools.
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
   try {
-    const snapshot = await adminDb.collection(TOOLS_COLLECTION).orderBy('name').get();
+    const toolsRef = adminDb.collection(TOOLS_COLLECTION);
+    let snapshot = await toolsRef.orderBy('name').get();
+
+    // If the collection is empty, populate it with initial tools
     if (snapshot.empty) {
-      return [];
+        const batch = adminDb.batch();
+        for (const toolData of initialTools) {
+            const slug = toolData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+            const docRef = toolsRef.doc(slug);
+            batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
+        }
+        await batch.commit();
+        // Re-fetch the data after populating
+        snapshot = await toolsRef.orderBy('name').get();
     }
+
     const tools = snapshot.docs.map(doc => {
         const data = doc.data();
         return ToolSchema.parse({ ...data, id: doc.id });
