@@ -67,7 +67,7 @@ export default function AdminToolsPage() {
 
   useEffect(() => {
     fetchTools();
-  }, [toast]);
+  }, []);
 
   const getCategoryName = (categoryId: string) => {
     return toolCategories.find(c => c.id === categoryId)?.name || 'Unknown';
