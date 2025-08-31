@@ -232,7 +232,7 @@ export default async function Home() {
           </p>
           <div className="mt-8">
             <Button asChild size="lg">
-              <Link href="#tools">
+              <Link href="/tools">
                 Explore All Tools <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -240,7 +240,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="py-20 md:py-32 bg-card">
+      <section id="tools" className="py-20 md:py-32 bg-card">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Browse by Category</h2>
@@ -301,7 +301,7 @@ export default async function Home() {
           </div>
           <div className="text-center mt-12">
               <Button asChild size="lg">
-                <Link href="#tools">
+                <Link href="/tools">
                     Explore Tools <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -343,24 +343,12 @@ export default async function Home() {
             </p>
             <div className="mt-8">
                 <Button asChild size="lg">
-                    <Link href="#tools">
+                    <Link href="/tools">
                         Explore Tools <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                 </Button>
             </div>
         </div>
-      </section>
-
-      <section id="tools" className="container mx-auto px-4 py-8 md:py-12 space-y-16">
-        {toolCategories.map((category) => (
-          <div key={category.id}>
-            <div id={category.id} className="mb-8">
-              <h2 className="text-3xl font-bold tracking-tight">{category.name}</h2>
-              <p className="mt-2 text-muted-foreground">{category.description}</p>
-            </div>
-            <ToolGrid tools={activeTools.filter(tool => tool.category === category.id)} />
-          </div>
-        ))}
       </section>
     </>
   );

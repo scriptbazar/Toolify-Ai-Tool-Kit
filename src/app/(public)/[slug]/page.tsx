@@ -1,4 +1,5 @@
 
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CaseConverter } from '@/components/tools/CaseConverter';
 import { WordCounter } from '@/components/tools/WordCounter';
@@ -59,7 +60,7 @@ export default async function ToolPage({ params }: { params: { slug:string } }) 
             <CardContent>
               <p className="text-muted-foreground mb-6">{tool.description}</p>
               
-              <div className="min-h-[300px] rounded-lg bg-muted/50 p-8">
+              <div className="min-h-[300px] rounded-lg bg-muted/50 p-4 sm:p-8">
                 {ToolComponent ? <ToolComponent /> : (
                   <div className="flex h-full items-center justify-center">
                     <p className="text-lg text-muted-foreground">
