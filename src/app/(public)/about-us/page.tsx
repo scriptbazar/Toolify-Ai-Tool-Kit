@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Target } from 'lucide-react';
+import { Target, BookOpen } from 'lucide-react';
 import Image from 'next/image';
 
 export default function AboutUsPage() {
@@ -53,6 +53,45 @@ export default function AboutUsPage() {
                 </div>
             </CardContent>
         </Card>
+
+        <Card className="mt-12 overflow-hidden">
+            <CardContent className="p-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
+                     <div className="p-8 md:p-12">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                                <BookOpen className="h-6 w-6 text-primary" />
+                            </div>
+                            <h2 className="text-2xl font-bold">Our Story</h2>
+                        </div>
+                        <div className="space-y-4 text-muted-foreground">
+                            <p>
+                                Founded in a small garage by a group of passionate developers and
+                                designers, AI Smart Tools started with a simple idea: what if everyone
+                                had access to the tools they needed without a hefty price tag or a
+                                steep learning curve? What began as a weekend project quickly grew
+                                into a comprehensive platform loved by thousands worldwide.
+                            </p>
+                            <p>
+                                We are driven by the stories of our users—the students who ace their projects,
+                                the entrepreneurs who launch their businesses, and the creators who bring
+                                their ideas to life. Your success is our motivation.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="relative aspect-[3/2] w-full">
+                        <Image 
+                            src="https://picsum.photos/600/400" 
+                            alt="Our Story"
+                            fill
+                            className="object-cover"
+                            data-ai-hint="passionate developers"
+                        />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+
       </div>
     </div>
   );
