@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Initializes and exports the Firebase Admin SDK instances.
  */
@@ -9,20 +10,28 @@ function initializeFirebaseAdmin(): App {
     return getApps()[0];
   }
 
-  // If standard Google credentials are provided, use them.
+  // Standard way to provide credentials in many environments.
+  // The value is a JSON string of the service account.
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    return initializeApp();
+    try {
+      const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+      return initializeApp({
+        credential: cert(serviceAccount),
+      });
+    } catch (error: any) {
+      console.error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS. Falling back to default.', error);
+    }
   }
-  
-  // Otherwise, construct the service account from individual environment variables.
+
+  // Fallback for environments where individual keys are set.
+  // This is less common and more error-prone.
   const serviceAccount = {
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    // Explicitly replace escaped newlines with actual newline characters.
+    // Replace escaped newlines with actual newline characters.
     privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
   };
 
-  // Ensure all parts of the service account are present before initializing.
   if (serviceAccount.projectId && serviceAccount.clientEmail && serviceAccount.privateKey) {
      return initializeApp({
         credential: cert(serviceAccount as ServiceAccount),
@@ -30,8 +39,8 @@ function initializeFirebaseAdmin(): App {
   }
 
   // If credentials are not fully set, log a clear warning and fall back to ADC.
-  // This helps in local development where ADC might be configured.
-  console.warn("Firebase Admin service account credentials not fully set in environment variables. Falling back to Application Default Credentials. This might fail if not configured.");
+  // This is the default behavior for many Google Cloud services.
+  console.warn("Firebase Admin credentials not set in environment variables. Falling back to Application Default Credentials. This might fail if not configured.");
   return initializeApp();
 }
 
