@@ -4,7 +4,7 @@ import { ToolGrid } from '@/components/tools/ToolGrid';
 import { CategoryCard } from '@/components/tools/CategoryCard';
 import { toolCategories } from '@/lib/constants';
 import { getTools } from '@/ai/flows/tool-management';
-import { ArrowRight, Hand, Database, Sparkles, Download } from 'lucide-react';
+import { ArrowRight, Hand, Database, Sparkles, Download, LifeBuoy, MessageCircle, Users, Wand2 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -30,6 +30,29 @@ const steps = [
         description: 'Easily download your results or share them with others in just a click.',
     },
 ];
+
+const features = [
+    {
+        icon: LifeBuoy,
+        title: '24/7 Support',
+        description: 'Our dedicated support team is available around the clock to assist you with any questions or issues.',
+    },
+    {
+        icon: Wand2,
+        title: 'Wide Range of Tools',
+        description: 'From content creation to technical utilities, find everything you need in one convenient platform.',
+    },
+    {
+        icon: MessageCircle,
+        title: 'Live Chat',
+        description: 'Get instant help and support from our team through live chat.',
+    },
+    {
+        icon: Users,
+        title: 'Community',
+        description: 'Join our community to share ideas, get feedback, and connect with other users.',
+    },
+]
 
 export default async function Home() {
   const tools = await getTools();
@@ -89,6 +112,37 @@ export default async function Home() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+       <section className="py-20 md:py-32 bg-card">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Why Choose Us?</h2>
+            <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
+              We provide the best tools to make your work easier and more efficient.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="text-center p-8 border-2 bg-background shadow-lg transition-all duration-300">
+                <CardContent className="p-0 flex flex-col items-center">
+                  <div className="flex items-center justify-center h-16 w-16 mb-6 rounded-full bg-primary/10">
+                    <feature.icon className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+              <Button asChild size="lg">
+                <Link href="#tools">
+                    Explore Tools <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
           </div>
         </div>
       </section>
