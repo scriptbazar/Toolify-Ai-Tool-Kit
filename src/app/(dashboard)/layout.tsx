@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -157,7 +156,7 @@ export default function UserPanelLayout({
   const mobileNavContent = (
     <>
       <SheetHeader className="text-left border-b p-4">
-        <SheetTitle>
+         <SheetTitle>
            <Link href="/" className="flex items-center gap-2 font-semibold">
             <Logo />
             <span className="text-lg">ToolifyAI</span>
@@ -236,7 +235,7 @@ export default function UserPanelLayout({
           <div className="flex-1 md:hidden">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Logo />
-              <span className="font-bold">ToolifyAI</span>
+              <span className="font-bold text-xl">ToolifyAI</span>
             </Link>
           </div>
           <div className="w-full flex-1 hidden md:block">
@@ -256,6 +255,9 @@ export default function UserPanelLayout({
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="flex flex-col p-0">
+                 <SheetHeader>
+                    <SheetTitle className="sr-only">Menu</SheetTitle>
+                 </SheetHeader>
                 {mobileNavContent}
               </SheetContent>
             </Sheet>
