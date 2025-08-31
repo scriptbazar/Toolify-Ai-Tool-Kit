@@ -29,6 +29,10 @@ const initialTools: Omit<Tool, 'id' | 'slug'>[] = [
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
+  if (!adminDb) {
+    console.warn("Firebase Admin is not initialized. Skipping Firestore call and returning initial tools.");
+    return initialTools.map(tool => ({...tool, id: tool.name.toLowerCase().replace(/\s+/g, '-'), slug: tool.name.toLowerCase().replace(/\s+/g, '-')}));
+  }
   try {
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
     let snapshot = await toolsRef.orderBy('name').get();
@@ -63,6 +67,9 @@ export async function getTools(): Promise<Tool[]> {
  * @returns {Promise<{ success: boolean; message: string; toolId?: string }>}
  */
 export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: boolean; message: string; toolId?: string }> {
+  if (!adminDb) {
+    return { success: false, message: 'Firebase Admin is not initialized.' };
+  }
   try {
     const { id, ...data } = toolData;
     
@@ -96,6 +103,9 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
  * @returns {Promise<{ success: boolean; message: string }>}
  */
 export async function deleteTool(toolId: string): Promise<{ success: boolean; message: string }> {
+    if (!adminDb) {
+      return { success: false, message: 'Firebase Admin is not initialized.' };
+    }
     if (!toolId) {
         return { success: false, message: 'Tool ID is required.' };
     }
