@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,15 +23,18 @@ export default function ContactUsPage() {
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-20">
+        <div className="max-w-3xl mx-auto text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+                Contact Us
+            </h1>
+            <p className="mt-4 text-lg text-muted-foreground">
+                We'd love to hear from you! Whether you have a question about our tools, pricing, or anything else, our team is ready to answer all your questions.
+            </p>
+        </div>
+
         <div className="max-w-3xl mx-auto">
             <Card>
-                <CardHeader className="text-center">
-                    <CardTitle className="text-3xl md:text-4xl">Contact Us</CardTitle>
-                    <CardDescription>
-                        Have a question or feedback? Drop us a line below and we'll get back to you as soon as possible.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
+                <CardContent className="p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
