@@ -4,7 +4,7 @@ import { ToolGrid } from '@/components/tools/ToolGrid';
 import { CategoryCard } from '@/components/tools/CategoryCard';
 import { toolCategories } from '@/lib/constants';
 import { getTools } from '@/ai/flows/tool-management';
-import { ArrowRight, Hand, Database, Sparkles, Download, LifeBuoy, MessageCircle, Users, Wand2 } from 'lucide-react';
+import { ArrowRight, Hand, Database, Sparkles, Download, LifeBuoy, MessageCircle, Users, Wand2, Award, MousePointerClick, Bot, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -32,6 +32,26 @@ const steps = [
 ];
 
 const features = [
+    {
+        icon: Award,
+        title: 'High-quality Output',
+        description: 'Get crisp, clear, and accurate results without compromising on quality.',
+    },
+    {
+        icon: MousePointerClick,
+        title: 'User-friendly Interface',
+        description: 'Our tools are designed to be intuitive and easy to use for everyone, regardless of technical skill.',
+    },
+    {
+        icon: Bot,
+        title: 'AI-Powered Tools',
+        description: 'Leverage the power of artificial intelligence to automate tasks and unlock new creative possibilities.',
+    },
+    {
+        icon: ShieldCheck,
+        title: 'Secure & Reliable',
+        description: 'Your data is always safe and protected with our robust security measures and reliable infrastructure.',
+    },
     {
         icon: LifeBuoy,
         title: '24/7 Support',
@@ -119,9 +139,9 @@ export default async function Home() {
        <section className="py-20 md:py-32 bg-card">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Why Choose Us?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Why Choose AI Smart Tools?</h2>
             <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
-              We provide the best tools to make your work easier and more efficient.
+              We are committed to providing a comprehensive suite of tools that are powerful, easy to use, and reliable, helping you achieve your goals faster.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
