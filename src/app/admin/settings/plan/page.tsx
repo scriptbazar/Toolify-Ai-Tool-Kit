@@ -44,18 +44,15 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { collection, getDocs, query, where, QueryConstraint } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
-
-const dummySubscribers: any[] = [
-    { id: 'usr_1', name: 'Sophia Davis', email: 'sophia.d@example.com', planId: 'pro' },
-    { id: 'usr_2', name: 'Jackson Lee', email: 'jackson.l@example.com', planId: 'team' },
-    { id: 'usr_3', name: 'Olivia Martinez', email: 'olivia.m@example.com', planId: 'pro' },
-    { id: 'usr_4', name: 'Liam Garcia', email: 'liam.g@example.com', planId: 'free' },
-    { id: 'usr_5', name: 'Emma Wilson', email: 'emma.w@example.com', planId: 'pro' },
-    { id: 'usr_6', name: 'Noah Taylor', email: 'noah.t@example.com', planId: 'team' },
-    { id: 'usr_7', name: 'Ava Anderson', email: 'ava.a@example.com', planId: 'free' },
-    { id: 'usr_8', name: 'Lucas Thomas', email: 'lucas.t@example.com', planId: 'pro' },
-];
+interface Subscriber {
+    id: string;
+    name: string;
+    email: string;
+    planId: string;
+}
 
 const SUBSCRIBERS_PER_PAGE = 5;
 
@@ -74,6 +71,7 @@ type PlanFormValues = z.infer<typeof PlanFormSchema>;
 
 export default function PlanManagementPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -100,30 +98,58 @@ export default function PlanManagementPage() {
   });
 
   useEffect(() => {
-    async function fetchPlans() {
+    async function fetchData() {
       setLoading(true);
       try {
         const settings = await getSettings();
-        setPlans(settings.plan?.plans || []);
+        const fetchedPlans = settings.plan?.plans || [];
+        setPlans(fetchedPlans);
+        
+        // Fetch users from Firestore
+        const usersRef = collection(db, 'users');
+        const planIds = fetchedPlans.map(p => p.id);
+        
+        let usersQuery;
+        if (planIds.length > 0) {
+            // Firestore 'in' queries are limited to 10 items. If more plans, need multiple queries.
+            // For this app, we'll assume there are fewer than 10 plans with subscribers.
+            usersQuery = query(usersRef, where('planId', 'in', planIds));
+        } else {
+            // If no plans, fetch no users
+            usersQuery = query(usersRef, where('planId', '==', 'no-such-plan-exists'));
+        }
+
+        const userDocs = await getDocs(usersQuery);
+        const fetchedSubscribers = userDocs.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                name: `${data.firstName} ${data.lastName}`,
+                email: data.email,
+                planId: data.planId || 'free',
+            } as Subscriber;
+        });
+        setSubscribers(fetchedSubscribers);
+
       } catch (error) {
-        console.error('Failed to fetch plans:', error);
+        console.error('Failed to fetch data:', error);
         toast({
           title: 'Error',
-          description: 'Could not load plans.',
+          description: 'Could not load plans or subscribers.',
           variant: 'destructive',
         });
       } finally {
         setLoading(false);
       }
     }
-    fetchPlans();
+    fetchData();
   }, [toast]);
   
-  const totalPages = Math.ceil(dummySubscribers.length / SUBSCRIBERS_PER_PAGE);
+  const totalPages = Math.ceil(subscribers.length / SUBSCRIBERS_PER_PAGE);
   const paginatedSubscribers = useMemo(() => {
     const startIndex = (currentPage - 1) * SUBSCRIBERS_PER_PAGE;
-    return dummySubscribers.slice(startIndex, startIndex + SUBSCRIBERS_PER_PAGE);
-  }, [currentPage]);
+    return subscribers.slice(startIndex, startIndex + SUBSCRIBERS_PER_PAGE);
+  }, [currentPage, subscribers]);
 
   const openModal = (plan?: Plan) => {
     if (plan) {
