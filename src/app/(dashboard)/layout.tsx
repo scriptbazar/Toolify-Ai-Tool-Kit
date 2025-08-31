@@ -2,16 +2,14 @@
 'use client';
 
 import {
-  Bell,
   Home,
   Star,
-  Mail,
   Ticket,
   MessageSquare,
   LogOut,
   User,
   History,
-  File,
+  FileText,
   Settings,
   CreditCard,
   Heart,
@@ -19,7 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
@@ -54,8 +52,6 @@ export default function UserPanelLayout({
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
-  const isLoginPage = pathname === '/login';
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -65,15 +61,13 @@ export default function UserPanelLayout({
         if (userDocSnap.exists()) {
           const fetchedUserData = userDocSnap.data() as AppUser;
           if (fetchedUserData.role === 'admin') {
-            // If the user is an admin, redirect them away from the user dashboard.
             router.push('/admin/dashboard');
-            return; // Stop further processing for this layout
+            return;
           }
           setUser(firebaseUser);
           setUserData(fetchedUserData);
-          setIsAuthorized(true); // User is a regular user and is authorized
+          setIsAuthorized(true);
         } else {
-            // If no user doc, something is wrong, redirect to login
             toast({
               title: "Authentication Error",
               description: "Could not find your user details. Please log in again.",
@@ -109,61 +103,60 @@ export default function UserPanelLayout({
   };
   
   if (loading || !isAuthorized) {
-      return <div>Loading...</div>
+      return <div className="flex h-screen w-full items-center justify-center">Loading...</div>
   }
   
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/community-chat', label: 'Community Chat', icon: MessageSquare },
     { href: '/my-tickets', label: 'My Tickets', icon: Ticket },
-    { href: '/my-media', label: 'My Media', icon: File },
+    { href: '/my-media', label: 'My Media', icon: FileText },
     { href: '/usage-history', label: 'Usage History', icon: History },
     { href: '/payment-history', label: 'Payment History', icon: CreditCard },
     { href: '/refer-a-friend', label: 'Refer a Friend', icon: GitCommitVertical },
     { href: '/favorites', label: 'My Favorites', icon: Heart },
-    { href: '/settings', label: 'Settings', icon: Settings },
-    { href: '/profile', label: 'My Profile', icon: User },
     { href: '/manage-subscription', label: 'Manage Subscription', icon: Star },
-    { href: '/login-history', label: 'Login History', icon: Mail },
+    { href: '/profile', label: 'My Profile', icon: User },
+    { href: '/settings', label: 'Settings', icon: Settings },
   ];
 
   const sidebarNav = (
-    <>
-    <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-      <Link href="/" className="flex items-center gap-2 font-semibold">
-        <Logo />
-        <span className="text-lg">ToolifyAI</span>
-      </Link>
+    <div className="flex h-full max-h-screen flex-col gap-2">
+      <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+        <Link href="/" className="flex items-center gap-2 font-semibold">
+          <Logo />
+          <span className="text-lg">ToolifyAI</span>
+        </Link>
+      </div>
+      <ScrollArea className="flex-1">
+        <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4 py-4">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+              )}
+            >
+              <link.icon className="h-4 w-4" />
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      </ScrollArea>
+       <div className="mt-auto p-4 border-t">
+        <Button variant="secondary" className="w-full justify-start" onClick={handleLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
+      </div>
     </div>
-    <ScrollArea className="flex-1">
-      <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4 py-4">
-        {navLinks.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={cn(
-              'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-              pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-            )}
-          >
-            <link.icon className="h-4 w-4" />
-            {link.label}
-          </Link>
-        ))}
-      </nav>
-    </ScrollArea>
-     <div className="mt-auto p-4 border-t">
-      <Button variant="secondary" className="w-full justify-start" onClick={handleLogout}>
-        <LogOut className="mr-2 h-4 w-4" />
-        Logout
-      </Button>
-    </div>
-    </>
   );
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <div className="hidden border-r bg-muted/40 md:flex flex-col h-full">
+      <div className="hidden border-r bg-muted/40 md:block">
         {sidebarNav}
       </div>
       <div className="flex flex-col">
