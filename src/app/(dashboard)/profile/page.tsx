@@ -142,12 +142,12 @@ export default function UserProfilePage() {
             </div>
             <div className="flex gap-2 w-full md:w-auto">
                  <Button asChild className="flex-1">
-                      <Link href={`/admin/users/${user.uid}`}>
+                      <Link href="/settings">
                         <Edit className="mr-2 h-4 w-4" /> Edit Profile
                       </Link>
                     </Button>
                 <Button variant="outline" asChild className="flex-1">
-                  <Link href={`/admin/users/${user.uid}`}>
+                  <Link href="/settings">
                     <Lock className="mr-2 h-4 w-4" /> Change Password
                   </Link>
                 </Button>
