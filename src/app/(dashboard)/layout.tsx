@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -29,7 +30,7 @@ import { ModeToggle } from '@/components/common/ModeToggle';
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -203,6 +204,9 @@ export default function UserPanelLayout({
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0">
+               <SheetHeader className="p-4 border-b">
+                <SheetTitle>Navigation Menu</SheetTitle>
+               </SheetHeader>
                {sidebarNav}
             </SheetContent>
           </Sheet>

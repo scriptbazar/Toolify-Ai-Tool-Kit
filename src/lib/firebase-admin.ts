@@ -14,14 +14,16 @@ function initializeFirebaseAdmin(): App {
   // The value is a JSON string of the service account.
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     try {
-      const serviceAccountJson = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+      const serviceAccountJsonString = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+      const serviceAccount: ServiceAccount = JSON.parse(serviceAccountJsonString);
+
       // The private key inside the JSON also needs its newlines fixed
-      if (serviceAccountJson.private_key) {
-        serviceAccountJson.private_key = serviceAccountJson.private_key.replace(/\\n/g, '\n');
+      if (serviceAccount.private_key) {
+        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
       }
       
       return initializeApp({
-        credential: cert(serviceAccountJson),
+        credential: cert(serviceAccount),
       });
     } catch (error: any) {
       console.error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS. Falling back to Application Default Credentials.', error);

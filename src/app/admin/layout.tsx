@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -388,6 +389,9 @@ export default function AdminLayout({
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="flex flex-col p-0 w-[280px] sm:w-[320px]">
+                 <SheetHeader>
+                    <SheetTitle className="sr-only">Admin Menu</SheetTitle>
+                 </SheetHeader>
                  {mobileNavContent}
               </SheetContent>
             </Sheet>
