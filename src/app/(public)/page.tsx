@@ -194,7 +194,7 @@ const TestimonialCard = ({ name, role, avatar, comment }: { name: string, role: 
 );
 
 const Testimonials = () => (
-     <section className="py-20 md:py-32 bg-background">
+     <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Loved by Professionals Worldwide</h2>
             <p className="mt-3 max-w-2xl mx-auto text-muted-foreground mb-12">
@@ -223,7 +223,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="text-center py-20 md:py-32 bg-background">
+      <section className="text-center py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
             The Ultimate All-in-One Toolkit
@@ -248,7 +248,7 @@ export default async function Home() {
         </div>
       </section>
       
-      <section className="py-20 md:py-24 bg-card">
+      <section className="py-16 md:py-24 bg-card">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Get Started in 4 Easy Steps</h2>
@@ -272,7 +272,7 @@ export default async function Home() {
         </div>
       </section>
 
-       <section id="features" className="py-20 md:py-32 bg-background">
+       <section id="features" className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Why Choose ToolifyAI?</h2>
@@ -303,7 +303,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section id="blog" className="py-20 md:py-32 bg-card">
+      <section id="blog" className="py-16 md:py-24 bg-card">
         <div className="container mx-auto px-4">
             <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight">From Our Blog</h2>
@@ -336,7 +336,7 @@ export default async function Home() {
 
       <Testimonials />
 
-      <section className="py-12 md:py-16 bg-background">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <Card className="bg-card">
             <CardContent className="p-12 text-center">
