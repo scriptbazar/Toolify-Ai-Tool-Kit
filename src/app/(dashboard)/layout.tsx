@@ -8,29 +8,29 @@ import {
   MessageSquare,
   LogOut,
   User,
-  History,
-  FileText,
   Settings,
-  CreditCard,
-  Heart,
   GitCommitVertical,
+  Heart,
   Mail,
+  FileText,
+  History,
+  CreditCard,
+  Menu,
 } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
 import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -145,9 +145,9 @@ export default function UserPanelLayout({
     { href: '/payment-history', label: 'Payment History', icon: CreditCard },
     { href: '/refer-a-friend', label: 'Refer a Friend', icon: GitCommitVertical },
     { href: '/favorites', label: 'My Favorites', icon: Heart },
-    { href: '/manage-subscription', label: 'Manage Subscription', icon: Star },
-    { href: '/profile', label: 'My Profile', icon: User },
     { href: '/settings', label: 'Settings', icon: Settings },
+    { href: '/profile', label: 'My Profile', icon: User },
+    { href: '/manage-subscription', label: 'Manage Subscription', icon: Star },
     { href: '/login-history', label: 'Login History', icon: Mail },
   ];
 
@@ -214,7 +214,7 @@ export default function UserPanelLayout({
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
                    <Avatar className="h-8 w-8">
-                     <AvatarFallback>{userData?.firstName?.[0] || 'U'}</AvatarFallback>
+                     <AvatarFallback>{userData?.firstName?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
                    </Avatar>
                    <span className="sr-only">Toggle user menu</span>
                 </Button>

@@ -21,7 +21,7 @@ import { doc, getDoc } from 'firebase/firestore';
 const mainNavLinks = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/#features', label: 'Features', icon: LayoutGrid },
-  { href: '/#blog', label: 'Blog', icon: Newspaper },
+  { href: '/blog', label: 'Blog', icon: Newspaper },
   { href: '/about-us', label: 'About Us', icon: Info },
   { href: '/contact-us', label: 'Contact Us', icon: Mail },
   { href: '/pricing', label: 'Pricing', icon: DollarSign },
