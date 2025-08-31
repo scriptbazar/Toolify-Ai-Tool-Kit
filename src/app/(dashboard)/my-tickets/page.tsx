@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { getTicketsByUser, type Ticket, type TicketStatus } from '@/ai/flows/ticket-management';
 import { useRouter } from 'next/navigation';
-import { Ticket as TicketIcon, PlusCircle, Clock, CheckCircle, RefreshCw, CircleDotDashed, AlertCircle } from "lucide-react";
+import { Ticket as TicketIcon, PlusCircle, Clock, CheckCircle, RefreshCw, CircleDotDashed, AlertCircle, Inbox } from "lucide-react";
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -64,11 +64,14 @@ const getStatusBadge = (status: TicketStatus) => {
     }
 };
 
+type FilterType = 'all' | 'pending' | 'closed';
+
 export default function MyTicketsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const router = useRouter();
 
   useEffect(() => {
@@ -95,11 +98,36 @@ export default function MyTicketsPage() {
     };
     return () => unsubscribe();
   }, [router]);
+  
+  const filteredTickets = useMemo(() => {
+    if (activeFilter === 'pending') {
+      return tickets.filter(t => t.status === 'Open' || t.status === 'In Progress');
+    }
+    if (activeFilter === 'closed') {
+      return tickets.filter(t => t.status === 'Closed');
+    }
+    return tickets;
+  }, [tickets, activeFilter]);
+  
+  const counts = useMemo(() => ({
+    all: tickets.length,
+    pending: tickets.filter(t => t.status === 'Open' || t.status === 'In Progress').length,
+    closed: tickets.filter(t => t.status === 'Closed').length,
+  }), [tickets]);
+
+  const tabs: { id: FilterType; label: string; icon: React.ElementType }[] = [
+    { id: 'all', label: 'All Tickets' },
+    { id: 'pending', label: 'Pending' },
+    { id: 'closed', label: 'Closed' },
+  ];
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">My Support Tickets</h1>
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+        <div>
+            <h1 className="text-3xl font-bold">My Support Tickets</h1>
+            <p className="text-muted-foreground">Review your past and present support requests.</p>
+        </div>
         <Button asChild>
             <Link href="/create-ticket">
                 <PlusCircle className="mr-2 h-4 w-4" /> Create New Ticket
@@ -108,8 +136,29 @@ export default function MyTicketsPage() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Your Ticket History</CardTitle>
-          <CardDescription>Here are all the support tickets you've submitted. Tickets are automatically deleted after 30 days for your privacy.</CardDescription>
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+            <div>
+              <CardTitle>Your Ticket History</CardTitle>
+              <CardDescription>Tickets are automatically deleted after 30 days for your privacy.</CardDescription>
+            </div>
+             <div className="flex items-center gap-2">
+                <Button 
+                    variant={activeFilter === 'all' ? 'secondary' : 'ghost'} 
+                    onClick={() => setActiveFilter('all')}>
+                    All ({counts.all})
+                </Button>
+                <Button 
+                    variant={activeFilter === 'pending' ? 'secondary' : 'ghost'} 
+                    onClick={() => setActiveFilter('pending')}>
+                    Pending ({counts.pending})
+                </Button>
+                <Button 
+                    variant={activeFilter === 'closed' ? 'secondary' : 'ghost'} 
+                    onClick={() => setActiveFilter('closed')}>
+                    Closed ({counts.closed})
+                </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
             {loading && (
@@ -124,14 +173,13 @@ export default function MyTicketsPage() {
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
             )}
-            {!loading && !error && tickets.length === 0 && (
+            {!loading && !error && filteredTickets.length === 0 && (
                  <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg">
                     <TicketIcon className="w-16 h-16 text-muted-foreground mb-4" />
-                    <p className="text-lg text-muted-foreground">You haven't submitted any tickets yet.</p>
-                    <p className="text-muted-foreground">If you need help, feel free to create one!</p>
+                    <p className="text-lg text-muted-foreground">You don't have any tickets in this category.</p>
                  </div>
             )}
-            {!loading && !error && tickets.length > 0 && (
+            {!loading && !error && filteredTickets.length > 0 && (
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -142,7 +190,7 @@ export default function MyTicketsPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {tickets.map(ticket => (
+                        {filteredTickets.map(ticket => (
                             <TableRow key={ticket.id}>
                                 <TableCell className="font-medium">{ticket.subject}</TableCell>
                                 <TableCell>{getStatusBadge(ticket.status)}</TableCell>
