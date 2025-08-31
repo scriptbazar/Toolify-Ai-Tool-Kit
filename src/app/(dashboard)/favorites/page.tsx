@@ -9,7 +9,7 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { getTools } from '@/ai/flows/tool-management';
+import { getFavoriteTools } from '@/ai/flows/tool-management';
 import type { Tool } from '@/ai/flows/tool-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ToolCard } from '@/components/tools/ToolCard';
@@ -42,22 +42,11 @@ export default function FavoritesPage() {
         setUser(firebaseUser);
         try {
           await setupDefaultFavorites(firebaseUser.uid);
-          
-          const userDocRef = doc(db, 'users', firebaseUser.uid);
-          const [allTools, userDocSnap] = await Promise.all([
-            getTools(),
-            getDoc(userDocRef),
-          ]);
-          
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data();
-            const favoriteSlugs: string[] = userData.favorites || [];
-            const userFavorites = allTools.filter(tool => favoriteSlugs.includes(tool.slug));
-            setFavoriteTools(userFavorites);
-          }
+          const userFavorites = await getFavoriteTools(firebaseUser.uid);
+          setFavoriteTools(userFavorites);
         } catch (err: any) {
           console.error("Failed to load favorites:", err);
-          setError("Could not load your favorite tools. Please check your permissions or try again later.");
+          setError("Could not load your favorite tools. Please try again later.");
           toast({
             title: "Error Loading Favorites",
             description: "There was a problem fetching your favorite tools.",

@@ -117,3 +117,38 @@ export async function deleteTool(toolId: string): Promise<{ success: boolean; me
         return { success: false, message: error.message || 'An unknown error occurred.' };
     }
 }
+
+/**
+ * Fetches the favorite tools for a specific user.
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<Tool[]>} A list of the user's favorite tools.
+ */
+export async function getFavoriteTools(userId: string): Promise<Tool[]> {
+  if (!adminDb) {
+    console.error("Firebase Admin is not initialized. Cannot fetch favorite tools.");
+    return [];
+  }
+  try {
+    const userDocRef = adminDb.collection('users').doc(userId);
+    const userDocSnap = await userDocRef.get();
+
+    if (!userDocSnap.exists()) {
+      return [];
+    }
+
+    const userData = userDocSnap.data();
+    const favoriteSlugs: string[] = userData?.favorites || [];
+
+    if (favoriteSlugs.length === 0) {
+      return [];
+    }
+
+    const allTools = await getTools();
+    const userFavorites = allTools.filter(tool => favoriteSlugs.includes(tool.slug));
+    
+    return userFavorites;
+  } catch (error) {
+    console.error(`Error fetching favorite tools for user ${userId}:`, error);
+    return [];
+  }
+}
