@@ -194,7 +194,7 @@ const TestimonialCard = ({ name, role, avatar, comment }: { name: string, role: 
 );
 
 const Testimonials = () => (
-     <section className="py-16 md:py-24 bg-background">
+     <section className="py-16 md:py-24 bg-card">
         <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Loved by Professionals Worldwide</h2>
             <p className="mt-3 max-w-2xl mx-auto text-muted-foreground mb-12">
@@ -336,9 +336,9 @@ export default async function Home() {
 
       <Testimonials />
 
-      <section className="py-16 md:py-24 bg-card">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
-          <Card className="bg-background">
+          <Card className="bg-card">
             <CardContent className="p-12 text-center">
               <h2 className="text-3xl font-bold tracking-tight">Join Thousands of Satisfied Users</h2>
               <p className="mt-3 max-w-xl mx-auto text-muted-foreground">

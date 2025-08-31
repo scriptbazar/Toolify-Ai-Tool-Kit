@@ -53,6 +53,7 @@ interface Subscriber {
     email: string;
     planId: string;
     subscribedAt: string;
+    subscriptionEndsAt: string;
 }
 
 const SUBSCRIBERS_PER_PAGE = 5;
@@ -106,13 +107,11 @@ export default function PlanManagementPage() {
         const fetchedPlans = settings.plan?.plans || [];
         setPlans(fetchedPlans);
         
-        // Fetch users from Firestore
         const usersRef = collection(db, 'users');
-        const planIds = fetchedPlans.map(p => p.id);
+        const planIds = fetchedPlans.map(p => p.id).filter(id => id);
         
-        let usersQuery;
+        let fetchedSubscribers: Subscriber[] = [];
         if (planIds.length > 0) {
-            // Firestore 'in' queries are limited to 10 items. If more plans, need multiple queries.
             const planChunks: string[][] = [];
             for (let i = 0; i < planIds.length; i += 10) {
                 planChunks.push(planIds.slice(i, i + 10));
@@ -124,26 +123,25 @@ export default function PlanManagementPage() {
             });
             const userSnapshots = await Promise.all(userPromises);
             
-            const fetchedSubscribers: Subscriber[] = [];
             userSnapshots.forEach(snapshot => {
                 snapshot.docs.forEach(doc => {
                     const data = doc.data();
-                    // Using createdAt as a placeholder for subscription date
-                    const subscribedAtDate = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'N/A';
+                    const subscribedAtDate = data.createdAt?.toDate ? data.createdAt.toDate() : new Date();
+                    const endsAtDate = new Date(subscribedAtDate);
+                    endsAtDate.setDate(endsAtDate.getDate() + 30);
+
                     fetchedSubscribers.push({
                         id: doc.id,
                         name: `${data.firstName} ${data.lastName}`,
                         email: data.email,
                         planId: data.planId || 'free',
-                        subscribedAt: subscribedAtDate,
+                        subscribedAt: subscribedAtDate.toLocaleDateString(),
+                        subscriptionEndsAt: endsAtDate.toLocaleDateString(),
                     });
                 });
             });
-            setSubscribers(fetchedSubscribers);
-
-        } else {
-             setSubscribers([]);
         }
+        setSubscribers(fetchedSubscribers);
 
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -386,6 +384,7 @@ export default function PlanManagementPage() {
                   <TableHead>Email</TableHead>
                   <TableHead>Subscribed Plan</TableHead>
                   <TableHead>Subscription Date</TableHead>
+                  <TableHead>Subscription End Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -407,11 +406,12 @@ export default function PlanManagementPage() {
                          </Badge>
                       </TableCell>
                        <TableCell>{sub.subscribedAt}</TableCell>
+                       <TableCell>{sub.subscriptionEndsAt}</TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                       No subscribers found.
                     </TableCell>
                   </TableRow>
