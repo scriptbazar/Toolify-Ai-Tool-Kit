@@ -9,7 +9,7 @@ import { getFirestore, Firestore } from 'firebase-admin/firestore';
 const placeholderServiceAccount: ServiceAccount = {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo-project',
   clientEmail: 'demo@example.com',
-  privateKey: '-----BEGIN PRIVATE KEY-----\n-----END PRIVATE KEY-----\n',
+  privateKey: '-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC39G5s4s/j\n-----END PRIVATE KEY-----\n',
 };
 
 function initializeFirebaseAdmin(): App {
@@ -18,27 +18,24 @@ function initializeFirebaseAdmin(): App {
   }
 
   let serviceAccount: ServiceAccount;
-  let hasCredentials = false;
 
   // Primary Method: Individual environment variables
   if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
     serviceAccount = {
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      // IMPORTANT: Replace escaped newlines with actual newlines
+      // IMPORTANT: Replace escaped newlines from environment variables
       privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
     };
-    hasCredentials = true;
     console.log('Initializing Firebase Admin with individual environment variables.');
   } 
   // Fallback Method: Full GOOGLE_APPLICATION_CREDENTIALS JSON object
   else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     try {
       const serviceAccountJson = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-      // IMPORTANT: Replace escaped newlines with actual newlines
+      // IMPORTANT: Replace escaped newlines from environment variables
       serviceAccountJson.private_key = (serviceAccountJson.private_key || '').replace(/\\n/g, '\n');
       serviceAccount = serviceAccountJson;
-      hasCredentials = true;
       console.log('Initializing Firebase Admin with GOOGLE_APPLICATION_CREDENTIALS.');
     } catch (error) {
       console.error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS. Using placeholder credentials. Error:', error);
