@@ -1,22 +1,18 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Allow users to read and write to their own document
+    // Allow users to read and write only their own user document.
     match /users/{userId} {
-      allow read, update, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Tools collection should be readable by anyone, but only writable by admins (not yet implemented)
-    // For now, allow public read access so the favorites page can get tool details.
+    // Allow all users (including unauthenticated) to read from the 'tools' collection.
     match /tools/{toolId} {
       allow read: if true;
-      allow write: if false; // Protect the tools collection from client-side writes
     }
-    
-    // Default deny all other collections for security
+
+    // Default deny for all other collections.
     match /{document=**} {
       allow read, write: if false;
     }
