@@ -204,9 +204,9 @@ export default function UserPanelLayout({
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0">
-               <SheetHeader className="p-4 border-b">
-                <SheetTitle>Navigation Menu</SheetTitle>
-               </SheetHeader>
+                <SheetHeader>
+                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                </SheetHeader>
                {sidebarNav}
             </SheetContent>
           </Sheet>
