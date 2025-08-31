@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
@@ -95,9 +95,9 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: Message['poll']) 
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Create a New Poll</DialogTitle>
-                    <DialogDescription>
+                    <DialogDesc>
                         Engage the community by creating a multiple-choice poll.
-                    </DialogDescription>
+                    </DialogDesc>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
