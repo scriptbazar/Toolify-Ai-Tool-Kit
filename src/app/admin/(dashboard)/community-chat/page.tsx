@@ -100,11 +100,13 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: Message['poll']) 
                     </div>
                     <div className="space-y-2">
                         <Label>Options</Label>
-                        {options.map((opt, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                                <Input value={opt} onChange={(e) => handleOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`} />
-                            </div>
-                        ))}
+                        <div className="grid grid-cols-2 gap-4">
+                          {options.map((opt, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                  <Input value={opt} onChange={(e) => handleOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`} />
+                              </div>
+                          ))}
+                        </div>
                     </div>
                     <div className="flex items-center space-x-2">
                         <Switch id="allow-custom" checked={allowCustom} onCheckedChange={setAllowCustom} />
