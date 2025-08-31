@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -45,7 +46,18 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 
-const dummySubscribers: any[] = [];
+const dummySubscribers: any[] = [
+    { id: 'usr_1', name: 'Sophia Davis', email: 'sophia.d@example.com', planId: 'pro' },
+    { id: 'usr_2', name: 'Jackson Lee', email: 'jackson.l@example.com', planId: 'team' },
+    { id: 'usr_3', name: 'Olivia Martinez', email: 'olivia.m@example.com', planId: 'pro' },
+    { id: 'usr_4', name: 'Liam Garcia', email: 'liam.g@example.com', planId: 'free' },
+    { id: 'usr_5', name: 'Emma Wilson', email: 'emma.w@example.com', planId: 'pro' },
+    { id: 'usr_6', name: 'Noah Taylor', email: 'noah.t@example.com', planId: 'team' },
+    { id: 'usr_7', name: 'Ava Anderson', email: 'ava.a@example.com', planId: 'free' },
+    { id: 'usr_8', name: 'Lucas Thomas', email: 'lucas.t@example.com', planId: 'pro' },
+];
+
+const SUBSCRIBERS_PER_PAGE = 5;
 
 const PlanFormSchema = z.object({
   name: z.string().min(1, 'Plan name is required'),
@@ -66,6 +78,7 @@ export default function PlanManagementPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
   const form = useForm<PlanFormValues>({
@@ -105,6 +118,12 @@ export default function PlanManagementPage() {
     }
     fetchPlans();
   }, [toast]);
+  
+  const totalPages = Math.ceil(dummySubscribers.length / SUBSCRIBERS_PER_PAGE);
+  const paginatedSubscribers = useMemo(() => {
+    const startIndex = (currentPage - 1) * SUBSCRIBERS_PER_PAGE;
+    return dummySubscribers.slice(startIndex, startIndex + SUBSCRIBERS_PER_PAGE);
+  }, [currentPage]);
 
   const openModal = (plan?: Plan) => {
     if (plan) {
@@ -329,8 +348,8 @@ export default function PlanManagementPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {dummySubscribers.length > 0 ? (
-                  dummySubscribers.map(sub => (
+                {paginatedSubscribers.length > 0 ? (
+                  paginatedSubscribers.map(sub => (
                     <TableRow key={sub.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -358,6 +377,29 @@ export default function PlanManagementPage() {
               </TableBody>
             </Table>
           </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-end space-x-2 pt-4">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                >
+                    Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                    Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                >
+                    Next
+                </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
