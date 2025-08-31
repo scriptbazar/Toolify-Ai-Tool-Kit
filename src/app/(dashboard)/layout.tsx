@@ -11,15 +11,14 @@ import {
   User,
   Settings,
   GitCommitVertical,
-  Heart,
   Mail,
-  FileText,
   History,
   CreditCard,
   Menu,
   Briefcase,
   DollarSign,
   UserCog,
+  FileText,
 } from 'lucide-react';
 import Link from 'next/link';
 import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
@@ -142,7 +141,7 @@ export default function UserPanelLayout({
   
   const allNavLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
-    { href: '/favorites', label: 'My Favorites', icon: Heart },
+    { href: '/my-media', label: 'My Media', icon: FileText },
     { href: '/usage-history', label: 'Usage History', icon: History },
     { href: '/community-chat', label: 'Community Chat', icon: MessageSquare },
     { href: '/my-tickets', label: 'My Tickets', icon: Ticket },

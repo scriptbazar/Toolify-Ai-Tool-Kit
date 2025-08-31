@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useRef, type FormEvent, useEffect } from 'react';
@@ -126,6 +127,10 @@ export default function CommunityChatPage() {
                 },
             };
             setMessages(prev => [...prev, newMediaMessage]);
+            toast({
+                title: "Media Shared",
+                description: "Your media will be automatically deleted after 48 hours. You can view it in the 'My Media' section.",
+            });
         }
     };
 

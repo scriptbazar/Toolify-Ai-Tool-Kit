@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -10,9 +11,11 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { adminDb } from '@/lib/firebase-admin';
 
 const GenerateImageInputSchema = z.object({
   promptText: z.string().describe('The text prompt to use for image generation.'),
+  userId: z.string().describe('The ID of the user generating the image.'),
 });
 
 export type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
@@ -33,14 +36,28 @@ const generateImageFlow = ai.defineFlow(
     inputSchema: GenerateImageInputSchema,
     outputSchema: GenerateImageOutputSchema,
   },
-  async input => {
+  async ({ promptText, userId }) => {
     const {media} = await ai.generate({
       model: 'googleai/imagen-4.0-fast-generate-001',
-      prompt: input.promptText,
+      prompt: promptText,
     });
 
     if (!media || !media.url) {
       throw new Error('No image was generated.');
+    }
+    
+    if (adminDb) {
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      
+      await adminDb.collection('userMedia').add({
+          userId,
+          type: 'ai-generated',
+          mediaUrl: media.url,
+          prompt: promptText,
+          createdAt: new Date(),
+          expiresAt: expiresAt,
+      });
     }
 
     return {imageDataUri: media.url};
