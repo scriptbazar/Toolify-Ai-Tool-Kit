@@ -1,4 +1,5 @@
 
+
 import { Button } from '@/components/ui/button';
 import { ToolGrid } from '@/components/tools/ToolGrid';
 import { CategoryCard } from '@/components/tools/CategoryCard';
@@ -8,6 +9,8 @@ import { ArrowRight, Hand, Database, Sparkles, Download, LifeBuoy, MessageCircle
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Star } from 'lucide-react';
 
 const steps = [
     {
@@ -101,6 +104,119 @@ const blogPosts = [
         href: '#',
     },
 ];
+
+const testimonials = [
+    {
+        name: 'Sarah L.',
+        role: 'Content Creator',
+        avatar: 'https://i.pravatar.cc/150?u=sarah',
+        comment: "ToolifyAI has revolutionized my workflow. The text tools are a lifesaver for drafting and editing content quickly.",
+    },
+    {
+        name: 'Michael B.',
+        role: 'Developer',
+        avatar: 'https://i.pravatar.cc/150?u=michael',
+        comment: "The JSON Formatter and Password Generator are my daily drivers. Simple, fast, and reliable. Highly recommended!",
+    },
+    {
+        name: 'Jessica P.',
+        role: 'Digital Marketer',
+        avatar: 'https://i.pravatar.cc/150?u=jessica',
+        comment: "I love the variety of tools available. From image conversion to SEO analysis, it has everything I need in one place.",
+    },
+    {
+        name: 'David H.',
+        role: 'Student',
+        avatar: 'https://i.pravatar.cc/150?u=david',
+        comment: "The Lorem Ipsum Generator and Word Counter are essential for my assignments. So much better than other sites.",
+    },
+    {
+        name: 'Emily R.',
+        role: 'Project Manager',
+        avatar: 'https://i.pravatar.cc/150?u=emily',
+        comment: "An indispensable toolkit for my team. The PDF tools, in particular, have saved us countless hours.",
+    },
+    {
+        name: 'Chris T.',
+        role: 'Graphic Designer',
+        avatar: 'https://i.pravatar.cc/150?u=chris',
+        comment: "The Color Picker is fantastic. It's so easy to grab the exact hex code I need for my designs. A brilliant tool!",
+    },
+    {
+        name: 'Amanda G.',
+        role: 'Small Business Owner',
+        avatar: 'https://i.pravatar.cc/150?u=amanda',
+        comment: "As someone who wears many hats, having all these utilities in one subscription is incredibly cost-effective and convenient.",
+    },
+    {
+        name: 'Kevin S.',
+        role: 'SEO Specialist',
+        avatar: 'https://i.pravatar.cc/150?u=kevin',
+        comment: "The AI Writer helps me generate content ideas and outlines in minutes. A true game-changer for my content strategy.",
+    },
+    {
+        name: 'Olivia M.',
+        role: 'Photographer',
+        avatar: 'https://i.pravatar.cc/150?u=olivia',
+        comment: "I frequently use the image tools to quickly resize and convert formats for web use. It's fast and maintains quality.",
+    },
+    {
+        name: 'Brian W.',
+        role: 'IT Consultant',
+        avatar: 'https://i.pravatar.cc/150?u=brian',
+        comment: "A reliable and secure set of tools. I recommend it to all my clients for its ease of use and broad functionality.",
+    },
+];
+
+const TestimonialCard = ({ name, role, avatar, comment }: { name: string, role: string, avatar: string, comment: string }) => (
+    <Card className="w-[350px] shrink-0">
+        <CardContent className="p-6 flex flex-col items-start text-left">
+            <div className="flex items-center gap-4 mb-4">
+                <Avatar>
+                    <AvatarImage src={avatar} alt={name} />
+                    <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                    <p className="font-semibold">{name}</p>
+                    <p className="text-sm text-muted-foreground">{role}</p>
+                </div>
+            </div>
+            <p className="text-muted-foreground text-sm mb-4">"{comment}"</p>
+            <div className="flex items-center gap-1 text-yellow-500">
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const Testimonials = () => (
+     <section className="py-20 md:py-32 bg-background">
+        <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Loved by Professionals Worldwide</h2>
+            <p className="mt-3 max-w-2xl mx-auto text-muted-foreground mb-12">
+                Our tools are trusted by thousands of developers, designers, and content creators to streamline their work and boost productivity.
+            </p>
+        </div>
+        <div className="relative flex flex-col gap-8 overflow-hidden">
+            <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
+                {[...testimonials, ...testimonials].map((testimonial, index) => (
+                    <TestimonialCard key={`rtl-${index}`} {...testimonial} />
+                ))}
+            </div>
+            <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
+                {[...testimonials, ...testimonials].map((testimonial, index) => (
+                    <TestimonialCard key={`ltr-${index}`} {...testimonial} />
+                ))}
+            </div>
+             <div className="absolute inset-0 bg-gradient-to-r from-background to-transparent w-1/4"></div>
+            <div className="absolute inset-0 bg-gradient-to-l from-background to-transparent w-1/4 right-0"></div>
+        </div>
+    </section>
+);
 
 export default async function Home() {
   const tools = await getTools();
@@ -218,6 +334,8 @@ export default async function Home() {
             </div>
         </div>
       </section>
+
+      <Testimonials />
 
       <section className="py-20 md:py-32 bg-card">
         <div className="container mx-auto px-4 text-center">
