@@ -165,7 +165,7 @@ export default function UserPanelLayout({
         </SheetTitle>
       </SheetHeader>
       <ScrollArea className="flex-1">
-        <nav className="grid gap-2 text-base font-medium p-4 py-4">
+        <nav className="grid gap-2 text-base font-medium p-4">
             {allNavLinks.map((link) => (
                 <Link
                     key={link.href}
