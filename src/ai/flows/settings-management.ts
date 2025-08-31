@@ -193,7 +193,10 @@ export async function updateSettings(newSettings: AppSettings): Promise<{ succes
     
     // 5. Write API keys to .env.local if they exist
     const geminiApiKey = validatedSettings.general?.apiKeys?.gemini;
-    if (geminiApiKey) {
+    
+    // Only write to the file if a non-empty API key is provided.
+    // This prevents unnecessary server restarts when settings are saved without API key changes.
+    if (geminiApiKey && geminiApiKey.trim() !== '') {
       const envLocalPath = path.resolve(process.cwd(), '.env.local');
       let envContent = '';
       try {
