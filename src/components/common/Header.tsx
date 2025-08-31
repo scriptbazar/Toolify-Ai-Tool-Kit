@@ -148,7 +148,7 @@ export default function Header() {
             </nav>
             <div className="flex flex-1 items-center justify-end space-x-2">
                <ModeToggle />
-               {loading ? null : !user ? (
+               {loading ? <div className="h-8 w-8 rounded-full bg-muted animate-pulse" /> : !user ? (
                   <>
                     <Button asChild variant="ghost">
                       <Link href="/login"><LogIn className="mr-2 h-4 w-4" />Log in</Link>

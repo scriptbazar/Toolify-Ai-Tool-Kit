@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +15,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { type User } from 'firebase/auth';
 import { LayoutDashboard, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface UserNavProps {
   user: User;
@@ -21,6 +24,25 @@ interface UserNavProps {
 }
 
 export function UserNav({ user, onLogout }: UserNavProps) {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkUserRole() {
+      if (user) {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
+          setIsAdmin(true);
+        }
+      }
+      setLoading(false);
+    }
+    checkUserRole();
+  }, [user]);
+
+  const dashboardHref = isAdmin ? '/admin/dashboard' : '/dashboard';
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -40,8 +62,8 @@ export function UserNav({ user, onLogout }: UserNavProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-            <Link href="/dashboard">
+        <DropdownMenuItem asChild disabled={loading}>
+            <Link href={dashboardHref}>
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 <span>Dashboard</span>
             </Link>
