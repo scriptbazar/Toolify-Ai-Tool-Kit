@@ -12,9 +12,10 @@ import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
 import { ModeToggle } from './ModeToggle';
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { UserNav } from './UserNav';
+import { doc, getDoc } from 'firebase/firestore';
 
 
 const mainNavLinks = [
@@ -26,11 +27,11 @@ const mainNavLinks = [
   { href: '/pricing', label: 'Pricing', icon: DollarSign },
 ];
 
-const NavLinks = ({ isMobile = false, isLoggedIn = false }) => {
+const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }) => {
   const pathname = usePathname();
 
   const allLinks = isLoggedIn 
-    ? [...mainNavLinks, { href: '/community-chat', label: 'Community Chat', icon: MessageSquare }]
+    ? [...mainNavLinks, { href: isAdmin ? '/admin/community-chat' : '/community-chat', label: 'Community Chat', icon: MessageSquare }]
     : mainNavLinks;
 
   return (
@@ -62,13 +63,26 @@ const NavLinks = ({ isMobile = false, isLoggedIn = false }) => {
 export default function Header() {
   const isMobile = useIsMobile();
   const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
   
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } else {
+        setUser(null);
+        setIsAdmin(false);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
@@ -112,7 +126,7 @@ export default function Header() {
                   </SheetHeader>
                   <div className="flex-1 overflow-y-auto p-4">
                     <nav className="flex flex-col space-y-2">
-                       <NavLinks isMobile={true} isLoggedIn={!!user} />
+                       <NavLinks isMobile={true} isLoggedIn={!!user} isAdmin={isAdmin} />
                     </nav>
                   </div>
                    <div className="mt-auto p-4 border-t">
@@ -144,7 +158,7 @@ export default function Header() {
               </Link>
             </div>
             <nav className="flex-1 flex items-center justify-center space-x-1 text-sm font-medium">
-              <NavLinks isLoggedIn={!!user} />
+              <NavLinks isLoggedIn={!!user} isAdmin={isAdmin} />
             </nav>
             <div className="flex items-center justify-end">
                <ModeToggle />
