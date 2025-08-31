@@ -9,7 +9,7 @@ import { getFirestore, Firestore } from 'firebase-admin/firestore';
 const placeholderServiceAccount: ServiceAccount = {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo-project',
   clientEmail: 'demo@example.com',
-  privateKey: '-----BEGIN PRIVATE KEY-----\\n-----END PRIVATE KEY-----\\n',
+  privateKey: '-----BEGIN PRIVATE KEY-----\\n-----END PRIVATE KEY-----\\n'.replace(/\\n/g, '\n'),
 };
 
 function initializeFirebaseAdmin(): App {
@@ -25,6 +25,7 @@ function initializeFirebaseAdmin(): App {
     serviceAccount = {
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      // Ensure newline characters are correctly formatted
       privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
     };
     credentialsFound = true;
@@ -34,18 +35,19 @@ function initializeFirebaseAdmin(): App {
   else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     try {
       const serviceAccountJson = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+      // Ensure newline characters are correctly formatted
       serviceAccountJson.private_key = (serviceAccountJson.private_key || '').replace(/\\n/g, '\n');
       serviceAccount = serviceAccountJson;
       credentialsFound = true;
       console.log('Initializing Firebase Admin with GOOGLE_APPLICATION_CREDENTIALS.');
     } catch (error) {
       console.error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS. Using placeholder credentials. Error:', error);
-      serviceAccount = { ...placeholderServiceAccount, privateKey: placeholderServiceAccount.privateKey.replace(/\\n/g, '\n') };
+      serviceAccount = placeholderServiceAccount;
     }
   } else {
     // If no credentials are found, use the placeholder.
     console.warn("Firebase Admin SDK credentials not found. Using placeholder credentials for local development. Server-side Firebase features will not work.");
-    serviceAccount = { ...placeholderServiceAccount, privateKey: placeholderServiceAccount.privateKey.replace(/\\n/g, '\n') };
+    serviceAccount = placeholderServiceAccount;
   }
   
   return initializeApp({
