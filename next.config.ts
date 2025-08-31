@@ -38,6 +38,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "toolifyai-7sfvi.appspot.com",
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "69818852370",
     NEXT_PUBLIC_FIREBASE_APP_ID: "1:69818852370:web:375b674cfee5e2c863e4cb",
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   },
 };
 
