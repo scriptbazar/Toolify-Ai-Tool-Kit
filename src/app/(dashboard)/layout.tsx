@@ -17,6 +17,9 @@ import {
   History,
   CreditCard,
   Menu,
+  Briefcase,
+  DollarSign,
+  UserCog,
 } from 'lucide-react';
 import Link from 'next/link';
 import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
@@ -24,6 +27,7 @@ import { auth, db } from '@/lib/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
@@ -137,37 +141,218 @@ export default function UserPanelLayout({
       );
   }
   
-  const navLinks = [
+  const mainNavLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
-    { href: '/community-chat', label: 'Community Chat', icon: MessageSquare },
-    { href: '/my-tickets', label: 'My Tickets', icon: Ticket },
-    { href: '/my-media', label: 'My Media', icon: FileText },
-    { href: '/usage-history', label: 'Usage History', icon: History },
-    { href: '/payment-history', label: 'Payment History', icon: CreditCard },
-    { href: '/refer-a-friend', label: 'Refer a Friend', icon: GitCommitVertical },
     { href: '/favorites', label: 'My Favorites', icon: Heart },
-    { href: '/settings', label: 'Settings', icon: Settings },
-    { href: '/manage-subscription', label: 'Manage Subscription', icon: Star },
-    { href: '/login-history', label: 'Login History', icon: Mail },
+    { href: '/usage-history', label: 'Usage History', icon: History },
+  ];
+  
+  const communityLinks = [
+      { href: '/community-chat', label: 'Community Chat', icon: MessageSquare },
+      { href: '/my-tickets', label: 'My Tickets', icon: Ticket },
+      { href: '/refer-a-friend', label: 'Refer a Friend', icon: GitCommitVertical },
   ];
 
-  const sidebarNav = (isMobile = false) => (
-    <div className="flex h-full max-h-screen flex-col gap-2">
+  const billingLinks = [
+    { href: '/manage-subscription', label: 'Manage Subscription', icon: Star },
+    { href: '/payment-history', label: 'Payment History', icon: CreditCard },
+  ]
+  
+  const settingsLinks = [
+      { href: '/settings', label: 'Profile Settings', icon: Settings },
+      { href: '/login-history', label: 'Login History', icon: History },
+  ];
+
+
+  const mobileNavContent = (
+    <>
+      <SheetHeader className="text-left border-b p-4">
+        <SheetTitle>
+           <Link href="/" className="flex items-center gap-2 font-semibold">
+            <Logo />
+            <span className="text-lg">ToolifyAI</span>
+          </Link>
+        </SheetTitle>
+      </SheetHeader>
+      <ScrollArea className="flex-1">
+        <nav className="grid gap-2 text-base font-medium p-4 py-4">
+          <Accordion type="multiple" defaultValue={['main', 'community', 'billing', 'settings']} className="w-full">
+             <AccordionItem value="main" className="border-b-0">
+                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Account</AccordionTrigger>
+                <AccordionContent className="pl-4 pt-1">
+                    {mainNavLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                            )}
+                            >
+                            <link.icon className="h-4 w-4" />
+                            {link.label}
+                        </Link>
+                    ))}
+                </AccordionContent>
+             </AccordionItem>
+             <AccordionItem value="community" className="border-b-0">
+                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Community</AccordionTrigger>
+                 <AccordionContent className="pl-4 pt-1">
+                    {communityLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                            )}
+                            >
+                            <link.icon className="h-4 w-4" />
+                            {link.label}
+                        </Link>
+                    ))}
+                 </AccordionContent>
+             </AccordionItem>
+             <AccordionItem value="billing" className="border-b-0">
+                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Billing</AccordionTrigger>
+                 <AccordionContent className="pl-4 pt-1">
+                     {billingLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                            )}
+                            >
+                            <link.icon className="h-4 w-4" />
+                            {link.label}
+                        </Link>
+                    ))}
+                 </AccordionContent>
+             </AccordionItem>
+             <AccordionItem value="settings" className="border-b-0">
+                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Settings</AccordionTrigger>
+                 <AccordionContent className="pl-4 pt-1">
+                     {settingsLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                            )}
+                            >
+                            <link.icon className="h-4 w-4" />
+                            {link.label}
+                        </Link>
+                    ))}
+                 </AccordionContent>
+             </AccordionItem>
+          </Accordion>
+        </nav>
+      </ScrollArea>
+       <div className="mt-auto p-4 border-t">
+          <div className="grid grid-cols-2 gap-2">
+            <Button asChild className="w-full">
+              <Link href="/profile">
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
+            </Button>
+            <Button variant="destructive" onClick={handleLogout} className="w-full">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
+        </div>
+    </>
+  );
+
+  const sidebarNav = (
+    <div className="flex h-full max-h-screen flex-col">
+      <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+        <Link href="/" className="flex items-center gap-2 font-semibold">
+          <Logo />
+          <span className="text-lg">ToolifyAI</span>
+        </Link>
+      </div>
       <ScrollArea className="flex-1">
         <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4 py-4">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-              )}
-            >
-              <link.icon className="h-4 w-4" />
-              {link.label}
-            </Link>
-          ))}
+           <Accordion type="multiple" defaultValue={['main', 'community', 'billing', 'settings']} className="w-full">
+             <AccordionItem value="main" className="border-b-0">
+                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Account</AccordionTrigger>
+                <AccordionContent className="pl-4 pt-1">
+                    {mainNavLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                            )}
+                            >
+                            <link.icon className="h-4 w-4" />
+                            {link.label}
+                        </Link>
+                    ))}
+                </AccordionContent>
+             </AccordionItem>
+             <AccordionItem value="community" className="border-b-0">
+                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Community</AccordionTrigger>
+                 <AccordionContent className="pl-4 pt-1">
+                    {communityLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                            )}
+                            >
+                            <link.icon className="h-4 w-4" />
+                            {link.label}
+                        </Link>
+                    ))}
+                 </AccordionContent>
+             </AccordionItem>
+             <AccordionItem value="billing" className="border-b-0">
+                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Billing</AccordionTrigger>
+                 <AccordionContent className="pl-4 pt-1">
+                     {billingLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                            )}
+                            >
+                            <link.icon className="h-4 w-4" />
+                            {link.label}
+                        </Link>
+                    ))}
+                 </AccordionContent>
+             </AccordionItem>
+             <AccordionItem value="settings" className="border-b-0">
+                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Settings</AccordionTrigger>
+                 <AccordionContent className="pl-4 pt-1">
+                     {settingsLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                            )}
+                            >
+                            <link.icon className="h-4 w-4" />
+                            {link.label}
+                        </Link>
+                    ))}
+                 </AccordionContent>
+             </AccordionItem>
+          </Accordion>
         </nav>
       </ScrollArea>
     </div>
@@ -176,7 +361,7 @@ export default function UserPanelLayout({
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
-        {sidebarNav()}
+        {sidebarNav}
       </div>
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-50">
@@ -188,6 +373,7 @@ export default function UserPanelLayout({
           </div>
           <div className="w-full flex-1 hidden md:block">&nbsp;</div>
           <div className="flex items-center gap-2 md:gap-4 justify-end flex-1">
+             <ModeToggle />
              <Sheet>
               <SheetTrigger asChild>
                 <Button
@@ -200,27 +386,7 @@ export default function UserPanelLayout({
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="flex flex-col p-0">
-                <SheetHeader className="p-4 border-b">
-                   <SheetTitle>
-                    <Link href="/" className="flex items-center gap-2 font-semibold">
-                      <Logo />
-                      <span className="text-lg">ToolifyAI</span>
-                    </Link>
-                  </SheetTitle>
-                </SheetHeader>
-               {sidebarNav(true)}
-                 <div className="mt-auto p-4 border-t flex flex-col gap-2">
-                    <Button asChild variant="outline">
-                        <Link href="/profile">
-                            <User className="mr-2 h-4 w-4" />
-                            My Profile
-                        </Link>
-                    </Button>
-                    <Button variant="secondary" onClick={handleLogout}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Logout
-                    </Button>
-                </div>
+                {mobileNavContent}
               </SheetContent>
             </Sheet>
           </div>
