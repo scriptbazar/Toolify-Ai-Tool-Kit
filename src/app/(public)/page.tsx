@@ -336,7 +336,7 @@ export default async function Home() {
 
       <Testimonials />
 
-      <section className="py-20 md:py-32 bg-background">
+      <section className="py-12 md:py-16 bg-background">
         <div className="container mx-auto px-4">
           <Card className="bg-card">
             <CardContent className="p-12 text-center">
