@@ -58,16 +58,10 @@ const initialMessages: Message[] = [
 
 const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: Message['poll']) => void }) => {
     const [question, setQuestion] = useState('');
-    const [options, setOptions] = useState(['', '']);
+    const [options, setOptions] = useState(['', '', '', '']);
     const [allowCustom, setAllowCustom] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
-    const handleAddOption = () => setOptions([...options, '']);
-    const handleRemoveOption = (index: number) => {
-        if (options.length > 2) {
-            setOptions(options.filter((_, i) => i !== index));
-        }
-    };
     const handleOptionChange = (index: number, value: string) => {
         const newOptions = [...options];
         newOptions[index] = value;
@@ -80,7 +74,7 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: Message['poll']) 
             setIsOpen(false);
             // Reset state
             setQuestion('');
-            setOptions(['', '']);
+            setOptions(['', '', '', '']);
             setAllowCustom(false);
         }
     };
@@ -109,14 +103,8 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: Message['poll']) 
                         {options.map((opt, index) => (
                             <div key={index} className="flex items-center gap-2">
                                 <Input value={opt} onChange={(e) => handleOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`} />
-                                <Button variant="ghost" size="icon" onClick={() => handleRemoveOption(index)} disabled={options.length <= 2}>
-                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                </Button>
                             </div>
                         ))}
-                         <Button variant="outline" size="sm" onClick={handleAddOption}>
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add Option
-                        </Button>
                     </div>
                     <div className="flex items-center space-x-2">
                         <Switch id="allow-custom" checked={allowCustom} onCheckedChange={setAllowCustom} />
