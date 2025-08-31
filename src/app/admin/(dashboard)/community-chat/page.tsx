@@ -244,12 +244,18 @@ export default function CommunityChatPage() {
                   </div>
                   <div className="space-y-1">
                       <div className="grid w-full grid-cols-2 gap-1 pt-2">
-                          <Button variant={activeUserFilter === 'all' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('all')}>
-                              <span className="flex items-center"><Users className="mr-2 h-4 w-4" /> All</span>
-                          </Button>
-                          <Button variant={activeUserFilter === 'live' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('live')}>
-                             <span className="flex items-center"><Wifi className="mr-2 h-4 w-4"/>Live</span>
-                          </Button>
+                           <Button variant={activeUserFilter === 'all' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('all')}>
+                                <span className="flex items-center"><Users className="mr-2 h-4 w-4" /> All</span>
+                           </Button>
+                           <Button variant={activeUserFilter === 'live' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('live')}>
+                              <span className="flex items-center"><Wifi className="mr-2 h-4 w-4"/>Live</span>
+                           </Button>
+                           <Button variant="outline" onClick={() => toast({ description: "Create Poll clicked" })}>
+                                <span className="flex items-center"><Vote className="mr-2 h-4 w-4"/>Create Poll</span>
+                           </Button>
+                           <Button variant={activeUserFilter === 'new' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('new')}>
+                               <span className="flex items-center"><UserPlus className="mr-2 h-4 w-4"/>New Users</span>
+                           </Button>
                       </div>
                   </div>
               </CardHeader>
