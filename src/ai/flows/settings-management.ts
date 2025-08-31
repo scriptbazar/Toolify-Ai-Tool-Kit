@@ -77,7 +77,57 @@ const defaultPages = [
     },
   ];
 
-const defaultSettings = AppSettingsSchema.parse({ page: { pages: defaultPages } });
+const defaultPlans = [
+  {
+    id: 'free',
+    name: 'Free',
+    description: 'For individuals and hobbyists starting out.',
+    price: 0,
+    priceSuffix: '/ month',
+    features: [
+      { id: 'f1', text: 'Access to basic tools' },
+      { id: 'f2', text: '5 AI generations per day' },
+      { id: 'f3', text: 'Community support' },
+    ],
+    isPopular: false,
+    status: 'active' as const,
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    description: 'For professionals and power users who need more.',
+    price: 19,
+    priceSuffix: '/ month',
+    features: [
+      { id: 'p1', text: 'Access to all tools' },
+      { id: 'p2', text: 'Unlimited AI generations' },
+      { id: 'p3', text: 'Priority email support' },
+      { id: 'p4', text: 'Advanced analytics' },
+    ],
+    isPopular: true,
+    status: 'active' as const,
+  },
+  {
+    id: 'team',
+    name: 'Team',
+    description: 'For collaborative teams and businesses.',
+    price: 49,
+    priceSuffix: '/ month',
+    features: [
+      { id: 't1', text: 'All Pro features' },
+      { id: 't2', text: 'Team management' },
+      { id: 't3', text: 'Shared workspaces' },
+      { id: 't4', text: 'Dedicated support' },
+    ],
+    isPopular: false,
+    status: 'active' as const,
+  },
+];
+
+const defaultSettings = AppSettingsSchema.parse({ 
+  page: { pages: defaultPages },
+  plan: { plans: defaultPlans },
+});
 
 /**
  * Retrieves the application settings from Firestore.
