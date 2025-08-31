@@ -236,7 +236,7 @@ export default function UserPanelLayout({
           <div className="flex-1 md:hidden">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Logo />
-              <span className="sr-only">ToolifyAI</span>
+              <span className="font-bold">ToolifyAI</span>
             </Link>
           </div>
           <div className="w-full flex-1 hidden md:block">
