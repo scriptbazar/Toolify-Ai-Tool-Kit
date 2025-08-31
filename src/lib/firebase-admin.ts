@@ -18,7 +18,6 @@ function initializeFirebaseAdmin(): App {
   }
 
   let serviceAccount: ServiceAccount;
-  let credentialsFound = false;
 
   // Primary Method: Individual environment variables
   if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
@@ -28,7 +27,6 @@ function initializeFirebaseAdmin(): App {
       // Ensure newline characters are correctly formatted
       privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
     };
-    credentialsFound = true;
     console.log('Initializing Firebase Admin with individual environment variables.');
   } 
   // Fallback Method: Full GOOGLE_APPLICATION_CREDENTIALS JSON object
@@ -38,7 +36,6 @@ function initializeFirebaseAdmin(): App {
       // Ensure newline characters are correctly formatted
       serviceAccountJson.private_key = (serviceAccountJson.private_key || '').replace(/\\n/g, '\n');
       serviceAccount = serviceAccountJson;
-      credentialsFound = true;
       console.log('Initializing Firebase Admin with GOOGLE_APPLICATION_CREDENTIALS.');
     } catch (error) {
       console.error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS. Using placeholder credentials. Error:', error);
