@@ -70,7 +70,7 @@ export default function UserDashboard() {
     return () => unsubscribe();
   }, [router, toast]);
   
-  const welcomeMessage = profile?.firstName ? `Welcome back, ${profile.firstName}!` : "User Dashboard";
+  const welcomeMessage = profile?.firstName ? `Welcome Back, ${profile.firstName} ${profile.lastName}!` : "User Dashboard";
   
   if (loading) {
       return (
@@ -169,7 +169,7 @@ export default function UserDashboard() {
             <TableBody>
               {activities.length > 0 ? activities.map(activity => (
                 <TableRow key={activity.id}>
-                  <TableCell>{activity.action}</TableCell>
+                  <TableCell>{activity.details.name}</TableCell>
                   <TableCell>{new Date(activity.timestamp).toLocaleString()}</TableCell>
                 </TableRow>
               )) : (
