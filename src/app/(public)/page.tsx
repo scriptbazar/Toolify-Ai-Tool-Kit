@@ -278,10 +278,10 @@ export default async function Home() {
         </div>
       </section>
 
-       <section className="py-20 md:py-32 bg-card">
+       <section id="features" className="py-20 md:py-32 bg-card">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Why Choose AI Smart Tools?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Why Choose ToolifyAI?</h2>
             <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
               We are committed to providing a comprehensive suite of tools that are powerful, easy to use, and reliable, helping you achieve your goals faster.
             </p>
@@ -309,7 +309,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="py-20 md:py-32 bg-background">
+      <section id="blog" className="py-20 md:py-32 bg-background">
         <div className="container mx-auto px-4">
             <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight">From Our Blog</h2>
