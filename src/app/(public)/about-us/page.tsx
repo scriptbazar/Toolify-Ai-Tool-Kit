@@ -1,7 +1,31 @@
 
+
 import { Card, CardContent } from '@/components/ui/card';
-import { Target, BookOpen } from 'lucide-react';
+import { Target, BookOpen, Lightbulb, MousePointerClick, ShieldCheck, LifeBuoy } from 'lucide-react';
 import Image from 'next/image';
+
+const coreValues = [
+    {
+      icon: Lightbulb,
+      title: 'Innovation',
+      description: 'We constantly seek to innovate and improve our tools with the latest technology.',
+    },
+    {
+      icon: MousePointerClick,
+      title: 'Simplicity',
+      description: 'Our tools are designed to be intuitive and easy to use for everyone.',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'Reliability',
+      description: 'Your data is always safe and protected with our robust security measures.',
+    },
+    {
+      icon: LifeBuoy,
+      title: 'Customer Focus',
+      description: 'Our dedicated support team is available around the clock to assist you.',
+    },
+];
 
 export default function AboutUsPage() {
   return (
@@ -91,6 +115,28 @@ export default function AboutUsPage() {
                 </div>
             </CardContent>
         </Card>
+
+        <section className="py-20 md:py-24">
+            <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Our Core Values</h2>
+                <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
+                    The principles that guide our work and our commitment to you.
+                </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {coreValues.map((value, index) => (
+                    <Card key={index} className="text-center p-8 border-2 shadow-lg transition-all duration-300 hover:-translate-y-2 bg-card">
+                        <CardContent className="p-0 flex flex-col items-center">
+                            <div className="flex items-center justify-center h-16 w-16 mb-6 rounded-full bg-primary/10">
+                                <value.icon className="h-8 w-8 text-primary" />
+                            </div>
+                            <h3 className="text-xl font-semibold mb-2">{value.title}</h3>
+                            <p className="text-muted-foreground text-sm">{value.description}</p>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        </section>
 
       </div>
     </div>
