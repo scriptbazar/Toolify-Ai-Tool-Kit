@@ -52,6 +52,7 @@ export default function UserPanelLayout({
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userData, setUserData] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   const isLoginPage = pathname === '/login';
 
@@ -66,12 +67,18 @@ export default function UserPanelLayout({
           if (fetchedUserData.role === 'admin') {
             // If the user is an admin, redirect them away from the user dashboard.
             router.push('/admin/dashboard');
-            return; // Stop further processing
+            return; // Stop further processing for this layout
           }
           setUser(firebaseUser);
           setUserData(fetchedUserData);
+          setIsAuthorized(true); // User is a regular user and is authorized
         } else {
-            // If no user doc, treat as a regular user but redirect to login as something is wrong.
+            // If no user doc, something is wrong, redirect to login
+            toast({
+              title: "Authentication Error",
+              description: "Could not find your user details. Please log in again.",
+              variant: "destructive",
+            });
             router.push('/login');
         }
       } else {
@@ -81,7 +88,7 @@ export default function UserPanelLayout({
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, toast]);
 
   const handleLogout = async () => {
     try {
@@ -101,8 +108,8 @@ export default function UserPanelLayout({
     }
   };
   
-  if (loading) {
-      return <div>Loading user panel...</div>
+  if (loading || !isAuthorized) {
+      return <div>Loading...</div>
   }
   
   const navLinks = [
