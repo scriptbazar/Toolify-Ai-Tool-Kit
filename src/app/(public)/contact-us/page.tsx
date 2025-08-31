@@ -10,8 +10,8 @@ export default function ContactUsPage() {
   return (
     <div className="container mx-auto px-4 py-12 md:py-20">
       <Card className="max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center gap-2 text-2xl">
             <Mail className="h-6 w-6" />
             Support & Inquiries
           </CardTitle>
