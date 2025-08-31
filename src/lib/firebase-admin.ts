@@ -24,11 +24,10 @@ function initializeFirebaseAdmin(): App {
   }
 
   // Fallback for environments where individual keys are set.
-  // This is less common and more error-prone.
   const serviceAccount = {
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    // Replace escaped newlines with actual newline characters.
+    // Replace escaped newlines with actual newline characters. This is crucial.
     privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
   };
 
@@ -40,7 +39,7 @@ function initializeFirebaseAdmin(): App {
 
   // If credentials are not fully set, log a clear warning and fall back to ADC.
   // This is the default behavior for many Google Cloud services.
-  console.warn("Firebase Admin credentials not set in environment variables. Falling back to Application Default Credentials. This might fail if not configured.");
+  console.warn("Firebase Admin credentials not fully set in environment variables. Falling back to Application Default Credentials. This may fail if your environment is not configured for it (e.g., local development without gcloud CLI).");
   return initializeApp();
 }
 
