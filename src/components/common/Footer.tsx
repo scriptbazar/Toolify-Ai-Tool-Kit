@@ -1,5 +1,4 @@
 
-
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from './Logo';
@@ -13,11 +12,11 @@ const topTools = [
 ];
 
 const quickLinks = [
-  { name: 'About Us', href: '/pages/about-us' },
-  { name: 'Contact Us', href: '/pages/contact-us' },
-  { name: 'Privacy Policy', href: '/pages/privacy-policy' },
-  { name: 'Terms & Conditions', href: '/pages/terms-conditions' },
-  { name: 'DMCA', href: '/pages/dmca' },
+  { name: 'About Us', href: '/tools/about-us' },
+  { name: 'Contact Us', href: '/tools/contact-us' },
+  { name: 'Privacy Policy', href: '/tools/privacy-policy' },
+  { name: 'Terms & Conditions', href: '/tools/terms-conditions' },
+  { name: 'DMCA', href: '/tools/dmca' },
 ];
 
 const moreTools = [
