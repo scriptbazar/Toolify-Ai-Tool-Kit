@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from '@/components/ui/button';
 import { getSettings } from '@/ai/flows/settings-management';
 import { getReferralStatus, requestToJoinReferralProgram } from '@/ai/flows/user-management';
-import type { ReferralSettings, ReferralStatus } from '@/ai/flows/settings-management.types';
+import type { ReferralSettings } from '@/ai/flows/settings-management.types';
+import type { ReferralStatus } from '@/ai/flows/user-management.types';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, UserPlus, Gift, Copy, CheckCircle, Clock } from 'lucide-react';
