@@ -14,6 +14,7 @@ import {
   CreditCard,
   Heart,
   GitCommitVertical,
+  Mail,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -118,6 +119,7 @@ export default function UserPanelLayout({
     { href: '/manage-subscription', label: 'Manage Subscription', icon: Star },
     { href: '/profile', label: 'My Profile', icon: User },
     { href: '/settings', label: 'Settings', icon: Settings },
+    { href: '/login-history', label: 'Login History', icon: Mail },
   ];
 
   const sidebarNav = (
