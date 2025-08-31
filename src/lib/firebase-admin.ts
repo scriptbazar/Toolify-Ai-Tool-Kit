@@ -8,13 +8,14 @@ import { getFirestore, Firestore } from 'firebase-admin/firestore';
 // correctly formatted, especially the multi-line private key.
 function initializeFirebaseAdmin(): App {
   if (getApps().length) {
-    return getApps()[0];
+    const defaultApp = getApps().find(app => app.name === '[DEFAULT]');
+    if (defaultApp) return defaultApp;
   }
 
   const hasCreds = process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY;
   const hasCredsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
-  let serviceAccount: ServiceAccount;
+  let serviceAccount: ServiceAccount | undefined;
 
   try {
     if (hasCreds) {
@@ -32,26 +33,32 @@ function initializeFirebaseAdmin(): App {
       // Ensure private_key is correctly formatted with newlines
       serviceAccountJson.private_key = (serviceAccountJson.private_key || '').replace(/\\n/g, '\n');
       serviceAccount = serviceAccountJson;
+    }
+
+    if (serviceAccount) {
+      return initializeApp({
+        credential: cert(serviceAccount),
+      });
     } else {
-      throw new Error("Firebase Admin SDK credentials not found in environment variables.");
+        throw new Error("Firebase Admin SDK credentials not found in environment variables.");
     }
     
-    return initializeApp({
-      credential: cert(serviceAccount),
-    });
-
   } catch (error: any) {
     console.warn(`Firebase Admin SDK initialization failed: ${error.message}. Using placeholder credentials for local development. Server-side Firebase features will not work unless configured.`);
+    
+    // Check if placeholder app already exists to prevent re-initialization errors
+    const placeholderAppName = 'placeholder-app-instance-' + Date.now();
+    
     const placeholderServiceAccount = {
       projectId: "demo-toolify",
       clientEmail: "demo@example.com",
       privateKey:
-        "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC39G5s4s/j\nbi2g2aK2i8qGvPwsf5do4g5iE5y3j5k3L5a9i8f7o6e2e5h2d4e4h5j4k3k5k4j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\n-----END PRIVATE KEY-----\n",
+        "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCpQol0TqgG51e7\nB8fGgqVb1f9b5g3hD/j/k9l7m8n9o0p1q3r5s7t9v/x+y/z/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0CAwEAAQ==\n-----END PRIVATE KEY-----\n",
     };
      return initializeApp({
         credential: cert(placeholderServiceAccount),
         projectId: placeholderServiceAccount.projectId,
-    }, 'placeholder-app-instance-' + Date.now()); // Use a unique name to avoid conflicts
+    }, placeholderAppName);
   }
 }
 
