@@ -17,6 +17,68 @@ import path from 'path';
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
 
+
+const defaultPages = [
+    {
+      id: 'about-us',
+      slug: 'about-us',
+      title: 'About Us',
+      content: `
+        <div class="space-y-6">
+          <p class="text-lg">Welcome to ToolifyAI, your all-in-one destination for a smarter, more efficient digital life. Our mission is to provide a comprehensive suite of powerful, easy-to-use online utilities that simplify complex tasks and boost productivity for everyone—from students and content creators to developers and business professionals.</p>
+          
+          <h2 class="text-2xl font-bold border-b pb-2">Our Mission</h2>
+          <p>In a world overflowing with information and digital noise, we believe in the power of simplicity and efficiency. ToolifyAI was born from a desire to eliminate the need for multiple, single-purpose websites and applications. We wanted to create a single, reliable hub where you can find all the tools you need, right when you need them. Our goal is to empower you to work smarter, not harder, by providing intuitive tools that deliver accurate results instantly.</p>
+
+          <h2 class="text-2xl font-bold border-b pb-2">Meet The Team</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-4">
+              <div class="text-center">
+                  <img src="https://i.pravatar.cc/150?u=jane" alt="Jane Doe" class="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg" />
+                  <h3 class="text-xl font-semibold">Jane Doe</h3>
+                  <p class="text-muted-foreground">Founder & CEO</p>
+              </div>
+              <div class="text-center">
+                  <img src="https://i.pravatar.cc/150?u=john" alt="John Smith" class="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg" />
+                  <h3 class="text-xl font-semibold">John Smith</h3>
+                  <p class="text-muted-foreground">Lead Developer</p>
+              </div>
+              <div class="text-center">
+                  <img src="https://i.pravatar.cc/150?u=emily" alt="Emily White" class="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg" />
+                  <h3 class="text-xl font-semibold">Emily White</h3>
+                  <p class="text-muted-foreground">UX/UI Designer</p>
+              </div>
+          </div>
+        </div>
+      `,
+    },
+    {
+      id: 'contact-us',
+      slug: 'contact-us',
+      title: 'Contact Us',
+      content: '<p>Contact form coming soon. For now, please reach out to us at contact@toolifyai.com.</p>',
+    },
+    {
+      id: 'privacy-policy',
+      slug: 'privacy-policy',
+      title: 'Privacy Policy',
+      content: '<p>Your privacy is important to us. Our full privacy policy will be detailed here soon.</p>',
+    },
+    {
+      id: 'terms-conditions',
+      slug: 'terms-conditions',
+      title: 'Terms & Conditions',
+      content: '<p>Please read our terms and conditions carefully. Full details will be provided here shortly.</p>',
+    },
+    {
+      id: 'dmca',
+      slug: 'dmca',
+      title: 'DMCA',
+      content: '<p>We respect intellectual property rights. Our DMCA policy and takedown request form will be available here.</p>',
+    },
+  ];
+
+const defaultSettings = AppSettingsSchema.parse({ page: { pages: defaultPages } });
+
 /**
  * Retrieves the application settings from Firestore.
  * If no settings exist, it returns the default values defined in the schema.
@@ -36,16 +98,16 @@ export async function getSettings(): Promise<AppSettings> {
         // This case handles situations where the data in Firestore is malformed.
         // It returns default settings to prevent the app from crashing.
         console.warn("Firestore settings data is invalid, returning defaults.", parsedData.error);
-        return AppSettingsSchema.parse({}); 
+        return defaultSettings; 
       }
     } else {
       // If the document doesn't exist, return the default settings.
-      return AppSettingsSchema.parse({});
+      return defaultSettings;
     }
   } catch (error: any) {
     console.error("Error getting settings:", error.message);
     // On error, return default settings to ensure app stability.
-    return AppSettingsSchema.parse({});
+    return defaultSettings;
   }
 }
 

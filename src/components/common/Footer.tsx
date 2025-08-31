@@ -12,17 +12,17 @@ const topTools = [
 ];
 
 const quickLinks = [
-  { name: 'About Us', href: '/tools/about-us' },
-  { name: 'Contact Us', href: '/tools/contact-us' },
-  { name: 'Privacy Policy', href: '/tools/privacy-policy' },
-  { name: 'Terms & Conditions', href: '/tools/terms-conditions' },
-  { name: 'DMCA', href: '/tools/dmca' },
+  { name: 'About Us', href: '/about-us' },
+  { name: 'Contact Us', href: '/contact-us' },
+  { name: 'Privacy Policy', href: '/privacy-policy' },
+  { name: 'Terms & Conditions', href: '/terms-conditions' },
+  { name: 'DMCA', href: '/dmca' },
 ];
 
 const moreTools = [
   { name: 'BMI Calculator', href: '/tools/bmi-calculator' },
   { name: 'Text to Speech', href: '/tools/text-to-speech' },
-  { name: 'PDF Merger', href: '/tools/merge-pdf' },
+  { name: 'PDF Merger', href: '/tools/pdf-merger' },
   { name: 'Unit Converter', href: '/tools/unit-converter' },
   { name: 'Color Picker', href: '/tools/color-picker' },
 ];
