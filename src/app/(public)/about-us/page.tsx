@@ -179,7 +179,7 @@ export default function AboutUsPage() {
             </div>
         </section>
 
-         <section className="pt-12 pb-8">
+         <section className="py-12">
             <Card className="bg-card">
                 <CardContent className="p-12 text-center">
                     <h2 className="text-3xl font-bold tracking-tight">Join Thousands of Satisfied Users</h2>
