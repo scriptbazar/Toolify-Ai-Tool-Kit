@@ -1,14 +1,20 @@
+
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { LogIn, Menu, UserPlus, Home, LayoutGrid, Newspaper, Info, Mail, DollarSign, MessageSquare } from 'lucide-react';
+import { LogIn, Menu, UserPlus, Home, LayoutGrid, Newspaper, Info, Mail, DollarSign, MessageSquare, User } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
 import { ModeToggle } from './ModeToggle';
+import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { UserNav } from './UserNav';
 
 
 const mainNavLinks = [
@@ -18,16 +24,18 @@ const mainNavLinks = [
   { href: '/about-us', label: 'About Us', icon: Info },
   { href: '/contact-us', label: 'Contact Us', icon: Mail },
   { href: '/pricing', label: 'Pricing', icon: DollarSign },
-  { href: '/community-chat', label: 'Community Chat', icon: MessageSquare },
 ];
 
-
-const NavLinks = ({ isMobile = false }) => {
+const NavLinks = ({ isMobile = false, isLoggedIn = false }) => {
   const pathname = usePathname();
+
+  const allLinks = isLoggedIn 
+    ? [...mainNavLinks, { href: '/community-chat', label: 'Community Chat', icon: MessageSquare }]
+    : mainNavLinks;
 
   return (
     <>
-      {mainNavLinks.map((link) => {
+      {allLinks.map((link) => {
         const isActive = pathname === link.href;
         return (
           <Button
@@ -53,8 +61,25 @@ const NavLinks = ({ isMobile = false }) => {
 
 export default function Header() {
   const isMobile = useIsMobile();
-  const pathname = usePathname();
-  const isAdminRoute = pathname.startsWith('/admin');
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const router = useRouter();
+  
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    toast({ title: 'Logged out successfully.' });
+    router.push('/');
+  };
+  
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -87,17 +112,23 @@ export default function Header() {
                   </SheetHeader>
                   <div className="flex-1 overflow-y-auto p-4">
                     <nav className="flex flex-col space-y-2">
-                       <NavLinks isMobile={true} />
+                       <NavLinks isMobile={true} isLoggedIn={!!user} />
                     </nav>
                   </div>
                    <div className="mt-auto p-4 border-t">
                       <div className="flex gap-2">
-                        <Button asChild variant="ghost" className="flex-1">
-                           <Link href="/login"><LogIn className="mr-2 h-4 w-4" /> Log in</Link>
-                        </Button>
-                        <Button asChild className="flex-1">
-                           <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" /> Sign Up</Link>
-                        </Button>
+                        {!user ? (
+                          <>
+                           <Button asChild variant="ghost" className="flex-1">
+                             <Link href="/login"><LogIn className="mr-2 h-4 w-4" /> Log in</Link>
+                           </Button>
+                           <Button asChild className="flex-1">
+                             <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" /> Sign Up</Link>
+                           </Button>
+                          </>
+                        ) : (
+                           <UserNav user={user} onLogout={handleLogout} />
+                        )}
                       </div>
                   </div>
                 </SheetContent>
@@ -113,20 +144,22 @@ export default function Header() {
               </Link>
             </div>
             <nav className="flex flex-1 items-center justify-center space-x-1 text-sm font-medium">
-              <NavLinks />
+              <NavLinks isLoggedIn={!!user} />
             </nav>
             <div className="flex flex-1 items-center justify-end space-x-2">
-            {!isAdminRoute && (
-              <>
-                <ModeToggle />
-                <Button asChild variant="ghost">
-                  <Link href="/login"><LogIn className="mr-2 h-4 w-4" />Log in</Link>
-                </Button>
-                <Button asChild>
-                  <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" />Sign Up</Link>
-                </Button>
-              </>
-            )}
+               <ModeToggle />
+               {loading ? null : !user ? (
+                  <>
+                    <Button asChild variant="ghost">
+                      <Link href="/login"><LogIn className="mr-2 h-4 w-4" />Log in</Link>
+                    </Button>
+                    <Button asChild>
+                      <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" />Sign Up</Link>
+                    </Button>
+                  </>
+                ) : (
+                   <UserNav user={user} onLogout={handleLogout} />
+                )}
             </div>
           </>
         )}
