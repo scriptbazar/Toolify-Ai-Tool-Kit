@@ -146,7 +146,6 @@ export default function UserPanelLayout({
     { href: '/refer-a-friend', label: 'Refer a Friend', icon: GitCommitVertical },
     { href: '/favorites', label: 'My Favorites', icon: Heart },
     { href: '/settings', label: 'Settings', icon: Settings },
-    { href: '/profile', label: 'My Profile', icon: User },
     { href: '/manage-subscription', label: 'Manage Subscription', icon: Star },
     { href: '/login-history', label: 'Login History', icon: Mail },
   ];
