@@ -19,6 +19,7 @@ import {
   DollarSign,
   UserCog,
   FileText,
+  Bell,
 } from 'lucide-react';
 import Link from 'next/link';
 import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
@@ -257,6 +258,10 @@ export default function UserPanelLayout({
           </div>
           <div className="flex items-center gap-2 md:gap-4 justify-end flex-1">
              <ModeToggle />
+             <Button variant="outline" size="icon" className="h-9 w-9">
+                <Bell className="h-4 w-4" />
+                <span className="sr-only">Toggle notifications</span>
+             </Button>
             <div className="hidden md:flex items-center gap-2">
                  <DropdownMenu>
                   <DropdownMenuTrigger asChild>
