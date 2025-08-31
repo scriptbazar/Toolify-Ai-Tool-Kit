@@ -37,6 +37,7 @@ interface AppUser {
   firstName: string;
   lastName: string;
   email: string;
+  role?: 'user' | 'admin';
 }
 
 
@@ -57,11 +58,21 @@ export default function UserPanelLayout({
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        setUser(firebaseUser);
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         const userDocSnap = await getDoc(userDocRef);
+        
         if (userDocSnap.exists()) {
-          setUserData(userDocSnap.data() as AppUser);
+          const fetchedUserData = userDocSnap.data() as AppUser;
+          if (fetchedUserData.role === 'admin') {
+            // If the user is an admin, redirect them away from the user dashboard.
+            router.push('/admin/dashboard');
+            return; // Stop further processing
+          }
+          setUser(firebaseUser);
+          setUserData(fetchedUserData);
+        } else {
+            // If no user doc, treat as a regular user but redirect to login as something is wrong.
+            router.push('/login');
         }
       } else {
         router.push('/login');
