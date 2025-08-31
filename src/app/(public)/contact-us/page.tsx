@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -130,7 +129,7 @@ export default function ContactUsPage() {
                 <HelpCircle className="h-6 w-6" />
                 Frequently Asked Questions
               </h2>
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion type="single" collapsible className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-8">
                 {faqs.map((faq, index) => (
                   <AccordionItem value={`item-${index}`} key={index}>
                     <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
