@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { TeamMemberCard } from '@/components/common/TeamMemberCard';
 
 const coreValues = [
     {
@@ -41,98 +42,94 @@ const teamMembers = [
 export default function AboutUsPage() {
   return (
     <div className="bg-background">
-      <div className="container mx-auto px-4 py-12 md:py-20">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-            About ToolifyAI
-          </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            We are on a mission to provide powerful, intuitive, and accessible online utilities for
-            everyone.
-          </p>
+      
+      {/* Hero Section */}
+      <section className="bg-background py-16 md:py-24">
+        <div className="container mx-auto px-4 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+              About ToolifyAI
+            </h1>
+            <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
+              We are on a mission to provide powerful, intuitive, and accessible online utilities for
+              everyone.
+            </p>
         </div>
+      </section>
 
-        <Card className="mt-12 overflow-hidden">
-            <CardContent className="p-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
-                    <div className="relative aspect-video w-full">
-                        <Image 
-                            src="https://picsum.photos/600/400" 
-                            alt="Our Mission"
-                            width={600}
-                            height={400}
-                            className="object-cover w-full h-full"
-                            data-ai-hint="team mission"
-                        />
+      {/* Our Mission Section */}
+      <section className="bg-card py-16 md:py-24">
+        <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div className="relative aspect-video w-full rounded-lg overflow-hidden shadow-lg">
+                    <Image 
+                        src="https://picsum.photos/600/400" 
+                        alt="Our Mission"
+                        fill
+                        className="object-cover"
+                        data-ai-hint="team mission"
+                    />
+                </div>
+                <div className="text-center md:text-left">
+                    <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                            <Target className="h-6 w-6 text-primary" />
+                        </div>
+                        <h2 className="text-3xl font-bold">Our Mission</h2>
                     </div>
-                    <div className="p-8 md:p-12">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                                <Target className="h-6 w-6 text-primary" />
-                            </div>
-                            <h2 className="text-2xl font-bold">Our Mission</h2>
-                        </div>
-                        <div className="space-y-4 text-muted-foreground">
-                            <p>
-                                Our mission is to empower individuals and businesses by simplifying
-                                complex tasks. We believe that technology should be a great
-                                equalizer, and our suite of smart tools is designed to save you time,
-                                enhance your productivity, and unlock your creative potential—all
-                                within a single, user-friendly platform.
-                            </p>
-                            <p>
-                                From students and freelancers to large enterprises, ToolifyAI provides
-                                the resources needed to succeed in a digital world.
-                            </p>
-                        </div>
+                    <div className="space-y-4 text-muted-foreground">
+                        <p>
+                            Our mission is to empower individuals and businesses by simplifying
+                            complex tasks. We believe that technology should be a great
+                            equalizer, and our suite of smart tools is designed to save you time,
+                            enhance your productivity, and unlock your creative potential—all
+                            within a single, user-friendly platform.
+                        </p>
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
+      </section>
 
-        <Card className="mt-12 overflow-hidden">
-            <CardContent className="p-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
-                     <div className="p-8 md:p-12 order-last md:order-first">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                                <BookOpen className="h-6 w-6 text-primary" />
-                            </div>
-                            <h2 className="text-2xl font-bold">Our Story</h2>
+      {/* Our Story Section */}
+      <section className="bg-background py-16 md:py-24">
+        <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+                 <div className="text-center md:text-left md:order-last">
+                    <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                            <BookOpen className="h-6 w-6 text-primary" />
                         </div>
-                        <div className="space-y-4 text-muted-foreground">
-                            <p>
-                                Founded in a small garage by a group of passionate developers and
-                                designers, ToolifyAI started with a simple idea: what if everyone
-                                had access to the tools they needed without a hefty price tag or a
-                                steep learning curve? What began as a weekend project quickly grew
-                                into a comprehensive platform loved by thousands worldwide.
-                            </p>
-                            <p>
-                                We are driven by the stories of our users—the students who ace their projects,
-                                the entrepreneurs who launch their businesses, and the creators who bring
-                                their ideas to life. Your success is our motivation.
-                            </p>
-                        </div>
+                        <h2 className="text-3xl font-bold">Our Story</h2>
                     </div>
-                    <div className="relative aspect-video w-full">
-                        <Image 
-                            src="https://picsum.photos/600/400" 
-                            alt="Our Story"
-                            width={600}
-                            height={400}
-                            className="object-cover w-full h-full"
-                            data-ai-hint="passionate developers"
-                        />
+                    <div className="space-y-4 text-muted-foreground">
+                        <p>
+                            Founded in a small garage by a group of passionate developers and
+                            designers, ToolifyAI started with a simple idea: what if everyone
+                            had access to the tools they needed without a hefty price tag or a
+                            steep learning curve? What began as a weekend project quickly grew
+                            into a comprehensive platform loved by thousands worldwide.
+                        </p>
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+                <div className="relative aspect-video w-full rounded-lg overflow-hidden shadow-lg">
+                    <Image 
+                        src="https://picsum.photos/600/400" 
+                        alt="Our Story"
+                        fill
+                        className="object-cover"
+                        data-ai-hint="passionate developers"
+                    />
+                </div>
+            </div>
+        </div>
+      </section>
 
-        <section className="py-12 md:py-16">
+      {/* Core Values Section */}
+      <section className="bg-card py-16 md:py-24">
+        <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-                <div className="flex items-center justify-center gap-3">
-                    <Gem className="h-10 w-10 text-primary" />
+                <div className="inline-flex items-center justify-center gap-3">
+                    <Gem className="h-8 w-8 text-primary" />
                     <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Our Core Values</h2>
                 </div>
                 <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
@@ -141,7 +138,7 @@ export default function AboutUsPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {coreValues.map((value, index) => (
-                    <Card key={index} className="text-center border-2 shadow-lg transition-all duration-300 hover:-translate-y-2 bg-card">
+                    <Card key={index} className="text-center border-2 shadow-lg transition-all duration-300 hover:-translate-y-2 bg-background">
                         <CardContent className="p-8 flex flex-col items-center">
                             <div className="flex items-center justify-center h-16 w-16 mb-6 rounded-full bg-primary/10">
                                 <value.icon className="h-8 w-8 text-primary" />
@@ -152,12 +149,15 @@ export default function AboutUsPage() {
                     </Card>
                 ))}
             </div>
-        </section>
-
-        <section className="py-12 md:py-16">
+        </div>
+      </section>
+      
+      {/* Meet The Team Section */}
+      <section className="bg-background py-16 md:py-24">
+        <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-                <div className="flex items-center justify-center gap-3">
-                    <Users className="h-10 w-10 text-primary" />
+                <div className="inline-flex items-center justify-center gap-3">
+                    <Users className="h-8 w-8 text-primary" />
                     <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Meet The Team</h2>
                 </div>
                 <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
@@ -166,27 +166,16 @@ export default function AboutUsPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
                 {teamMembers.map((member) => (
-                    <Card key={member.name} className="text-center p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                        <CardContent className="p-0 flex flex-col items-center">
-                            <div className="relative h-32 w-32 mb-4">
-                                <Image
-                                    src={member.avatar}
-                                    alt={member.name}
-                                    width={128}
-                                    height={128}
-                                    className="rounded-full object-cover shadow-lg"
-                                />
-                            </div>
-                            <h3 className="text-lg font-semibold">{member.name}</h3>
-                            <p className="text-primary">{member.role}</p>
-                        </CardContent>
-                    </Card>
+                    <TeamMemberCard key={member.name} member={member} />
                 ))}
             </div>
-        </section>
+        </div>
+      </section>
 
-         <section className="py-12">
-            <Card className="bg-card">
+      {/* Join Users Section */}
+      <section className="bg-card py-16 md:py-24">
+        <div className="container mx-auto px-4">
+            <Card className="bg-background border-primary border-2 shadow-xl">
                 <CardContent className="p-12 text-center">
                     <h2 className="text-3xl font-bold tracking-tight">Join Thousands of Satisfied Users</h2>
                     <p className="mt-3 max-w-xl mx-auto text-muted-foreground">
@@ -201,9 +190,8 @@ export default function AboutUsPage() {
                     </div>
                 </CardContent>
             </Card>
-        </section>
-
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

@@ -18,7 +18,7 @@ function initializeFirebaseAdmin(): App {
     try {
       const serviceAccountJson = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
       
-      const privateKey = serviceAccountJson.private_key || serviceAccountJson.privateKey;
+      const privateKey = (serviceAccountJson.private_key || serviceAccountJson.privateKey || '').trim();
       if (privateKey) {
         serviceAccountJson.private_key = privateKey.replace(/\\n/g, '\n');
         if (serviceAccountJson.privateKey) {
@@ -36,11 +36,12 @@ function initializeFirebaseAdmin(): App {
   }
 
   // Fallback method: Individual environment variables
-  if (!serviceAccount && process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+  if (!credentialsFound && process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+    const privateKey = (process.env.FIREBASE_PRIVATE_KEY || '').trim();
     serviceAccount = {
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+      privateKey: privateKey.replace(/\\n/g, '\n'),
     };
     credentialsFound = true;
     console.log('Initializing Firebase Admin with individual environment variables.');
