@@ -1,4 +1,5 @@
 
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Target, BookOpen, Lightbulb, MousePointerClick, ShieldCheck, LifeBuoy, Users, Gem } from 'lucide-react';
 import Image from 'next/image';
@@ -130,10 +131,8 @@ export default function AboutUsPage() {
 
         <section className="py-12 md:py-16">
             <div className="text-center mb-12">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                        <Gem className="h-6 w-6 text-primary" />
-                    </div>
+                <div className="flex items-center justify-center gap-3">
+                    <Gem className="h-10 w-10 text-primary" />
                     <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Our Core Values</h2>
                 </div>
                 <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
@@ -155,7 +154,7 @@ export default function AboutUsPage() {
             </div>
         </section>
 
-        <section className="py-12 md:py-16 bg-card rounded-lg">
+        <section className="py-12 md:py-16">
             <div className="text-center mb-12">
                 <div className="flex items-center justify-center gap-3">
                     <Users className="h-10 w-10 text-primary" />
@@ -167,7 +166,7 @@ export default function AboutUsPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
                 {teamMembers.map((member) => (
-                    <Card key={member.name} className="text-center p-6 border-0 shadow-none bg-transparent">
+                    <Card key={member.name} className="text-center p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                         <CardContent className="p-0 flex flex-col items-center">
                             <div className="relative h-32 w-32 mb-4">
                                 <Image

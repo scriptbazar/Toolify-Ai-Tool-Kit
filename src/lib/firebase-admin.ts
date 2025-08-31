@@ -11,19 +11,23 @@ function initializeFirebaseAdmin(): App {
   }
 
   let serviceAccount: ServiceAccount | undefined;
+  let credentialsFound = false;
 
   // Primary method: GOOGLE_APPLICATION_CREDENTIALS environment variable (JSON string)
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     try {
       const serviceAccountJson = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-      // Firebase Admin SDK expects private_key, but some environments provide privateKey
-      if (serviceAccountJson.privateKey) {
-        serviceAccountJson.private_key = serviceAccountJson.privateKey.replace(/\\n/g, '\n');
-        delete serviceAccountJson.privateKey;
-      } else if (serviceAccountJson.private_key) {
-        serviceAccountJson.private_key = serviceAccountJson.private_key.replace(/\\n/g, '\n');
+      
+      const privateKey = serviceAccountJson.private_key || serviceAccountJson.privateKey;
+      if (privateKey) {
+        serviceAccountJson.private_key = privateKey.replace(/\\n/g, '\n');
+        if (serviceAccountJson.privateKey) {
+            delete serviceAccountJson.privateKey;
+        }
       }
+      
       serviceAccount = serviceAccountJson;
+      credentialsFound = true;
       console.log('Initializing Firebase Admin with GOOGLE_APPLICATION_CREDENTIALS.');
     } catch (error) {
       console.error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS. Error:', error);
@@ -38,19 +42,24 @@ function initializeFirebaseAdmin(): App {
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
     };
+    credentialsFound = true;
     console.log('Initializing Firebase Admin with individual environment variables.');
   }
 
-  if (serviceAccount) {
-    return initializeApp({
-      credential: cert(serviceAccount),
-    });
+  // Development fallback: Use placeholder credentials if none are found.
+  // This allows the server to start for UI development but Firestore/Admin features will fail.
+  if (!credentialsFound) {
+      console.warn("Firebase Admin credentials not found. Using placeholder credentials for development. Server-side Firebase operations will fail.");
+      serviceAccount = {
+          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "demo-project",
+          clientEmail: 'demo@example.com',
+          privateKey: '-----BEGIN PRIVATE KEY-----\\n-----END PRIVATE KEY-----\\n',
+      };
   }
-  
-  // If no credentials are provided, we cannot initialize the admin app.
-  throw new Error(
-    'Firebase Admin SDK credentials not found. Please set GOOGLE_APPLICATION_CREDENTIALS or the individual FIREBASE_* environment variables.'
-  );
+
+  return initializeApp({
+    credential: cert(serviceAccount as ServiceAccount),
+  });
 }
 
 const adminApp: App = initializeFirebaseAdmin();
