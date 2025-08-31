@@ -1,7 +1,7 @@
 
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Target, BookOpen, Lightbulb, MousePointerClick, ShieldCheck, LifeBuoy } from 'lucide-react';
+import { Target, BookOpen, Lightbulb, MousePointerClick, ShieldCheck, LifeBuoy, Users } from 'lucide-react';
 import Image from 'next/image';
 
 const coreValues = [
@@ -25,6 +25,14 @@ const coreValues = [
       title: 'Customer Focus',
       description: 'Our dedicated support team is available around the clock to assist you.',
     },
+];
+
+const teamMembers = [
+    { name: 'Rohan Sharma', role: 'Founder & CEO', avatar: 'https://i.pravatar.cc/150?u=rohan' },
+    { name: 'Priya Verma', role: 'Lead Developer', avatar: 'https://i.pravatar.cc/150?u=priya' },
+    { name: 'Amit Kumar', role: 'Head of Product', avatar: 'https://i.pravatar.cc/150?u=amit' },
+    { name: 'Sunita Singh', role: 'Marketing Lead', avatar: 'https://i.pravatar.cc/150?u=sunita' },
+    { name: 'Anjali Sharma', role: 'UI/UX Designer', avatar: 'https://i.pravatar.cc/150?u=anjali' },
 ];
 
 export default function AboutUsPage() {
@@ -81,7 +89,7 @@ export default function AboutUsPage() {
         <Card className="mt-12 overflow-hidden">
             <CardContent className="p-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
-                     <div className="p-8 md:p-12">
+                     <div className="p-8 md:p-12 order-last md:order-first">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                                 <BookOpen className="h-6 w-6 text-primary" />
@@ -125,13 +133,41 @@ export default function AboutUsPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {coreValues.map((value, index) => (
-                    <Card key={index} className="text-center p-8 border-2 shadow-lg transition-all duration-300 hover:-translate-y-2 bg-card">
-                        <CardContent className="p-0 flex flex-col items-center">
+                    <Card key={index} className="text-center border-2 shadow-lg transition-all duration-300 hover:-translate-y-2 bg-card">
+                        <CardContent className="p-8 flex flex-col items-center">
                             <div className="flex items-center justify-center h-16 w-16 mb-6 rounded-full bg-primary/10">
                                 <value.icon className="h-8 w-8 text-primary" />
                             </div>
                             <h3 className="text-xl font-semibold mb-2">{value.title}</h3>
                             <p className="text-muted-foreground text-sm">{value.description}</p>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        </section>
+
+        <section className="py-20 md:py-24 bg-card rounded-lg">
+            <div className="text-center mb-12">
+                <Users className="h-10 w-10 mx-auto text-primary mb-4" />
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Meet The Team</h2>
+                <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
+                    The passionate individuals behind AI Smart Tools, dedicated to building the best platform for you.
+                </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                {teamMembers.map((member) => (
+                    <Card key={member.name} className="text-center p-6 border-0 shadow-none bg-transparent">
+                        <CardContent className="p-0 flex flex-col items-center">
+                            <div className="relative h-32 w-32 mb-4">
+                                <Image
+                                    src={member.avatar}
+                                    alt={member.name}
+                                    fill
+                                    className="rounded-full object-cover shadow-lg"
+                                />
+                            </div>
+                            <h3 className="text-lg font-semibold">{member.name}</h3>
+                            <p className="text-primary">{member.role}</p>
                         </CardContent>
                     </Card>
                 ))}
