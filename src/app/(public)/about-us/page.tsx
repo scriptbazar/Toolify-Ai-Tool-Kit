@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Target, BookOpen, Lightbulb, MousePointerClick, ShieldCheck, LifeBuoy, Users } from 'lucide-react';
+import { Target, BookOpen, Lightbulb, MousePointerClick, ShieldCheck, LifeBuoy, Users, Gem } from 'lucide-react';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -54,7 +54,7 @@ export default function AboutUsPage() {
         <Card className="mt-12 overflow-hidden">
             <CardContent className="p-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
-                    <div className="relative aspect-[3/2] w-full">
+                    <div className="relative aspect-video w-full">
                         <Image 
                             src="https://picsum.photos/600/400" 
                             alt="Our Mission"
@@ -114,7 +114,7 @@ export default function AboutUsPage() {
                             </p>
                         </div>
                     </div>
-                    <div className="relative aspect-[3/2] w-full">
+                    <div className="relative aspect-video w-full">
                         <Image 
                             src="https://picsum.photos/600/400" 
                             alt="Our Story"
@@ -128,9 +128,14 @@ export default function AboutUsPage() {
             </CardContent>
         </Card>
 
-        <section className="py-20 md:py-24">
+        <section className="py-12 md:py-16">
             <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Our Core Values</h2>
+                <div className="flex items-center justify-center gap-3 mb-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                        <Gem className="h-6 w-6 text-primary" />
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Our Core Values</h2>
+                </div>
                 <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
                     The principles that guide our work and our commitment to you.
                 </p>
@@ -152,8 +157,10 @@ export default function AboutUsPage() {
 
         <section className="py-12 md:py-16 bg-card rounded-lg">
             <div className="text-center mb-12">
-                <Users className="h-10 w-10 mx-auto text-primary mb-4" />
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Meet The Team</h2>
+                <div className="flex items-center justify-center gap-3">
+                    <Users className="h-10 w-10 text-primary" />
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Meet The Team</h2>
+                </div>
                 <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
                     The passionate individuals behind ToolifyAI, dedicated to building the best platform for you.
                 </p>
@@ -168,7 +175,7 @@ export default function AboutUsPage() {
                                     alt={member.name}
                                     width={128}
                                     height={128}
-                                    className="rounded-full object-cover shadow-lg w-32 h-32"
+                                    className="rounded-full object-cover shadow-lg"
                                 />
                             </div>
                             <h3 className="text-lg font-semibold">{member.name}</h3>
