@@ -31,6 +31,15 @@ import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
 
 interface AppUser {
   firstName: string;
@@ -51,7 +60,6 @@ export default function UserPanelLayout({
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userData, setUserData] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -61,22 +69,28 @@ export default function UserPanelLayout({
         
         if (userDocSnap.exists()) {
           const fetchedUserData = userDocSnap.data() as AppUser;
+          // If a user with 'admin' role tries to access the user dashboard,
+          // redirect them to the admin dashboard.
           if (fetchedUserData.role === 'admin') {
-            router.push('/admin/dashboard');
-            return;
+            router.replace('/admin/dashboard');
+            return; // Stop further processing for this user
           }
           setUser(firebaseUser);
           setUserData(fetchedUserData);
-          setIsAuthorized(true);
         } else {
+            // This case handles if a user is authenticated but has no Firestore document.
+            // It's safer to log them out and ask to log in again.
             toast({
               title: "Authentication Error",
               description: "Could not find your user details. Please log in again.",
               variant: "destructive",
             });
+            await signOut(auth); // Log out the user
             router.push('/login');
+            return;
         }
       } else {
+        // No user is signed in.
         router.push('/login');
       }
       setLoading(false);
@@ -84,6 +98,7 @@ export default function UserPanelLayout({
 
     return () => unsubscribe();
   }, [router, toast]);
+
 
   const handleLogout = async () => {
     try {
@@ -103,8 +118,22 @@ export default function UserPanelLayout({
     }
   };
   
-  if (loading || !isAuthorized) {
-      return <div className="flex h-screen w-full items-center justify-center">Loading...</div>
+  if (loading) {
+      return (
+        <div className="flex h-screen w-full items-center justify-center">
+            <p>Loading user dashboard...</p>
+        </div>
+      );
+  }
+
+  if (!user || !userData) {
+    // This state can be reached if the user is being redirected.
+    // Showing a loading state prevents flashing the UI before redirection is complete.
+     return (
+        <div className="flex h-screen w-full items-center justify-center">
+            <p>Redirecting...</p>
+        </div>
+      );
   }
   
   const navLinks = [
@@ -181,9 +210,37 @@ export default function UserPanelLayout({
           <div className="w-full flex-1">&nbsp;</div>
           <div className="flex items-center gap-4">
             <ModeToggle />
-             <Avatar className="h-8 w-8">
-               <AvatarFallback>{userData?.firstName?.[0] || 'U'}</AvatarFallback>
-             </Avatar>
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" size="icon" className="rounded-full">
+                   <Avatar className="h-8 w-8">
+                     <AvatarFallback>{userData?.firstName?.[0] || 'U'}</AvatarFallback>
+                   </Avatar>
+                   <span className="sr-only">Toggle user menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                 <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {userData ? `${userData.firstName} ${userData.lastName}` : 'User'}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user?.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push('/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                 <DropdownMenuItem onClick={handleLogout}>
+                   <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+             </DropdownMenu>
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/40">
@@ -193,5 +250,3 @@ export default function UserPanelLayout({
     </div>
   );
 }
-
-    

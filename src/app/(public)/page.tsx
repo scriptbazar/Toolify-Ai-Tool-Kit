@@ -216,6 +216,7 @@ const Testimonials = () => (
     </section>
 );
 
+
 export default async function Home() {
   const tools = await getTools();
   const activeTools = tools.filter(tool => tool.status === 'Active');
