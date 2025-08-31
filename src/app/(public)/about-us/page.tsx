@@ -58,8 +58,9 @@ export default function AboutUsPage() {
                         <Image 
                             src="https://picsum.photos/600/400" 
                             alt="Our Mission"
-                            fill
-                            className="object-cover"
+                            width={600}
+                            height={400}
+                            className="object-cover w-full h-full"
                             data-ai-hint="team mission"
                         />
                     </div>
@@ -117,8 +118,9 @@ export default function AboutUsPage() {
                         <Image 
                             src="https://picsum.photos/600/400" 
                             alt="Our Story"
-                            fill
-                            className="object-cover"
+                            width={600}
+                            height={400}
+                            className="object-cover w-full h-full"
                             data-ai-hint="passionate developers"
                         />
                     </div>
@@ -164,7 +166,8 @@ export default function AboutUsPage() {
                                 <Image
                                     src={member.avatar}
                                     alt={member.name}
-                                    fill
+                                    width={150}
+                                    height={150}
                                     className="rounded-full object-cover shadow-lg"
                                 />
                             </div>
