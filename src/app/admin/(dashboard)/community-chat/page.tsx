@@ -10,14 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getChatUsers } from '@/ai/flows/user-management';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 
 type Message = {
@@ -46,17 +47,97 @@ interface ChatUser {
     lastActive?: string | null;
 }
 
+interface AppUser {
+  firstName: string;
+  lastName: string;
+}
+
 const initialMessages: Message[] = [
-    { id: 1, from: 'AA', text: 'Welcome to the community chat! Feel free to ask questions and share ideas.', type: 'assistant' },
+    { id: 1, from: 'ToolifyAI', text: 'Welcome to the community chat! Feel free to ask questions and share ideas.', type: 'assistant' },
 ];
+
+const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: Message['poll']) => void }) => {
+    const [question, setQuestion] = useState('');
+    const [options, setOptions] = useState(['', '']);
+    const [allowCustom, setAllowCustom] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleAddOption = () => setOptions([...options, '']);
+    const handleRemoveOption = (index: number) => {
+        if (options.length > 2) {
+            setOptions(options.filter((_, i) => i !== index));
+        }
+    };
+    const handleOptionChange = (index: number, value: string) => {
+        const newOptions = [...options];
+        newOptions[index] = value;
+        setOptions(newOptions);
+    };
+
+    const handleSubmit = () => {
+        if (question && options.every(opt => opt.trim())) {
+            onAddPoll({ question, options, allowCustomAnswer: allowCustom });
+            setIsOpen(false);
+            // Reset state
+            setQuestion('');
+            setOptions(['', '']);
+            setAllowCustom(false);
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button variant="outline">
+                    <Vote className="mr-2 h-4 w-4"/>Create Poll
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Create a New Poll</DialogTitle>
+                    <DialogDescription>
+                        Engage the community by creating a multiple-choice poll.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="poll-question">Poll Question</Label>
+                        <Input id="poll-question" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="What's your favorite feature?" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Options</Label>
+                        {options.map((opt, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <Input value={opt} onChange={(e) => handleOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`} />
+                                <Button variant="ghost" size="icon" onClick={() => handleRemoveOption(index)} disabled={options.length <= 2}>
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
+                            </div>
+                        ))}
+                         <Button variant="outline" size="sm" onClick={handleAddOption}>
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add Option
+                        </Button>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch id="allow-custom" checked={allowCustom} onCheckedChange={setAllowCustom} />
+                        <Label htmlFor="allow-custom">Allow users to add their own option</Label>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button onClick={handleSubmit}>Create Poll</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
 
 
 export default function CommunityChatPage() {
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+    const [userData, setUserData] = useState<AppUser | null>(null);
     const [messages, setMessages] = useState<Message[]>(initialMessages);
     const [input, setInput] = useState('');
     const [activeUserFilter, setActiveUserFilter] = useState<'all' | 'live' | 'new'>('live');
-    const [isPollModalOpen, setIsPollModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
@@ -64,8 +145,15 @@ export default function CommunityChatPage() {
     const [loadingUsers, setLoadingUsers] = useState(true);
 
      useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
+            if (user) {
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    setUserData(userDocSnap.data() as AppUser);
+                }
+            }
         });
         return () => unsubscribe();
     }, []);
@@ -91,14 +179,27 @@ export default function CommunityChatPage() {
             scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
         }
     }, [messages]);
+    
+    const handleAddPoll = (pollData: Message['poll']) => {
+        const newPollMessage: Message = {
+            id: messages.length + 1,
+            from: 'Admin',
+            type: 'poll',
+            poll: pollData,
+        };
+        setMessages(prev => [...prev, newPollMessage]);
+        toast({ title: "Poll Created!", description: "Your poll has been added to the chat." });
+    };
 
     const handleSendMessage = (e: FormEvent) => {
         e.preventDefault();
-        if (!input.trim() || !currentUser?.displayName) return;
+        if (!input.trim() || !userData) return;
+        
+        const senderName = `${userData.firstName} ${userData.lastName}`.trim() || 'Admin';
 
         const newMessage: Message = {
             id: messages.length + 1,
-            from: currentUser.displayName || 'User',
+            from: senderName,
             text: input,
             type: 'user',
         };
@@ -109,10 +210,11 @@ export default function CommunityChatPage() {
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (file && currentUser?.displayName) {
+        if (file && userData) {
+            const senderName = `${userData.firstName} ${userData.lastName}`.trim() || 'Admin';
             const newMediaMessage: Message = {
                 id: messages.length + 1,
-                from: currentUser.displayName,
+                from: senderName,
                 type: 'media',
                 media: {
                     fileName: file.name,
@@ -135,12 +237,7 @@ export default function CommunityChatPage() {
        return allUsers;
     }, [activeUserFilter, allUsers]);
 
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        toast({
-        description: `Copied username: @${text}`,
-        });
-    };
+    const senderDisplayName = userData ? `${userData.firstName} ${userData.lastName}`.trim() : 'Admin';
 
 
   return (
@@ -165,9 +262,11 @@ export default function CommunityChatPage() {
                <ScrollArea className="h-full max-h-[calc(100vh-27rem)] px-4" ref={scrollAreaRef}>
                   <div className="space-y-6">
                       {messages.map((msg) => (
-                          <div key={msg.id} className={cn("flex items-start gap-3", msg.from === currentUser?.displayName ? 'flex-row-reverse' : '')}>
+                          <div key={msg.id} className={cn("flex items-start gap-3", msg.from === senderDisplayName ? 'flex-row-reverse' : '')}>
                               <Avatar>
-                                  <AvatarFallback>{msg.from.substring(0, 2)}</AvatarFallback>
+                                  <AvatarFallback>
+                                    {msg.from === 'ToolifyAI' ? <Bot /> : msg.from.substring(0, 2)}
+                                  </AvatarFallback>
                               </Avatar>
                                {msg.type === 'poll' && msg.poll ? (
                                    <Card className="w-full max-w-md">
@@ -203,7 +302,7 @@ export default function CommunityChatPage() {
                                       <p>Shared a file: <span className="font-medium">{msg.media.fileName}</span></p>
                                    </div>
                                ) : (
-                                  <div className={cn("rounded-lg px-4 py-2 max-w-sm", msg.from === currentUser?.displayName ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                  <div className={cn("rounded-lg px-4 py-2 max-w-sm", msg.from === senderDisplayName ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                     <p>{msg.text}</p>
                                   </div>
                                )}
@@ -250,9 +349,7 @@ export default function CommunityChatPage() {
                            <Button variant={activeUserFilter === 'live' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('live')}>
                               <span className="flex items-center"><Wifi className="mr-2 h-4 w-4"/>Live</span>
                            </Button>
-                           <Button variant="outline" onClick={() => toast({ description: "Create Poll clicked" })}>
-                                <span className="flex items-center"><Vote className="mr-2 h-4 w-4"/>Create Poll</span>
-                           </Button>
+                           <PollCreationDialog onAddPoll={handleAddPoll} />
                            <Button variant={activeUserFilter === 'new' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('new')}>
                                <span className="flex items-center"><UserPlus className="mr-2 h-4 w-4"/>New Users</span>
                            </Button>
@@ -279,6 +376,11 @@ export default function CommunityChatPage() {
                                   {activeUserFilter === 'live' && <Badge className="bg-green-500 hover:bg-green-600 text-white">online</Badge>}
                               </div>
                           ))}
+                           {filteredUsers.length === 0 && (
+                                <div className="text-center text-muted-foreground pt-10">
+                                    <p>No users found for this filter.</p>
+                                </div>
+                            )}
                           </div>
                       )}
                    </ScrollArea>
