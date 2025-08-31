@@ -212,8 +212,6 @@ const Testimonials = () => (
                     <TestimonialCard key={`ltr-${index}`} {...testimonial} />
                 ))}
             </div>
-             <div className="absolute inset-0 bg-gradient-to-r from-background to-transparent w-1/4"></div>
-            <div className="absolute inset-0 bg-gradient-to-l from-background to-transparent w-1/4 right-0"></div>
         </div>
     </section>
 );
