@@ -27,7 +27,6 @@ import { auth, db } from '@/lib/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
@@ -141,115 +140,44 @@ export default function UserPanelLayout({
       );
   }
   
-  const mainNavLinks = [
+  const allNavLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/favorites', label: 'My Favorites', icon: Heart },
     { href: '/usage-history', label: 'Usage History', icon: History },
-  ];
-  
-  const communityLinks = [
-      { href: '/community-chat', label: 'Community Chat', icon: MessageSquare },
-      { href: '/my-tickets', label: 'My Tickets', icon: Ticket },
-      { href: '/refer-a-friend', label: 'Refer a Friend', icon: GitCommitVertical },
-  ];
-
-  const billingLinks = [
+    { href: '/community-chat', label: 'Community Chat', icon: MessageSquare },
+    { href: '/my-tickets', label: 'My Tickets', icon: Ticket },
+    { href: '/refer-a-friend', label: 'Refer a Friend', icon: GitCommitVertical },
     { href: '/manage-subscription', label: 'Manage Subscription', icon: Star },
     { href: '/payment-history', label: 'Payment History', icon: CreditCard },
-  ]
-  
-  const settingsLinks = [
-      { href: '/settings', label: 'Profile Settings', icon: Settings },
-      { href: '/login-history', label: 'Login History', icon: History },
+    { href: '/settings', label: 'Profile Settings', icon: Settings },
+    { href: '/login-history', label: 'Login History', icon: History },
   ];
 
 
   const mobileNavContent = (
     <>
       <SheetHeader className="text-left border-b p-4">
-        <SheetTitle>
-           <Link href="/" className="flex items-center gap-2 font-semibold">
+        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+        <Link href="/" className="flex items-center gap-2 font-semibold">
             <Logo />
             <span className="text-lg">ToolifyAI</span>
-          </Link>
-        </SheetTitle>
+        </Link>
       </SheetHeader>
       <ScrollArea className="flex-1">
         <nav className="grid gap-2 text-base font-medium p-4 py-4">
-          <Accordion type="multiple" defaultValue={['main', 'community', 'billing', 'settings']} className="w-full">
-             <AccordionItem value="main" className="border-b-0">
-                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Account</AccordionTrigger>
-                <AccordionContent className="pl-4 pt-1">
-                    {mainNavLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                            )}
-                            >
-                            <link.icon className="h-4 w-4" />
-                            {link.label}
-                        </Link>
-                    ))}
-                </AccordionContent>
-             </AccordionItem>
-             <AccordionItem value="community" className="border-b-0">
-                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Community</AccordionTrigger>
-                 <AccordionContent className="pl-4 pt-1">
-                    {communityLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                            )}
-                            >
-                            <link.icon className="h-4 w-4" />
-                            {link.label}
-                        </Link>
-                    ))}
-                 </AccordionContent>
-             </AccordionItem>
-             <AccordionItem value="billing" className="border-b-0">
-                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Billing</AccordionTrigger>
-                 <AccordionContent className="pl-4 pt-1">
-                     {billingLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                            )}
-                            >
-                            <link.icon className="h-4 w-4" />
-                            {link.label}
-                        </Link>
-                    ))}
-                 </AccordionContent>
-             </AccordionItem>
-             <AccordionItem value="settings" className="border-b-0">
-                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Settings</AccordionTrigger>
-                 <AccordionContent className="pl-4 pt-1">
-                     {settingsLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                            )}
-                            >
-                            <link.icon className="h-4 w-4" />
-                            {link.label}
-                        </Link>
-                    ))}
-                 </AccordionContent>
-             </AccordionItem>
-          </Accordion>
+            {allNavLinks.map((link) => (
+                <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                        pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                    )}
+                    >
+                    <link.icon className="h-4 w-4" />
+                    {link.label}
+                </Link>
+            ))}
         </nav>
       </ScrollArea>
        <div className="mt-auto p-4 border-t">
@@ -279,80 +207,19 @@ export default function UserPanelLayout({
       </div>
       <ScrollArea className="flex-1">
         <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4 py-4">
-           <Accordion type="multiple" defaultValue={['main', 'community', 'billing', 'settings']} className="w-full">
-             <AccordionItem value="main" className="border-b-0">
-                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Account</AccordionTrigger>
-                <AccordionContent className="pl-4 pt-1">
-                    {mainNavLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                            )}
-                            >
-                            <link.icon className="h-4 w-4" />
-                            {link.label}
-                        </Link>
-                    ))}
-                </AccordionContent>
-             </AccordionItem>
-             <AccordionItem value="community" className="border-b-0">
-                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Community</AccordionTrigger>
-                 <AccordionContent className="pl-4 pt-1">
-                    {communityLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                            )}
-                            >
-                            <link.icon className="h-4 w-4" />
-                            {link.label}
-                        </Link>
-                    ))}
-                 </AccordionContent>
-             </AccordionItem>
-             <AccordionItem value="billing" className="border-b-0">
-                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Billing</AccordionTrigger>
-                 <AccordionContent className="pl-4 pt-1">
-                     {billingLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                            )}
-                            >
-                            <link.icon className="h-4 w-4" />
-                            {link.label}
-                        </Link>
-                    ))}
-                 </AccordionContent>
-             </AccordionItem>
-             <AccordionItem value="settings" className="border-b-0">
-                <AccordionTrigger className='hover:no-underline text-muted-foreground'>Settings</AccordionTrigger>
-                 <AccordionContent className="pl-4 pt-1">
-                     {settingsLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
-                                pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                            )}
-                            >
-                            <link.icon className="h-4 w-4" />
-                            {link.label}
-                        </Link>
-                    ))}
-                 </AccordionContent>
-             </AccordionItem>
-          </Accordion>
+            {allNavLinks.map((link) => (
+                <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground',
+                        pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                    )}
+                    >
+                    <link.icon className="h-4 w-4" />
+                    {link.label}
+                </Link>
+            ))}
         </nav>
       </ScrollArea>
     </div>
@@ -365,13 +232,9 @@ export default function UserPanelLayout({
       </div>
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-50">
-          <div className="flex-1 md:hidden">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
-              <Logo />
-              <span className="text-lg">ToolifyAI</span>
-            </Link>
+          <div className="w-full flex-1">
+            {/* Can add search or other header elements here if needed */}
           </div>
-          <div className="w-full flex-1 hidden md:block">&nbsp;</div>
           <div className="flex items-center gap-2 md:gap-4 justify-end flex-1">
              <ModeToggle />
              <Sheet>
