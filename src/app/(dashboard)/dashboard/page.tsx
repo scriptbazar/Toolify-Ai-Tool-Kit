@@ -17,6 +17,8 @@ import type { UserActivity } from '@/ai/flows/user-activity.types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface UserProfile {
+  firstName?: string;
+  lastName?: string;
   planId?: string;
   referrals?: number;
   toolsUsed?: number;
@@ -68,10 +70,13 @@ export default function UserDashboard() {
     return () => unsubscribe();
   }, [router, toast]);
   
+  const welcomeMessage = profile?.firstName ? `Welcome back, ${profile.firstName}!` : "User Dashboard";
+  
   if (loading) {
       return (
         <div className="space-y-6">
             <Skeleton className="h-10 w-1/3" />
+            <Skeleton className="h-4 w-1/2" />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28" />)}
             </div>
@@ -83,9 +88,9 @@ export default function UserDashboard() {
   return (
     <div className="space-y-6">
        <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">User Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{welcomeMessage}</h1>
         <p className="text-muted-foreground">
-          Welcome back! Here's a quick overview of your account.
+          Here's a quick overview of your account and recent activity.
         </p>
       </div>
 
