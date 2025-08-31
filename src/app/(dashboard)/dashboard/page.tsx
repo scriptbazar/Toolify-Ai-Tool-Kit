@@ -12,7 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getSettings } from '@/ai/flows/settings-management';
 import type { Plan } from '@/ai/flows/settings-management.types';
-import { getUserActivity, type UserActivity } from '@/ai/flows/user-activity';
+import { getUserActivity } from '@/ai/flows/user-activity';
+import type { UserActivity } from '@/ai/flows/user-activity.types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface UserProfile {

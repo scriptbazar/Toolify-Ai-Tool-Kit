@@ -6,17 +6,8 @@
  */
 
 import { adminDb } from '@/lib/firebase-admin';
-import { z } from 'zod';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-
-export const UserActivitySchema = z.object({
-  id: z.string(),
-  userId: z.string(),
-  action: z.string(),
-  timestamp: z.string().datetime(),
-});
-
-export type UserActivity = z.infer<typeof UserActivitySchema>;
+import { type UserActivity } from './user-activity.types';
 
 /**
  * Adds a new activity log for a user.
