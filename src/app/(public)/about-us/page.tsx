@@ -166,9 +166,9 @@ export default function AboutUsPage() {
                                 <Image
                                     src={member.avatar}
                                     alt={member.name}
-                                    width={150}
-                                    height={150}
-                                    className="rounded-full object-cover shadow-lg"
+                                    width={128}
+                                    height={128}
+                                    className="rounded-full object-cover shadow-lg w-32 h-32"
                                 />
                             </div>
                             <h3 className="text-lg font-semibold">{member.name}</h3>
@@ -179,7 +179,7 @@ export default function AboutUsPage() {
             </div>
         </section>
 
-         <section className="py-20 md:py-24">
+         <section className="pt-12 pb-8">
             <Card className="bg-card">
                 <CardContent className="p-12 text-center">
                     <h2 className="text-3xl font-bold tracking-tight">Join Thousands of Satisfied Users</h2>
