@@ -9,7 +9,7 @@ import { getFirestore, Firestore } from 'firebase-admin/firestore';
 const placeholderServiceAccount: ServiceAccount = {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo-project',
   clientEmail: 'demo@example.com',
-  privateKey: '-----BEGIN PRIVATE KEY-----\\n-----END PRIVATE KEY-----\\n'.replace(/\\n/g, '\n'),
+  privateKey: '-----BEGIN PRIVATE KEY-----\n-----END PRIVATE KEY-----\n',
 };
 
 function initializeFirebaseAdmin(): App {
