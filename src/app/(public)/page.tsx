@@ -248,7 +248,7 @@ export default async function Home() {
         </div>
       </section>
       
-      <section className="py-20 md:py-32 bg-background">
+      <section className="py-20 md:py-24 bg-card">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Get Started in 4 Easy Steps</h2>
@@ -258,7 +258,7 @@ export default async function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, index) => (
-              <Card key={index} className="text-center p-8 border-2 shadow-lg transition-all duration-300 hover:-translate-y-2">
+              <Card key={index} className="text-center p-8 border-2 shadow-lg transition-all duration-300 hover:-translate-y-2 bg-background">
                 <CardContent className="p-0 flex flex-col items-center">
                   <div className="flex items-center justify-center h-16 w-16 mb-6 rounded-full bg-primary/10">
                     <step.icon className="h-8 w-8 text-primary" />
@@ -272,7 +272,7 @@ export default async function Home() {
         </div>
       </section>
 
-       <section id="features" className="py-20 md:py-32 bg-card">
+       <section id="features" className="py-20 md:py-32 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Why Choose ToolifyAI?</h2>
@@ -282,7 +282,7 @@ export default async function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center p-8 border-2 bg-background shadow-lg transition-all duration-300">
+              <Card key={index} className="text-center p-8 border-2 bg-card shadow-lg transition-all duration-300">
                 <CardContent className="p-0 flex flex-col items-center">
                   <div className="flex items-center justify-center h-16 w-16 mb-6 rounded-full bg-primary/10">
                     <feature.icon className="h-8 w-8 text-primary" />
@@ -303,7 +303,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section id="blog" className="py-20 md:py-32 bg-background">
+      <section id="blog" className="py-20 md:py-32 bg-card">
         <div className="container mx-auto px-4">
             <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight">From Our Blog</h2>
