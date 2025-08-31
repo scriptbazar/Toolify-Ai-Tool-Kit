@@ -73,10 +73,7 @@ export default function CommunityChatPage() {
               router.push('/login');
             }
         });
-        return () => unsubscribe();
-    }, [router]);
-    
-    useEffect(() => {
+        
         async function fetchUsers() {
             setLoading(true);
             try {
@@ -89,8 +86,11 @@ export default function CommunityChatPage() {
                 setLoading(false);
             }
         }
+        
         fetchUsers();
-    }, [toast]);
+
+        return () => unsubscribe();
+    }, [router, toast]);
     
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -284,6 +284,11 @@ export default function CommunityChatPage() {
                                   {activeUserFilter === 'live' && <Badge className="bg-green-500 hover:bg-green-600 text-white">online</Badge>}
                               </div>
                           ))}
+                           {filteredUsers.length === 0 && (
+                                <div className="text-center text-muted-foreground pt-10">
+                                    <p>No users found for this filter.</p>
+                                </div>
+                            )}
                           </div>
                       )}
                    </ScrollArea>

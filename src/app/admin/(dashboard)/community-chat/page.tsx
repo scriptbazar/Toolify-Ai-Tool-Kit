@@ -145,10 +145,7 @@ export default function CommunityChatPage() {
                 }
             }
         });
-        return () => unsubscribe();
-    }, []);
-    
-    useEffect(() => {
+        
         async function fetchUsers() {
             setLoadingUsers(true);
             try {
@@ -162,6 +159,8 @@ export default function CommunityChatPage() {
             }
         }
         fetchUsers();
+
+        return () => unsubscribe();
     }, [toast]);
     
     useEffect(() => {
