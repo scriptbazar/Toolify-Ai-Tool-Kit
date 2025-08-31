@@ -1,16 +1,25 @@
-
 'use client';
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { LogIn, Menu, UserPlus } from 'lucide-react';
+import { LogIn, Menu, UserPlus, Home, LayoutGrid, Newspaper, Info, Mail, DollarSign, MessageSquare } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
-import { toolCategories } from '@/lib/constants';
 import { ModeToggle } from './ModeToggle';
+
+
+const mainNavLinks = [
+  { href: '/', label: 'Home', icon: Home },
+  { href: '/tools', label: 'Features', icon: LayoutGrid },
+  { href: '/blog', label: 'Blog', icon: Newspaper },
+  { href: '/about-us', label: 'About Us', icon: Info },
+  { href: '/contact-us', label: 'Contact Us', icon: Mail },
+  { href: '/pricing', label: 'Pricing', icon: DollarSign },
+  { href: '/community-chat', label: 'Community Chat', icon: MessageSquare },
+];
 
 
 const NavLinks = ({ isMobile = false }) => {
@@ -18,14 +27,11 @@ const NavLinks = ({ isMobile = false }) => {
 
   return (
     <>
-      {toolCategories.slice(0, 4).map((category) => {
-        // For demonstration, making 'text' category active.
-        // In a real app, this would be dynamic based on scroll position.
-        const isActive = pathname === '/' && category.id === 'text';
-        const linkHref = `/#${category.id}`;
+      {mainNavLinks.map((link) => {
+        const isActive = pathname === link.href;
         return (
           <Button
-            key={category.id}
+            key={link.href}
             asChild
             variant={isActive ? 'secondary' : 'ghost'}
             className={cn(
@@ -34,9 +40,9 @@ const NavLinks = ({ isMobile = false }) => {
                 'text-sm w-auto'
             )}
           >
-            <Link href={linkHref}>
-              <category.Icon className="mr-2 h-4 w-4" />
-              {category.name.replace(' Tools', '')}
+            <Link href={link.href}>
+              <link.icon className="mr-2 h-4 w-4" />
+              {link.label}
             </Link>
           </Button>
         );
