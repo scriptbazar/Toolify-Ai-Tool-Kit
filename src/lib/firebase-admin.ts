@@ -42,15 +42,16 @@ function initializeFirebaseAdmin(): App {
 
   } catch (error: any) {
     console.warn(`Firebase Admin SDK initialization failed: ${error.message}. Using placeholder credentials for local development. Server-side Firebase features will not work unless configured.`);
-    const placeholderServiceAccount = { 
-        projectId: 'demo-project', 
-        clientEmail: 'demo@example.com', 
-        privateKey: '-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC39G5s4s/j\n-----END PRIVATE KEY-----\n' 
+    const placeholderServiceAccount = {
+      projectId: "demo-toolify",
+      clientEmail: "demo@example.com",
+      privateKey:
+        "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC39G5s4s/j\nbi2g2aK2i8qGvPwsf5do4g5iE5y3j5k3L5a9i8f7o6e2e5h2d4e4h5j4k3k5k4j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\nj3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3j3\n-----END PRIVATE KEY-----\n",
     };
      return initializeApp({
         credential: cert(placeholderServiceAccount),
         projectId: placeholderServiceAccount.projectId,
-    }, 'placeholder-app-instance');
+    }, 'placeholder-app-instance-' + Date.now()); // Use a unique name to avoid conflicts
   }
 }
 
