@@ -137,16 +137,16 @@ export default function Header() {
             </div>
         ) : (
           <>
-            <div className="flex-1 md:flex-initial">
+            <div className="flex items-center">
               <Link href="/" className="flex items-center space-x-2">
                 <Logo />
                 <span className="font-bold text-xl">ToolifyAI</span>
               </Link>
             </div>
-            <nav className="flex flex-1 items-center justify-center space-x-1 text-sm font-medium">
+            <nav className="flex-1 flex items-center justify-center space-x-1 text-sm font-medium">
               <NavLinks isLoggedIn={!!user} />
             </nav>
-            <div className="flex flex-1 items-center justify-end space-x-2">
+            <div className="flex items-center justify-end">
                <ModeToggle />
                {loading ? <div className="h-8 w-8 rounded-full bg-muted animate-pulse" /> : !user ? (
                   <>
