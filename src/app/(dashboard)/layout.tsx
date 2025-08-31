@@ -202,38 +202,40 @@ export default function UserPanelLayout({
           </div>
           <div className="w-full flex-1 hidden md:block">&nbsp;</div>
           <div className="flex items-center gap-2 md:gap-4 justify-end flex-1">
-            <ModeToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="icon" className="rounded-full">
-                   <Avatar className="h-8 w-8">
-                     <AvatarFallback>{userData?.firstName?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
-                   </Avatar>
-                   <span className="sr-only">Toggle user menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                 <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {userData ? `${userData.firstName} ${userData.lastName}` : 'User'}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user?.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/profile')}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                 <DropdownMenuItem onClick={handleLogout}>
-                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-             </DropdownMenu>
+            <div className="hidden md:flex items-center gap-4">
+                <ModeToggle />
+                <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" size="icon" className="rounded-full">
+                    <Avatar className="h-8 w-8">
+                        <AvatarFallback>{userData?.firstName?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <span className="sr-only">Toggle user menu</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                        {userData ? `${userData.firstName} ${userData.lastName}` : 'User'}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email}
+                        </p>
+                    </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => router.push('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
              <Sheet>
               <SheetTrigger asChild>
                 <Button
@@ -247,7 +249,7 @@ export default function UserPanelLayout({
               </SheetTrigger>
               <SheetContent side="right" className="flex flex-col p-0">
                 <SheetHeader className="p-4 border-b">
-                  <SheetTitle className="text-left">
+                  <SheetTitle>
                     <Link href="/" className="flex items-center gap-2 font-semibold">
                       <Logo />
                       <span className="text-lg">ToolifyAI</span>
@@ -255,6 +257,18 @@ export default function UserPanelLayout({
                   </SheetTitle>
                 </SheetHeader>
                {sidebarNav(true)}
+                 <div className="mt-auto p-4 border-t flex flex-col gap-2">
+                    <Button asChild variant="outline">
+                        <Link href="/profile">
+                            <User className="mr-2 h-4 w-4" />
+                            My Profile
+                        </Link>
+                    </Button>
+                    <Button variant="secondary" onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                    </Button>
+                </div>
               </SheetContent>
             </Sheet>
           </div>
@@ -266,3 +280,4 @@ export default function UserPanelLayout({
     </div>
   );
 }
+
