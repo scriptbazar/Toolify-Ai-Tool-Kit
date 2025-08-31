@@ -43,7 +43,7 @@ export default function AboutUsPage() {
       <div className="container mx-auto px-4 py-12 md:py-20">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-            About AI Smart Tools
+            About ToolifyAI
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
             We are on a mission to provide powerful, intuitive, and accessible online utilities for
@@ -79,7 +79,7 @@ export default function AboutUsPage() {
                                 within a single, user-friendly platform.
                             </p>
                             <p>
-                                From students and freelancers to large enterprises, AI Smart Tools provides
+                                From students and freelancers to large enterprises, ToolifyAI provides
                                 the resources needed to succeed in a digital world.
                             </p>
                         </div>
@@ -101,7 +101,7 @@ export default function AboutUsPage() {
                         <div className="space-y-4 text-muted-foreground">
                             <p>
                                 Founded in a small garage by a group of passionate developers and
-                                designers, AI Smart Tools started with a simple idea: what if everyone
+                                designers, ToolifyAI started with a simple idea: what if everyone
                                 had access to the tools they needed without a hefty price tag or a
                                 steep learning curve? What began as a weekend project quickly grew
                                 into a comprehensive platform loved by thousands worldwide.
@@ -153,7 +153,7 @@ export default function AboutUsPage() {
                 <Users className="h-10 w-10 mx-auto text-primary mb-4" />
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Meet The Team</h2>
                 <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
-                    The passionate individuals behind AI Smart Tools, dedicated to building the best platform for you.
+                    The passionate individuals behind ToolifyAI, dedicated to building the best platform for you.
                 </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
