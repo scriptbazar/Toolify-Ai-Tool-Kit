@@ -1,8 +1,10 @@
 
-
 import { Card, CardContent } from '@/components/ui/card';
 import { Target, BookOpen, Lightbulb, MousePointerClick, ShieldCheck, LifeBuoy, Users } from 'lucide-react';
 import Image from 'next/image';
+import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 const coreValues = [
     {
@@ -172,6 +174,24 @@ export default function AboutUsPage() {
                     </Card>
                 ))}
             </div>
+        </section>
+
+         <section className="py-20 md:py-24">
+            <Card className="bg-card">
+                <CardContent className="p-12 text-center">
+                    <h2 className="text-3xl font-bold tracking-tight">Join Thousands of Satisfied Users</h2>
+                    <p className="mt-3 max-w-xl mx-auto text-muted-foreground">
+                        Start exploring our powerful suite of tools today and see how we can help you achieve more.
+                    </p>
+                    <div className="mt-8">
+                        <Button asChild size="lg">
+                            <Link href="/tools">
+                                Explore Tools <ArrowRight className="ml-2 h-5 w-5" />
+                            </Link>
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
         </section>
 
       </div>
