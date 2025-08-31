@@ -223,6 +223,20 @@ export default function UserPanelLayout({
             ))}
         </nav>
       </ScrollArea>
+       <div className="mt-auto p-4 border-t">
+          <div className="grid grid-cols-2 gap-2">
+            <Button asChild className="w-full justify-center">
+              <Link href="/profile">
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
+            </Button>
+            <Button variant="destructive" onClick={handleLogout} className="w-full justify-center">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
+        </div>
     </div>
   );
 
@@ -244,6 +258,40 @@ export default function UserPanelLayout({
           </div>
           <div className="flex items-center gap-2 md:gap-4 justify-end flex-1">
              <ModeToggle />
+            <div className="hidden md:flex items-center gap-2">
+                 <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" size="icon" className="rounded-full">
+                       <Avatar className="h-8 w-8">
+                         <AvatarFallback>{userData?.firstName?.[0] || 'A'}</AvatarFallback>
+                      </Avatar>
+                      <span className="sr-only">Toggle user menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {userData ? `${userData.firstName} ${userData.lastName}` : 'User'}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {userData?.email || ''}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                     <DropdownMenuItem onClick={() => router.push(`/profile`)}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                       <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
              <Sheet>
               <SheetTrigger asChild>
                 <Button
