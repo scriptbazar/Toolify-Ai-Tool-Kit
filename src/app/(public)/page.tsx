@@ -219,6 +219,22 @@ export default async function Home() {
         </div>
       </section>
 
+      <section className="py-20 md:py-32 bg-card">
+        <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Join Thousands of Satisfied Users</h2>
+            <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
+              Start exploring our powerful suite of tools today and see how we can help you achieve more.
+            </p>
+            <div className="mt-8">
+                <Button asChild size="lg">
+                    <Link href="#tools">
+                        Explore Tools <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                </Button>
+            </div>
+        </div>
+      </section>
+
       <section id="tools" className="container mx-auto px-4 py-8 md:py-12 space-y-16">
         {toolCategories.map((category) => (
           <div key={category.id}>
