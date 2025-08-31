@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -182,13 +183,13 @@ export default function UserPanelLayout({
       </ScrollArea>
        <div className="mt-auto p-4 border-t">
           <div className="grid grid-cols-2 gap-2">
-            <Button asChild className="w-full">
+            <Button asChild className="w-full justify-center">
               <Link href="/profile">
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </Link>
             </Button>
-            <Button variant="destructive" onClick={handleLogout} className="w-full">
+            <Button variant="destructive" onClick={handleLogout} className="w-full justify-center">
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </Button>
