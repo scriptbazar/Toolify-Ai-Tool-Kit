@@ -157,11 +157,12 @@ export default function UserPanelLayout({
   const mobileNavContent = (
     <>
       <SheetHeader className="text-left border-b p-4">
-        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-        <Link href="/" className="flex items-center gap-2 font-semibold">
+        <SheetTitle>
+           <Link href="/" className="flex items-center gap-2 font-semibold">
             <Logo />
             <span className="text-lg">ToolifyAI</span>
-        </Link>
+          </Link>
+        </SheetTitle>
       </SheetHeader>
       <ScrollArea className="flex-1">
         <nav className="grid gap-2 text-base font-medium p-4 py-4">
@@ -232,7 +233,13 @@ export default function UserPanelLayout({
       </div>
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-50">
-          <div className="w-full flex-1">
+          <div className="flex-1 md:hidden">
+            <Link href="/" className="flex items-center gap-2 font-semibold">
+              <Logo />
+              <span className="sr-only">ToolifyAI</span>
+            </Link>
+          </div>
+          <div className="w-full flex-1 hidden md:block">
             {/* Can add search or other header elements here if needed */}
           </div>
           <div className="flex items-center gap-2 md:gap-4 justify-end flex-1">
