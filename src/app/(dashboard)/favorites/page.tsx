@@ -9,7 +9,8 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { getTools, type Tool } from '@/ai/flows/tool-management';
+import { getTools } from '@/ai/flows/tool-management';
+import type { Tool } from '@/ai/flows/tool-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ToolCard } from '@/components/tools/ToolCard';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -32,7 +33,6 @@ export default function FavoritesPage() {
       await updateDoc(userDocRef, {
         favorites: ['case-converter', 'password-generator', 'pdf-merger']
       });
-      console.log("Default favorites set for user:", uid);
     }
   };
 
@@ -40,9 +40,9 @@ export default function FavoritesPage() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        await setupDefaultFavorites(firebaseUser.uid); // Setup default favorites
-        
         try {
+          await setupDefaultFavorites(firebaseUser.uid);
+          
           const userDocRef = doc(db, 'users', firebaseUser.uid);
           const [allTools, userDocSnap] = await Promise.all([
             getTools(),
@@ -57,7 +57,12 @@ export default function FavoritesPage() {
           }
         } catch (err: any) {
           console.error("Failed to load favorites:", err);
-          setError("Could not load your favorite tools. Please try again later.");
+          setError("Could not load your favorite tools. Please check your permissions or try again later.");
+          toast({
+            title: "Error Loading Favorites",
+            description: "There was a problem fetching your favorite tools.",
+            variant: "destructive",
+          });
         }
       } else {
         router.push('/login');

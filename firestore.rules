@@ -4,18 +4,20 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Users can read their own data, and only admins can write to it.
+    // Allow users to read and write to their own user document only.
+    // They cannot see other users' documents.
     match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Allow any authenticated user to read the list of tools.
+    // Allow any authenticated user to read from the 'tools' collection.
+    // This is needed to display the list of tools on the site.
     match /tools/{toolId} {
       allow read: if request.auth != null;
     }
-    
-    // Default deny all other reads/writes
+
+    // Explicitly deny all other reads and writes to all other collections
+    // to ensure security.
     match /{document=**} {
       allow read, write: if false;
     }
