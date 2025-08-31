@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, CreditCard, DollarSign, Users, ArrowRight, Newspaper, Package, Star } from "lucide-react";
+import { Activity, CreditCard, DollarSign, Users, ArrowRight, Newspaper, Package, Star, Megaphone } from "lucide-react";
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -14,6 +14,10 @@ import { getSettings } from '@/ai/flows/settings-management';
 import type { Plan } from '@/ai/flows/settings-management.types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { getAnnouncementsForUser, markAnnouncementsAsRead } from '@/ai/flows/announcement-flow';
+import { type Announcement } from '@/ai/flows/announcement-flow.types';
 
 interface UserProfile {
   firstName?: string;
@@ -25,11 +29,32 @@ interface UserProfile {
   subscriptionPrice?: number;
 }
 
+const AnnouncementItem = ({ announcement }: { announcement: Announcement }) => (
+    <div className="p-4 rounded-lg border bg-background/50">
+        <div className="flex items-center justify-between">
+            <h4 className="font-semibold">{announcement.title}</h4>
+            <div className="flex items-center gap-2">
+                {announcement.isNew && <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />}
+                <p className="text-xs text-muted-foreground">{new Date(announcement.createdAt).toLocaleDateString()}</p>
+            </div>
+        </div>
+        <p className="text-sm text-muted-foreground mt-2 mb-4">{announcement.content}</p>
+        {announcement.featureSlug && (
+            <Button size="sm" asChild>
+                <Link href={`/tools/${announcement.featureSlug}`}>Check it out</Link>
+            </Button>
+        )}
+    </div>
+);
+
+
 export default function UserDashboard() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -38,9 +63,10 @@ export default function UserDashboard() {
         if (firebaseUser) {
             setUser(firebaseUser);
             try {
-                const [settings, userDocSnap] = await Promise.all([
+                const [settings, userDocSnap, fetchedAnnouncements] = await Promise.all([
                     getSettings(),
                     getDoc(doc(db, "users", firebaseUser.uid)),
+                    getAnnouncementsForUser(firebaseUser.uid),
                 ]);
                 
                 if (userDocSnap.exists()) {
@@ -49,6 +75,8 @@ export default function UserDashboard() {
                     const userPlan = settings.plan?.plans.find(p => p.id === userData.planId) || settings.plan?.plans.find(p => p.id === 'free') || null;
                     setPlan(userPlan);
                 }
+                
+                setAnnouncements(fetchedAnnouncements);
 
             } catch (error) {
                 console.error("Failed to load dashboard data:", error);
@@ -65,6 +93,18 @@ export default function UserDashboard() {
     });
     return () => unsubscribe();
   }, [router, toast]);
+  
+  const handleOpenWhatsNew = async () => {
+    setIsWhatsNewOpen(true);
+    if (user && announcements.some(a => a.isNew)) {
+      const newIds = announcements.filter(a => a.isNew).map(a => a.id);
+      await markAnnouncementsAsRead(user.uid, newIds);
+      // Optimistically update the UI
+      setAnnouncements(prev => prev.map(a => ({ ...a, isNew: false })));
+    }
+  };
+
+  const hasNewAnnouncements = announcements.some(a => a.isNew);
   
   const welcomeMessage = profile?.firstName ? `Welcome Back, ${profile.firstName} ${profile.lastName}!` : "User Dashboard";
   
@@ -155,14 +195,24 @@ export default function UserDashboard() {
           <CardDescription>Explore new tools, read our latest articles, or manage your subscription.</CardDescription>
         </CardHeader>
         <CardContent>
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div className="group cursor-pointer p-6 border rounded-lg hover:bg-muted/50 transition-colors" onClick={handleOpenWhatsNew}>
+                  <div className="flex items-center justify-between">
+                      <h3 className="font-semibold flex items-center gap-2">
+                          <Megaphone />What's New
+                          {hasNewAnnouncements && <div className="h-2 w-2 rounded-full bg-primary" />}
+                      </h3>
+                      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform"/>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">Check out the latest updates and new features.</p>
+              </div>
               <Link href="/tools" className="group">
                   <div className="p-6 border rounded-lg hover:bg-muted/50 transition-colors">
                       <div className="flex items-center justify-between">
-                          <h3 className="font-semibold flex items-center gap-2"><Package />Explore New Tools</h3>
+                          <h3 className="font-semibold flex items-center gap-2"><Package />Explore All Tools</h3>
                           <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform"/>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-2">Check out the latest additions to our toolbox.</p>
+                      <p className="text-sm text-muted-foreground mt-2">Check out our full toolbox of 100+ utilities.</p>
                   </div>
               </Link>
               <Link href="/blog" className="group">
@@ -186,6 +236,28 @@ export default function UserDashboard() {
            </div>
         </CardContent>
       </Card>
+      
+        <Dialog open={isWhatsNewOpen} onOpenChange={setIsWhatsNewOpen}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>What's New at ToolifyAI</DialogTitle>
+              <DialogDescription>
+                Here are the latest updates, features, and fixes from our team.
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[60vh] -mx-6 px-6">
+                <div className="space-y-4 py-4">
+                  {announcements.length > 0 ? (
+                    announcements.map(announcement => (
+                      <AnnouncementItem key={announcement.id} announcement={announcement} />
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-center pt-8">No announcements yet. Check back soon!</p>
+                  )}
+                </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
     </div>
   );
 }

@@ -183,18 +183,18 @@ export async function getChatUsers(): Promise<any[]> {
 /**
  * Creates a request for a user to join the referral program.
  */
-export async function requestToJoinReferralProgram(input: { userId: string, userName: string, userEmail: string }): Promise<{ success: boolean }> {
+export async function requestToJoinReferralProgram(input: { userId: string, userName: string, userEmail: string }): Promise<{ success: boolean; message: string }> {
     if (!adminDb) {
         const message = "Firebase Admin is not initialized. Cannot process referral request.";
         console.error(message);
-        throw new Error(message);
+        return { success: false, message };
     }
     const { userId, userName, userEmail } = input;
     
     // Check if a request already exists for this user
     const existingRequest = await adminDb.collection('referralRequests').where('userId', '==', userId).limit(1).get();
     if (!existingRequest.empty) {
-        throw new Error("You have already submitted a request to join the program.");
+        return { success: false, message: "You have already submitted a request to join the program." };
     }
     
     await adminDb.collection('referralRequests').add({
@@ -204,7 +204,7 @@ export async function requestToJoinReferralProgram(input: { userId: string, user
         status: 'pending',
         createdAt: FieldValue.serverTimestamp(),
     });
-    return { success: true };
+    return { success: true, message: "Request sent successfully." };
 }
 
 
@@ -217,7 +217,7 @@ export async function getReferralStatus(userId: string): Promise<ReferralStatus>
     return { status: 'not_joined' };
   }
   const userDoc = await adminDb.collection('users').doc(userId).get();
-  if (userDoc.exists() && userDoc.data()?.referralCode) {
+  if (userDoc.exists && userDoc.data()?.referralCode) {
     return { status: 'approved', referralCode: userDoc.data()?.referralCode };
   }
 
@@ -269,18 +269,18 @@ export async function getReferralRequests(): Promise<ReferralRequest[]> {
 /**
  * Updates the status of a referral request (approve/reject).
  */
-export async function updateReferralRequestStatus(input: { requestId: string; status: 'approved' | 'rejected' }): Promise<{ success: boolean }> {
+export async function updateReferralRequestStatus(input: { requestId: string; status: 'approved' | 'rejected' }): Promise<{ success: boolean; message: string }> {
     if (!adminDb) {
         const message = "Firebase Admin is not initialized. Cannot update referral status.";
         console.error(message);
-        throw new Error(message);
+        return { success: false, message };
     }
     const { requestId, status } = input;
     const requestRef = adminDb.collection('referralRequests').doc(requestId);
     const requestDoc = await requestRef.get();
 
     if (!requestDoc.exists) {
-        throw new Error('Referral request not found.');
+        return { success: false, message: 'Referral request not found.' };
     }
 
     if (status === 'approved') {
@@ -298,5 +298,5 @@ export async function updateReferralRequestStatus(input: { requestId: string; st
         await requestRef.update({ status: 'rejected' });
     }
 
-    return { success: true };
+    return { success: true, message: `Request status updated to ${status}.` };
 }

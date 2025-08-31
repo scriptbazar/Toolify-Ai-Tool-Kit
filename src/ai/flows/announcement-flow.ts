@@ -5,12 +5,15 @@
  * @fileOverview An AI agent for creating and managing announcements.
  * - generateAnnouncement - Generates an announcement title and content.
  * - saveAnnouncement - Saves a new announcement to Firestore.
+ * - getAnnouncementsForUser - Fetches all announcements and indicates if they are new for the user.
+ * - markAnnouncementsAsRead - Marks specific announcements as read for a user.
  */
 
 import { ai } from '@/ai/genkit';
 import { adminDb } from '@/lib/firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
-import { z } from 'genkit';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { z } from 'zod';
+import { type Announcement } from './announcement-flow.types';
 
 const GenerateAnnouncementInputSchema = z.object({
   featureName: z.string().describe('The name of the new feature being announced.'),
@@ -71,13 +74,15 @@ export async function saveAnnouncement(input: SaveAnnouncementInput): Promise<{ 
     }
     
     try {
-        const { title, content } = SaveAnnouncementInputSchema.parse(input);
+        const { title, content, featureName } = SaveAnnouncementInputSchema.parse(input);
         
         await adminDb.collection('announcements').add({
             title,
             content,
+            featureName,
+            // Create a slug from the feature name to link to the tool
+            featureSlug: featureName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, ''),
             createdAt: FieldValue.serverTimestamp(),
-            // Initially, no one has read it
             readBy: [], 
         });
 
@@ -87,4 +92,58 @@ export async function saveAnnouncement(input: SaveAnnouncementInput): Promise<{ 
         console.error("Error saving announcement:", error);
         return { success: false, message: error.message || 'An unknown error occurred.' };
     }
+}
+
+
+export async function getAnnouncementsForUser(userId: string): Promise<Announcement[]> {
+  if (!adminDb) {
+    console.warn("Cannot get announcements: DB not initialized.");
+    return [];
+  }
+  try {
+    const snapshot = await adminDb.collection('announcements').orderBy('createdAt', 'desc').get();
+    if (snapshot.empty) {
+      return [];
+    }
+    
+    const announcements = snapshot.docs.map(doc => {
+      const data = doc.data();
+      const readBy: string[] = data.readBy || [];
+      return {
+        id: doc.id,
+        title: data.title,
+        content: data.content,
+        featureSlug: data.featureSlug,
+        createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+        isNew: !readBy.includes(userId),
+      } as Announcement;
+    });
+
+    return announcements;
+  } catch (error) {
+    console.error("Error fetching announcements:", error);
+    return [];
+  }
+}
+
+export async function markAnnouncementsAsRead(userId: string, announcementIds: string[]): Promise<{ success: boolean }> {
+  if (!adminDb || !userId || announcementIds.length === 0) {
+    return { success: false };
+  }
+
+  const batch = adminDb.batch();
+  announcementIds.forEach(id => {
+    const docRef = adminDb.collection('announcements').doc(id);
+    batch.update(docRef, {
+      readBy: FieldValue.arrayUnion(userId)
+    });
+  });
+
+  try {
+    await batch.commit();
+    return { success: true };
+  } catch (error) {
+    console.error("Error marking announcements as read:", error);
+    return { success: false };
+  }
 }
