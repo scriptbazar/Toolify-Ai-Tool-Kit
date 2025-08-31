@@ -14,7 +14,7 @@ import { getSettings } from '@/ai/flows/settings-management';
 import type { Plan } from '@/ai/flows/settings-management.types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getAnnouncementsForUser, markAnnouncementsAsRead } from '@/ai/flows/announcement-flow';
 import { type Announcement } from '@/ai/flows/announcement-flow.types';
@@ -241,9 +241,9 @@ export default function UserDashboard() {
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>What's New at ToolifyAI</DialogTitle>
-              <DialogDescription>
+              <DialogDesc>
                 Here are the latest updates, features, and fixes from our team.
-              </DialogDescription>
+              </DialogDesc>
             </DialogHeader>
             <ScrollArea className="h-[60vh] -mx-6 px-6">
                 <div className="space-y-4 py-4">
