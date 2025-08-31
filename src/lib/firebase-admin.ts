@@ -53,7 +53,7 @@ function initializeFirebaseAdmin(): App {
       projectId: "demo-toolify",
       clientEmail: "demo@example.com",
       privateKey:
-        "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCpQol0TqgG51e7\nB8fGgqVb1f9b5g3hD/j/k9l7m8n9o0p1q3r5s7t9v/x+y/z/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0/A+B/C+D/E+F/G+H\n/I+J/K+L/M+N/O+P/Q+R/S+T/U+V/W+X/Y+Z/a+b/c+d/e+f/g+h/i+j/k+l/m+n\n/o+p+q+r/s+t+u+v+w+x+y+z/1+2+3+4+5+6+7+8+9/0CAwEAAQ==\n-----END PRIVATE KEY-----\n",
+        "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC3E9A/A/x2\n-----END PRIVATE KEY-----\n",
     };
      return initializeApp({
         credential: cert(placeholderServiceAccount),
