@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { doc, getDoc } from "firebase/firestore";
+import { logUserLogin } from "@/ai/flows/user-activity";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -39,6 +40,9 @@ export default function LoginPage() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
+
+      // Log the successful login activity
+      await logUserLogin(user.uid);
 
       // Check user role from Firestore
       const userDocRef = doc(db, "users", user.uid);

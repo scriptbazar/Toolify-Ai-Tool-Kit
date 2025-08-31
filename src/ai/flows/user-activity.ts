@@ -7,7 +7,8 @@
 
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { type UserActivity, type UserActivityDetails, type UserActivityType } from './user-activity.types';
+import { type UserActivity, type UserActivityDetails, type UserActivityType, type UserLoginHistory } from './user-activity.types';
+import { headers } from 'next/headers';
 
 /**
  * Adds a new activity log for a user.
@@ -77,4 +78,65 @@ export async function getUserActivity(userId: string, count = 25): Promise<UserA
     console.error(`Error fetching activity for user ${userId}:`, error);
     return [];
   }
+}
+
+
+/**
+ * Logs a user's login event to Firestore.
+ * This should be called from the server-side after a successful login.
+ */
+export async function logUserLogin(userId: string): Promise<{ success: boolean }> {
+  if (!userId) return { success: false };
+
+  try {
+    const headerList = headers();
+    const ip = headerList.get('x-forwarded-for') ?? 'Unknown IP';
+    const userAgent = headerList.get('user-agent') ?? 'Unknown Device';
+    
+    // In a real app, you would use a GeoIP service here.
+    const location = 'Unknown Location'; 
+
+    await adminDb.collection('users').doc(userId).collection('loginHistory').add({
+      timestamp: FieldValue.serverTimestamp(),
+      ipAddress: ip,
+      userAgent: userAgent,
+      location: location,
+      status: 'Success',
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error(`Could not log login for user ${userId}:`, error);
+    return { success: false };
+  }
+}
+
+/**
+ * Fetches the login history for a specific user.
+ */
+export async function getLoginHistory(userId: string): Promise<UserLoginHistory[]> {
+    if (!userId) return [];
+    try {
+        const historyRef = adminDb.collection('users').doc(userId).collection('loginHistory');
+        const snapshot = await historyRef.orderBy('timestamp', 'desc').limit(20).get();
+
+        if (snapshot.empty) return [];
+        
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            const timestamp = (data.timestamp as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
+            return {
+                id: doc.id,
+                timestamp,
+                ipAddress: data.ipAddress,
+                userAgent: data.userAgent,
+                location: data.location,
+                status: data.status
+            } as UserLoginHistory;
+        });
+
+    } catch (error) {
+        console.error(`Error fetching login history for user ${userId}:`, error);
+        return [];
+    }
 }

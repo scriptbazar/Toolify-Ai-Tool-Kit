@@ -24,5 +24,15 @@ export const UserActivitySchema = z.object({
   details: UserActivityDetailsSchema,
   timestamp: z.string().datetime(),
 });
-
 export type UserActivity = z.infer<typeof UserActivitySchema>;
+
+
+export const UserLoginHistorySchema = z.object({
+    id: z.string(),
+    timestamp: z.string().datetime(),
+    ipAddress: z.string(),
+    userAgent: z.string(),
+    location: z.string(),
+    status: z.enum(['Success', 'Failed']),
+});
+export type UserLoginHistory = z.infer<typeof UserLoginHistorySchema>;
