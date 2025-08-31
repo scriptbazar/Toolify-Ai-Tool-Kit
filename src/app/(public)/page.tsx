@@ -330,6 +330,13 @@ export default async function Home() {
                     />
                 ))}
             </div>
+            <div className="text-center mt-12">
+              <Button asChild size="lg">
+                <Link href="/blog">
+                    Explore Blog <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+          </div>
         </div>
       </section>
 
