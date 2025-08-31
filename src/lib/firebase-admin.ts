@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Initializes and exports the Firebase Admin SDK instances.
  */
