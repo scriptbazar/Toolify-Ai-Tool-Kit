@@ -160,7 +160,7 @@ export default function Header() {
             <nav className="flex-1 flex items-center justify-center space-x-1 text-sm font-medium">
               <NavLinks isLoggedIn={!!user} isAdmin={isAdmin} />
             </nav>
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-end gap-2">
                <ModeToggle />
                {loading ? <div className="h-8 w-8 rounded-full bg-muted animate-pulse" /> : !user ? (
                   <>
