@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,8 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { getPayments } from '@/ai/flows/payment-management';
 import type { Payment, PaymentStatus } from '@/ai/flows/payment-management.types';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Clock, XCircle, CreditCard } from "lucide-react";
+import { CheckCircle2, Clock, XCircle, CreditCard, Search, FileText } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 const getStatusBadge = (status: PaymentStatus) => {
   switch (status) {
@@ -30,6 +32,8 @@ export default function PaymentHistoryPage() {
   const [user, setUser] = useState<User | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<PaymentStatus | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   
   useEffect(() => {
@@ -53,6 +57,30 @@ export default function PaymentHistoryPage() {
 
     return () => unsubscribe();
   }, [router]);
+  
+  const counts = useMemo(() => ({
+    all: payments.length,
+    Completed: payments.filter(p => p.status === 'Completed').length,
+    Pending: payments.filter(p => p.status === 'Pending').length,
+    Failed: payments.filter(p => p.status === 'Failed').length,
+  }), [payments]);
+
+  const tabs: { id: PaymentStatus | 'all'; label: string; icon: React.ElementType }[] = [
+    { id: 'all', label: 'All Transactions', icon: FileText },
+    { id: 'Completed', label: 'Completed', icon: CheckCircle2 },
+    { id: 'Pending', label: 'Pending', icon: Clock },
+    { id: 'Failed', label: 'Failed', icon: XCircle },
+  ];
+  
+  const filteredPayments = useMemo(() => {
+    return payments.filter(p => {
+        const filterMatch = activeFilter === 'all' || p.status === activeFilter;
+        const searchMatch = p.transactionId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            p.plan.toLowerCase().includes(searchQuery.toLowerCase());
+        return filterMatch && searchMatch;
+    });
+  }, [payments, activeFilter, searchQuery]);
+
 
   if (loading) {
       return (
@@ -87,6 +115,30 @@ export default function PaymentHistoryPage() {
           <CardDescription>Review your past payments and subscription charges.</CardDescription>
         </CardHeader>
         <CardContent>
+           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                    {tabs.map((tab) => (
+                        <Button
+                        key={tab.id}
+                        variant={activeFilter === tab.id ? 'default' : 'outline'}
+                        onClick={() => setActiveFilter(tab.id)}
+                        className="shrink-0"
+                        >
+                        <tab.icon className="mr-2 h-4 w-4" />
+                        {tab.label} ({counts[tab.id as keyof typeof counts]})
+                        </Button>
+                    ))}
+                </div>
+                <div className="relative w-full sm:w-auto">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search transactions..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9 w-full sm:w-auto"
+                    />
+                </div>
+            </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -98,8 +150,8 @@ export default function PaymentHistoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {payments.length > 0 ? (
-                payments.map((payment) => (
+              {filteredPayments.length > 0 ? (
+                filteredPayments.map((payment) => (
                   <TableRow key={payment.transactionId}>
                     <TableCell className="font-mono text-xs">{payment.transactionId}</TableCell>
                     <TableCell className="font-medium">{payment.plan}</TableCell>
