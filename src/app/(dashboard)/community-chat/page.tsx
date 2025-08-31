@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getChatUsers } from '@/ai/flows/user-management';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
 
 
 type Message = {
@@ -60,19 +61,24 @@ export default function CommunityChatPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
+    const router = useRouter();
     const [allUsers, setAllUsers] = useState<ChatUser[]>([]);
-    const [loadingUsers, setLoadingUsers] = useState(true);
+    const [loading, setLoading] = useState(true);
 
      useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setCurrentUser(user);
+            if (user) {
+              setCurrentUser(user);
+            } else {
+              router.push('/login');
+            }
         });
         return () => unsubscribe();
-    }, []);
+    }, [router]);
     
     useEffect(() => {
         async function fetchUsers() {
-            setLoadingUsers(true);
+            setLoading(true);
             try {
                 const usersList = await getChatUsers();
                 setAllUsers(usersList);
@@ -80,7 +86,7 @@ export default function CommunityChatPage() {
                 console.error("Error fetching users:", error);
                 toast({ title: "Error", description: "Could not load community members.", variant: "destructive" });
             } finally {
-                setLoadingUsers(false);
+                setLoading(false);
             }
         }
         fetchUsers();
@@ -141,6 +147,11 @@ export default function CommunityChatPage() {
         description: `Copied username: @${text}`,
         });
     };
+
+
+  if (loading) {
+    return <p>Loading chat...</p>
+  }
 
 
   return (
@@ -255,7 +266,7 @@ export default function CommunityChatPage() {
               </CardHeader>
               <CardContent className="flex-grow">
                   <ScrollArea className="h-full max-h-[calc(100vh-26rem)] pr-4">
-                      {loadingUsers ? <p>Loading members...</p> : (
+                      {loading ? <p>Loading members...</p> : (
                           <div className="space-y-4">
                           {filteredUsers.map(user => (
                               <div key={user.id} className="flex items-center justify-between">
