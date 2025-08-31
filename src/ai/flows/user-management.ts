@@ -20,6 +20,11 @@ import crypto from 'crypto';
 
 
 export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ success: boolean; message: string }> {
+  if (!adminDb) {
+    const message = "Firebase Admin is not initialized. Check server environment variables.";
+    console.error(message);
+    return { success: false, message };
+  }
   try {
     const { userId, newRole } = UpdateUserRoleInputSchema.parse(input);
     const userRef = adminDb.collection('users').doc(userId);
@@ -35,6 +40,11 @@ export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ succ
 }
 
 export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: boolean; message: string }> {
+  if (!adminDb) {
+    const message = "Firebase Admin is not initialized. Check server environment variables.";
+    console.error(message);
+    return { success: false, message };
+  }
   try {
     const { name, email, message } = AddLeadUserInputSchema.parse(input);
     const leadsRef = adminDb.collection('leads');
@@ -55,6 +65,10 @@ export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: b
 }
 
 export async function getAllEmails(): Promise<{ email: string; source: string; date: string }[]> {
+   if (!adminDb) {
+    console.error("Firebase Admin is not initialized. Cannot fetch emails.");
+    return [];
+  }
   try {
     const usersSnapshot = await adminDb.collection('users').get();
     const leadsSnapshot = await adminDb.collection('leads').get();
@@ -108,6 +122,10 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
  * @returns An object indicating success or failure.
  */
 export async function updateUserActivity(userId: string): Promise<{ success: boolean }> {
+  if (!adminDb) {
+    console.error("Firebase Admin is not initialized. Cannot update user activity.");
+    return { success: false };
+  }
   if (!userId) {
     return { success: false };
   }
@@ -133,6 +151,10 @@ export async function updateUserActivity(userId: string): Promise<{ success: boo
  * Fetches all signed-up users for the community chat.
  */
 export async function getChatUsers(): Promise<any[]> {
+    if (!adminDb) {
+        console.error("Firebase Admin is not initialized. Cannot fetch chat users.");
+        return [];
+    }
     try {
         const usersRef = adminDb.collection('users');
         const usersSnapshot = await usersRef.get();
@@ -162,6 +184,11 @@ export async function getChatUsers(): Promise<any[]> {
  * Creates a request for a user to join the referral program.
  */
 export async function requestToJoinReferralProgram(input: { userId: string, userName: string, userEmail: string }): Promise<{ success: boolean }> {
+    if (!adminDb) {
+        const message = "Firebase Admin is not initialized. Cannot process referral request.";
+        console.error(message);
+        throw new Error(message);
+    }
     const { userId, userName, userEmail } = input;
     
     // Check if a request already exists for this user
@@ -185,6 +212,10 @@ export async function requestToJoinReferralProgram(input: { userId: string, user
  * Fetches the referral status for a specific user.
  */
 export async function getReferralStatus(userId: string): Promise<ReferralStatus> {
+  if (!adminDb) {
+    console.error("Firebase Admin is not initialized. Cannot get referral status.");
+    return { status: 'not_joined' };
+  }
   const userDoc = await adminDb.collection('users').doc(userId).get();
   if (userDoc.exists() && userDoc.data()?.referralCode) {
     return { status: 'approved', referralCode: userDoc.data()?.referralCode };
@@ -208,6 +239,10 @@ export async function getReferralStatus(userId: string): Promise<ReferralStatus>
  * Fetches all referral requests for the admin panel.
  */
 export async function getReferralRequests(): Promise<ReferralRequest[]> {
+    if (!adminDb) {
+        console.error("Firebase Admin is not initialized. Cannot fetch referral requests.");
+        return [];
+    }
     try {
         const snapshot = await adminDb.collection('referralRequests').orderBy('createdAt', 'desc').get();
         const requests = snapshot.docs
@@ -235,6 +270,11 @@ export async function getReferralRequests(): Promise<ReferralRequest[]> {
  * Updates the status of a referral request (approve/reject).
  */
 export async function updateReferralRequestStatus(input: { requestId: string; status: 'approved' | 'rejected' }): Promise<{ success: boolean }> {
+    if (!adminDb) {
+        const message = "Firebase Admin is not initialized. Cannot update referral status.";
+        console.error(message);
+        throw new Error(message);
+    }
     const { requestId, status } = input;
     const requestRef = adminDb.collection('referralRequests').doc(requestId);
     const requestDoc = await requestRef.get();
