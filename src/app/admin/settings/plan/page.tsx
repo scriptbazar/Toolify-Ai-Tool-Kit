@@ -52,6 +52,7 @@ interface Subscriber {
     name: string;
     email: string;
     planId: string;
+    subscribedAt: string;
 }
 
 const SUBSCRIBERS_PER_PAGE = 5;
@@ -112,24 +113,37 @@ export default function PlanManagementPage() {
         let usersQuery;
         if (planIds.length > 0) {
             // Firestore 'in' queries are limited to 10 items. If more plans, need multiple queries.
-            // For this app, we'll assume there are fewer than 10 plans with subscribers.
-            usersQuery = query(usersRef, where('planId', 'in', planIds));
-        } else {
-            // If no plans, fetch no users
-            usersQuery = query(usersRef, where('planId', '==', 'no-such-plan-exists'));
-        }
+            const planChunks: string[][] = [];
+            for (let i = 0; i < planIds.length; i += 10) {
+                planChunks.push(planIds.slice(i, i + 10));
+            }
+            
+            const userPromises = planChunks.map(chunk => {
+                const q = query(usersRef, where('planId', 'in', chunk));
+                return getDocs(q);
+            });
+            const userSnapshots = await Promise.all(userPromises);
+            
+            const fetchedSubscribers: Subscriber[] = [];
+            userSnapshots.forEach(snapshot => {
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    // Using createdAt as a placeholder for subscription date
+                    const subscribedAtDate = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'N/A';
+                    fetchedSubscribers.push({
+                        id: doc.id,
+                        name: `${data.firstName} ${data.lastName}`,
+                        email: data.email,
+                        planId: data.planId || 'free',
+                        subscribedAt: subscribedAtDate,
+                    });
+                });
+            });
+            setSubscribers(fetchedSubscribers);
 
-        const userDocs = await getDocs(usersQuery);
-        const fetchedSubscribers = userDocs.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                name: `${data.firstName} ${data.lastName}`,
-                email: data.email,
-                planId: data.planId || 'free',
-            } as Subscriber;
-        });
-        setSubscribers(fetchedSubscribers);
+        } else {
+             setSubscribers([]);
+        }
 
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -371,6 +385,7 @@ export default function PlanManagementPage() {
                   <TableHead>User</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Subscribed Plan</TableHead>
+                  <TableHead>Subscription Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -391,11 +406,12 @@ export default function PlanManagementPage() {
                            {plans.find(p => p.id === sub.planId)?.name || sub.planId}
                          </Badge>
                       </TableCell>
+                       <TableCell>{sub.subscribedAt}</TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={3} className="h-24 text-center">
+                    <TableCell colSpan={4} className="h-24 text-center">
                       No subscribers found.
                     </TableCell>
                   </TableRow>
