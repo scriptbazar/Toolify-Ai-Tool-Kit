@@ -150,7 +150,7 @@ export default function AboutUsPage() {
             </div>
         </section>
 
-        <section className="py-20 md:py-24 bg-card rounded-lg">
+        <section className="py-12 md:py-16 bg-card rounded-lg">
             <div className="text-center mb-12">
                 <Users className="h-10 w-10 mx-auto text-primary mb-4" />
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Meet The Team</h2>

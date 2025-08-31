@@ -10,44 +10,47 @@ function initializeFirebaseAdmin(): App {
     return getApps()[0];
   }
 
-  // Standard way to initialize: from GOOGLE_APPLICATION_CREDENTIALS
+  let serviceAccount: ServiceAccount | undefined;
+
+  // Primary method: GOOGLE_APPLICATION_CREDENTIALS environment variable (JSON string)
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     try {
-      const serviceAccountString = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-      const serviceAccount: ServiceAccount = JSON.parse(serviceAccountString);
-
-      // Firebase Admin SDK needs private_key, not privateKey
-      if (serviceAccount.private_key) {
-          serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+      const serviceAccountJson = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+      // Firebase Admin SDK expects private_key, but some environments provide privateKey
+      if (serviceAccountJson.privateKey) {
+        serviceAccountJson.private_key = serviceAccountJson.privateKey.replace(/\\n/g, '\n');
+        delete serviceAccountJson.privateKey;
+      } else if (serviceAccountJson.private_key) {
+        serviceAccountJson.private_key = serviceAccountJson.private_key.replace(/\\n/g, '\n');
       }
-
+      serviceAccount = serviceAccountJson;
       console.log('Initializing Firebase Admin with GOOGLE_APPLICATION_CREDENTIALS.');
-      return initializeApp({
-        credential: cert(serviceAccount),
-      });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS. Error:', error);
-      // Fall through to other methods if parsing fails
+      // Fall through to the next method
     }
   }
 
-  // Fallback for environments that set individual keys (like Vercel)
-  const serviceAccountFromVars: ServiceAccount = {
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-  };
-
-  if (serviceAccountFromVars.projectId && serviceAccountFromVars.clientEmail && serviceAccountFromVars.privateKey) {
+  // Fallback method: Individual environment variables
+  if (!serviceAccount && process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+    serviceAccount = {
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+    };
     console.log('Initializing Firebase Admin with individual environment variables.');
-    return initializeApp({
-      credential: cert(serviceAccountFromVars),
-    });
   }
 
-  // Last resort: Application Default Credentials (for Google Cloud environments)
-  console.warn("Firebase Admin credentials not explicitly set. Falling back to Application Default Credentials. This might fail if your environment is not configured correctly.");
-  return initializeApp();
+  if (serviceAccount) {
+    return initializeApp({
+      credential: cert(serviceAccount),
+    });
+  }
+  
+  // If no credentials are provided, we cannot initialize the admin app.
+  throw new Error(
+    'Firebase Admin SDK credentials not found. Please set GOOGLE_APPLICATION_CREDENTIALS or the individual FIREBASE_* environment variables.'
+  );
 }
 
 const adminApp: App = initializeFirebaseAdmin();
