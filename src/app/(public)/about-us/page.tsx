@@ -1,55 +1,57 @@
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { Target } from 'lucide-react';
 import Image from 'next/image';
 
 export default function AboutUsPage() {
   return (
-    <div className="container mx-auto px-4 py-12 md:py-20">
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl md:text-4xl">About ToolifyAI</CardTitle>
-            <CardDescription>
-              Your all-in-one destination for a smarter, more efficient digital life.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-8">
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-                <p>Welcome to ToolifyAI. Our mission is to provide a comprehensive suite of powerful, easy-to-use online utilities that simplify complex tasks and boost productivity for everyone—from students and content creators to developers and business professionals.</p>
-                <p>In a world overflowing with information and digital noise, we believe in the power of simplicity and efficiency. ToolifyAI was born from a desire to eliminate the need for multiple, single-purpose websites and applications. We wanted to create a single, reliable hub where you can find all the tools you need, right when you need them. Our goal is to empower you to work smarter, not harder, by providing intuitive tools that deliver accurate results instantly.</p>
-            </div>
-            
-            <div className="text-center">
-                <h2 className="text-2xl font-bold border-b pb-2 mb-6">Meet The Team</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-4">
-                    <div className="text-center">
-                        <Avatar className="w-32 h-32 mx-auto mb-4 shadow-lg">
-                            <AvatarImage src="https://i.pravatar.cc/150?u=jane" alt="Jane Doe" />
-                            <AvatarFallback>JD</AvatarFallback>
-                        </Avatar>
-                        <h3 className="text-xl font-semibold">Jane Doe</h3>
-                        <p className="text-muted-foreground">Founder & CEO</p>
+    <div className="bg-background">
+      <div className="container mx-auto px-4 py-12 md:py-20">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+            About AI Smart Tools
+          </h1>
+          <p className="mt-4 text-lg text-muted-foreground">
+            We are on a mission to provide powerful, intuitive, and accessible online utilities for
+            everyone.
+          </p>
+        </div>
+
+        <Card className="mt-12 overflow-hidden">
+            <CardContent className="p-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 items-center">
+                    <div className="relative aspect-[3/2] w-full">
+                        <Image 
+                            src="https://picsum.photos/600/400" 
+                            alt="Our Mission"
+                            fill
+                            className="object-cover"
+                            data-ai-hint="team mission"
+                        />
                     </div>
-                    <div className="text-center">
-                        <Avatar className="w-32 h-32 mx-auto mb-4 shadow-lg">
-                            <AvatarImage src="https://i.pravatar.cc/150?u=john" alt="John Smith" />
-                            <AvatarFallback>JS</AvatarFallback>
-                        </Avatar>
-                        <h3 className="text-xl font-semibold">John Smith</h3>
-                        <p className="text-muted-foreground">Lead Developer</p>
-                    </div>
-                    <div className="text-center">
-                        <Avatar className="w-32 h-32 mx-auto mb-4 shadow-lg">
-                            <AvatarImage src="https://i.pravatar.cc/150?u=emily" alt="Emily White" />
-                            <AvatarFallback>EW</AvatarFallback>
-                        </Avatar>
-                        <h3 className="text-xl font-semibold">Emily White</h3>
-                        <p className="text-muted-foreground">UX/UI Designer</p>
+                    <div className="p-8 md:p-12">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                                <Target className="h-6 w-6 text-primary" />
+                            </div>
+                            <h2 className="text-2xl font-bold">Our Mission</h2>
+                        </div>
+                        <div className="space-y-4 text-muted-foreground">
+                            <p>
+                                Our mission is to empower individuals and businesses by simplifying
+                                complex tasks. We believe that technology should be a great
+                                equalizer, and our suite of smart tools is designed to save you time,
+                                enhance your productivity, and unlock your creative potential—all
+                                within a single, user-friendly platform.
+                            </p>
+                            <p>
+                                From students and freelancers to large enterprises, AI Smart Tools provides
+                                the resources needed to succeed in a digital world.
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
-          </CardContent>
+            </CardContent>
         </Card>
       </div>
     </div>
