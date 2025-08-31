@@ -16,7 +16,7 @@ export function ToolCard({ tool }: ToolCardProps) {
 
 
   return (
-    <Link href={`/${slug}`} className="group block h-full">
+    <Link href={`/tools/${slug}`} className="group block h-full">
       <Card className="h-full transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1 hover:border-primary p-6 flex flex-col items-center text-center relative overflow-hidden">
         {tool.plan === 'Pro' && <Badge className="absolute top-2 right-2">Pro</Badge>}
         <Icon className="h-8 w-8 mb-4 text-muted-foreground transition-colors group-hover:text-primary" />
