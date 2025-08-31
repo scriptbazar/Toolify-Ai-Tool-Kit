@@ -238,9 +238,9 @@ export default async function Home() {
               </Link>
             </Button>
           </div>
-            <div className="mt-12 flex gap-4 overflow-x-auto pb-4 justify-center">
+            <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 justify-center">
               {toolCategories.map((category) => (
-                <div key={category.id} className="flex-shrink-0 w-32 md:w-40">
+                <div key={category.id} className="w-full">
                   <CategoryCard category={category} />
                 </div>
               ))}
