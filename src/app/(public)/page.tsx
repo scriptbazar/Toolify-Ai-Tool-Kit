@@ -7,6 +7,7 @@ import { getTools } from '@/ai/flows/tool-management';
 import { ArrowRight, Hand, Database, Sparkles, Download, LifeBuoy, MessageCircle, Users, Wand2, Award, MousePointerClick, Bot, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
+import { BlogPostCard } from '@/components/common/BlogPostCard';
 
 const steps = [
     {
@@ -73,6 +74,33 @@ const features = [
         description: 'Join our community to share ideas, get feedback, and connect with other users.',
     },
 ]
+
+const blogPosts = [
+    {
+        category: 'Productivity',
+        title: '10 AI-Powered Tools to Supercharge Your Productivity',
+        description: 'Discover how artificial intelligence can help you automate tasks, save time, and focus on what matters most.',
+        imageUrl: 'https://picsum.photos/600/400',
+        imageHint: 'AI productivity',
+        href: '#',
+    },
+    {
+        category: 'SEO',
+        title: 'The Ultimate Guide to SEO for Beginners in 2024',
+        description: 'Learn the fundamentals of Search Engine Optimization and start driving more organic traffic to your website.',
+        imageUrl: 'https://picsum.photos/600/400',
+        imageHint: 'SEO guide',
+        href: '#',
+    },
+    {
+        category: 'Design',
+        title: '5 Design Principles for Creating Stunning Images',
+        description: 'Master the core principles of design to create visually appealing images that captivate your audience.',
+        imageUrl: 'https://picsum.photos/600/400',
+        imageHint: 'design principles',
+        href: '#',
+    },
+];
 
 export default async function Home() {
   const tools = await getTools();
@@ -164,6 +192,30 @@ export default async function Home() {
                 </Link>
               </Button>
           </div>
+        </div>
+      </section>
+
+      <section className="py-20 md:py-32 bg-background">
+        <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">From Our Blog</h2>
+                <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
+                    Stay updated with the latest news, tips, and tutorials from our team.
+                </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {blogPosts.map((post, index) => (
+                    <BlogPostCard
+                        key={index}
+                        category={post.category}
+                        title={post.title}
+                        description={post.description}
+                        imageUrl={post.imageUrl}
+                        imageHint={post.imageHint}
+                        href={post.href}
+                    />
+                ))}
+            </div>
         </div>
       </section>
 
