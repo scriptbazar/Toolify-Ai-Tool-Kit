@@ -247,7 +247,7 @@ export default async function Home() {
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Browse by Category</h2>
                 <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">Find the right tool for the job by exploring our categories.</p>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {toolCategories.map((category) => (
                     <CategoryCard key={category.id} category={category} />
                 ))}
