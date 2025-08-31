@@ -151,14 +151,16 @@ export default function UserPanelLayout({
     { href: '/login-history', label: 'Login History', icon: Mail },
   ];
 
-  const sidebarNav = (
+  const sidebarNav = (isMobile = false) => (
     <div className="flex h-full max-h-screen flex-col gap-2">
-      <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <Logo />
-          <span className="text-lg">ToolifyAI</span>
-        </Link>
-      </div>
+      {!isMobile && (
+        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <Logo />
+            <span className="text-lg">ToolifyAI</span>
+          </Link>
+        </div>
+      )}
       <ScrollArea className="flex-1">
         <nav className="grid items-start gap-1 px-2 text-sm font-medium lg:px-4 py-4">
           {navLinks.map((link) => (
@@ -188,18 +190,18 @@ export default function UserPanelLayout({
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
-        {sidebarNav}
+        {sidebarNav()}
       </div>
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-50">
-          <div className="flex-1 md:hidden pt-1.5">
+          <div className="flex-1 md:hidden">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Logo />
               <span className="text-lg">ToolifyAI</span>
             </Link>
           </div>
           <div className="w-full flex-1 hidden md:block">&nbsp;</div>
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-2 md:gap-4 justify-end flex-1">
             <ModeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -252,7 +254,7 @@ export default function UserPanelLayout({
                     </Link>
                   </SheetTitle>
                 </SheetHeader>
-               {sidebarNav}
+               {sidebarNav(true)}
               </SheetContent>
             </Sheet>
           </div>
