@@ -351,8 +351,11 @@ export default function CommunityChatPage() {
                 type: 'admin',
                 timestamp: serverTimestamp(),
                 reactions: {},
-                ...(imageUrl && { imageUrl }),
             };
+
+            if (imageUrl) {
+                messagePayload.imageUrl = imageUrl;
+            }
             
             if (replyingTo) {
                 messagePayload.replyTo = {

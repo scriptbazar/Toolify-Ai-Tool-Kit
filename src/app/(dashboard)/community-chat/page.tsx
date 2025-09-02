@@ -288,9 +288,12 @@ export default function CommunityChatPage() {
                 type: 'user',
                 timestamp: serverTimestamp(),
                 reactions: {},
-                ...(imageUrl && { imageUrl }),
             };
             
+            if (imageUrl) {
+                messagePayload.imageUrl = imageUrl;
+            }
+
             if (replyingTo) {
                 messagePayload.replyTo = {
                     id: replyingTo.id,
