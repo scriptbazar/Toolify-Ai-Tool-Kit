@@ -167,7 +167,7 @@ export default function CommunityChatPage() {
             
             // After successfully sending the message, check if it was the first one
             // and add the local welcome message.
-            if (isFirstUserMessage) {
+            if (isFirstUserMessage && userData?.firstName) {
                 const welcomeMessage: Message = {
                     id: `welcome-${Date.now()}`,
                     fromId: 'bot',

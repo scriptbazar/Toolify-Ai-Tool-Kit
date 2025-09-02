@@ -29,6 +29,10 @@ type Message = {
     text: string;
     type: 'user' | 'admin';
     imageUrl?: string;
+    poll?: {
+        question: string;
+        options: string[];
+    };
     timestamp: any;
 };
 
@@ -51,6 +55,7 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) =
     const [options, setOptions] = useState(['', '']);
     const [allowCustomOptions, setAllowCustomOptions] = useState(false);
     const { toast } = useToast();
+    const [isOpen, setIsOpen] = useState(false);
 
     const handleOptionChange = (index: number, value: string) => {
         const newOptions = [...options];
@@ -82,14 +87,17 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) =
         toast({ title: "Please provide at least 2 options.", variant: "destructive" });
         return;
       }
-      // In a real app, this would save to the database.
-      console.log({ question, options: filledOptions, allowCustomOptions });
       onAddPoll({ question, options: filledOptions, allowCustomOptions });
       toast({ title: "Poll created successfully!" });
+      setIsOpen(false);
+      // Reset state for next poll
+      setQuestion('');
+      setOptions(['', '']);
+      setAllowCustomOptions(false);
     };
 
     return (
-      <Dialog>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button variant="outline"><Vote className="mr-2 h-4 w-4" />Create Poll</Button>
         </DialogTrigger>
@@ -107,7 +115,7 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) =
                 </div>
                 <div className="space-y-2">
                     <Label>Options</Label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {options.map((option, index) => (
                         <div key={index} className="flex items-center gap-2">
                             <Input value={option} onChange={(e) => handleOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`}/>
@@ -200,8 +208,26 @@ export default function CommunityChatPage() {
         }
     }, [messages]);
     
-    const handleAddPoll = (pollData: any) => {
-        // Poll logic is a placeholder for now
+    const handleAddPoll = async (pollData: any) => {
+        if (!currentUser) return;
+        setIsSending(true);
+        try {
+            await addDoc(collection(db, "communityChat"), {
+                fromId: currentUser.uid,
+                fromName: 'Admin Poll',
+                text: '',
+                type: 'admin',
+                poll: {
+                    question: pollData.question,
+                    options: pollData.options,
+                },
+                timestamp: serverTimestamp(),
+            });
+        } catch (error) {
+            toast({ title: "Error", description: "Could not publish poll.", variant: "destructive" });
+        } finally {
+            setIsSending(false);
+        }
     };
 
     const handleSendMessage = async (e: FormEvent) => {
