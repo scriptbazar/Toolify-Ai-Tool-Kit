@@ -277,3 +277,44 @@ export async function updateAffiliateRequestStatus(userId: string, status: 'appr
     return { success: false, message: 'Could not update status. Please try again.' };
   }
 }
+
+
+/**
+ * Tracks a click on an affiliate link.
+ * @param referrerId - The ID of the affiliate user whose link was clicked.
+ * @returns An object indicating success or failure.
+ */
+export async function trackAffiliateClick(referrerId: string): Promise<{ success: boolean; message: string }> {
+    if (!adminDb || !referrerId) {
+        return { success: false, message: 'Invalid referrer ID or database connection.' };
+    }
+    try {
+        const userRef = adminDb.collection('users').doc(referrerId);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            return { success: false, message: 'Referrer not found.' };
+        }
+
+        // Use FieldValue.increment to atomically increase the click count.
+        await userRef.update({
+            affiliateClicks: FieldValue.increment(1)
+        });
+
+        return { success: true, message: 'Click tracked successfully.' };
+    } catch (error: any) {
+        console.error(`Error tracking click for referrer ${referrerId}:`, error);
+        // It's possible the 'affiliateClicks' field doesn't exist. Let's try setting it to 1 if that's the case.
+        if (error.code === 5) { // 'NOT_FOUND' error code, indicating field doesn't exist
+             try {
+                const userRef = adminDb.collection('users').doc(referrerId);
+                await userRef.set({ affiliateClicks: 1 }, { merge: true });
+                return { success: true, message: 'Click tracked successfully.' };
+            } catch (initError: any) {
+                console.error(`Error initializing clicks for referrer ${referrerId}:`, initError);
+                return { success: false, message: 'Could not initialize click tracking.' };
+            }
+        }
+        return { success: false, message: 'An unknown error occurred while tracking the click.' };
+    }
+}

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -11,12 +11,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Eye, EyeOff } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
+import { trackAffiliateClick } from "@/ai/flows/user-management";
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required." }),
@@ -38,6 +39,7 @@ const formSchema = z.object({
 export default function SignupPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
@@ -52,6 +54,28 @@ export default function SignupPage() {
       confirmPassword: "",
     },
   });
+
+  useEffect(() => {
+    const referrerId = searchParams.get('ref');
+    if (referrerId) {
+      // Store the referrer ID in local storage to persist it across sessions if needed
+      localStorage.setItem('referrerId', referrerId);
+      
+      // Track the click only if it hasn't been tracked for this session
+      const trackedKey = `tracked_${referrerId}`;
+      if (!sessionStorage.getItem(trackedKey)) {
+        trackAffiliateClick(referrerId).then(result => {
+            if (result.success) {
+                console.log(`Click tracked for referrer: ${referrerId}`);
+                sessionStorage.setItem(trackedKey, 'true');
+            } else {
+                 console.error(`Failed to track click for referrer: ${referrerId}. Reason: ${result.message}`);
+            }
+        });
+      }
+    }
+  }, [searchParams]);
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -68,6 +92,9 @@ export default function SignupPage() {
       const endDate = new Date();
       endDate.setFullYear(endDate.getFullYear() + 100); // Effectively "never" for free plan
 
+      // Get referrer from local storage
+      const referrerId = localStorage.getItem('referrerId');
+
       // Save user data to Firestore
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
@@ -80,6 +107,7 @@ export default function SignupPage() {
         planId: "free",
         subscriptionStartDate: startDate,
         subscriptionEndDate: endDate,
+        ...(referrerId && { referredBy: referrerId }), // Add referrer if exists
       });
 
       toast({
