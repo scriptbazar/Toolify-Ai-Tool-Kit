@@ -273,23 +273,21 @@ export default function CommunityChatPage() {
         setIsSending(true);
 
         try {
-            let imageUrl: string | undefined = undefined;
-            if (attachment) {
-                const storage = getStorage();
-                const storageRef = ref(storage, `community-chat/${currentUser.uid}/${Date.now()}_${attachment.name}`);
-                const snapshot = await uploadBytes(storageRef, attachment);
-                imageUrl = await getDownloadURL(snapshot.ref);
-            }
-
-            const messagePayload: Partial<Message> = {
+            const messagePayload: Partial<Omit<Message, 'id'>> = {
                 fromId: currentUser.uid,
                 fromName: `${userData.firstName} ${userData.lastName}`,
                 text: input,
                 type: 'user',
-                imageUrl,
                 timestamp: serverTimestamp(),
                 reactions: {},
             };
+            
+            if (attachment) {
+                const storage = getStorage();
+                const storageRef = ref(storage, `community-chat/${currentUser.uid}/${Date.now()}_${attachment.name}`);
+                const snapshot = await uploadBytes(storageRef, attachment);
+                messagePayload.imageUrl = await getDownloadURL(snapshot.ref);
+            }
             
             if (replyingTo) {
                 messagePayload.replyTo = {
@@ -418,7 +416,7 @@ export default function CommunityChatPage() {
                <ScrollArea className="h-full max-h-[calc(100vh-30rem)] px-4" ref={scrollAreaRef}>
                   <div className="space-y-6">
                       {messages.map((msg) => (
-                         <div key={msg.id} className={cn("flex items-start gap-3 group", msg.fromId === currentUser?.uid ? 'flex-row-reverse' : '')}>
+                         <div key={msg.id} id={`message-${msg.id}`} className={cn("flex items-start gap-3 group", msg.fromId === currentUser?.uid ? 'flex-row-reverse' : '')}>
                             <Avatar>
                                 <AvatarFallback>{msg.fromName === 'ToolifyAI' ? <Bot/> : msg.type === 'admin' ? <Logo className="h-5 w-5"/> : msg.fromName.substring(0, 2)}</AvatarFallback>
                             </Avatar>

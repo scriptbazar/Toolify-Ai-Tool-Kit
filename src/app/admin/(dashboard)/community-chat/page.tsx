@@ -336,23 +336,21 @@ export default function CommunityChatPage() {
         
         setIsSending(true);
         try {
-            let imageUrl: string | undefined = undefined;
-            if (attachment) {
-                const storage = getStorage();
-                const storageRef = ref(storage, `community-chat/${currentUser.uid}/${Date.now()}_${attachment.name}`);
-                const snapshot = await uploadBytes(storageRef, attachment);
-                imageUrl = await getDownloadURL(snapshot.ref);
-            }
-            
-            const messagePayload: Partial<Message> = {
+            const messagePayload: Partial<Omit<Message, 'id'>> = {
                 fromId: currentUser.uid,
                 fromName: 'Admin',
                 text: input,
                 type: 'admin',
-                imageUrl,
                 timestamp: serverTimestamp(),
                 reactions: {},
             };
+            
+            if (attachment) {
+                const storage = getStorage();
+                const storageRef = ref(storage, `community-chat/${currentUser.uid}/${Date.now()}_${attachment.name}`);
+                const snapshot = await uploadBytes(storageRef, attachment);
+                messagePayload.imageUrl = await getDownloadURL(snapshot.ref);
+            }
             
             if (replyingTo) {
                 messagePayload.replyTo = {
