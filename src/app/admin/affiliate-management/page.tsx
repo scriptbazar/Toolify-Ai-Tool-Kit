@@ -253,13 +253,15 @@ export default function AffiliateManagementPage() {
                                     </TableCell>
                                     <TableCell>{req.email}</TableCell>
                                     <TableCell>{new Date(req.requestDate).toLocaleDateString()}</TableCell>
-                                    <TableCell className="text-right space-x-2">
-                                        <Button variant="outline" size="sm" className="bg-green-500 hover:bg-green-600 text-white" onClick={() => handleRequestUpdate(req.id, 'approved')}>
-                                            <ThumbsUp className="mr-2 h-4 w-4" />Approve
-                                        </Button>
-                                         <Button variant="destructive" size="sm" onClick={() => handleRequestUpdate(req.id, 'rejected')}>
-                                            <ThumbsDown className="mr-2 h-4 w-4" />Reject
-                                        </Button>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <Button variant="outline" size="sm" className="bg-green-500 hover:bg-green-600 text-white" onClick={() => handleRequestUpdate(req.id, 'approved')}>
+                                                <ThumbsUp className="mr-2 h-4 w-4" />Approve
+                                            </Button>
+                                             <Button variant="destructive" size="sm" onClick={() => handleRequestUpdate(req.id, 'rejected')}>
+                                                <ThumbsDown className="mr-2 h-4 w-4" />Reject
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             )) : (
