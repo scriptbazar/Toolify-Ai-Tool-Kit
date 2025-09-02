@@ -73,7 +73,7 @@ const faqs = [
 
 export default function ContactUsPage() {
   return (
-    <div className="container mx-auto px-4 py-12 md:py-20">
+    <div className="container mx-auto px-4 py-12 md:py-20 space-y-8">
       <Card className="max-w-4xl mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-2 text-2xl">
@@ -104,30 +104,34 @@ export default function ContactUsPage() {
               contact@example.com
             </a>
           </div>
-
-           <div className="mt-12 pt-8 border-t">
-              <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-2">
+        </CardContent>
+      </Card>
+      
+      <Card className="max-w-4xl mx-auto">
+        <CardHeader>
+             <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
                 <HelpCircle className="h-6 w-6" />
                 Frequently Asked Questions
-              </h2>
-               <Accordion type="single" collapsible className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                  {faqs.map((faq, index) => (
-                    <AccordionItem value={`item-${index}`} key={index} className="border-none">
-                      <AccordionTrigger className="faq-accordion-trigger">
-                        <div className="flex items-center gap-4">
-                           <div className="p-2 bg-muted rounded-full">
-                            <faq.icon className="h-5 w-5 text-primary" />
-                           </div>
-                           <span>{faq.question}</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground pl-16">
-                        {faq.answer}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-              </Accordion>
-            </div>
+            </CardTitle>
+        </CardHeader>
+        <CardContent>
+            <Accordion type="single" collapsible className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              {faqs.map((faq, index) => (
+                <AccordionItem value={`item-${index}`} key={index} className="border-none">
+                  <AccordionTrigger className="faq-accordion-trigger">
+                    <div className="flex items-center gap-4">
+                       <div className="p-2 bg-muted rounded-full">
+                        <faq.icon className="h-5 w-5 text-primary" />
+                       </div>
+                       <span>{faq.question}</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pl-16">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+          </Accordion>
         </CardContent>
       </Card>
     </div>
