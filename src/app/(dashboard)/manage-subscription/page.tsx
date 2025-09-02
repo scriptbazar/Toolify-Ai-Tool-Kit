@@ -76,45 +76,55 @@ export default function ManageSubscriptionPage() {
         toast({ title: 'Error', description: 'You must be logged in to upgrade.', variant: 'destructive'});
         return;
     }
+    
+    // Check if Stripe is enabled
+    if (paymentSettings?.stripe?.isEnabled) {
+        setIsProcessing(plan.id);
+        try {
+            const { sessionId, publishableKey } = await createStripeCheckoutSession({
+                planId: plan.id,
+                planName: plan.name,
+                planPrice: plan.price,
+                userId: user.uid,
+                userEmail: userProfile.email,
+            });
 
-    if (!paymentSettings?.stripe?.isEnabled) {
-         toast({ title: 'Not Available', description: 'Online payment is currently not available. Please contact support.', variant: 'destructive'});
+            if (!sessionId || !publishableKey) {
+                throw new Error('Could not create a checkout session.');
+            }
+
+            const stripe = await loadStripe(publishableKey);
+            if (!stripe) {
+                throw new Error('Stripe.js failed to load.');
+            }
+
+            const { error } = await stripe.redirectToCheckout({ sessionId });
+            if (error) {
+                 throw new Error(error.message);
+            }
+
+        } catch (error: any) {
+            toast({
+                title: 'Checkout Error',
+                description: error.message || 'Could not initiate the payment process. Please try again.',
+                variant: 'destructive'
+            });
+        } finally {
+            setIsProcessing(null);
+        }
+        return;
+    }
+    
+    // Check if any other gateway is enabled
+    const anyGatewayEnabled = Object.values(paymentSettings || {}).some(gateway => gateway?.isEnabled);
+
+    if (anyGatewayEnabled) {
+         toast({ title: 'Coming Soon!', description: 'This payment gateway is not yet supported. Please contact support.', variant: 'default'});
          return;
     }
 
-    setIsProcessing(plan.id);
-    try {
-        const { sessionId, publishableKey } = await createStripeCheckoutSession({
-            planId: plan.id,
-            planName: plan.name,
-            planPrice: plan.price,
-            userId: user.uid,
-            userEmail: userProfile.email,
-        });
-
-        if (!sessionId || !publishableKey) {
-            throw new Error('Could not create a checkout session.');
-        }
-
-        const stripe = await loadStripe(publishableKey);
-        if (!stripe) {
-            throw new Error('Stripe.js failed to load.');
-        }
-
-        const { error } = await stripe.redirectToCheckout({ sessionId });
-        if (error) {
-             throw new Error(error.message);
-        }
-
-    } catch (error: any) {
-        toast({
-            title: 'Checkout Error',
-            description: error.message || 'Could not initiate the payment process. Please try again.',
-            variant: 'destructive'
-        });
-    } finally {
-        setIsProcessing(null);
-    }
+    // If no gateway is enabled at all
+    toast({ title: 'Not Available', description: 'Online payment is currently not available. Please contact support.', variant: 'destructive'});
   };
 
   return (
