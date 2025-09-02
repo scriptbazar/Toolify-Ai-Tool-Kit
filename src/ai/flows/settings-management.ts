@@ -13,6 +13,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { AppSettingsSchema, type AppSettings } from './settings-management.types';
 import fs from 'fs/promises';
 import path from 'path';
+import { merge } from 'lodash';
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
@@ -178,22 +179,23 @@ export async function getSettings(): Promise<AppSettings> {
  */
 export async function updateSettings(newSettings: Partial<AppSettings>): Promise<{ success: boolean; message: string }> {
   try {
-    const settingsToUpdate = { ...newSettings };
-    
+    const currentSettings = await getSettings();
+    const mergedSettings = merge({}, currentSettings, newSettings);
+
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
     // are reset to their default (0) to prevent Zod validation errors.
-    if (settingsToUpdate.referral && !settingsToUpdate.referral.isReferralEnabled) {
-      settingsToUpdate.referral.commissionRate = 0;
-      settingsToUpdate.referral.cookieDuration = 0;
-      settingsToUpdate.referral.payoutThreshold = 0;
+    if (mergedSettings.referral && !mergedSettings.referral.isReferralEnabled) {
+      mergedSettings.referral.commissionRate = 0;
+      mergedSettings.referral.cookieDuration = 0;
+      mergedSettings.referral.payoutThreshold = 0;
     }
     
     // Save the fully merged and validated object to Firestore
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
-    await docRef.set(settingsToUpdate, { merge: true });
+    await docRef.set(mergedSettings, { merge: true });
     
     // Handle environment variable updates separately
-    const geminiApiKey = settingsToUpdate.general?.apiKeys?.gemini;
+    const geminiApiKey = mergedSettings.general?.apiKeys?.gemini;
     if (geminiApiKey && geminiApiKey.trim() !== '') {
       const envLocalPath = path.resolve(process.cwd(), '.env.local');
       let envContent = '';
