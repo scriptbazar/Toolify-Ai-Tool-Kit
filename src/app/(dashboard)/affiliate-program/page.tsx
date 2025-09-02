@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Copy, Users, DollarSign, MousePointerClick, Percent, Calendar, Hourglass, XCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getSettings, updateSettings } from '@/ai/flows/settings-management';
+import { getSettings } from '@/ai/flows/settings-management';
 import { type ReferralSettings, type ReferralStatus } from '@/ai/flows/settings-management.types';
 import { requestToJoinAffiliateProgram } from '@/ai/flows/user-management';
 
@@ -90,7 +90,7 @@ export default function AffiliateProgramPage() {
                 setAffiliateStatus('pending');
                 toast({
                     title: 'Request Submitted!',
-                    description: 'Your request to join the affiliate program is pending review.',
+                    description: 'Our team will review your request. This can take up to 24-48 hours.',
                 });
             } else {
                 throw new Error(result.message);
