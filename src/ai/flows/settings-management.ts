@@ -88,6 +88,7 @@ const defaultPlans = [
       { id: 'f1', text: 'Access to basic tools' },
       { id: 'f2', text: '5 AI generations per day' },
       { id: 'f3', text: 'Community support' },
+      { id: 'f4', text: 'Ad-supported experience' },
     ],
     isPopular: false,
     status: 'active' as const,
