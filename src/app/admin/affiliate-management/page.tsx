@@ -46,7 +46,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -54,7 +53,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAffiliateRequests, updateAffiliateRequestStatus, getAffiliates, type Affiliate, type ReferralRequest } from '@/ai/flows/user-management';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import Link from 'next/link';
 
 
 const StatCard = ({ title, value, icon: Icon, onClick }: { title: string, value: string, icon: React.ElementType, onClick?: () => void }) => (
@@ -218,7 +216,7 @@ export default function AffiliateManagementPage() {
                             <TableCell className="text-right">
                                 <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button size="icon" variant="ghost">
+                                    <Button size="icon" variant="ghost" onClick={(e) => e.stopPropagation()}>
                                     <MoreHorizontal className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
