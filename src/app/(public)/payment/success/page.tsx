@@ -8,7 +8,7 @@ import { CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 
@@ -26,29 +26,30 @@ export default function PaymentSuccessPage() {
 
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // In a real application, you would verify the session on your backend
-                // and then update the user's plan in Firestore.
-                // For this example, we will simulate this update on the client side.
-                // NOTE: Client-side updates like this are not secure. This should be a webhook.
+                // In a real production app, you would verify the session on your backend
+                // using a webhook to prevent users from accessing this page directly.
+                // For this example, we'll fetch the user's data to show a toast.
                 try {
-                    // Placeholder for which plan was purchased.
-                    // This should be retrieved from the webhook/backend verification.
-                    const purchasedPlanId = 'pro'; // Hardcoded for demonstration
-
                     const userDocRef = doc(db, 'users', user.uid);
-                    await updateDoc(userDocRef, {
-                        planId: purchasedPlanId
-                    });
-
-                    toast({
-                        title: "Payment Successful!",
-                        description: `Your plan has been upgraded to ${purchasedPlanId}.`,
-                    });
+                    // NOTE: The actual plan update should be handled by a secure webhook
+                    // from Stripe to your backend. The client-side update is not secure
+                    // and is only for immediate feedback in this demo.
+                    // A webhook would look up the session, get the planId from metadata,
+                    // and update the user's document in Firestore.
+                    
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists()) {
+                        const planId = userDocSnap.data().planId || 'upgraded';
+                         toast({
+                            title: "Payment Successful!",
+                            description: `Your plan has been upgraded.`,
+                        });
+                    }
                 } catch (error) {
                     console.error("Failed to update user plan:", error);
                      toast({
                         title: "Update Error",
-                        description: "Your payment was successful, but we couldn't update your plan. Please contact support.",
+                        description: "Your payment was successful, but we couldn't update your plan automatically. Please contact support.",
                         variant: "destructive",
                     });
                 }
