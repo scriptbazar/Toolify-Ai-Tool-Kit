@@ -89,11 +89,13 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) =
                 </div>
                 <div className="space-y-2">
                     <Label>Options</Label>
+                    <div className="grid grid-cols-2 gap-2">
                     {options.map((option, index) => (
                         <div key={index} className="flex items-center gap-2">
                             <Input value={option} onChange={(e) => handleOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`}/>
                         </div>
                     ))}
+                    </div>
                 </div>
                 <div className="flex items-center space-x-2">
                     <Switch id="allow-custom-options" checked={allowCustomOptions} onCheckedChange={setAllowCustomOptions} />
@@ -102,7 +104,7 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) =
             </div>
              <DialogFooter>
                 <Button variant="outline" onClick={handleCreatePoll}>Save Poll</Button>
-            </DialogFooter>
+             </DialogFooter>
         </DialogContent>
       </Dialog>
     );

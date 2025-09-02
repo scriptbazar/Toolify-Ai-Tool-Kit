@@ -152,8 +152,7 @@ export default function CommunityChatPage() {
             });
 
             if (isFirstUserMessage) {
-                // Simulate a welcome message locally, not saving to DB
-                 const welcomeMessage: Message = {
+                const welcomeMessage: Message = {
                     id: `welcome-${Date.now()}`,
                     fromId: 'bot',
                     fromName: 'ToolifyAI',
