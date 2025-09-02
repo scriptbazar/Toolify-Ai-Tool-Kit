@@ -29,7 +29,7 @@ import {
   BadgeCheck,
   ThumbsUp,
   ThumbsDown,
-  Hourglass,
+  Loader2,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -41,24 +41,9 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getAffiliateRequests, updateAffiliateRequestStatus, type ReferralRequest } from '@/ai/flows/user-management';
+import { getAffiliateRequests, updateAffiliateRequestStatus, getAffiliates, type Affiliate, type ReferralRequest } from '@/ai/flows/user-management';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-type Affiliate = {
-  id: string;
-  name: string;
-  email: string;
-  avatar: string;
-  referrals: number;
-  earnings: number;
-  status: 'Active' | 'Inactive';
-};
-
-const dummyAffiliates: Affiliate[] = [
-  { id: '1', name: 'John Doe', email: 'john@example.com', avatar: '', referrals: 25, earnings: 125.50, status: 'Active' },
-  { id: '2', name: 'Jane Smith', email: 'jane@example.com', avatar: '', referrals: 10, earnings: 50.00, status: 'Active' },
-  { id: '3', name: 'Peter Jones', email: 'peter@example.com', avatar: '', referrals: 5, earnings: 25.00, status: 'Inactive' },
-];
 
 const StatCard = ({ title, value, icon: Icon }: { title: string, value: string, icon: React.ElementType }) => (
   <Card>
@@ -79,23 +64,24 @@ export default function AffiliateManagementPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
-  const fetchRequests = async () => {
+  const fetchData = async () => {
+    setLoading(true);
     try {
-        const pendingRequests = await getAffiliateRequests();
+        const [pendingRequests, approvedAffiliates] = await Promise.all([
+            getAffiliateRequests(),
+            getAffiliates()
+        ]);
         setRequests(pendingRequests);
+        setAffiliates(approvedAffiliates);
     } catch (error) {
-        console.error("Failed to fetch affiliate requests:", error);
-        toast({ title: 'Error', description: 'Could not load pending requests.', variant: 'destructive'});
+        console.error("Failed to fetch affiliate data:", error);
+        toast({ title: 'Error', description: 'Could not load affiliate data.', variant: 'destructive'});
+    } finally {
+        setLoading(false);
     }
   }
 
   useEffect(() => {
-    async function fetchData() {
-        setLoading(true);
-        await fetchRequests();
-        setAffiliates(dummyAffiliates);
-        setLoading(false);
-    }
     fetchData();
   }, []);
   
@@ -103,7 +89,7 @@ export default function AffiliateManagementPage() {
     const result = await updateAffiliateRequestStatus(userId, status);
     if (result.success) {
         toast({ title: 'Success', description: `Request has been ${status}.`});
-        fetchRequests(); // Re-fetch the list of pending requests
+        fetchData(); // Re-fetch all data to update both lists
     } else {
         toast({ title: 'Error', description: result.message, variant: 'destructive'});
     }
@@ -140,7 +126,7 @@ export default function AffiliateManagementPage() {
       </div>
       
        <Tabs defaultValue="overview">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-1 sm:w-auto sm:grid-cols-2">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="requests">
                 Pending Requests
@@ -185,11 +171,12 @@ export default function AffiliateManagementPage() {
                         </TableRow>
                         </TableHeader>
                         <TableBody>
-                        {filteredAffiliates.map((affiliate) => (
+                        {filteredAffiliates.length > 0 ? filteredAffiliates.map((affiliate) => (
                             <TableRow key={affiliate.id}>
                             <TableCell>
                                 <div className="flex items-center gap-3">
                                 <Avatar>
+                                    <AvatarImage src={affiliate.avatar} alt={affiliate.name} />
                                     <AvatarFallback>{affiliate.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
@@ -224,7 +211,11 @@ export default function AffiliateManagementPage() {
                                 </DropdownMenu>
                             </TableCell>
                             </TableRow>
-                        ))}
+                        )) : (
+                            <TableRow>
+                                <TableCell colSpan={5} className="h-24 text-center">No approved affiliates yet.</TableCell>
+                            </TableRow>
+                        )}
                         </TableBody>
                     </Table>
                 </CardContent>
@@ -254,6 +245,7 @@ export default function AffiliateManagementPage() {
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <Avatar>
+                                                <AvatarImage src={req.avatar} alt={req.name} />
                                                 <AvatarFallback>{req.name.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <span className="font-medium">{req.name}</span>

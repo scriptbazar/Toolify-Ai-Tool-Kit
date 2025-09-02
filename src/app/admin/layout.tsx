@@ -46,7 +46,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { CircleUser, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { usePathname, useRouter } from 'next/navigation';
@@ -59,7 +59,6 @@ import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { SidebarProvider } from '@/components/ui/sidebar';
 
 interface AppUser {
   firstName: string;
@@ -298,7 +297,6 @@ export default function AdminLayout({
   );
 
   return (
-    <SidebarProvider>
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <div className="hidden border-r bg-muted/40 md:block">
           <div className="flex h-full max-h-screen flex-col">
@@ -468,6 +466,5 @@ export default function AdminLayout({
           </main>
         </div>
       </div>
-    </SidebarProvider>
   );
 }

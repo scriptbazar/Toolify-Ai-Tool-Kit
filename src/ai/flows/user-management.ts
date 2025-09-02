@@ -14,7 +14,7 @@
 
 import { z } from 'zod';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, ReferralRequestSchema } from './user-management.types';
+import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, ReferralRequestSchema, type Affiliate, AffiliateSchema } from './user-management.types';
 import { adminDb } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 
@@ -220,7 +220,7 @@ export async function getAffiliateRequests(): Promise<ReferralRequest[]> {
             id: doc.id,
             name: `${data.firstName} ${data.lastName}`,
             email: data.email,
-            avatar: data.avatar || '',
+            avatar: data.avatar || `https://i.pravatar.cc/150?u=${data.email}`,
             requestDate: (data.referralRequestDate as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
             status: data.affiliateStatus
         });
@@ -229,6 +229,35 @@ export async function getAffiliateRequests(): Promise<ReferralRequest[]> {
     console.error("Error fetching affiliate requests:", error);
     return [];
   }
+}
+
+/**
+ * Fetches all users who have an 'approved' affiliate status.
+ */
+export async function getAffiliates(): Promise<Affiliate[]> {
+    if (!adminDb) return [];
+    try {
+        const snapshot = await adminDb.collection('users')
+            .where('affiliateStatus', '==', 'approved')
+            .get();
+
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return AffiliateSchema.parse({
+                id: doc.id,
+                name: `${data.firstName} ${data.lastName}`,
+                email: data.email,
+                avatar: data.avatar || `https://i.pravatar.cc/150?u=${data.email}`,
+                // These are placeholders for now
+                referrals: data.referrals || 0, 
+                earnings: data.earnings || 0.00,
+                status: 'Active', 
+            });
+        });
+    } catch (error) {
+        console.error("Error fetching affiliates:", error);
+        return [];
+    }
 }
 
 /**

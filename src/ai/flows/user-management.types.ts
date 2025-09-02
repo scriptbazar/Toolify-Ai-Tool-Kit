@@ -30,3 +30,14 @@ export const ReferralRequestSchema = z.object({
     status: z.literal('pending'),
 });
 export type ReferralRequest = z.infer<typeof ReferralRequestSchema>;
+
+export const AffiliateSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string().email(),
+    avatar: z.string().url().or(z.literal('')),
+    referrals: z.number().default(0),
+    earnings: z.number().default(0),
+    status: z.enum(['Active', 'Inactive']).default('Active'),
+});
+export type Affiliate = z.infer<typeof AffiliateSchema>;
