@@ -140,8 +140,8 @@ export default function CommunityChatPage() {
            return allUsers.filter(user => user.lastActive && new Date(user.lastActive) > fiveMinutesAgo);
         }
        if (activeUserFilter === 'new') {
-            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-            return allUsers.filter(user => user.createdAt && new Date(user.createdAt) > twentyFourHoursAgo);
+            const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            return allUsers.filter(user => user.createdAt && new Date(user.createdAt) > sevenDaysAgo);
        }
        return allUsers;
     }, [activeUserFilter, allUsers]);
@@ -259,12 +259,15 @@ export default function CommunityChatPage() {
                       </p>
                   </div>
                   <div className="space-y-1">
-                      <div className="grid w-full grid-cols-2 gap-1 pt-2">
+                      <div className="grid w-full grid-cols-3 gap-1 pt-2">
                           <Button variant={activeUserFilter === 'all' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('all')}>
                               <span className="flex items-center"><Users className="mr-2 h-4 w-4" /> All</span>
                           </Button>
                           <Button variant={activeUserFilter === 'live' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('live')}>
                              <span className="flex items-center"><Wifi className="mr-2 h-4 w-4"/>Live</span>
+                          </Button>
+                          <Button variant={activeUserFilter === 'new' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('new')}>
+                             <span className="flex items-center"><UserPlus className="mr-2 h-4 w-4"/>New</span>
                           </Button>
                       </div>
                   </div>
@@ -283,6 +286,9 @@ export default function CommunityChatPage() {
                                           <p className="font-medium">{user.name}</p>
                                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                             <span>@{user.username}</span>
+                                            <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(user.username)}>
+                                                <Copy className="h-3 w-3" />
+                                            </Button>
                                           </div>
                                         </div>
                                   </div>
