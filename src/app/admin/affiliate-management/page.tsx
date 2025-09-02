@@ -30,6 +30,9 @@ import {
   ThumbsUp,
   ThumbsDown,
   Loader2,
+  Eye,
+  UserX,
+  Copy,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -38,15 +41,24 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAffiliateRequests, updateAffiliateRequestStatus, getAffiliates, type Affiliate, type ReferralRequest } from '@/ai/flows/user-management';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Link from 'next/link';
 
 
-const StatCard = ({ title, value, icon: Icon }: { title: string, value: string, icon: React.ElementType }) => (
-  <Card>
+const StatCard = ({ title, value, icon: Icon, onClick }: { title: string, value: string, icon: React.ElementType, onClick?: () => void }) => (
+  <Card onClick={onClick} className={onClick ? "cursor-pointer hover:bg-muted/50 transition-colors" : ""}>
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle className="text-sm font-medium">{title}</CardTitle>
       <Icon className="h-4 w-4 text-muted-foreground" />
@@ -62,6 +74,9 @@ export default function AffiliateManagementPage() {
   const [requests, setRequests] = useState<ReferralRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAffiliate, setSelectedAffiliate] = useState<Affiliate | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
 
   const fetchData = async () => {
@@ -115,6 +130,12 @@ export default function AffiliateManagementPage() {
         </div>
       );
   }
+  
+  const copyToClipboard = (text: string, fieldName: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ description: `Copied ${fieldName}: ${text}` });
+  };
+
 
   return (
     <div className="space-y-6">
@@ -125,7 +146,7 @@ export default function AffiliateManagementPage() {
         </p>
       </div>
       
-       <Tabs defaultValue="overview">
+       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-1 sm:w-auto sm:grid-cols-2">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="requests">
@@ -135,10 +156,10 @@ export default function AffiliateManagementPage() {
         </TabsList>
         <TabsContent value="overview" className="mt-6 space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <StatCard title="Total Affiliates" value={affiliates.length.toString()} icon={Users} />
+                <StatCard title="Total Affiliates" value={affiliates.length.toString()} icon={Users} onClick={() => setActiveTab('overview')} />
+                <StatCard title="Pending Requests" value={requests.length.toString()} icon={Send} onClick={() => setActiveTab('requests')} />
                 <StatCard title="Total Earnings" value={`$${totalEarnings.toFixed(2)}`} icon={DollarSign} />
                 <StatCard title="Total Paid" value="$0.00" icon={CreditCard} />
-                <StatCard title="Total Due" value={`$${totalEarnings.toFixed(2)}`} icon={Send} />
             </div>
 
             <Card>
@@ -172,7 +193,7 @@ export default function AffiliateManagementPage() {
                         </TableHeader>
                         <TableBody>
                         {filteredAffiliates.length > 0 ? filteredAffiliates.map((affiliate) => (
-                            <TableRow key={affiliate.id}>
+                            <TableRow key={affiliate.id} className="cursor-pointer" onClick={() => { setSelectedAffiliate(affiliate); setIsDetailOpen(true); }}>
                             <TableCell>
                                 <div className="flex items-center gap-3">
                                 <Avatar>
@@ -202,9 +223,14 @@ export default function AffiliateManagementPage() {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>View Details</DropdownMenuItem>
-                                    <DropdownMenuItem>Mark as Paid</DropdownMenuItem>
-                                    <DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setSelectedAffiliate(affiliate); setIsDetailOpen(true); }}>
+                                        <Eye className="mr-2 h-4 w-4" /> View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                        <CreditCard className="mr-2 h-4 w-4" /> Mark as Paid
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                        <UserX className="mr-2 h-4 w-4 text-destructive" /> 
                                         {affiliate.status === 'Active' ? 'Deactivate' : 'Activate'}
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -277,6 +303,49 @@ export default function AffiliateManagementPage() {
             </Card>
         </TabsContent>
       </Tabs>
+
+        <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Affiliate Details</DialogTitle>
+            </DialogHeader>
+            {selectedAffiliate && (
+              <div className="space-y-4 py-4">
+                  <div className="flex items-center gap-4">
+                      <Avatar className="h-16 w-16">
+                          <AvatarImage src={selectedAffiliate.avatar} alt={selectedAffiliate.name}/>
+                          <AvatarFallback>{selectedAffiliate.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                          <h3 className="text-lg font-semibold">{selectedAffiliate.name}</h3>
+                          <p className="text-sm text-muted-foreground">{selectedAffiliate.email}</p>
+                      </div>
+                  </div>
+                   <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="font-medium text-muted-foreground">User ID:</div>
+                      <div className="flex items-center gap-1">
+                          <span className="truncate">{selectedAffiliate.id}</span>
+                           <Copy className="h-3 w-3 cursor-pointer" onClick={() => copyToClipboard(selectedAffiliate.id, 'User ID')} />
+                      </div>
+                      <div className="font-medium text-muted-foreground">Status:</div>
+                      <div>
+                          <Badge variant={selectedAffiliate.status === 'Active' ? 'default' : 'secondary'} className={selectedAffiliate.status === 'Active' ? 'bg-green-500 hover:bg-green-600' : ''}>
+                              {selectedAffiliate.status}
+                          </Badge>
+                      </div>
+                       <div className="font-medium text-muted-foreground">Total Referrals:</div>
+                      <div>{selectedAffiliate.referrals}</div>
+                       <div className="font-medium text-muted-foreground">Total Earnings:</div>
+                      <div>${selectedAffiliate.earnings.toFixed(2)}</div>
+                   </div>
+              </div>
+            )}
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIsDetailOpen(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
     </div>
   );
 }
