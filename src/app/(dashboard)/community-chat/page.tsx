@@ -19,7 +19,7 @@ import { getChatUsers } from '@/ai/flows/user-management';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from '@/components/common/Logo';
 
@@ -111,7 +111,7 @@ export default function CommunityChatPage() {
                 if (error.code === 'permission-denied') {
                     toast({
                         title: "Permission Denied",
-                        description: "You do not have permission to view the chat. Please contact support or check your Firestore rules.",
+                        description: "You do not have permission to view the chat. This is likely due to Firestore security rules.",
                         variant: "destructive",
                         duration: 10000,
                     });
@@ -152,13 +152,15 @@ export default function CommunityChatPage() {
             });
 
             if (isFirstUserMessage) {
+                // This is a client-side only welcome message, it won't be saved to DB
+                // and will only be visible to the current user in their current session.
                 const welcomeMessage: Message = {
                     id: `welcome-${Date.now()}`,
                     fromId: 'bot',
                     fromName: 'ToolifyAI',
                     type: 'admin',
                     text: `Welcome to the community, ${userData.firstName}! We're glad to have you here.`,
-                    timestamp: new Date(),
+                    timestamp: Timestamp.now(),
                 };
                 setMessages(prev => [...prev, welcomeMessage]);
             }

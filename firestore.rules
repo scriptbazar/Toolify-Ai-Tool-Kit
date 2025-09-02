@@ -2,35 +2,66 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Users can only read and write to their own document.
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Tools collection is public and can be read by anyone.
-    // Writes should only be done from a trusted server environment (like admin panel).
-    match /tools/{toolId} {
-      allow read: if true;
-      allow write: if false; // Disallow client-side writes for security
-    }
-
-    // Leads can be created by anyone.
-    match /leads/{leadId} {
-      allow create: if true;
-      allow read, update, delete: if false; // Only accessible by admin server
-    }
-
-    // Tickets can only be accessed by their owner or admins.
-    // This is a simplified rule; a real app might check an 'isAdmin' custom claim.
-    match /tickets/{ticketId} {
-      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
-      // Admin access would be handled by server-side code with elevated privileges.
-    }
-
-    // Default deny all other access
+    
+    // Default security: Deny all reads/writes to unknown paths
     match /{document=**} {
       allow read, write: if false;
     }
+
+    // Community Chat Rules
+    match /communityChat/{messageId} {
+      // Allow any authenticated user to read all messages
+      allow read: if request.auth != null;
+      
+      // Allow any authenticated user to create a new message,
+      // but only if the 'fromId' in the message matches their own user ID.
+      // This prevents users from sending messages on behalf of others.
+      // We don't allow updates or deletes to preserve chat history.
+      allow create: if request.auth != null && request.resource.data.fromId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Users Collection Rules
+    match /users/{userId}/{document=**} {
+      // Allow users to read and update their own data.
+      // Allow admins to read/write any user's data.
+      allow read, update: if request.auth != null && (request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+    
+    // Other collections should have their own specific rules.
+    // For example, for settings, only admins should have access.
+    match /settings/{docId} {
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // These are examples. Add rules for all your collections.
+    match /tickets/{ticketId} {
+      allow read, write: if request.auth != null;
+    }
+    match /userMedia/{mediaId} {
+      allow read, write: if request.auth != null;
+    }
+    match /leads/{leadId} {
+        allow read, write: if true; // Allow anyone to create a lead
+    }
+     match /announcements/{announcementId} {
+        allow read: if true;
+        allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+     match /tools/{toolId} {
+        allow read: if true;
+        allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+     match /payments/{paymentId} {
+        allow read: if request.auth != null && (request.auth.uid == resource.data.userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+        allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+     match /emailLog/{logId} {
+       allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+     match /comments/{commentId} {
+       allow read, write: if true;
+    }
+    
   }
 }
