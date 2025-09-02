@@ -336,6 +336,14 @@ export default function CommunityChatPage() {
         
         setIsSending(true);
         try {
+            let imageUrl: string | undefined = undefined;
+            if (attachment) {
+                const storage = getStorage();
+                const storageRef = ref(storage, `community-chat/${currentUser.uid}/${Date.now()}_${attachment.name}`);
+                const snapshot = await uploadBytes(storageRef, attachment);
+                imageUrl = await getDownloadURL(snapshot.ref);
+            }
+            
             const messagePayload: Partial<Omit<Message, 'id'>> = {
                 fromId: currentUser.uid,
                 fromName: 'Admin',
@@ -343,14 +351,8 @@ export default function CommunityChatPage() {
                 type: 'admin',
                 timestamp: serverTimestamp(),
                 reactions: {},
+                ...(imageUrl && { imageUrl }),
             };
-            
-            if (attachment) {
-                const storage = getStorage();
-                const storageRef = ref(storage, `community-chat/${currentUser.uid}/${Date.now()}_${attachment.name}`);
-                const snapshot = await uploadBytes(storageRef, attachment);
-                messagePayload.imageUrl = await getDownloadURL(snapshot.ref);
-            }
             
             if (replyingTo) {
                 messagePayload.replyTo = {
@@ -461,7 +463,7 @@ export default function CommunityChatPage() {
                                 {msg.replyTo && (
                                 <a href={`#message-${msg.replyTo.id}`} className="block bg-black/10 p-2 rounded-md mb-2 text-xs italic">
                                     <p className="font-bold">{msg.replyTo.fromName}</p>
-                                    <p className="truncate">{msg.replyTo.text}</p>
+                                    <p className="truncate">{msg.replyTo.text || (replyingTo?.imageUrl ? 'Image' : '')}</p>
                                 </a>
                                 )}
                                 {msg.imageUrl && (
@@ -495,7 +497,7 @@ export default function CommunityChatPage() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent>
-                                        <DropdownMenuItem onSelect={() => setReplyingTo(msg)}>
+                                        <DropdownMenuItem onClick={(e) => { e.preventDefault(); setReplyingTo(msg); }}>
                                             <MessageSquareReply className="mr-2 h-4 w-4" />
                                             Reply
                                         </DropdownMenuItem>
