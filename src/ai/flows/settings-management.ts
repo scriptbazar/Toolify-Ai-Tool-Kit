@@ -182,17 +182,17 @@ export async function updateSettings(newSettings: AppSettings): Promise<{ succes
     const currentSettings = await getSettings();
 
     // 2. Perform a deep merge of current settings with new settings.
-    const mergedSettings = {
+    const mergedSettings: AppSettings = {
         ...currentSettings,
         ...newSettings,
-        general: { ...currentSettings.general, ...newSettings.general },
-        referral: { ...currentSettings.referral, ...newSettings.referral },
-        advertisement: { ...currentSettings.advertisement, ...newSettings.advertisement },
-        plan: { ...currentSettings.plan, ...newSettings.plan },
-        payment: { ...currentSettings.payment, ...newSettings.payment },
-        page: { ...currentSettings.page, ...newSettings.page },
+        general: newSettings.general ? { ...currentSettings.general, ...newSettings.general } : currentSettings.general,
+        referral: newSettings.referral ? { ...currentSettings.referral, ...newSettings.referral } : currentSettings.referral,
+        advertisement: newSettings.advertisement ? { ...currentSettings.advertisement, ...newSettings.advertisement } : currentSettings.advertisement,
+        plan: newSettings.plan ? { ...currentSettings.plan, ...newSettings.plan } : currentSettings.plan,
+        payment: newSettings.payment ? { ...currentSettings.payment, ...newSettings.payment } : currentSettings.payment,
+        page: newSettings.page ? { ...currentSettings.page, ...newSettings.page } : currentSettings.page,
     };
-
+    
     // BUG FIX: If referral program is disabled, ensure related numeric values are reset to 0
     // This prevents validation errors if the user disables the feature but leaves old values in the fields.
     if (mergedSettings.referral && !mergedSettings.referral.isReferralEnabled) {
