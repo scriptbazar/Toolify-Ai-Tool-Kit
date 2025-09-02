@@ -151,25 +151,28 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
   const removeAttachment = (index: number) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   }
-
+  
   const uploadAttachments = async (files: File[], userId: string): Promise<string[]> => {
     if (files.length === 0) return [];
 
     const storage = getStorage();
-    const uploadPromises = files.map(async (file, index) => {
-      try {
-        const uniqueFileName = `${Date.now()}-${index}-${file.name}`;
-        const storageRef = ref(storage, `ticket-attachments/${userId}/${uniqueFileName}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        return await getDownloadURL(snapshot.ref);
-      } catch (uploadError) {
-        console.error(`Failed to upload ${file.name}:`, uploadError);
-        throw new Error(`Could not upload file: ${file.name}. Please check file permissions and network.`);
-      }
+    const uploadPromises = files.map(file => {
+      // Using a more robust unique name generation
+      const uniqueFileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}_${file.name}`;
+      const storageRef = ref(storage, `ticket-attachments/${userId}/${uniqueFileName}`);
+      return uploadBytes(storageRef, file).then(snapshot => getDownloadURL(snapshot.ref));
     });
 
-    return Promise.all(uploadPromises);
-  };
+    try {
+        // This will now properly reject if any of the uploads fail.
+        const urls = await Promise.all(uploadPromises);
+        return urls;
+    } catch (error) {
+        console.error('An error occurred during file upload:', error);
+        // Provide a more specific error to the user.
+        throw new Error('Could not upload one or more attachments. Please check your network and file permissions.');
+    }
+};
 
 
   const onSubmit: SubmitHandler<TicketFormValues> = async (data) => {
@@ -216,8 +219,10 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
     } catch (error: any) {
         console.error('Ticket submission process failed:', error);
         toast({ title: 'Submission Failed', description: error.message || 'An unknown error occurred.', variant: 'destructive' });
+    } finally {
+        // This ensures the submitting state is always reset, even on error.
         setIsSubmitting(false);
-    } 
+    }
   };
   
   const handleCloseDialog = () => {
