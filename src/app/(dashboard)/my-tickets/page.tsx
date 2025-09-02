@@ -16,44 +16,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { CreateTicketDialog } from '@/components/dashboard/CreateTicketDialog';
+import { CountdownTimer } from '@/components/common/CountdownTimer';
 
-
-const CountdownCell = ({ expiryDate }: { expiryDate: string }) => {
-    const calculateTimeLeft = () => {
-        const difference = +new Date(expiryDate) - +new Date();
-        let timeLeft: {d: number, h: number, m: number, s: number} | null = null;
-        if (difference > 0) {
-            timeLeft = {
-                d: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                h: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                m: Math.floor((difference / 1000 / 60) % 60),
-                s: Math.floor((difference / 1000) % 60),
-            };
-        }
-        return timeLeft;
-    };
-
-    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-
-    useEffect(() => {
-        if (!timeLeft) return;
-        const timer = setTimeout(() => setTimeLeft(calculateTimeLeft()), 1000);
-        return () => clearTimeout(timer);
-    }, [timeLeft]);
-
-    if (!timeLeft) {
-        return <span className="text-red-500">Expired & Deleted</span>;
-    }
-
-    return (
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" />
-            <span>
-                {timeLeft.d}d {timeLeft.h}h {timeLeft.m}m {timeLeft.s}s
-            </span>
-        </div>
-    );
-};
 
 const getStatusBadge = (status: TicketStatus) => {
     switch (status) {
@@ -199,7 +163,14 @@ export default function MyTicketsPage() {
                                 <TableCell>{getStatusBadge(ticket.status)}</TableCell>
                                 <TableCell>{new Date(ticket.lastUpdated).toLocaleString()}</TableCell>
                                 <TableCell>
-                                    <CountdownCell expiryDate={ticket.expiresAt} />
+                                     <CountdownTimer
+                                        expiryDate={new Date(ticket.expiresAt)}
+                                        className="text-xs text-muted-foreground flex items-center gap-1.5"
+                                        expiredText="Expired & Deleted"
+                                        expiredClassName="text-red-500"
+                                     >
+                                         <Clock className="h-3 w-3" />
+                                     </CountdownTimer>
                                 </TableCell>
                             </TableRow>
                         ))}

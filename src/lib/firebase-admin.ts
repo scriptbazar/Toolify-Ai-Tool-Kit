@@ -18,22 +18,19 @@ if (!getApps().length) {
     initializeApp({
       credential: cert(serviceAccount as ServiceAccount),
     });
-    console.log("Firebase Admin SDK initialized successfully.");
   } catch (error: any) {
-    console.error("Firebase Admin SDK initialization failed:", error.message);
+     // This error is critical for server functionality, so we log it.
+     // In a real production environment, you might use a more robust logging service.
+    console.error("CRITICAL: Firebase Admin SDK initialization failed:", error.message);
   }
 }
 
 // Get the Firestore instance from the initialized app.
 // This will be undefined if initialization failed.
-adminDb = getFirestore();
-
-if (!adminDb) {
-    console.warn(
-      "Firestore is not available. Server-side Firebase features will be disabled."
-    );
+try {
+    adminDb = getFirestore();
+} catch (error) {
+     console.error("CRITICAL: Failed to get Firestore instance. Server-side database features will be disabled.", error);
 }
 
-
 export { adminDb };
-

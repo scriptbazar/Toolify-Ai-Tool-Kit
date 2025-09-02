@@ -7,67 +7,7 @@ import { type SecuritySettings } from '@/ai/flows/settings-management.types';
 import { Logo } from '@/components/common/Logo';
 import { Construction } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-const CountdownTimer = ({ until }: { until: Date }) => {
-  const calculateTimeLeft = () => {
-    const difference = +new Date(until) - +new Date();
-    let timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
-
-    if (difference > 0) {
-      timeLeft = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    }
-
-    return timeLeft;
-  };
-
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-  const router = useRouter();
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const newTimeLeft = calculateTimeLeft();
-      setTimeLeft(newTimeLeft);
-       if (Object.values(newTimeLeft).every(val => val === 0)) {
-        // Force refresh when timer ends to re-check maintenance mode
-         window.location.reload();
-      }
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  });
-  
-  const timerComponents = Object.entries(timeLeft).map(([interval, value]) => {
-      if (value === 0 && interval !== 'seconds' && timeLeft.days === 0 && (interval !== 'minutes' || timeLeft.hours === 0)) {
-          return null;
-      }
-      return (
-          <div key={interval} className="flex flex-col items-center">
-              <span className="text-4xl md:text-6xl font-bold text-primary tabular-nums">
-                  {String(value).padStart(2, '0')}
-              </span>
-              <span className="text-sm uppercase text-muted-foreground">{interval}</span>
-          </div>
-      );
-  }).filter(Boolean);
-
-
-  if (!timerComponents.length) {
-    return null;
-  }
-
-
-  return (
-    <div className="flex space-x-4 md:space-x-8">
-        {timerComponents}
-    </div>
-  );
-};
-
+import { CountdownTimer } from '@/components/common/CountdownTimer';
 
 export default function MaintenancePage() {
   const [settings, setSettings] = useState<SecuritySettings | null>(null);
@@ -101,6 +41,10 @@ export default function MaintenancePage() {
     );
   }
 
+  const handleTimerEnd = () => {
+    window.location.reload();
+  };
+
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center bg-background p-4 text-center">
         <div className="mb-8">
@@ -114,7 +58,29 @@ export default function MaintenancePage() {
             {settings?.maintenanceModeMessage || "We're currently performing scheduled maintenance to improve our services. We'll be back online shortly. Thank you for your patience!"}
         </p>
 
-        {settings?.maintenanceModeUntil && <CountdownTimer until={settings.maintenanceModeUntil} />}
+        {settings?.maintenanceModeUntil && (
+           <CountdownTimer
+            expiryDate={settings.maintenanceModeUntil}
+            onTimerEnd={handleTimerEnd}
+            className="flex space-x-4 md:space-x-8"
+          >
+           {(timeLeft) => (
+             Object.entries(timeLeft).map(([interval, value]) => {
+                if (value === 0 && interval !== 'seconds' && timeLeft.days === 0 && (interval !== 'minutes' || timeLeft.hours === 0)) {
+                  return null;
+                }
+                return (
+                  <div key={interval} className="flex flex-col items-center">
+                    <span className="text-4xl md:text-6xl font-bold text-primary tabular-nums">
+                      {String(value).padStart(2, '0')}
+                    </span>
+                    <span className="text-sm uppercase text-muted-foreground">{interval}</span>
+                  </div>
+                );
+              }).filter(Boolean)
+           )}
+          </CountdownTimer>
+        )}
     </div>
   );
 }
