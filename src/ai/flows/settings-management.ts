@@ -181,12 +181,12 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
   try {
     const currentSettings = await getSettings();
     
-    // Use lodash's merge for a safe, deep merge.
+    // Use lodash's merge for a safe, deep merge. This correctly handles nested objects.
     const mergedSettings = merge({}, currentSettings, newSettings);
 
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
-    // are reset to their default (0) to prevent Zod validation errors.
-    if (mergedSettings.referral && newSettings.referral && newSettings.referral.isReferralEnabled === false) {
+    // are reset to their default (0) to prevent Zod validation errors on subsequent saves.
+    if (newSettings.referral && newSettings.referral.isReferralEnabled === false) {
       mergedSettings.referral.commissionRate = 0;
       mergedSettings.referral.cookieDuration = 0;
       mergedSettings.referral.payoutThreshold = 0;
