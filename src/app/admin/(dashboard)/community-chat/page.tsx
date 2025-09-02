@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2, Loader2, MessageSquare, X, Image as ImageIcon } from 'lucide-react';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2, Loader2, MessageSquare, X, Image as ImageIcon, MoreHorizontal, Smile, MessageSquareReply } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { getChatUsers } from '@/ai/flows/user-management';
@@ -21,6 +21,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Logo } from '@/components/common/Logo';
 import { Switch } from '@/components/ui/switch';
 import Image from 'next/image';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 type Message = {
     id: string;
@@ -319,7 +320,7 @@ export default function CommunityChatPage() {
                <ScrollArea className="h-full max-h-[calc(100vh-30rem)] px-4" ref={scrollAreaRef}>
                   <div className="space-y-6">
                       {messages.map((msg) => (
-                          <div key={msg.id} className={cn("flex items-start gap-3", msg.type === 'admin' ? 'flex-row-reverse' : '')}>
+                          <div key={msg.id} className={cn("flex items-start gap-3 group", msg.type === 'admin' ? 'flex-row-reverse' : '')}>
                               <Avatar>
                                   <AvatarFallback>
                                     {msg.fromName === 'ToolifyAI' ? <Bot /> : msg.type === 'admin' ? <Logo className="h-5 w-5" /> : msg.fromName.substring(0, 2)}
@@ -332,6 +333,25 @@ export default function CommunityChatPage() {
                                 )}
                                 {msg.text && <p>{msg.text}</p>}
                               </div>
+                               <div className={cn("opacity-0 group-hover:opacity-100 transition-opacity", msg.type === 'admin' ? 'mr-2' : 'ml-2')}>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-6 w-6">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem>
+                                            <MessageSquareReply className="mr-2 h-4 w-4" />
+                                            Reply
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem>
+                                            <Smile className="mr-2 h-4 w-4" />
+                                            React
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
                           </div>
                       ))}
                   </div>
