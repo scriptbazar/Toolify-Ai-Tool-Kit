@@ -29,7 +29,6 @@ import { createTicket, generateTicketContent } from '@/ai/flows/ticket-managemen
 import { sendSupportTicketConfirmationEmail } from '@/ai/flows/send-email';
 import { Loader2, Send, Wand2, PlusCircle, AlertCircle, CheckCircle, Clock, UploadCloud, X, Paperclip } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
-import Image from 'next/image';
 
 const ticketSchema = z.object({
   subject: z.string().min(5, 'Subject must be at least 5 characters.'),
@@ -154,15 +153,19 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
   }
 
   const onSubmit: SubmitHandler<TicketFormValues> = async (data) => {
-    if (!user || !userData) return;
+    if (!user || !userData) {
+      toast({ title: 'Authentication Error', description: 'You must be logged in to create a ticket.', variant: 'destructive' });
+      return;
+    }
     
     setIsSubmitting(true);
-    let attachmentUrls: string[] = [];
     try {
+        let attachmentUrls: string[] = [];
         if (attachments.length > 0) {
             const storage = getStorage();
-            const uploadPromises = attachments.map(file => {
-                const storageRef = ref(storage, `ticket-attachments/${user.uid}/${Date.now()}-${file.name}`);
+            const uploadPromises = attachments.map((file, index) => {
+                // Ensure unique filenames
+                const storageRef = ref(storage, `ticket-attachments/${user.uid}/${Date.now()}-${index}-${file.name}`);
                 return uploadBytes(storageRef, file).then(snapshot => getDownloadURL(snapshot.ref));
             });
             attachmentUrls = await Promise.all(uploadPromises);
@@ -196,36 +199,30 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
         });
         
         setTicketSubmitted(true);
+        onTicketCreated(user.uid); // Refresh the ticket list
     } catch (error: any) {
-        toast({ title: 'Submission Failed', description: error.message, variant: 'destructive' });
-    } finally {
-        setIsSubmitting(false);
-    }
+        toast({ title: 'Submission Failed', description: error.message || 'An unknown error occurred.', variant: 'destructive' });
+        setIsSubmitting(false); // Make sure to turn off loading state on error
+    } 
+    // We don't set setIsSubmitting(false) here because the view changes to the success screen
   };
   
-  const handleCloseAndRefresh = () => {
-    onTicketCreated(user!.uid);
+  const handleCloseDialog = () => {
     setIsDialogOpen(false);
-    // Reset state after a short delay to allow dialog to close
+    // Reset state after a short delay to allow dialog to close smoothly
     setTimeout(() => {
         setTicketSubmitted(false);
         setExpiryDate(null);
         setAttachments([]);
         form.reset();
+        setIsSubmitting(false); // Reset submitting state
     }, 300);
   }
   
   const handleOpenChange = (open: boolean) => {
     setIsDialogOpen(open);
     if (!open) {
-        // If ticket was submitted, refresh list. Otherwise, just reset form.
-        if (ticketSubmitted && user) {
-            onTicketCreated(user.uid);
-        }
-        setTicketSubmitted(false);
-        setExpiryDate(null);
-        setAttachments([]);
-        form.reset();
+       handleCloseDialog();
     }
   }
 
@@ -346,7 +343,7 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
                     Thank you for contacting support. We have received your ticket and a confirmation email has been sent. Our team will get back to you shortly.
                 </p>
                 {expiryDate && <CountdownTimer expiryDate={expiryDate} />}
-                 <Button onClick={handleCloseAndRefresh}>Close</Button>
+                 <Button onClick={handleCloseDialog}>Close</Button>
             </div>
         )}
       </DialogContent>
