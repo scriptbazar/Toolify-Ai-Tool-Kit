@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { createStripeCheckoutSession } from '@/ai/flows/payment-management';
+import { createStripeCheckoutSession, createPayPalOrder } from '@/ai/flows/payment-management';
 import { loadStripe } from '@stripe/stripe-js';
 
 
@@ -77,9 +77,10 @@ export default function ManageSubscriptionPage() {
         return;
     }
     
-    // Check if Stripe is enabled
+    setIsProcessing(plan.id);
+
+    // Stripe
     if (paymentSettings?.stripe?.isEnabled) {
-        setIsProcessing(plan.id);
         try {
             const { sessionId, publishableKey } = await createStripeCheckoutSession({
                 planId: plan.id,
@@ -89,42 +90,55 @@ export default function ManageSubscriptionPage() {
                 userEmail: userProfile.email,
             });
 
-            if (!sessionId || !publishableKey) {
-                throw new Error('Could not create a checkout session.');
-            }
-
+            if (!sessionId || !publishableKey) throw new Error('Could not create a checkout session.');
             const stripe = await loadStripe(publishableKey);
-            if (!stripe) {
-                throw new Error('Stripe.js failed to load.');
-            }
+            if (!stripe) throw new Error('Stripe.js failed to load.');
 
             const { error } = await stripe.redirectToCheckout({ sessionId });
-            if (error) {
-                 throw new Error(error.message);
-            }
+            if (error) throw new Error(error.message);
 
         } catch (error: any) {
-            toast({
-                title: 'Checkout Error',
-                description: error.message || 'Could not initiate the payment process. Please try again.',
-                variant: 'destructive'
-            });
+            toast({ title: 'Stripe Error', description: error.message, variant: 'destructive' });
         } finally {
             setIsProcessing(null);
         }
         return;
     }
     
-    // Check if any other gateway is enabled
-    const anyGatewayEnabled = Object.values(paymentSettings || {}).some(gateway => gateway?.isEnabled);
+    // PayPal
+    if (paymentSettings?.paypal?.isEnabled) {
+      try {
+        const { id, links } = await createPayPalOrder({
+            planId: plan.id,
+            planName: plan.name,
+            planPrice: plan.price,
+            userId: user.uid,
+        });
+        const approvalLink = links.find(link => link.rel === 'approve');
+        if (approvalLink) {
+            window.location.href = approvalLink.href;
+        } else {
+            throw new Error('Could not find PayPal approval link.');
+        }
+      } catch (error: any) {
+        toast({ title: 'PayPal Error', description: error.message, variant: 'destructive' });
+      } finally {
+         setIsProcessing(null);
+      }
+      return;
+    }
 
-    if (anyGatewayEnabled) {
+    // Other Gateways
+    const anyOtherGatewayEnabled = Object.values(paymentSettings || {}).some(gateway => gateway?.isEnabled);
+    if (anyOtherGatewayEnabled) {
          toast({ title: 'Coming Soon!', description: 'This payment gateway is not yet supported. Please contact support.', variant: 'default'});
+         setIsProcessing(null);
          return;
     }
 
-    // If no gateway is enabled at all
+    // No Gateway enabled
     toast({ title: 'Not Available', description: 'Online payment is currently not available. Please contact support.', variant: 'destructive'});
+    setIsProcessing(null);
   };
 
   return (

@@ -10,6 +10,7 @@ import { type Payment } from './payment-management.types';
 import { getSettings } from './settings-management';
 import { z } from 'zod';
 import Stripe from 'stripe';
+import paypal from '@paypal/checkout-server-sdk';
 
 const CreateStripeSessionInputSchema = z.object({
   planId: z.string(),
@@ -18,15 +19,90 @@ const CreateStripeSessionInputSchema = z.object({
   userId: z.string(),
   userEmail: z.string().email(),
 });
-
 type CreateStripeSessionInput = z.infer<typeof CreateStripeSessionInputSchema>;
 
 const CreateStripeSessionOutputSchema = z.object({
   sessionId: z.string(),
   publishableKey: z.string(),
 });
-
 type CreateStripeSessionOutput = z.infer<typeof CreateStripeSessionOutputSchema>;
+
+
+const CreatePayPalOrderInputSchema = z.object({
+  planId: z.string(),
+  planName: z.string(),
+  planPrice: z.number(),
+  userId: z.string(),
+});
+type CreatePayPalOrderInput = z.infer<typeof CreatePayPalOrderInputSchema>;
+
+const CreatePayPalOrderOutputSchema = z.object({
+  id: z.string(),
+  links: z.array(z.object({
+    href: z.string(),
+    rel: z.string(),
+    method: z.string(),
+  })),
+});
+
+
+function getPayPalClient() {
+  return new Promise<paypal.core.PayPalHttpClient>(async (resolve, reject) => {
+    const settings = await getSettings();
+    const paypalSettings = settings.payment?.paypal;
+    if (!paypalSettings?.isEnabled || !paypalSettings.clientId || !paypalSettings.clientSecret) {
+      return reject(new Error('PayPal is not configured or enabled.'));
+    }
+
+    const environment = paypalSettings.mode === 'live'
+      ? new paypal.core.LiveEnvironment(paypalSettings.clientId, paypalSettings.clientSecret)
+      : new paypal.core.SandboxEnvironment(paypalSettings.clientId, paypalSettings.clientSecret);
+      
+    const client = new paypal.core.PayPalHttpClient(environment);
+    resolve(client);
+  });
+}
+
+/**
+ * Creates a PayPal order for a user to purchase a plan.
+ */
+export async function createPayPalOrder(input: CreatePayPalOrderInput): Promise<z.infer<typeof CreatePayPalOrderOutputSchema>> {
+  const { planId, planName, planPrice, userId } = CreatePayPalOrderInputSchema.parse(input);
+  const client = await getPayPalClient();
+  const request = new paypal.orders.OrdersCreateRequest();
+  
+  const siteUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+
+  request.prefer("return=representation");
+  request.requestBody({
+    intent: 'CAPTURE',
+    purchase_units: [{
+      description: `Subscription to ${planName}`,
+      amount: {
+        currency_code: 'USD',
+        value: planPrice.toFixed(2),
+      },
+      custom_id: `${userId}|${planId}`,
+    }],
+    application_context: {
+      return_url: `${siteUrl}/payment/success?gateway=paypal`,
+      cancel_url: `${siteUrl}/payment/cancel`,
+      brand_name: 'ToolifyAI',
+      user_action: 'PAY_NOW',
+    },
+  });
+
+  try {
+    const order = await client.execute(request);
+    return CreatePayPalOrderOutputSchema.parse({
+      id: order.result.id,
+      links: order.result.links,
+    });
+  } catch (error: any) {
+    console.error("PayPal Error:", error);
+    throw new Error(`Failed to create PayPal order: ${error.message}`);
+  }
+}
 
 /**
  * Creates a Stripe Checkout session for a user to purchase a plan.
