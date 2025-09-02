@@ -1,23 +1,17 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bot, MessageSquare, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Image from 'next/image';
-
-// Dummy data for demonstration purposes
-const aiGeneratedMedia = [
-    { id: 1, src: "https://picsum.photos/400/300", alt: "AI generated landscape", hint: "landscape" },
-    { id: 2, src: "https://picsum.photos/400/300", alt: "AI generated portrait", hint: "portrait" },
-    { id: 3, src: "https://picsum.photos/400/300", alt: "AI generated abstract art", hint: "abstract art" },
-];
-
-const communityMedia = [
-    { id: 1, src: "https://picsum.photos/400/300", alt: "Community shared photo", hint: "community photo" },
-];
+import { getUserMedia, type UserMedia } from '@/ai/flows/ai-image-generator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 const MediaCard = ({ src, alt, hint }: { src: string, alt: string, hint: string }) => (
     <Card className="overflow-hidden">
@@ -35,6 +29,44 @@ const MediaCard = ({ src, alt, hint }: { src: string, alt: string, hint: string 
 );
 
 export default function MyMediaPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [media, setMedia] = useState<UserMedia[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        if (firebaseUser) {
+            setUser(firebaseUser);
+            fetchMedia(firebaseUser.uid);
+        } else {
+            setLoading(false);
+        }
+    });
+
+    const fetchMedia = async (uid: string) => {
+        setLoading(true);
+        try {
+            const userMedia = await getUserMedia(uid);
+            setMedia(userMedia);
+        } catch (error) {
+            console.error("Failed to fetch media:", error);
+            toast({
+                title: "Error",
+                description: "Could not load your media.",
+                variant: "destructive"
+            });
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return () => unsubscribe();
+  }, [toast]);
+  
+  const aiGeneratedMedia = media.filter(m => m.type === 'ai-generated');
+  const communityMedia = media.filter(m => m.type === 'community-chat');
+
   return (
     <div className="space-y-6">
       <div>
@@ -63,9 +95,13 @@ export default function MyMediaPage() {
                     For your privacy and to manage storage, AI-generated images are automatically deleted after 7 days.
                   </AlertDescription>
                 </Alert>
-                {aiGeneratedMedia.length > 0 ? (
+                {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {aiGeneratedMedia.map(media => <MediaCard key={media.id} {...media} />)}
+                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+                    </div>
+                ) : aiGeneratedMedia.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {aiGeneratedMedia.map(item => <MediaCard key={item.id} src={item.mediaUrl} alt={item.prompt || 'AI generated image'} hint={item.prompt || 'ai image'} />)}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg">
@@ -91,9 +127,13 @@ export default function MyMediaPage() {
                       For your privacy and to manage storage, media shared in the community chat is automatically deleted after 48 hours.
                     </AlertDescription>
                 </Alert>
-                {communityMedia.length > 0 ? (
+                {loading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+                    </div>
+                ) : communityMedia.length > 0 ? (
                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {communityMedia.map(media => <MediaCard key={media.id} {...media} />)}
+                        {communityMedia.map(item => <MediaCard key={item.id} src={item.mediaUrl} alt={item.prompt || 'Community shared media'} hint={item.prompt || 'community media'} />)}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg">
