@@ -63,7 +63,7 @@ export default function ManageSubscriptionPage() {
     fetchData();
   }, [toast]);
   
-  const currentPlanId = userProfile?.planId || 'free-plan-id';
+  const currentPlanId = userProfile?.planId || 'free';
 
   return (
     <div className="space-y-6">
