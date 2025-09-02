@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useRef, type FormEvent, useEffect } from 'react';
@@ -10,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, Loader2, X, Image as ImageIcon, MoreHorizontal, Smile, MessageSquareReply, ThumbsUp } from 'lucide-react';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, Loader2, X, Image as ImageIcon, MoreHorizontal, Smile, MessageSquareReply, ThumbsUp, AtSign } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { getChatUsers } from '@/ai/flows/user-management';
@@ -66,6 +65,15 @@ interface AppUser {
   lastName:string;
 }
 
+const renderMessageWithTags = (text: string) => {
+    const parts = text.split(/(@\w+)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('@')) {
+        return <strong key={i} className="text-primary bg-primary/10 px-1 rounded-sm">{part}</strong>;
+      }
+      return part;
+    });
+};
 
 const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: FirebaseUser | null }) => {
     const { toast } = useToast();
@@ -371,6 +379,8 @@ export default function CommunityChatPage() {
         description: `Copied username: @${text}`,
         });
     };
+    
+    const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
 
   if (loading) {
@@ -424,18 +434,22 @@ export default function CommunityChatPage() {
                               {msg.imageUrl && (
                                   <Image src={msg.imageUrl} alt="chat attachment" width={200} height={200} className="rounded-md my-2" />
                               )}
-                              {msg.text && <p>{msg.text}</p>}
+                              {msg.text && <p className="whitespace-pre-wrap">{renderMessageWithTags(msg.text)}</p>}
                               {msg.poll && <PollDisplay message={msg} currentUser={currentUser} />}
                               <div className="flex items-center gap-1 mt-2">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-auto px-1.5 rounded-full"
-                                    onClick={() => handleReaction(msg, '👍')}
-                                >
-                                    <ThumbsUp className={cn("h-4 w-4", msg.reactions?.['👍']?.includes(currentUser?.uid ?? '') ? "text-blue-500 fill-blue-500" : "")} />
-                                    {msg.reactions?.['👍']?.length > 0 && <span className="text-xs ml-1">{msg.reactions['👍'].length}</span>}
-                                </Button>
+                                {msg.reactions && Object.entries(msg.reactions).map(([emoji, users]) => (
+                                    users.length > 0 && (
+                                        <Button
+                                            key={emoji}
+                                            variant={users.includes(currentUser?.uid ?? '') ? 'default' : 'secondary'}
+                                            size="sm"
+                                            className="h-7 px-2 rounded-full"
+                                            onClick={() => handleReaction(msg, emoji)}
+                                        >
+                                            {emoji} <span className="text-xs ml-1.5">{users.length}</span>
+                                        </Button>
+                                    )
+                                ))}
                               </div>
                             </div>
                             <div className={cn("opacity-0 group-hover:opacity-100 transition-opacity", msg.fromId === currentUser?.uid ? 'mr-2' : 'ml-2')}>
@@ -450,10 +464,23 @@ export default function CommunityChatPage() {
                                             <MessageSquareReply className="mr-2 h-4 w-4" />
                                             Reply
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleReaction(msg, '👍')}>
-                                            <Smile className="mr-2 h-4 w-4" />
-                                            React
-                                        </DropdownMenuItem>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                    <Smile className="mr-2 h-4 w-4" />
+                                                    React
+                                                </DropdownMenuItem>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-1">
+                                                <div className="flex gap-1">
+                                                    {reactionEmojis.map(emoji => (
+                                                        <Button key={emoji} variant="ghost" size="icon" onClick={() => handleReaction(msg, emoji)}>
+                                                            {emoji}
+                                                        </Button>
+                                                    ))}
+                                                </div>
+                                            </PopoverContent>
+                                        </Popover>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
@@ -539,7 +566,9 @@ export default function CommunityChatPage() {
                                           </div>
                                         </div>
                                   </div>
-                                  {activeUserFilter === 'live' && <Badge className="bg-green-500 hover:bg-green-600 text-white">online</Badge>}
+                                   <Button variant="ghost" size="icon" onClick={() => setInput(prev => `${prev} @${user.username} `)}>
+                                      <AtSign className="h-4 w-4 text-muted-foreground" />
+                                  </Button>
                               </div>
                           ))}
                            {filteredUsers.length === 0 && (
