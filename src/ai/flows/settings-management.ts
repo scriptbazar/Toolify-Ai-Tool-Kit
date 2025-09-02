@@ -180,6 +180,8 @@ export async function getSettings(): Promise<AppSettings> {
 export async function updateSettings(newSettings: Partial<AppSettings>): Promise<{ success: boolean; message: string }> {
   try {
     const currentSettings = await getSettings();
+    
+    // Use lodash's merge for a safe, deep merge.
     const mergedSettings = merge({}, currentSettings, newSettings);
 
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
@@ -226,5 +228,3 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
     return { success: false, message: error.message || 'An unknown error occurred while updating settings.' };
   }
 }
-
-    
