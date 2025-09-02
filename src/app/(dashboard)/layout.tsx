@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -20,6 +19,7 @@ import {
   UserCog,
   FileText,
   Bell,
+  Users as UsersIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
@@ -152,6 +152,7 @@ export default function UserPanelLayout({
     { href: '/my-tickets', label: 'My Tickets', icon: Ticket },
     { href: '/manage-subscription', label: 'Manage Subscription', icon: Star },
     { href: '/payment-history', label: 'Payment History', icon: CreditCard },
+    { href: '/affiliate-program', label: 'Affiliate Program', icon: UsersIcon },
     { href: '/settings', label: 'Profile Settings', icon: Settings },
     { href: '/login-history', label: 'Login History', icon: History },
   ];
