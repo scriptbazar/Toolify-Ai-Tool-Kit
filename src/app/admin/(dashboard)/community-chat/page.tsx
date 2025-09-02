@@ -21,7 +21,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Logo } from '@/components/common/Logo';
 import { Switch } from '@/components/ui/switch';
 import Image from 'next/image';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -471,21 +471,23 @@ export default function CommunityChatPage() {
                                 )}
                                 {msg.text && <p className="whitespace-pre-wrap">{renderMessageWithTags(msg.text)}</p>}
                                 {msg.poll && <PollDisplay message={msg} currentUser={currentUser} />}
-                                <div className="flex items-center gap-1 mt-2">
-                                    {msg.reactions && Object.entries(msg.reactions).map(([emoji, users]) => (
-                                        users.length > 0 && (
-                                            <Button
-                                                key={emoji}
-                                                variant={users.includes(currentUser?.uid ?? '') ? 'default' : 'secondary'}
-                                                size="sm"
-                                                className="h-7 px-2 rounded-full"
-                                                onClick={() => handleReaction(msg, emoji)}
-                                            >
-                                                {emoji} <span className="text-xs ml-1.5">{users.length}</span>
-                                            </Button>
-                                        )
-                                    ))}
-                                </div>
+                                {msg.reactions && Object.values(msg.reactions).some(users => users && users.length > 0) && (
+                                    <div className="flex items-center gap-1 mt-2">
+                                        {Object.entries(msg.reactions).map(([emoji, users]) => (
+                                            users && users.length > 0 && (
+                                                <Button
+                                                    key={emoji}
+                                                    variant={users.includes(currentUser?.uid ?? '') ? 'default' : 'secondary'}
+                                                    size="sm"
+                                                    className="h-7 px-2 rounded-full"
+                                                    onClick={() => handleReaction(msg, emoji)}
+                                                >
+                                                    {emoji} <span className="text-xs ml-1.5">{users.length}</span>
+                                                </Button>
+                                            )
+                                        ))}
+                                    </div>
+                                )}
                               </div>
                                <div className={cn("opacity-0 group-hover:opacity-100 transition-opacity", msg.type === 'admin' ? 'mr-2' : 'ml-2')}>
                                 <DropdownMenu>
@@ -495,18 +497,16 @@ export default function CommunityChatPage() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent>
-                                        <DropdownMenuItem onClick={() => setReplyingTo(msg)}>
+                                        <DropdownMenuItem onSelect={() => setReplyingTo(msg)}>
                                             <MessageSquareReply className="mr-2 h-4 w-4" />
                                             Reply
                                         </DropdownMenuItem>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                                    <Smile className="mr-2 h-4 w-4" />
-                                                    React
-                                                </DropdownMenuItem>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-1">
+                                        <DropdownMenuSub>
+                                            <DropdownMenuSubTrigger>
+                                                <Smile className="mr-2 h-4 w-4" />
+                                                React
+                                            </DropdownMenuSubTrigger>
+                                            <DropdownMenuSubContent className="p-1">
                                                 <div className="flex gap-1">
                                                     {reactionEmojis.map(emoji => (
                                                         <Button key={emoji} variant="ghost" size="icon" onClick={() => handleReaction(msg, emoji)}>
@@ -514,8 +514,8 @@ export default function CommunityChatPage() {
                                                         </Button>
                                                     ))}
                                                 </div>
-                                            </PopoverContent>
-                                        </Popover>
+                                            </DropdownMenuSubContent>
+                                        </DropdownMenuSub>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
