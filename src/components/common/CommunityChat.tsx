@@ -731,10 +731,14 @@ export function CommunityChat({ allUsers, isAdmin }: CommunityChatProps) {
                            <Button variant={activeUserFilter === 'live' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('live')}>
                               <span className="flex items-center"><Wifi className="mr-2 h-4 w-4"/>Live</span>
                            </Button>
-                           {isAdmin && <ManagePollsDialog onAddPoll={handleAddPoll} allMessages={messages} />}
-                           <Button variant={activeUserFilter === 'new' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('new')}>
-                               <span className="flex items-center"><UserPlus className="mr-2 h-4 w-4"/>New Users</span>
-                           </Button>
+                           {isAdmin && (
+                            <>
+                                <ManagePollsDialog onAddPoll={handleAddPoll} allMessages={messages} />
+                                <Button variant={activeUserFilter === 'new' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('new')}>
+                                    <span className="flex items-center"><UserPlus className="mr-2 h-4 w-4"/>New Users</span>
+                                </Button>
+                            </>
+                           )}
                       </div>
                   </div>
               </CardHeader>
