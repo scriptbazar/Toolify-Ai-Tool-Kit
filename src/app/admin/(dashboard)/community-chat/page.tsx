@@ -221,8 +221,8 @@ export default function CommunityChatPage() {
            return allUsers.filter(user => user.lastActive && new Date(user.lastActive) > fiveMinutesAgo);
         }
        if (activeUserFilter === 'new') {
-            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-            return allUsers.filter(user => user.createdAt && new Date(user.createdAt) > twentyFourHoursAgo);
+            const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            return allUsers.filter(user => user.createdAt && new Date(user.createdAt) > sevenDaysAgo);
        }
        return allUsers;
     }, [activeUserFilter, allUsers]);
