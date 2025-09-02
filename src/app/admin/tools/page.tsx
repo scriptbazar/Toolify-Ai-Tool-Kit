@@ -18,7 +18,7 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Sparkles, CheckCircle, XCircle, Package, MoreHorizontal, Edit, PlusCircle } from 'lucide-react';
+import { Search, Star, Sparkles, CheckCircle, XCircle, Package, MoreHorizontal, Edit, PlusCircle, List, ListChecks, ListX, Sparkle } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -31,6 +31,7 @@ import {
     DropdownMenuSubContent,
     DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
+import * as Icons from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -234,69 +235,74 @@ export default function AdminToolsPage() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {paginatedTools.map(tool => (
-                        <TableRow key={tool.id}>
-                        <TableCell className="font-medium">
-                            <div className="flex items-center gap-2">
-                            <span>{tool.name}</span>
-                            {tool.isNew && <Badge variant="outline" className="text-primary border-primary">New</Badge>}
-                            </div>
-                        </TableCell>
-                        <TableCell>{getCategoryName(tool.category)}</TableCell>
-                        <TableCell>
-                            <Badge variant={tool.plan === 'Pro' ? 'secondary' : 'outline'}>{tool.plan}</Badge>
-                        </TableCell>
-                        <TableCell>
-                            <Badge variant={tool.status === 'Active' ? 'default' : 'destructive'} className={cn(tool.status === 'Active' && 'bg-green-500 hover:bg-green-600')}>{tool.status}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                            <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Actions for {tool.name}</span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem asChild>
-                                    <Link href={`/admin/tools/${tool.id}`}><Edit className="mr-2 h-4 w-4" />Edit</Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>Change Plan</DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                        <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { plan: 'Free' })}>
-                                            Free
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { plan: 'Pro' })}>
-                                            Pro
-                                        </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                                </DropdownMenuSub>
-                                <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>Change Status</DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                        <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { status: 'Active' })}>
-                                            Active
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { status: 'Disabled' })}>
-                                            Disabled
-                                        </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                                </DropdownMenuSub>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuCheckboxItem
-                                    checked={tool.isNew}
-                                    onCheckedChange={(checked) => handleUpdateTool(tool.id, { isNew: !!checked })}
-                                >
-                                    Mark as New
-                                </DropdownMenuCheckboxItem>
-                            </DropdownMenuContent>
-                            </DropdownMenu>
-                        </TableCell>
-                        </TableRow>
-                    ))}
+                    {paginatedTools.map(tool => {
+                        const IconComponent = (Icons as any)[tool.icon] || Icons.HelpCircle;
+                        return (
+                            <TableRow key={tool.id}>
+                            <TableCell className="font-medium">
+                                <div className="flex items-center gap-3">
+                                <IconComponent className="h-5 w-5 text-muted-foreground" />
+                                <span>{tool.name}</span>
+                                {tool.isNew && <Badge variant="outline" className="text-primary border-primary">New</Badge>}
+                                </div>
+                            </TableCell>
+                            <TableCell>{getCategoryName(tool.category)}</TableCell>
+                            <TableCell>
+                                <Badge variant={tool.plan === 'Pro' ? 'secondary' : 'outline'}>{tool.plan}</Badge>
+                            </TableCell>
+                            <TableCell>
+                                <Badge variant={tool.status === 'Active' ? 'default' : 'destructive'} className={cn(tool.status === 'Active' && 'bg-green-500 hover:bg-green-600')}>{tool.status}</Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                                <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Actions for {tool.name}</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuItem asChild>
+                                        <Link href={`/admin/tools/${tool.id}`}><Edit className="mr-2 h-4 w-4" />Edit</Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger><List className="mr-2 h-4 w-4" />Change Plan</DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent>
+                                            <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { plan: 'Free' })}>
+                                                Free
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { plan: 'Pro' })}>
+                                                Pro
+                                            </DropdownMenuItem>
+                                    </DropdownMenuSubContent>
+                                    </DropdownMenuSub>
+                                    <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger><ListChecks className="mr-2 h-4 w-4" />Change Status</DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent>
+                                            <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { status: 'Active' })}>
+                                                <CheckCircle className="mr-2 h-4 w-4 text-green-500" />Active
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleUpdateTool(tool.id, { status: 'Disabled' })}>
+                                                <XCircle className="mr-2 h-4 w-4 text-red-500" />Disabled
+                                            </DropdownMenuItem>
+                                    </DropdownMenuSubContent>
+                                    </DropdownMenuSub>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuCheckboxItem
+                                        checked={tool.isNew}
+                                        onCheckedChange={(checked) => handleUpdateTool(tool.id, { isNew: !!checked })}
+                                    >
+                                        <Sparkle className="mr-2 h-4 w-4" />
+                                        Mark as New
+                                    </DropdownMenuCheckboxItem>
+                                </DropdownMenuContent>
+                                </DropdownMenu>
+                            </TableCell>
+                            </TableRow>
+                        )
+                    })}
                     {paginatedTools.length === 0 && (
                         <TableRow>
                         <TableCell colSpan={5} className="h-24 text-center">
