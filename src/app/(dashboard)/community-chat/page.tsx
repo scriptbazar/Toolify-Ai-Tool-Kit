@@ -28,7 +28,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 type Poll = {
     question: string;
     options: string[];
-    votes: { [key: string]: string[] };
+    votes: { [key: string]: string[] }; // option -> userId[]
     allowCustomOptions: boolean;
 };
 
@@ -54,7 +54,7 @@ interface ChatUser {
 
 interface AppUser {
   firstName: string;
-  lastName: string;
+  lastName:string;
 }
 
 
@@ -62,25 +62,27 @@ const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: 
     const { toast } = useToast();
 
     if (!message.poll) return null;
+    
+    // Ensure votes object and options exist
+    const votes = message.poll.votes || {};
+    const options = message.poll.options || [];
 
-    const totalVotes = message.poll.votes ? Object.values(message.poll.votes).reduce((acc, votes) => acc + votes.length, 0) : 0;
-    const userHasVoted = currentUser ? Object.values(message.poll.votes || {}).some(votes => votes.includes(currentUser.uid)) : false;
+    const userHasVoted = currentUser ? Object.values(votes).some(voters => voters && voters.includes(currentUser.uid)) : false;
 
     const handleVote = async (option: string) => {
-        if (!currentUser || !message.poll || userHasVoted) {
-            if (userHasVoted) {
-                toast({ description: "You have already voted in this poll." });
-            }
+        if (!currentUser || userHasVoted) {
+            if (userHasVoted) toast({ description: "You have already voted in this poll." });
             return;
         }
 
         const messageRef = doc(db, 'communityChat', message.id);
-        const poll = message.poll;
         
-        const updates: { [key: string]: any } = {};
-        updates[`poll.votes.${option}`] = arrayUnion(currentUser.uid);
-
-        await updateDoc(messageRef, updates);
+        // Ensure the option exists in votes before trying to update it
+        const currentVotesForOption = votes[option] || [];
+        
+        await updateDoc(messageRef, {
+            [`poll.votes.${option}`]: arrayUnion(currentUser.uid)
+        });
         toast({ title: "Vote cast!", description: `You voted for "${option}".` });
     };
 
@@ -102,7 +104,7 @@ const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: 
 
         const messageRef = doc(db, 'communityChat', message.id);
         await updateDoc(messageRef, {
-            [`poll.options`]: arrayUnion(newOption.trim()),
+            'poll.options': arrayUnion(newOption.trim()),
             [`poll.votes.${newOption.trim()}`]: arrayUnion(currentUser.uid),
         });
         
@@ -114,9 +116,9 @@ const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: 
         <div className="mt-2 space-y-2">
             <p className="font-semibold">{message.poll.question}</p>
             <div className="space-y-2">
-                {message.poll.options.map((option, index) => {
-                    const voteCount = message.poll!.votes?.[option]?.length || 0;
-                    const hasVotedThisOption = currentUser ? message.poll!.votes?.[option]?.includes(currentUser.uid) : false;
+                {options.map((option, index) => {
+                    const voteCount = votes[option]?.length || 0;
+                    const hasVotedThisOption = currentUser ? votes[option]?.includes(currentUser.uid) : false;
                     return (
                         <Button
                             key={index}

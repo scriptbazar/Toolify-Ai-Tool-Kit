@@ -27,7 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 type Poll = {
     question: string;
     options: string[];
-    votes: { [key: string]: string[] };
+    votes: { [key: string]: string[] }; // option -> userId[]
     allowCustomOptions: boolean;
 };
 
@@ -116,7 +116,7 @@ const ManagePollsDialog = ({ onAddPoll, allMessages }: { onAddPoll: (poll: Omit<
     return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline"><Vote className="mr-2 h-4 w-4" />Manage Polls</Button>
+          <Button variant="outline" className="gap-2"><Vote className="h-4 w-4" />Manage Polls</Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg">
             <DialogHeader>
@@ -188,14 +188,15 @@ const ManagePollsDialog = ({ onAddPoll, allMessages }: { onAddPoll: (poll: Omit<
 const PollDisplay = ({ message }: { message: Message }) => {
     if (!message.poll) return null;
 
-    const totalVotes = message.poll.votes ? Object.values(message.poll.votes).reduce((acc, votes) => acc + votes.length, 0) : 0;
+    const votes = message.poll.votes || {};
+    const totalVotes = Object.values(votes).reduce((acc, v) => acc + (v?.length || 0), 0);
 
     return (
         <div className="mt-2 space-y-2">
             <p className="font-semibold">{message.poll.question}</p>
             <div className="space-y-2">
                 {message.poll.options.map((option, index) => {
-                    const voteCount = message.poll!.votes?.[option]?.length || 0;
+                    const voteCount = votes[option]?.length || 0;
                     const percentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
                     return (
                         <div key={index} className="space-y-1">
