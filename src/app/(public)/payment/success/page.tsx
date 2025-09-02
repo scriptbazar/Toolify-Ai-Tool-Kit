@@ -15,50 +15,57 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 
 export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();
-    const sessionId = searchParams.get('session_id');
+    const sessionId = searchParams.get('session_id'); // For Stripe
+    const token = searchParams.get('token'); // For PayPal (order ID)
     const { toast } = useToast();
 
     useEffect(() => {
-        if (!sessionId) {
-            console.error("No session ID found in URL.");
-            return;
-        }
+        // Function to update the user's plan in Firestore
+        const updateUserPlan = async (user: User) => {
+            // In a real production app, you would verify the session/token on your backend
+            // using a webhook to prevent users from accessing this page directly.
+            // For this example, we'll optimistically update the user's plan.
+            try {
+                const userDocRef = doc(db, 'users', user.uid);
+                // A secure webhook would look up the session/order, get the planId from metadata,
+                // and update the user's document in Firestore.
+                // For this demo, we'll assume a successful payment means upgrading to the 'pro' plan.
+                await updateDoc(userDocRef, {
+                    planId: 'pro', 
+                    subscriptionStatus: 'active',
+                });
+                 toast({
+                    title: "Payment Successful!",
+                    description: `Your plan has been upgraded.`,
+                });
+            } catch (error) {
+                console.error("Failed to update user plan:", error);
+                 toast({
+                    title: "Update Error",
+                    description: "Your payment was successful, but we couldn't update your plan automatically. Please contact support.",
+                    variant: "destructive",
+                });
+            }
+        };
 
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // In a real production app, you would verify the session on your backend
-                // using a webhook to prevent users from accessing this page directly.
-                // For this example, we'll fetch the user's data to show a toast.
-                try {
-                    const userDocRef = doc(db, 'users', user.uid);
-                    // NOTE: The actual plan update should be handled by a secure webhook
-                    // from Stripe to your backend. The client-side update is not secure
-                    // and is only for immediate feedback in this demo.
-                    // A webhook would look up the session, get the planId from metadata,
-                    // and update the user's document in Firestore.
-                    
-                    const userDocSnap = await getDoc(userDocRef);
-                    if (userDocSnap.exists()) {
-                        const planId = userDocSnap.data().planId || 'upgraded';
-                         toast({
-                            title: "Payment Successful!",
-                            description: `Your plan has been upgraded.`,
-                        });
-                    }
-                } catch (error) {
-                    console.error("Failed to update user plan:", error);
+        if (sessionId || token) {
+             const unsubscribe = onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    await updateUserPlan(user);
+                } else {
+                    // If the user is not logged in when they hit this page,
+                    // we can't update their record. Webhooks are essential to solve this.
+                    console.warn("User not logged in on success page. Cannot update plan.");
                      toast({
-                        title: "Update Error",
-                        description: "Your payment was successful, but we couldn't update your plan automatically. Please contact support.",
-                        variant: "destructive",
+                        title: "Please Log In",
+                        description: "Your payment was successful. Please log in to see your new plan.",
                     });
                 }
-            }
-        });
+            });
+            return () => unsubscribe();
+        }
 
-        return () => unsubscribe();
-
-    }, [sessionId, toast]);
+    }, [sessionId, token, toast]);
 
 
   return (
