@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
+import { Loader2 } from 'lucide-react';
+import { Logo } from '@/components/common/Logo';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -37,8 +39,12 @@ export default function AdminPage() {
   }, [router]);
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <p>Loading admin panel...</p>
+    <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
+      <Logo className="h-16 w-16 animate-pulse" />
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin" />
+        <p className="text-lg">Loading Admin Panel...</p>
+      </div>
     </div>
   );
 }
