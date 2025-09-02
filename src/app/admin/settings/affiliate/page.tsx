@@ -58,11 +58,15 @@ export default function AffiliateSettingsPage() {
     if (!settings) return;
     setIsSaving(true);
     try {
-      await updateSettings({ referral: settings });
-      toast({
-        title: 'Success!',
-        description: 'Affiliate settings have been saved.',
-      });
+      const result = await updateSettings({ referral: settings });
+      if (result.success) {
+        toast({
+            title: 'Success!',
+            description: 'Affiliate settings have been saved.',
+        });
+      } else {
+        throw new Error(result.message);
+      }
     } catch (error: any) {
       console.error('Failed to save settings:', error);
       toast({

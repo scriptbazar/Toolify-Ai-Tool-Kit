@@ -26,7 +26,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { cn } from '@/lib/utils';
+import { Logo } from '@/components/common/Logo';
 
 const PageManagementFormSchema = z.object({
   pages: z.array(z.object({
@@ -55,7 +57,7 @@ const getPageIcon = (slug: string) => {
 export default function PageManagementPage() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [openSections, setOpenSections] = useState<string[]>([]);
+  const [openSection, setOpenSection] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<PageManagementFormValues>({
@@ -113,9 +115,7 @@ export default function PageManagementPage() {
   };
 
   const handleToggle = (id: string) => {
-    setOpenSections(prev => 
-      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
-    );
+    setOpenSection(prev => (prev === id ? null : id));
   };
 
   const handleAddNewPage = () => {
@@ -126,16 +126,16 @@ export default function PageManagementPage() {
         title: '',
         content: '',
     });
-    setOpenSections(prev => [...prev, newId]);
+    setOpenSection(newId);
   }
   
   const handleTitleChange = (value: string, index: number) => {
     const slug = value
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '-') // Replace spaces with -
-      .replace(/[^\w-]+/g, '') // Remove all non-word chars
-      .replace(/--+/g, '-'); // Replace multiple - with single -
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/--+/g, '-');
     form.setValue(`pages.${index}.title`, value);
     form.setValue(`pages.${index}.slug`, slug);
   };
@@ -143,18 +143,14 @@ export default function PageManagementPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-1/3" />
-        <Skeleton className="h-8 w-2/3" />
-        <div className="space-y-6">
-          {[...Array(5)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader><Skeleton className="h-6 w-1/4" /></CardHeader>
-            </Card>
-          ))}
+        <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
+          <Logo className="h-16 w-16 animate-pulse" />
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <p className="text-lg">Loading Page Settings...</p>
+          </div>
         </div>
-      </div>
-    );
+      );
   }
 
   return (
@@ -172,15 +168,19 @@ export default function PageManagementPage() {
             </Button>
         </div>
         
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {fields.map((field, index) => {
             const Icon = getPageIcon(form.watch(`pages.${index}.slug`));
+            const isOpen = openSection === field.id;
             return (
               <Collapsible
                 key={field.fieldId}
-                open={openSections.includes(field.id)}
+                open={isOpen}
                 onOpenChange={() => handleToggle(field.id)}
-                className="space-y-2"
+                className={cn(
+                    "space-y-2 transition-all duration-300",
+                    isOpen ? "md:col-span-2" : "md:col-span-1"
+                )}
               >
                 <Card>
                   <div className="flex w-full cursor-pointer items-center justify-between p-4">
@@ -217,7 +217,7 @@ export default function PageManagementPage() {
                       </AlertDialog>
                       <CollapsibleTrigger asChild>
                         <Button variant="ghost" size="icon">
-                          {openSections.includes(field.id) ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                          {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                           <span className="sr-only">Toggle</span>
                         </Button>
                       </CollapsibleTrigger>
