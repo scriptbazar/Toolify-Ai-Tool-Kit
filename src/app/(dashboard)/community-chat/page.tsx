@@ -64,6 +64,10 @@ interface AppUser {
 const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: FirebaseUser | null }) => {
     const { toast } = useToast();
 
+    if (!message.poll) return null;
+
+    const totalVotes = message.poll.votes ? Object.values(message.poll.votes).reduce((acc, votes) => acc + votes.length, 0) : 0;
+
     const handleVote = async (option: string) => {
         if (!currentUser || !message.poll) return;
 
@@ -72,13 +76,13 @@ const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: 
         const userId = currentUser.uid;
 
         // Check if user has already voted for this option
-        if (poll.votes[option]?.includes(userId)) {
+        if (poll.votes && poll.votes[option]?.includes(userId)) {
             toast({ description: "You have already voted for this option." });
             return;
         }
 
         // Atomically remove user's previous vote and add the new one.
-        const currentVotes = poll.votes;
+        const currentVotes = poll.votes || {};
         const updates: { [key: string]: any } = {};
         
         // Find and remove previous vote
@@ -95,15 +99,35 @@ const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: 
         toast({ title: "Vote cast!", description: `You voted for "${option}".` });
     };
 
-    if (!message.poll) return null;
+    const handleAddOption = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const newOption = formData.get('newOption') as string;
+        
+        if (!newOption.trim() || !currentUser || !message.poll) return;
+        if (message.poll.options.includes(newOption.trim())) {
+            toast({ description: "This option already exists.", variant: "destructive" });
+            return;
+        }
+
+        const messageRef = doc(db, 'communityChat', message.id);
+        await updateDoc(messageRef, {
+            [`poll.options`]: arrayUnion(newOption.trim()),
+            [`poll.votes.${newOption.trim()}`]: arrayUnion(currentUser.uid),
+        });
+        
+        // Close the popover after submission
+        const popoverTrigger = document.getElementById(`add-option-popover-${message.id}`);
+        if (popoverTrigger) popoverTrigger.click(); 
+    };
 
     return (
         <div className="mt-2 space-y-2">
             <p className="font-semibold">{message.poll.question}</p>
             <div className="space-y-2">
                 {message.poll.options.map((option, index) => {
-                    const voteCount = message.poll!.votes[option]?.length || 0;
-                    const hasVoted = currentUser ? message.poll!.votes[option]?.includes(currentUser.uid) : false;
+                    const voteCount = message.poll!.votes?.[option]?.length || 0;
+                    const hasVoted = currentUser ? message.poll!.votes?.[option]?.includes(currentUser.uid) : false;
                     return (
                         <Button
                             key={index}
@@ -117,7 +141,27 @@ const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: 
                     );
                 })}
             </div>
-             {/* Add Custom Option feature to be implemented here */}
+            {message.poll.allowCustomOptions && (
+              <Popover>
+                <PopoverTrigger asChild id={`add-option-popover-${message.id}`}>
+                  <Button variant="link" className="p-0 h-auto text-sm">Add your own option</Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <form onSubmit={handleAddOption} className="grid gap-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium leading-none">Add a new option</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Your vote will be automatically cast for this option.
+                      </p>
+                    </div>
+                    <div className="grid gap-2">
+                        <Input name="newOption" placeholder="Type your option..." />
+                        <Button type="submit">Submit</Button>
+                    </div>
+                  </form>
+                </PopoverContent>
+              </Popover>
+            )}
         </div>
     );
 };

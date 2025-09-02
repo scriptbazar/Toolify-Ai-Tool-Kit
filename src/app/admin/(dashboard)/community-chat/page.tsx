@@ -156,14 +156,14 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: Omit<Poll, 'votes
 const PollDisplay = ({ message }: { message: Message }) => {
     if (!message.poll) return null;
 
-    const totalVotes = Object.values(message.poll.votes).reduce((acc, votes) => acc + votes.length, 0);
+    const totalVotes = message.poll.votes ? Object.values(message.poll.votes).reduce((acc, votes) => acc + votes.length, 0) : 0;
 
     return (
         <div className="mt-2 space-y-2">
             <p className="font-semibold">{message.poll.question}</p>
             <div className="space-y-2">
                 {message.poll.options.map((option, index) => {
-                    const voteCount = message.poll!.votes[option]?.length || 0;
+                    const voteCount = message.poll!.votes?.[option]?.length || 0;
                     const percentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
                     return (
                         <div key={index} className="space-y-1">
