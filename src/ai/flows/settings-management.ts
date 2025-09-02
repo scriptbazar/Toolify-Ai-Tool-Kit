@@ -179,33 +179,30 @@ export async function getSettings(): Promise<AppSettings> {
 export async function updateSettings(newSettings: Partial<AppSettings>): Promise<{ success: boolean; message: string }> {
   try {
     const currentSettings = await getSettings();
-
-    // Helper to check if a value is an object
-    const isObject = (item: any): item is Record<string, any> => {
-        return (item && typeof item === 'object' && !Array.isArray(item));
-    }
     
-    // Deep merge function to handle nested objects
-    const deepMerge = <T extends object>(target: T, source: Partial<T>): T => {
-        const output = { ...target };
+    // Create a copy of the current settings to avoid direct mutation
+    let mergedSettings = { ...currentSettings };
 
-        if (isObject(target) && isObject(source)) {
-            Object.keys(source).forEach(key => {
-                const sourceKey = key as keyof T;
-                if (isObject(source[sourceKey])) {
-                    if (!(key in target))
-                        Object.assign(output, { [sourceKey]: source[sourceKey] });
-                    else
-                        (output as any)[sourceKey] = deepMerge(target[sourceKey] as any, source[sourceKey] as any);
-                } else {
-                    Object.assign(output, { [sourceKey]: source[sourceKey] });
-                }
-            });
+    // Iterate over the keys in newSettings and merge them into the copy
+    for (const key in newSettings) {
+        const typedKey = key as keyof AppSettings;
+        if (Object.prototype.hasOwnProperty.call(newSettings, typedKey)) {
+            const newValue = newSettings[typedKey];
+            const currentValue = mergedSettings[typedKey];
+
+            // If the value is an object (and not null/array), perform a deep merge for that level
+            if (
+                typeof newValue === 'object' && newValue !== null && !Array.isArray(newValue) &&
+                typeof currentValue === 'object' && currentValue !== null && !Array.isArray(currentValue)
+            ) {
+                mergedSettings[typedKey] = { ...currentValue, ...newValue };
+            } else {
+                // Otherwise, just overwrite the value
+                mergedSettings[typedKey] = newValue;
+            }
         }
-        return output;
     }
-    
-    const mergedSettings = deepMerge(currentSettings, newSettings);
+
 
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
     // are reset to their default (0) to prevent Zod validation errors.
