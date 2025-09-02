@@ -41,6 +41,14 @@ type Message = {
     imageUrl?: string;
     poll?: Poll;
     timestamp: any;
+    replyTo?: {
+      id: string;
+      text: string;
+      fromName: string;
+    };
+    reactions?: {
+      [key: string]: string[]; // emoji -> userId[]
+    };
 };
 
 
@@ -186,7 +194,7 @@ const ManagePollsDialog = ({ onAddPoll, allMessages }: { onAddPoll: (poll: Omit<
     );
 };
 
-const PollDisplay = ({ message }: { message: Message }) => {
+const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: FirebaseUser | null }) => {
     if (!message.poll) return null;
 
     const votes = message.poll.votes || {};
@@ -199,10 +207,12 @@ const PollDisplay = ({ message }: { message: Message }) => {
                 {message.poll.options.map((option, index) => {
                     const voteCount = votes[option]?.length || 0;
                     const percentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
+                    const hasVotedThisOption = currentUser ? votes[option]?.includes(currentUser.uid) : false;
+                    
                     return (
                         <div key={index} className="space-y-1">
                             <div className="flex justify-between items-center text-xs">
-                                <span>{option}</span>
+                                <span className={cn(hasVotedThisOption && "font-bold")}>{option}</span>
                                 <span>{voteCount} votes</span>
                             </div>
                             <div className="w-full bg-muted rounded-full h-2.5">
@@ -230,6 +240,7 @@ export default function CommunityChatPage() {
     const [allUsers, setAllUsers] = useState<ChatUser[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [isSending, setIsSending] = useState(false);
+    const [replyingTo, setReplyingTo] = useState<Message | null>(null);
 
      useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -319,21 +330,54 @@ export default function CommunityChatPage() {
                 const snapshot = await uploadBytes(storageRef, attachment);
                 imageUrl = await getDownloadURL(snapshot.ref);
             }
-
-             await addDoc(collection(db, "communityChat"), {
+            
+            const messagePayload: Partial<Message> = {
                 fromId: currentUser.uid,
                 fromName: 'Admin',
                 text: input,
                 type: 'admin',
                 imageUrl,
                 timestamp: serverTimestamp(),
-            });
+                reactions: {},
+            };
+            
+            if (replyingTo) {
+                messagePayload.replyTo = {
+                    id: replyingTo.id,
+                    text: replyingTo.text || (replyingTo.imageUrl ? 'Image' : ''),
+                    fromName: replyingTo.fromName
+                };
+            }
+
+            await addDoc(collection(db, "communityChat"), messagePayload);
+
             setInput('');
             setAttachment(null);
+            setReplyingTo(null);
+
         } catch (error) {
             toast({ title: "Error", description: "Could not send message.", variant: "destructive" });
         } finally {
             setIsSending(false);
+        }
+    };
+    
+    const handleReaction = async (message: Message, emoji: string) => {
+        if (!currentUser) return;
+        const messageRef = doc(db, 'communityChat', message.id);
+        const currentReactions = message.reactions || {};
+        const usersForEmoji = currentReactions[emoji] || [];
+
+        if (usersForEmoji.includes(currentUser.uid)) {
+            // User is removing their reaction
+            await updateDoc(messageRef, {
+                [`reactions.${emoji}`]: arrayRemove(currentUser.uid)
+            });
+        } else {
+            // User is adding a reaction
+            await updateDoc(messageRef, {
+                [`reactions.${emoji}`]: arrayUnion(currentUser.uid)
+            });
         }
     };
 
@@ -403,11 +447,28 @@ export default function CommunityChatPage() {
                               </Avatar>
                               <div className={cn("rounded-lg px-4 py-2 max-w-sm", msg.type === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                 <p className="font-bold text-xs mb-1">{msg.fromName}</p>
+                                {msg.replyTo && (
+                                <a href={`#message-${msg.replyTo.id}`} className="block bg-black/10 p-2 rounded-md mb-2 text-xs italic">
+                                    <p className="font-bold">{msg.replyTo.fromName}</p>
+                                    <p className="truncate">{msg.replyTo.text}</p>
+                                </a>
+                                )}
                                 {msg.imageUrl && (
                                     <Image src={msg.imageUrl} alt="chat attachment" width={200} height={200} className="rounded-md my-2" />
                                 )}
                                 {msg.text && <p>{msg.text}</p>}
-                                {msg.poll && <PollDisplay message={msg} />}
+                                {msg.poll && <PollDisplay message={msg} currentUser={currentUser} />}
+                                <div className="flex items-center gap-1 mt-2">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-auto px-1.5 rounded-full"
+                                    onClick={() => handleReaction(msg, '👍')}
+                                >
+                                    <ThumbsUp className={cn("h-4 w-4", msg.reactions?.['👍']?.includes(currentUser?.uid ?? '') ? "text-blue-500 fill-blue-500" : "")} />
+                                    {msg.reactions?.['👍']?.length > 0 && <span className="text-xs ml-1">{msg.reactions['👍'].length}</span>}
+                                </Button>
+                              </div>
                               </div>
                                <div className={cn("opacity-0 group-hover:opacity-100 transition-opacity", msg.type === 'admin' ? 'mr-2' : 'ml-2')}>
                                 <DropdownMenu>
@@ -417,11 +478,11 @@ export default function CommunityChatPage() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent>
-                                        <DropdownMenuItem onClick={() => toast({ title: "Reply coming soon!" })}>
+                                        <DropdownMenuItem onClick={() => setReplyingTo(msg)}>
                                             <MessageSquareReply className="mr-2 h-4 w-4" />
                                             Reply
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => toast({ title: "Reactions coming soon!" })}>
+                                        <DropdownMenuItem onClick={() => handleReaction(msg, '👍')}>
                                             <Smile className="mr-2 h-4 w-4" />
                                             React
                                         </DropdownMenuItem>
@@ -434,6 +495,12 @@ export default function CommunityChatPage() {
               </ScrollArea>
             </CardContent>
             <CardFooter className="p-2 border-t flex-col items-start gap-2">
+                 {replyingTo && (
+                  <div className="flex items-center justify-between w-full p-2 bg-muted rounded-md text-sm">
+                    <p className="truncate">Replying to <strong>{replyingTo.fromName}</strong></p>
+                    <Button variant="ghost" size="icon" onClick={() => setReplyingTo(null)}><X className="h-4 w-4" /></Button>
+                  </div>
+                )}
                  {attachment && (
                     <div className="flex items-center gap-2 p-2 bg-muted rounded-md w-full">
                         <ImageIcon className="h-5 w-5 text-muted-foreground" />
