@@ -29,9 +29,11 @@ const mainNavLinks = [
 
 const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }) => {
   const pathname = usePathname();
+  
+  const communityChatHref = isAdmin ? '/admin/community-chat' : '/community-chat';
 
   const allLinks = isLoggedIn 
-    ? [...mainNavLinks, { href: '/community-chat', label: 'Community Chat', icon: MessageSquare }]
+    ? [...mainNavLinks, { href: communityChatHref, label: 'Community Chat', icon: MessageSquare }]
     : mainNavLinks;
 
   return (
