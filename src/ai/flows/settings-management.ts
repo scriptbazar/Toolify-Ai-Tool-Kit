@@ -179,30 +179,31 @@ export async function getSettings(): Promise<AppSettings> {
 export async function updateSettings(newSettings: Partial<AppSettings>): Promise<{ success: boolean; message: string }> {
   try {
     const currentSettings = await getSettings();
-    
-    // Create a copy of the current settings to avoid direct mutation
-    let mergedSettings = { ...currentSettings };
 
-    // Iterate over the keys in newSettings and merge them into the copy
+    // Create a deep copy of the current settings
+    const mergedSettings = JSON.parse(JSON.stringify(currentSettings));
+
+    // Deep merge newSettings into mergedSettings
     for (const key in newSettings) {
         const typedKey = key as keyof AppSettings;
-        if (Object.prototype.hasOwnProperty.call(newSettings, typedKey)) {
-            const newValue = newSettings[typedKey];
-            const currentValue = mergedSettings[typedKey];
-
-            // If the value is an object (and not null/array), perform a deep merge for that level
+        if (newSettings[typedKey] !== undefined) {
             if (
-                typeof newValue === 'object' && newValue !== null && !Array.isArray(newValue) &&
-                typeof currentValue === 'object' && currentValue !== null && !Array.isArray(currentValue)
+                typeof newSettings[typedKey] === 'object' &&
+                newSettings[typedKey] !== null &&
+                !Array.isArray(newSettings[typedKey]) &&
+                currentSettings[typedKey] &&
+                typeof currentSettings[typedKey] === 'object' &&
+                !Array.isArray(currentSettings[typedKey])
             ) {
-                mergedSettings[typedKey] = { ...currentValue, ...newValue };
+                mergedSettings[typedKey] = {
+                    ...currentSettings[typedKey],
+                    ...newSettings[typedKey],
+                };
             } else {
-                // Otherwise, just overwrite the value
-                mergedSettings[typedKey] = newValue;
+                mergedSettings[typedKey] = newSettings[typedKey];
             }
         }
     }
-
 
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
     // are reset to their default (0) to prevent Zod validation errors.
