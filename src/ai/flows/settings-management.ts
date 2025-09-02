@@ -127,6 +127,14 @@ const defaultPlans = [
 const defaultSettings = AppSettingsSchema.parse({ 
   page: { pages: defaultPages },
   plan: { plans: defaultPlans },
+  referral: {
+    isReferralEnabled: true,
+    commissionRate: 20,
+    cookieDuration: 30,
+    payoutThreshold: 50,
+    isMultiLevel: false,
+    referralProgramDescription: 'Earn a commission for every new paying customer you refer. Payments are made monthly via PayPal.',
+  }
 });
 
 /**
