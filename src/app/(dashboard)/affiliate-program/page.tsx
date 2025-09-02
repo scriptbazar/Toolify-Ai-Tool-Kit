@@ -9,12 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Copy, Users, DollarSign, MousePointerClick, Percent, Calendar, Hourglass, XCircle, Loader2 } from 'lucide-react';
+import { Copy, Users, DollarSign, MousePointerClick, Percent, Calendar, Hourglass, XCircle, Loader2, HelpCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getSettings } from '@/ai/flows/settings-management';
 import { type ReferralSettings, type ReferralStatus } from '@/ai/flows/settings-management.types';
 import { requestToJoinAffiliateProgram } from '@/ai/flows/user-management';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 
 const StatCard = ({ title, value, icon: Icon }: { title: string, value: string, icon: React.ElementType }) => (
@@ -28,6 +29,34 @@ const StatCard = ({ title, value, icon: Icon }: { title: string, value: string, 
         </CardContent>
     </Card>
 );
+
+const faqs = [
+    {
+        question: "How does the affiliate program work?",
+        answer: "Simply share your unique referral link. When someone signs up for a paid plan through your link and becomes a paying customer, you earn a commission. It's that simple!"
+    },
+    {
+        question: "How much can I earn?",
+        answer: "You'll earn a percentage of every payment made by the customers you refer for their first year. The more customers you refer, the more you can earn!"
+    },
+    {
+        question: "How long does the tracking cookie last?",
+        answer: "Our tracking cookie lasts for a set number of days. If a user signs up for a paid plan within this period after clicking your link, you'll get credit for the referral."
+    },
+    {
+        question: "When and how do I get paid?",
+        answer: "Payouts are made monthly via PayPal, provided you have met the minimum payout threshold. Make sure your PayPal email is correctly set up in your profile."
+    },
+    {
+        question: "Where can I find my referral link?",
+        answer: "Once your request to join the affiliate program is approved, your unique referral link will be available on your affiliate dashboard."
+    },
+    {
+        question: "How can I track my referrals and earnings?",
+        answer: "Your affiliate dashboard provides detailed statistics, including the number of clicks on your link, successful referrals, and your total earnings."
+    }
+];
+
 
 const dummyReferredUsers = [
     { id: '1', name: 'Alice', date: '2023-10-15', status: 'Converted', earnings: '$5.00' },
@@ -150,24 +179,42 @@ export default function AffiliateProgramPage() {
                         Earn rewards by sharing ToolifyAI with your audience. Get a commission for every new paying customer you refer.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                     <div className="p-4 border rounded-lg">
-                        <Percent className="mx-auto h-8 w-8 mb-2 text-primary"/>
-                        <h3 className="font-bold">{referralSettings?.commissionRate || 20}% Commission</h3>
-                        <p className="text-sm text-muted-foreground">On all payments for the first year.</p>
-                     </div>
-                     <div className="p-4 border rounded-lg">
-                        <Calendar className="mx-auto h-8 w-8 mb-2 text-primary"/>
-                        <h3 className="font-bold">{referralSettings?.cookieDuration || 30}-Day Cookie</h3>
-                        <p className="text-sm text-muted-foreground">Get credit for referrals up to a month later.</p>
-                     </div>
-                      <div className="p-4 border rounded-lg">
-                        <DollarSign className="mx-auto h-8 w-8 mb-2 text-primary"/>
-                        <h3 className="font-bold">${referralSettings?.payoutThreshold || 50} Payout Threshold</h3>
-                        <p className="text-sm text-muted-foreground">Receive your earnings via PayPal.</p>
-                     </div>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center mb-12">
+                         <div className="p-4 border rounded-lg">
+                            <Percent className="mx-auto h-8 w-8 mb-2 text-primary"/>
+                            <h3 className="font-bold">{referralSettings?.commissionRate || 20}% Commission</h3>
+                            <p className="text-sm text-muted-foreground">On all payments for the first year.</p>
+                         </div>
+                         <div className="p-4 border rounded-lg">
+                            <Calendar className="mx-auto h-8 w-8 mb-2 text-primary"/>
+                            <h3 className="font-bold">{referralSettings?.cookieDuration || 30}-Day Cookie</h3>
+                            <p className="text-sm text-muted-foreground">Get credit for referrals up to a month later.</p>
+                         </div>
+                          <div className="p-4 border rounded-lg">
+                            <DollarSign className="mx-auto h-8 w-8 mb-2 text-primary"/>
+                            <h3 className="font-bold">${referralSettings?.payoutThreshold || 50} Payout Threshold</h3>
+                            <p className="text-sm text-muted-foreground">Receive your earnings via PayPal.</p>
+                         </div>
+                    </div>
+                    <div className="mt-12 pt-8 border-t">
+                      <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-2">
+                        <HelpCircle className="h-6 w-6" />
+                        Frequently Asked Questions
+                      </h2>
+                      <Accordion type="single" collapsible className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-8">
+                        {faqs.map((faq, index) => (
+                          <AccordionItem value={`item-${index}`} key={index}>
+                            <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
+                            <AccordionContent className="text-muted-foreground">
+                              {faq.answer}
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </Accordion>
+                    </div>
                 </CardContent>
-                <CardFooter className="flex-col gap-4 pt-6 border-t">
+                <CardFooter className="flex-col gap-4 pt-6 border-t mt-8">
                     <p className="text-sm text-muted-foreground">{referralSettings.referralProgramDescription}</p>
                     <Button onClick={handleJoinRequest} disabled={isSubmitting}>
                          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
