@@ -77,7 +77,8 @@ export default function UserPanelLayout({
           // redirect them to the admin dashboard.
           if (fetchedUserData.role === 'admin') {
             router.replace('/admin/dashboard');
-            return; // Stop further processing for this user
+            // We don't set loading to false here to avoid a flicker
+            return;
           }
           setUser(firebaseUser);
           setUserData(fetchedUserData);
@@ -91,11 +92,14 @@ export default function UserPanelLayout({
             });
             await signOut(auth); // Log out the user
             router.push('/login');
+            // We don't set loading to false here to avoid a flicker
             return;
         }
       } else {
         // No user is signed in.
         router.push('/login');
+        // We don't set loading to false here to avoid a flicker
+        return;
       }
       setLoading(false);
     });
@@ -125,7 +129,7 @@ export default function UserPanelLayout({
   if (loading) {
       return (
         <div className="flex h-screen w-full items-center justify-center">
-            <p>Loading user dashboard...</p>
+            <p>Loading...</p>
         </div>
       );
   }
