@@ -122,65 +122,69 @@ export default function AffiliateSettingsPage() {
             />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-             <div className="space-y-2">
-                <Label htmlFor="commissionRate" className="flex items-center gap-2"><Percent className="w-4 h-4" />Commission Rate (%)</Label>
-                <Input
-                    id="commissionRate"
-                    type="number"
-                    value={settings.commissionRate}
-                    onChange={(e) => handleInputChange('commissionRate', Number(e.target.value))}
-                    placeholder="e.g., 20"
-                />
-             </div>
-             <div className="space-y-2">
-                <Label htmlFor="cookieDuration" className="flex items-center gap-2"><Calendar className="w-4 h-4" />Cookie Duration (Days)</Label>
-                <Input
-                    id="cookieDuration"
-                    type="number"
-                    value={settings.cookieDuration}
-                    onChange={(e) => handleInputChange('cookieDuration', Number(e.target.value))}
-                    placeholder="e.g., 30"
-                />
-             </div>
-             <div className="space-y-2">
-                <Label htmlFor="payoutThreshold" className="flex items-center gap-2"><DollarSign className="w-4 h-4" />Payout Threshold ($)</Label>
-                <Input
-                    id="payoutThreshold"
-                    type="number"
-                    value={settings.payoutThreshold}
-                    onChange={(e) => handleInputChange('payoutThreshold', Number(e.target.value))}
-                    placeholder="e.g., 50"
-                />
-             </div>
-          </div>
-          
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <Label htmlFor="isMultiLevel" className="flex items-center gap-2"><Users className="w-4 h-4" />Enable Multi-level Referrals</Label>
-              <p className="text-sm text-muted-foreground">
-                Allow affiliates to earn commissions from users they refer (Tier 2).
-              </p>
-            </div>
-            <Switch
-              id="isMultiLevel"
-              checked={settings.isMultiLevel}
-              onCheckedChange={(checked) => handleInputChange('isMultiLevel', checked)}
-              disabled
-            />
-          </div>
+          {settings.isReferralEnabled && (
+            <div className="space-y-6 animate-in fade-in-0 duration-300">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="commissionRate" className="flex items-center gap-2"><Percent className="w-4 h-4" />Commission Rate (%)</Label>
+                        <Input
+                            id="commissionRate"
+                            type="number"
+                            value={settings.commissionRate}
+                            onChange={(e) => handleInputChange('commissionRate', Number(e.target.value))}
+                            placeholder="e.g., 20"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="cookieDuration" className="flex items-center gap-2"><Calendar className="w-4 h-4" />Cookie Duration (Days)</Label>
+                        <Input
+                            id="cookieDuration"
+                            type="number"
+                            value={settings.cookieDuration}
+                            onChange={(e) => handleInputChange('cookieDuration', Number(e.target.value))}
+                            placeholder="e.g., 30"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="payoutThreshold" className="flex items-center gap-2"><DollarSign className="w-4 h-4" />Payout Threshold ($)</Label>
+                        <Input
+                            id="payoutThreshold"
+                            type="number"
+                            value={settings.payoutThreshold}
+                            onChange={(e) => handleInputChange('payoutThreshold', Number(e.target.value))}
+                            placeholder="e.g., 50"
+                        />
+                    </div>
+                </div>
+                
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                    <Label htmlFor="isMultiLevel" className="flex items-center gap-2"><Users className="w-4 h-4" />Enable Multi-level Referrals</Label>
+                    <p className="text-sm text-muted-foreground">
+                        Allow affiliates to earn commissions from users they refer (Tier 2).
+                    </p>
+                    </div>
+                    <Switch
+                    id="isMultiLevel"
+                    checked={settings.isMultiLevel}
+                    onCheckedChange={(checked) => handleInputChange('isMultiLevel', checked)}
+                    disabled
+                    />
+                </div>
 
-          <div className="space-y-2">
-             <Label htmlFor="referralProgramDescription">Program Description for Users</Label>
-             <Textarea
-                id="referralProgramDescription"
-                value={settings.referralProgramDescription || ''}
-                onChange={(e) => handleInputChange('referralProgramDescription', e.target.value)}
-                placeholder="Describe how your affiliate program works..."
-                className="min-h-[100px]"
-             />
-             <p className="text-xs text-muted-foreground">This description will be shown to users on their affiliate program page.</p>
-          </div>
+                <div className="space-y-2">
+                    <Label htmlFor="referralProgramDescription">Program Description for Users</Label>
+                    <Textarea
+                        id="referralProgramDescription"
+                        value={settings.referralProgramDescription || ''}
+                        onChange={(e) => handleInputChange('referralProgramDescription', e.target.value)}
+                        placeholder="Describe how your affiliate program works..."
+                        className="min-h-[100px]"
+                    />
+                    <p className="text-xs text-muted-foreground">This description will be shown to users on their affiliate program page.</p>
+                </div>
+            </div>
+          )}
         </CardContent>
       </Card>
       

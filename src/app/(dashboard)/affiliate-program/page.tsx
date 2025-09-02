@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Copy, Users, DollarSign, MousePointerClick, Percent, Calendar, Hourglass, XCircle, Loader2, HelpCircle, Code, Palette, Database, UserCog } from 'lucide-react';
+import { Copy, Users, DollarSign, MousePointerClick, Percent, Calendar, Hourglass, XCircle, Loader2, HelpCircle, Code, Palette, Database, UserCog, Settings, Construction } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getSettings } from '@/ai/flows/settings-management';
@@ -163,14 +163,26 @@ export default function AffiliateProgramPage() {
     }
     
     if (!referralSettings?.isReferralEnabled) {
-        return (
-            <Card className="text-center p-8">
-                <CardTitle>Affiliate Program Not Available</CardTitle>
-                <CardDescription className="mt-2">
-                    The affiliate program is currently disabled. Please check back later.
-                </CardDescription>
-            </Card>
-        );
+        if (affiliateStatus === 'not_joined') {
+             return (
+                <Card className="text-center p-8">
+                    <CardTitle>Affiliate Program Coming Soon!</CardTitle>
+                    <CardDescription className="mt-2">
+                        Our affiliate program is currently being revamped. Please check back later for exciting opportunities.
+                    </CardDescription>
+                </Card>
+            );
+        } else {
+            return (
+                <Card className="text-center p-8">
+                     <Construction className="mx-auto h-12 w-12 text-primary mb-4"/>
+                    <CardTitle>Affiliate Program Under Maintenance</CardTitle>
+                    <CardDescription className="mt-2">
+                        We are currently performing some updates on the affiliate system. Your dashboard will be back online shortly.
+                    </CardDescription>
+                </Card>
+            );
+        }
     }
     
     if (affiliateStatus === 'not_joined') {
