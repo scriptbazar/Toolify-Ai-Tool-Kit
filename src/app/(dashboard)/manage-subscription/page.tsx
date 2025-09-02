@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Check, ArrowRight, Star, BadgeCheck, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSettings } from '@/ai/flows/settings-management';
-import type { Plan } from '@/ai/flows/settings-management.types';
+import type { Plan, PaymentSettings } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc } from 'firebase/firestore';
@@ -27,6 +27,7 @@ interface UserProfile {
 export default function ManageSubscriptionPage() {
   const [isYearly, setIsYearly] = useState(false);
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -47,6 +48,7 @@ export default function ManageSubscriptionPage() {
                     
                     const activePlans = settings.plan?.plans.filter(p => p.status === 'active') || [];
                     setPlans(activePlans);
+                    setPaymentSettings(settings.payment || null);
 
                     if (userDocSnap.exists()) {
                         setUserProfile(userDocSnap.data() as UserProfile);
@@ -74,6 +76,12 @@ export default function ManageSubscriptionPage() {
         toast({ title: 'Error', description: 'You must be logged in to upgrade.', variant: 'destructive'});
         return;
     }
+
+    if (!paymentSettings?.stripe?.isEnabled) {
+         toast({ title: 'Not Available', description: 'Online payment is currently not available. Please contact support.', variant: 'destructive'});
+         return;
+    }
+
     setIsProcessing(plan.id);
     try {
         const { sessionId, publishableKey } = await createStripeCheckoutSession({

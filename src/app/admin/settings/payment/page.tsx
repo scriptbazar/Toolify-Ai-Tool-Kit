@@ -96,51 +96,52 @@ export default function PaymentSettingsPage() {
 
     return (
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2"><CreditCard className="w-5 h-5"/>{title}</CardTitle>
-            <Switch
+        <CardHeader className="flex flex-row items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+             <CreditCard className="w-5 h-5 text-muted-foreground"/>
+             <CardTitle className="text-base">{title}</CardTitle>
+          </div>
+          <Switch
               checked={gatewaySettings?.isEnabled || false}
               onCheckedChange={(checked) => handleInputChange(gatewayKey, 'isEnabled', checked)}
-            />
-          </div>
+          />
         </CardHeader>
-        <CardContent className={cn('space-y-4', !gatewaySettings?.isEnabled && 'hidden')}>
-          {fields.map(field => (
-            <div key={field.id} className="space-y-2">
-              <Label htmlFor={`${gatewayKey}-${field.id}`}>{field.label}</Label>
-              <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id={`${gatewayKey}-${field.id}`}
-                  type={field.type || 'text'}
-                  placeholder={field.placeholder || ''}
-                  value={(gatewaySettings as any)?.[field.id] || ''}
-                  onChange={(e) => handleInputChange(gatewayKey, field.id, e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-          ))}
-          {modeOptions && (
-            <div className="space-y-2">
-              <Label>Mode</Label>
-              <Select
-                value={(gatewaySettings as any)?.mode}
-                onValueChange={(value) => handleInputChange(gatewayKey, 'mode', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select mode" />
-                </SelectTrigger>
-                <SelectContent>
-                  {modeOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </CardContent>
+        {gatewaySettings?.isEnabled && (
+            <CardContent className="space-y-4 p-4 pt-0">
+            {fields.map(field => (
+                <div key={field.id} className="space-y-2">
+                <Label htmlFor={`${gatewayKey}-${field.id}`}>{field.label}</Label>
+                <div className="relative">
+                    <Input
+                    id={`${gatewayKey}-${field.id}`}
+                    type={field.type || 'text'}
+                    placeholder={field.placeholder || ''}
+                    value={(gatewaySettings as any)?.[field.id] || ''}
+                    onChange={(e) => handleInputChange(gatewayKey, field.id, e.target.value)}
+                    />
+                </div>
+                </div>
+            ))}
+            {modeOptions && (
+                <div className="space-y-2">
+                <Label>Mode</Label>
+                <Select
+                    value={(gatewaySettings as any)?.mode}
+                    onValueChange={(value) => handleInputChange(gatewayKey, 'mode', value)}
+                >
+                    <SelectTrigger>
+                    <SelectValue placeholder="Select mode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    {modeOptions.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+                </div>
+            )}
+            </CardContent>
+        )}
       </Card>
     );
   };
@@ -170,7 +171,7 @@ export default function PaymentSettingsPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Payment Settings</h1>
         <p className="text-muted-foreground">
-          Manage your payment gateway integrations.
+          Manage your payment gateway integrations. Enable a gateway to allow users to purchase plans.
         </p>
       </div>
 
