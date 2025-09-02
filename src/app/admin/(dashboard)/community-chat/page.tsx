@@ -20,13 +20,14 @@ import { getChatUsers } from '@/ai/flows/user-management';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { Logo } from '@/components/common/Logo';
 
 
 type Message = {
     id: number;
     from: string;
     text?: string;
-    type: 'user' | 'assistant' | 'poll' | 'media';
+    type: 'user' | 'assistant' | 'poll' | 'media' | 'admin';
     error?: boolean;
     poll?: {
       question: string;
@@ -185,13 +186,11 @@ export default function CommunityChatPage() {
         e.preventDefault();
         if (!input.trim() || !userData) return;
         
-        const senderName = `${userData.firstName} ${userData.lastName}`.trim() || 'Admin';
-
         const newMessage: Message = {
             id: messages.length + 1,
-            from: senderName,
+            from: 'Admin',
             text: input,
-            type: 'user',
+            type: 'admin',
         };
         setMessages(prev => [...prev, newMessage]);
         setInput('');
@@ -201,10 +200,9 @@ export default function CommunityChatPage() {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file && userData) {
-            const senderName = `${userData.firstName} ${userData.lastName}`.trim() || 'Admin';
             const newMediaMessage: Message = {
                 id: messages.length + 1,
-                from: senderName,
+                from: 'Admin',
                 type: 'media',
                 media: {
                     fileName: file.name,
@@ -234,7 +232,7 @@ export default function CommunityChatPage() {
         });
     };
 
-    const senderDisplayName = userData ? `${userData.firstName} ${userData.lastName}`.trim() : 'Admin';
+    const senderDisplayName = 'Admin';
 
 
   return (
@@ -259,10 +257,10 @@ export default function CommunityChatPage() {
                <ScrollArea className="h-full max-h-[calc(100vh-27rem)] px-4" ref={scrollAreaRef}>
                   <div className="space-y-6">
                       {messages.map((msg) => (
-                          <div key={msg.id} className={cn("flex items-start gap-3", msg.from === senderDisplayName ? 'flex-row-reverse' : '')}>
+                          <div key={msg.id} className={cn("flex items-start gap-3", msg.type === 'admin' ? 'flex-row-reverse' : '')}>
                               <Avatar>
                                   <AvatarFallback>
-                                    {msg.from === 'ToolifyAI' ? <Bot /> : msg.from.substring(0, 2)}
+                                    {msg.from === 'ToolifyAI' ? <Bot /> : msg.from === 'Admin' ? <Logo className="h-5 w-5" /> : msg.from.substring(0, 2)}
                                   </AvatarFallback>
                               </Avatar>
                                {msg.type === 'poll' && msg.poll ? (
@@ -299,7 +297,7 @@ export default function CommunityChatPage() {
                                       <p>Shared a file: <span className="font-medium">{msg.media.fileName}</span></p>
                                    </div>
                                ) : (
-                                  <div className={cn("rounded-lg px-4 py-2 max-w-sm", msg.from === senderDisplayName ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                  <div className={cn("rounded-lg px-4 py-2 max-w-sm", msg.type === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                     <p>{msg.text}</p>
                                   </div>
                                )}

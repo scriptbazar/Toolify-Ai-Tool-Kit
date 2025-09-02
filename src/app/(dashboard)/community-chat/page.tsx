@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useRef, type FormEvent, useEffect } from 'react';
@@ -18,8 +17,9 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getChatUsers } from '@/ai/flows/user-management';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
+import { doc, getDoc } from 'firebase/firestore';
 
 
 type Message = {
@@ -48,16 +48,22 @@ interface ChatUser {
     lastActive?: string | null;
 }
 
+interface AppUser {
+  firstName: string;
+  lastName: string;
+}
+
 const initialMessages: Message[] = [
-    { id: 1, from: 'AA', text: 'Welcome to the community chat! Feel free to ask questions and share ideas.', type: 'assistant' },
+    { id: 1, from: 'ToolifyAI', text: 'Welcome to the community chat! Feel free to ask questions and share ideas.', type: 'assistant' },
 ];
 
 
 export default function CommunityChatPage() {
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+    const [userData, setUserData] = useState<AppUser | null>(null);
     const [messages, setMessages] = useState<Message[]>(initialMessages);
     const [input, setInput] = useState('');
-    const [activeUserFilter, setActiveUserFilter] = useState<'all' | 'live' | 'new'>('live');
+    const [activeUserFilter, setActiveUserFilter] = useState<'all' | 'live'>('all');
     const [isPollModalOpen, setIsPollModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -67,9 +73,14 @@ export default function CommunityChatPage() {
     const [loading, setLoading] = useState(true);
 
      useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
               setCurrentUser(user);
+              const userDocRef = doc(db, 'users', user.uid);
+              const userDocSnap = await getDoc(userDocRef);
+              if (userDocSnap.exists()) {
+                  setUserData(userDocSnap.data() as AppUser);
+              }
             } else {
               router.push('/login');
             }
@@ -103,13 +114,28 @@ export default function CommunityChatPage() {
         e.preventDefault();
         if (!input.trim() || !currentUser?.displayName) return;
 
+        const isFirstUserMessage = !messages.some(m => m.type === 'user');
+
         const newMessage: Message = {
             id: messages.length + 1,
             from: currentUser.displayName || 'User',
             text: input,
             type: 'user',
         };
-        setMessages(prev => [...prev, newMessage]);
+        
+        let updatedMessages = [...messages, newMessage];
+
+        if (isFirstUserMessage) {
+            const welcomeMessage: Message = {
+                id: messages.length + 2,
+                from: 'ToolifyAI',
+                type: 'assistant',
+                text: `Welcome to the community, ${currentUser.displayName}! We're glad to have you here.`,
+            };
+            updatedMessages.push(welcomeMessage);
+        }
+
+        setMessages(updatedMessages);
         setInput('');
     };
 
@@ -148,10 +174,6 @@ export default function CommunityChatPage() {
            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
            return allUsers.filter(user => user.lastActive && new Date(user.lastActive) > fiveMinutesAgo);
         }
-       if (activeUserFilter === 'new') {
-            const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-            return allUsers.filter(user => user.createdAt && new Date(user.createdAt) > sevenDaysAgo);
-       }
        return allUsers;
     }, [activeUserFilter, allUsers]);
 
@@ -161,6 +183,8 @@ export default function CommunityChatPage() {
         description: `Copied username: @${text}`,
         });
     };
+    
+    const senderDisplayName = userData ? `${userData.firstName} ${userData.lastName}`.trim() : 'User';
 
 
   if (loading) {
@@ -190,9 +214,9 @@ export default function CommunityChatPage() {
                <ScrollArea className="h-full max-h-[calc(100vh-27rem)] px-4" ref={scrollAreaRef}>
                   <div className="space-y-6">
                       {messages.map((msg) => (
-                          <div key={msg.id} className={cn("flex items-start gap-3", msg.from === currentUser?.displayName ? 'flex-row-reverse' : '')}>
+                          <div key={msg.id} className={cn("flex items-start gap-3", msg.from === senderDisplayName ? 'flex-row-reverse' : '')}>
                               <Avatar>
-                                  <AvatarFallback>{msg.from.substring(0, 2)}</AvatarFallback>
+                                  <AvatarFallback>{msg.from === 'ToolifyAI' ? <Bot/> : msg.from.substring(0, 2)}</AvatarFallback>
                               </Avatar>
                                {msg.type === 'poll' && msg.poll ? (
                                    <Card className="w-full max-w-md">
@@ -228,7 +252,7 @@ export default function CommunityChatPage() {
                                       <p>Shared a file: <span className="font-medium">{msg.media.fileName}</span></p>
                                    </div>
                                ) : (
-                                  <div className={cn("rounded-lg px-4 py-2 max-w-sm", msg.from === currentUser?.displayName ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                  <div className={cn("rounded-lg px-4 py-2 max-w-sm", msg.from === senderDisplayName ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                     <p>{msg.text}</p>
                                   </div>
                                )}
