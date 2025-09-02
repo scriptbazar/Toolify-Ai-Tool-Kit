@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useRef, type FormEvent, useEffect } from 'react';
@@ -225,6 +226,13 @@ export default function CommunityChatPage() {
        }
        return allUsers;
     }, [activeUserFilter, allUsers]);
+    
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        toast({
+        description: `Copied username: @${text}`,
+        });
+    };
 
     const senderDisplayName = userData ? `${userData.firstName} ${userData.lastName}`.trim() : 'Admin';
 
@@ -359,6 +367,9 @@ export default function CommunityChatPage() {
                                           <p className="font-medium">{user.name}</p>
                                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                             <span>@{user.username}</span>
+                                             <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(user.username)}>
+                                                <Copy className="h-3 w-3" />
+                                            </Button>
                                           </div>
                                         </div>
                                   </div>

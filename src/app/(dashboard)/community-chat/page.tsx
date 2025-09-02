@@ -117,6 +117,15 @@ export default function CommunityChatPage() {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file && currentUser?.displayName) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                toast({
+                    title: 'File too large',
+                    description: `"${file.name}" exceeds the 2MB size limit.`,
+                    variant: 'destructive',
+                });
+                return;
+            }
+
             const newMediaMessage: Message = {
                 id: messages.length + 1,
                 from: currentUser.displayName,
@@ -259,15 +268,12 @@ export default function CommunityChatPage() {
                       </p>
                   </div>
                   <div className="space-y-1">
-                      <div className="grid w-full grid-cols-3 gap-1 pt-2">
+                      <div className="grid w-full grid-cols-2 gap-1 pt-2">
                           <Button variant={activeUserFilter === 'all' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('all')}>
                               <span className="flex items-center"><Users className="mr-2 h-4 w-4" /> All</span>
                           </Button>
                           <Button variant={activeUserFilter === 'live' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('live')}>
                              <span className="flex items-center"><Wifi className="mr-2 h-4 w-4"/>Live</span>
-                          </Button>
-                          <Button variant={activeUserFilter === 'new' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('new')}>
-                             <span className="flex items-center"><UserPlus className="mr-2 h-4 w-4"/>New</span>
                           </Button>
                       </div>
                   </div>
