@@ -45,9 +45,24 @@ interface AppUser {
 }
 
 const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) => {
-    // Poll creation logic remains the same
-    // ...
-    return <Dialog><DialogTrigger asChild><Button variant="outline"><Vote className="mr-2 h-4 w-4"/>Create Poll</Button></DialogTrigger></Dialog>;
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline"><Vote className="mr-2 h-4 w-4" />Create Poll</Button>
+        </DialogTrigger>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Create a New Poll</DialogTitle>
+                <DialogDesc>
+                    This feature is coming soon! You'll be able to create polls for the community.
+                </DialogDesc>
+            </DialogHeader>
+             <DialogFooter>
+                <Button variant="outline" disabled>Save Poll</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
 };
 
 

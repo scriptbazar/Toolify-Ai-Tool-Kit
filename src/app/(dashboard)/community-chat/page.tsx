@@ -98,16 +98,35 @@ export default function CommunityChatPage() {
     // Listen for new messages
     useEffect(() => {
         const q = query(collection(db, "communityChat"), orderBy("timestamp", "asc"));
-        const unsubscribeMessages = onSnapshot(q, (querySnapshot) => {
-            const fetchedMessages: Message[] = [];
-            querySnapshot.forEach((doc) => {
-                fetchedMessages.push({ ...doc.data(), id: doc.id } as Message);
-            });
-            setMessages(fetchedMessages);
-        });
+        const unsubscribeMessages = onSnapshot(q, 
+            (querySnapshot) => {
+                const fetchedMessages: Message[] = [];
+                querySnapshot.forEach((doc) => {
+                    fetchedMessages.push({ ...doc.data(), id: doc.id } as Message);
+                });
+                setMessages(fetchedMessages);
+            },
+            (error) => {
+                console.error("Chat Snapshot Error: ", error);
+                if (error.code === 'permission-denied') {
+                    toast({
+                        title: "Permission Denied",
+                        description: "You do not have permission to view the chat. Please contact support or check your Firestore rules.",
+                        variant: "destructive",
+                        duration: 10000,
+                    });
+                } else {
+                    toast({
+                        title: "Error Loading Chat",
+                        description: "Could not load messages. Please try again later.",
+                        variant: "destructive",
+                    });
+                }
+            }
+        );
 
         return () => unsubscribeMessages();
-    }, []);
+    }, [toast]);
     
     useEffect(() => {
         if (scrollAreaRef.current) {
