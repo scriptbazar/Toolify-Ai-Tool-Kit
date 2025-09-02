@@ -91,9 +91,9 @@ export default function ContactUsPage() {
               To get help with your account or report an issue, please log in and create a support ticket from your dashboard.
             </p>
             <Button asChild>
-              <Link href="/login">
+              <Link href="/my-tickets">
                 <ArrowRight className="mr-2 h-4 w-4" />
-                Login to Create Ticket
+                Go to My Tickets
               </Link>
             </Button>
           </div>

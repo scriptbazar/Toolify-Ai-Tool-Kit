@@ -17,6 +17,7 @@ import {
     type AddReplyInput,
     type UpdateTicketDetailsInput
 } from './ticket-management.types';
+import { ai } from '@/ai/genkit';
 
 
 /**
@@ -179,3 +180,49 @@ export async function updateTicketDetails(input: UpdateTicketDetailsInput): Prom
         return { success: false, message: error.message || 'An unknown error occurred.' };
     }
 }
+
+/**
+ * Generates a detailed support ticket message using AI based on a brief summary.
+ */
+const GenerateTicketContentInputSchema = z.object({
+  problemSummary: z.string().describe('A brief summary of the user\'s problem.'),
+});
+
+const GenerateTicketContentOutputSchema = z.object({
+  detailedMessage: z.string().describe('A detailed, polite, and well-structured support ticket message.'),
+});
+
+export async function generateTicketContent(input: z.infer<typeof GenerateTicketContentInputSchema>): Promise<z.infer<typeof GenerateTicketContentOutputSchema>> {
+  return generateTicketContentFlow(input);
+}
+
+const generateTicketContentPrompt = ai.definePrompt({
+  name: 'generateTicketContentPrompt',
+  input: { schema: GenerateTicketContentInputSchema },
+  output: { schema: GenerateTicketContentOutputSchema },
+  prompt: `You are an expert at writing clear and detailed support ticket messages.
+A user has provided a short summary of their problem. Expand this summary into a full support message.
+
+The message should be polite and provide as much detail as possible to help the support team understand the issue.
+If the summary is about a specific tool, mention that the user was using that tool.
+
+User's problem summary:
+"{{{problemSummary}}}"
+
+Generate a detailed support message based on this summary.`,
+});
+
+const generateTicketContentFlow = ai.defineFlow(
+  {
+    name: 'generateTicketContentFlow',
+    inputSchema: GenerateTicketContentInputSchema,
+    outputSchema: GenerateTicketContentOutputSchema,
+  },
+  async (input) => {
+    const { output } = await generateTicketContentPrompt(input);
+    if (!output) {
+      throw new Error('Failed to generate ticket content.');
+    }
+    return output;
+  }
+);

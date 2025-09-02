@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
+import { CreateTicketDialog } from '@/components/dashboard/CreateTicketDialog';
 
 
 const CountdownCell = ({ expiryDate }: { expiryDate: string }) => {
@@ -131,11 +132,7 @@ export default function MyTicketsPage() {
             <h1 className="text-3xl font-bold">My Support Tickets</h1>
             <p className="text-muted-foreground">Review your past and present support requests.</p>
         </div>
-        <Button asChild>
-            <Link href="/create-ticket">
-                <PlusCircle className="mr-2 h-4 w-4" /> Create New Ticket
-            </Link>
-        </Button>
+        <CreateTicketDialog onTicketCreated={fetchTickets} />
       </div>
       <Card>
         <CardHeader>
