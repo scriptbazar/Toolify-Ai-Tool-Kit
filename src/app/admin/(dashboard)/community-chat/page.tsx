@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2, Loader2 } from 'lucide-react';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2, Loader2, MessageSquare } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { getChatUsers } from '@/ai/flows/user-management';
@@ -18,6 +18,7 @@ import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { Logo } from '@/components/common/Logo';
+import { Switch } from '@/components/ui/switch';
 
 type Message = {
     id: string;
@@ -44,29 +45,14 @@ interface AppUser {
 
 const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) => {
     const [question, setQuestion] = useState('');
-    const [options, setOptions] = useState(['', '']);
+    const [options, setOptions] = useState(['', '', '', '']);
+    const [allowCustomOptions, setAllowCustomOptions] = useState(false);
     const { toast } = useToast();
 
     const handleOptionChange = (index: number, value: string) => {
         const newOptions = [...options];
         newOptions[index] = value;
         setOptions(newOptions);
-    };
-
-    const addOption = () => {
-        if (options.length < 5) {
-            setOptions([...options, '']);
-        } else {
-            toast({ title: "Maximum 5 options allowed.", variant: "destructive" });
-        }
-    };
-    
-    const removeOption = (index: number) => {
-        if (options.length > 2) {
-            setOptions(options.filter((_, i) => i !== index));
-        } else {
-             toast({ title: "Minimum 2 options required.", variant: "destructive" });
-        }
     };
     
     const handleCreatePoll = () => {
@@ -79,8 +65,8 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) =
         return;
       }
       // In a real app, this would save to the database.
-      console.log({ question, options });
-      onAddPoll({ question, options });
+      console.log({ question, options, allowCustomOptions });
+      onAddPoll({ question, options, allowCustomOptions });
       toast({ title: "Poll created successfully!" });
     };
 
@@ -106,13 +92,13 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) =
                     {options.map((option, index) => (
                         <div key={index} className="flex items-center gap-2">
                             <Input value={option} onChange={(e) => handleOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`}/>
-                            {options.length > 2 && <Button variant="ghost" size="icon" onClick={() => removeOption(index)}><Trash2 className="h-4 w-4"/></Button>}
                         </div>
                     ))}
                 </div>
-                <Button variant="outline" size="sm" onClick={addOption} disabled={options.length >= 5}>
-                    <PlusCircle className="mr-2 h-4 w-4"/> Add Option
-                </Button>
+                <div className="flex items-center space-x-2">
+                    <Switch id="allow-custom-options" checked={allowCustomOptions} onCheckedChange={setAllowCustomOptions} />
+                    <Label htmlFor="allow-custom-options">Allow users to add their own option</Label>
+                </div>
             </div>
              <DialogFooter>
                 <Button variant="outline" onClick={handleCreatePoll}>Save Poll</Button>
