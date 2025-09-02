@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -44,7 +43,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -82,7 +81,7 @@ const chartConfig = {
 
 export default function AdminDashboard() {
   const [recentUsers, setRecentUsers] = useState<User[]>([]);
-  const [userCounts, setUserCounts] = useState<UserCounts>({ all: 0, signup: 0, lead: 0, affiliate: 573 });
+  const [userCounts, setUserCounts] = useState<UserCounts>({ all: 0, signup: 0, lead: 0, affiliate: 0 });
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -142,14 +141,19 @@ export default function AdminDashboard() {
 
         // --- Process Stat Cards ---
         const leadsSnapshot = await getDocs(collection(db, 'leads'));
+        const affiliateQuery = query(collection(db, 'users'), where('affiliateStatus', '==', 'approved'));
+        const affiliateSnapshot = await getDocs(affiliateQuery);
+
         const signupCount = usersSnapshot.size;
         const leadCount = leadsSnapshot.size;
+        const affiliateCount = affiliateSnapshot.size;
         
         setUserCounts(prev => ({
             ...prev,
             signup: signupCount,
             lead: leadCount,
-            all: signupCount + leadCount
+            all: signupCount + leadCount,
+            affiliate: affiliateCount,
         }));
 
       } catch (error) {

@@ -235,7 +235,7 @@ export default function SiteSettingsPage() {
     { id: 'apiKeys', title: 'API Key Management', description: 'Manage third-party API keys for your application.' },
     { id: 'social', title: 'Social Media Links', description: 'Provide links to your social media profiles.' },
     { id: 'webmaster', title: 'Webmaster Tools', description: 'Add verification codes for webmaster tools.' },
-    { id: 'security', title: 'Security Settings', description: 'Manage site security features like 2FA and reCAPTCHA.' },
+    { id: 'security', title: 'Security & Utilities', description: 'Manage site security and maintenance.' },
   ];
 
   return (
@@ -428,23 +428,12 @@ export default function SiteSettingsPage() {
             </div>
         </CollapsibleSection>
 
-        <CollapsibleSection id="security" title="Security Settings" description="Manage site security features and maintenance mode." isOpen={openSection === 'security'} onToggle={handleToggle} isFullWidth={openSection === 'security'}>
+        <CollapsibleSection id="security" title="Security & Utilities" description="Manage site security and maintenance." isOpen={openSection === 'security'} onToggle={handleToggle} isFullWidth={openSection === 'security'}>
             <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex items-start justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
-                            <Label htmlFor="enableRecaptcha" className="font-medium">Enable Google reCAPTCHA</Label>
-                            <p className="text-sm text-muted-foreground">Protect your forms from spam and abuse.</p>
-                        </div>
-                        <Switch
-                            id="enableRecaptcha"
-                            checked={settings.security?.enableRecaptcha || false}
-                            onCheckedChange={(checked) => handleSecurityChange('enableRecaptcha', checked)}
-                        />
-                    </div>
-                     <div className="flex items-start justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                            <Label htmlFor="enableNewLoginAlerts" className="font-medium">Enable New Login Alerts</Label>
+                            <Label htmlFor="enableNewLoginAlerts" className="font-medium">New Login Alerts</Label>
                             <p className="text-sm text-muted-foreground">Notify users of logins from new devices.</p>
                         </div>
                         <Switch
@@ -453,97 +442,11 @@ export default function SiteSettingsPage() {
                             onCheckedChange={(checked) => handleSecurityChange('enableNewLoginAlerts', checked)}
                         />
                     </div>
-                </div>
-                
-                {settings.security?.enableRecaptcha && (
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="recaptchaSiteKey">reCAPTCHA Site Key</Label>
-                            <div className="relative">
-                               <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                               <Input id="recaptchaSiteKey" name="recaptchaSiteKey" value={settings.security?.recaptchaSiteKey || ''} onChange={(e) => handleSecurityChange('recaptchaSiteKey', e.target.value)} placeholder="Your site key" className="pl-10" />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="recaptchaSecretKey">reCAPTCHA Secret Key</Label>
-                            <div className="relative">
-                               <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                               <Input id="recaptchaSecretKey" name="recaptchaSecretKey" value={settings.security?.recaptchaSecretKey || ''} onChange={(e) => handleSecurityChange('recaptchaSecretKey', e.target.value)} placeholder="Your secret key" className="pl-10" />
-                            </div>
-                        </div>
-                    </div>
-                )}
-                <div className="space-y-2 pt-4">
-                    <Label className="text-base font-medium">Maintenance &amp; Utilities</Label>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="rounded-lg border p-4 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div className="space-y-0.5">
-                                    <Label htmlFor="maintenanceMode" className="font-medium">Enable Maintenance Mode</Label>
-                                    <p className="text-sm text-muted-foreground">Temporarily take your site offline for visitors.</p>
-                                </div>
-                                <Switch
-                                    id="maintenanceMode"
-                                    checked={settings.security?.maintenanceMode || false}
-                                    onCheckedChange={(checked) => handleSecurityChange('maintenanceMode', checked)}
-                                />
-                            </div>
-                            {settings.security?.maintenanceMode && (
-                                <div className="space-y-4 pt-4 border-t">
-                                     <div className="space-y-2">
-                                        <Label htmlFor="maintenanceModeMessage">Maintenance Message</Label>
-                                        <Textarea
-                                            id="maintenanceModeMessage"
-                                            placeholder="e.g., We'll be back online shortly!"
-                                            value={settings.security?.maintenanceModeMessage || ''}
-                                            onChange={(e) => handleSecurityChange('maintenanceModeMessage', e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="maintenanceModeUntil">Ends At (Optional)</Label>
-                                         <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    className={cn(
-                                                        "w-full justify-start text-left font-normal",
-                                                        !settings.security?.maintenanceModeUntil && "text-muted-foreground"
-                                                    )}
-                                                >
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {settings.security?.maintenanceModeUntil ? format(settings.security.maintenanceModeUntil, "PPP") : <span>Pick a date</span>}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0">
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={settings.security?.maintenanceModeUntil}
-                                                    onSelect={(date) => handleSecurityChange('maintenanceModeUntil', date)}
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                         <div className="space-y-4 rounded-lg border p-4">
-                            <Label className="font-medium">Site Utilities</Label>
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <Button variant="outline" type="button" onClick={() => handleUtilityClick('Clear Cache')}><Eraser className="mr-2 h-4 w-4" />Clear Cache</Button>
-                                <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Sitemap')}><FileCode className="mr-2 h-4 w-4" />Generate sitemap.xml</Button>
-                                <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Robots.txt')}><FileText className="mr-2 h-4 w-4" />Generate robots.txt</Button>
-                             </div>
-                         </div>
-                     </div>
-                </div>
-                 <div className="space-y-2 pt-4">
-                    <Label className="text-base font-medium">Ad Blocker Detection</Label>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
+                     <div className="flex items-start justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
-                            <Label htmlFor="adBlockerDetection" className="font-medium">Enable Ad Blocker Detection</Label>
+                            <Label htmlFor="adBlockerDetection" className="font-medium">Ad Blocker Detection</Label>
                             <p className="text-sm text-muted-foreground">
-                                Show a popup to free users with an ad blocker, asking them to disable it.
+                                Ask free users to disable their ad blocker.
                             </p>
                         </div>
                         <Switch
@@ -553,6 +456,81 @@ export default function SiteSettingsPage() {
                         />
                     </div>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="rounded-lg border p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label htmlFor="maintenanceMode" className="font-medium">Maintenance Mode</Label>
+                                <p className="text-sm text-muted-foreground">Take site offline for visitors.</p>
+                            </div>
+                            <Switch
+                                id="maintenanceMode"
+                                checked={settings.security?.maintenanceMode || false}
+                                onCheckedChange={(checked) => handleSecurityChange('maintenanceMode', checked)}
+                            />
+                        </div>
+                        {settings.security?.maintenanceMode && (
+                            <div className="space-y-4 pt-4 border-t">
+                                 <div className="space-y-2">
+                                    <Label htmlFor="maintenanceModeMessage">Maintenance Message</Label>
+                                    <Textarea
+                                        id="maintenanceModeMessage"
+                                        placeholder="e.g., We'll be back online shortly!"
+                                        value={settings.security?.maintenanceModeMessage || ''}
+                                        onChange={(e) => handleSecurityChange('maintenanceModeMessage', e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="maintenanceModeUntil">Ends At (Optional)</Label>
+                                     <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal",
+                                                    !settings.security?.maintenanceModeUntil && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {settings.security?.maintenanceModeUntil ? format(settings.security.maintenanceModeUntil, "PPP") : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={settings.security?.maintenanceModeUntil}
+                                                onSelect={(date) => handleSecurityChange('maintenanceModeUntil', date)}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                     <div className="flex items-start justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="enableRecaptcha" className="font-medium">Google reCAPTCHA</Label>
+                            <p className="text-sm text-muted-foreground">Protect your forms from spam and abuse.</p>
+                        </div>
+                        <Switch
+                            id="enableRecaptcha"
+                            checked={settings.security?.enableRecaptcha || false}
+                            onCheckedChange={(checked) => handleSecurityChange('enableRecaptcha', checked)}
+                        />
+                    </div>
+                </div>
+                 <div className="col-span-1 md:col-span-2">
+                    <div className="space-y-4 rounded-lg border p-4">
+                        <Label className="font-medium">Site Utilities</Label>
+                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            <Button variant="outline" type="button" onClick={() => handleUtilityClick('Clear Cache')}><Eraser className="mr-2 h-4 w-4" />Clear Cache</Button>
+                            <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Sitemap')}><FileCode className="mr-2 h-4 w-4" />Generate sitemap.xml</Button>
+                            <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Robots.txt')}><FileText className="mr-2 h-4 w-4" />Generate robots.txt</Button>
+                         </div>
+                     </div>
+                 </div>
             </div>
         </CollapsibleSection>
       </div>

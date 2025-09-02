@@ -133,7 +133,7 @@ export default function AdminLayout({
           <Logo className="h-16 w-16 animate-pulse" />
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
-            <p className="text-lg">Loading...</p>
+            <p className="text-lg">Loading Admin Panel...</p>
           </div>
         </div>
     );
@@ -280,11 +280,19 @@ export default function AdminLayout({
         </nav>
       </ScrollArea>
       <div className="mt-auto p-4 border-t">
-          <Button variant="destructive" onClick={handleLogout} className="w-full justify-center">
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
-        </div>
+        <div className="grid grid-cols-2 gap-2">
+            <Button asChild className="w-full justify-center" variant="outline">
+              <Link href="/admin/profile">
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
+            </Button>
+            <Button variant="destructive" onClick={handleLogout} className="w-full justify-center">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
+      </div>
     </>
   );
 
