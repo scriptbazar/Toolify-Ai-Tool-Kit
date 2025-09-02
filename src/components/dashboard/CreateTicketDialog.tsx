@@ -257,7 +257,7 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
                                 Briefly summarize your problem below, and our AI can help you write a clear, detailed message for our support team.
                             </AlertDescription>
                         </Alert>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                              <FormField control={form.control} name="problemSummary" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Problem Summary (for AI)</FormLabel>
@@ -271,41 +271,41 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
                                     <FormMessage />
                                 </FormItem>
                             )}/>
-                            <FormField control={form.control} name="message" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Describe your issue</FormLabel>
-                                    <FormControl><Textarea {...field} placeholder="Please provide as much detail as possible..." className="min-h-[150px]"/></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}/>
-                        </div>
-
-                         <div className="space-y-2">
-                            <FormLabel>Attachments</FormLabel>
-                             <div className="rounded-lg border border-dashed border-input p-4">
-                                <div className="flex flex-wrap items-center gap-4">
-                                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
-                                        <UploadCloud className="mr-2 h-4 w-4"/>
-                                        Attach Files
-                                    </Button>
-                                    <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 2MB each.</p>
-                                </div>
-                                <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" />
-                                {attachments.length > 0 && (
-                                    <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                                        {attachments.map((file, index) => (
-                                            <div key={index} className="relative group flex items-center p-2 bg-muted rounded-md text-sm">
-                                                <Paperclip className="h-4 w-4 mr-2 shrink-0" />
-                                                <span className="truncate">{file.name}</span>
-                                                <Button type="button" variant="ghost" size="icon" onClick={() => removeAttachment(index)} className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <X className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        ))}
+                            <div className="space-y-2">
+                                <FormLabel>Attachments</FormLabel>
+                                <div className="rounded-lg border border-dashed border-input p-4">
+                                    <div className="flex items-center gap-4">
+                                        <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                                            <UploadCloud className="mr-2 h-4 w-4"/>
+                                            Attach Files
+                                        </Button>
+                                        <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 2MB each.</p>
                                     </div>
-                                )}
+                                    <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" />
+                                    {attachments.length > 0 && (
+                                        <div className="mt-4 grid grid-cols-1 gap-2">
+                                            {attachments.map((file, index) => (
+                                                <div key={index} className="relative group flex items-center p-2 bg-muted rounded-md text-sm">
+                                                    <Paperclip className="h-4 w-4 mr-2 shrink-0" />
+                                                    <span className="truncate">{file.name}</span>
+                                                    <Button type="button" variant="ghost" size="icon" onClick={() => removeAttachment(index)} className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
+
+                        <FormField control={form.control} name="message" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Describe your issue</FormLabel>
+                                <FormControl><Textarea {...field} placeholder="Please provide as much detail as possible..." className="min-h-[150px]"/></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
 
                         <DialogFooter className="sticky bottom-0 bg-background pt-4">
                             <DialogClose asChild><Button type="button" variant="ghost">Cancel</Button></DialogClose>
