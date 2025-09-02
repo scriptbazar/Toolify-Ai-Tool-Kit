@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Check, ArrowRight, HelpCircle, Code, Palette, Database, UserCog } from 'lucide-react';
+import { Check, ArrowRight, HelpCircle, Code, Palette, Database, UserCog, Settings, CreditCard, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { getSettings } from '@/ai/flows/settings-management';
