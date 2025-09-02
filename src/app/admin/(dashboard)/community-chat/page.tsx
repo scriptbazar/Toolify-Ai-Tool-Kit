@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useRef, type FormEvent, useEffect } from 'react';
@@ -416,11 +417,11 @@ export default function CommunityChatPage() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent>
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => toast({ title: "Reply coming soon!" })}>
                                             <MessageSquareReply className="mr-2 h-4 w-4" />
                                             Reply
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => toast({ title: "Reactions coming soon!" })}>
                                             <Smile className="mr-2 h-4 w-4" />
                                             React
                                         </DropdownMenuItem>
