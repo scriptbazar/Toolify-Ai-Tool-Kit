@@ -18,7 +18,7 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Sparkles, CheckCircle, XCircle, Package, MoreHorizontal, Edit, PlusCircle, List, ListChecks, ListX, Sparkle } from 'lucide-react';
+import { Search, Star, Sparkles, CheckCircle, XCircle, Package, MoreHorizontal, Edit, PlusCircle, List, ListChecks, ListX, Sparkle, LayoutGrid } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -207,13 +207,23 @@ export default function AdminToolsPage() {
                 </div>
                 <Select value={selectedCategory} onValueChange={handleCategoryChange}>
                     <SelectTrigger className="w-full sm:w-auto h-10">
-                    <SelectValue placeholder="All Categories" />
+                        <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {toolCategories.map(cat => (
-                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                    ))}
+                        <SelectItem value="all">
+                            <div className="flex items-center gap-2">
+                                <LayoutGrid className="h-4 w-4" />
+                                All Categories
+                            </div>
+                        </SelectItem>
+                        {toolCategories.map(cat => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                                <div className="flex items-center gap-2">
+                                    <cat.Icon className="h-4 w-4" />
+                                    {cat.name}
+                                </div>
+                            </SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </div>
