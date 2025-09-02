@@ -74,7 +74,7 @@ const faqs = [
 export default function ContactUsPage() {
   return (
     <div className="container mx-auto px-4 py-12 md:py-20 space-y-8">
-      <Card className="max-w-4xl mx-auto">
+      <Card>
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-2 text-2xl">
             <Mail className="h-6 w-6" />
@@ -107,7 +107,7 @@ export default function ContactUsPage() {
         </CardContent>
       </Card>
       
-      <Card className="max-w-4xl mx-auto">
+      <Card>
         <CardHeader>
              <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
                 <HelpCircle className="h-6 w-6" />
