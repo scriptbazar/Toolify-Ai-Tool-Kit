@@ -86,7 +86,7 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
   const [ticketSubmitted, setTicketSubmitted] = useState(false);
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
   const [attachments, setAttachments] = useState<File[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -156,7 +156,7 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
   const onSubmit: SubmitHandler<TicketFormValues> = async (data) => {
     if (!user || !userData) return;
     
-    setIsUploading(true);
+    setIsSubmitting(true);
     let attachmentUrls: string[] = [];
     try {
         if (attachments.length > 0) {
@@ -173,7 +173,7 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
         expires.setDate(expires.getDate() + 15);
         setExpiryDate(expires);
 
-        await createTicket({
+        const result = await createTicket({
             ticketId,
             subject: data.subject,
             priority: data.priority,
@@ -184,6 +184,10 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
             expiresAt: expires.toISOString(),
             attachments: attachmentUrls,
         });
+
+        if (!result.success) {
+            throw new Error(result.message);
+        }
         
         await sendSupportTicketConfirmationEmail({
             to: user.email!,
@@ -195,19 +199,36 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
     } catch (error: any) {
         toast({ title: 'Submission Failed', description: error.message, variant: 'destructive' });
     } finally {
-        setIsUploading(false);
+        setIsSubmitting(false);
     }
   };
+  
+  const handleCloseAndRefresh = () => {
+    onTicketCreated(user!.uid);
+    setIsDialogOpen(false);
+    // Reset state after a short delay to allow dialog to close
+    setTimeout(() => {
+        setTicketSubmitted(false);
+        setExpiryDate(null);
+        setAttachments([]);
+        form.reset();
+    }, 300);
+  }
   
   const handleOpenChange = (open: boolean) => {
     setIsDialogOpen(open);
     if (!open) {
-      setTicketSubmitted(false);
-      setExpiryDate(null);
-      setAttachments([]);
-      form.reset();
+        // If ticket was submitted, refresh list. Otherwise, just reset form.
+        if (ticketSubmitted && user) {
+            onTicketCreated(user.uid);
+        }
+        setTicketSubmitted(false);
+        setExpiryDate(null);
+        setAttachments([]);
+        form.reset();
     }
   }
+
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
@@ -309,8 +330,8 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
 
                         <DialogFooter className="sticky bottom-0 bg-background pt-4">
                             <DialogClose asChild><Button type="button" variant="ghost">Cancel</Button></DialogClose>
-                            <Button type="submit" disabled={form.formState.isSubmitting || isUploading}>
-                                {form.formState.isSubmitting || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                                 Submit Ticket
                             </Button>
                         </DialogFooter>
@@ -325,7 +346,7 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
                     Thank you for contacting support. We have received your ticket and a confirmation email has been sent. Our team will get back to you shortly.
                 </p>
                 {expiryDate && <CountdownTimer expiryDate={expiryDate} />}
-                 <Button onClick={() => { onTicketCreated(user!.uid); handleOpenChange(false); }}>Close</Button>
+                 <Button onClick={handleCloseAndRefresh}>Close</Button>
             </div>
         )}
       </DialogContent>

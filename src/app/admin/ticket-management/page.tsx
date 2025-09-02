@@ -204,6 +204,9 @@ export default function TicketManagementPage() {
                   className="pl-9 w-full sm:w-auto"
                 />
               </div>
+                <Button onClick={fetchTickets} variant="outline" size="icon" disabled={loading}>
+                    <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+                </Button>
             </div>
           </div>
 
@@ -276,6 +279,26 @@ export default function TicketManagementPage() {
                                                         </ScrollArea>
                                                     </CardContent>
                                                 </Card>
+                                                <Card>
+                                                    <CardHeader><CardTitle>Add a Reply</CardTitle></CardHeader>
+                                                    <CardContent>
+                                                        <form onSubmit={handleReply} className="flex flex-col gap-2">
+                                                            <Textarea 
+                                                                placeholder="Type your reply here..." 
+                                                                className="flex-1"
+                                                                value={replyText}
+                                                                onChange={(e) => setReplyText(e.target.value)}
+                                                            />
+                                                            <div className="flex justify-between items-center gap-2">
+                                                                <Button type="button" variant="outline" size="icon"><Paperclip className="h-4 w-4"/></Button>
+                                                                <Button type="submit" disabled={isReplying || !replyText.trim()}>
+                                                                    {isReplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
+                                                                    Reply
+                                                                </Button>
+                                                            </div>
+                                                        </form>
+                                                    </CardContent>
+                                                </Card>
                                             </div>
                                             <div className="lg:col-span-1 flex flex-col space-y-6">
                                                 <Card>
@@ -332,26 +355,6 @@ export default function TicketManagementPage() {
                                                         </Button>
                                                     </CardContent>
                                                 </Card>
-                                               <Card className="flex flex-col flex-1">
-                                                    <CardHeader><CardTitle>Add a Reply</CardTitle></CardHeader>
-                                                    <CardContent className="flex-1 flex flex-col">
-                                                        <form onSubmit={handleReply} className="flex-1 flex flex-col gap-2">
-                                                            <Textarea 
-                                                                placeholder="Type your reply here..." 
-                                                                className="flex-1"
-                                                                value={replyText}
-                                                                onChange={(e) => setReplyText(e.target.value)}
-                                                            />
-                                                            <div className="flex justify-between items-center gap-2">
-                                                                <Button type="button" variant="outline" size="icon"><Paperclip className="h-4 w-4"/></Button>
-                                                                <Button type="submit" disabled={isReplying || !replyText.trim()}>
-                                                                    {isReplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
-                                                                    Reply
-                                                                </Button>
-                                                            </div>
-                                                        </form>
-                                                    </CardContent>
-                                                </Card>
                                             </div>
                                         </div>
                                        </>
@@ -376,5 +379,3 @@ export default function TicketManagementPage() {
     </div>
   );
 }
-
-    
