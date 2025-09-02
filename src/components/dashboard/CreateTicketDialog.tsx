@@ -268,33 +268,31 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
                             )}/>
                         </div>
 
-                         <div>
+                         <div className="space-y-2">
                             <FormLabel>Attachments</FormLabel>
-                            <div className="mt-2 flex justify-center rounded-lg border border-dashed border-input px-6 py-10 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                                <div className="text-center">
-                                    <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
-                                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                                        <p className="pl-1">Click to upload files</p>
-                                    </div>
-                                    <p className="text-xs leading-5 text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                             <div className="rounded-lg border border-dashed border-input p-4">
+                                <div className="flex items-center gap-4">
+                                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                                        <UploadCloud className="mr-2 h-4 w-4"/>
+                                        Attach Files
+                                    </Button>
+                                    <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB each.</p>
                                 </div>
-                            </div>
-                            <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" />
-                            {attachments.length > 0 && (
-                                <div className="mt-4 space-y-2">
-                                    {attachments.map((file, index) => (
-                                        <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md text-sm">
-                                            <div className="flex items-center gap-2 truncate">
-                                                <Paperclip className="h-4 w-4" />
+                                <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" />
+                                {attachments.length > 0 && (
+                                    <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                        {attachments.map((file, index) => (
+                                            <div key={index} className="relative group flex items-center p-2 bg-muted rounded-md text-sm">
+                                                <Paperclip className="h-4 w-4 mr-2 shrink-0" />
                                                 <span className="truncate">{file.name}</span>
+                                                <Button type="button" variant="ghost" size="icon" onClick={() => removeAttachment(index)} className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <X className="h-4 w-4" />
+                                                </Button>
                                             </div>
-                                            <Button type="button" variant="ghost" size="icon" onClick={() => removeAttachment(index)}>
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <DialogFooter className="sticky bottom-0 bg-background pt-4">
