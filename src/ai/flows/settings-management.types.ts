@@ -74,6 +74,7 @@ export const SecuritySettingsSchema = z.object({
     maintenanceModeMessage: z.string().optional(),
     maintenanceModeUntil: z.date().optional(),
     enableNewLoginAlerts: z.boolean().default(true),
+    enableAdBlockerDetection: z.boolean().default(false),
 });
 export type SecuritySettings = z.infer<typeof SecuritySettingsSchema>;
 

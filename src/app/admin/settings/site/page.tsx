@@ -21,6 +21,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
+import { AdBlockerDetector } from '@/components/common/AdBlockerDetector';
 
 export const runtime = 'nodejs';
 
@@ -535,6 +536,22 @@ export default function SiteSettingsPage() {
                              </div>
                          </div>
                      </div>
+                </div>
+                 <div className="space-y-2 pt-4">
+                    <Label className="text-base font-medium">Ad Blocker Detection</Label>
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="adBlockerDetection" className="font-medium">Enable Ad Blocker Detection</Label>
+                            <p className="text-sm text-muted-foreground">
+                                Show a popup to free users with an ad blocker, asking them to disable it.
+                            </p>
+                        </div>
+                        <Switch
+                            id="adBlockerDetection"
+                            checked={settings.security?.enableAdBlockerDetection || false}
+                            onCheckedChange={(checked) => handleSecurityChange('enableAdBlockerDetection', checked)}
+                        />
+                    </div>
                 </div>
             </div>
         </CollapsibleSection>

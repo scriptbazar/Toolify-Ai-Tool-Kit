@@ -1,5 +1,6 @@
 
 import { getTools } from '@/ai/flows/tool-management';
+import { getSettings } from '@/ai/flows/settings-management';
 import { CaseConverter } from '@/components/tools/CaseConverter';
 import { WordCounter } from '@/components/tools/WordCounter';
 import { LoremIpsumGenerator } from '@/components/tools/LoremIpsumGenerator';
@@ -13,6 +14,7 @@ import { ColorPicker } from '@/components/tools/ColorPicker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
+import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 
 
 export async function generateStaticParams() {
@@ -38,6 +40,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
 export default async function ToolPage({ params }: { params: { slug: string } }) {
   const allTools = await getTools();
   const tool = allTools.find((t) => t.slug === params.slug);
+  const settings = await getSettings();
 
   if (!tool) {
     notFound();
@@ -48,6 +51,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
+      <AdPlaceholder adSlotId="toolpage-banner-top" adSettings={settings.advertisement ?? null} className="mb-6" />
       <div className="flex flex-col lg:flex-row lg:gap-8">
         <div className="flex-1">
           <Card>
@@ -69,6 +73,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
                   </div>
                 )}
               </div>
+              <AdPlaceholder adSlotId="toolpage-in-description" adSettings={settings.advertisement ?? null} className="my-6" />
 
               {tool.slug === 'case-converter' && (
                 <div className="prose prose-sm dark:prose-invert max-w-none mt-8 pt-6 border-t">
@@ -99,7 +104,11 @@ export default async function ToolPage({ params }: { params: { slug: string } })
             </CardContent>
           </Card>
         </div>
+         <aside className="w-full lg:w-64 xl:w-80 mt-8 lg:mt-0 space-y-6">
+            <AdPlaceholder adSlotId="toolpage-sidebar" adSettings={settings.advertisement ?? null} />
+        </aside>
       </div>
+      <AdPlaceholder adSlotId="toolpage-banner-bottom" adSettings={settings.advertisement ?? null} className="mt-6" />
     </div>
   );
 }
