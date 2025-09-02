@@ -49,7 +49,7 @@ interface UserProfile {
   role: 'admin' | 'user';
   createdAt: {
       seconds: number;
-  }
+  };
 }
 
 interface UserCounts {
