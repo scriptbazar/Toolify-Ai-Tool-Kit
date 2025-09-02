@@ -135,14 +135,14 @@ export default function Header() {
                    <div className="mt-auto p-4 border-t">
                       <div className="flex flex-col gap-2">
                         {loading ? null : !user ? (
-                          <>
-                           <Button asChild variant="ghost" className="flex-1 justify-start">
+                          <div className="grid grid-cols-2 gap-2">
+                           <Button asChild variant="ghost" className="flex-1 justify-center">
                              <Link href="/login"><LogIn className="mr-2 h-4 w-4" /> Log in</Link>
                            </Button>
-                           <Button asChild className="flex-1 justify-start">
+                           <Button asChild className="flex-1 justify-center">
                              <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" /> Sign Up</Link>
                            </Button>
-                          </>
+                          </div>
                         ) : (
                           <div className="grid grid-cols-2 gap-2">
                              <Button asChild variant="secondary" className="justify-center">
