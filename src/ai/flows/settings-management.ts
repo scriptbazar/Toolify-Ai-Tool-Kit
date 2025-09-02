@@ -171,31 +171,6 @@ export async function getSettings(): Promise<AppSettings> {
 }
 
 /**
- * Performs a deep merge of `source` into `target`.
- * It's immutable, meaning it returns a new object.
- */
-function deepMerge(target: any, source: any) {
-  const isObject = (obj: any) => obj && typeof obj === 'object' && !Array.isArray(obj);
-  const result = { ...target };
-
-  if (isObject(target) && isObject(source)) {
-    Object.keys(source).forEach(key => {
-      if (isObject(source[key])) {
-        if (!(key in target)) {
-          Object.assign(result, { [key]: source[key] });
-        } else {
-          result[key] = deepMerge(target[key], source[key]);
-        }
-      } else {
-        Object.assign(result, { [key]: source[key] });
-      }
-    });
-  }
-  return result;
-}
-
-
-/**
  * Updates the application settings in Firestore and writes API keys to .env.local.
  * It performs a deep merge to only update the provided fields in Firestore.
  * @param {AppSettings} newSettings - The new settings values to save.
@@ -203,29 +178,22 @@ function deepMerge(target: any, source: any) {
  */
 export async function updateSettings(newSettings: Partial<AppSettings>): Promise<{ success: boolean; message: string }> {
   try {
-    const currentSettings = await getSettings();
-
-    // Deep merge the new settings into the current settings
-    const mergedSettings = deepMerge(currentSettings, newSettings);
-
+    const settingsToUpdate = { ...newSettings };
+    
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
     // are reset to their default (0) to prevent Zod validation errors.
-    // This must happen BEFORE parsing with Zod.
-    if (mergedSettings.referral && !mergedSettings.referral.isReferralEnabled) {
-      mergedSettings.referral.commissionRate = 0;
-      mergedSettings.referral.cookieDuration = 0;
-      mergedSettings.referral.payoutThreshold = 0;
+    if (settingsToUpdate.referral && !settingsToUpdate.referral.isReferralEnabled) {
+      settingsToUpdate.referral.commissionRate = 0;
+      settingsToUpdate.referral.cookieDuration = 0;
+      settingsToUpdate.referral.payoutThreshold = 0;
     }
-
-    const validatedSettings = AppSettingsSchema.parse(mergedSettings);
-
+    
     // Save the fully merged and validated object to Firestore
-    // Using `set` instead of `update` with `merge: true` to handle nested objects correctly
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
-    await docRef.set(validatedSettings, { merge: true });
+    await docRef.set(settingsToUpdate, { merge: true });
     
     // Handle environment variable updates separately
-    const geminiApiKey = validatedSettings.general?.apiKeys?.gemini;
+    const geminiApiKey = settingsToUpdate.general?.apiKeys?.gemini;
     if (geminiApiKey && geminiApiKey.trim() !== '') {
       const envLocalPath = path.resolve(process.cwd(), '.env.local');
       let envContent = '';
