@@ -211,7 +211,6 @@ export async function getAffiliateRequests(): Promise<ReferralRequest[]> {
   try {
     const snapshot = await adminDb.collection('users')
       .where('affiliateStatus', '==', 'pending')
-      .orderBy('referralRequestDate', 'desc')
       .get();
       
     return snapshot.docs.map(doc => {
