@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -177,6 +176,7 @@ export default function AdminLayout({
     { href: '/admin/settings/plan', icon: ListChecks, label: 'Plan Management' },
     { href: '/admin/settings/payment', icon: CreditCard, label: 'Payment Settings' },
     { href: '/admin/settings/page', icon: FileCog, label: 'Page Management' },
+    { href: '/admin/settings/affiliate', icon: GitCommitVertical, label: 'Affiliate Settings'},
   ];
 
   const isBlogRouteActive = pathname.startsWith('/admin/blog');
