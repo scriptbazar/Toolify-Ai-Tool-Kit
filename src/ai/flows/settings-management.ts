@@ -194,7 +194,7 @@ export async function updateSettings(newSettings: AppSettings): Promise<{ succes
     };
     
     // BUG FIX: If referral program is disabled, ensure related numeric values are reset to 0
-    // This prevents validation errors if the user disables the feature but leaves old values in the fields.
+    // to prevent Zod validation errors. This must happen BEFORE parsing.
     if (mergedSettings.referral && !mergedSettings.referral.isReferralEnabled) {
       mergedSettings.referral.commissionRate = 0;
       mergedSettings.referral.cookieDuration = 0;
