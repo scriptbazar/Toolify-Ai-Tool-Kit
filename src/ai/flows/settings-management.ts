@@ -180,16 +180,18 @@ export async function updateSettings(newSettings: AppSettings): Promise<{ succes
   try {
     const currentSettings = await getSettings();
 
-    const mergedSettings: AppSettings = {
-        ...currentSettings,
-        ...newSettings,
-        general: newSettings.general ? { ...currentSettings.general, ...newSettings.general } : currentSettings.general,
-        referral: newSettings.referral ? { ...currentSettings.referral, ...newSettings.referral } : currentSettings.referral,
-        advertisement: newSettings.advertisement ? { ...currentSettings.advertisement, ...newSettings.advertisement } : currentSettings.advertisement,
-        plan: newSettings.plan ? { ...currentSettings.plan, ...newSettings.plan } : currentSettings.plan,
-        payment: newSettings.payment ? { ...currentSettings.payment, ...newSettings.payment } : currentSettings.payment,
-        page: newSettings.page ? { ...currentSettings.page, ...newSettings.page } : currentSettings.page,
-    };
+    // Deep merge function to handle nested objects
+    const deepMerge = (target: any, source: any) => {
+        for (const key in source) {
+            if (source[key] instanceof Object && key in target) {
+                Object.assign(source[key], deepMerge(target[key], source[key]))
+            }
+        }
+        Object.assign(target || {}, source)
+        return target
+    }
+
+    const mergedSettings = deepMerge({ ...currentSettings }, newSettings);
     
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
     // are reset to their default (0) to prevent Zod validation errors.
