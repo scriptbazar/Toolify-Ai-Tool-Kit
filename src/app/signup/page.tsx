@@ -13,11 +13,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc, increment, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Eye, EyeOff } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
-import { trackAffiliateClick } from "@/ai/flows/user-management";
+import { trackAffiliateClick, getSettings } from "@/ai/flows/user-management";
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required." }),
@@ -92,8 +92,23 @@ export default function SignupPage() {
       const endDate = new Date();
       endDate.setFullYear(endDate.getFullYear() + 100); // Effectively "never" for free plan
 
-      // Get referrer from local storage
+      // Get referrer from local storage and update their stats
       const referrerId = localStorage.getItem('referrerId');
+      if (referrerId) {
+        const referrerRef = doc(db, "users", referrerId);
+        const settings = await getSettings(); // Fetch settings to get commission rate
+        const commissionRate = settings.referral?.commissionRate || 20;
+        
+        // In a real app, earnings would be calculated based on payments.
+        // For now, let's assume a fixed earning on signup for demonstration.
+        const earningsOnSignup = 0; // Or calculate based on plan if they sign up for paid plan directly
+
+        await updateDoc(referrerRef, {
+            affiliateReferrals: increment(1),
+            affiliateEarnings: increment(earningsOnSignup)
+        });
+      }
+
 
       // Save user data to Firestore
       await setDoc(doc(db, "users", user.uid), {

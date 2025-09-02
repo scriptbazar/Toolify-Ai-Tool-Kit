@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,8 +63,20 @@ const faqs = [
     }
 ];
 
+interface ReferredUser {
+    id: string;
+    name: string;
+    date: string;
+    status: string;
+    earnings: string;
+}
 
-const dummyReferredUsers: any[] = [];
+interface AffiliateStats {
+    clicks: number;
+    referrals: number;
+    earnings: number;
+    conversionRate: string;
+}
 
 export default function AffiliateProgramPage() {
     const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -72,6 +84,8 @@ export default function AffiliateProgramPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [referralSettings, setReferralSettings] = useState<ReferralSettings | null>(null);
     const [affiliateStatus, setAffiliateStatus] = useState<ReferralStatus>('not_joined');
+    const [stats, setStats] = useState<AffiliateStats>({ clicks: 0, referrals: 0, earnings: 0, conversionRate: '0.00%' });
+    const [referredUsers, setReferredUsers] = useState<ReferredUser[]>([]);
     const { toast } = useToast();
     
     useEffect(() => {
@@ -80,6 +94,7 @@ export default function AffiliateProgramPage() {
                 setUser(firebaseUser);
                 setLoading(true);
                 try {
+                    // Fetch settings and user data in parallel
                     const settingsPromise = getSettings();
                     const userDocPromise = getDoc(doc(db, "users", firebaseUser.uid));
                     
@@ -89,7 +104,32 @@ export default function AffiliateProgramPage() {
                     
                     if (userDocSnap.exists()) {
                         const userData = userDocSnap.data();
-                        setAffiliateStatus(userData.affiliateStatus || 'not_joined');
+                        const currentStatus = userData.affiliateStatus || 'not_joined';
+                        setAffiliateStatus(currentStatus);
+
+                        // If user is an approved affiliate, fetch their stats
+                        if (currentStatus === 'approved') {
+                            const clicks = userData.affiliateClicks || 0;
+                            const referrals = userData.affiliateReferrals || 0;
+                            const earnings = userData.affiliateEarnings || 0;
+                            const conversionRate = clicks > 0 ? ((referrals / clicks) * 100).toFixed(2) + '%' : '0.00%';
+                            setStats({ clicks, referrals, earnings, conversionRate });
+
+                            // Fetch referred users
+                            const q = query(collection(db, "users"), where("referredBy", "==", firebaseUser.uid));
+                            const referredUsersSnapshot = await getDocs(q);
+                            const fetchedReferredUsers: ReferredUser[] = referredUsersSnapshot.docs.map(doc => {
+                                const data = doc.data();
+                                return {
+                                    id: doc.id,
+                                    name: `${data.firstName} ${data.lastName}`,
+                                    date: data.createdAt.toDate().toLocaleDateString(),
+                                    status: data.planId === 'free' ? 'Free Plan' : 'Pro Plan',
+                                    earnings: '$0.00' // This would require more complex logic
+                                };
+                            });
+                            setReferredUsers(fetchedReferredUsers);
+                        }
                     }
 
                 } catch (error) {
@@ -104,6 +144,8 @@ export default function AffiliateProgramPage() {
                 }
             } else {
                 setLoading(false);
+                // Optionally redirect to login
+                // router.push('/login');
             }
         });
 
@@ -297,10 +339,10 @@ export default function AffiliateProgramPage() {
             </Card>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <StatCard title="Your Referrals" value="0" icon={Users} />
-                <StatCard title="Total Clicks" value="0" icon={MousePointerClick} />
-                <StatCard title="Conversion Rate" value="0%" icon={Percent} />
-                <StatCard title="Total Earnings" value="$0.00" icon={DollarSign} />
+                <StatCard title="Your Referrals" value={stats.referrals.toString()} icon={Users} />
+                <StatCard title="Total Clicks" value={stats.clicks.toString()} icon={MousePointerClick} />
+                <StatCard title="Conversion Rate" value={stats.conversionRate} icon={Percent} />
+                <StatCard title="Total Earnings" value={`$${stats.earnings.toFixed(2)}`} icon={DollarSign} />
             </div>
 
             <Card>
@@ -319,7 +361,7 @@ export default function AffiliateProgramPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {dummyReferredUsers.length > 0 ? dummyReferredUsers.map(ref => (
+                            {referredUsers.length > 0 ? referredUsers.map(ref => (
                                 <TableRow key={ref.id}>
                                     <TableCell>{ref.name}</TableCell>
                                     <TableCell>{ref.date}</TableCell>
