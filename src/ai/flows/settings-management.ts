@@ -176,29 +176,33 @@ export async function getSettings(): Promise<AppSettings> {
  * @param {AppSettings} newSettings - The new settings values to save.
  * @returns {Promise<{ success: boolean; message: string }>} Result of the operation.
  */
-export async function updateSettings(newSettings: AppSettings): Promise<{ success: boolean; message: string }> {
+export async function updateSettings(newSettings: Partial<AppSettings>): Promise<{ success: boolean; message: string }> {
   try {
     const currentSettings = await getSettings();
 
+    // Helper to check if a value is an object
+    const isObject = (item: any): item is Record<string, any> => {
+        return (item && typeof item === 'object' && !Array.isArray(item));
+    }
+    
     // Deep merge function to handle nested objects
-    const deepMerge = (target: any, source: any) => {
+    const deepMerge = <T extends object>(target: T, source: Partial<T>): T => {
         const output = { ...target };
+
         if (isObject(target) && isObject(source)) {
             Object.keys(source).forEach(key => {
-                if (isObject(source[key])) {
+                const sourceKey = key as keyof T;
+                if (isObject(source[sourceKey])) {
                     if (!(key in target))
-                        Object.assign(output, { [key]: source[key] });
+                        Object.assign(output, { [sourceKey]: source[sourceKey] });
                     else
-                        output[key] = deepMerge(target[key], source[key]);
+                        (output as any)[sourceKey] = deepMerge(target[sourceKey] as any, source[sourceKey] as any);
                 } else {
-                    Object.assign(output, { [key]: source[key] });
+                    Object.assign(output, { [sourceKey]: source[sourceKey] });
                 }
             });
         }
         return output;
-    }
-    const isObject = (item: any) => {
-        return (item && typeof item === 'object' && !Array.isArray(item));
     }
     
     const mergedSettings = deepMerge(currentSettings, newSettings);
@@ -258,5 +262,3 @@ export async function updateSettings(newSettings: AppSettings): Promise<{ succes
     return { success: false, message: error.message || 'An unknown error occurred while updating settings.' };
   }
 }
-
-    
