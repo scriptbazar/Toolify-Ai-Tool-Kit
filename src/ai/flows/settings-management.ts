@@ -203,12 +203,22 @@ export async function updateSettings(newSettings: AppSettings): Promise<{ succes
 
     // 3. Validate the merged data to ensure it conforms to the schema.
     const validatedSettings = AppSettingsSchema.parse(mergedSettings);
+
+    // 4. Create a clean object for Firestore to prevent 'undefined' issues.
+    const settingsToSave = {
+        general: validatedSettings.general || {},
+        referral: validatedSettings.referral || {},
+        advertisement: validatedSettings.advertisement || {},
+        plan: validatedSettings.plan || {},
+        payment: validatedSettings.payment || {},
+        page: validatedSettings.page || {},
+    };
     
-    // 4. Save the fully merged and validated settings to Firestore.
+    // 5. Save the fully merged and validated settings to Firestore.
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
-    await docRef.set(validatedSettings, { merge: true });
+    await docRef.set(settingsToSave, { merge: true });
     
-    // 5. Write API keys to .env.local if they exist
+    // 6. Write API keys to .env.local if they exist
     const geminiApiKey = validatedSettings.general?.apiKeys?.gemini;
     
     // Only write to the file if a non-empty API key is provided.
