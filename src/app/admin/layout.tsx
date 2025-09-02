@@ -33,6 +33,7 @@ import {
   User,
   Shield,
   ShieldCheck,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -129,8 +130,12 @@ export default function AdminLayout({
   
   if (loading) {
     return (
-        <div className="flex h-screen w-full items-center justify-center">
-            <p>Loading admin panel...</p>
+        <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
+          <Logo className="h-16 w-16 animate-pulse" />
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <p className="text-lg">Loading...</p>
+          </div>
         </div>
     );
   }
