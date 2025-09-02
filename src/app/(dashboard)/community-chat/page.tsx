@@ -165,8 +165,15 @@ export default function CommunityChatPage() {
             }
 
             setInput('');
-        } catch (error) {
-             toast({ title: "Error", description: "Could not send message.", variant: "destructive" });
+        } catch (error: any) {
+             console.error("Error sending message:", error);
+             toast({
+                title: "Error Sending Message",
+                description: error.code === 'permission-denied'
+                    ? "You do not have permission to send messages. Please check your Firestore security rules."
+                    : "Could not send message. Please try again.",
+                variant: "destructive",
+            });
         } finally {
             setIsSending(false);
         }

@@ -12,8 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getChatUsers } from '@/ai/flows/user-management';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
@@ -45,6 +43,47 @@ interface AppUser {
 }
 
 const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) => {
+    const [question, setQuestion] = useState('');
+    const [options, setOptions] = useState(['', '']);
+    const { toast } = useToast();
+
+    const handleOptionChange = (index: number, value: string) => {
+        const newOptions = [...options];
+        newOptions[index] = value;
+        setOptions(newOptions);
+    };
+
+    const addOption = () => {
+        if (options.length < 5) {
+            setOptions([...options, '']);
+        } else {
+            toast({ title: "Maximum 5 options allowed.", variant: "destructive" });
+        }
+    };
+    
+    const removeOption = (index: number) => {
+        if (options.length > 2) {
+            setOptions(options.filter((_, i) => i !== index));
+        } else {
+             toast({ title: "Minimum 2 options required.", variant: "destructive" });
+        }
+    };
+    
+    const handleCreatePoll = () => {
+      if (!question.trim()) {
+        toast({ title: "Poll question cannot be empty.", variant: "destructive" });
+        return;
+      }
+      if (options.some(opt => !opt.trim())) {
+        toast({ title: "All poll options must be filled.", variant: "destructive" });
+        return;
+      }
+      // In a real app, this would save to the database.
+      console.log({ question, options });
+      onAddPoll({ question, options });
+      toast({ title: "Poll created successfully!" });
+    };
+
     return (
       <Dialog>
         <DialogTrigger asChild>
@@ -54,11 +93,29 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) =
             <DialogHeader>
                 <DialogTitle>Create a New Poll</DialogTitle>
                 <DialogDesc>
-                    This feature is coming soon! You'll be able to create polls for the community.
+                    Engage the community by creating a new poll.
                 </DialogDesc>
             </DialogHeader>
+             <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                    <Label htmlFor="poll-question">Poll Question</Label>
+                    <Input id="poll-question" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="What's your favorite new feature?"/>
+                </div>
+                <div className="space-y-2">
+                    <Label>Options</Label>
+                    {options.map((option, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                            <Input value={option} onChange={(e) => handleOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`}/>
+                            {options.length > 2 && <Button variant="ghost" size="icon" onClick={() => removeOption(index)}><Trash2 className="h-4 w-4"/></Button>}
+                        </div>
+                    ))}
+                </div>
+                <Button variant="outline" size="sm" onClick={addOption} disabled={options.length >= 5}>
+                    <PlusCircle className="mr-2 h-4 w-4"/> Add Option
+                </Button>
+            </div>
              <DialogFooter>
-                <Button variant="outline" disabled>Save Poll</Button>
+                <Button variant="outline" onClick={handleCreatePoll}>Save Poll</Button>
             </DialogFooter>
         </DialogContent>
       </Dialog>
