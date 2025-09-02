@@ -192,9 +192,15 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
       mergedSettings.referral.payoutThreshold = 0;
     }
     
+    // Validate the merged object before saving to ensure data integrity
+    const validationResult = AppSettingsSchema.safeParse(mergedSettings);
+    if (!validationResult.success) {
+      throw new z.ZodError(validationResult.error.issues);
+    }
+
     // Save the fully merged and validated object to Firestore
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
-    await docRef.set(mergedSettings, { merge: true });
+    await docRef.set(validationResult.data, { merge: true }); // Use the validated data
     
     // Handle environment variable updates separately
     const geminiApiKey = mergedSettings.general?.apiKeys?.gemini;
