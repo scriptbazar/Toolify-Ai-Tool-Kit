@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Mail, ArrowRight, HelpCircle, Code, Palette, Database, UserCog, Settings, ShieldCheck, CreditCard, Wand2 } from 'lucide-react';
+import { Mail, ArrowRight, HelpCircle, Code, Palette, Database, UserCog, Settings, ShieldCheck, CreditCard, Wand2, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
