@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, Loader2, X, Image as ImageIcon, MoreHorizontal, Smile, ThumbsUp, MessageSquareReply } from 'lucide-react';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, Loader2, X, Image as ImageIcon, MoreHorizontal, Smile, MessageSquareReply, ThumbsUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
@@ -19,7 +19,7 @@ import { getChatUsers } from '@/ai/flows/user-management';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from '@/components/common/Logo';
@@ -28,6 +28,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 
+type Poll = {
+    question: string;
+    options: string[];
+    votes: { [key: string]: string[] }; // option -> userId[]
+    allowCustomOptions: boolean;
+};
+
 type Message = {
     id: string;
     fromId: string;
@@ -35,6 +42,7 @@ type Message = {
     text: string;
     type: 'user' | 'admin';
     imageUrl?: string;
+    poll?: Poll;
     timestamp: any;
 };
 
@@ -51,6 +59,68 @@ interface AppUser {
   firstName: string;
   lastName: string;
 }
+
+
+const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: FirebaseUser | null }) => {
+    const { toast } = useToast();
+
+    const handleVote = async (option: string) => {
+        if (!currentUser || !message.poll) return;
+
+        const messageRef = doc(db, 'communityChat', message.id);
+        const poll = message.poll;
+        const userId = currentUser.uid;
+
+        // Check if user has already voted for this option
+        if (poll.votes[option]?.includes(userId)) {
+            toast({ description: "You have already voted for this option." });
+            return;
+        }
+
+        // Atomically remove user's previous vote and add the new one.
+        const currentVotes = poll.votes;
+        const updates: { [key: string]: any } = {};
+        
+        // Find and remove previous vote
+        for (const opt in currentVotes) {
+            if (currentVotes[opt].includes(userId)) {
+                updates[`poll.votes.${opt}`] = arrayRemove(userId);
+            }
+        }
+
+        // Add new vote
+        updates[`poll.votes.${option}`] = arrayUnion(userId);
+
+        await updateDoc(messageRef, updates);
+        toast({ title: "Vote cast!", description: `You voted for "${option}".` });
+    };
+
+    if (!message.poll) return null;
+
+    return (
+        <div className="mt-2 space-y-2">
+            <p className="font-semibold">{message.poll.question}</p>
+            <div className="space-y-2">
+                {message.poll.options.map((option, index) => {
+                    const voteCount = message.poll!.votes[option]?.length || 0;
+                    const hasVoted = currentUser ? message.poll!.votes[option]?.includes(currentUser.uid) : false;
+                    return (
+                        <Button
+                            key={index}
+                            variant={hasVoted ? "default" : "outline"}
+                            className="w-full justify-between"
+                            onClick={() => handleVote(option)}
+                        >
+                            <span>{option}</span>
+                            <Badge variant={hasVoted ? "secondary" : "default"}>{voteCount}</Badge>
+                        </Button>
+                    );
+                })}
+            </div>
+             {/* Add Custom Option feature to be implemented here */}
+        </div>
+    );
+};
 
 
 export default function CommunityChatPage() {
@@ -177,7 +247,7 @@ export default function CommunityChatPage() {
                     text: `Welcome to the community, ${userData.firstName}! We're glad to have you here.`,
                     timestamp: Timestamp.now(),
                 };
-                setMessages(prev => [...prev, welcomeMessage]);
+                 await addDoc(collection(db, "communityChat"), welcomeMessage);
             }
         } catch (error: any) {
              console.error("Error sending message:", error);
@@ -270,6 +340,7 @@ export default function CommunityChatPage() {
                                   <Image src={msg.imageUrl} alt="chat attachment" width={200} height={200} className="rounded-md my-2" />
                               )}
                               {msg.text && <p>{msg.text}</p>}
+                              {msg.poll && <PollDisplay message={msg} currentUser={currentUser} />}
                             </div>
                             <div className={cn("opacity-0 group-hover:opacity-100 transition-opacity", msg.fromId === currentUser?.uid ? 'mr-2' : 'ml-2')}>
                                 <DropdownMenu>

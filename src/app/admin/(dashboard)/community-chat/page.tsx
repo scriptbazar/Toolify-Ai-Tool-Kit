@@ -10,18 +10,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2, Loader2, MessageSquare, X, Image as ImageIcon, MoreHorizontal, Smile, MessageSquareReply } from 'lucide-react';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2, Loader2, MessageSquare, X, Image as ImageIcon, MoreHorizontal, Smile, MessageSquareReply, ThumbsUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { getChatUsers } from '@/ai/flows/user-management';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Logo } from '@/components/common/Logo';
 import { Switch } from '@/components/ui/switch';
 import Image from 'next/image';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
+
+type Poll = {
+    question: string;
+    options: string[];
+    votes: { [key: string]: string[] }; // option -> userId[]
+    allowCustomOptions: boolean;
+};
 
 type Message = {
     id: string;
@@ -30,12 +38,10 @@ type Message = {
     text: string;
     type: 'user' | 'admin';
     imageUrl?: string;
-    poll?: {
-        question: string;
-        options: string[];
-    };
+    poll?: Poll;
     timestamp: any;
 };
+
 
 interface ChatUser {
     id: string;
@@ -51,7 +57,7 @@ interface AppUser {
   lastName: string;
 }
 
-const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) => {
+const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: Omit<Poll, 'votes'>) => void }) => {
     const [question, setQuestion] = useState('');
     const [options, setOptions] = useState(['', '']);
     const [allowCustomOptions, setAllowCustomOptions] = useState(false);
@@ -147,6 +153,35 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) =
     );
 };
 
+const PollDisplay = ({ message }: { message: Message }) => {
+    if (!message.poll) return null;
+
+    const totalVotes = Object.values(message.poll.votes).reduce((acc, votes) => acc + votes.length, 0);
+
+    return (
+        <div className="mt-2 space-y-2">
+            <p className="font-semibold">{message.poll.question}</p>
+            <div className="space-y-2">
+                {message.poll.options.map((option, index) => {
+                    const voteCount = message.poll!.votes[option]?.length || 0;
+                    const percentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
+                    return (
+                        <div key={index} className="space-y-1">
+                            <div className="flex justify-between items-center text-xs">
+                                <span>{option}</span>
+                                <span>{voteCount} votes</span>
+                            </div>
+                            <div className="w-full bg-muted rounded-full h-2.5">
+                                <div className="bg-primary h-2.5 rounded-full" style={{ width: `${percentage}%` }}></div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
 
 export default function CommunityChatPage() {
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -209,9 +244,15 @@ export default function CommunityChatPage() {
         }
     }, [messages]);
     
-    const handleAddPoll = async (pollData: any) => {
+    const handleAddPoll = async (pollData: Omit<Poll, 'votes'>) => {
         if (!currentUser) return;
         setIsSending(true);
+
+        const initialVotes: { [key: string]: string[] } = {};
+        pollData.options.forEach(option => {
+            initialVotes[option] = [];
+        });
+
         try {
             await addDoc(collection(db, "communityChat"), {
                 fromId: currentUser.uid,
@@ -219,8 +260,8 @@ export default function CommunityChatPage() {
                 text: '',
                 type: 'admin',
                 poll: {
-                    question: pollData.question,
-                    options: pollData.options,
+                    ...pollData,
+                    votes: initialVotes,
                 },
                 timestamp: serverTimestamp(),
             });
@@ -332,6 +373,7 @@ export default function CommunityChatPage() {
                                     <Image src={msg.imageUrl} alt="chat attachment" width={200} height={200} className="rounded-md my-2" />
                                 )}
                                 {msg.text && <p>{msg.text}</p>}
+                                {msg.poll && <PollDisplay message={msg} />}
                               </div>
                                <div className={cn("opacity-0 group-hover:opacity-100 transition-opacity", msg.type === 'admin' ? 'mr-2' : 'ml-2')}>
                                 <DropdownMenu>
