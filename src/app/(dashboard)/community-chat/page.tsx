@@ -150,10 +150,11 @@ export default function CommunityChatPage() {
                 type: 'user',
                 timestamp: serverTimestamp(),
             });
+            setInput('');
 
+            // After successfully sending the message, check if it was the first one
+            // and add the local welcome message.
             if (isFirstUserMessage) {
-                // This is a client-side only welcome message, it won't be saved to DB
-                // and will only be visible to the current user in their current session.
                 const welcomeMessage: Message = {
                     id: `welcome-${Date.now()}`,
                     fromId: 'bot',
@@ -162,10 +163,9 @@ export default function CommunityChatPage() {
                     text: `Welcome to the community, ${userData.firstName}! We're glad to have you here.`,
                     timestamp: Timestamp.now(),
                 };
+                // Use a functional update to ensure we're acting on the latest state
                 setMessages(prev => [...prev, welcomeMessage]);
             }
-
-            setInput('');
         } catch (error: any) {
              console.error("Error sending message:", error);
              toast({
