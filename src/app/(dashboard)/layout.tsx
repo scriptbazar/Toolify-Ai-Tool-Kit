@@ -20,6 +20,7 @@ import {
   FileText,
   Bell,
   Users as UsersIcon,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
@@ -128,8 +129,12 @@ export default function UserPanelLayout({
   
   if (loading) {
       return (
-        <div className="flex h-screen w-full items-center justify-center">
-            <p>Loading...</p>
+        <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
+          <Logo className="h-16 w-16 animate-pulse" />
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <p className="text-lg">Loading...</p>
+          </div>
         </div>
       );
   }
@@ -138,8 +143,12 @@ export default function UserPanelLayout({
     // This state can be reached if the user is being redirected.
     // Showing a loading state prevents flashing the UI before redirection is complete.
      return (
-        <div className="flex h-screen w-full items-center justify-center">
-            <p>Redirecting...</p>
+        <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
+          <Logo className="h-16 w-16 animate-pulse" />
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <p className="text-lg">Redirecting...</p>
+          </div>
         </div>
       );
   }
