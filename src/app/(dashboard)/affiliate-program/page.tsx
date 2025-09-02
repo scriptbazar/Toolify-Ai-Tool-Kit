@@ -16,19 +16,8 @@ import { getSettings } from '@/ai/flows/settings-management';
 import { type ReferralSettings, type ReferralStatus } from '@/ai/flows/settings-management.types';
 import { requestToJoinAffiliateProgram } from '@/ai/flows/user-management';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { StatCard } from '@/components/common/StatCard';
 
-
-const StatCard = ({ title, value, icon: Icon }: { title: string, value: string, icon: React.ElementType }) => (
-    <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-            <div className="text-2xl font-bold">{value}</div>
-        </CardContent>
-    </Card>
-);
 
 const faqs = [
     {
