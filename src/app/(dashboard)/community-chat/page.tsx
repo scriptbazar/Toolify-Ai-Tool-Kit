@@ -7,13 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, Loader2, X, Image as ImageIcon, MoreHorizontal, Smile, MessageSquareReply, ThumbsUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getChatUsers } from '@/ai/flows/user-management';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
@@ -31,7 +28,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 type Poll = {
     question: string;
     options: string[];
-    votes: { [key: string]: string[] }; // option -> userId[]
+    votes: { [key: string]: string[] };
     allowCustomOptions: boolean;
 };
 
@@ -67,33 +64,21 @@ const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: 
     if (!message.poll) return null;
 
     const totalVotes = message.poll.votes ? Object.values(message.poll.votes).reduce((acc, votes) => acc + votes.length, 0) : 0;
+    const userHasVoted = currentUser ? Object.values(message.poll.votes || {}).some(votes => votes.includes(currentUser.uid)) : false;
 
     const handleVote = async (option: string) => {
-        if (!currentUser || !message.poll) return;
-
-        const messageRef = doc(db, 'communityChat', message.id);
-        const poll = message.poll;
-        const userId = currentUser.uid;
-
-        // Check if user has already voted for this option
-        if (poll.votes && poll.votes[option]?.includes(userId)) {
-            toast({ description: "You have already voted for this option." });
+        if (!currentUser || !message.poll || userHasVoted) {
+            if (userHasVoted) {
+                toast({ description: "You have already voted in this poll." });
+            }
             return;
         }
 
-        // Atomically remove user's previous vote and add the new one.
-        const currentVotes = poll.votes || {};
-        const updates: { [key: string]: any } = {};
+        const messageRef = doc(db, 'communityChat', message.id);
+        const poll = message.poll;
         
-        // Find and remove previous vote
-        for (const opt in currentVotes) {
-            if (currentVotes[opt].includes(userId)) {
-                updates[`poll.votes.${opt}`] = arrayRemove(userId);
-            }
-        }
-
-        // Add new vote
-        updates[`poll.votes.${option}`] = arrayUnion(userId);
+        const updates: { [key: string]: any } = {};
+        updates[`poll.votes.${option}`] = arrayUnion(currentUser.uid);
 
         await updateDoc(messageRef, updates);
         toast({ title: "Vote cast!", description: `You voted for "${option}".` });
@@ -101,6 +86,11 @@ const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: 
 
     const handleAddOption = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (userHasVoted) {
+            toast({ description: "You have already voted in this poll." });
+            return;
+        }
+
         const formData = new FormData(e.currentTarget);
         const newOption = formData.get('newOption') as string;
         
@@ -116,7 +106,6 @@ const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: 
             [`poll.votes.${newOption.trim()}`]: arrayUnion(currentUser.uid),
         });
         
-        // Close the popover after submission
         const popoverTrigger = document.getElementById(`add-option-popover-${message.id}`);
         if (popoverTrigger) popoverTrigger.click(); 
     };
@@ -127,16 +116,17 @@ const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: 
             <div className="space-y-2">
                 {message.poll.options.map((option, index) => {
                     const voteCount = message.poll!.votes?.[option]?.length || 0;
-                    const hasVoted = currentUser ? message.poll!.votes?.[option]?.includes(currentUser.uid) : false;
+                    const hasVotedThisOption = currentUser ? message.poll!.votes?.[option]?.includes(currentUser.uid) : false;
                     return (
                         <Button
                             key={index}
-                            variant={hasVoted ? "default" : "outline"}
+                            variant={hasVotedThisOption ? "default" : "outline"}
                             className="w-full justify-between"
                             onClick={() => handleVote(option)}
+                            disabled={userHasVoted}
                         >
                             <span>{option}</span>
-                            <Badge variant={hasVoted ? "secondary" : "default"}>{voteCount}</Badge>
+                            <Badge variant={hasVotedThisOption ? "secondary" : "default"}>{voteCount}</Badge>
                         </Button>
                     );
                 })}
@@ -144,7 +134,7 @@ const PollDisplay = ({ message, currentUser }: { message: Message, currentUser: 
             {message.poll.allowCustomOptions && (
               <Popover>
                 <PopoverTrigger asChild id={`add-option-popover-${message.id}`}>
-                  <Button variant="link" className="p-0 h-auto text-sm">Add your own option</Button>
+                  <Button variant="link" className="p-0 h-auto text-sm" disabled={userHasVoted}>Add your own option</Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80">
                   <form onSubmit={handleAddOption} className="grid gap-4">

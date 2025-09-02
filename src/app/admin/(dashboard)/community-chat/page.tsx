@@ -22,12 +22,12 @@ import { Logo } from '@/components/common/Logo';
 import { Switch } from '@/components/ui/switch';
 import Image from 'next/image';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 type Poll = {
     question: string;
     options: string[];
-    votes: { [key: string]: string[] }; // option -> userId[]
+    votes: { [key: string]: string[] };
     allowCustomOptions: boolean;
 };
 
@@ -57,12 +57,14 @@ interface AppUser {
   lastName: string;
 }
 
-const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: Omit<Poll, 'votes'>) => void }) => {
+const ManagePollsDialog = ({ onAddPoll, allMessages }: { onAddPoll: (poll: Omit<Poll, 'votes'>) => void; allMessages: Message[] }) => {
     const [question, setQuestion] = useState('');
     const [options, setOptions] = useState(['', '']);
     const [allowCustomOptions, setAllowCustomOptions] = useState(false);
     const { toast } = useToast();
     const [isOpen, setIsOpen] = useState(false);
+
+    const pollMessages = useMemo(() => allMessages.filter(msg => msg.poll), [allMessages]);
 
     const handleOptionChange = (index: number, value: string) => {
         const newOptions = [...options];
@@ -103,51 +105,81 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: Omit<Poll, 'votes
       setAllowCustomOptions(false);
     };
 
+    const handlePollClick = (pollId: string) => {
+        const element = document.getElementById(`message-${pollId}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        setIsOpen(false);
+    };
+
     return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline"><Vote className="mr-2 h-4 w-4" />Create Poll</Button>
+          <Button variant="outline"><Vote className="mr-2 h-4 w-4" />Manage Polls</Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-                <DialogTitle>Create a New Poll</DialogTitle>
+                <DialogTitle>Manage Polls</DialogTitle>
                 <DialogDesc>
-                    Engage the community by creating a new poll.
+                    Create a new poll or view previous polls.
                 </DialogDesc>
             </DialogHeader>
-             <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                    <Label htmlFor="poll-question">Poll Question</Label>
-                    <Input id="poll-question" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="What's your favorite new feature?"/>
-                </div>
-                <div className="space-y-2">
-                    <Label>Options</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {options.map((option, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                            <Input value={option} onChange={(e) => handleOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`}/>
-                            {index >= 2 && (
-                                <Button variant="ghost" size="icon" onClick={() => removeOption(index)}>
-                                    <X className="h-4 w-4 text-red-500" />
+            <Tabs defaultValue="create">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="create">Create New Poll</TabsTrigger>
+                    <TabsTrigger value="view">Created Polls</TabsTrigger>
+                </TabsList>
+                <TabsContent value="create">
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="poll-question">Poll Question</Label>
+                            <Input id="poll-question" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="What's your favorite new feature?"/>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Options</Label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {options.map((option, index) => (
+                                <div key={index} className="flex items-center gap-2">
+                                    <Input value={option} onChange={(e) => handleOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`}/>
+                                    {index >= 2 && (
+                                        <Button variant="ghost" size="icon" onClick={() => removeOption(index)}>
+                                            <X className="h-4 w-4 text-red-500" />
+                                        </Button>
+                                    )}
+                                </div>
+                            ))}
+                            </div>
+                            {options.length < 4 && (
+                                <Button variant="outline" size="sm" onClick={addOption}>
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Add Option
                                 </Button>
                             )}
                         </div>
-                    ))}
+                        <div className="flex items-center space-x-2">
+                            <Switch id="allow-custom-options" checked={allowCustomOptions} onCheckedChange={setAllowCustomOptions} />
+                            <Label htmlFor="allow-custom-options">Allow users to add their own option</Label>
+                        </div>
                     </div>
-                    {options.length < 4 && (
-                        <Button variant="outline" size="sm" onClick={addOption}>
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add Option
-                        </Button>
-                    )}
-                </div>
-                <div className="flex items-center space-x-2">
-                    <Switch id="allow-custom-options" checked={allowCustomOptions} onCheckedChange={setAllowCustomOptions} />
-                    <Label htmlFor="allow-custom-options">Allow users to add their own option</Label>
-                </div>
-            </div>
-             <DialogFooter>
-                <Button variant="outline" onClick={handleCreatePoll}>Save Poll</Button>
-             </DialogFooter>
+                     <DialogFooter>
+                        <Button variant="outline" onClick={handleCreatePoll}>Save Poll</Button>
+                     </DialogFooter>
+                </TabsContent>
+                <TabsContent value="view">
+                    <ScrollArea className="h-72">
+                    <div className="space-y-2 py-4">
+                        {pollMessages.length > 0 ? pollMessages.map(msg => (
+                            <div key={msg.id} className="p-2 border rounded-md hover:bg-muted cursor-pointer" onClick={() => handlePollClick(msg.id)}>
+                                <p className="font-medium truncate">{msg.poll?.question}</p>
+                                <p className="text-xs text-muted-foreground">{new Date(msg.timestamp?.toDate()).toLocaleString()}</p>
+                            </div>
+                        )) : (
+                            <p className="text-center text-muted-foreground pt-10">No polls created yet.</p>
+                        )}
+                    </div>
+                    </ScrollArea>
+                </TabsContent>
+            </Tabs>
         </DialogContent>
       </Dialog>
     );
@@ -317,7 +349,7 @@ export default function CommunityChatPage() {
             }
             setAttachment(file);
         }
-        event.target.value = ''; // Reset file input
+        event.target.value = '';
     };
 
     const filteredUsers = useMemo(() => {
@@ -361,7 +393,7 @@ export default function CommunityChatPage() {
                <ScrollArea className="h-full max-h-[calc(100vh-30rem)] px-4" ref={scrollAreaRef}>
                   <div className="space-y-6">
                       {messages.map((msg) => (
-                          <div key={msg.id} className={cn("flex items-start gap-3 group", msg.type === 'admin' ? 'flex-row-reverse' : '')}>
+                          <div key={msg.id} id={`message-${msg.id}`} className={cn("flex items-start gap-3 group", msg.type === 'admin' ? 'flex-row-reverse' : '')}>
                               <Avatar>
                                   <AvatarFallback>
                                     {msg.fromName === 'ToolifyAI' ? <Bot /> : msg.type === 'admin' ? <Logo className="h-5 w-5" /> : msg.fromName.substring(0, 2)}
@@ -447,7 +479,7 @@ export default function CommunityChatPage() {
                            <Button variant={activeUserFilter === 'live' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('live')}>
                               <span className="flex items-center"><Wifi className="mr-2 h-4 w-4"/>Live</span>
                            </Button>
-                           <PollCreationDialog onAddPoll={handleAddPoll} />
+                           <ManagePollsDialog onAddPoll={handleAddPoll} allMessages={messages} />
                            <Button variant={activeUserFilter === 'new' ? 'default' : 'outline'} onClick={() => setActiveUserFilter('new')}>
                                <span className="flex items-center"><UserPlus className="mr-2 h-4 w-4"/>New Users</span>
                            </Button>

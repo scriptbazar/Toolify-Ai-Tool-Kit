@@ -18,6 +18,7 @@ import {
     type UpdateTicketDetailsInput
 } from './ticket-management.types';
 import { ai } from '@/ai/genkit';
+import { getStorage } from 'firebase-admin/storage';
 
 
 /**
@@ -61,6 +62,7 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
             messages: [initialMessage, automatedReply],
         });
         
+        // This part is for permanent storage of ticket media and is kept for reference
         if (attachments && attachments.length > 0) {
             const mediaBatch = adminDb.batch();
             const mediaCollection = adminDb.collection('userMedia');
@@ -90,35 +92,51 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
 
 
 /**
- * Fetches all support tickets and deletes expired ones along with their media.
+ * Fetches all support tickets and deletes expired ones along with their media from Firebase Storage.
  */
 export async function getTickets(): Promise<Ticket[]> {
     try {
         const now = new Date();
         const ticketsRef = adminDb.collection('tickets');
-        const mediaRef = adminDb.collection('userMedia');
+
+        // Get default bucket from Firebase Admin
+        const bucket = getStorage().bucket();
 
         // Delete expired tickets and their associated media
         const expiredQuery = ticketsRef.where('expiresAt', '<=', now);
         const expiredSnapshot = await expiredQuery.get();
         if (!expiredSnapshot.empty) {
             const ticketBatch = adminDb.batch();
-            const mediaBatch = adminDb.batch();
+            const deletionPromises: Promise<any>[] = [];
             
             for (const doc of expiredSnapshot.docs) {
-                // Delete the ticket document
+                // Queue the ticket document for deletion
                 ticketBatch.delete(doc.ref);
                 
-                // Find and delete associated media
-                const mediaQuery = mediaRef.where('prompt', '==', `Attachment for ticket ${doc.id}`);
-                const mediaSnapshot = await mediaQuery.get();
-                if (!mediaSnapshot.empty) {
-                    mediaSnapshot.docs.forEach(mediaDoc => mediaBatch.delete(mediaDoc.ref));
+                // Find and queue associated media for deletion from Firebase Storage
+                const ticketData = doc.data() as Ticket;
+                if (ticketData.messages) {
+                    for (const message of ticketData.messages) {
+                        if (message.attachments) {
+                            for (const url of message.attachments) {
+                                try {
+                                    const decodedUrl = decodeURIComponent(url);
+                                    const filePath = decodedUrl.split('/o/')[1].split('?')[0];
+                                    if (filePath) {
+                                        deletionPromises.push(bucket.file(filePath).delete().catch(e => console.error(`Failed to delete storage file ${filePath}:`, e.message)));
+                                    }
+                                } catch (e) {
+                                    console.error(`Could not parse or delete file from URL ${url}:`, e);
+                                }
+                            }
+                        }
+                    }
                 }
                 console.log(`Queueing deletion for expired ticket: ${doc.id} and its media.`);
             }
             
-            await Promise.all([ticketBatch.commit(), mediaBatch.commit()]);
+            // Execute all deletions
+            await Promise.all([ticketBatch.commit(), ...deletionPromises]);
         }
         
         // Fetch remaining tickets
