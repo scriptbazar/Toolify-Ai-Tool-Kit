@@ -152,6 +152,26 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
     setAttachments(prev => prev.filter((_, i) => i !== index));
   }
 
+  const uploadAttachments = async (files: File[], userId: string): Promise<string[]> => {
+    if (files.length === 0) return [];
+
+    const storage = getStorage();
+    const uploadPromises = files.map(async (file, index) => {
+      try {
+        const uniqueFileName = `${Date.now()}-${index}-${file.name}`;
+        const storageRef = ref(storage, `ticket-attachments/${userId}/${uniqueFileName}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        return await getDownloadURL(snapshot.ref);
+      } catch (uploadError) {
+        console.error(`Failed to upload ${file.name}:`, uploadError);
+        throw new Error(`Could not upload file: ${file.name}. Please check file permissions and network.`);
+      }
+    });
+
+    return Promise.all(uploadPromises);
+  };
+
+
   const onSubmit: SubmitHandler<TicketFormValues> = async (data) => {
     if (!user || !userData) {
       toast({ title: 'Authentication Error', description: 'You must be logged in to create a ticket.', variant: 'destructive' });
@@ -160,23 +180,14 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
     
     setIsSubmitting(true);
     try {
-        let attachmentUrls: string[] = [];
-        if (attachments.length > 0) {
-            const storage = getStorage();
-            const uploadPromises = attachments.map((file, index) => {
-                // Ensure unique filenames
-                const storageRef = ref(storage, `ticket-attachments/${user.uid}/${Date.now()}-${index}-${file.name}`);
-                return uploadBytes(storageRef, file).then(snapshot => getDownloadURL(snapshot.ref));
-            });
-            attachmentUrls = await Promise.all(uploadPromises);
-        }
+        const attachmentUrls = await uploadAttachments(attachments, user.uid);
 
         const ticketId = `TKT-${Date.now()}`;
         const expires = new Date();
         expires.setDate(expires.getDate() + 15);
         setExpiryDate(expires);
 
-        const result = await createTicket({
+        const ticketData = {
             ticketId,
             subject: data.subject,
             priority: data.priority,
@@ -186,7 +197,9 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
             userEmail: user.email!,
             expiresAt: expires.toISOString(),
             attachments: attachmentUrls,
-        });
+        };
+
+        const result = await createTicket(ticketData);
 
         if (!result.success) {
             throw new Error(result.message);
@@ -199,30 +212,30 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
         });
         
         setTicketSubmitted(true);
-        onTicketCreated(user.uid); // Refresh the ticket list
+        onTicketCreated(user.uid);
     } catch (error: any) {
+        console.error('Ticket submission process failed:', error);
         toast({ title: 'Submission Failed', description: error.message || 'An unknown error occurred.', variant: 'destructive' });
-        setIsSubmitting(false); // Make sure to turn off loading state on error
+        setIsSubmitting(false);
     } 
-    // We don't set setIsSubmitting(false) here because the view changes to the success screen
   };
   
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
-    // Reset state after a short delay to allow dialog to close smoothly
     setTimeout(() => {
         setTicketSubmitted(false);
         setExpiryDate(null);
         setAttachments([]);
         form.reset();
-        setIsSubmitting(false); // Reset submitting state
+        setIsSubmitting(false);
     }, 300);
   }
   
   const handleOpenChange = (open: boolean) => {
-    setIsDialogOpen(open);
     if (!open) {
        handleCloseDialog();
+    } else {
+       setIsDialogOpen(true);
     }
   }
 
@@ -276,12 +289,12 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
                             </AlertDescription>
                         </Alert>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                             <FormField control={form.control} name="problemSummary" render={({ field }) => (
+                            <FormField control={form.control} name="problemSummary" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Problem Summary (for AI)</FormLabel>
                                     <div className="flex gap-2">
                                     <FormControl><Input {...field} placeholder="e.g., PDF merger is not combining my files" /></FormControl>
-                                     <Button type="button" onClick={handleGenerate} disabled={isGenerating}>
+                                    <Button type="button" onClick={handleGenerate} disabled={isGenerating}>
                                         {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
                                         Generate
                                     </Button>
