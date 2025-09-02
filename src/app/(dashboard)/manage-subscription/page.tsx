@@ -65,6 +65,13 @@ export default function ManageSubscriptionPage() {
   
   const currentPlanId = userProfile?.planId || 'free';
 
+  const handleUpgradeClick = () => {
+    toast({
+      title: "Coming Soon!",
+      description: "Checkout functionality is not implemented yet.",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -137,7 +144,7 @@ export default function ManageSubscriptionPage() {
                             </ul>
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full" disabled={isCurrentPlan}>
+                            <Button className="w-full" disabled={isCurrentPlan} onClick={handleUpgradeClick}>
                                 {isCurrentPlan ? 'Your Current Plan' : 'Upgrade Plan'}
                             </Button>
                         </CardFooter>
