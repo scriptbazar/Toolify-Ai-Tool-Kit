@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare, AlertTriangle, Calendar as CalendarIcon, Clock, Cpu } from 'lucide-react';
+import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare, AlertTriangle, Calendar as CalendarIcon, Clock, Cpu, SlidersHorizontal, Palette, Link as LinkIcon, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
@@ -33,9 +32,10 @@ type CollapsibleSectionProps = {
   isOpen: boolean;
   onToggle: (id: string) => void;
   isFullWidth: boolean;
+  icon: React.ElementType;
 };
 
-const CollapsibleSection = ({ id, title, description, children, isOpen, onToggle, isFullWidth }: CollapsibleSectionProps) => {
+const CollapsibleSection = ({ id, title, description, children, isOpen, onToggle, isFullWidth, icon: Icon }: CollapsibleSectionProps) => {
   return (
     <Collapsible
       open={isOpen}
@@ -48,9 +48,12 @@ const CollapsibleSection = ({ id, title, description, children, isOpen, onToggle
       <Card>
         <CollapsibleTrigger asChild>
             <div className="flex w-full cursor-pointer items-center justify-between p-4">
-                <div>
-                    <CardTitle>{title}</CardTitle>
-                    <CardDescription className="mt-1">{description}</CardDescription>
+                <div className="flex items-center gap-4">
+                    <Icon className="h-6 w-6 text-primary"/>
+                    <div>
+                        <CardTitle className="text-lg">{title}</CardTitle>
+                        <CardDescription className="mt-1">{description}</CardDescription>
+                    </div>
                 </div>
                 <Button variant="ghost" size="icon">
                     {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -230,12 +233,12 @@ export default function SiteSettingsPage() {
   }
 
   const sections = [
-    { id: 'general', title: 'General Settings', description: "Update your site's title, description, etc." },
-    { id: 'branding', title: 'Branding & Contact', description: "Customize your site's appearance and contact info." },
-    { id: 'apiKeys', title: 'API Key Management', description: 'Manage third-party API keys for your application.' },
-    { id: 'social', title: 'Social Media Links', description: 'Provide links to your social media profiles.' },
-    { id: 'webmaster', title: 'Webmaster Tools', description: 'Add verification codes for webmaster tools.' },
-    { id: 'security', title: 'Security & Utilities', description: 'Manage site security and maintenance.' },
+    { id: 'general', title: 'General Settings', description: "Update your site's title, description, etc.", icon: SlidersHorizontal },
+    { id: 'branding', title: 'Branding & Contact', description: "Customize your site's appearance and contact info.", icon: Palette },
+    { id: 'apiKeys', title: 'API Key Management', description: 'Manage third-party API keys for your application.', icon: KeyRound },
+    { id: 'social', title: 'Social Media Links', description: 'Provide links to your social media profiles.', icon: LinkIcon },
+    { id: 'webmaster', title: 'Webmaster Tools', description: 'Add verification codes for webmaster tools.', icon: Globe },
+    { id: 'security', title: 'Security & Utilities', description: 'Manage site security and maintenance.', icon: ShieldCheck },
   ];
 
   return (
@@ -248,7 +251,7 @@ export default function SiteSettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         <CollapsibleSection id="general" title="General Settings" description="Update your site's title, description, etc." isOpen={openSection === 'general'} onToggle={handleToggle} isFullWidth={openSection === 'general'}>
+         <CollapsibleSection id="general" title="General Settings" description="Update your site's title, description, etc." icon={SlidersHorizontal} isOpen={openSection === 'general'} onToggle={handleToggle} isFullWidth={openSection === 'general'}>
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
@@ -274,7 +277,7 @@ export default function SiteSettingsPage() {
               </div>
          </CollapsibleSection>
 
-        <CollapsibleSection id="branding" title="Branding & Contact" description="Customize your site's appearance and contact info." isOpen={openSection === 'branding'} onToggle={handleToggle} isFullWidth={openSection === 'branding'}>
+        <CollapsibleSection id="branding" title="Branding & Contact" description="Customize your site's appearance and contact info." icon={Palette} isOpen={openSection === 'branding'} onToggle={handleToggle} isFullWidth={openSection === 'branding'}>
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                 <div className="space-y-2">
@@ -321,7 +324,7 @@ export default function SiteSettingsPage() {
             </div>
         </CollapsibleSection>
         
-        <CollapsibleSection id="apiKeys" title="API Key Management" description="Manage third-party API keys." isOpen={openSection === 'apiKeys'} onToggle={handleToggle} isFullWidth={openSection === 'apiKeys'}>
+        <CollapsibleSection id="apiKeys" title="API Key Management" description="Manage third-party API keys." icon={KeyRound} isOpen={openSection === 'apiKeys'} onToggle={handleToggle} isFullWidth={openSection === 'apiKeys'}>
             <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="gemini">Google Gemini API Key</Label>
@@ -329,12 +332,12 @@ export default function SiteSettingsPage() {
                     <Cpu className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input id="gemini" name="gemini" value={settings.apiKeys?.gemini || ''} onChange={handleApiKeyChange} placeholder="Enter your Gemini API key" className="pl-10" />
                   </div>
-                   <p className="text-sm text-muted-foreground">This key will be used for all AI-powered features. Changes may require a server restart.</p>
+                   <p className="text-sm text-muted-foreground">This key will be used for all AI-powered features. Changes may require a server restart to take effect.</p>
               </div>
             </div>
         </CollapsibleSection>
 
-        <CollapsibleSection id="social" title="Social Media Links" description="Provide links to your social media profiles." isOpen={openSection === 'social'} onToggle={handleToggle} isFullWidth={openSection === 'social'}>
+        <CollapsibleSection id="social" title="Social Media Links" description="Provide links to your social media profiles." icon={LinkIcon} isOpen={openSection === 'social'} onToggle={handleToggle} isFullWidth={openSection === 'social'}>
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                     <Label htmlFor="facebook">Facebook</Label>
@@ -367,7 +370,7 @@ export default function SiteSettingsPage() {
             </div>
         </CollapsibleSection>
         
-        <CollapsibleSection id="webmaster" title="Webmaster Tools" description="Add verification codes for webmaster tools." isOpen={openSection === 'webmaster'} onToggle={handleToggle} isFullWidth={openSection === 'webmaster'}>
+        <CollapsibleSection id="webmaster" title="Webmaster Tools" description="Add verification codes for webmaster tools." icon={Globe} isOpen={openSection === 'webmaster'} onToggle={handleToggle} isFullWidth={openSection === 'webmaster'}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                   <Label htmlFor="googleSearchConsole">Google Search Console</Label>
@@ -428,7 +431,7 @@ export default function SiteSettingsPage() {
             </div>
         </CollapsibleSection>
 
-        <CollapsibleSection id="security" title="Security & Utilities" description="Manage site security and maintenance." isOpen={openSection === 'security'} onToggle={handleToggle} isFullWidth={openSection === 'security'}>
+        <CollapsibleSection id="security" title="Security & Utilities" description="Manage site security and maintenance." icon={ShieldCheck} isOpen={openSection === 'security'} onToggle={handleToggle} isFullWidth={openSection === 'security'}>
             <div className="space-y-6">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex items-start justify-between rounded-lg border p-4">
