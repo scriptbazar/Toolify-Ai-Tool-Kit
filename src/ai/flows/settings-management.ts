@@ -184,7 +184,7 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
 
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
     // are reset to their default (0) to prevent Zod validation errors.
-    if (mergedSettings.referral && !mergedSettings.referral.isReferralEnabled) {
+    if (mergedSettings.referral && newSettings.referral && newSettings.referral.isReferralEnabled === false) {
       mergedSettings.referral.commissionRate = 0;
       mergedSettings.referral.cookieDuration = 0;
       mergedSettings.referral.payoutThreshold = 0;
@@ -226,3 +226,5 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
     return { success: false, message: error.message || 'An unknown error occurred while updating settings.' };
   }
 }
+
+    
