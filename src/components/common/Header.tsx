@@ -142,24 +142,18 @@ export default function Header() {
                            </Button>
                           </>
                         ) : (
-                          <>
-                            <Button asChild variant="secondary" className="justify-start">
+                          <div className="grid grid-cols-2 gap-2">
+                             <Button asChild variant="secondary" className="justify-center">
                               <Link href={dashboardHref}>
                                   {isAdmin ? <ShieldCheck className="mr-2 h-4 w-4"/> : <LayoutDashboard className="mr-2 h-4 w-4"/>}
-                                  {isAdmin ? 'Admin Panel' : 'My Dashboard'}
+                                  {isAdmin ? 'Admin' : 'Dashboard'}
                               </Link>
                             </Button>
-                            <Button asChild variant="ghost" className="justify-start">
-                               <Link href={isAdmin ? '/admin/profile' : '/profile'}>
-                                  <User className="mr-2 h-4 w-4"/>
-                                  Profile
-                               </Link>
-                            </Button>
-                            <Button variant="destructive" onClick={handleLogout} className="justify-start">
+                            <Button variant="destructive" onClick={handleLogout} className="justify-center">
                                 <LogoutIcon className="mr-2 h-4 w-4"/>
                                 Logout
                             </Button>
-                          </>
+                          </div>
                         )}
                       </div>
                   </div>
