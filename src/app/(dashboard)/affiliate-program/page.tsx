@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Copy, Users, DollarSign, MousePointerClick, Percent, Calendar, Hourglass, XCircle, Loader2, HelpCircle } from 'lucide-react';
+import { Copy, Users, DollarSign, MousePointerClick, Percent, Calendar, Hourglass, XCircle, Loader2, HelpCircle, Code, Palette, Database, UserCog } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getSettings } from '@/ai/flows/settings-management';
@@ -33,35 +33,38 @@ const StatCard = ({ title, value, icon: Icon }: { title: string, value: string, 
 const faqs = [
     {
         question: "How does the affiliate program work?",
-        answer: "Simply share your unique referral link. When someone signs up for a paid plan through your link and becomes a paying customer, you earn a commission. It's that simple!"
+        answer: "Simply share your unique referral link. When someone signs up for a paid plan through your link and becomes a paying customer, you earn a commission. It's that simple!",
+        icon: Code
     },
     {
         question: "How much can I earn?",
-        answer: "You'll earn a percentage of every payment made by the customers you refer for their first year. The more customers you refer, the more you can earn!"
+        answer: "You'll earn a percentage of every payment made by the customers you refer for their first year. The more customers you refer, the more you can earn!",
+        icon: DollarSign
     },
     {
         question: "How long does the tracking cookie last?",
-        answer: "Our tracking cookie lasts for a set number of days. If a user signs up for a paid plan within this period after clicking your link, you'll get credit for the referral."
+        answer: "Our tracking cookie lasts for a set number of days. If a user signs up for a paid plan within this period after clicking your link, you'll get credit for the referral.",
+        icon: Database
     },
     {
         question: "When and how do I get paid?",
-        answer: "Payouts are made monthly via PayPal, provided you have met the minimum payout threshold. Make sure your PayPal email is correctly set up in your profile."
+        answer: "Payouts are made monthly via PayPal, provided you have met the minimum payout threshold. Make sure your PayPal email is correctly set up in your profile.",
+        icon: Palette
     },
     {
         question: "Where can I find my referral link?",
-        answer: "Once your request to join the affiliate program is approved, your unique referral link will be available on your affiliate dashboard."
+        answer: "Once your request to join the affiliate program is approved, your unique referral link will be available on your affiliate dashboard.",
+        icon: MousePointerClick
     },
     {
         question: "How can I track my referrals and earnings?",
-        answer: "Your affiliate dashboard provides detailed statistics, including the number of clicks on your link, successful referrals, and your total earnings."
+        answer: "Your affiliate dashboard provides detailed statistics, including the number of clicks on your link, successful referrals, and your total earnings.",
+        icon: UserCog
     }
 ];
 
 
-const dummyReferredUsers = [
-    { id: '1', name: 'Alice', date: '2023-10-15', status: 'Converted', earnings: '$5.00' },
-    { id: '2', name: 'Bob', date: '2023-10-18', status: 'Clicked', earnings: '$0.00' },
-];
+const dummyReferredUsers: any[] = [];
 
 export default function AffiliateProgramPage() {
     const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -202,11 +205,18 @@ export default function AffiliateProgramPage() {
                         <HelpCircle className="h-6 w-6" />
                         Frequently Asked Questions
                       </h2>
-                      <Accordion type="single" collapsible className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-8">
+                      <Accordion type="single" collapsible className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                         {faqs.map((faq, index) => (
-                          <AccordionItem value={`item-${index}`} key={index}>
-                            <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
-                            <AccordionContent className="text-muted-foreground">
+                          <AccordionItem value={`item-${index}`} key={index} className="border-none">
+                            <AccordionTrigger className="faq-accordion-trigger">
+                               <div className="flex items-center gap-4">
+                                  <div className="p-2 bg-muted rounded-full">
+                                    <faq.icon className="h-5 w-5 text-primary" />
+                                  </div>
+                                  <span>{faq.question}</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="text-muted-foreground pl-16">
                               {faq.answer}
                             </AccordionContent>
                           </AccordionItem>
@@ -275,10 +285,10 @@ export default function AffiliateProgramPage() {
             </Card>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <StatCard title="Your Referrals" value="1" icon={Users} />
-                <StatCard title="Total Clicks" value="2" icon={MousePointerClick} />
-                <StatCard title="Conversion Rate" value="50%" icon={Percent} />
-                <StatCard title="Total Earnings" value="$5.00" icon={DollarSign} />
+                <StatCard title="Your Referrals" value="0" icon={Users} />
+                <StatCard title="Total Clicks" value="0" icon={MousePointerClick} />
+                <StatCard title="Conversion Rate" value="0%" icon={Percent} />
+                <StatCard title="Total Earnings" value="$0.00" icon={DollarSign} />
             </div>
 
             <Card>
@@ -297,14 +307,18 @@ export default function AffiliateProgramPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {dummyReferredUsers.map(ref => (
+                            {dummyReferredUsers.length > 0 ? dummyReferredUsers.map(ref => (
                                 <TableRow key={ref.id}>
                                     <TableCell>{ref.name}</TableCell>
                                     <TableCell>{ref.date}</TableCell>
                                     <TableCell>{ref.status}</TableCell>
                                     <TableCell>{ref.earnings}</TableCell>
                                 </TableRow>
-                            ))}
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center h-24">No referred users yet.</TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

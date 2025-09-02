@@ -83,4 +83,20 @@
     .animate-marquee-right-to-left {
       animation: marquee-right-to-left 60s linear infinite;
     }
+
+    .faq-accordion-trigger {
+        @apply flex w-full items-center justify-between rounded-lg bg-secondary/30 p-4 text-left font-semibold text-foreground no-underline transition-all;
+    }
+    .faq-accordion-trigger:hover {
+        @apply bg-secondary;
+    }
+    .faq-accordion-trigger[data-state=open] {
+        @apply bg-secondary;
+    }
+    .faq-accordion-trigger > svg {
+        @apply transition-transform duration-300;
+    }
+    .faq-accordion-trigger[data-state=open] > svg {
+        @apply rotate-180;
+    }
 }
