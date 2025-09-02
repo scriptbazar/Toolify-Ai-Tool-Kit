@@ -24,7 +24,7 @@ export type AdvertisementSettings = z.infer<typeof AdvertisementSettingsSchema>;
 export const ReferralSettingsSchema = z.object({
   isReferralEnabled: z.boolean().default(true),
   commissionRate: z.number().min(0).max(100).default(20),
-  cookieDuration: z.number().min(1).default(30),
+  cookieDuration: z.number().min(0).default(30),
   payoutThreshold: z.number().min(0).default(50),
   isMultiLevel: z.boolean().default(false),
   referralProgramDescription: z.string().optional(),
