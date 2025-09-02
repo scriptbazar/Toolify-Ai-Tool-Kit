@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Check, ArrowRight, Star, BadgeCheck } from 'lucide-react';
+import { Check, ArrowRight, Star, BadgeCheck, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSettings } from '@/ai/flows/settings-management';
 import type { Plan } from '@/ai/flows/settings-management.types';
@@ -15,10 +15,13 @@ import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { createStripeCheckoutSession } from '@/ai/flows/payment-management';
+import { loadStripe } from '@stripe/stripe-js';
 
 
 interface UserProfile {
   planId?: string;
+  email: string;
 }
 
 export default function ManageSubscriptionPage() {
@@ -27,6 +30,7 @@ export default function ManageSubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,11 +69,44 @@ export default function ManageSubscriptionPage() {
   
   const currentPlanId = userProfile?.planId || 'free';
 
-  const handleUpgradeClick = () => {
-    toast({
-      title: "Coming Soon!",
-      description: "Checkout functionality is not implemented yet.",
-    });
+  const handleUpgradeClick = async (plan: Plan) => {
+    if (!userProfile || !user) {
+        toast({ title: 'Error', description: 'You must be logged in to upgrade.', variant: 'destructive'});
+        return;
+    }
+    setIsProcessing(plan.id);
+    try {
+        const { sessionId, publishableKey } = await createStripeCheckoutSession({
+            planId: plan.id,
+            planName: plan.name,
+            planPrice: plan.price,
+            userId: user.uid,
+            userEmail: userProfile.email,
+        });
+
+        if (!sessionId || !publishableKey) {
+            throw new Error('Could not create a checkout session.');
+        }
+
+        const stripe = await loadStripe(publishableKey);
+        if (!stripe) {
+            throw new Error('Stripe.js failed to load.');
+        }
+
+        const { error } = await stripe.redirectToCheckout({ sessionId });
+        if (error) {
+             throw new Error(error.message);
+        }
+
+    } catch (error: any) {
+        toast({
+            title: 'Checkout Error',
+            description: error.message || 'Could not initiate the payment process. Please try again.',
+            variant: 'destructive'
+        });
+    } finally {
+        setIsProcessing(null);
+    }
   };
 
   return (
@@ -87,6 +124,7 @@ export default function ManageSubscriptionPage() {
                 id="billing-cycle"
                 checked={isYearly}
                 onCheckedChange={setIsYearly}
+                disabled
             />
             <Label htmlFor="billing-cycle" className="text-muted-foreground">
                 Yearly <span className="text-primary font-semibold">(Save 2 months)</span>
@@ -105,6 +143,7 @@ export default function ManageSubscriptionPage() {
         ) : (
             plans.map((plan) => {
                 const isCurrentPlan = plan.id === currentPlanId;
+                const isProcessingThisPlan = isProcessing === plan.id;
                 return (
                     <Card key={plan.id} className={cn(
                         'flex flex-col h-full transition-all',
@@ -144,8 +183,10 @@ export default function ManageSubscriptionPage() {
                             </ul>
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full" disabled={isCurrentPlan} onClick={handleUpgradeClick}>
-                                {isCurrentPlan ? 'Your Current Plan' : 'Upgrade Plan'}
+                            <Button className="w-full" disabled={isCurrentPlan || !!isProcessing} onClick={() => handleUpgradeClick(plan)}>
+                                {isProcessingThisPlan ? (
+                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Processing...</>
+                                ) : isCurrentPlan ? 'Your Current Plan' : 'Upgrade Plan'}
                             </Button>
                         </CardFooter>
                     </Card>
