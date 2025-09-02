@@ -180,30 +180,18 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
   try {
     const currentSettings = await getSettings();
 
-    // Create a deep copy of the current settings
-    const mergedSettings = JSON.parse(JSON.stringify(currentSettings));
+    // Deep merge the new settings into the current settings
+    const mergedSettings = {
+        ...currentSettings,
+        ...newSettings,
+        general: { ...currentSettings.general, ...newSettings.general },
+        referral: { ...currentSettings.referral, ...newSettings.referral },
+        advertisement: { ...currentSettings.advertisement, ...newSettings.advertisement },
+        plan: { ...currentSettings.plan, ...newSettings.plan },
+        payment: { ...currentSettings.payment, ...newSettings.payment },
+        page: { ...currentSettings.page, ...newSettings.page },
+    };
 
-    // Deep merge newSettings into mergedSettings
-    for (const key in newSettings) {
-        const typedKey = key as keyof AppSettings;
-        if (newSettings[typedKey] !== undefined) {
-            if (
-                typeof newSettings[typedKey] === 'object' &&
-                newSettings[typedKey] !== null &&
-                !Array.isArray(newSettings[typedKey]) &&
-                currentSettings[typedKey] &&
-                typeof currentSettings[typedKey] === 'object' &&
-                !Array.isArray(currentSettings[typedKey])
-            ) {
-                mergedSettings[typedKey] = {
-                    ...currentSettings[typedKey],
-                    ...newSettings[typedKey],
-                };
-            } else {
-                mergedSettings[typedKey] = newSettings[typedKey];
-            }
-        }
-    }
 
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
     // are reset to their default (0) to prevent Zod validation errors.
