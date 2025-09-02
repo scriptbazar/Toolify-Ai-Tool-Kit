@@ -170,26 +170,30 @@ export async function getSettings(): Promise<AppSettings> {
   }
 }
 
+/**
+ * Performs a deep merge of `source` into `target`.
+ * It's immutable, meaning it returns a new object.
+ */
 function deepMerge(target: any, source: any) {
-    const output = { ...target };
-    if (isObject(target) && isObject(source)) {
-        Object.keys(source).forEach(key => {
-            if (isObject(source[key])) {
-                if (!(key in target))
-                    Object.assign(output, { [key]: source[key] });
-                else
-                    output[key] = deepMerge(target[key], source[key]);
-            } else {
-                Object.assign(output, { [key]: source[key] });
-            }
-        });
-    }
-    return output;
+  const isObject = (obj: any) => obj && typeof obj === 'object' && !Array.isArray(obj);
+  const result = { ...target };
+
+  if (isObject(target) && isObject(source)) {
+    Object.keys(source).forEach(key => {
+      if (isObject(source[key])) {
+        if (!(key in target)) {
+          Object.assign(result, { [key]: source[key] });
+        } else {
+          result[key] = deepMerge(target[key], source[key]);
+        }
+      } else {
+        Object.assign(result, { [key]: source[key] });
+      }
+    });
+  }
+  return result;
 }
 
-function isObject(item: any) {
-    return (item && typeof item === 'object' && !Array.isArray(item));
-}
 
 /**
  * Updates the application settings in Firestore and writes API keys to .env.local.
@@ -215,20 +219,13 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
 
     const validatedSettings = AppSettingsSchema.parse(mergedSettings);
 
-    const settingsToSave = {
-        general: validatedSettings.general,
-        referral: validatedSettings.referral,
-        advertisement: validatedSettings.advertisement,
-        plan: validatedSettings.plan,
-        payment: validatedSettings.payment,
-        page: validatedSettings.page,
-    };
-    
+    // Save the fully merged and validated object to Firestore
+    // Using `set` instead of `update` with `merge: true` to handle nested objects correctly
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
-    await docRef.set(settingsToSave, { merge: true });
+    await docRef.set(validatedSettings, { merge: true });
     
+    // Handle environment variable updates separately
     const geminiApiKey = validatedSettings.general?.apiKeys?.gemini;
-    
     if (geminiApiKey && geminiApiKey.trim() !== '') {
       const envLocalPath = path.resolve(process.cwd(), '.env.local');
       let envContent = '';
