@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { LogIn, Menu, UserPlus, Home, LayoutGrid, Newspaper, Info, Mail, DollarSign, MessageSquare, User } from 'lucide-react';
+import { LogIn, Menu, UserPlus, Home, LayoutGrid, Newspaper, Info, Mail, DollarSign, MessageSquare, User, LayoutDashboard, LogOut as LogoutIcon, ShieldCheck } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname, useRouter } from 'next/navigation';
 import { Logo } from './Logo';
@@ -94,6 +94,7 @@ export default function Header() {
     router.push('/');
   };
   
+  const dashboardHref = isAdmin ? '/admin/dashboard' : '/dashboard';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -130,18 +131,35 @@ export default function Header() {
                     </nav>
                   </div>
                    <div className="mt-auto p-4 border-t">
-                      <div className="flex gap-2">
-                        {!user ? (
+                      <div className="flex flex-col gap-2">
+                        {loading ? null : !user ? (
                           <>
-                           <Button asChild variant="ghost" className="flex-1">
+                           <Button asChild variant="ghost" className="flex-1 justify-start">
                              <Link href="/login"><LogIn className="mr-2 h-4 w-4" /> Log in</Link>
                            </Button>
-                           <Button asChild className="flex-1">
+                           <Button asChild className="flex-1 justify-start">
                              <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" /> Sign Up</Link>
                            </Button>
                           </>
                         ) : (
-                           <UserNav user={user} onLogout={handleLogout} />
+                          <>
+                            <Button asChild variant="secondary" className="justify-start">
+                              <Link href={dashboardHref}>
+                                  {isAdmin ? <ShieldCheck className="mr-2 h-4 w-4"/> : <LayoutDashboard className="mr-2 h-4 w-4"/>}
+                                  {isAdmin ? 'Admin Panel' : 'My Dashboard'}
+                              </Link>
+                            </Button>
+                            <Button asChild variant="ghost" className="justify-start">
+                               <Link href={isAdmin ? '/admin/profile' : '/profile'}>
+                                  <User className="mr-2 h-4 w-4"/>
+                                  Profile
+                               </Link>
+                            </Button>
+                            <Button variant="destructive" onClick={handleLogout} className="justify-start">
+                                <LogoutIcon className="mr-2 h-4 w-4"/>
+                                Logout
+                            </Button>
+                          </>
                         )}
                       </div>
                   </div>
