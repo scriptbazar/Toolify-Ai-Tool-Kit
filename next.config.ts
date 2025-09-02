@@ -41,6 +41,23 @@ const nextConfig: NextConfig = {
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
   },
+   webpack: (config, { isServer }) => {
+    // This is a workaround for a bug in the `handlebars` package.
+    // It's used by Genkit and causes issues with the Next.js server.
+    // This can be removed once the `handlebars` package is updated.
+    config.externals.push({
+      "handlebars": "commonjs handlebars"
+    })
+    
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      // This is a workaround for a bug in the `handlebars` package.
+      // It's used by Genkit and causes issues with the Next.js server.
+      // This can be removed once the `handlebars` package is updated.
+      "handlebars": require.resolve("handlebars/dist/cjs/handlebars.js"),
+    };
+    return config;
+  },
 };
 
 export default nextConfig;
