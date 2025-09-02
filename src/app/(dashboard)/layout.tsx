@@ -150,7 +150,6 @@ export default function UserPanelLayout({
     { href: '/usage-history', label: 'Usage History', icon: History },
     { href: '/community-chat', label: 'Community Chat', icon: MessageSquare },
     { href: '/my-tickets', label: 'My Tickets', icon: Ticket },
-    { href: '/refer-a-friend', label: 'Refer a Friend', icon: GitCommitVertical },
     { href: '/manage-subscription', label: 'Manage Subscription', icon: Star },
     { href: '/payment-history', label: 'Payment History', icon: CreditCard },
     { href: '/settings', label: 'Profile Settings', icon: Settings },

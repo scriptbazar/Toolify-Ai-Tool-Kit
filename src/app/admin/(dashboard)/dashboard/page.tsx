@@ -65,7 +65,7 @@ interface UserCounts {
     all: number;
     signup: number;
     lead: number;
-    referral: number;
+    affiliate: number;
 }
 
 interface ChartData {
@@ -82,7 +82,7 @@ const chartConfig = {
 
 export default function AdminDashboard() {
   const [recentUsers, setRecentUsers] = useState<User[]>([]);
-  const [userCounts, setUserCounts] = useState<UserCounts>({ all: 0, signup: 0, lead: 0, referral: 573 });
+  const [userCounts, setUserCounts] = useState<UserCounts>({ all: 0, signup: 0, lead: 0, affiliate: 573 });
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -223,14 +223,14 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/admin/referral-management">
+        <Link href="/admin/affiliate-management">
           <Card className="hover:bg-muted/50 transition-colors">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Referral Users</CardTitle>
+              <CardTitle className="text-sm font-medium">Affiliate Users</CardTitle>
               <UserRound className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-20" /> : `+${userCounts.referral.toLocaleString()}`}</div>
+              <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-20" /> : `+${userCounts.affiliate.toLocaleString()}`}</div>
               <p className="text-xs text-muted-foreground">
                 +201 since last hour
               </p>

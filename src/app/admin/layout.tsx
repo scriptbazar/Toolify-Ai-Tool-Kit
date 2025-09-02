@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -149,7 +150,7 @@ export default function AdminLayout({
     { href: '/admin/announcement', label: 'Announcement', icon: Megaphone },
     { href: '/admin/community-chat', label: 'Community Chat', icon: MessageSquare },
     { href: '/admin/payment-history', label: 'Payment History', icon: History },
-    { href: '/admin/referral-management', label: 'Referral Management', icon: GitCommitVertical },
+    { href: '/admin/affiliate-management', label: 'Affiliate Management', icon: GitCommitVertical },
     { href: '/admin/review-management', label: 'Review Management', icon: Star },
     { href: '/admin/advertisement', label: 'Advertisement', icon: Megaphone },
     { href: '/admin/backup-restore', label: 'Backup & Restore', icon: DatabaseBackup },
