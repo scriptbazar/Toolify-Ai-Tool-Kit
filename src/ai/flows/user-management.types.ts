@@ -1,4 +1,5 @@
 
+
 /**
  * @fileOverview Types and schemas for user management flows.
  */
@@ -16,3 +17,16 @@ export const AddLeadUserInputSchema = z.object({
   message: z.string().optional().describe("The initial message from the lead."),
 });
 export type AddLeadUserInput = z.infer<typeof AddLeadUserInputSchema>;
+
+export const ReferralStatusSchema = z.enum(['not_joined', 'pending', 'approved', 'rejected']);
+export type ReferralStatus = z.infer<typeof ReferralStatusSchema>;
+
+export const ReferralRequestSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string().email(),
+    avatar: z.string().url().or(z.literal('')),
+    requestDate: z.string().datetime(),
+    status: z.literal('pending'),
+});
+export type ReferralRequest = z.infer<typeof ReferralRequestSchema>;

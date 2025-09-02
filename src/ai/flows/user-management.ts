@@ -14,7 +14,7 @@
 
 import { z } from 'zod';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput } from './user-management.types';
+import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, ReferralRequestSchema } from './user-management.types';
 import { adminDb } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 
@@ -178,4 +178,74 @@ export async function getChatUsers(): Promise<any[]> {
         console.error("Error fetching chat users:", error);
         return []; // Return empty array on error to prevent crashing the client
     }
+}
+
+
+/**
+ * Allows a user to request to join the affiliate program.
+ * Sets their affiliate status to 'pending'.
+ */
+export async function requestToJoinAffiliateProgram(userId: string): Promise<{ success: boolean; message: string }> {
+    if (!adminDb || !userId) {
+        return { success: false, message: 'Invalid user or database connection.' };
+    }
+    try {
+        const userRef = adminDb.collection('users').doc(userId);
+        await userRef.update({
+            affiliateStatus: 'pending',
+            referralRequestDate: FieldValue.serverTimestamp(),
+        });
+        return { success: true, message: 'Your request has been submitted for review.' };
+    } catch (error: any) {
+        console.error("Error submitting affiliate request:", error);
+        return { success: false, message: 'Could not submit your request. Please try again.' };
+    }
+}
+
+
+/**
+ * Fetches all users who have a 'pending' affiliate status.
+ */
+export async function getAffiliateRequests(): Promise<ReferralRequest[]> {
+  if (!adminDb) return [];
+  try {
+    const snapshot = await adminDb.collection('users')
+      .where('affiliateStatus', '==', 'pending')
+      .orderBy('referralRequestDate', 'desc')
+      .get();
+      
+    return snapshot.docs.map(doc => {
+        const data = doc.data();
+        return ReferralRequestSchema.parse({
+            id: doc.id,
+            name: `${data.firstName} ${data.lastName}`,
+            email: data.email,
+            avatar: data.avatar || '',
+            requestDate: (data.referralRequestDate as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+            status: data.affiliateStatus
+        });
+    });
+  } catch (error) {
+    console.error("Error fetching affiliate requests:", error);
+    return [];
+  }
+}
+
+/**
+ * Updates a user's affiliate status.
+ */
+export async function updateAffiliateRequestStatus(userId: string, status: 'approved' | 'rejected'): Promise<{ success: boolean; message: string }> {
+  if (!adminDb || !userId) {
+    return { success: false, message: 'Invalid user or database connection.' };
+  }
+  try {
+    const userRef = adminDb.collection('users').doc(userId);
+    await userRef.update({
+      affiliateStatus: status,
+    });
+    return { success: true, message: `User affiliate status updated to ${status}.` };
+  } catch (error: any) {
+    console.error("Error updating affiliate status:", error);
+    return { success: false, message: 'Could not update status. Please try again.' };
+  }
 }
