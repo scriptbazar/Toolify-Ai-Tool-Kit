@@ -178,10 +178,8 @@ export async function getSettings(): Promise<AppSettings> {
  */
 export async function updateSettings(newSettings: AppSettings): Promise<{ success: boolean; message: string }> {
   try {
-    // 1. Fetch the current settings from Firestore.
     const currentSettings = await getSettings();
 
-    // 2. Perform a deep merge of current settings with new settings.
     const mergedSettings: AppSettings = {
         ...currentSettings,
         ...newSettings,
@@ -193,43 +191,38 @@ export async function updateSettings(newSettings: AppSettings): Promise<{ succes
         page: newSettings.page ? { ...currentSettings.page, ...newSettings.page } : currentSettings.page,
     };
     
-    // BUG FIX: If referral program is disabled, ensure related numeric values are reset to 0
-    // to prevent Zod validation errors. This must happen BEFORE parsing.
+    // BUG FIX: If the referral program is being disabled, ensure related numeric values
+    // are reset to their default (0) to prevent Zod validation errors.
+    // This must happen BEFORE parsing with Zod.
     if (mergedSettings.referral && !mergedSettings.referral.isReferralEnabled) {
       mergedSettings.referral.commissionRate = 0;
       mergedSettings.referral.cookieDuration = 0;
       mergedSettings.referral.payoutThreshold = 0;
     }
 
-    // 3. Validate the merged data to ensure it conforms to the schema.
     const validatedSettings = AppSettingsSchema.parse(mergedSettings);
 
-    // 4. Create a clean object for Firestore to prevent 'undefined' issues.
     const settingsToSave = {
-        general: validatedSettings.general || {},
-        referral: validatedSettings.referral || {},
-        advertisement: validatedSettings.advertisement || {},
-        plan: validatedSettings.plan || {},
-        payment: validatedSettings.payment || {},
-        page: validatedSettings.page || {},
+        general: validatedSettings.general,
+        referral: validatedSettings.referral,
+        advertisement: validatedSettings.advertisement,
+        plan: validatedSettings.plan,
+        payment: validatedSettings.payment,
+        page: validatedSettings.page,
     };
     
-    // 5. Save the fully merged and validated settings to Firestore.
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
     await docRef.set(settingsToSave, { merge: true });
     
-    // 6. Write API keys to .env.local if they exist
     const geminiApiKey = validatedSettings.general?.apiKeys?.gemini;
     
-    // Only write to the file if a non-empty API key is provided.
-    // This prevents unnecessary server restarts when settings are saved without API key changes.
     if (geminiApiKey && geminiApiKey.trim() !== '') {
       const envLocalPath = path.resolve(process.cwd(), '.env.local');
       let envContent = '';
       try {
         envContent = await fs.readFile(envLocalPath, 'utf-8');
       } catch (e: any) {
-        if (e.code !== 'ENOENT') throw e; // Ignore if file doesn't exist
+        if (e.code !== 'ENOENT') throw e;
       }
 
       const key = 'GEMINI_API_KEY';
