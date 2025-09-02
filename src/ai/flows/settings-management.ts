@@ -258,3 +258,5 @@ export async function updateSettings(newSettings: AppSettings): Promise<{ succes
     return { success: false, message: error.message || 'An unknown error occurred while updating settings.' };
   }
 }
+
+    
