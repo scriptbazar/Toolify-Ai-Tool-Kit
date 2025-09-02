@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview Generates images based on text prompts using the Gemini 2.0 Flash experimental image generation model.
+ * @fileOverview Generates images based on text prompts and manages all user media.
  *
  * - generateImage - A function that takes a text prompt and returns a data URI of the generated image.
  * - getUserMedia - A function that fetches all media for a specific user.
@@ -32,7 +32,7 @@ export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
 const UserMediaSchema = z.object({
   id: z.string(),
   userId: z.string(),
-  type: z.enum(['ai-generated', 'community-chat']),
+  type: z.enum(['ai-generated', 'community-chat', 'ticket-media']),
   mediaUrl: z.string().url(),
   prompt: z.string().optional(),
   createdAt: z.string().datetime(),

@@ -6,7 +6,7 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, MessageSquare, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { Bot, MessageSquare, Image as ImageIcon, AlertCircle, Ticket } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Image from 'next/image';
 import { getUserMedia, type UserMedia } from '@/ai/flows/ai-image-generator';
@@ -66,6 +66,7 @@ export default function MyMediaPage() {
   
   const aiGeneratedMedia = media.filter(m => m.type === 'ai-generated');
   const communityMedia = media.filter(m => m.type === 'community-chat');
+  const ticketMedia = media.filter(m => m.type === 'ticket-media');
 
   return (
     <div className="space-y-6">
@@ -77,9 +78,10 @@ export default function MyMediaPage() {
       </div>
 
       <Tabs defaultValue="ai" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="ai"><Bot className="mr-2 h-4 w-4"/>AI Generated Media</TabsTrigger>
-          <TabsTrigger value="community"><MessageSquare className="mr-2 h-4 w-4"/>Community Chat Media</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="ai"><Bot className="mr-2 h-4 w-4"/>AI Generated</TabsTrigger>
+          <TabsTrigger value="community"><MessageSquare className="mr-2 h-4 w-4"/>Community Chat</TabsTrigger>
+          <TabsTrigger value="ticket"><Ticket className="mr-2 h-4 w-4"/>Ticket Media</TabsTrigger>
         </TabsList>
         <TabsContent value="ai" className="mt-6">
           <Card>
@@ -139,6 +141,37 @@ export default function MyMediaPage() {
                     <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg">
                         <ImageIcon className="w-12 h-12 text-muted-foreground mb-4" />
                         <p className="text-lg text-muted-foreground">You haven't shared any media in the chat.</p>
+                    </div>
+                )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="ticket" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ticket Media</CardTitle>
+              <CardDescription>Files you've attached to your support tickets.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Heads Up!</AlertTitle>
+                    <AlertDescription>
+                      Media attached to support tickets is deleted along with the ticket, which is 15 days after creation.
+                    </AlertDescription>
+                </Alert>
+                {loading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+                    </div>
+                ) : ticketMedia.length > 0 ? (
+                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {ticketMedia.map(item => <MediaCard key={item.id} src={item.mediaUrl} alt={item.prompt || 'Ticket attachment'} hint={item.prompt || 'ticket attachment'} />)}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg">
+                        <ImageIcon className="w-12 h-12 text-muted-foreground mb-4" />
+                        <p className="text-lg text-muted-foreground">You haven't attached any media to tickets.</p>
                     </div>
                 )}
             </CardContent>

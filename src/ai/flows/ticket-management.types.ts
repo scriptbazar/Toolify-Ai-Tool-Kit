@@ -8,6 +8,7 @@ export const TicketMessageSchema = z.object({
   avatar: z.string().url(),
   text: z.string(),
   timestamp: z.string().datetime({ offset: true }),
+  attachments: z.array(z.string().url()).optional(),
 });
 
 export const CreateTicketInputSchema = z.object({
@@ -19,6 +20,7 @@ export const CreateTicketInputSchema = z.object({
   userName: z.string(),
   userEmail: z.string().email(),
   expiresAt: z.string().datetime({ offset: true }),
+  attachments: z.array(z.string().url()).optional(),
 });
 
 export const TicketSchema = z.object({

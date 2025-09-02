@@ -137,7 +137,7 @@ export default function MyTicketsPage() {
       <Card>
         <CardHeader>
             <CardTitle>Your Ticket History</CardTitle>
-            <CardDescription>Tickets are automatically deleted after 30 days for your privacy.</CardDescription>
+            <CardDescription>Tickets are automatically deleted after 15 days for your privacy.</CardDescription>
         </CardHeader>
         <CardContent>
            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">

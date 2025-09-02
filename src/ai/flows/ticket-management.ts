@@ -25,7 +25,7 @@ import { ai } from '@/ai/genkit';
  */
 export async function createTicket(input: CreateTicketInput): Promise<{ success: boolean; message: string }> {
     try {
-        const { ticketId, subject, priority, message, userId, userName, userEmail, expiresAt } = CreateTicketInputSchema.parse(input);
+        const { ticketId, subject, priority, message, userId, userName, userEmail, expiresAt, attachments } = CreateTicketInputSchema.parse(input);
         const ticketRef = adminDb.collection('tickets').doc(ticketId);
         
         const initialMessage: TicketMessage = {
@@ -34,13 +34,14 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
             avatar: `https://i.pravatar.cc/150?u=${userEmail}`,
             text: message,
             timestamp: new Date().toISOString(),
+            attachments: attachments || [],
         };
 
         const automatedReply: TicketMessage = {
             author: 'admin',
             name: 'ToolifyAI Bot',
             avatar: 'https://i.pravatar.cc/150?u=admin-bot',
-            text: `Hello ${userName},\n\nThank you for reaching out! This is an automated confirmation that we have received your support ticket. Our team will review it and get back to you as soon as possible.\n\nYour reference ID is: ${ticketId}`,
+            text: `Hello ${userName},\n\nThank you for reaching out! This is an automated confirmation that we have received your support ticket.\n\nYour reference ID is: ${ticketId}`,
             timestamp: new Date().toISOString(),
         }
 
@@ -59,6 +60,23 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
             expiresAt: new Date(expiresAt),
             messages: [initialMessage, automatedReply],
         });
+        
+        if (attachments && attachments.length > 0) {
+            const mediaBatch = adminDb.batch();
+            const mediaCollection = adminDb.collection('userMedia');
+            attachments.forEach(url => {
+                const docRef = mediaCollection.doc(); 
+                mediaBatch.set(docRef, {
+                    userId,
+                    type: 'ticket-media',
+                    mediaUrl: url,
+                    prompt: `Attachment for ticket ${ticketId}`,
+                    createdAt: FieldValue.serverTimestamp(),
+                    expiresAt: new Date(expiresAt),
+                });
+            });
+            await mediaBatch.commit();
+        }
 
         return { success: true, message: 'Ticket created successfully.' };
     } catch (error: any) {
@@ -72,23 +90,35 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
 
 
 /**
- * Fetches all support tickets and deletes expired ones.
+ * Fetches all support tickets and deletes expired ones along with their media.
  */
 export async function getTickets(): Promise<Ticket[]> {
     try {
         const now = new Date();
         const ticketsRef = adminDb.collection('tickets');
+        const mediaRef = adminDb.collection('userMedia');
 
-        // Delete expired tickets
+        // Delete expired tickets and their associated media
         const expiredQuery = ticketsRef.where('expiresAt', '<=', now);
         const expiredSnapshot = await expiredQuery.get();
         if (!expiredSnapshot.empty) {
-            const batch = adminDb.batch();
-            expiredSnapshot.docs.forEach(doc => {
-                batch.delete(doc.ref);
-                console.log(`Deleted expired ticket: ${doc.id}`);
-            });
-            await batch.commit();
+            const ticketBatch = adminDb.batch();
+            const mediaBatch = adminDb.batch();
+            
+            for (const doc of expiredSnapshot.docs) {
+                // Delete the ticket document
+                ticketBatch.delete(doc.ref);
+                
+                // Find and delete associated media
+                const mediaQuery = mediaRef.where('prompt', '==', `Attachment for ticket ${doc.id}`);
+                const mediaSnapshot = await mediaQuery.get();
+                if (!mediaSnapshot.empty) {
+                    mediaSnapshot.docs.forEach(mediaDoc => mediaBatch.delete(mediaDoc.ref));
+                }
+                console.log(`Queueing deletion for expired ticket: ${doc.id} and its media.`);
+            }
+            
+            await Promise.all([ticketBatch.commit(), mediaBatch.commit()]);
         }
         
         // Fetch remaining tickets
@@ -107,6 +137,7 @@ export async function getTickets(): Promise<Ticket[]> {
         return [];
     }
 }
+
 
 /**
  * Fetches all tickets for a specific user.

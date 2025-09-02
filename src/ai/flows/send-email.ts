@@ -18,12 +18,6 @@ import { FieldValue } from 'firebase-admin/firestore';
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
 
-const mailgun = new Mailgun(formData);
-const mg = mailgun.client({
-  username: 'api',
-  key: process.env.MAILGUN_API_KEY || '',
-});
-
 const SENDER_EMAIL = `ToolifyAI <no-reply@${process.env.MAILGUN_DOMAIN || 'example.com'}>`;
 
 
@@ -115,24 +109,31 @@ const sendPasswordChangeEmailFlow = ai.defineFlow(
     let status: EmailLog['status'] = 'sent';
 
     try {
-        // SIMULATED: In a real app, you would uncomment the code below
-        // and replace the console.log with the mg.messages.create call.
-        // await mg.messages.create(process.env.MAILGUN_DOMAIN!, {
-        //     from: SENDER_EMAIL,
-        //     to: [to],
-        //     subject: subject,
-        //     text: body,
-        // });
-        console.log("--- SIMULATED EMAIL ---");
-        console.log(`To: ${to}`);
-        console.log(`From: ${SENDER_EMAIL}`);
-        console.log(`Subject: ${subject}`);
-        console.log(`Body: ${body}`);
-        console.log("-----------------------");
+        const mailgunApiKey = process.env.MAILGUN_API_KEY;
+        const mailgunDomain = process.env.MAILGUN_DOMAIN;
+
+        if (mailgunApiKey && mailgunDomain) {
+            const mailgun = new Mailgun(formData);
+            const mg = mailgun.client({ username: 'api', key: mailgunApiKey });
+
+            await mg.messages.create(mailgunDomain, {
+                from: SENDER_EMAIL,
+                to: [to],
+                subject: subject,
+                text: body,
+            });
+        } else {
+            console.log("--- SIMULATED EMAIL (Mailgun keys not configured) ---");
+            console.log(`To: ${to}`);
+            console.log(`From: ${SENDER_EMAIL}`);
+            console.log(`Subject: ${subject}`);
+            console.log(`Body: ${body}`);
+            console.log("-----------------------------------------------------");
+        }
         
         return { success: true, message: `Password change notification sent to ${to}.` };
     } catch (error: any) {
-        console.error("Mailgun simulation error:", error);
+        console.error("Mailgun error:", error);
         status = 'failed';
         return { success: false, message: `Failed to send email: ${error.message}` };
     } finally {
@@ -154,24 +155,32 @@ const sendSupportTicketConfirmationEmailFlow = ai.defineFlow(
         let status: EmailLog['status'] = 'sent';
         
          try {
-            // SIMULATED: In a real app, you would uncomment the code below
-            // and replace the console.log with the mg.messages.create call.
-            // await mg.messages.create(process.env.MAILGUN_DOMAIN!, {
-            //     from: SENDER_EMAIL,
-            //     to: [to],
-            //     subject: subject,
-            //     html: body, // Use html for styled emails
-            // });
-            console.log("--- SIMULATED EMAIL ---");
-            console.log(`To: ${to}`);
-            console.log(`From: ${SENDER_EMAIL}`);
-            console.log(`Subject: ${subject}`);
-            console.log(`Body (HTML): ${body}`);
-            console.log("-----------------------");
+            const mailgunApiKey = process.env.MAILGUN_API_KEY;
+            const mailgunDomain = process.env.MAILGUN_DOMAIN;
+
+            if (mailgunApiKey && mailgunDomain) {
+                const mailgun = new Mailgun(formData);
+                const mg = mailgun.client({ username: 'api', key: mailgunApiKey });
+
+                await mg.messages.create(mailgunDomain, {
+                    from: SENDER_EMAIL,
+                    to: [to],
+                    subject: subject,
+                    html: body,
+                });
+            } else {
+                console.log("--- SIMULATED EMAIL (Mailgun keys not configured) ---");
+                console.log(`To: ${to}`);
+                console.log(`From: ${SENDER_EMAIL}`);
+                console.log(`Subject: ${subject}`);
+                console.log(`Body (HTML): ${body}`);
+                console.log("-----------------------------------------------------");
+            }
 
             return { success: true, message: `Support ticket confirmation sent to ${to}.` };
-        } catch (error: any) {
-            console.error("Mailgun simulation error:", error);
+        } catch (error: any)
+          {
+            console.error("Mailgun error:", error);
             status = 'failed';
             return { success: false, message: `Failed to send email: ${error.message}` };
         } finally {
