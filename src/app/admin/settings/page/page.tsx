@@ -5,18 +5,17 @@ import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, FileText, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { Save, Loader2, FileText, ChevronDown, ChevronUp, Trash2, Info, Mail, Shield, Gavel } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { CustomPage } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +38,19 @@ const PageManagementFormSchema = z.object({
 });
 
 type PageManagementFormValues = z.infer<typeof PageManagementFormSchema>;
+
+const pageIcons: { [key: string]: React.ElementType } = {
+  'about-us': Info,
+  'contact-us': Mail,
+  'privacy-policy': Shield,
+  'terms-conditions': FileText,
+  'dmca': Gavel,
+  'default': FileText,
+};
+
+const getPageIcon = (slug: string) => {
+    return pageIcons[slug] || pageIcons.default;
+}
 
 export default function PageManagementPage() {
   const [loading, setLoading] = useState(true);
@@ -160,105 +172,108 @@ export default function PageManagementPage() {
             </Button>
         </div>
         
-        <div className="space-y-6">
-          {fields.map((field, index) => (
-            <Collapsible
-              key={field.fieldId}
-              open={openSections.includes(field.id)}
-              onOpenChange={() => handleToggle(field.id)}
-              className="space-y-2"
-            >
-              <Card>
-                <div className="flex w-full cursor-pointer items-center justify-between p-4">
-                  <CollapsibleTrigger asChild className="flex-1 text-left">
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-5 w-5" />
-                      <div>
-                        <CardTitle>{form.watch(`pages.${index}.title`) || 'New Page'}</CardTitle>
-                        <CardDescription className="mt-1">
-                          Manage the content for the /{form.watch(`pages.${index}.slug`) || '...'} page.
-                        </CardDescription>
+        <div className="space-y-4">
+          {fields.map((field, index) => {
+            const Icon = getPageIcon(form.watch(`pages.${index}.slug`));
+            return (
+              <Collapsible
+                key={field.fieldId}
+                open={openSections.includes(field.id)}
+                onOpenChange={() => handleToggle(field.id)}
+                className="space-y-2"
+              >
+                <Card>
+                  <div className="flex w-full cursor-pointer items-center justify-between p-4">
+                    <CollapsibleTrigger asChild className="flex-1 text-left">
+                      <div className="flex items-center gap-4">
+                        <Icon className="h-6 w-6 text-primary" />
+                        <div>
+                          <h3 className="text-lg font-semibold">{form.watch(`pages.${index}.title`) || 'New Page'}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Manage the content for the /{form.watch(`pages.${index}.slug`) || '...'} page.
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </CollapsibleTrigger>
-                  <div className="flex items-center gap-2">
-                     <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
-                           <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the page "{form.watch(`pages.${index}.title`)}".
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => remove(index)}>Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    <CollapsibleTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        {openSections.includes(field.id) ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                        <span className="sr-only">Toggle</span>
-                      </Button>
                     </CollapsibleTrigger>
+                    <div className="flex items-center gap-2">
+                       <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                             <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete the page "{form.watch(`pages.${index}.title`)}".
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => remove(index)}>Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          {openSections.includes(field.id) ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                          <span className="sr-only">Toggle</span>
+                        </Button>
+                      </CollapsibleTrigger>
+                    </div>
                   </div>
-                </div>
-                <CollapsibleContent>
-                  <CardContent className="border-t pt-6">
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <CollapsibleContent>
+                    <CardContent className="border-t pt-6">
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                              control={form.control}
+                              name={`pages.${index}.title`}
+                              render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Page Title</FormLabel>
+                                  <FormControl>
+                                  <Input {...field} placeholder="e.g., About Our Company" onChange={(e) => handleTitleChange(e.target.value, index)} />
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                              )}
+                          />
+                          <FormField
+                              control={form.control}
+                              name={`pages.${index}.slug`}
+                              render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Page Slug (URL)</FormLabel>
+                                  <FormControl>
+                                  <Input {...field} placeholder="e.g., about-us" />
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                              )}
+                          />
+                        </div>
                         <FormField
-                            control={form.control}
-                            name={`pages.${index}.title`}
-                            render={({ field }) => (
+                          control={form.control}
+                          name={`pages.${index}.content`}
+                          render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Page Title</FormLabel>
-                                <FormControl>
-                                <Input {...field} placeholder="e.g., About Our Company" onChange={(e) => handleTitleChange(e.target.value, index)} />
-                                </FormControl>
-                                <FormMessage />
+                              <FormLabel>Page Content</FormLabel>
+                              <FormControl>
+                                <Textarea {...field} value={field.value ?? ""} placeholder="Enter the page content here. HTML is supported." className="min-h-[250px] font-mono" />
+                              </FormControl>
+                              <FormMessage />
                             </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name={`pages.${index}.slug`}
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Page Slug (URL)</FormLabel>
-                                <FormControl>
-                                <Input {...field} placeholder="e.g., about-us" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                            )}
+                          )}
                         />
                       </div>
-                      <FormField
-                        control={form.control}
-                        name={`pages.${index}.content`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Page Content</FormLabel>
-                            <FormControl>
-                              <Textarea {...field} placeholder="Enter the page content here. HTML is supported." className="min-h-[250px] font-mono" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
-          ))}
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            )
+          })}
         </div>
         <div className="flex justify-end pt-6">
           <Button type="submit" disabled={isSaving}>
