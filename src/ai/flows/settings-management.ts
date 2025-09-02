@@ -193,6 +193,14 @@ export async function updateSettings(newSettings: AppSettings): Promise<{ succes
         page: { ...currentSettings.page, ...newSettings.page },
     };
 
+    // BUG FIX: If referral program is disabled, ensure related numeric values are reset to 0
+    // This prevents validation errors if the user disables the feature but leaves old values in the fields.
+    if (mergedSettings.referral && !mergedSettings.referral.isReferralEnabled) {
+      mergedSettings.referral.commissionRate = 0;
+      mergedSettings.referral.cookieDuration = 0;
+      mergedSettings.referral.payoutThreshold = 0;
+    }
+
     // 3. Validate the merged data to ensure it conforms to the schema.
     const validatedSettings = AppSettingsSchema.parse(mergedSettings);
     
