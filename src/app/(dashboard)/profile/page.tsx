@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -37,7 +38,10 @@ interface UserProfile {
   role: 'admin' | 'user';
   createdAt: {
       seconds: number;
-  }
+  };
+  subscriptionEndDate?: {
+      seconds: number;
+  };
 }
 
 
@@ -159,6 +163,11 @@ export default function UserProfilePage() {
             <Badge variant="outline" className="p-2 justify-center">
                 <CalendarDays className="h-4 w-4 mr-2"/>Joined {new Date(profile.createdAt.seconds * 1000).toLocaleDateString()}
             </Badge>
+             {profile.subscriptionEndDate && (
+                 <Badge variant="outline" className="p-2 justify-center">
+                    <CalendarDays className="h-4 w-4 mr-2"/>Plan expires on {new Date(profile.subscriptionEndDate.seconds * 1000).toLocaleDateString()}
+                </Badge>
+             )}
         </div>
         </CardContent>
       </Card>

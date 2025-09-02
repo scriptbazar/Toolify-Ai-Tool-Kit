@@ -126,9 +126,8 @@ export default function PlanManagementPage() {
             userSnapshots.forEach(snapshot => {
                 snapshot.docs.forEach(doc => {
                     const data = doc.data();
-                    const subscribedAtDate = data.createdAt?.toDate ? data.createdAt.toDate() : new Date();
-                    const endsAtDate = new Date(subscribedAtDate);
-                    endsAtDate.setDate(endsAtDate.getDate() + 30);
+                    const subscribedAtDate = data.subscriptionStartDate?.toDate ? data.subscriptionStartDate.toDate() : new Date();
+                    const endsAtDate = data.subscriptionEndDate?.toDate ? data.subscriptionEndDate.toDate() : new Date();
 
                     fetchedSubscribers.push({
                         id: doc.id,

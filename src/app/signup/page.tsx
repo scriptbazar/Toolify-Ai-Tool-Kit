@@ -63,6 +63,11 @@ export default function SignupPage() {
       // Send email verification
       await sendEmailVerification(user);
 
+      // Set subscription dates for free plan
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setFullYear(endDate.getFullYear() + 100); // Effectively "never" for free plan
+
       // Save user data to Firestore
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
@@ -72,6 +77,9 @@ export default function SignupPage() {
         email,
         role: "user", // Default role is 'user'
         createdAt: new Date(),
+        planId: "free",
+        subscriptionStartDate: startDate,
+        subscriptionEndDate: endDate,
       });
 
       toast({
