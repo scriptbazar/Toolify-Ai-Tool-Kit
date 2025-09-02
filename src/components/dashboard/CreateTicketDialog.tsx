@@ -133,7 +133,19 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-        setAttachments(prev => [...prev, ...Array.from(e.target.files!)]);
+        const newFiles = Array.from(e.target.files);
+        const validFiles = newFiles.filter(file => {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                toast({
+                    title: 'File too large',
+                    description: `"${file.name}" exceeds the 2MB size limit.`,
+                    variant: 'destructive',
+                });
+                return false;
+            }
+            return true;
+        });
+        setAttachments(prev => [...prev, ...validFiles]);
     }
   }
 
@@ -271,12 +283,12 @@ export function CreateTicketDialog({ onTicketCreated }: { onTicketCreated: (user
                          <div className="space-y-2">
                             <FormLabel>Attachments</FormLabel>
                              <div className="rounded-lg border border-dashed border-input p-4">
-                                <div className="flex items-center gap-4">
+                                <div className="flex flex-wrap items-center gap-4">
                                     <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
                                         <UploadCloud className="mr-2 h-4 w-4"/>
                                         Attach Files
                                     </Button>
-                                    <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB each.</p>
+                                    <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 2MB each.</p>
                                 </div>
                                 <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" />
                                 {attachments.length > 0 && (
