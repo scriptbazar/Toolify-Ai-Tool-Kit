@@ -170,6 +170,27 @@ export async function getSettings(): Promise<AppSettings> {
   }
 }
 
+function deepMerge(target: any, source: any) {
+    const output = { ...target };
+    if (isObject(target) && isObject(source)) {
+        Object.keys(source).forEach(key => {
+            if (isObject(source[key])) {
+                if (!(key in target))
+                    Object.assign(output, { [key]: source[key] });
+                else
+                    output[key] = deepMerge(target[key], source[key]);
+            } else {
+                Object.assign(output, { [key]: source[key] });
+            }
+        });
+    }
+    return output;
+}
+
+function isObject(item: any) {
+    return (item && typeof item === 'object' && !Array.isArray(item));
+}
+
 /**
  * Updates the application settings in Firestore and writes API keys to .env.local.
  * It performs a deep merge to only update the provided fields in Firestore.
@@ -181,17 +202,7 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
     const currentSettings = await getSettings();
 
     // Deep merge the new settings into the current settings
-    const mergedSettings = {
-        ...currentSettings,
-        ...newSettings,
-        general: { ...currentSettings.general, ...newSettings.general },
-        referral: { ...currentSettings.referral, ...newSettings.referral },
-        advertisement: { ...currentSettings.advertisement, ...newSettings.advertisement },
-        plan: { ...currentSettings.plan, ...newSettings.plan },
-        payment: { ...currentSettings.payment, ...newSettings.payment },
-        page: { ...currentSettings.page, ...newSettings.page },
-    };
-
+    const mergedSettings = deepMerge(currentSettings, newSettings);
 
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
     // are reset to their default (0) to prevent Zod validation errors.
