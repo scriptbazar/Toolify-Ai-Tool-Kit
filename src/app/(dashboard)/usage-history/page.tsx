@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -20,6 +21,8 @@ import {
   YAxis,
   Tooltip,
 } from 'recharts';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 
 const getActivityIcon = (type: UserActivityType) => {
   switch (type) {
@@ -93,16 +96,6 @@ export default function UsageHistoryPage() {
             <Skeleton className="h-64 w-full" />
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-8 w-1/4" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
-            </div>
-          </CardContent>
-        </Card>
       </div>
     );
   }
@@ -116,96 +109,100 @@ export default function UsageHistoryPage() {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
-            Most Used Tools
-          </CardTitle>
-          <CardDescription>
-            Your top tools based on usage in your recent activities.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {toolUsageData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={toolUsageData} layout="vertical" margin={{ left: 20 }}>
-                <XAxis type="number" hide />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  width={150}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 12 }}
-                />
-                <Tooltip
-                  cursor={{ fill: 'hsl(var(--muted))' }}
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="rounded-lg border bg-background p-2 shadow-sm">
-                          <p className="font-medium">{`${payload[0].payload.name}: ${payload[0].value} uses`}</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar dataKey="count" layout="vertical" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-             <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg">
-                <HelpCircle className="w-12 h-12 text-muted-foreground mb-4" />
-                <p className="text-lg text-muted-foreground">No tool usage data available yet.</p>
-                <p className="text-muted-foreground">Start using some tools to see your stats here!</p>
-             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5" />
-            Recent Activity Log
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Activity</TableHead>
-                <TableHead>Details</TableHead>
-                <TableHead className="text-right">Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {activities.length > 0 ? activities.slice(0, 15).map(activity => (
-                <TableRow key={activity.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {getActivityIcon(activity.type)}
-                      <span className="capitalize font-medium">
-                        {activity.type.replace('_', ' ')}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{activity.details.name}</TableCell>
-                  <TableCell className="text-right text-muted-foreground">{new Date(activity.timestamp).toLocaleString()}</TableCell>
-                </TableRow>
-              )) : (
-                 <TableRow>
-                    <TableCell colSpan={3} className="text-center h-24">
-                        You have no recent activity.
-                    </TableCell>
-                </TableRow>
+       <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="overview"><BarChart3 className="mr-2 h-4 w-4"/>Most Used Tools</TabsTrigger>
+          <TabsTrigger value="log"><Clock className="mr-2 h-4 w-4"/>Recent Activity Log</TabsTrigger>
+        </TabsList>
+        <TabsContent value="overview" className="mt-6">
+           <Card>
+            <CardHeader>
+              <CardTitle>Usage Overview</CardTitle>
+              <CardDescription>
+                Your top tools based on usage in your recent activities.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {toolUsageData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={toolUsageData} layout="vertical" margin={{ left: 20 }}>
+                    <XAxis type="number" hide />
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      width={150}
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <Tooltip
+                      cursor={{ fill: 'hsl(var(--muted))' }}
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                              <p className="font-medium">{`${payload[0].payload.name}: ${payload[0].value} uses`}</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="count" layout="vertical" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                 <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg">
+                    <HelpCircle className="w-12 h-12 text-muted-foreground mb-4" />
+                    <p className="text-lg text-muted-foreground">No tool usage data available yet.</p>
+                    <p className="text-muted-foreground">Start using some tools to see your stats here!</p>
+                 </div>
               )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="log" className="mt-6">
+           <Card>
+            <CardHeader>
+              <CardTitle>Complete Activity Log</CardTitle>
+              <CardDescription>A chronological list of your recent activities on the platform.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Activity</TableHead>
+                    <TableHead>Details</TableHead>
+                    <TableHead className="text-right">Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {activities.length > 0 ? activities.slice(0, 15).map(activity => (
+                    <TableRow key={activity.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getActivityIcon(activity.type)}
+                          <span className="capitalize font-medium">
+                            {activity.type.replace('_', ' ')}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{activity.details.name}</TableCell>
+                      <TableCell className="text-right text-muted-foreground">{new Date(activity.timestamp).toLocaleString()}</TableCell>
+                    </TableRow>
+                  )) : (
+                     <TableRow>
+                        <TableCell colSpan={3} className="text-center h-24">
+                            You have no recent activity.
+                        </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
