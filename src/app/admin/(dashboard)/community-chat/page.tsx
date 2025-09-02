@@ -10,15 +10,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2, Loader2, MessageSquare } from 'lucide-react';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2, Loader2, MessageSquare, X, Image as ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { getChatUsers } from '@/ai/flows/user-management';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Logo } from '@/components/common/Logo';
 import { Switch } from '@/components/ui/switch';
+import Image from 'next/image';
 
 type Message = {
     id: string;
@@ -26,6 +28,7 @@ type Message = {
     fromName: string;
     text: string;
     type: 'user' | 'admin';
+    imageUrl?: string;
     timestamp: any;
 };
 
@@ -45,7 +48,7 @@ interface AppUser {
 
 const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) => {
     const [question, setQuestion] = useState('');
-    const [options, setOptions] = useState(['', '', '', '']);
+    const [options, setOptions] = useState(['', '']);
     const [allowCustomOptions, setAllowCustomOptions] = useState(false);
     const { toast } = useToast();
 
@@ -54,19 +57,34 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) =
         newOptions[index] = value;
         setOptions(newOptions);
     };
+
+    const addOption = () => {
+        if (options.length < 4) {
+            setOptions([...options, '']);
+        }
+    };
+
+    const removeOption = (index: number) => {
+        if (options.length > 2) {
+            const newOptions = [...options];
+            newOptions.splice(index, 1);
+            setOptions(newOptions);
+        }
+    };
     
     const handleCreatePoll = () => {
       if (!question.trim()) {
         toast({ title: "Poll question cannot be empty.", variant: "destructive" });
         return;
       }
-      if (options.some(opt => !opt.trim())) {
-        toast({ title: "All poll options must be filled.", variant: "destructive" });
+      const filledOptions = options.filter(opt => opt.trim() !== '');
+      if (filledOptions.length < 2) {
+        toast({ title: "Please provide at least 2 options.", variant: "destructive" });
         return;
       }
       // In a real app, this would save to the database.
-      console.log({ question, options, allowCustomOptions });
-      onAddPoll({ question, options, allowCustomOptions });
+      console.log({ question, options: filledOptions, allowCustomOptions });
+      onAddPoll({ question, options: filledOptions, allowCustomOptions });
       toast({ title: "Poll created successfully!" });
     };
 
@@ -93,9 +111,19 @@ const PollCreationDialog = ({ onAddPoll }: { onAddPoll: (poll: any) => void }) =
                     {options.map((option, index) => (
                         <div key={index} className="flex items-center gap-2">
                             <Input value={option} onChange={(e) => handleOptionChange(index, e.target.value)} placeholder={`Option ${index + 1}`}/>
+                            {index >= 2 && (
+                                <Button variant="ghost" size="icon" onClick={() => removeOption(index)}>
+                                    <X className="h-4 w-4 text-red-500" />
+                                </Button>
+                            )}
                         </div>
                     ))}
                     </div>
+                    {options.length < 4 && (
+                        <Button variant="outline" size="sm" onClick={addOption}>
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add Option
+                        </Button>
+                    )}
                 </div>
                 <div className="flex items-center space-x-2">
                     <Switch id="allow-custom-options" checked={allowCustomOptions} onCheckedChange={setAllowCustomOptions} />
@@ -116,6 +144,7 @@ export default function CommunityChatPage() {
     const [userData, setUserData] = useState<AppUser | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
+    const [attachment, setAttachment] = useState<File | null>(null);
     const [activeUserFilter, setActiveUserFilter] = useState<'all' | 'live' | 'new'>('live');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -177,18 +206,28 @@ export default function CommunityChatPage() {
 
     const handleSendMessage = async (e: FormEvent) => {
         e.preventDefault();
-        if (!input.trim() || !currentUser) return;
+        if ((!input.trim() && !attachment) || !currentUser) return;
         
         setIsSending(true);
         try {
+            let imageUrl: string | undefined = undefined;
+            if (attachment) {
+                const storage = getStorage();
+                const storageRef = ref(storage, `community-chat/${currentUser.uid}/${Date.now()}_${attachment.name}`);
+                const snapshot = await uploadBytes(storageRef, attachment);
+                imageUrl = await getDownloadURL(snapshot.ref);
+            }
+
              await addDoc(collection(db, "communityChat"), {
                 fromId: currentUser.uid,
                 fromName: 'Admin',
                 text: input,
                 type: 'admin',
+                imageUrl,
                 timestamp: serverTimestamp(),
             });
             setInput('');
+            setAttachment(null);
         } catch (error) {
             toast({ title: "Error", description: "Could not send message.", variant: "destructive" });
         } finally {
@@ -198,7 +237,19 @@ export default function CommunityChatPage() {
 
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-       // File handling logic placeholder
+       const file = event.target.files?.[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                toast({
+                    title: "File too large",
+                    description: `"${file.name}" exceeds the 2MB size limit.`,
+                    variant: 'destructive'
+                });
+                return;
+            }
+            setAttachment(file);
+        }
+        event.target.value = ''; // Reset file input
     };
 
     const filteredUsers = useMemo(() => {
@@ -239,7 +290,7 @@ export default function CommunityChatPage() {
               </p>
             </CardHeader>
             <CardContent className="flex-grow p-0">
-               <ScrollArea className="h-full max-h-[calc(100vh-27rem)] px-4" ref={scrollAreaRef}>
+               <ScrollArea className="h-full max-h-[calc(100vh-30rem)] px-4" ref={scrollAreaRef}>
                   <div className="space-y-6">
                       {messages.map((msg) => (
                           <div key={msg.id} className={cn("flex items-start gap-3", msg.type === 'admin' ? 'flex-row-reverse' : '')}>
@@ -250,20 +301,32 @@ export default function CommunityChatPage() {
                               </Avatar>
                               <div className={cn("rounded-lg px-4 py-2 max-w-sm", msg.type === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                 <p className="font-bold text-xs mb-1">{msg.fromName}</p>
-                                <p>{msg.text}</p>
+                                {msg.imageUrl && (
+                                    <Image src={msg.imageUrl} alt="chat attachment" width={200} height={200} className="rounded-md my-2" />
+                                )}
+                                {msg.text && <p>{msg.text}</p>}
                               </div>
                           </div>
                       ))}
                   </div>
               </ScrollArea>
             </CardContent>
-            <CardFooter className="p-2 border-t">
+            <CardFooter className="p-2 border-t flex-col items-start gap-2">
+                 {attachment && (
+                    <div className="flex items-center gap-2 p-2 bg-muted rounded-md w-full">
+                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-sm truncate flex-1">{attachment.name}</span>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setAttachment(null)}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
                 <form onSubmit={handleSendMessage} className="relative w-full flex items-center gap-2">
                     <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
                         <Paperclip className="h-5 w-5"/>
                         <span className="sr-only">Attach file</span>
                     </Button>
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
                     <Input
                         placeholder="Type your message..."
                         className="pr-12 h-12"
@@ -272,7 +335,7 @@ export default function CommunityChatPage() {
                         autoComplete="off"
                         disabled={isSending}
                     />
-                    <Button type="submit" variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSending || !input.trim()}>
+                    <Button type="submit" variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSending || (!input.trim() && !attachment)}>
                         {isSending ? <Loader2 className="h-5 w-5 animate-spin"/> : <Send className="h-5 w-5"/>}
                     </Button>
                 </form>

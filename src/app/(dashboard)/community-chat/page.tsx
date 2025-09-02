@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, Loader2 } from 'lucide-react';
+import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, Loader2, X, Image as ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
@@ -20,9 +20,10 @@ import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from '@/components/common/Logo';
-
+import Image from 'next/image';
 
 type Message = {
     id: string;
@@ -30,6 +31,7 @@ type Message = {
     fromName: string;
     text: string;
     type: 'user' | 'admin';
+    imageUrl?: string;
     timestamp: any;
 };
 
@@ -53,6 +55,7 @@ export default function CommunityChatPage() {
     const [userData, setUserData] = useState<AppUser | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
+    const [attachment, setAttachment] = useState<File | null>(null);
     const [activeUserFilter, setActiveUserFilter] = useState<'all' | 'live'>('all');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -136,22 +139,32 @@ export default function CommunityChatPage() {
 
     const handleSendMessage = async (e: FormEvent) => {
         e.preventDefault();
-        if (!input.trim() || !currentUser || !userData) return;
+        if ((!input.trim() && !attachment) || !currentUser || !userData) return;
 
         const isFirstUserMessage = !messages.some(m => m.fromId === currentUser.uid && m.type === 'user');
         
         setIsSending(true);
 
         try {
+            let imageUrl: string | undefined = undefined;
+            if (attachment) {
+                const storage = getStorage();
+                const storageRef = ref(storage, `community-chat/${currentUser.uid}/${Date.now()}_${attachment.name}`);
+                const snapshot = await uploadBytes(storageRef, attachment);
+                imageUrl = await getDownloadURL(snapshot.ref);
+            }
+
             await addDoc(collection(db, "communityChat"), {
                 fromId: currentUser.uid,
                 fromName: `${userData.firstName} ${userData.lastName}`,
                 text: input,
                 type: 'user',
+                imageUrl,
                 timestamp: serverTimestamp(),
             });
             setInput('');
-
+            setAttachment(null);
+            
             // After successfully sending the message, check if it was the first one
             // and add the local welcome message.
             if (isFirstUserMessage) {
@@ -181,7 +194,19 @@ export default function CommunityChatPage() {
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        // ... (file handling logic as before)
+        const file = event.target.files?.[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                toast({
+                    title: "File too large",
+                    description: `"${file.name}" exceeds the 2MB size limit.`,
+                    variant: 'destructive'
+                });
+                return;
+            }
+            setAttachment(file);
+        }
+        event.target.value = ''; // Reset file input
     };
 
     const filteredUsers = useMemo(() => {
@@ -198,8 +223,6 @@ export default function CommunityChatPage() {
         description: `Copied username: @${text}`,
         });
     };
-    
-    const senderDisplayName = userData ? `${userData.firstName} ${userData.lastName}`.trim() : 'User';
 
 
   if (loading) {
@@ -234,7 +257,7 @@ export default function CommunityChatPage() {
               </p>
             </CardHeader>
             <CardContent className="flex-grow p-0">
-               <ScrollArea className="h-full max-h-[calc(100vh-27rem)] px-4" ref={scrollAreaRef}>
+               <ScrollArea className="h-full max-h-[calc(100vh-30rem)] px-4" ref={scrollAreaRef}>
                   <div className="space-y-6">
                       {messages.map((msg) => (
                           <div key={msg.id} className={cn("flex items-start gap-3", msg.fromId === currentUser?.uid ? 'flex-row-reverse' : '')}>
@@ -243,20 +266,32 @@ export default function CommunityChatPage() {
                               </Avatar>
                               <div className={cn("rounded-lg px-4 py-2 max-w-sm", msg.fromId === currentUser?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                                 <p className="font-bold text-xs mb-1">{msg.fromName}</p>
-                                <p>{msg.text}</p>
+                                {msg.imageUrl && (
+                                    <Image src={msg.imageUrl} alt="chat attachment" width={200} height={200} className="rounded-md my-2" />
+                                )}
+                                {msg.text && <p>{msg.text}</p>}
                               </div>
                           </div>
                       ))}
                   </div>
               </ScrollArea>
             </CardContent>
-            <CardFooter className="p-2 border-t">
+            <CardFooter className="p-2 border-t flex-col items-start gap-2">
+                 {attachment && (
+                    <div className="flex items-center gap-2 p-2 bg-muted rounded-md w-full">
+                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-sm truncate flex-1">{attachment.name}</span>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setAttachment(null)}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
                 <form onSubmit={handleSendMessage} className="relative w-full flex items-center gap-2">
                     <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
                         <Paperclip className="h-5 w-5"/>
                         <span className="sr-only">Attach file</span>
                     </Button>
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
                     <Input
                         placeholder="Type your message..."
                         className="pr-12 h-12"
@@ -265,7 +300,7 @@ export default function CommunityChatPage() {
                         autoComplete="off"
                         disabled={isSending}
                     />
-                    <Button type="submit" variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSending || !input.trim()}>
+                    <Button type="submit" variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSending || (!input.trim() && !attachment)}>
                         {isSending ? <Loader2 className="h-5 w-5 animate-spin"/> : <Send className="h-5 w-5"/>}
                     </Button>
                 </form>
