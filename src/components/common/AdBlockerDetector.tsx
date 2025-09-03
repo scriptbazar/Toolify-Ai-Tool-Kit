@@ -6,7 +6,7 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { getSettings } from '@/ai/flows/settings-management';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ShieldAlert } from 'lucide-react';
 
@@ -82,9 +82,9 @@ export function AdBlockerDetector() {
             <ShieldAlert className="h-16 w-16 text-destructive" />
           </div>
           <DialogTitle className="text-center text-2xl">Ad Blocker Detected</DialogTitle>
-          <DialogDescription className="text-center">
+          <DialogDesc className="text-center">
             Our free tools are supported by ads. To continue using our services, please disable your ad blocker for this site. Your support helps us keep our tools free!
-          </DialogDescription>
+          </DialogDesc>
         </DialogHeader>
         <div className="flex justify-center mt-4">
           <Button onClick={() => window.location.reload()}>
