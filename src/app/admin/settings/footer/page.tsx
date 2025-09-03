@@ -1,8 +1,7 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,74 +21,52 @@ import { cn } from '@/lib/utils';
 
 type FooterFormValues = z.infer<typeof FooterSettingsSchema>;
 
-const LinkArrayEditor = ({ control, name, title }: { control: any, name: "topTools" | "quickLinks" | "hostingLinks" | "moreTools", title: string }) => {
+const LinkArrayEditor = ({ control, name }: { control: any, name: "topTools" | "quickLinks" | "hostingLinks" | "moreTools" }) => {
     const { fields, append, remove } = useFieldArray({
         control,
         name
     });
 
-    const [isOpen, setIsOpen] = useState(false);
-
     return (
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <Card>
-                <CollapsibleTrigger asChild>
-                    <div className="flex w-full cursor-pointer items-center justify-between p-4">
-                        <div className="flex items-center gap-4">
-                            <LinkIcon className="h-6 w-6 text-primary"/>
-                            <div>
-                                <CardTitle className="text-lg">{title}</CardTitle>
-                            </div>
-                        </div>
-                        <Button variant="ghost" size="icon">
-                            <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
-                            <span className="sr-only">Toggle</span>
-                        </Button>
+        <div className="space-y-4 pt-0">
+            {fields.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-2 p-2 border rounded-lg bg-muted/50">
+                    <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
+                    <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <FormField
+                        control={control}
+                        name={`${name}.${index}.name`}
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormControl><Input {...field} placeholder="Link Name" /></FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={control}
+                        name={`${name}.${index}.href`}
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormControl><Input {...field} placeholder="URL (e.g., /about-us)" /></FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
                     </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                    <CardContent className="space-y-4 pt-0">
-                        {fields.map((field, index) => (
-                            <div key={field.id} className="flex items-center gap-2 p-2 border rounded-lg bg-muted/50">
-                                <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
-                                <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <FormField
-                                    control={control}
-                                    name={`${name}.${index}.name`}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                        <FormControl><Input {...field} placeholder="Link Name" /></FormControl>
-                                        <FormMessage />
-                                        </FormItem>
-                                    )}
-                                    />
-                                    <FormField
-                                    control={control}
-                                    name={`${name}.${index}.href`}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                        <FormControl><Input {...field} placeholder="URL (e.g., /about-us)" /></FormControl>
-                                        <FormMessage />
-                                        </FormItem>
-                                    )}
-                                    />
-                                </div>
-                                <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)} className="shrink-0">
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        ))}
-                        <Button type="button" variant="outline" onClick={() => append({ id: `link_${Date.now()}`, name: '', href: '' })}>
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add Link
-                        </Button>
-                    </CardContent>
-                </CollapsibleContent>
-            </Card>
-        </Collapsible>
+                    <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)} className="shrink-0">
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
+            ))}
+            <Button type="button" variant="outline" onClick={() => append({ id: `link_${Date.now()}`, name: '', href: '' })}>
+                <PlusCircle className="mr-2 h-4 w-4" /> Add Link
+            </Button>
+        </div>
     )
 }
 
-const CollapsibleSection = ({ id, title, children, isOpen, onToggle, isFullWidth, icon: Icon }: { id: string, title: string, children: React.ReactNode, isOpen: boolean, onToggle: (id: string) => void, isFullWidth: boolean, icon: React.ElementType }) => {
+const CollapsibleSection = ({ id, title, description, children, isOpen, onToggle, isFullWidth, icon: Icon }: { id: string, title: string, description?: string, children: React.ReactNode, isOpen: boolean, onToggle: (id: string) => void, isFullWidth: boolean, icon: React.ElementType }) => {
   return (
     <Collapsible
       open={isOpen}
@@ -106,6 +83,7 @@ const CollapsibleSection = ({ id, title, children, isOpen, onToggle, isFullWidth
                     <Icon className="h-6 w-6 text-primary"/>
                     <div>
                         <CardTitle className="text-lg">{title}</CardTitle>
+                        {description && <CardDescription className="mt-1">{description}</CardDescription>}
                     </div>
                 </div>
                 <Button variant="ghost" size="icon">
@@ -209,6 +187,42 @@ export default function FooterManagementPage() {
     );
   }
 
+  const sections = [
+    { id: 'general', title: 'General Settings', description: "Manage logo and description", icon: SlidersHorizontal, children: (
+      <div className="space-y-4">
+        <FormField control={form.control} name="showLogo" render={({ field }) => (
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+            <div className="space-y-0.5"><FormLabel>Show Footer Logo</FormLabel></div>
+            <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="description" render={({ field }) => (
+          <FormItem><FormLabel>Footer Description</FormLabel><FormControl><Textarea {...field} placeholder="A short description about your site for the footer." /></FormControl><FormMessage /></FormItem>
+        )} />
+      </div>
+    )},
+    { id: 'titles', title: 'Column Titles', description: "Set the titles for link columns", icon: Edit2, children: (
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           <FormField control={form.control} name="topToolsTitle" render={({ field }) => (
+              <FormItem><FormLabel>Top Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+          )}/>
+           <FormField control={form.control} name="quickLinksTitle" render={({ field }) => (
+              <FormItem><FormLabel>Quick Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+          )}/>
+           <FormField control={form.control} name="moreToolsTitle" render={({ field }) => (
+              <FormItem><FormLabel>More Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+          )}/>
+           <FormField control={form.control} name="hostingLinksTitle" render={({ field }) => (
+              <FormItem><FormLabel>Hosting Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+          )}/>
+      </div>
+    )},
+    { id: 'topTools', title: 'Top Tools Links', icon: LinkIcon, children: <LinkArrayEditor control={form.control} name="topTools" /> },
+    { id: 'quickLinks', title: 'Quick Links', icon: LinkIcon, children: <LinkArrayEditor control={form.control} name="quickLinks" /> },
+    { id: 'moreTools', title: 'More Tools Links', icon: LinkIcon, children: <LinkArrayEditor control={form.control} name="moreTools" /> },
+    { id: 'hostingLinks', title: 'Hosting Links', icon: LinkIcon, children: <LinkArrayEditor control={form.control} name="hostingLinks" /> },
+  ];
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -225,66 +239,21 @@ export default function FooterManagementPage() {
             </Button>
         </div>
         
-        <div className="space-y-6">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <CollapsibleSection id="general" title="General Settings" icon={SlidersHorizontal} isOpen={openSection === 'general'} onToggle={handleToggle} isFullWidth={openSection === 'general'}>
-                    <div className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="showLogo"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                <div className="space-y-0.5">
-                                    <FormLabel>Show Footer Logo</FormLabel>
-                                </div>
-                                <FormControl>
-                                    <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                    />
-                                </FormControl>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Footer Description</FormLabel>
-                                <FormControl>
-                                    <Textarea {...field} placeholder="A short description about your site for the footer." />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {sections.map(section => (
+                <CollapsibleSection
+                    key={section.id}
+                    id={section.id}
+                    title={section.title}
+                    description={section.description}
+                    icon={section.icon}
+                    isOpen={openSection === section.id}
+                    onToggle={handleToggle}
+                    isFullWidth={openSection === section.id}
+                >
+                    {section.children}
                 </CollapsibleSection>
-
-                <CollapsibleSection id="titles" title="Column Titles" icon={Edit2} isOpen={openSection === 'titles'} onToggle={handleToggle} isFullWidth={openSection === 'titles'}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <FormField control={form.control} name="topToolsTitle" render={({ field }) => (
-                            <FormItem><FormLabel>Top Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
-                         <FormField control={form.control} name="quickLinksTitle" render={({ field }) => (
-                            <FormItem><FormLabel>Quick Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
-                         <FormField control={form.control} name="moreToolsTitle" render={({ field }) => (
-                            <FormItem><FormLabel>More Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
-                         <FormField control={form.control} name="hostingLinksTitle" render={({ field }) => (
-                            <FormItem><FormLabel>Hosting Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
-                    </div>
-                </CollapsibleSection>
-            </div>
-
-
-            <LinkArrayEditor control={form.control} name="topTools" title="Top Tools Links" />
-            <LinkArrayEditor control={form.control} name="quickLinks" title="Quick Links" />
-            <LinkArrayEditor control={form.control} name="moreTools" title="More Tools Links" />
-            <LinkArrayEditor control={form.control} name="hostingLinks" title="Hosting Links" />
+            ))}
         </div>
       </form>
     </Form>
