@@ -61,27 +61,52 @@ export async function upsertPost(postData: Partial<Omit<Post, 'id' | 'createdAt'
       const currentDoc = await postRef.get();
       const wasPublished = currentDoc.exists() && currentDoc.data()?.status === 'Published';
 
-      const updateData = {
+      const updateData: { [key: string]: any } = {
           ...data,
-          // Only set publishedAt if the status is changing to 'Published' for the first time
-          ...(data.status === 'Published' && !wasPublished && { publishedAt: FieldValue.serverTimestamp() })
       };
+      
+      // Only set publishedAt if the status is changing to 'Published' for the first time
+      if (data.status === 'Published' && !wasPublished) {
+        updateData.publishedAt = FieldValue.serverTimestamp();
+      }
 
       await postRef.update(updateData);
       return { success: true, message: 'Post updated successfully.', postId: id };
     } else {
       // Add new post
       const postRef = adminDb.collection(POSTS_COLLECTION).doc();
-      const newPostData = {
+      const newPostData: { [key: string]: any } = {
         ...data,
         createdAt: FieldValue.serverTimestamp(),
-        ...(data.status === 'Published' && { publishedAt: FieldValue.serverTimestamp() })
       };
+      if (data.status === 'Published') {
+        newPostData.publishedAt = FieldValue.serverTimestamp();
+      }
       await postRef.set(newPostData);
       return { success: true, message: 'Post created successfully.', postId: postRef.id };
     }
   } catch (error: any) {
     console.error("Error upserting post:", error);
+    return { success: false, message: error.message || 'An unknown error occurred.' };
+  }
+}
+
+
+/**
+ * Deletes a post by moving it to 'Trash' status.
+ * @param {string} postId - The ID of the post to delete.
+ * @returns {Promise<{ success: boolean; message: string }>}
+ */
+export async function deletePost(postId: string): Promise<{ success: boolean; message: string }> {
+  if (!adminDb) {
+    return { success: false, message: "Database not initialized" };
+  }
+  try {
+    const postRef = adminDb.collection(POSTS_COLLECTION).doc(postId);
+    await postRef.update({ status: 'Trash' });
+    return { success: true, message: 'Post moved to trash.' };
+  } catch (error: any) {
+    console.error(`Error deleting post ${postId}:`, error);
     return { success: false, message: error.message || 'An unknown error occurred.' };
   }
 }

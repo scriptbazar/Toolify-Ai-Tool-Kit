@@ -1,8 +1,7 @@
 
-
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +16,7 @@ import {
   PlusCircle,
   MoreHorizontal,
   Clock,
+  Loader2,
 } from 'lucide-react';
 import {
     DropdownMenu,
@@ -26,17 +26,49 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from 'next/link';
+import { getPosts, deletePost } from '@/ai/flows/blog-management';
+import { type Post, type PostStatus } from '@/ai/flows/blog-management.types';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
-type PostStatus = 'Published' | 'Draft' | 'Scheduled' | 'Trash';
 
-const allPosts: any[] = [];
-
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 export default function AllPostsPage() {
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<PostStatus | 'All'>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const { toast } = useToast();
+
+  const fetchAllPosts = async () => {
+    setLoading(true);
+    try {
+        const posts = await getPosts();
+        setAllPosts(posts);
+    } catch (error) {
+        console.error("Failed to fetch posts:", error);
+        toast({ title: 'Error', description: 'Could not load blog posts.', variant: 'destructive' });
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllPosts();
+  }, []);
 
   const filteredPosts = useMemo(() => {
     let posts = allPosts;
@@ -48,7 +80,7 @@ export default function AllPostsPage() {
         }
     }
     return posts.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [searchQuery, activeFilter]);
+  }, [allPosts, searchQuery, activeFilter]);
   
   const paginatedPosts = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -56,6 +88,19 @@ export default function AllPostsPage() {
   }, [filteredPosts, currentPage]);
   
   const totalPages = Math.ceil(filteredPosts.length / ITEMS_PER_PAGE);
+
+  const handleDelete = async (postId: string) => {
+    const originalPosts = [...allPosts];
+    setAllPosts(prev => prev.filter(p => p.id !== postId));
+    const result = await deletePost(postId);
+    if (!result.success) {
+      setAllPosts(originalPosts);
+      toast({ title: 'Error', description: result.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Post Deleted', description: 'The post has been moved to the trash.' });
+    }
+  };
+
 
   const getStatusBadge = (status: PostStatus) => {
     switch (status) {
@@ -134,6 +179,11 @@ export default function AllPostsPage() {
           </div>
 
           <div className="overflow-x-auto">
+             {loading ? (
+                <div className="flex justify-center items-center h-48">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            ) : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -151,7 +201,7 @@ export default function AllPostsPage() {
                             <TableCell className="font-medium">{post.title}</TableCell>
                             <TableCell>{getStatusBadge(post.status as PostStatus)}</TableCell>
                             <TableCell>{post.category}</TableCell>
-                            <TableCell>{post.publishedDate}</TableCell>
+                            <TableCell>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : '—'}</TableCell>
                             <TableCell className="text-right">
                                <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -160,12 +210,32 @@ export default function AllPostsPage() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                           <Link href={`/admin/blog/edit/${post.id}`}>
                                             <Edit className="mr-2 h-4 w-4"/> Edit
+                                           </Link>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem className="text-red-500">
-                                            <Trash2 className="mr-2 h-4 w-4"/> Delete
-                                        </DropdownMenuItem>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500">
+                                                    <Trash2 className="mr-2 h-4 w-4"/> Delete
+                                                </DropdownMenuItem>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action cannot be undone. This will permanently delete this post and all of its data.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDelete(post.id)}>
+                                                        Delete
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>
@@ -180,6 +250,7 @@ export default function AllPostsPage() {
                 )}
               </TableBody>
             </Table>
+            )}
           </div>
           
            {totalPages > 1 && (
