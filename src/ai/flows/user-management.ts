@@ -318,3 +318,25 @@ export async function trackAffiliateClick(referrerId: string): Promise<{ success
         return { success: false, message: 'An unknown error occurred while tracking the click.' };
     }
 }
+
+
+/**
+ * Deletes a user from Firestore. This is a permanent action.
+ * @param {string} userId - The ID of the user to delete.
+ * @returns {Promise<{ success: boolean; message: string }>} Result of the operation.
+ */
+export async function deleteUser(userId: string): Promise<{ success: boolean; message: string }> {
+  if (!adminDb || !userId) {
+    return { success: false, message: 'Invalid user or database connection.' };
+  }
+  try {
+    await adminDb.collection('users').doc(userId).delete();
+    // Note: This does not delete the user from Firebase Authentication.
+    // A more complete solution would also involve deleting the user from Auth,
+    // which requires higher privileges and is often handled separately.
+    return { success: true, message: 'User deleted from database successfully.' };
+  } catch (error: any) {
+    console.error(`Error deleting user ${userId}:`, error);
+    return { success: false, message: error.message || 'An unknown error occurred.' };
+  }
+}

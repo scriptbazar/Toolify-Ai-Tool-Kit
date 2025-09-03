@@ -33,6 +33,7 @@ import {
   Eye,
   UserX,
   Copy,
+  Trash2,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -40,6 +41,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -47,11 +49,24 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
+  DialogClose,
 } from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getAffiliateRequests, updateAffiliateRequestStatus, getAffiliates, type Affiliate, type ReferralRequest } from '@/ai/flows/user-management';
+import { getAffiliateRequests, updateAffiliateRequestStatus, getAffiliates, deleteUser, type Affiliate, type ReferralRequest } from '@/ai/flows/user-management';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StatCard } from '@/components/common/StatCard';
 
@@ -96,6 +111,16 @@ export default function AffiliateManagementPage() {
         toast({ title: 'Error', description: result.message, variant: 'destructive'});
     }
   }
+  
+  const handleDeleteAffiliate = async (affiliate: Affiliate) => {
+    const result = await deleteUser(affiliate.id);
+     if (result.success) {
+        toast({ title: 'Affiliate Deleted', description: `${affiliate.name} has been removed.`});
+        fetchData(); // Re-fetch data
+    } else {
+        toast({ title: 'Error', description: result.message, variant: 'destructive'});
+    }
+  };
 
   const filteredAffiliates = affiliates.filter(
     (affiliate) =>
@@ -216,10 +241,32 @@ export default function AffiliateManagementPage() {
                                     <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                                         <CreditCard className="mr-2 h-4 w-4" /> Mark as Paid
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                                        <UserX className="mr-2 h-4 w-4 text-destructive" /> 
+                                     <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                        <UserX className="mr-2 h-4 w-4 text-orange-500" /> 
                                         {affiliate.status === 'Active' ? 'Deactivate' : 'Activate'}
                                     </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                     <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500">
+                                                <Trash2 className="mr-2 h-4 w-4" /> Delete User
+                                            </DropdownMenuItem>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. This will permanently delete the affiliate's account and remove their data from our servers.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDeleteAffiliate(affiliate)}>
+                                                    Continue
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>
