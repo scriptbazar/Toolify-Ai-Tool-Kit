@@ -14,6 +14,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { AppSettingsSchema, type AppSettings } from './settings-management.types';
 import fs from 'fs/promises';
 import path from 'path';
+import { merge } from 'lodash';
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
@@ -367,21 +368,7 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
   try {
     const currentSettings = await getSettings();
     
-    // Manual deep merge to ensure array overwrites.
-    const mergedSettings = {
-      ...currentSettings,
-      ...newSettings,
-      // Overwrite nested objects explicitly if they exist in newSettings
-      general: newSettings.general ? { ...currentSettings.general, ...newSettings.general } : currentSettings.general,
-      plan: newSettings.plan ? { ...currentSettings.plan, ...newSettings.plan } : currentSettings.plan,
-      payment: newSettings.payment ? { ...currentSettings.payment, ...newSettings.payment } : currentSettings.payment,
-      page: newSettings.page ? { ...currentSettings.page, ...newSettings.page } : currentSettings.page,
-      footer: newSettings.footer ? { ...currentSettings.footer, ...newSettings.footer } : currentSettings.footer,
-      homepage: newSettings.homepage ? { ...currentSettings.homepage, ...newSettings.homepage } : currentSettings.homepage,
-      faqs: newSettings.faqs ? newSettings.faqs : currentSettings.faqs, // Direct overwrite for arrays
-      referral: newSettings.referral ? { ...currentSettings.referral, ...newSettings.referral } : currentSettings.referral,
-      advertisement: newSettings.advertisement ? { ...currentSettings.advertisement, ...newSettings.advertisement } : currentSettings.advertisement,
-    };
+    const mergedSettings = merge({}, currentSettings, newSettings);
     
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
     // are reset to their default (0) to prevent Zod validation errors on subsequent saves.
@@ -433,3 +420,5 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
     return { success: false, message: error.message || 'An unknown error occurred while updating settings.' };
   }
 }
+
+    
