@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, PlusCircle, Trash2, GripVertical, HelpCircle } from 'lucide-react';
+import { Save, Loader2, PlusCircle, Trash2, GripVertical, HelpCircle, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import { FaqSettingsSchema } from '@/ai/flows/settings-management.types';
@@ -17,6 +16,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import * as Icons from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { cn } from '@/lib/utils';
 
 const iconNames = Object.keys(Icons) as [string, ...string[]];
 
@@ -48,6 +49,8 @@ const FaqArrayEditor = ({ control, name, title }: { control: any, name: "contact
         control,
         name
     });
+    
+    const [openItemId, setOpenItemId] = useState<string | null>(null);
 
     const getNewItem = () => ({
         id: `${name}_${Date.now()}`,
@@ -60,59 +63,77 @@ const FaqArrayEditor = ({ control, name, title }: { control: any, name: "contact
         <Card>
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
-                <CardDescription>Drag and drop to reorder items.</CardDescription>
+                <CardDescription>Click on a question to expand and edit it.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-                {fields.map((field, index) => (
-                    <div key={field.id} className="flex items-start gap-2 p-4 border rounded-lg bg-muted/50">
-                        <GripVertical className="h-5 w-5 text-muted-foreground mt-8 shrink-0 cursor-move" />
-                        <div className="flex-grow space-y-4">
-                             <FormField
-                                control={control}
-                                name={`${name}.${index}.icon`}
-                                render={({ field: formField }) => (
-                                    <FormItem>
-                                        <FormLabel>Icon Name</FormLabel>
-                                        <FormControl>
-                                            <Input {...formField} placeholder="e.g., HelpCircle" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={control}
-                                name={`${name}.${index}.question`}
-                                render={({ field: formField }) => (
-                                    <FormItem>
-                                        <FormLabel>Question</FormLabel>
-                                        <FormControl>
-                                            <Input {...formField} placeholder="e.g., What is ToolifyAI?" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                             <FormField
-                                control={control}
-                                name={`${name}.${index}.answer`}
-                                render={({ field: formField }) => (
-                                    <FormItem>
-                                        <FormLabel>Answer</FormLabel>
-                                        <FormControl>
-                                            <Textarea {...formField} placeholder="Provide a clear and concise answer." />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)} className="shrink-0">
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </div>
-                ))}
-                <Button type="button" variant="outline" onClick={() => append(getNewItem())}>
+            <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {fields.map((field, index) => {
+                      const isOpen = openItemId === field.id;
+                      return (
+                        <Collapsible 
+                            key={field.id}
+                            open={isOpen}
+                            onOpenChange={() => setOpenItemId(isOpen ? null : field.id)}
+                            className={cn("space-y-2", isOpen && "lg:col-span-2")}
+                        >
+                          <div className="flex items-start gap-2 p-4 border rounded-lg bg-muted/50">
+                            <GripVertical className="h-5 w-5 text-muted-foreground mt-2 shrink-0 cursor-move" />
+                            <CollapsibleTrigger className="flex-1 text-left">
+                                <div className="flex justify-between items-center">
+                                    <p className="font-medium truncate">{form.watch(`${name}.${index}.question`) || 'New Question'}</p>
+                                    <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
+                                </div>
+                            </CollapsibleTrigger>
+                             <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)} className="shrink-0">
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <CollapsibleContent>
+                            <div className="p-4 border rounded-lg -mt-2 space-y-4">
+                                <FormField
+                                    control={control}
+                                    name={`${name}.${index}.icon`}
+                                    render={({ field: formField }) => (
+                                        <FormItem>
+                                            <FormLabel>Icon Name</FormLabel>
+                                            <FormControl><Input {...formField} placeholder="e.g., HelpCircle" /></FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={control}
+                                    name={`${name}.${index}.question`}
+                                    render={({ field: formField }) => (
+                                        <FormItem>
+                                            <FormLabel>Question</FormLabel>
+                                            <FormControl><Input {...formField} placeholder="e.g., What is ToolifyAI?" /></FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={control}
+                                    name={`${name}.${index}.answer`}
+                                    render={({ field: formField }) => (
+                                        <FormItem>
+                                            <FormLabel>Answer</FormLabel>
+                                            <FormControl><Textarea {...formField} placeholder="Provide a clear and concise answer." /></FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      )
+                  })}
+                </div>
+                 <Button type="button" variant="outline" onClick={() => {
+                    const newItem = getNewItem();
+                    append(newItem);
+                    setOpenItemId(newItem.id);
+                 }} className="mt-4">
                     <PlusCircle className="mr-2 h-4 w-4" /> Add FAQ
                 </Button>
             </CardContent>
@@ -222,5 +243,3 @@ export default function FaqManagementPage() {
         </Form>
     )
 }
-
-    
