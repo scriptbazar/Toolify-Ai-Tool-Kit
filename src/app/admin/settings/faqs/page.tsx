@@ -44,7 +44,8 @@ const FaqManagementFormSchema = z.object({
 
 type FaqManagementFormValues = z.infer<typeof FaqManagementFormSchema>;
 
-const FaqArrayEditor = ({ control, name, title }: { control: any, name: "contactFaqs" | "pricingFaqs" | "affiliateFaqs", title: string }) => {
+const FaqArrayEditor = ({ form, name, title }: { form: any, name: "contactFaqs" | "pricingFaqs" | "affiliateFaqs", title: string }) => {
+    const { control } = form;
     const { fields, append, remove } = useFieldArray({
         control,
         name
@@ -230,13 +231,13 @@ export default function FaqManagementPage() {
                         <TabsTrigger value="affiliate">Affiliate Page</TabsTrigger>
                     </TabsList>
                     <TabsContent value="contact" className="mt-6">
-                        <FaqArrayEditor control={form.control} name="contactFaqs" title="Contact Us Page FAQs" />
+                        <FaqArrayEditor form={form} name="contactFaqs" title="Contact Us Page FAQs" />
                     </TabsContent>
                      <TabsContent value="pricing" className="mt-6">
-                        <FaqArrayEditor control={form.control} name="pricingFaqs" title="Pricing Page FAQs" />
+                        <FaqArrayEditor form={form} name="pricingFaqs" title="Pricing Page FAQs" />
                     </TabsContent>
                      <TabsContent value="affiliate" className="mt-6">
-                        <FaqArrayEditor control={form.control} name="affiliateFaqs" title="Affiliate Program FAQs" />
+                        <FaqArrayEditor form={form} name="affiliateFaqs" title="Affiliate Program FAQs" />
                     </TabsContent>
                  </Tabs>
             </form>
