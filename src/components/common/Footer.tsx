@@ -83,16 +83,16 @@ export default function Footer() {
 
           <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-8">
              {footerSettings?.topTools && footerSettings.topTools.length > 0 && (
-                <FooterLinkColumn title={footerSettings.topToolsTitle || 'Top Tools'} links={footerSettings.topTools} />
+                <FooterLinkColumn title="Top Tools" links={footerSettings.topTools} />
              )}
               {footerSettings?.quickLinks && footerSettings.quickLinks.length > 0 && (
-                <FooterLinkColumn title={footerSettings.quickLinksTitle || 'Quick Links'} links={footerSettings.quickLinks} />
+                <FooterLinkColumn title="Quick Links" links={footerSettings.quickLinks} />
              )}
              {footerSettings?.moreTools && footerSettings.moreTools.length > 0 && (
-                <FooterLinkColumn title={footerSettings.moreToolsTitle || 'More Tools'} links={footerSettings.moreTools} />
+                <FooterLinkColumn title="More Tools" links={footerSettings.moreTools} />
              )}
                {footerSettings?.hostingLinks && footerSettings.hostingLinks.length > 0 && (
-                <FooterLinkColumn title={footerSettings.hostingLinksTitle || 'Best Hostings'} links={footerSettings.hostingLinks} />
+                <FooterLinkColumn title="Best Hostings" links={footerSettings.hostingLinks} />
              )}
           </div>
         </div>
@@ -105,3 +105,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+    

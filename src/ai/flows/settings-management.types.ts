@@ -210,10 +210,6 @@ export type FooterLink = z.infer<typeof FooterLinkSchema>;
 export const FooterSettingsSchema = z.object({
   showLogo: z.boolean().default(true),
   description: z.string().optional(),
-  topToolsTitle: z.string().optional().default('Top Tools'),
-  quickLinksTitle: z.string().optional().default('Quick Links'),
-  hostingLinksTitle: z.string().optional().default('Best Hostings'),
-  moreToolsTitle: z.string().optional().default('More Tools'),
   topTools: z.array(FooterLinkSchema).optional(),
   quickLinks: z.array(FooterLinkSchema).optional(),
   hostingLinks: z.array(FooterLinkSchema).optional(),
@@ -273,3 +269,5 @@ export type AppSettings = z.infer<typeof AppSettingsSchema>;
 
 export type ReferralRequest = z.infer<typeof ReferralRequestSchema>;
 export type ReferralStatus = z.infer<typeof ReferralStatusSchema>;
+
+    

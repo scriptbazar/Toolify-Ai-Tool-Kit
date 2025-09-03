@@ -99,10 +99,6 @@ export default function FooterManagementPage() {
     defaultValues: {
       showLogo: true,
       description: '',
-      topToolsTitle: 'Top Tools',
-      quickLinksTitle: 'Quick Links',
-      hostingLinksTitle: 'Best Hostings',
-      moreToolsTitle: 'More Tools',
       topTools: [],
       quickLinks: [],
       hostingLinks: [],
@@ -229,32 +225,6 @@ export default function FooterManagementPage() {
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-4">
-                        <CaseUpper className="h-6 w-6 text-primary"/>
-                        <div>
-                            <CardTitle className="text-lg">Column Titles</CardTitle>
-                             <CardDescription>Customize the titles for each link column in the footer.</CardDescription>
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField control={form.control} name="topToolsTitle" render={({ field }) => (
-                        <FormItem><FormLabel>Top Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )}/>
-                    <FormField control={form.control} name="quickLinksTitle" render={({ field }) => (
-                        <FormItem><FormLabel>Quick Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )}/>
-                    <FormField control={form.control} name="moreToolsTitle" render={({ field }) => (
-                        <FormItem><FormLabel>More Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )}/>
-                    <FormField control={form.control} name="hostingLinksTitle" render={({ field }) => (
-                        <FormItem><FormLabel>Hosting Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )}/>
-                </CardContent>
-            </Card>
-
             <LinkArrayEditor control={form.control} name="topTools" title="Top Tools Links" />
             <LinkArrayEditor control={form.control} name="quickLinks" title="Quick Links" />
             <LinkArrayEditor control={form.control} name="moreTools" title="More Tools Links" />
@@ -265,3 +235,4 @@ export default function FooterManagementPage() {
   );
 }
 
+    
