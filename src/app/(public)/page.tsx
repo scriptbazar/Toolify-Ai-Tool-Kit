@@ -12,12 +12,53 @@ import { TypingEffect } from '@/components/common/TypingEffect';
 import { getSettings } from '@/ai/flows/settings-management';
 import * as Icons from 'lucide-react';
 
+// Dummy data from review-management, will be replaced by a proper data fetch
+const allReviews = [
+    {
+        id: '1',
+        user: { name: 'Jane Doe', avatar: 'https://i.pravatar.cc/150?u=jane' },
+        toolSlug: 'case-converter',
+        comment: 'This tool is a lifesaver! It saves me so much time when formatting text for my blog posts. Highly recommended!',
+        rating: 5,
+        date: '2024-05-10',
+        status: 'Approved',
+    },
+    {
+        id: '2',
+        user: { name: 'John Smith', avatar: 'https://i.pravatar.cc/150?u=john' },
+        toolSlug: 'password-generator',
+        comment: 'Great for creating strong, secure passwords. The options for length and character types are very useful.',
+        rating: 4,
+        date: '2024-05-12',
+        status: 'Approved',
+    },
+    {
+        id: '3',
+        user: { name: 'Emily White', avatar: 'https://i.pravatar.cc/150?u=emily' },
+        toolSlug: 'json-formatter',
+        comment: 'It works, but sometimes it hangs on very large JSON files. Could be better.',
+        rating: 3,
+        date: '2024-05-15',
+        status: 'Approved',
+    },
+     {
+        id: '4',
+        user: { name: 'Michael Brown', avatar: 'https://i.pravatar.cc/150?u=michael' },
+        toolSlug: 'text-to-speech',
+        comment: 'The voice sounds a bit robotic. I was expecting something more natural for a Pro tool.',
+        rating: 4,
+        date: '2024-05-18',
+        status: 'Approved',
+    },
+];
+
+
 export default async function Home() {
   const tools = await getTools();
   const settings = await getSettings();
   const homepageSettings = settings.homepage || {};
   
-  const testimonials = homepageSettings.testimonials || [];
+  const testimonials = allReviews.filter(review => review.status === 'Approved');
   const steps = homepageSettings.steps || [];
   const features = homepageSettings.features || [];
   const blogPosts = homepageSettings.blogPosts || [];
@@ -61,12 +102,12 @@ export default async function Home() {
         <div className="relative flex flex-col gap-8 overflow-hidden">
             <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
                 {[...testimonials, ...testimonials].map((testimonial, index) => (
-                    <TestimonialCard key={`rtl-${index}`} {...testimonial} />
+                    <TestimonialCard key={`rtl-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
                 ))}
             </div>
             <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
-                {[...testimonials, ...testimonials].map((testimonial, index) => (
-                    <TestimonialCard key={`ltr-${index}`} {...testimonial} />
+                 {[...testimonials, ...testimonials].map((testimonial, index) => (
+                    <TestimonialCard key={`ltr-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
                 ))}
             </div>
         </div>

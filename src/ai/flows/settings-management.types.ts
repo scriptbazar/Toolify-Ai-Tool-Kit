@@ -235,14 +235,6 @@ const HomepageStepSchema = z.object({
   description: z.string().min(1, "Description is required."),
 });
 
-const HomepageTestimonialSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, "Name is required."),
-  role: z.string().min(1, "Role is required."),
-  avatar: z.string().url("Must be a valid URL."),
-  comment: z.string().min(1, "Comment is required."),
-});
-
 const HomepageBlogPostSchema = z.object({
   id: z.string(),
   category: z.string().min(1, "Category is required."),
@@ -257,7 +249,6 @@ const HomepageBlogPostSchema = z.object({
 export const HomepageSettingsSchema = z.object({
   features: z.array(HomepageFeatureSchema).optional(),
   steps: z.array(HomepageStepSchema).optional(),
-  testimonials: z.array(HomepageTestimonialSchema).optional(),
   blogPosts: z.array(HomepageBlogPostSchema).optional(),
 });
 export type HomepageSettings = z.infer<typeof HomepageSettingsSchema>;

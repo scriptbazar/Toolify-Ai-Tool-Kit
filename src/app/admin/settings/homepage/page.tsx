@@ -33,20 +33,14 @@ const HomepageSettingsFormSchema = HomepageSettingsSchema.extend({
     title: z.string().min(1, "Title is required."),
     description: z.string().min(1, "Description is required."),
   })).optional(),
-  testimonials: z.array(z.object({
-    id: z.string(),
-    name: z.string().min(1, "Name is required."),
-    role: z.string().min(1, "Role is required."),
-    avatar: z.string().url("Must be a valid URL."),
-    comment: z.string().min(1, "Comment is required."),
-  })).optional(),
+  // Testimonials are now managed automatically via reviews
 });
 
 type HomepageFormValues = z.infer<typeof HomepageSettingsFormSchema>;
 
 const DynamicSectionEditor = ({ control, name, title, fieldsConfig }: {
     control: any,
-    name: "features" | "steps" | "testimonials",
+    name: "features" | "steps",
     title: string,
     fieldsConfig: { name: string, label: string, placeholder: string, component?: 'textarea' }[]
 }) => {
@@ -119,7 +113,6 @@ export default function HomepageSettingsPage() {
         defaultValues: {
             features: [],
             steps: [],
-            testimonials: [],
         },
     });
 
@@ -190,10 +183,9 @@ export default function HomepageSettingsPage() {
                 </div>
 
                 <Tabs defaultValue="steps">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="steps">4 Easy Steps</TabsTrigger>
                         <TabsTrigger value="features">Why Choose Us</TabsTrigger>
-                        <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
                     </TabsList>
                     <TabsContent value="steps" className="mt-6">
                         <DynamicSectionEditor
@@ -216,19 +208,6 @@ export default function HomepageSettingsPage() {
                                 { name: 'icon', label: 'Icon Name', placeholder: 'e.g., Sparkles' },
                                 { name: 'title', label: 'Title', placeholder: 'e.g., Comprehensive Toolset' },
                                 { name: 'description', label: 'Description', placeholder: 'Describe the feature', component: 'textarea' }
-                            ]}
-                        />
-                    </TabsContent>
-                     <TabsContent value="testimonials" className="mt-6">
-                        <DynamicSectionEditor
-                            control={form.control}
-                            name="testimonials"
-                            title="Testimonials Section"
-                            fieldsConfig={[
-                                { name: 'name', label: 'Name', placeholder: 'e.g., John Doe' },
-                                { name: 'role', label: 'Role / Company', placeholder: 'e.g., CEO at Company' },
-                                { name: 'avatar', label: 'Avatar URL', placeholder: 'https://...' },
-                                { name: 'comment', label: 'Comment', placeholder: 'Write the testimonial here...', component: 'textarea' }
                             ]}
                         />
                     </TabsContent>
