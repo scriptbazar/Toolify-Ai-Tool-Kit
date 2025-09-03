@@ -16,16 +16,29 @@ import {
   MoreHorizontal,
   ThumbsUp,
   ThumbsDown,
+  Trash2,
 } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { getReviews, updateReviewStatus, type Review, type ReviewStatus } from '@/ai/flows/review-management';
+import { getReviews, updateReviewStatus, deleteReview, type Review, type ReviewStatus } from '@/ai/flows/review-management';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -86,6 +99,20 @@ export default function ReviewManagementPage() {
         } else {
             setReviews(originalReviews); // Revert on failure
             toast({ title: 'Error', description: result.message, variant: 'destructive'});
+        }
+    };
+    
+    const handleDeleteReview = async (reviewId: string) => {
+        const originalReviews = [...reviews];
+        const updatedReviews = reviews.filter(r => r.id !== reviewId);
+        setReviews(updatedReviews);
+
+        const result = await deleteReview(reviewId);
+        if (result.success) {
+            toast({ title: 'Success', description: 'Review has been deleted.' });
+        } else {
+            setReviews(originalReviews);
+            toast({ title: 'Error', description: result.message, variant: 'destructive' });
         }
     };
 
@@ -193,6 +220,28 @@ export default function ReviewManagementPage() {
                             <DropdownMenuContent align="end">
                                 {review.status !== 'approved' && <DropdownMenuItem onClick={() => handleStatusUpdate(review.id, 'approved')}><ThumbsUp className="mr-2 h-4 w-4 text-green-500"/>Approve</DropdownMenuItem>}
                                 {review.status !== 'rejected' && <DropdownMenuItem onClick={() => handleStatusUpdate(review.id, 'rejected')}><ThumbsDown className="mr-2 h-4 w-4 text-red-500"/>Reject</DropdownMenuItem>}
+                                <DropdownMenuSeparator />
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600">
+                                            <Trash2 className="mr-2 h-4 w-4"/>Delete
+                                        </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently delete the review from the database.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteReview(review.id)}>
+                                                Delete
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </DropdownMenuContent>
                            </DropdownMenu>
                         </TableCell>

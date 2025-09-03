@@ -89,3 +89,22 @@ export async function updateReviewStatus(reviewId: string, status: 'approved' | 
     return { success: false, message: error.message || 'An unknown error occurred.' };
   }
 }
+
+
+/**
+ * Deletes a review from Firestore.
+ * @param {string} reviewId - The ID of the review to delete.
+ * @returns {Promise<{ success: boolean; message: string }>}
+ */
+export async function deleteReview(reviewId: string): Promise<{ success: boolean; message: string }> {
+    if (!adminDb) {
+        return { success: false, message: "Database not initialized." };
+    }
+    try {
+        await adminDb.collection('reviews').doc(reviewId).delete();
+        return { success: true, message: 'Review deleted successfully.' };
+    } catch (error: any) {
+        console.error(`Error deleting review ${reviewId}:`, error);
+        return { success: false, message: error.message || 'An unknown error occurred.' };
+    }
+}
