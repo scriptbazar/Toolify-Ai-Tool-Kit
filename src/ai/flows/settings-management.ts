@@ -21,56 +21,56 @@ const MAIN_SETTINGS_DOC_ID = 'main';
 
 const defaultFaqSettings = {
     contactFaqs: [
-        {
-            id: "contact-1",
-            icon: "Mail" as const,
-            question: "How can I contact customer support?",
-            answer: "You can reach our support team by creating a ticket through your user dashboard for the fastest response. For general inquiries, you can also email us at support@toolifyai.com.",
-        },
-        {
-            id: "contact-2",
-            icon: "Clock" as const,
-            question: "What are your business hours?",
-            answer: "Our support team is available 24/7 to assist you with any questions or issues. We strive to respond to all inquiries within a few hours.",
-        },
-        {
-            id: "contact-3",
-            icon: "MapPin" as const,
-            question: "Where are you located?",
-            answer: "Our company is fully remote, with team members distributed across the globe. Our official headquarters is registered in Delhi, India.",
-        },
-        {
-            id: "contact-4",
-            icon: "Briefcase" as const,
-            question: "Do you offer enterprise solutions?",
-            answer: "Yes, we offer custom enterprise plans tailored to the specific needs of large organizations. Please contact our sales team through the inquiry form for more details.",
-        },
+      {
+        id: "contact-1",
+        icon: "Mail" as const,
+        question: "How can I contact customer support?",
+        answer: "You can reach our support team by creating a ticket through your user dashboard for the fastest response. For general inquiries, you can also email us at support@toolifyai.com.",
+      },
+      {
+        id: "contact-2",
+        icon: "Clock" as const,
+        question: "What are your business hours?",
+        answer: "Our support team is available 24/7 to assist you with any questions or issues. We strive to respond to all inquiries within a few hours.",
+      },
+      {
+        id: "contact-3",
+        icon: "MapPin" as const,
+        question: "Where are you located?",
+        answer: "Our company is fully remote, with team members distributed across the globe. Our official headquarters is registered in Delhi, India.",
+      },
+      {
+        id: "contact-4",
+        icon: "Briefcase" as const,
+        question: "Do you offer enterprise solutions?",
+        answer: "Yes, we offer custom enterprise plans tailored to the specific needs of large organizations. Please contact our sales team through the inquiry form for more details.",
+      },
     ],
     pricingFaqs: [
-        {
-            id: "pricing-1",
-            icon: "CreditCard" as const,
-            question: "What payment methods do you accept?",
-            answer: "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and various other payment methods depending on your region.",
-        },
-        {
-            id: "pricing-2",
-            icon: "ShieldCheck" as const,
-            question: "Is my payment information secure?",
-            answer: "Absolutely. All payments are processed through Stripe, a certified PCI Service Provider Level 1. We do not store any of your credit card information on our servers.",
-        },
-        {
-            id: "pricing-3",
-            icon: "RefreshCw" as const,
-            question: "Can I change my plan later?",
-            answer: "Yes, you can upgrade or downgrade your plan at any time from your account settings. The changes will be prorated and applied to your next billing cycle.",
-        },
-        {
-            id: "pricing-4",
-            icon: "XCircle" as const,
-            question: "Do you offer refunds?",
-            answer: "We offer a 30-day money-back guarantee on all our paid plans. If you're not satisfied, you can request a full refund within 30 days of your purchase.",
-        },
+      {
+        id: "pricing-1",
+        icon: "CreditCard" as const,
+        question: "What payment methods do you accept?",
+        answer: "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and various other payment methods depending on your region.",
+      },
+      {
+        id: "pricing-2",
+        icon: "ShieldCheck" as const,
+        question: "Is my payment information secure?",
+        answer: "Absolutely. All payments are processed through Stripe, a certified PCI Service Provider Level 1. We do not store any of your credit card information on our servers.",
+      },
+      {
+        id: "pricing-3",
+        icon: "RefreshCw" as const,
+        question: "Can I change my plan later?",
+        answer: "Yes, you can upgrade or downgrade your plan at any time from your account settings. The changes will be prorated and applied to your next billing cycle.",
+      },
+      {
+        id: "pricing-4",
+        icon: "XCircle" as const,
+        question: "Do you offer refunds?",
+        answer: "We offer a 30-day money-back guarantee on all our paid plans. If you're not satisfied, you can request a full refund within 30 days of your purchase.",
+      },
     ],
     affiliateFaqs: [
         {
@@ -368,6 +368,7 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
   try {
     const currentSettings = await getSettings();
     
+    // Deep merge the new settings into the current settings
     const mergedSettings = merge({}, currentSettings, newSettings);
     
     // BUG FIX: If the referral program is being disabled, ensure related numeric values
@@ -386,7 +387,7 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
 
     // Save the fully merged and validated object to Firestore
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
-    await docRef.set(validationResult.data);
+    await docRef.set(validationResult.data, { merge: true }); // Use set with merge:true for safety
     
     // Handle environment variable updates separately
     const geminiApiKey = mergedSettings.general?.apiKeys?.gemini;
@@ -420,5 +421,3 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
     return { success: false, message: error.message || 'An unknown error occurred while updating settings.' };
   }
 }
-
-    
