@@ -11,12 +11,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Save, Loader2, PlusCircle, Trash2, GripVertical, CaseUpper } from 'lucide-react';
+import { Save, Loader2, PlusCircle, Trash2, GripVertical, CaseUpper, Footprints, SlidersHorizontal, ChevronDown, Link as LinkIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import { FooterSettingsSchema, type FooterSettings } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { cn } from '@/lib/utils';
 
 type FooterFormValues = z.infer<typeof FooterSettingsSchema>;
 
@@ -26,47 +28,64 @@ const LinkArrayEditor = ({ control, name, title }: { control: any, name: "topToo
         name
     });
 
+    const [isOpen, setIsOpen] = useState(false);
+
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>{title}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {fields.map((field, index) => (
-                    <div key={field.id} className="flex items-center gap-2 p-2 border rounded-lg">
-                        <GripVertical className="h-5 w-5 text-muted-foreground" />
-                        <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-2">
-                           <FormField
-                              control={control}
-                              name={`${name}.${index}.name`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl><Input {...field} placeholder="Link Name" /></FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                             <FormField
-                              control={control}
-                              name={`${name}.${index}.href`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl><Input {...field} placeholder="URL (e.g., /about-us)" /></FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <Card>
+                <CollapsibleTrigger asChild>
+                    <div className="flex w-full cursor-pointer items-center justify-between p-4">
+                        <div className="flex items-center gap-4">
+                            <LinkIcon className="h-6 w-6 text-primary"/>
+                            <div>
+                                <CardTitle className="text-lg">{title}</CardTitle>
+                            </div>
                         </div>
-                        <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
-                            <Trash2 className="h-4 w-4" />
+                        <Button variant="ghost" size="icon">
+                            <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
+                            <span className="sr-only">Toggle</span>
                         </Button>
                     </div>
-                ))}
-                <Button type="button" variant="outline" onClick={() => append({ id: `link_${Date.now()}`, name: '', href: '' })}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Add Link
-                </Button>
-            </CardContent>
-        </Card>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                    <CardContent className="space-y-4 pt-0">
+                        {fields.map((field, index) => (
+                            <div key={field.id} className="flex items-center gap-2 p-2 border rounded-lg bg-muted/50">
+                                <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
+                                <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <FormField
+                                    control={control}
+                                    name={`${name}.${index}.name`}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormControl><Input {...field} placeholder="Link Name" /></FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                    />
+                                    <FormField
+                                    control={control}
+                                    name={`${name}.${index}.href`}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormControl><Input {...field} placeholder="URL (e.g., /about-us)" /></FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                    />
+                                </div>
+                                <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)} className="shrink-0">
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        ))}
+                        <Button type="button" variant="outline" onClick={() => append({ id: `link_${Date.now()}`, name: '', href: '' })}>
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add Link
+                        </Button>
+                    </CardContent>
+                </CollapsibleContent>
+            </Card>
+        </Collapsible>
     )
 }
 
@@ -152,88 +171,97 @@ export default function FooterManagementPage() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Footer Management</h1>
-          <p className="text-muted-foreground">
-            Customize the content and links in your website's footer.
-          </p>
+        <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Footer Management</h1>
+              <p className="text-muted-foreground">
+                Customize the content and links in your website's footer.
+              </p>
+            </div>
+             <Button type="submit" disabled={isSaving}>
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save Changes
+            </Button>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1 space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>General Settings</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="showLogo"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                <div className="space-y-0.5">
-                                    <FormLabel>Show Footer Logo</FormLabel>
-                                </div>
-                                <FormControl>
-                                    <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                    />
-                                </FormControl>
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Footer Description</FormLabel>
-                                <FormControl>
-                                    <Textarea {...field} placeholder="A short description about your site for the footer." />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><CaseUpper/> Column Titles</CardTitle>
-                        <CardDescription>Customize the titles for each link column in the footer.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                         <FormField control={form.control} name="topToolsTitle" render={({ field }) => (
-                            <FormItem><FormLabel>Top Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                         )}/>
-                         <FormField control={form.control} name="quickLinksTitle" render={({ field }) => (
-                            <FormItem><FormLabel>Quick Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                         )}/>
-                         <FormField control={form.control} name="moreToolsTitle" render={({ field }) => (
-                            <FormItem><FormLabel>More Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                         )}/>
-                         <FormField control={form.control} name="hostingLinksTitle" render={({ field }) => (
-                            <FormItem><FormLabel>Hosting Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                         )}/>
-                    </CardContent>
-                </Card>
-            </div>
-            <div className="lg:col-span-2 space-y-6">
-                 <LinkArrayEditor control={form.control} name="topTools" title="Top Tools Links" />
-                 <LinkArrayEditor control={form.control} name="quickLinks" title="Quick Links" />
-                 <LinkArrayEditor control={form.control} name="moreTools" title="More Tools Links" />
-                 <LinkArrayEditor control={form.control} name="hostingLinks" title="Hosting Links" />
-            </div>
-        </div>
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-4">
+                        <SlidersHorizontal className="h-6 w-6 text-primary"/>
+                        <div>
+                            <CardTitle className="text-lg">General Settings</CardTitle>
+                            <CardDescription>Basic footer configuration.</CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <FormField
+                        control={form.control}
+                        name="showLogo"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                            <div className="space-y-0.5">
+                                <FormLabel>Show Footer Logo</FormLabel>
+                            </div>
+                            <FormControl>
+                                <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                />
+                            </FormControl>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Footer Description</FormLabel>
+                            <FormControl>
+                                <Textarea {...field} placeholder="A short description about your site for the footer." />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </CardContent>
+            </Card>
 
-        <div className="flex justify-end pt-6">
-          <Button type="submit" disabled={isSaving}>
-            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            Save Footer Settings
-          </Button>
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-4">
+                        <CaseUpper className="h-6 w-6 text-primary"/>
+                        <div>
+                            <CardTitle className="text-lg">Column Titles</CardTitle>
+                             <CardDescription>Customize the titles for each link column in the footer.</CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField control={form.control} name="topToolsTitle" render={({ field }) => (
+                        <FormItem><FormLabel>Top Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                    <FormField control={form.control} name="quickLinksTitle" render={({ field }) => (
+                        <FormItem><FormLabel>Quick Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                    <FormField control={form.control} name="moreToolsTitle" render={({ field }) => (
+                        <FormItem><FormLabel>More Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                    <FormField control={form.control} name="hostingLinksTitle" render={({ field }) => (
+                        <FormItem><FormLabel>Hosting Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                </CardContent>
+            </Card>
+
+            <LinkArrayEditor control={form.control} name="topTools" title="Top Tools Links" />
+            <LinkArrayEditor control={form.control} name="quickLinks" title="Quick Links" />
+            <LinkArrayEditor control={form.control} name="moreTools" title="More Tools Links" />
+            <LinkArrayEditor control={form.control} name="hostingLinks" title="Hosting Links" />
         </div>
       </form>
     </Form>
   );
 }
+
