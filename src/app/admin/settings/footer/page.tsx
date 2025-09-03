@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -31,7 +32,7 @@ const LinkArrayEditor = ({ control, name }: { control: any, name: "topTools" | "
         <div className="space-y-4 pt-0">
             {fields.map((field, index) => (
                 <div key={field.id} className="flex items-center gap-2 p-2 border rounded-lg bg-muted/50">
-                    <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
+                    <GripVertical className="h-5 w-5 text-muted-foreground shrink-0 cursor-move" />
                     <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-2">
                     <FormField
                         control={control}
