@@ -109,7 +109,7 @@ export default function AddNewPostPage() {
     }
   };
 
-  const handlePostSubmit = async (values: PostFormValues, status: PostFormValues['status']) => {
+  const processAndSavePost = async (values: PostFormValues, status: PostFormValues['status']) => {
     setIsSaving(true);
     try {
       let imageUrl: string | undefined = undefined;
@@ -157,7 +157,7 @@ export default function AddNewPostPage() {
         </p>
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit((values) => handlePostSubmit(values, 'Published'))} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <form onSubmit={form.handleSubmit((values) => processAndSavePost(values, 'Published'))} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
@@ -235,7 +235,7 @@ export default function AddNewPostPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Button type="button" variant="outline" className="w-full" onClick={() => form.handleSubmit((values) => handlePostSubmit(values, 'Draft'))()} disabled={isSaving}>
+                  <Button type="button" variant="outline" className="w-full" onClick={form.handleSubmit((values) => processAndSavePost(values, 'Draft'))} disabled={isSaving}>
                      <Save className="mr-2 h-4 w-4" />
                      Save Draft
                   </Button>

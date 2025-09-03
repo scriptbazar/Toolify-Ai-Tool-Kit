@@ -6,9 +6,10 @@
  */
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { PostSchema, type Post } from './blog-management.types';
+import { PostSchema, type Post, CommentSchema, type Comment } from './blog-management.types';
 
 const POSTS_COLLECTION = 'blogPosts';
+const COMMENTS_COLLECTION = 'blogComments';
 
 /**
  * Fetches all posts from Firestore, ordered by creation date.
@@ -27,7 +28,7 @@ export async function getPosts(): Promise<Post[]> {
         id: doc.id,
         ...data,
         createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-        publishedAt: (data.publishedAt as Timestamp)?.toDate().toISOString() || undefined,
+        publishedAt: data.publishedAt ? (data.publishedAt as Timestamp)?.toDate().toISOString() : undefined,
       });
     });
 
@@ -50,9 +51,13 @@ export async function upsertPost(postData: Partial<Omit<Post, 'id' | 'createdAt'
     if (id) {
       // Update existing post
       const postRef = adminDb.collection(POSTS_COLLECTION).doc(id);
+      const currentDoc = await postRef.get();
+      const wasPublished = currentDoc.exists() && currentDoc.data()?.status === 'Published';
+
       await postRef.update({
           ...data,
-          ...(data.status === 'Published' && !data.publishedAt && { publishedAt: FieldValue.serverTimestamp() })
+          // Only set publishedAt if the status is changing to 'Published' for the first time
+          ...(data.status === 'Published' && !wasPublished && { publishedAt: FieldValue.serverTimestamp() })
       });
       return { success: true, message: 'Post updated successfully.', postId: id };
     } else {
@@ -69,4 +74,32 @@ export async function upsertPost(postData: Partial<Omit<Post, 'id' | 'createdAt'
     console.error("Error upserting post:", error);
     return { success: false, message: error.message || 'An unknown error occurred.' };
   }
+}
+
+
+/**
+ * Fetches all comments from Firestore.
+ * @returns {Promise<Comment[]>} A list of all comments.
+ */
+export async function getComments(): Promise<Comment[]> {
+    try {
+        const snapshot = await adminDb.collection(COMMENTS_COLLECTION).orderBy('submittedOn', 'desc').get();
+        if (snapshot.empty) {
+            return [];
+        }
+
+        const comments = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return CommentSchema.parse({
+                id: doc.id,
+                ...data,
+                submittedOn: (data.submittedOn as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+            });
+        });
+
+        return comments;
+    } catch (error) {
+        console.error("Error fetching comments:", error);
+        return [];
+    }
 }
