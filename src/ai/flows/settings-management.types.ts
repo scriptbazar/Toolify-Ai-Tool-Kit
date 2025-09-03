@@ -192,6 +192,7 @@ export const CustomPageSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
+  icon: z.string().optional(),
   content: z.string().optional(),
 });
 export type CustomPage = z.infer<typeof CustomPageSchema>;

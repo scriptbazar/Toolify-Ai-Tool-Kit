@@ -31,6 +31,7 @@ const defaultSettings = AppSettingsSchema.parse({
       id: 'about-us',
       slug: 'about-us',
       title: 'About Us',
+      icon: 'Users',
       content: `
         <div class="space-y-6">
           <p class="text-lg">Welcome to ToolifyAI, your all-in-one destination for a smarter, more efficient digital life. Our mission is to provide a comprehensive suite of powerful, easy-to-use online utilities that simplify complex tasks and boost productivity for everyone—from students and content creators to developers and business professionals.</p>
@@ -63,24 +64,28 @@ const defaultSettings = AppSettingsSchema.parse({
       id: 'contact-us',
       slug: 'contact-us',
       title: 'Contact Us',
+      icon: 'Mail',
       content: '<p>Contact form coming soon. For now, please reach out to us at contact@toolifyai.com.</p>',
     },
     {
       id: 'privacy-policy',
       slug: 'privacy-policy',
       title: 'Privacy Policy',
+      icon: 'Shield',
       content: '',
     },
     {
       id: 'terms-conditions',
       slug: 'terms-conditions',
       title: 'Terms & Conditions',
+      icon: 'FileText',
       content: '',
     },
     {
       id: 'dmca',
       slug: 'dmca',
       title: 'DMCA',
+      icon: 'Gavel',
       content: '',
     },
   ] },
@@ -133,7 +138,7 @@ const defaultSettings = AppSettingsSchema.parse({
   ] },
   footer: {
     showLogo: true,
-    description: "ToolifyAI is your go-to hub for powerful, easy-to-use online utilities that simplify everyday tasks. Whether you need converters, analyzers, or creative tools, ToolifyAI connects you to everything in one place.",
+    description: "ToolifyAI is your go-to hub for powerful, easy-to-use online utilities that simplify everyday tasks. Whether you need to convert, analyze, or create, we've got you covered.",
     topToolsTitle: 'Top Tools',
     quickLinksTitle: 'Quick Links',
     hostingLinksTitle: 'Best Hostings',

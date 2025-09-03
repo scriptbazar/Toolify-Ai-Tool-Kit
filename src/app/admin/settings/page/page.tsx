@@ -18,6 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import * as Icons from 'lucide-react';
 
 
 const pageManagementFormSchema = z.object({
@@ -25,6 +26,7 @@ const pageManagementFormSchema = z.object({
         id: z.string(),
         slug: z.string().min(1, "Slug is required."),
         title: z.string().min(1, "Title is required."),
+        icon: z.string().optional(),
         content: z.string().optional(),
     })).optional(),
 });
@@ -94,7 +96,7 @@ export default function PageManagementPage() {
     
     const handleAddNewPage = () => {
         const newPageId = `page_${Date.now()}`;
-        append({ id: newPageId, slug: '', title: '', content: '' });
+        append({ id: newPageId, slug: '', title: '', icon: 'File', content: '' });
         setOpenPageId(newPageId);
     };
     
@@ -144,6 +146,8 @@ export default function PageManagementPage() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             {fields.map((field, index) => {
                                 const isOpen = openPageId === field.id;
+                                const iconName = form.watch(`pages.${index}.icon`) || 'FileText';
+                                const IconComponent = (Icons as any)[iconName] || Icons.FileText;
                                 return (
                                 <Collapsible
                                     key={field.id}
@@ -157,7 +161,7 @@ export default function PageManagementPage() {
                                              <div className="flex-1 text-left cursor-pointer">
                                                 <div className="flex justify-between items-center">
                                                     <p className="font-medium truncate flex items-center gap-2">
-                                                        <FileText className="h-4 w-4" />
+                                                        <IconComponent className="h-4 w-4" />
                                                         {form.watch(`pages.${index}.title`) || 'New Page'}
                                                     </p>
                                                     <div className="flex items-center gap-4">
@@ -176,7 +180,7 @@ export default function PageManagementPage() {
                                     </div>
                                      <CollapsibleContent>
                                         <div className="p-4 border rounded-lg -mt-2 space-y-4">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                 <FormField
                                                     control={form.control}
                                                     name={`pages.${index}.title`}
@@ -204,6 +208,22 @@ export default function PageManagementPage() {
                                                                 <Input 
                                                                     {...slugField}
                                                                     placeholder="e.g., about-us" 
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name={`pages.${index}.icon`}
+                                                    render={({ field: iconField }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Icon Name</FormLabel>
+                                                            <FormControl>
+                                                                <Input 
+                                                                    {...iconField}
+                                                                    placeholder="e.g., Users" 
                                                                 />
                                                             </FormControl>
                                                             <FormMessage />
