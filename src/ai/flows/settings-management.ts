@@ -184,6 +184,32 @@ const defaultHomepageSettings = {
       description: 'Easily download your results or share them with others in just a click.',
     },
   ],
+  features: [
+    {
+      id: 'feat1',
+      icon: 'LifeBuoy' as const,
+      title: '24/7 Support',
+      description: 'Our dedicated support team is available around the clock to assist you with any questions or issues.',
+    },
+    {
+      id: 'feat2',
+      icon: 'Wand2' as const,
+      title: 'Wide Range of Tools',
+      description: 'From content creation to technical utilities, find everything you need in one convenient platform.',
+    },
+    {
+      id: 'feat3',
+      icon: 'MessageSquare' as const,
+      title: 'Live Chat',
+      description: 'Get instant help and support from our team through live chat.',
+    },
+    {
+      id: 'feat4',
+      icon: 'Users' as const,
+      title: 'Community',
+      description: 'Join our community to share ideas, get feedback, and connect with other users.',
+    },
+  ],
 };
 
 
