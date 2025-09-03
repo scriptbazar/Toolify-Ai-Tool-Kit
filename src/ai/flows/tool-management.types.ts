@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
 
-export const ToolCategorySchema = z.enum(['text', 'pdf', 'ai', 'dev', 'image', 'seo']);
+export const ToolCategorySchema = z.enum(['text', 'pdf', 'ai', 'dev', 'image', 'seo', 'video', 'cal_con']);
 export type ToolCategory = z.infer<typeof ToolCategorySchema>;
 
 export const ToolSchema = z.object({
