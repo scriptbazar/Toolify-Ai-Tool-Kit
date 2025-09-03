@@ -1,43 +1,35 @@
-
 'use server';
 
 /**
  * @fileOverview Manages reviews and comments.
  */
 import { adminDb } from '@/lib/firebase-admin';
-import { type Comment } from './blog-management.types';
+import { type Review, ReviewSchema } from './review-management.types';
 
 
 /**
- * Fetches all comments from the 'comments' collection in Firestore.
- * @returns {Promise<Comment[]>} A list of all comments.
+ * Fetches all reviews from the 'reviews' collection in Firestore.
+ * @returns {Promise<Review[]>} A list of all reviews.
  */
-export async function getComments(): Promise<Comment[]> {
+export async function getReviews(): Promise<Review[]> {
     try {
-        const snapshot = await adminDb.collection('comments').orderBy('submittedOn', 'desc').get();
+        const snapshot = await adminDb.collection('reviews').orderBy('submittedOn', 'desc').get();
         if (snapshot.empty) {
             return [];
         }
 
-        const comments = snapshot.docs.map(doc => {
+        const reviews = snapshot.docs.map(doc => {
             const data = doc.data();
-            return {
+            return ReviewSchema.parse({
                 id: doc.id,
-                authorId: data.authorId,
-                authorName: data.authorName,
-                authorAvatar: data.authorAvatar,
-                comment: data.comment,
-                postId: data.postId,
-                postTitle: data.postTitle,
-                status: data.status,
+                ...data,
                 submittedOn: data.submittedOn.toDate().toISOString(),
-            } as Comment;
+            });
         });
 
-        return comments;
+        return reviews;
     } catch (error) {
-        console.error("Error fetching comments:", error);
+        console.error("Error fetching reviews:", error);
         return [];
     }
 }
-
