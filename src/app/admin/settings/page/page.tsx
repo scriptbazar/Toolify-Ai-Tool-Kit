@@ -140,67 +140,86 @@ export default function PageManagementPage() {
                         <CardTitle>Your Pages</CardTitle>
                         <CardDescription>Click on a page to expand and edit its content.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        {fields.map((field, index) => (
-                            <Collapsible
-                                key={field.id}
-                                open={openPageId === field.id}
-                                onOpenChange={() => setOpenPageId(openPageId === field.id ? null : field.id)}
-                                className="space-y-2"
-                            >
-                                <div className="flex items-center gap-2 p-4 border rounded-lg bg-muted/50">
-                                    <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
-                                    <CollapsibleTrigger asChild>
-                                         <div className="flex-1 text-left cursor-pointer">
-                                            <div className="flex justify-between items-center">
-                                                <p className="font-medium truncate flex items-center gap-2">
-                                                    <FileText className="h-4 w-4" />
-                                                    {form.watch(`pages.${index}.title`) || 'New Page'}
-                                                </p>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                                        <LinkIcon className="h-3 w-3" />
-                                                        /{form.watch(`pages.${index}.slug`)}
+                    <CardContent>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {fields.map((field, index) => (
+                                <Collapsible
+                                    key={field.id}
+                                    open={openPageId === field.id}
+                                    onOpenChange={() => setOpenPageId(openPageId === field.id ? null : field.id)}
+                                    className="space-y-2"
+                                >
+                                    <div className="flex items-center gap-2 p-4 border rounded-lg bg-muted/50">
+                                        <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
+                                        <CollapsibleTrigger asChild>
+                                             <div className="flex-1 text-left cursor-pointer">
+                                                <div className="flex justify-between items-center">
+                                                    <p className="font-medium truncate flex items-center gap-2">
+                                                        <FileText className="h-4 w-4" />
+                                                        {form.watch(`pages.${index}.title`) || 'New Page'}
+                                                    </p>
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                                            <LinkIcon className="h-3 w-3" />
+                                                            /{form.watch(`pages.${index}.slug`)}
+                                                        </div>
+                                                        <ChevronDown className={cn("h-5 w-5 transition-transform", openPageId === field.id && "rotate-180")} />
                                                     </div>
-                                                    <ChevronDown className={cn("h-5 w-5 transition-transform", openPageId === field.id && "rotate-180")} />
                                                 </div>
                                             </div>
-                                        </div>
-                                    </CollapsibleTrigger>
-                                     <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)} className="shrink-0">
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                                 <CollapsibleContent>
-                                    <div className="p-4 border rounded-lg -mt-2 space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <FormField
-                                                control={form.control}
-                                                name={`pages.${index}.title`}
-                                                render={({ field: titleField }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Page Title</FormLabel>
-                                                        <FormControl>
-                                                            <Input 
-                                                                {...titleField} 
-                                                                onChange={(e) => handleTitleChange(index, e.target.value)}
-                                                                placeholder="e.g., About Us" 
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                        </CollapsibleTrigger>
+                                         <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)} className="shrink-0">
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                     <CollapsibleContent>
+                                        <div className="p-4 border rounded-lg -mt-2 space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <FormField
+                                                    control={form.control}
+                                                    name={`pages.${index}.title`}
+                                                    render={({ field: titleField }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Page Title</FormLabel>
+                                                            <FormControl>
+                                                                <Input 
+                                                                    {...titleField} 
+                                                                    onChange={(e) => handleTitleChange(index, e.target.value)}
+                                                                    placeholder="e.g., About Us" 
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                 <FormField
+                                                    control={form.control}
+                                                    name={`pages.${index}.slug`}
+                                                    render={({ field: slugField }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Page Slug (URL)</FormLabel>
+                                                            <FormControl>
+                                                                <Input 
+                                                                    {...slugField}
+                                                                    placeholder="e.g., about-us" 
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
                                              <FormField
                                                 control={form.control}
-                                                name={`pages.${index}.slug`}
-                                                render={({ field: slugField }) => (
+                                                name={`pages.${index}.content`}
+                                                render={({ field: contentField }) => (
                                                     <FormItem>
-                                                        <FormLabel>Page Slug (URL)</FormLabel>
+                                                        <FormLabel>Page Content (HTML supported)</FormLabel>
                                                         <FormControl>
-                                                            <Input 
-                                                                {...slugField}
-                                                                placeholder="e.g., about-us" 
+                                                            <Textarea 
+                                                                {...contentField}
+                                                                placeholder="Enter your page content here. You can use HTML tags like <p>, <h2>, <ul>, etc."
+                                                                className="min-h-[250px] font-mono"
                                                             />
                                                         </FormControl>
                                                         <FormMessage />
@@ -208,27 +227,10 @@ export default function PageManagementPage() {
                                                 )}
                                             />
                                         </div>
-                                         <FormField
-                                            control={form.control}
-                                            name={`pages.${index}.content`}
-                                            render={({ field: contentField }) => (
-                                                <FormItem>
-                                                    <FormLabel>Page Content (HTML supported)</FormLabel>
-                                                    <FormControl>
-                                                        <Textarea 
-                                                            {...contentField}
-                                                            placeholder="Enter your page content here. You can use HTML tags like <p>, <h2>, <ul>, etc."
-                                                            className="min-h-[250px] font-mono"
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                 </CollapsibleContent>
-                            </Collapsible>
-                        ))}
+                                     </CollapsibleContent>
+                                </Collapsible>
+                            ))}
+                        </div>
                          {fields.length === 0 && (
                             <p className="text-center text-muted-foreground py-10">No custom pages have been created yet.</p>
                         )}
