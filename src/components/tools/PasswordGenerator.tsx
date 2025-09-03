@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Copy, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '../ui/checkbox';
-import { Slider } from '../ui/slider';
+import { Slider } from '@/components/ui/slider';
 
 export function PasswordGenerator() {
   const [password, setPassword] = useState('');
