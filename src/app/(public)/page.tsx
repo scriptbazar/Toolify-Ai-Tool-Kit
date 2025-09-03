@@ -8,12 +8,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star } from 'lucide-react';
-import { TypingEffect } from '@/components/common/TypingEffect';
 import { getSettings } from '@/ai/flows/settings-management';
 import * as Icons from 'lucide-react';
 import { getPosts } from '@/ai/flows/blog-management';
 import { getReviews } from '@/ai/flows/review-management';
 import { ResponsiveHero } from '@/components/common/ResponsiveHero';
+import { CategoryCard } from '@/components/tools/CategoryCard';
 
 
 export default async function Home() {
@@ -107,6 +107,11 @@ export default async function Home() {
                 Explore All Tools <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
+          </div>
+          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-4xl mx-auto">
+            {toolCategories.filter(c => c.id !== 'cal_con').map(category => (
+                <CategoryCard key={category.id} category={category} />
+            ))}
           </div>
         </div>
       </section>
