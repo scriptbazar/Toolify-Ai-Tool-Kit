@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Save, Loader2, PlusCircle, Trash2, GripVertical, CaseUpper, Footprints, SlidersHorizontal, ChevronDown, Link as LinkIcon } from 'lucide-react';
+import { Save, Loader2, PlusCircle, Trash2, GripVertical, CaseUpper, Footprints, SlidersHorizontal, ChevronDown, Link as LinkIcon, Edit2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import { FooterSettingsSchema, type FooterSettings } from '@/ai/flows/settings-management.types';
@@ -89,16 +89,56 @@ const LinkArrayEditor = ({ control, name, title }: { control: any, name: "topToo
     )
 }
 
+const CollapsibleSection = ({ id, title, children, isOpen, onToggle, isFullWidth, icon: Icon }: { id: string, title: string, children: React.ReactNode, isOpen: boolean, onToggle: (id: string) => void, isFullWidth: boolean, icon: React.ElementType }) => {
+  return (
+    <Collapsible
+      open={isOpen}
+      onOpenChange={() => onToggle(id)}
+      className={cn(
+        "space-y-2 transition-all duration-300",
+        isFullWidth ? "md:col-span-2" : "col-span-1"
+      )}
+    >
+      <Card>
+        <CollapsibleTrigger asChild>
+            <div className="flex w-full cursor-pointer items-center justify-between p-4">
+                <div className="flex items-center gap-4">
+                    <Icon className="h-6 w-6 text-primary"/>
+                    <div>
+                        <CardTitle className="text-lg">{title}</CardTitle>
+                    </div>
+                </div>
+                <Button variant="ghost" size="icon">
+                    <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
+                    <span className="sr-only">Toggle</span>
+                </Button>
+            </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+            <CardContent>
+                {children}
+            </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  )
+}
+
 export default function FooterManagementPage() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const [openSection, setOpenSection] = useState<string | null>(null);
 
   const form = useForm<FooterFormValues>({
     resolver: zodResolver(FooterSettingsSchema),
     defaultValues: {
       showLogo: true,
       description: '',
+      topToolsTitle: 'Top Tools',
+      quickLinksTitle: 'Quick Links',
+      hostingLinksTitle: 'Best Hostings',
+      moreToolsTitle: 'More Tools',
       topTools: [],
       quickLinks: [],
       hostingLinks: [],
@@ -147,6 +187,11 @@ export default function FooterManagementPage() {
       setIsSaving(false);
     }
   };
+  
+  const handleToggle = (id: string) => {
+    setOpenSection(prev => (prev === id ? null : id));
+  };
+
 
   if (loading) {
     return (
@@ -181,49 +226,60 @@ export default function FooterManagementPage() {
         </div>
         
         <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-4">
-                        <SlidersHorizontal className="h-6 w-6 text-primary"/>
-                        <div>
-                            <CardTitle className="text-lg">General Settings</CardTitle>
-                            <CardDescription>Basic footer configuration.</CardDescription>
-                        </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CollapsibleSection id="general" title="General Settings" icon={SlidersHorizontal} isOpen={openSection === 'general'} onToggle={handleToggle} isFullWidth={openSection === 'general'}>
+                    <div className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="showLogo"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                <div className="space-y-0.5">
+                                    <FormLabel>Show Footer Logo</FormLabel>
+                                </div>
+                                <FormControl>
+                                    <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    />
+                                </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Footer Description</FormLabel>
+                                <FormControl>
+                                    <Textarea {...field} placeholder="A short description about your site for the footer." />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <FormField
-                        control={form.control}
-                        name="showLogo"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                            <div className="space-y-0.5">
-                                <FormLabel>Show Footer Logo</FormLabel>
-                            </div>
-                            <FormControl>
-                                <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                />
-                            </FormControl>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Footer Description</FormLabel>
-                            <FormControl>
-                                <Textarea {...field} placeholder="A short description about your site for the footer." />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </CardContent>
-            </Card>
+                </CollapsibleSection>
+
+                <CollapsibleSection id="titles" title="Column Titles" icon={Edit2} isOpen={openSection === 'titles'} onToggle={handleToggle} isFullWidth={openSection === 'titles'}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <FormField control={form.control} name="topToolsTitle" render={({ field }) => (
+                            <FormItem><FormLabel>Top Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                         <FormField control={form.control} name="quickLinksTitle" render={({ field }) => (
+                            <FormItem><FormLabel>Quick Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                         <FormField control={form.control} name="moreToolsTitle" render={({ field }) => (
+                            <FormItem><FormLabel>More Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                         <FormField control={form.control} name="hostingLinksTitle" render={({ field }) => (
+                            <FormItem><FormLabel>Hosting Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                    </div>
+                </CollapsibleSection>
+            </div>
+
 
             <LinkArrayEditor control={form.control} name="topTools" title="Top Tools Links" />
             <LinkArrayEditor control={form.control} name="quickLinks" title="Quick Links" />
@@ -234,5 +290,3 @@ export default function FooterManagementPage() {
     </Form>
   );
 }
-
-    

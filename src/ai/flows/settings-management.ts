@@ -134,6 +134,10 @@ const defaultSettings = AppSettingsSchema.parse({
   footer: {
     showLogo: true,
     description: "ToolifyAI is your go-to hub for powerful, easy-to-use online utilities that simplify everyday tasks. Whether you need converters, analyzers, or creative tools, ToolifyAI connects you to everything in one place.",
+    topToolsTitle: 'Top Tools',
+    quickLinksTitle: 'Quick Links',
+    hostingLinksTitle: 'Best Hostings',
+    moreToolsTitle: 'More Tools',
     topTools: [
         { id: 'tt1', name: 'Case Converter', href: '/tools/case-converter' },
         { id: 'tt2', name: 'Word Counter', href: '/tools/word-counter' },

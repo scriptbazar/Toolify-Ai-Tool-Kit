@@ -210,6 +210,10 @@ export type FooterLink = z.infer<typeof FooterLinkSchema>;
 export const FooterSettingsSchema = z.object({
   showLogo: z.boolean().default(true),
   description: z.string().optional(),
+  topToolsTitle: z.string().optional(),
+  quickLinksTitle: z.string().optional(),
+  hostingLinksTitle: z.string().optional(),
+  moreToolsTitle: z.string().optional(),
   topTools: z.array(FooterLinkSchema).optional(),
   quickLinks: z.array(FooterLinkSchema).optional(),
   hostingLinks: z.array(FooterLinkSchema).optional(),
