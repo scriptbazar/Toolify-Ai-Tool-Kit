@@ -6,7 +6,8 @@ import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from './Logo';
 import { getSettings } from '@/ai/flows/settings-management';
-import type { FooterSettings, SocialLinks } from '@/ai/flows/settings-management.types';
+import type { FooterSettings, SocialLinks, AdvertisementSettings } from '@/ai/flows/settings-management.types';
+import { AdPlaceholder } from './AdPlaceholder';
 
 const FooterLinkColumn = ({ title, links }: { title: string, links: { name: string, href: string }[] }) => (
     <div>
@@ -24,23 +25,25 @@ const FooterLinkColumn = ({ title, links }: { title: string, links: { name: stri
 );
 
 export default function Footer() {
-  const [settings, setSettings] = useState<FooterSettings | null>(null);
+  const [footerSettings, setFooterSettings] = useState<FooterSettings | null>(null);
   const [socialLinks, setSocialLinks] = useState<SocialLinks | null>(null);
   const [copyrightText, setCopyrightText] = useState('');
+  const [adSettings, setAdSettings] = useState<AdvertisementSettings | null>(null);
   
   useEffect(() => {
-    async function fetchFooterSettings() {
+    async function fetchSettings() {
         try {
             const appSettings = await getSettings();
-            setSettings(appSettings.footer ?? null);
+            setFooterSettings(appSettings.footer ?? null);
             setSocialLinks(appSettings.general?.socialLinks ?? null);
+            setAdSettings(appSettings.advertisement ?? null);
             const rawCopyright = appSettings.general?.copyrightText || `© {year} ToolifyAI. All rights reserved.`;
             setCopyrightText(rawCopyright.replace('{year}', new Date().getFullYear().toString()));
         } catch (error) {
             console.error("Failed to fetch footer settings:", error);
         }
     }
-    fetchFooterSettings();
+    fetchSettings();
   }, []);
 
   const socialIcons = [
@@ -53,17 +56,18 @@ export default function Footer() {
   return (
     <footer className="bg-card text-card-foreground border-t">
       <div className="container mx-auto px-4 py-12">
+        <AdPlaceholder adSlotId="footer-banner" adSettings={adSettings} className="mb-8" />
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-1">
-            {settings?.showLogo && (
+            {footerSettings?.showLogo && (
                  <Link href="/" className="flex items-center gap-2 mb-4">
                     <Logo />
                     <span className="font-bold text-xl">ToolifyAI</span>
                 </Link>
             )}
-            {settings?.description && (
+            {footerSettings?.description && (
                 <p className="text-sm text-muted-foreground mb-6">
-                    {settings.description}
+                    {footerSettings.description}
                 </p>
             )}
             <h3 className="font-semibold mb-4">Follow Us</h3>
@@ -78,17 +82,17 @@ export default function Footer() {
           </div>
 
           <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-8">
-             {settings?.topTools && settings.topTools.length > 0 && (
-                <FooterLinkColumn title="Top Tools" links={settings.topTools} />
+             {footerSettings?.topTools && footerSettings.topTools.length > 0 && (
+                <FooterLinkColumn title="Top Tools" links={footerSettings.topTools} />
              )}
-              {settings?.quickLinks && settings.quickLinks.length > 0 && (
-                <FooterLinkColumn title="Quick Links" links={settings.quickLinks} />
+              {footerSettings?.quickLinks && footerSettings.quickLinks.length > 0 && (
+                <FooterLinkColumn title="Quick Links" links={footerSettings.quickLinks} />
              )}
-             {settings?.moreTools && settings.moreTools.length > 0 && (
-                <FooterLinkColumn title="More Tools" links={settings.moreTools} />
+             {footerSettings?.moreTools && footerSettings.moreTools.length > 0 && (
+                <FooterLinkColumn title="More Tools" links={footerSettings.moreTools} />
              )}
-               {settings?.hostingLinks && settings.hostingLinks.length > 0 && (
-                <FooterLinkColumn title="Best Hostings" links={settings.hostingLinks} />
+               {footerSettings?.hostingLinks && footerSettings.hostingLinks.length > 0 && (
+                <FooterLinkColumn title="Best Hostings" links={footerSettings.hostingLinks} />
              )}
           </div>
         </div>

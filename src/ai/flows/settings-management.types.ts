@@ -210,7 +210,6 @@ export const FooterSettingsSchema = z.object({
   quickLinks: z.array(FooterLinkSchema).optional(),
   hostingLinks: z.array(FooterLinkSchema).optional(),
   moreTools: z.array(FooterLinkSchema).optional(),
-  footerAdCode: z.string().optional(),
 });
 export type FooterSettings = z.infer<typeof FooterSettingsSchema>;
 

@@ -155,7 +155,6 @@ const defaultFooterSettings = {
         { id: 'hl4', name: 'Sitecountry', href: '#' },
         { id: 'hl5', name: 'Hostwinds', href: '#' },
     ],
-    footerAdCode: '',
 };
 
 const defaultSettings = AppSettingsSchema.parse({ 
@@ -206,7 +205,7 @@ export async function getSettings(): Promise<AppSettings> {
 
 /**
  * Updates the application settings in Firestore and writes API keys to .env.local.
- * It performs a deep merge to only update the provided fields in Firestore.
+ * It performs a deep merge to only update the provided fields.
  * @param {AppSettings} newSettings - The new settings values to save.
  * @returns {Promise<{ success: boolean; message: string }>} Result of the operation.
  */

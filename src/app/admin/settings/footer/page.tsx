@@ -84,7 +84,6 @@ export default function FooterManagementPage() {
       quickLinks: [],
       hostingLinks: [],
       moreTools: [],
-      footerAdCode: '',
     },
   });
 
@@ -189,27 +188,6 @@ export default function FooterManagementPage() {
                                 <FormControl>
                                     <Textarea {...field} placeholder="A short description about your site for the footer." />
                                 </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Footer Ad Slot</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                         <FormField
-                            control={form.control}
-                            name="footerAdCode"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Ad Code</FormLabel>
-                                <FormControl>
-                                    <Textarea {...field} placeholder="Paste your ad code here." className="font-mono" />
-                                </FormControl>
-                                 <FormDescription>This will appear in the footer if advertisements are enabled.</FormDescription>
                                 <FormMessage />
                                 </FormItem>
                             )}
