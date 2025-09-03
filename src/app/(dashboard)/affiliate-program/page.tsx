@@ -223,7 +223,7 @@ export default function AffiliateProgramPage() {
                             {faqs.map((faq) => {
                                 const Icon = (Icons as any)[faq.icon] || HelpCircle;
                                 return (
-                                  <AccordionItem value={faq.id} key={faq.id} className="border-none">
+                                  <AccordionItem value={faq.question} key={faq.question} className="border-none">
                                     <AccordionTrigger className="faq-accordion-trigger">
                                        <div className="flex items-center gap-4">
                                           <div className="p-2 bg-muted rounded-full">
