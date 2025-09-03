@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef } from 'react';
@@ -109,7 +108,7 @@ export default function AddNewPostPage() {
     }
   };
 
-  const processAndSavePost = async (values: PostFormValues, status: PostFormValues['status']) => {
+  const processAndSavePost = async (values: PostFormValues) => {
     setIsSaving(true);
     try {
       let imageUrl: string | undefined = undefined;
@@ -122,7 +121,6 @@ export default function AddNewPostPage() {
       
       const postData = {
           ...values,
-          status,
           imageUrl,
           imageHint: values.title.split(' ').slice(0, 2).join(' '),
           tags: values.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [],
@@ -132,7 +130,7 @@ export default function AddNewPostPage() {
 
       if (result.success) {
          toast({
-          title: `Post ${status}!`,
+          title: `Post ${values.status}!`,
           description: `Your post "${values.title}" has been successfully saved.`,
         });
         router.push('/admin/blog/all-posts');
@@ -149,7 +147,7 @@ export default function AddNewPostPage() {
 
   const handlePostSubmit = (status: PostFormValues['status']) => {
     form.setValue('status', status);
-    form.handleSubmit((values) => processAndSavePost(values, status))();
+    form.handleSubmit(processAndSavePost)();
   };
 
   return (
@@ -161,7 +159,7 @@ export default function AddNewPostPage() {
         </p>
       </div>
       <Form {...form}>
-        <form className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <form onSubmit={form.handleSubmit(processAndSavePost)} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
