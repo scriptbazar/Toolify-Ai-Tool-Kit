@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { getTools } from '@/ai/flows/tool-management';
 import { toolCategories } from '@/lib/constants';
-import { ArrowRight, Hand, Database, Sparkles, Download, LifeBuoy, MessageCircle, Users, Wand2, Award, MousePointerClick, Bot, ShieldCheck } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
@@ -10,14 +10,18 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star } from 'lucide-react';
 import { TypingEffect } from '@/components/common/TypingEffect';
 import { getSettings } from '@/ai/flows/settings-management';
+import * as Icons from 'lucide-react';
 
 export default async function Home() {
   const tools = await getTools();
   const settings = await getSettings();
-  const testimonials = settings.referral?.testimonials || [];
-  const steps = settings.referral?.steps || [];
-  const features = settings.referral?.features || [];
-  const blogPosts = settings.referral?.blogPosts || [];
+  const homepageSettings = settings.homepage || {};
+  
+  const testimonials = homepageSettings.testimonials || [];
+  const steps = homepageSettings.steps || [];
+  const features = homepageSettings.features || [];
+  const blogPosts = homepageSettings.blogPosts || [];
+
   const activeTools = tools.filter(tool => tool.status === 'Active');
   const categoryNames = toolCategories.map(c => c.name.replace(' Tools', ''));
 
@@ -75,13 +79,13 @@ export default async function Home() {
       <section className="text-center py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter">
-            Your All-in-One Smart{' '}
+            Your All-in-One Smart&nbsp;
              <span className="text-primary whitespace-nowrap">
                 <TypingEffect
                     words={categoryNames}
                 />
             </span>
-            {' '}Toolkit
+            &nbsp;Toolkit
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground">
             Over 100+ smart utility and AI-powered tools to boost your productivity. From text manipulation to AI image generation, we've got you covered.
@@ -105,17 +109,19 @@ export default async function Home() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((step, index) => (
+            {steps.map((step, index) => {
+              const Icon = (Icons as any)[step.icon] || Icons.HelpCircle;
+              return (
               <Card key={index} className="text-center p-8 border-2 shadow-lg transition-all duration-300 hover:-translate-y-2 bg-background">
                 <CardContent className="p-0 flex flex-col items-center">
                   <div className="flex items-center justify-center h-16 w-16 mb-6 rounded-full bg-primary/10">
-                     <step.icon className="h-8 w-8 text-primary" />
+                     <Icon className="h-8 w-8 text-primary" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
                   <p className="text-muted-foreground text-sm">{step.description}</p>
                 </CardContent>
               </Card>
-            ))}
+            )})}
           </div>
         </div>
       </section>
@@ -129,17 +135,19 @@ export default async function Home() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
+            {features.map((feature, index) => {
+              const Icon = (Icons as any)[feature.icon] || Icons.HelpCircle;
+              return (
               <Card key={index} className="text-center p-8 border-2 bg-card shadow-lg transition-all duration-300">
                 <CardContent className="p-0 flex flex-col items-center">
                   <div className="flex items-center justify-center h-16 w-16 mb-6 rounded-full bg-primary/10">
-                    <feature.icon className="h-8 w-8 text-primary" />
+                    <Icon className="h-8 w-8 text-primary" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground text-sm">{feature.description}</p>
                 </CardContent>
               </Card>
-            ))}
+            )})}
           </div>
           <div className="text-center mt-12">
               <Button asChild size="lg">

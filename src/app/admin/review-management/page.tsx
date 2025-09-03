@@ -25,11 +25,48 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-// import { tools } from '@/lib/constants'; // This will be fetched dynamically
 
 type ReviewStatus = 'Approved' | 'Pending' | 'Rejected';
 
-const allReviews: any[] = []; // Data should be fetched from a database in a real app
+// Dummy Data - In a real app, this would be fetched from Firestore
+const allReviews = [
+    {
+        id: '1',
+        user: { name: 'Jane Doe', avatar: 'https://i.pravatar.cc/150?u=jane' },
+        toolSlug: 'case-converter',
+        comment: 'This tool is a lifesaver! It saves me so much time when formatting text for my blog posts. Highly recommended!',
+        rating: 5,
+        date: '2024-05-10',
+        status: 'Approved',
+    },
+    {
+        id: '2',
+        user: { name: 'John Smith', avatar: 'https://i.pravatar.cc/150?u=john' },
+        toolSlug: 'password-generator',
+        comment: 'Great for creating strong, secure passwords. The options for length and character types are very useful.',
+        rating: 4,
+        date: '2024-05-12',
+        status: 'Approved',
+    },
+    {
+        id: '3',
+        user: { name: 'Emily White', avatar: 'https://i.pravatar.cc/150?u=emily' },
+        toolSlug: 'json-formatter',
+        comment: 'It works, but sometimes it hangs on very large JSON files. Could be better.',
+        rating: 3,
+        date: '2024-05-15',
+        status: 'Pending',
+    },
+    {
+        id: '4',
+        user: { name: 'Michael Brown', avatar: 'https://i.pravatar.cc/150?u=michael' },
+        toolSlug: 'text-to-speech',
+        comment: 'The voice sounds a bit robotic. I was expecting something more natural for a Pro tool.',
+        rating: 2,
+        date: '2024-05-18',
+        status: 'Rejected',
+    },
+];
 
 const getStatusBadge = (status: ReviewStatus) => {
     switch (status) {

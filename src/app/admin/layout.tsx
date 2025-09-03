@@ -173,6 +173,7 @@ export default function AdminLayout({
   
   const settingsLinks = [
     { href: '/admin/settings/site', icon: SlidersHorizontal, label: 'Site Settings' },
+    { href: '/admin/settings/homepage', icon: Home, label: 'Homepage Settings' },
     { href: '/admin/settings/plan', icon: ListChecks, label: 'Plan Management' },
     { href: '/admin/settings/payment', icon: CreditCard, label: 'Payment Settings' },
     { href: '/admin/settings/page', icon: FileCog, label: 'Page Management' },

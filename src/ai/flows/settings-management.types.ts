@@ -4,6 +4,10 @@
  */
 import { z } from 'zod';
 import { type ReferralRequestSchema, type ReferralStatusSchema } from './user-management.types';
+import * as Icons from 'lucide-react';
+
+const iconNames = Object.keys(Icons) as [string, ...string[]];
+const IconEnum = z.enum(iconNames);
 
 
 export const ManualAdSlotSchema = z.object({
@@ -217,6 +221,47 @@ export const FooterSettingsSchema = z.object({
 });
 export type FooterSettings = z.infer<typeof FooterSettingsSchema>;
 
+const HomepageFeatureSchema = z.object({
+  id: z.string(),
+  icon: IconEnum,
+  title: z.string().min(1, "Title is required."),
+  description: z.string().min(1, "Description is required."),
+});
+
+const HomepageStepSchema = z.object({
+  id: z.string(),
+  icon: IconEnum,
+  title: z.string().min(1, "Title is required."),
+  description: z.string().min(1, "Description is required."),
+});
+
+const HomepageTestimonialSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, "Name is required."),
+  role: z.string().min(1, "Role is required."),
+  avatar: z.string().url("Must be a valid URL."),
+  comment: z.string().min(1, "Comment is required."),
+});
+
+const HomepageBlogPostSchema = z.object({
+  id: z.string(),
+  category: z.string().min(1, "Category is required."),
+  title: z.string().min(1, "Title is required."),
+  description: z.string().min(1, "Description is required."),
+  imageUrl: z.string().url("Must be a valid URL."),
+  imageHint: z.string(),
+  href: z.string().min(1, "Link is required."),
+});
+
+
+export const HomepageSettingsSchema = z.object({
+  features: z.array(HomepageFeatureSchema).optional(),
+  steps: z.array(HomepageStepSchema).optional(),
+  testimonials: z.array(HomepageTestimonialSchema).optional(),
+  blogPosts: z.array(HomepageBlogPostSchema).optional(),
+});
+export type HomepageSettings = z.infer<typeof HomepageSettingsSchema>;
+
 
 export const AppSettingsSchema = z.object({
   advertisement: AdvertisementSettingsSchema.optional(),
@@ -226,6 +271,7 @@ export const AppSettingsSchema = z.object({
   payment: PaymentSettingsSchema.optional(),
   page: PageSettingsSchema.optional(),
   footer: FooterSettingsSchema.optional(),
+  homepage: HomepageSettingsSchema.optional(),
 });
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
 
