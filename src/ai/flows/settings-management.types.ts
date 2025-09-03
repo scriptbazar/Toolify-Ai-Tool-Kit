@@ -1,4 +1,5 @@
 
+
 /**
  * @fileOverview Types and Zod schemas for application settings management.
  */
@@ -273,5 +274,3 @@ export type AppSettings = z.infer<typeof AppSettingsSchema>;
 
 export type ReferralRequest = z.infer<typeof ReferralRequestSchema>;
 export type ReferralStatus = z.infer<typeof ReferralStatusSchema>;
-
-    
