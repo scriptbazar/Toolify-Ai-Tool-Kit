@@ -157,10 +157,41 @@ const defaultFooterSettings = {
     ],
 };
 
+const defaultHomepageSettings = {
+  steps: [
+    {
+      id: 'step1',
+      icon: 'MousePointerClick' as const,
+      title: 'Choose a Tool',
+      description: 'Browse our extensive collection and select the tool that fits your needs.',
+    },
+    {
+      id: 'step2',
+      icon: 'Database' as const,
+      title: 'Input Your Data',
+      description: 'Upload your file, paste your text, or enter the required information.',
+    },
+    {
+      id: 'step3',
+      icon: 'Wand2' as const,
+      title: 'Get Results',
+      description: 'Our tool will process your request instantly, providing you with the output you need.',
+    },
+    {
+      id: 'step4',
+      icon: 'Download' as const,
+      title: 'Download & Share',
+      description: 'Easily download your results or share them with others in just a click.',
+    },
+  ],
+};
+
+
 const defaultSettings = AppSettingsSchema.parse({ 
   page: { pages: defaultPages },
   plan: { plans: defaultPlans },
   footer: defaultFooterSettings,
+  homepage: defaultHomepageSettings,
   referral: {
     isReferralEnabled: true,
     commissionRate: 20,
