@@ -94,8 +94,8 @@ export default async function Home() {
 
   const Testimonials = () => {
     // Only duplicate the array for a smooth marquee effect if there are enough items.
-    // Otherwise, it looks weird to have few items repeating immediately.
-    const displayTestimonials = testimonials.length > 5 ? [...testimonials, ...testimonials] : testimonials;
+    const useMarquee = testimonials.length > 5;
+    const displayTestimonials = useMarquee ? [...testimonials, ...testimonials] : testimonials;
     
     return (
         <section className="py-16 md:py-24 bg-card">
@@ -107,11 +107,19 @@ export default async function Home() {
             </div>
             {testimonials.length > 0 ? (
                  <div className="relative flex flex-col gap-8 overflow-hidden">
-                    <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
-                         {displayTestimonials.map((testimonial, index) => (
-                            <TestimonialCard key={`rtl-${testimonial.id}-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
+                    {useMarquee ? (
+                        <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
+                            {displayTestimonials.map((testimonial, index) => (
+                                <TestimonialCard key={`rtl-${testimonial.id}-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
+                            ))}
+                        </div>
+                    ) : (
+                       <div className="flex justify-center flex-wrap gap-8">
+                         {testimonials.map((testimonial) => (
+                            <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
                         ))}
-                    </div>
+                       </div>
+                    )}
                 </div>
             ) : (
                 <div className="text-center text-muted-foreground">No approved reviews yet.</div>
