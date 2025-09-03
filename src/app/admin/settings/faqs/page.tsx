@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Save, Loader2, PlusCircle, Trash2, GripVertical, HelpCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
-import { FaqSettingsSchema, type FaqItem } from '@/ai/flows/settings-management.types';
+import { FaqSettingsSchema } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

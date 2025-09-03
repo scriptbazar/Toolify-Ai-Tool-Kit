@@ -9,48 +9,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Copy, Users, DollarSign, MousePointerClick, Percent, Calendar, Hourglass, XCircle, Loader2, HelpCircle, Code, Palette, Database, UserCog, Settings, Construction } from 'lucide-react';
+import { Copy, Users, DollarSign, MousePointerClick, Percent, Calendar, Hourglass, XCircle, Loader2, HelpCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getSettings } from '@/ai/flows/settings-management';
-import { type ReferralSettings, type ReferralStatus } from '@/ai/flows/settings-management.types';
+import { type ReferralSettings, type ReferralStatus, type FaqItem } from '@/ai/flows/settings-management.types';
 import { requestToJoinAffiliateProgram } from '@/ai/flows/user-management';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { StatCard } from '@/components/common/StatCard';
+import * as Icons from 'lucide-react';
 
-
-const faqs = [
-    {
-        question: "How does the affiliate program work?",
-        answer: "Simply share your unique referral link. When someone signs up for a paid plan through your link and becomes a paying customer, you earn a commission. It's that simple!",
-        icon: Code
-    },
-    {
-        question: "How much can I earn?",
-        answer: "You'll earn a percentage of every payment made by the customers you refer for their first year. The more customers you refer, the more you can earn!",
-        icon: DollarSign
-    },
-    {
-        question: "How long does the tracking cookie last?",
-        answer: "Our tracking cookie lasts for a set number of days. If a user signs up for a paid plan within this period after clicking your link, you'll get credit for the referral.",
-        icon: Database
-    },
-    {
-        question: "When and how do I get paid?",
-        answer: "Payouts are made monthly via PayPal, provided you have met the minimum payout threshold. Make sure your PayPal email is correctly set up in your profile.",
-        icon: Palette
-    },
-    {
-        question: "Where can I find my referral link?",
-        answer: "Once your request to join the affiliate program is approved, your unique referral link will be available on your affiliate dashboard.",
-        icon: MousePointerClick
-    },
-    {
-        question: "How can I track my referrals and earnings?",
-        answer: "Your affiliate dashboard provides detailed statistics, including the number of clicks on your link, successful referrals, and your total earnings.",
-        icon: UserCog
-    }
-];
 
 interface ReferredUser {
     id: string;
@@ -73,6 +41,7 @@ export default function AffiliateProgramPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [referralSettings, setReferralSettings] = useState<ReferralSettings | null>(null);
     const [affiliateStatus, setAffiliateStatus] = useState<ReferralStatus>('not_joined');
+    const [faqs, setFaqs] = useState<FaqItem[]>([]);
     const [stats, setStats] = useState<AffiliateStats>({ clicks: 0, referrals: 0, earnings: 0, conversionRate: '0.00%' });
     const [referredUsers, setReferredUsers] = useState<ReferredUser[]>([]);
     const { toast } = useToast();
@@ -90,6 +59,7 @@ export default function AffiliateProgramPage() {
                     const [settings, userDocSnap] = await Promise.all([settingsPromise, userDocPromise]);
                     
                     setReferralSettings(settings.referral || null);
+                    setFaqs(settings.faqs?.affiliateFaqs || []);
                     
                     if (userDocSnap.exists()) {
                         const userData = userDocSnap.data();
@@ -243,29 +213,34 @@ export default function AffiliateProgramPage() {
                             <p className="text-sm text-muted-foreground">Receive your earnings via PayPal.</p>
                          </div>
                     </div>
-                    <div className="mt-12 pt-8 border-t">
-                      <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-2">
-                        <HelpCircle className="h-6 w-6" />
-                        Frequently Asked Questions
-                      </h2>
-                      <Accordion type="single" collapsible className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                        {faqs.map((faq, index) => (
-                          <AccordionItem value={`item-${index}`} key={index} className="border-none">
-                            <AccordionTrigger className="faq-accordion-trigger">
-                               <div className="flex items-center gap-4">
-                                  <div className="p-2 bg-muted rounded-full">
-                                    <faq.icon className="h-5 w-5 text-primary" />
-                                  </div>
-                                  <span>{faq.question}</span>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="text-muted-foreground pl-16">
-                              {faq.answer}
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
-                    </div>
+                    {faqs.length > 0 && (
+                         <div className="mt-12 pt-8 border-t">
+                          <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-2">
+                            <HelpCircle className="h-6 w-6" />
+                            Frequently Asked Questions
+                          </h2>
+                          <Accordion type="single" collapsible className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                            {faqs.map((faq) => {
+                                const Icon = (Icons as any)[faq.icon] || HelpCircle;
+                                return (
+                                  <AccordionItem value={faq.id} key={faq.id} className="border-none">
+                                    <AccordionTrigger className="faq-accordion-trigger">
+                                       <div className="flex items-center gap-4">
+                                          <div className="p-2 bg-muted rounded-full">
+                                            <Icon className="h-5 w-5 text-primary" />
+                                          </div>
+                                          <span>{faq.question}</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="text-muted-foreground pl-16">
+                                      {faq.answer}
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                )
+                            })}
+                          </Accordion>
+                        </div>
+                    )}
                 </CardContent>
                 <CardFooter className="flex-col gap-4 pt-6 border-t mt-8">
                     <p className="text-sm text-muted-foreground">{referralSettings.referralProgramDescription}</p>
