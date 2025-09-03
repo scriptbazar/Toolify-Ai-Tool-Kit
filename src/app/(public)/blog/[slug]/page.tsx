@@ -39,8 +39,8 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   }
   
   const sidebarSettings = settings.sidebar?.blogSidebar;
-  const popularTools = (await getTools()).filter(t => t.status === 'Active').slice(0, 5);
-  const recentPosts = allPosts.filter(p => p.status === 'Published' && p.id !== post.id).slice(0, 5);
+  const popularTools = (await getTools()).filter(t => t.status === 'Active').slice(0, 10);
+  const recentPosts = allPosts.filter(p => p.status === 'Published' && p.id !== post.id).slice(0, 10);
 
 
   return (
