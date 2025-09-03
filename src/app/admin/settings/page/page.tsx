@@ -142,12 +142,14 @@ export default function PageManagementPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {fields.map((field, index) => (
+                            {fields.map((field, index) => {
+                                const isOpen = openPageId === field.id;
+                                return (
                                 <Collapsible
                                     key={field.id}
-                                    open={openPageId === field.id}
-                                    onOpenChange={() => setOpenPageId(openPageId === field.id ? null : field.id)}
-                                    className="space-y-2"
+                                    open={isOpen}
+                                    onOpenChange={() => setOpenPageId(isOpen ? null : field.id)}
+                                    className={cn("space-y-2 transition-all duration-300", isOpen && "lg:col-span-2")}
                                 >
                                     <div className="flex items-center gap-2 p-4 border rounded-lg bg-muted/50">
                                         <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -163,7 +165,7 @@ export default function PageManagementPage() {
                                                             <LinkIcon className="h-3 w-3" />
                                                             /{form.watch(`pages.${index}.slug`)}
                                                         </div>
-                                                        <ChevronDown className={cn("h-5 w-5 transition-transform", openPageId === field.id && "rotate-180")} />
+                                                        <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -229,7 +231,7 @@ export default function PageManagementPage() {
                                         </div>
                                      </CollapsibleContent>
                                 </Collapsible>
-                            ))}
+                            )})}
                         </div>
                          {fields.length === 0 && (
                             <p className="text-center text-muted-foreground py-10">No custom pages have been created yet.</p>
