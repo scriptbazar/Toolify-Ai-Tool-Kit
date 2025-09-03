@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -27,6 +26,16 @@ export default function ToolsDashboardPage() {
       setLoading(false);
     }
     fetchTools();
+  }, []);
+
+  useEffect(() => {
+    if (window.location.hash) {
+      const categoryId = window.location.hash.substring(1);
+      const isValidCategory = toolCategories.some(c => c.id === categoryId);
+      if (isValidCategory) {
+        setActiveCategory(categoryId as ToolCategory);
+      }
+    }
   }, []);
 
   const filteredTools = useMemo(() => {
