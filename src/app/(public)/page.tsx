@@ -29,7 +29,10 @@ export default async function Home() {
   const features = homepageSettings.features || [];
 
   const activeTools = tools.filter(tool => tool.status === 'Active');
-  const categoryNames = toolCategories.map(c => c.name.replace(' Tools', ''));
+  
+  const categoryNames = toolCategories
+    .filter(c => c.id !== 'cal_con' && c.id !== 'dev')
+    .map(c => c.name.replace(' Tools', ''));
 
   const TestimonialCard = ({ name, role, avatar, comment, rating }: { name: string, role: string, avatar: string, comment: string, rating: number }) => (
     <Card className="w-[350px] shrink-0">
