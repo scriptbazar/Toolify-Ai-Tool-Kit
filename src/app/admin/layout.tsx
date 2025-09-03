@@ -34,6 +34,7 @@ import {
   Shield,
   ShieldCheck,
   Loader2,
+  Footprints,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -176,6 +177,7 @@ export default function AdminLayout({
     { href: '/admin/settings/payment', icon: CreditCard, label: 'Payment Settings' },
     { href: '/admin/settings/page', icon: FileCog, label: 'Page Management' },
     { href: '/admin/settings/affiliate', icon: GitCommitVertical, label: 'Affiliate Settings'},
+    { href: '/admin/settings/footer', icon: Footprints, label: 'Footer Management' },
   ];
 
   const isBlogRouteActive = pathname.startsWith('/admin/blog');

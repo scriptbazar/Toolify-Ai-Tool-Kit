@@ -1,49 +1,53 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from './Logo';
+import { getSettings } from '@/ai/flows/settings-management';
+import type { FooterSettings, SocialLinks } from '@/ai/flows/settings-management.types';
 
-const topTools = [
-  { name: 'Case Converter', href: '/tools/case-converter' },
-  { name: 'Word Counter', href: '/tools/word-counter' },
-  { name: 'Lorem Ipsum Generator', href: '/tools/lorem-ipsum-generator' },
-  { name: 'Password Generator', href: '/tools/password-generator' },
-  { name: 'JSON Formatter', href: '/tools/json-formatter' },
-];
-
-const quickLinks = [
-  { name: 'About Us', href: '/about-us' },
-  { name: 'Contact Us', href: '/contact-us' },
-  { name: 'Privacy Policy', href: '/privacy-policy' },
-  { name: 'Terms & Conditions', href: '/terms-conditions' },
-  { name: 'DMCA', href: '/dmca' },
-];
-
-const moreTools = [
-  { name: 'BMI Calculator', href: '/tools/bmi-calculator' },
-  { name: 'Text to Speech', href: '/tools/text-to-speech' },
-  { name: 'PDF Merger', href: '/tools/pdf-merger' },
-  { name: 'Unit Converter', href: '/tools/unit-converter' },
-  { name: 'Color Picker', href: '/tools/color-picker' },
-];
-
-const bestHostings = [
-    { name: 'Hostinger', href: '#' },
-    { name: 'Hostarmada', href: '#' },
-    { name: 'YouStable', href: '#' },
-    { name: 'Sitecountry', href: '#' },
-    { name: 'Hostwinds', href: '#' },
-];
+const FooterLinkColumn = ({ title, links }: { title: string, links: { name: string, href: string }[] }) => (
+    <div>
+        <h3 className="font-semibold mb-4">{title}</h3>
+        <ul className="space-y-3">
+            {links.map((link) => (
+                <li key={link.name}>
+                    <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        {link.name}
+                    </Link>
+                </li>
+            ))}
+        </ul>
+    </div>
+);
 
 export default function Footer() {
-  const copyrightText = `© ${new Date().getFullYear()} ToolifyAI. All rights reserved.`;
+  const [settings, setSettings] = useState<FooterSettings | null>(null);
+  const [socialLinks, setSocialLinks] = useState<SocialLinks | null>(null);
+  const [copyrightText, setCopyrightText] = useState('');
+  
+  useEffect(() => {
+    async function fetchFooterSettings() {
+        try {
+            const appSettings = await getSettings();
+            setSettings(appSettings.footer ?? null);
+            setSocialLinks(appSettings.general?.socialLinks ?? null);
+            const rawCopyright = appSettings.general?.copyrightText || `© {year} ToolifyAI. All rights reserved.`;
+            setCopyrightText(rawCopyright.replace('{year}', new Date().getFullYear().toString()));
+        } catch (error) {
+            console.error("Failed to fetch footer settings:", error);
+        }
+    }
+    fetchFooterSettings();
+  }, []);
 
-  // Example social links. In a real app, these would come from a CMS or settings.
-  const socialLinks = [
-    { name: 'Facebook', href: '#', icon: Facebook },
-    { name: 'Twitter', href: '#', icon: Twitter },
-    { name: 'Instagram', href: '#', icon: Instagram },
-    { name: 'YouTube', href: '#', icon: Youtube },
+  const socialIcons = [
+    { name: 'Facebook', href: socialLinks?.facebook, icon: Facebook },
+    { name: 'Twitter', href: socialLinks?.twitter, icon: Twitter },
+    { name: 'Instagram', href: socialLinks?.instagram, icon: Instagram },
+    { name: 'YouTube', href: socialLinks?.youtube, icon: Youtube },
   ].filter(link => link.href);
 
   return (
@@ -51,16 +55,20 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <Logo />
-              <span className="font-bold text-xl">ToolifyAI</span>
-            </Link>
-            <p className="text-sm text-muted-foreground mb-6">
-              ToolifyAI is your go-to hub for powerful, easy-to-use online utilities that simplify everyday tasks. Whether you need converters, analyzers, or creative tools, ToolifyAI connects you to everything in one place.
-            </p>
+            {settings?.showLogo && (
+                 <Link href="/" className="flex items-center gap-2 mb-4">
+                    <Logo />
+                    <span className="font-bold text-xl">ToolifyAI</span>
+                </Link>
+            )}
+            {settings?.description && (
+                <p className="text-sm text-muted-foreground mb-6">
+                    {settings.description}
+                </p>
+            )}
             <h3 className="font-semibold mb-4">Follow Us</h3>
             <div className="flex space-x-3">
-              {socialLinks.map((social) => (
+              {socialIcons.map((social) => (
                 <Link key={social.name} href={social.href!} className="text-muted-foreground hover:text-primary transition-colors">
                   <social.icon className="h-5 w-5" />
                    <span className="sr-only">{social.name}</span>
@@ -70,57 +78,24 @@ export default function Footer() {
           </div>
 
           <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-8">
-             <div>
-              <h3 className="font-semibold mb-4">Top Tools</h3>
-              <ul className="space-y-3">
-                {topTools.map((tool) => (
-                  <li key={tool.name}>
-                    <Link href={tool.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                      {tool.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-3">
-                {quickLinks.map((link) => (
-                  <li key={link.name}>
-                    <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-             <div>
-              <h3 className="font-semibold mb-4">More Tools</h3>
-              <ul className="space-y-3">
-                {moreTools.map((tool) => (
-                  <li key={tool.name}>
-                    <Link href={tool.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                      {tool.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Best Hostings</h3>
-              <ul className="space-y-3">
-                {bestHostings.map((hosting) => (
-                  <li key={hosting.name}>
-                    <Link href={hosting.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                      {hosting.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+             {settings?.topTools && settings.topTools.length > 0 && (
+                <FooterLinkColumn title="Top Tools" links={settings.topTools} />
+             )}
+              {settings?.quickLinks && settings.quickLinks.length > 0 && (
+                <FooterLinkColumn title="Quick Links" links={settings.quickLinks} />
+             )}
+              {/* This column is intentionally kept separate as it might not be part of the CMS in all versions */}
+              <div>
+                 <h3 className="font-semibold mb-4">More Tools</h3>
+                 <ul className="space-y-3">
+                    <li key='bmi-calculator'><Link href="/tools/bmi-calculator" className="text-sm text-muted-foreground hover:text-primary transition-colors">BMI Calculator</Link></li>
+                    <li key='text-to-speech'><Link href="/tools/text-to-speech" className="text-sm text-muted-foreground hover:text-primary transition-colors">Text to Speech</Link></li>
+                    <li key='pdf-merger'><Link href="/tools/pdf-merger" className="text-sm text-muted-foreground hover:text-primary transition-colors">PDF Merger</Link></li>
+                 </ul>
+              </div>
+               {settings?.hostingLinks && settings.hostingLinks.length > 0 && (
+                <FooterLinkColumn title="Best Hostings" links={settings.hostingLinks} />
+             )}
           </div>
         </div>
       </div>

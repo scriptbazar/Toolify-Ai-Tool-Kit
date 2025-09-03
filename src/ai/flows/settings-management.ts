@@ -126,9 +126,37 @@ const defaultPlans = [
   },
 ];
 
+const defaultFooterSettings = {
+    showLogo: true,
+    description: "ToolifyAI is your go-to hub for powerful, easy-to-use online utilities that simplify everyday tasks. Whether you need converters, analyzers, or creative tools, ToolifyAI connects you to everything in one place.",
+    topTools: [
+        { id: 'tt1', name: 'Case Converter', href: '/tools/case-converter' },
+        { id: 'tt2', name: 'Word Counter', href: '/tools/word-counter' },
+        { id: 'tt3', name: 'Lorem Ipsum Generator', href: '/tools/lorem-ipsum-generator' },
+        { id: 'tt4', name: 'Password Generator', href: '/tools/password-generator' },
+        { id: 'tt5', name: 'JSON Formatter', href: '/tools/json-formatter' },
+    ],
+    quickLinks: [
+        { id: 'ql1', name: 'About Us', href: '/about-us' },
+        { id: 'ql2', name: 'Contact Us', href: '/contact-us' },
+        { id: 'ql3', name: 'Privacy Policy', href: '/privacy-policy' },
+        { id: 'ql4', name: 'Terms & Conditions', href: '/terms-conditions' },
+        { id: 'ql5', name: 'DMCA', href: '/dmca' },
+    ],
+    hostingLinks: [
+        { id: 'hl1', name: 'Hostinger', href: '#' },
+        { id: 'hl2', name: 'Hostarmada', href: '#' },
+        { id: 'hl3', name: 'YouStable', href: '#' },
+        { id: 'hl4', name: 'Sitecountry', href: '#' },
+        { id: 'hl5', name: 'Hostwinds', href: '#' },
+    ],
+    footerAdCode: '',
+};
+
 const defaultSettings = AppSettingsSchema.parse({ 
   page: { pages: defaultPages },
   plan: { plans: defaultPlans },
+  footer: defaultFooterSettings,
   referral: {
     isReferralEnabled: true,
     commissionRate: 20,
@@ -149,7 +177,7 @@ export async function getSettings(): Promise<AppSettings> {
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
     const docSnap = await docRef.get();
 
-    if (docSnap.exists()) {
+    if (docSnap.exists) {
       // Validate data against schema, falling back to defaults if fields are missing
       const parsedData = AppSettingsSchema.safeParse(docSnap.data());
       if (parsedData.success) {

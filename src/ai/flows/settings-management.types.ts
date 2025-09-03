@@ -196,6 +196,24 @@ export const PageSettingsSchema = z.object({
 });
 export type PageSettings = z.infer<typeof PageSettingsSchema>;
 
+const FooterLinkSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, "Link name is required."),
+  href: z.string().min(1, "Link URL is required."),
+});
+export type FooterLink = z.infer<typeof FooterLinkSchema>;
+
+export const FooterSettingsSchema = z.object({
+  showLogo: z.boolean().default(true),
+  description: z.string().optional(),
+  topTools: z.array(FooterLinkSchema).optional(),
+  quickLinks: z.array(FooterLinkSchema).optional(),
+  hostingLinks: z.array(FooterLinkSchema).optional(),
+  footerAdCode: z.string().optional(),
+});
+export type FooterSettings = z.infer<typeof FooterSettingsSchema>;
+
+
 export const AppSettingsSchema = z.object({
   advertisement: AdvertisementSettingsSchema.optional(),
   referral: ReferralSettingsSchema.optional(),
@@ -203,6 +221,7 @@ export const AppSettingsSchema = z.object({
   plan: PlanSettingsSchema.optional(),
   payment: PaymentSettingsSchema.optional(),
   page: PageSettingsSchema.optional(),
+  footer: FooterSettingsSchema.optional(),
 });
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
 
