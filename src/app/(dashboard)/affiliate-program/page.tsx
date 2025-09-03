@@ -243,7 +243,7 @@ export default function AffiliateProgramPage() {
                     )}
                 </CardContent>
                 <CardFooter className="flex-col gap-4 pt-6 border-t mt-8">
-                    <p className="text-sm text-muted-foreground">{referralSettings.referralProgramDescription}</p>
+                    <p className="text-sm text-muted-foreground">{referralSettings?.referralProgramDescription || ''}</p>
                     <Button onClick={handleJoinRequest} disabled={isSubmitting}>
                          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Request to Join Affiliate Program
