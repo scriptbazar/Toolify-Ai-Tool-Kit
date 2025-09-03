@@ -35,25 +35,20 @@ export default async function Home() {
     .filter(c => c.id !== 'cal_con' && c.id !== 'dev')
     .map(c => c.name.replace(' Tools', ''));
 
-  const TestimonialCard = ({ name, role, avatar, comment, rating }: { name: string, role: string, avatar: string, comment: string, rating: number }) => (
-    <Card className="w-[350px] shrink-0">
+  const TestimonialCard = ({ name, role, avatar, comment }: { name: string, role: string, avatar: string, comment: string }) => (
+    <Card className="w-[350px] shrink-0 bg-card text-card-foreground">
         <CardContent className="p-6 flex flex-col items-start text-left">
             <div className="flex items-center gap-4 mb-4">
-                <Avatar>
+                <Avatar className="h-12 w-12">
                     <AvatarImage src={avatar} alt={name} />
                     <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                    <p className="font-semibold">{name}</p>
-                    <p className="text-sm text-muted-foreground">Reviewed: {role}</p>
+                    <p className="font-semibold text-lg">{name}</p>
+                    <p className="text-sm text-muted-foreground">{role}</p>
                 </div>
             </div>
-            <p className="text-muted-foreground text-sm mb-4">"{comment}"</p>
-            <div className="flex items-center gap-1 text-yellow-500">
-                {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`h-4 w-4 ${i < rating ? 'fill-current' : ''}`} />
-                ))}
-            </div>
+            <p className="text-muted-foreground text-base">"{comment}"</p>
         </CardContent>
     </Card>
   );
@@ -71,12 +66,12 @@ export default async function Home() {
         <div className="relative flex flex-col gap-8 overflow-hidden">
           <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
             {[...topRowItems, ...topRowItems].map((testimonial, index) => (
-              <TestimonialCard key={`top-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
+              <TestimonialCard key={`top-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} />
             ))}
           </div>
           <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
             {[...bottomRowItems, ...bottomRowItems].map((testimonial, index) => (
-              <TestimonialCard key={`bottom-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
+              <TestimonialCard key={`bottom-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} />
             ))}
           </div>
         </div>
@@ -86,7 +81,7 @@ export default async function Home() {
     return (
       <div className="flex justify-center flex-wrap gap-8">
         {displayTestimonials.map((testimonial) => (
-          <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
+          <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} />
         ))}
       </div>
     );
@@ -108,8 +103,8 @@ export default async function Home() {
               </Link>
             </Button>
           </div>
-          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-4xl mx-auto">
-            {toolCategories.filter(c => c.id !== 'cal_con').map(category => (
+           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 max-w-6xl mx-auto">
+            {toolCategories.map(category => (
                 <CategoryCard key={category.id} category={category} />
             ))}
           </div>
