@@ -209,6 +209,30 @@ const defaultHomepageSettings = {
       title: 'Community',
       description: 'Join our community to share ideas, get feedback, and connect with other users.',
     },
+    {
+      id: 'feat5',
+      icon: 'Gem' as const,
+      title: 'High-quality Output',
+      description: 'Get crisp, clear, and accurate results without compromising on quality.',
+    },
+    {
+      id: 'feat6',
+      icon: 'MousePointerClick' as const,
+      title: 'User-friendly Interface',
+      description: 'Our tools are designed to be intuitive and easy to use for everyone, regardless of technical skill.',
+    },
+    {
+      id: 'feat7',
+      icon: 'Bot' as const,
+      title: 'AI-Powered Tools',
+      description: 'Leverage the power of artificial intelligence to automate tasks and unlock new creative possibilities.',
+    },
+    {
+      id: 'feat8',
+      icon: 'ShieldCheck' as const,
+      title: 'Secure & Reliable',
+      description: 'Your data is always safe and protected with our robust security measures and reliable infrastructure.',
+    },
   ],
 };
 
