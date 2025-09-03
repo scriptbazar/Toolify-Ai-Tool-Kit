@@ -11,10 +11,15 @@ import { TextToSpeech } from '@/components/tools/TextToSpeech';
 import { PdfMerger } from '@/components/tools/PdfMerger';
 import { UnitConverter } from '@/components/tools/UnitConverter';
 import { ColorPicker } from '@/components/tools/ColorPicker';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
+import { Separator } from '@/components/ui/separator';
+import { ReviewForm } from '@/components/tools/ReviewForm';
+import { getReviews } from '@/ai/flows/review-management';
+import { Star } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 export async function generateStaticParams() {
@@ -41,10 +46,13 @@ export default async function ToolPage({ params }: { params: { slug: string } })
   const allTools = await getTools();
   const tool = allTools.find((t) => t.slug === params.slug);
   const settings = await getSettings();
-
+  
   if (!tool) {
     notFound();
   }
+
+  const allReviews = await getReviews();
+  const toolReviews = allReviews.filter(r => r.toolId === tool.slug && r.status === 'approved');
 
   const ToolComponent = toolComponents[tool.slug];
   const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
@@ -102,6 +110,40 @@ export default async function ToolPage({ params }: { params: { slug: string } })
               )}
 
             </CardContent>
+          </Card>
+
+          <Card className="mt-8">
+              <CardHeader>
+                  <CardTitle>Reviews for {tool.name}</CardTitle>
+                  <CardDescription>See what other users are saying about this tool.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <ReviewForm toolId={tool.slug} toolName={tool.name} />
+                  <Separator className="my-8" />
+                  <div className="space-y-6">
+                      {toolReviews.length > 0 ? toolReviews.map(review => (
+                          <div key={review.id} className="flex gap-4">
+                                <Avatar>
+                                    <AvatarImage src={review.authorAvatar} alt={review.authorName} />
+                                    <AvatarFallback>{review.authorName.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold">{review.authorName}</p>
+                                        <div className="flex items-center">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}`} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                     <p className="text-sm text-muted-foreground mt-1">{review.comment}</p>
+                                </div>
+                          </div>
+                      )) : (
+                          <p className="text-muted-foreground text-center">No reviews for this tool yet. Be the first to leave one!</p>
+                      )}
+                  </div>
+              </CardContent>
           </Card>
         </div>
          <aside className="w-full lg:w-64 xl:w-80 mt-8 lg:mt-0 space-y-6">

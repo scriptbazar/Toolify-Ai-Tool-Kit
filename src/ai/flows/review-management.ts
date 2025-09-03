@@ -1,10 +1,12 @@
+
 'use server';
 
 /**
  * @fileOverview Manages reviews and comments.
  */
 import { adminDb } from '@/lib/firebase-admin';
-import { type Review, ReviewSchema } from './review-management.types';
+import { FieldValue, Timestamp }from 'firebase-admin/firestore';
+import { type Review, ReviewSchema, AddReviewInputSchema, AddReviewInput, ReviewStatusSchema } from './review-management.types';
 
 
 /**
@@ -13,6 +15,9 @@ import { type Review, ReviewSchema } from './review-management.types';
  */
 export async function getReviews(): Promise<Review[]> {
     try {
+        if (!adminDb) {
+            throw new Error("Database not initialized");
+        }
         const snapshot = await adminDb.collection('reviews').orderBy('submittedOn', 'desc').get();
         if (snapshot.empty) {
             return [];
@@ -23,7 +28,7 @@ export async function getReviews(): Promise<Review[]> {
             return ReviewSchema.parse({
                 id: doc.id,
                 ...data,
-                submittedOn: data.submittedOn.toDate().toISOString(),
+                submittedOn: (data.submittedOn as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
             });
         });
 
@@ -32,4 +37,55 @@ export async function getReviews(): Promise<Review[]> {
         console.error("Error fetching reviews:", error);
         return [];
     }
+}
+
+
+/**
+ * Adds a new review to Firestore with a 'pending' status.
+ * @param {AddReviewInput} input - The review data to add.
+ * @returns {Promise<{ success: boolean; message: string }>}
+ */
+export async function addReview(input: AddReviewInput): Promise<{ success: boolean; message: string }> {
+  try {
+    if (!adminDb) {
+      throw new Error("Database not initialized");
+    }
+    const validatedInput = AddReviewInputSchema.parse(input);
+    
+    await adminDb.collection('reviews').add({
+      ...validatedInput,
+      submittedOn: FieldValue.serverTimestamp(),
+      status: 'pending',
+    });
+
+    return { success: true, message: 'Your review has been submitted for approval.' };
+  } catch (error: any) {
+    console.error("Error adding review:", error);
+    return { success: false, message: error.message || 'An unknown error occurred.' };
+  }
+}
+
+/**
+ * Updates the status of a review.
+ * @param {string} reviewId - The ID of the review to update.
+ * @param {ReviewStatus} status - The new status.
+ * @returns {Promise<{ success: boolean; message: string }>}
+ */
+export async function updateReviewStatus(reviewId: string, status: 'approved' | 'rejected'): Promise<{ success: boolean; message: string }> {
+  try {
+    if (!adminDb) {
+      throw new Error("Database not initialized");
+    }
+    
+    // Validate status just in case
+    const parsedStatus = ReviewStatusSchema.parse(status);
+    
+    const reviewRef = adminDb.collection('reviews').doc(reviewId);
+    await reviewRef.update({ status: parsedStatus });
+    
+    return { success: true, message: `Review status updated to ${status}.` };
+  } catch (error: any) {
+    console.error(`Error updating review ${reviewId}:`, error);
+    return { success: false, message: error.message || 'An unknown error occurred.' };
+  }
 }

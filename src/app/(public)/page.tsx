@@ -68,12 +68,12 @@ export default async function Home() {
         <div className="relative flex flex-col gap-8 overflow-hidden">
           <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
             {[...topRowItems, ...topRowItems].map((testimonial, index) => (
-              <TestimonialCard key={`top-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolId} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
+              <TestimonialCard key={`top-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
             ))}
           </div>
           <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
             {[...bottomRowItems, ...bottomRowItems].map((testimonial, index) => (
-              <TestimonialCard key={`bottom-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolId} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
+              <TestimonialCard key={`bottom-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
             ))}
           </div>
         </div>
@@ -83,7 +83,7 @@ export default async function Home() {
     return (
       <div className="flex justify-center flex-wrap gap-8">
         {displayTestimonials.map((testimonial) => (
-          <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.authorName} role={testimonial.toolId} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
+          <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
         ))}
       </div>
     );

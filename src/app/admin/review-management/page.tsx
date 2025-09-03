@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,56 +25,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-
-type ReviewStatus = 'Approved' | 'Pending' | 'Rejected';
-
-// Dummy Data - In a real app, this would be fetched from Firestore
-const allReviews = [
-    {
-        id: '1',
-        user: { name: 'Jane Doe', avatar: 'https://i.pravatar.cc/150?u=jane' },
-        toolSlug: 'case-converter',
-        comment: 'This tool is a lifesaver! It saves me so much time when formatting text for my blog posts. Highly recommended!',
-        rating: 5,
-        date: '2024-05-10',
-        status: 'Approved',
-    },
-    {
-        id: '2',
-        user: { name: 'John Smith', avatar: 'https://i.pravatar.cc/150?u=john' },
-        toolSlug: 'password-generator',
-        comment: 'Great for creating strong, secure passwords. The options for length and character types are very useful.',
-        rating: 4,
-        date: '2024-05-12',
-        status: 'Approved',
-    },
-    {
-        id: '3',
-        user: { name: 'Emily White', avatar: 'https://i.pravatar.cc/150?u=emily' },
-        toolSlug: 'json-formatter',
-        comment: 'It works, but sometimes it hangs on very large JSON files. Could be better.',
-        rating: 3,
-        date: '2024-05-15',
-        status: 'Pending',
-    },
-    {
-        id: '4',
-        user: { name: 'Michael Brown', avatar: 'https://i.pravatar.cc/150?u=michael' },
-        toolSlug: 'text-to-speech',
-        comment: 'The voice sounds a bit robotic. I was expecting something more natural for a Pro tool.',
-        rating: 2,
-        date: '2024-05-18',
-        status: 'Rejected',
-    },
-];
+import { getReviews, updateReviewStatus, type Review, type ReviewStatus } from '@/ai/flows/review-management';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const getStatusBadge = (status: ReviewStatus) => {
     switch (status) {
-        case 'Approved':
+        case 'approved':
             return <Badge className="bg-green-500 hover:bg-green-600"><CheckCircle className="mr-1 h-3 w-3"/>Approved</Badge>;
-        case 'Pending':
+        case 'pending':
             return <Badge variant="secondary" className="bg-yellow-500 text-white hover:bg-yellow-600"><Clock className="mr-1 h-3 w-3"/>Pending</Badge>;
-        case 'Rejected':
+        case 'rejected':
             return <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3"/>Rejected</Badge>;
     }
 };
@@ -90,28 +51,57 @@ const StarRating = ({ rating }: { rating: number }) => (
     </div>
 );
 
-
 export default function ReviewManagementPage() {
-    const [reviews, setReviews] = useState(allReviews);
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [loading, setLoading] = useState(true);
     const [activeFilter, setActiveFilter] = useState<ReviewStatus | 'all'>('all');
     const [searchQuery, setSearchQuery] = useState('');
-    // const [tools, setTools] = useState([]); // In a real app, fetch tools
+    const { toast } = useToast();
+
+    const fetchReviews = async () => {
+        setLoading(true);
+        try {
+            const fetchedReviews = await getReviews();
+            setReviews(fetchedReviews);
+        } catch (error) {
+            console.error(error);
+            toast({ title: 'Error', description: 'Could not fetch reviews.', variant: 'destructive' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchReviews();
+    }, []);
+    
+    const handleStatusUpdate = async (reviewId: string, status: 'approved' | 'rejected') => {
+        const originalReviews = [...reviews];
+        const updatedReviews = reviews.map(r => r.id === reviewId ? {...r, status} : r);
+        setReviews(updatedReviews);
+
+        const result = await updateReviewStatus(reviewId, status);
+        if (result.success) {
+            toast({ title: 'Success', description: `Review has been ${status}.`});
+        } else {
+            setReviews(originalReviews); // Revert on failure
+            toast({ title: 'Error', description: result.message, variant: 'destructive'});
+        }
+    };
 
     const filteredReviews = reviews.filter(review => {
         const filterMatch = activeFilter === 'all' || review.status === activeFilter;
-        // The search for tool name would need the tools list to be fetched
-        const searchMatch = review.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        const searchMatch = review.authorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             review.comment.toLowerCase().includes(searchQuery.toLowerCase());
         return filterMatch && searchMatch;
     });
 
     const tabs: { id: ReviewStatus | 'all', label: string, icon: React.ElementType, count: number }[] = [
         { id: 'all', label: 'All Reviews', icon: Star, count: reviews.length },
-        { id: 'Pending', label: 'Pending', icon: Clock, count: reviews.filter(r => r.status === 'Pending').length },
-        { id: 'Approved', label: 'Approved', icon: CheckCircle, count: reviews.filter(r => r.status === 'Approved').length },
-        { id: 'Rejected', label: 'Rejected', icon: XCircle, count: reviews.filter(r => r.status === 'Rejected').length },
+        { id: 'pending', label: 'Pending', icon: Clock, count: reviews.filter(r => r.status === 'pending').length },
+        { id: 'approved', label: 'Approved', icon: CheckCircle, count: reviews.filter(r => r.status === 'approved').length },
+        { id: 'rejected', label: 'Rejected', icon: XCircle, count: reviews.filter(r => r.status === 'rejected').length },
     ];
-
 
   return (
     <div className="space-y-6">
@@ -163,31 +153,36 @@ export default function ReviewManagementPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredReviews.length > 0 ? (
+                {loading && [...Array(5)].map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell colSpan={7}><Skeleton className="h-10 w-full" /></TableCell>
+                    </TableRow>
+                ))}
+                {!loading && filteredReviews.length > 0 ? (
                   filteredReviews.map(review => (
                     <TableRow key={review.id}>
                         <TableCell>
                             <div className="flex items-center gap-3">
                                 <Avatar>
-                                    <AvatarImage src={review.user.avatar} />
-                                    <AvatarFallback>{review.user.name.charAt(0)}</AvatarFallback>
+                                    <AvatarImage src={review.authorAvatar} />
+                                    <AvatarFallback>{review.authorName.charAt(0)}</AvatarFallback>
                                 </Avatar>
-                                <span className="font-medium">{review.user.name}</span>
+                                <span className="font-medium">{review.authorName}</span>
                             </div>
                         </TableCell>
                         <TableCell className="max-w-sm">
-                            <p className="truncate">{review.comment.length > 30 ? `${review.comment.substring(0, 30)}...` : review.comment}</p>
+                            <p className="truncate">{review.comment}</p>
                         </TableCell>
                         <TableCell>
                            <StarRating rating={review.rating} />
                         </TableCell>
                         <TableCell>
-                            <Link href={`/${review.toolSlug}`} className="text-primary hover:underline">
-                               {review.toolSlug}
+                            <Link href={`/tools/${review.toolId}`} className="text-primary hover:underline">
+                               {review.toolName}
                             </Link>
                         </TableCell>
-                        <TableCell>{review.date}</TableCell>
-                        <TableCell>{getStatusBadge(review.status as ReviewStatus)}</TableCell>
+                        <TableCell>{new Date(review.submittedOn).toLocaleDateString()}</TableCell>
+                        <TableCell>{getStatusBadge(review.status)}</TableCell>
                         <TableCell className="text-right">
                            <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -196,21 +191,20 @@ export default function ReviewManagementPage() {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                {review.status !== 'Approved' && <DropdownMenuItem><ThumbsUp className="mr-2 h-4 w-4"/>Approve</DropdownMenuItem>}
-                                {review.status !== 'Rejected' && <DropdownMenuItem><ThumbsDown className="mr-2 h-4 w-4"/>Reject</DropdownMenuItem>}
-                                <DropdownMenuItem className="text-red-500"><XCircle className="mr-2 h-4 w-4"/>Delete</DropdownMenuItem>
+                                {review.status !== 'approved' && <DropdownMenuItem onClick={() => handleStatusUpdate(review.id, 'approved')}><ThumbsUp className="mr-2 h-4 w-4 text-green-500"/>Approve</DropdownMenuItem>}
+                                {review.status !== 'rejected' && <DropdownMenuItem onClick={() => handleStatusUpdate(review.id, 'rejected')}><ThumbsDown className="mr-2 h-4 w-4 text-red-500"/>Reject</DropdownMenuItem>}
                             </DropdownMenuContent>
                            </DropdownMenu>
                         </TableCell>
                     </TableRow>
                   ))
-                ) : (
+                ) : !loading ? (
                   <TableRow>
                     <TableCell colSpan={7} className="h-48 text-center">
                       No reviews found.
                     </TableCell>
                   </TableRow>
-                )}
+                ) : null}
               </TableBody>
             </Table>
           </div>
