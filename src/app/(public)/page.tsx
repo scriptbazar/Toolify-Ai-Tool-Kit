@@ -48,7 +48,7 @@ const allReviews = [
         comment: 'The voice sounds a bit robotic. I was expecting something more natural for a Pro tool.',
         rating: 4,
         date: '2024-05-18',
-        status: 'Approved',
+        status: 'Rejected',
     },
 ];
 
