@@ -40,3 +40,4 @@ export async function getComments(): Promise<Comment[]> {
         return [];
     }
 }
+

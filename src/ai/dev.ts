@@ -5,11 +5,11 @@
 
 import '@/ai/flows/user-management.ts';
 import '@/ai/flows/settings-management.ts';
-import '@/ai_flows/ai-chat.ts';
+import '@/ai/flows/ai-chat.ts';
 import '@/ai/flows/ai-email-composer.ts';
 import '@/ai/flows/send-email.ts';
 import '@/ai/flows/ticket-management.ts';
-import '@/ai_flows/payment-management.ts';
+import '@/ai/flows/payment-management.ts';
 import '@/ai/flows/blog-management.ts';
 import '@/ai/flows/tool-management.ts';
 import '@/ai/flows/user-activity.ts';

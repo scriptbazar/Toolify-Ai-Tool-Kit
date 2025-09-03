@@ -16,7 +16,6 @@ import { z } from 'zod';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, ReferralRequestSchema, type Affiliate, AffiliateSchema } from './user-management.types';
 import { adminDb } from '@/lib/firebase-admin';
-import crypto from 'crypto';
 
 
 export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ success: boolean; message: string }> {
@@ -71,8 +70,8 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
   }
   try {
     const usersSnapshot = await adminDb.collection('users').get();
-    const leadsSnapshot = await adminDb.collection('leads').get();
-
+    const leadsSnapshot = await adminDb.collection('leads');
+    
     const emailMap = new Map<string, { source: string; date: string }>();
 
     const processDoc = (doc: FirebaseFirestore.QueryDocumentSnapshot, source: 'Signup' | 'Lead') => {
