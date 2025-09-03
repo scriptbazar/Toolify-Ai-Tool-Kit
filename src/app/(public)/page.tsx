@@ -59,10 +59,7 @@ export default async function Home() {
   const homepageSettings = settings.homepage || {};
   
   const testimonials = allReviews.filter(review => review.status === 'Approved');
-  const half = Math.ceil(testimonials.length / 2);
-  const firstHalfTestimonials = testimonials.slice(0, half);
-  const secondHalfTestimonials = testimonials.slice(half);
-
+  
   const steps = homepageSettings.steps || [];
   const features = homepageSettings.features || [];
   const blogPosts = homepageSettings.blogPosts || [];
@@ -95,32 +92,33 @@ export default async function Home() {
     </Card>
   );
 
-  const Testimonials = () => (
-     <section className="py-16 md:py-24 bg-card">
-        <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Loved by Professionals Worldwide</h2>
-            <p className="mt-3 max-w-2xl mx-auto text-muted-foreground mb-12">
-                Our tools are trusted by thousands of developers, designers, and content creators to streamline their work and boost productivity.
-            </p>
-        </div>
-        {testimonials.length > 0 ? (
-            <div className="relative flex flex-col gap-8 overflow-hidden">
-                <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
-                    {[...firstHalfTestimonials, ...firstHalfTestimonials].map((testimonial, index) => (
-                        <TestimonialCard key={`rtl-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
-                    ))}
-                </div>
-                <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
-                     {[...secondHalfTestimonials, ...secondHalfTestimonials].map((testimonial, index) => (
-                        <TestimonialCard key={`ltr-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
-                    ))}
-                </div>
+  const Testimonials = () => {
+    // Only duplicate the array for a smooth marquee effect if there are enough items.
+    // Otherwise, it looks weird to have few items repeating immediately.
+    const displayTestimonials = testimonials.length > 5 ? [...testimonials, ...testimonials] : testimonials;
+    
+    return (
+        <section className="py-16 md:py-24 bg-card">
+            <div className="container mx-auto px-4 text-center">
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Loved by Professionals Worldwide</h2>
+                <p className="mt-3 max-w-2xl mx-auto text-muted-foreground mb-12">
+                    Our tools are trusted by thousands of developers, designers, and content creators to streamline their work and boost productivity.
+                </p>
             </div>
-        ) : (
-             <div className="text-center text-muted-foreground">No approved reviews yet.</div>
-        )}
-    </section>
-  );
+            {testimonials.length > 0 ? (
+                 <div className="relative flex flex-col gap-8 overflow-hidden">
+                    <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
+                         {displayTestimonials.map((testimonial, index) => (
+                            <TestimonialCard key={`rtl-${testimonial.id}-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <div className="text-center text-muted-foreground">No approved reviews yet.</div>
+            )}
+        </section>
+    );
+  };
 
 
   return (
