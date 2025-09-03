@@ -84,15 +84,9 @@ export default function Footer() {
               {settings?.quickLinks && settings.quickLinks.length > 0 && (
                 <FooterLinkColumn title="Quick Links" links={settings.quickLinks} />
              )}
-              {/* This column is intentionally kept separate as it might not be part of the CMS in all versions */}
-              <div>
-                 <h3 className="font-semibold mb-4">More Tools</h3>
-                 <ul className="space-y-3">
-                    <li key='bmi-calculator'><Link href="/tools/bmi-calculator" className="text-sm text-muted-foreground hover:text-primary transition-colors">BMI Calculator</Link></li>
-                    <li key='text-to-speech'><Link href="/tools/text-to-speech" className="text-sm text-muted-foreground hover:text-primary transition-colors">Text to Speech</Link></li>
-                    <li key='pdf-merger'><Link href="/tools/pdf-merger" className="text-sm text-muted-foreground hover:text-primary transition-colors">PDF Merger</Link></li>
-                 </ul>
-              </div>
+             {settings?.moreTools && settings.moreTools.length > 0 && (
+                <FooterLinkColumn title="More Tools" links={settings.moreTools} />
+             )}
                {settings?.hostingLinks && settings.hostingLinks.length > 0 && (
                 <FooterLinkColumn title="Best Hostings" links={settings.hostingLinks} />
              )}

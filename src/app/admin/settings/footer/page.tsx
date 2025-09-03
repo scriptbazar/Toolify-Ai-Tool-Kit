@@ -20,7 +20,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 
 type FooterFormValues = z.infer<typeof FooterSettingsSchema>;
 
-const LinkArrayEditor = ({ control, name, title }: { control: any, name: "topTools" | "quickLinks" | "hostingLinks", title: string }) => {
+const LinkArrayEditor = ({ control, name, title }: { control: any, name: "topTools" | "quickLinks" | "hostingLinks" | "moreTools", title: string }) => {
     const { fields, append, remove } = useFieldArray({
         control,
         name
@@ -83,6 +83,7 @@ export default function FooterManagementPage() {
       topTools: [],
       quickLinks: [],
       hostingLinks: [],
+      moreTools: [],
       footerAdCode: '',
     },
   });
@@ -219,6 +220,7 @@ export default function FooterManagementPage() {
             <div className="lg:col-span-2 space-y-6">
                  <LinkArrayEditor control={form.control} name="topTools" title="Top Tools Links" />
                  <LinkArrayEditor control={form.control} name="quickLinks" title="Quick Links" />
+                 <LinkArrayEditor control={form.control} name="moreTools" title="More Tools Links" />
                  <LinkArrayEditor control={form.control} name="hostingLinks" title="Hosting Links" />
             </div>
         </div>

@@ -143,6 +143,11 @@ const defaultFooterSettings = {
         { id: 'ql4', name: 'Terms & Conditions', href: '/terms-conditions' },
         { id: 'ql5', name: 'DMCA', href: '/dmca' },
     ],
+    moreTools: [
+        { id: 'mt1', name: 'BMI Calculator', href: '/tools/bmi-calculator' },
+        { id: 'mt2', name: 'Text to Speech', href: '/tools/text-to-speech' },
+        { id: 'mt3', name: 'PDF Merger', href: '/tools/pdf-merger' },
+    ],
     hostingLinks: [
         { id: 'hl1', name: 'Hostinger', href: '#' },
         { id: 'hl2', name: 'Hostarmada', href: '#' },
