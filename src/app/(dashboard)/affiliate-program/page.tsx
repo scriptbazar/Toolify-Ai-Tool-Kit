@@ -35,6 +35,12 @@ interface AffiliateStats {
     conversionRate: string;
 }
 
+const getIconComponent = (iconName?: string): React.ElementType => {
+    if (!iconName) return HelpCircle;
+    const Icon = (Icons as any)[iconName];
+    return Icon || HelpCircle;
+};
+
 export default function AffiliateProgramPage() {
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [loading, setLoading] = useState(true);
@@ -58,8 +64,8 @@ export default function AffiliateProgramPage() {
                     
                     const [settings, userDocSnap] = await Promise.all([settingsPromise, userDocPromise]);
                     
-                    setReferralSettings(settings.referral || null);
-                    setFaqs(settings.faqs?.affiliateFaqs || []);
+                    setReferralSettings(settings.referral ?? null);
+                    setFaqs(settings.faqs?.affiliateFaqs ?? []);
                     
                     if (userDocSnap.exists()) {
                         const userData = userDocSnap.data();
@@ -221,7 +227,7 @@ export default function AffiliateProgramPage() {
                           </h2>
                           <Accordion type="single" collapsible className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                             {faqs.map((faq) => {
-                                const Icon = (Icons as any)[faq.icon] || HelpCircle;
+                                const Icon = getIconComponent(faq.icon as string);
                                 return (
                                   <AccordionItem value={faq.question} key={faq.question} className="border-none">
                                     <AccordionTrigger className="faq-accordion-trigger">
