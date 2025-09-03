@@ -39,7 +39,7 @@ const allReviews = [
         comment: 'It works, but sometimes it hangs on very large JSON files. Could be better.',
         rating: 3,
         date: '2024-05-15',
-        status: 'Approved',
+        status: 'Pending',
     },
      {
         id: '4',
@@ -59,6 +59,10 @@ export default async function Home() {
   const homepageSettings = settings.homepage || {};
   
   const testimonials = allReviews.filter(review => review.status === 'Approved');
+  const half = Math.ceil(testimonials.length / 2);
+  const firstHalfTestimonials = testimonials.slice(0, half);
+  const secondHalfTestimonials = testimonials.slice(half);
+
   const steps = homepageSettings.steps || [];
   const features = homepageSettings.features || [];
   const blogPosts = homepageSettings.blogPosts || [];
@@ -99,18 +103,22 @@ export default async function Home() {
                 Our tools are trusted by thousands of developers, designers, and content creators to streamline their work and boost productivity.
             </p>
         </div>
-        <div className="relative flex flex-col gap-8 overflow-hidden">
-            <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
-                {[...testimonials, ...testimonials].map((testimonial, index) => (
-                    <TestimonialCard key={`rtl-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
-                ))}
+        {testimonials.length > 0 ? (
+            <div className="relative flex flex-col gap-8 overflow-hidden">
+                <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
+                    {[...firstHalfTestimonials, ...firstHalfTestimonials].map((testimonial, index) => (
+                        <TestimonialCard key={`rtl-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
+                    ))}
+                </div>
+                <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
+                     {[...secondHalfTestimonials, ...secondHalfTestimonials].map((testimonial, index) => (
+                        <TestimonialCard key={`ltr-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
+                    ))}
+                </div>
             </div>
-            <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
-                 {[...testimonials, ...testimonials].map((testimonial, index) => (
-                    <TestimonialCard key={`ltr-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
-                ))}
-            </div>
-        </div>
+        ) : (
+             <div className="text-center text-muted-foreground">No approved reviews yet.</div>
+        )}
     </section>
   );
 
