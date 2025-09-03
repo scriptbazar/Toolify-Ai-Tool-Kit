@@ -46,7 +46,7 @@ export default function BlogPage() {
         <div className="container mx-auto px-4 py-12 md:py-20">
              <div className="max-w-4xl mx-auto text-center mb-12">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-                From Our Blog
+                Toolify AI Blog
               </h1>
               <p className="mt-4 text-lg text-muted-foreground">
                 Stay updated with the latest news, tips, and tutorials from our team.
