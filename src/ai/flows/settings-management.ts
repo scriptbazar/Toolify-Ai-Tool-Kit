@@ -236,12 +236,34 @@ const defaultHomepageSettings = {
   ],
 };
 
+const defaultFaqSettings = {
+    contactFaqs: [
+        { id: 'contact1', icon: 'HelpCircle' as const, question: 'What is ToolifyAI?', answer: 'ToolifyAI is a comprehensive suite of over 100+ online tools designed to help you with text, images, development, and more, all in one place.' },
+        { id: 'contact2', icon: 'UserPlus' as const, question: 'How do I create an account?', answer: 'You can create an account by clicking the "Sign Up" button on the top right corner. All you need is an email address and a password to get started.' },
+        { id: 'contact3', icon: 'Star' as const, question: 'Is ToolifyAI free to use?', answer: 'Yes, we offer a generous free plan that gives you access to our basic tools. We also have a Pro plan with unlimited access and advanced features.' },
+        { id: 'contact4', icon: 'ShieldCheck' as const, question: 'How secure is my data?', answer: 'We take your privacy and security very seriously. All data is processed securely, and we do not store your personal information without your consent.' },
+    ],
+    pricingFaqs: [
+        { id: 'pricing1', icon: 'CreditCard' as const, question: 'What payment methods do you accept?', answer: 'We accept all major credit cards (Visa, Mastercard, American Express) as well as PayPal.' },
+        { id: 'pricing2', icon: 'BadgeX' as const, question: 'Can I cancel my subscription at any time?', answer: 'Yes, you can cancel your subscription at any time from your account dashboard. You will retain access to Pro features until the end of your billing period.' },
+        { id: 'pricing3', icon: 'Repeat' as const, question: 'Do you offer refunds?', answer: 'We offer a 30-day money-back guarantee for all our Pro plans. If you\'re not satisfied, just contact our support team within 30 days of your purchase.' },
+        { id: 'pricing4', icon: 'Users' as const, question: 'What is the difference between the Free and Pro plan?', answer: 'The Free plan offers access to our basic tools with some usage limits. The Pro plan unlocks all tools, unlimited usage, priority support, and an ad-free experience.' },
+    ],
+    affiliateFaqs: [
+        { id: 'affiliate1', icon: 'HelpCircle' as const, question: 'How does the affiliate program work?', answer: 'Simply share your unique referral link with your audience. When someone signs up for a paid plan through your link, you earn a commission.' },
+        { id: 'affiliate2', icon: 'DollarSign' as const, question: 'How much can I earn?', answer: 'You will earn a recurring commission on every payment made by the users you refer. The exact percentage is shown on the affiliate dashboard.' },
+        { id: 'affiliate3', icon: 'Link' as const, question: 'Where can I find my referral link?', answer: 'Once your affiliate application is approved, your unique referral link will be available on your affiliate dashboard.' },
+        { id: 'affiliate4', icon: 'Clock' as const, question: 'How long does the tracking cookie last?', answer: 'Our tracking cookie lasts for 30 days. This means if a user clicks your link and signs up for a paid plan within 30 days, you will still get credit for the referral.' },
+    ],
+};
+
 
 const defaultSettings = AppSettingsSchema.parse({ 
   page: { pages: defaultPages },
   plan: { plans: defaultPlans },
   footer: defaultFooterSettings,
   homepage: defaultHomepageSettings,
+  faqs: defaultFaqSettings,
   referral: {
     isReferralEnabled: true,
     commissionRate: 20,

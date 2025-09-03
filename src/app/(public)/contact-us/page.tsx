@@ -65,7 +65,11 @@ export default function ContactUsPage() {
         </CardContent>
       </Card>
       
-      {faqs.length > 0 && (
+      {loading ? (
+          <Card>
+              <CardHeader><CardTitle className="text-2xl font-bold text-center">Loading FAQs...</CardTitle></CardHeader>
+          </Card>
+      ) : faqs.length > 0 && (
         <Card>
             <CardHeader>
                 <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
