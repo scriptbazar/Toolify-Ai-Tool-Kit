@@ -113,19 +113,9 @@ export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholder
   // Fallback for auto-ads, which are handled by a script in the header.
   // This can show a general placeholder for admins if no specific slot ID is relevant.
   if (adType === 'auto' && isAdmin) {
-    return (
-      <div
-        className={cn(
-          'flex w-full min-h-[100px] items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-4 text-center',
-          className
-        )}
-      >
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Megaphone className="h-5 w-5" />
-          <p className="text-sm font-medium">Auto Ads Enabled</p>
-        </div>
-      </div>
-    );
+    // Admins see a general notice for auto-ads, but no specific placeholders
+    // as the ad network controls placement. We don't render placeholders for auto-ads.
+    return null;
   }
 
   return null;
