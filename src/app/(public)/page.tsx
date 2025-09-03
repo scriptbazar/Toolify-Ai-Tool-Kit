@@ -13,6 +13,7 @@ import { getSettings } from '@/ai/flows/settings-management';
 import * as Icons from 'lucide-react';
 import { getPosts } from '@/ai/flows/blog-management';
 import { getReviews } from '@/ai/flows/review-management';
+import { ResponsiveHero } from '@/components/common/ResponsiveHero';
 
 
 export default async function Home() {
@@ -96,15 +97,7 @@ export default async function Home() {
     <>
       <section className="text-center py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter">
-            Your All-in-One Smart&nbsp;
-             <span className="text-primary whitespace-nowrap">
-                <TypingEffect
-                    words={categoryNames}
-                />
-            </span>
-            &nbsp;Toolkit
-          </h1>
+          <ResponsiveHero allWords={categoryNames} />
           <p className="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground">
             Over 100+ smart utility and AI-powered tools to boost your productivity. From text manipulation to AI image generation, we've got you covered.
           </p>
