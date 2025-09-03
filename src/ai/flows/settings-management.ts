@@ -72,21 +72,21 @@ const defaultSettings = AppSettingsSchema.parse({
       slug: 'privacy-policy',
       title: 'Privacy Policy',
       icon: 'Shield',
-      content: '',
+      content: ``,
     },
     {
       id: 'terms-conditions',
       slug: 'terms-conditions',
       title: 'Terms & Conditions',
       icon: 'Gavel',
-      content: '',
+      content: ``,
     },
     {
       id: 'dmca',
       slug: 'dmca',
       title: 'DMCA',
       icon: 'Gavel',
-      content: '',
+      content: ``,
     },
   ] },
   plan: { plans: [
@@ -261,13 +261,11 @@ const defaultSettings = AppSettingsSchema.parse({
     toolSidebar: {
         showPopularTools: true,
         showRecentPosts: true,
-        showAdvertisement: true,
     },
     blogSidebar: {
         showPopularTools: true,
         showRecentPosts: true,
         showCategories: true,
-        showAdvertisement: true,
     }
   }
 });

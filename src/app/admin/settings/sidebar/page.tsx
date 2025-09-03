@@ -16,13 +16,11 @@ const initialSettings: SidebarSettings = {
   toolSidebar: {
     showPopularTools: true,
     showRecentPosts: true,
-    showAdvertisement: true,
   },
   blogSidebar: {
     showPopularTools: true,
     showRecentPosts: true,
     showCategories: true,
-    showAdvertisement: true,
   }
 };
 
@@ -170,14 +168,6 @@ export default function SidebarManagementPage() {
                     onCheckedChange={(checked) => handleSwitchChange('toolSidebar', 'showRecentPosts', checked)}
                     icon={Newspaper}
                 />
-                 <WidgetToggle 
-                    id="tool-advertisement"
-                    label="Show Advertisement"
-                    description="Display an ad slot in the sidebar."
-                    checked={settings.toolSidebar?.showAdvertisement || false}
-                    onCheckedChange={(checked) => handleSwitchChange('toolSidebar', 'showAdvertisement', checked)}
-                    icon={Megaphone}
-                />
             </CardContent>
         </Card>
         <Card>
@@ -209,14 +199,6 @@ export default function SidebarManagementPage() {
                     checked={settings.blogSidebar?.showCategories || false}
                     onCheckedChange={(checked) => handleSwitchChange('blogSidebar', 'showCategories', checked)}
                     icon={List}
-                />
-                 <WidgetToggle 
-                    id="blog-advertisement"
-                    label="Show Advertisement"
-                    description="Display an ad slot in the sidebar."
-                    checked={settings.blogSidebar?.showAdvertisement || false}
-                    onCheckedChange={(checked) => handleSwitchChange('blogSidebar', 'showAdvertisement', checked)}
-                    icon={Megaphone}
                 />
             </CardContent>
         </Card>
