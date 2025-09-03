@@ -39,11 +39,12 @@ const HomepageSettingsFormSchema = HomepageSettingsSchema.extend({
 
 type HomepageFormValues = z.infer<typeof HomepageSettingsFormSchema>;
 
-const DynamicSectionEditor = ({ control, name, title }: {
-    control: any,
+const DynamicSectionEditor = ({ form, name, title }: {
+    form: any,
     name: "features" | "steps",
     title: string,
 }) => {
+    const { control } = form;
     const { fields, append, remove } = useFieldArray({
         control,
         name,
@@ -80,15 +81,15 @@ const DynamicSectionEditor = ({ control, name, title }: {
                             onOpenChange={() => setOpenItemId(isOpen ? null : field.id)}
                             className={cn("space-y-2", isOpen && "lg:col-span-2")}
                         >
-                          <div className="flex items-center gap-2 p-4 border rounded-lg bg-muted/50">
-                            <GripVertical className="h-5 w-5 text-muted-foreground shrink-0 cursor-move" />
-                            <CollapsibleTrigger className="flex-1 text-left w-full">
+                          <div className="flex items-start gap-2 p-4 border rounded-lg bg-muted/50">
+                            <GripVertical className="h-5 w-5 text-muted-foreground mt-2 shrink-0 cursor-move" />
+                            <CollapsibleTrigger className="flex-1 text-left">
                                 <div className="flex justify-between items-center">
-                                    <p className="font-medium truncate pr-4">{form.get().watch(`${name}.${index}.title`) || 'New Item'}</p>
+                                    <p className="font-medium truncate">{form.watch(`${name}.${index}.title`) || 'New Item'}</p>
                                     <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
                                 </div>
                             </CollapsibleTrigger>
-                             <Button type="button" variant="destructive" size="icon" onClick={(e) => { e.stopPropagation(); remove(index); }} className="shrink-0">
+                             <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)} className="shrink-0">
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -218,14 +219,14 @@ export default function HomepageSettingsPage() {
                     </TabsList>
                     <TabsContent value="steps" className="mt-6">
                         <DynamicSectionEditor
-                            control={form.control}
+                            form={form}
                             name="steps"
                             title="Get Started in 4 Easy Steps"
                         />
                     </TabsContent>
                     <TabsContent value="features" className="mt-6">
                         <DynamicSectionEditor
-                            control={form.control}
+                            form={form}
                             name="features"
                             title="Why Choose ToolifyAI? Section"
                         />
