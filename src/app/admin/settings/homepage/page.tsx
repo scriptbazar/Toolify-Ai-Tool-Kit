@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, PlusCircle, Trash2, GripVertical, Star, User, MessageCircle, HelpCircle } from 'lucide-react';
+import { Save, Loader2, PlusCircle, Trash2, GripVertical, Star, User, MessageCircle, HelpCircle, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import { HomepageSettingsSchema, type HomepageSettings } from '@/ai/flows/settings-management.types';
@@ -17,6 +17,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import * as Icons from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { cn } from '@/lib/utils';
 
 const iconNames = Object.keys(Icons) as [string, ...string[]];
 
@@ -37,38 +39,62 @@ const HomepageSettingsFormSchema = HomepageSettingsSchema.extend({
 
 type HomepageFormValues = z.infer<typeof HomepageSettingsFormSchema>;
 
-const DynamicSectionEditor = ({ control, name, title, fieldsConfig }: {
+const DynamicSectionEditor = ({ control, name, title }: {
     control: any,
     name: "features" | "steps",
     title: string,
-    fieldsConfig: { name: string, label: string, placeholder: string, component?: 'textarea' }[]
 }) => {
     const { fields, append, remove } = useFieldArray({
         control,
         name,
     });
+    const [openItemId, setOpenItemId] = useState<string | null>(null);
 
-    const getNewItem = () => {
-        const newItem: any = { id: `${name}_${Date.now()}` };
-        fieldsConfig.forEach(field => {
-            newItem[field.name] = '';
-        });
-        if (name === 'features' || name === 'steps') newItem.icon = 'HelpCircle';
-        return newItem;
-    };
+    const getNewItem = () => ({
+        id: `${name}_${Date.now()}`,
+        icon: 'HelpCircle' as const,
+        title: '',
+        description: '',
+    });
+
+    const fieldsConfig = [
+        { name: 'icon', label: 'Icon Name', placeholder: 'e.g., UserPlus' },
+        { name: 'title', label: 'Title', placeholder: 'e.g., Create Account' },
+        { name: 'description', label: 'Description', placeholder: 'Describe the item', component: 'textarea' as const }
+    ];
 
     return (
         <Card>
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
-                <CardDescription>Drag and drop to reorder items.</CardDescription>
+                <CardDescription>Click on an item to expand and edit it. Drag and drop to reorder is not yet supported.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-                {fields.map((field, index) => (
-                    <div key={field.id} className="flex items-start gap-2 p-4 border rounded-lg bg-muted/50">
-                        <GripVertical className="h-5 w-5 text-muted-foreground mt-8 shrink-0" />
-                        <div className="flex-grow space-y-4">
-                            {fieldsConfig.map(config => (
+            <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {fields.map((field, index) => {
+                      const isOpen = openItemId === field.id;
+                      return (
+                        <Collapsible 
+                            key={field.id}
+                            open={isOpen}
+                            onOpenChange={() => setOpenItemId(isOpen ? null : field.id)}
+                            className={cn("space-y-2", isOpen && "lg:col-span-2")}
+                        >
+                          <div className="flex items-center gap-2 p-4 border rounded-lg bg-muted/50">
+                            <GripVertical className="h-5 w-5 text-muted-foreground shrink-0 cursor-move" />
+                            <CollapsibleTrigger className="flex-1 text-left w-full">
+                                <div className="flex justify-between items-center">
+                                    <p className="font-medium truncate pr-4">{form.get().watch(`${name}.${index}.title`) || 'New Item'}</p>
+                                    <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
+                                </div>
+                            </CollapsibleTrigger>
+                             <Button type="button" variant="destructive" size="icon" onClick={(e) => { e.stopPropagation(); remove(index); }} className="shrink-0">
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <CollapsibleContent>
+                            <div className="p-4 border rounded-lg -mt-2 space-y-4">
+                               {fieldsConfig.map(config => (
                                 <FormField
                                     key={`${field.id}-${config.name}`}
                                     control={control}
@@ -88,13 +114,17 @@ const DynamicSectionEditor = ({ control, name, title, fieldsConfig }: {
                                     )}
                                 />
                             ))}
-                        </div>
-                        <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)} className="shrink-0">
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </div>
-                ))}
-                <Button type="button" variant="outline" onClick={() => append(getNewItem())}>
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      )
+                  })}
+                </div>
+                 <Button type="button" variant="outline" onClick={() => {
+                    const newItem = getNewItem();
+                    append(newItem);
+                    setOpenItemId(newItem.id);
+                 }} className="mt-4">
                     <PlusCircle className="mr-2 h-4 w-4" /> Add Item
                 </Button>
             </CardContent>
@@ -191,11 +221,6 @@ export default function HomepageSettingsPage() {
                             control={form.control}
                             name="steps"
                             title="Get Started in 4 Easy Steps"
-                            fieldsConfig={[
-                                { name: 'icon', label: 'Icon Name', placeholder: 'e.g., UserPlus' },
-                                { name: 'title', label: 'Title', placeholder: 'e.g., Create Account' },
-                                { name: 'description', label: 'Description', placeholder: 'Describe the step', component: 'textarea' }
-                            ]}
                         />
                     </TabsContent>
                     <TabsContent value="features" className="mt-6">
@@ -203,11 +228,6 @@ export default function HomepageSettingsPage() {
                             control={form.control}
                             name="features"
                             title="Why Choose ToolifyAI? Section"
-                            fieldsConfig={[
-                                { name: 'icon', label: 'Icon Name', placeholder: 'e.g., Sparkles' },
-                                { name: 'title', label: 'Title', placeholder: 'e.g., Comprehensive Toolset' },
-                                { name: 'description', label: 'Description', placeholder: 'Describe the feature', component: 'textarea' }
-                            ]}
                         />
                     </TabsContent>
                 </Tabs>
