@@ -16,6 +16,10 @@ const COMMENTS_COLLECTION = 'blogComments';
  * @returns {Promise<Post[]>} A list of all posts.
  */
 export async function getPosts(): Promise<Post[]> {
+  if (!adminDb) {
+    console.error("Database not initialized, cannot fetch posts.");
+    return [];
+  }
   try {
     const snapshot = await adminDb.collection(POSTS_COLLECTION).orderBy('createdAt', 'desc').get();
     if (snapshot.empty) {
@@ -45,6 +49,9 @@ export async function getPosts(): Promise<Post[]> {
  * @returns {Promise<{ success: boolean; message: string; postId?: string }>}
  */
 export async function upsertPost(postData: Partial<Omit<Post, 'id' | 'createdAt'>> & { id?: string }): Promise<{ success: boolean; message: string; postId?: string }> {
+  if (!adminDb) {
+    return { success: false, message: "Database not initialized" };
+  }
   try {
     const { id, ...data } = postData;
     
@@ -54,20 +61,23 @@ export async function upsertPost(postData: Partial<Omit<Post, 'id' | 'createdAt'
       const currentDoc = await postRef.get();
       const wasPublished = currentDoc.exists() && currentDoc.data()?.status === 'Published';
 
-      await postRef.update({
+      const updateData = {
           ...data,
           // Only set publishedAt if the status is changing to 'Published' for the first time
           ...(data.status === 'Published' && !wasPublished && { publishedAt: FieldValue.serverTimestamp() })
-      });
+      };
+
+      await postRef.update(updateData);
       return { success: true, message: 'Post updated successfully.', postId: id };
     } else {
       // Add new post
       const postRef = adminDb.collection(POSTS_COLLECTION).doc();
-      await postRef.set({
+      const newPostData = {
         ...data,
         createdAt: FieldValue.serverTimestamp(),
         ...(data.status === 'Published' && { publishedAt: FieldValue.serverTimestamp() })
-      });
+      };
+      await postRef.set(newPostData);
       return { success: true, message: 'Post created successfully.', postId: postRef.id };
     }
   } catch (error: any) {
@@ -82,6 +92,10 @@ export async function upsertPost(postData: Partial<Omit<Post, 'id' | 'createdAt'
  * @returns {Promise<Comment[]>} A list of all comments.
  */
 export async function getComments(): Promise<Comment[]> {
+    if (!adminDb) {
+      console.error("Database not initialized, cannot fetch comments.");
+      return [];
+    }
     try {
         const snapshot = await adminDb.collection(COMMENTS_COLLECTION).orderBy('submittedOn', 'desc').get();
         if (snapshot.empty) {

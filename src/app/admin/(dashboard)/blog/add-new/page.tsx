@@ -147,6 +147,10 @@ export default function AddNewPostPage() {
     }
   }
 
+  const handlePostSubmit = (status: PostFormValues['status']) => {
+    form.setValue('status', status);
+    form.handleSubmit((values) => processAndSavePost(values, status))();
+  };
 
   return (
     <div className="space-y-6">
@@ -157,7 +161,7 @@ export default function AddNewPostPage() {
         </p>
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit((values) => processAndSavePost(values, 'Published'))} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <form className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
@@ -235,11 +239,11 @@ export default function AddNewPostPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Button type="button" variant="outline" className="w-full" onClick={form.handleSubmit((values) => processAndSavePost(values, 'Draft'))} disabled={isSaving}>
+                  <Button type="button" variant="outline" className="w-full" onClick={() => handlePostSubmit('Draft')} disabled={isSaving}>
                      <Save className="mr-2 h-4 w-4" />
                      Save Draft
                   </Button>
-                  <Button type="submit" className="w-full" disabled={isSaving}>
+                  <Button type="button" className="w-full" onClick={() => handlePostSubmit('Published')} disabled={isSaving}>
                     <Send className="mr-2 h-4 w-4" />
                     Publish
                   </Button>
@@ -311,7 +315,7 @@ export default function AddNewPostPage() {
                 >
                     <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/png, image/jpeg, image/webp" />
                     {imagePreview ? (
-                        <Image src={imagePreview} alt="Featured image preview" layout="fill" objectFit="cover" className="rounded-md" />
+                        <Image src={imagePreview} alt="Featured image preview" fill objectFit="cover" className="rounded-md" />
                     ) : (
                         <div className="flex flex-col items-center">
                             <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
