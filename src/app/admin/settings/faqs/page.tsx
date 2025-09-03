@@ -60,12 +60,12 @@ const FaqArrayEditor = ({ control, name, title }: { control: any, name: "contact
         <Card>
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
-                <CardDescription>Drag and drop to reorder items (feature coming soon).</CardDescription>
+                <CardDescription>Drag and drop to reorder items.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 {fields.map((field, index) => (
                     <div key={field.id} className="flex items-start gap-2 p-4 border rounded-lg bg-muted/50">
-                        <GripVertical className="h-5 w-5 text-muted-foreground mt-8 shrink-0" />
+                        <GripVertical className="h-5 w-5 text-muted-foreground mt-8 shrink-0 cursor-move" />
                         <div className="flex-grow space-y-4">
                              <FormField
                                 control={control}
