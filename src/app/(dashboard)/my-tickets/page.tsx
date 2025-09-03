@@ -96,7 +96,7 @@ export default function MyTicketsPage() {
             <h1 className="text-3xl font-bold">My Support Tickets</h1>
             <p className="text-muted-foreground">Review your past and present support requests.</p>
         </div>
-        <CreateTicketDialog onTicketCreated={fetchTickets} />
+        <CreateTicketDialog onTicketCreated={() => user && fetchTickets(user.uid)} />
       </div>
       <Card>
         <CardHeader>
