@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -20,7 +21,6 @@ const initialSettings: SidebarSettings = {
   blogSidebar: {
     showPopularTools: true,
     showRecentPosts: true,
-    showCategories: true,
   }
 };
 
@@ -191,14 +191,6 @@ export default function SidebarManagementPage() {
                     checked={settings.blogSidebar?.showRecentPosts || false}
                     onCheckedChange={(checked) => handleSwitchChange('blogSidebar', 'showRecentPosts', checked)}
                     icon={Newspaper}
-                />
-                 <WidgetToggle 
-                    id="blog-categories"
-                    label="Show Categories"
-                    description="Display a list of blog post categories."
-                    checked={settings.blogSidebar?.showCategories || false}
-                    onCheckedChange={(checked) => handleSwitchChange('blogSidebar', 'showCategories', checked)}
-                    icon={List}
                 />
             </CardContent>
         </Card>

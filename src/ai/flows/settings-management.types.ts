@@ -268,7 +268,6 @@ export type ToolSidebarSettings = z.infer<typeof ToolSidebarSettingsSchema>;
 export const BlogSidebarSettingsSchema = z.object({
     showPopularTools: z.boolean().default(true),
     showRecentPosts: z.boolean().default(true),
-    showCategories: z.boolean().default(true),
 });
 export type BlogSidebarSettings = z.infer<typeof BlogSidebarSettingsSchema>;
 
