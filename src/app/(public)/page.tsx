@@ -105,7 +105,7 @@ export default async function Home() {
           <p className="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground">
             Over 100+ smart utility and AI-powered tools to boost your productivity. From text manipulation to AI image generation, we've got you covered.
           </p>
-          <div className="mt-8">
+          <div className="mt-8 flex justify-center">
             <Button asChild size="lg">
               <Link href="/tools">
                 Explore All Tools <ArrowRight className="ml-2 h-5 w-5" />
@@ -196,7 +196,7 @@ export default async function Home() {
               <p className="mt-3 max-w-xl mx-auto text-muted-foreground">
                 Start exploring our powerful suite of tools today and see how we can help you achieve more.
               </p>
-              <div className="mt-8">
+              <div className="mt-8 flex justify-center">
                 <Button asChild size="lg">
                   <Link href="/tools">
                     Explore Tools <ArrowRight className="ml-2 h-5 w-5" />
