@@ -75,13 +75,13 @@ export default async function Home() {
       <section className="text-center py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter">
-            Your All-in-One{' '}
+            Your All-in-One Smart{' '}
              <span className="text-primary whitespace-nowrap">
                 <TypingEffect
-                    staticText="Smart Toolkit"
                     words={categoryNames}
                 />
             </span>
+            {' '}Toolkit
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground">
             Over 100+ smart utility and AI-powered tools to boost your productivity. From text manipulation to AI image generation, we've got you covered.
