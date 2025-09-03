@@ -12,7 +12,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'zod';
+import {z} from 'genkit';
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
@@ -118,4 +118,40 @@ export async function getUserMedia(userId: string): Promise<UserMedia[]> {
         console.error(`Error fetching media for user ${userId}:`, error);
         return [];
     }
+}
+
+
+const SaveCommunityMediaInputSchema = z.object({
+  userId: z.string(),
+  mediaUrl: z.string().url(),
+  prompt: z.string().optional(),
+});
+
+export async function saveCommunityMedia(input: z.infer<typeof SaveCommunityMediaInputSchema>): Promise<{ success: boolean }> {
+  if (!adminDb) {
+    console.error('Database not initialized, cannot save community media.');
+    return { success: false };
+  }
+
+  const { userId, mediaUrl, prompt } = SaveCommunityMediaInputSchema.parse(input);
+
+  try {
+    const expiresAt = new Date();
+    // Community media expires after 2 days
+    expiresAt.setDate(expiresAt.getDate() + 2);
+
+    await adminDb.collection('userMedia').add({
+      userId,
+      type: 'community-chat',
+      mediaUrl,
+      prompt,
+      createdAt: FieldValue.serverTimestamp(),
+      expiresAt,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error(`Error saving community media for user ${userId}:`, error);
+    return { success: false };
+  }
 }

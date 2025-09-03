@@ -23,6 +23,7 @@ import Image from 'next/image';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { saveCommunityMedia } from '@/ai/flows/ai-image-generator';
 
 
 type Poll = {
@@ -435,6 +436,13 @@ export function CommunityChat({ allUsers, isAdmin }: CommunityChatProps) {
                 const storageRef = ref(storage, `community-chat/${currentUser.uid}/${Date.now()}_${attachment.name}`);
                 const snapshot = await uploadBytes(storageRef, attachment);
                 imageUrl = await getDownloadURL(snapshot.ref);
+
+                // Save to user media library
+                await saveCommunityMedia({
+                    userId: currentUser.uid,
+                    mediaUrl: imageUrl,
+                    prompt: `Community Chat Attachment: ${attachment.name}`
+                });
             }
             
             const messagePayload: Partial<Omit<Message, 'id'>> = {
@@ -780,3 +788,4 @@ export function CommunityChat({ allUsers, isAdmin }: CommunityChatProps) {
     </div>
   );
 }
+
