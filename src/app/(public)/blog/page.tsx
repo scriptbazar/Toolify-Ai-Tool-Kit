@@ -1,82 +1,40 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-
-const allPosts = [
-    {
-        category: 'Productivity',
-        title: '10 AI-Powered Tools to Supercharge Your Productivity',
-        description: 'Discover how artificial intelligence can help you automate tasks, save time, and focus on what matters most.',
-        imageUrl: 'https://picsum.photos/600/400',
-        imageHint: 'AI productivity',
-        href: '#',
-    },
-    {
-        category: 'SEO',
-        title: 'The Ultimate Guide to SEO for Beginners in 2024',
-        description: 'Learn the fundamentals of Search Engine Optimization and start driving more organic traffic to your website.',
-        imageUrl: 'https://picsum.photos/600/400',
-        imageHint: 'SEO guide',
-        href: '#',
-    },
-    {
-        category: 'Design',
-        title: '5 Design Principles for Creating Stunning Images',
-        description: 'Master the core principles of design to create visually appealing images that captivate your audience.',
-        imageUrl: 'https://picsum.photos/600/400',
-        imageHint: 'design principles',
-        href: '#',
-    },
-    {
-        category: 'Development',
-        title: 'A Deep Dive into Serverless with Next.js',
-        description: 'Explore the benefits and challenges of building serverless applications using Next.js and Vercel.',
-        imageUrl: 'https://picsum.photos/600/400',
-        imageHint: 'serverless code',
-        href: '#',
-    },
-    {
-        category: 'AI',
-        title: 'The Rise of Large Language Models: What\'s Next?',
-        description: 'From GPT-4 to open-source alternatives, we explore the future of language-based artificial intelligence.',
-        imageUrl: 'https://picsum.photos/600/400',
-        imageHint: 'AI brain',
-        href: '#',
-    },
-    {
-        category: 'Productivity',
-        title: 'How to Stay Focused in a World of Distractions',
-        description: 'Practical tips and techniques to help you maintain focus and achieve your goals in a busy world.',
-        imageUrl: 'https://picsum.photos/600/400',
-        imageHint: 'focused work',
-        href: '#',
-    },
-    {
-        category: 'Marketing',
-        title: 'Content Marketing Strategies for 2024',
-        description: 'Learn how to create and distribute valuable content to attract and retain a clearly defined audience.',
-        imageUrl: 'https://picsum.photos/600/400',
-        imageHint: 'marketing strategy',
-        href: '#',
-    },
-    {
-        category: 'Design',
-        title: 'UI vs. UX: A Comprehensive Guide for Beginners',
-        description: 'Understand the key differences between UI and UX design and why both are crucial for a successful product.',
-        imageUrl: 'https://picsum.photos/600/400',
-        imageHint: 'UI UX design',
-        href: '#',
-    },
-];
+import { getPosts } from '@/ai/flows/blog-management';
+import { type Post } from '@/ai/flows/blog-management.types';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const POSTS_PER_PAGE = 6;
 
 export default function BlogPage() {
+    const [allPosts, setAllPosts] = useState<Post[]>([]);
+    const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        async function fetchPosts() {
+            setLoading(true);
+            try {
+                const posts = await getPosts();
+                const publishedPosts = posts.filter(p => p.status === 'Published');
+                setAllPosts(publishedPosts);
+            } catch (error) {
+                console.error("Failed to fetch posts:", error);
+                toast({ title: 'Error', description: 'Could not load blog posts.', variant: 'destructive' });
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchPosts();
+    }, [toast]);
+
     const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
 
     const paginatedPosts = allPosts.slice(
@@ -95,19 +53,30 @@ export default function BlogPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {paginatedPosts.map((post, index) => (
-                    <BlogPostCard
-                        key={index}
-                        category={post.category}
-                        title={post.title}
-                        description={post.description}
-                        imageUrl={post.imageUrl}
-                        imageHint={post.imageHint}
-                        href={post.href}
-                    />
-                ))}
-            </div>
+            {loading ? (
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-96 w-full" />)}
+                 </div>
+            ) : paginatedPosts.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {paginatedPosts.map((post) => (
+                        <BlogPostCard
+                            key={post.id}
+                            category={post.category}
+                            title={post.title}
+                            description={post.content.substring(0, 100) + '...'}
+                            imageUrl={post.imageUrl || 'https://picsum.photos/600/400'}
+                            imageHint={post.imageHint || 'blog post'}
+                            href={`/blog/${post.slug}`}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-16 text-muted-foreground">
+                    <p className="text-lg">No blog posts found.</p>
+                </div>
+            )}
+
 
             {totalPages > 1 && (
                 <div className="flex items-center justify-center space-x-4 mt-12">
