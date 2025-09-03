@@ -58,11 +58,8 @@ export default function AffiliateProgramPage() {
                 setUser(firebaseUser);
                 setLoading(true);
                 try {
-                    // Fetch settings and user data in parallel
-                    const settingsPromise = getSettings();
-                    const userDocPromise = getDoc(doc(db, "users", firebaseUser.uid));
-                    
-                    const [settings, userDocSnap] = await Promise.all([settingsPromise, userDocPromise]);
+                    const settings = await getSettings();
+                    const userDocSnap = await getDoc(doc(db, "users", firebaseUser.uid));
                     
                     setReferralSettings(settings.referral ?? null);
                     setFaqs(settings.faqs?.affiliateFaqs ?? []);
@@ -72,7 +69,6 @@ export default function AffiliateProgramPage() {
                         const currentStatus = userData.affiliateStatus || 'not_joined';
                         setAffiliateStatus(currentStatus);
 
-                        // If user is an approved affiliate, fetch their stats
                         if (currentStatus === 'approved') {
                             const clicks = userData.affiliateClicks || 0;
                             const referrals = userData.affiliateReferrals || 0;
@@ -80,7 +76,6 @@ export default function AffiliateProgramPage() {
                             const conversionRate = clicks > 0 ? ((referrals / clicks) * 100).toFixed(2) + '%' : '0.00%';
                             setStats({ clicks, referrals, earnings, conversionRate });
 
-                            // Fetch referred users
                             const q = query(collection(db, "users"), where("referredBy", "==", firebaseUser.uid));
                             const referredUsersSnapshot = await getDocs(q);
                             const fetchedReferredUsers: ReferredUser[] = referredUsersSnapshot.docs.map(doc => {
@@ -109,8 +104,6 @@ export default function AffiliateProgramPage() {
                 }
             } else {
                 setLoading(false);
-                // Optionally redirect to login
-                // router.push('/login');
             }
         });
 
@@ -170,26 +163,15 @@ export default function AffiliateProgramPage() {
     }
     
     if (!referralSettings?.isReferralEnabled) {
-        if (affiliateStatus === 'not_joined') {
-             return (
-                <Card className="text-center p-8">
-                    <CardTitle>Affiliate Program Coming Soon!</CardTitle>
-                    <CardDescription className="mt-2">
-                        Our affiliate program is currently being revamped. Please check back later for exciting opportunities.
-                    </CardDescription>
-                </Card>
-            );
-        } else {
-            return (
-                <Card className="text-center p-8">
-                     <Construction className="mx-auto h-12 w-12 text-primary mb-4"/>
-                    <CardTitle>Affiliate Program Under Maintenance</CardTitle>
-                    <CardDescription className="mt-2">
-                        We are currently performing some updates on the affiliate system. Your dashboard will be back online shortly.
-                    </CardDescription>
-                </Card>
-            );
-        }
+        return (
+            <Card className="text-center p-8">
+                <Construction className="mx-auto h-12 w-12 text-primary mb-4"/>
+                <CardTitle>Affiliate Program Not Available</CardTitle>
+                <CardDescription className="mt-2">
+                    Our affiliate program is currently disabled. Please check back later.
+                </CardDescription>
+            </Card>
+        );
     }
     
     if (affiliateStatus === 'not_joined') {
@@ -229,7 +211,7 @@ export default function AffiliateProgramPage() {
                             {faqs.map((faq) => {
                                 const Icon = getIconComponent(faq.icon as string);
                                 return (
-                                  <AccordionItem value={faq.question} key={faq.question} className="border-none">
+                                  <AccordionItem value={faq.question} key={faq.id} className="border-none">
                                     <AccordionTrigger className="faq-accordion-trigger">
                                        <div className="flex items-center gap-4">
                                           <div className="p-2 bg-muted rounded-full">
