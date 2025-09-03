@@ -24,7 +24,6 @@ export default async function Home() {
   const homepageSettings = settings.homepage || {};
   
   const testimonials = allReviews.filter(review => review.status === 'approved');
-  const blogPosts = allPosts.filter(post => post.status === 'Published').slice(0, 3);
   
   const steps = homepageSettings.steps || [];
   const features = homepageSettings.features || [];
@@ -169,37 +168,6 @@ export default async function Home() {
               <Button asChild size="lg">
                 <Link href="/tools">
                     Explore Tools <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-          </div>
-        </div>
-      </section>
-
-      <section id="blog" className="py-16 md:py-24 bg-card">
-        <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">From Our Blog</h2>
-                <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
-                    Stay updated with the latest news, tips, and tutorials from our team.
-                </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {blogPosts.map((post) => (
-                    <BlogPostCard
-                        key={post.id}
-                        category={post.category}
-                        title={post.title}
-                        description={post.content.substring(0, 100) + '...'}
-                        imageUrl={post.imageUrl || 'https://picsum.photos/600/400'}
-                        imageHint={post.imageHint || 'blog post'}
-                        href={`/blog/${post.slug}`}
-                    />
-                ))}
-            </div>
-            <div className="text-center mt-12">
-              <Button asChild size="lg">
-                <Link href="/blog">
-                    Explore Blog <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
           </div>

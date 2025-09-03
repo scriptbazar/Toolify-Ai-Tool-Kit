@@ -33,22 +33,13 @@ const HomepageSettingsFormSchema = HomepageSettingsSchema.extend({
     title: z.string().min(1, "Title is required."),
     description: z.string().min(1, "Description is required."),
   })).optional(),
-  blogPosts: z.array(z.object({
-    id: z.string(),
-    category: z.string().min(1, "Category is required."),
-    title: z.string().min(1, "Title is required."),
-    description: z.string().min(1, "Description is required."),
-    imageUrl: z.string().url("Must be a valid URL."),
-    imageHint: z.string(),
-    href: z.string().min(1, "Link is required."),
-  })).optional(),
 });
 
 type HomepageFormValues = z.infer<typeof HomepageSettingsFormSchema>;
 
 const DynamicSectionEditor = ({ control, name, title, fieldsConfig }: {
     control: any,
-    name: "features" | "steps" | "blogPosts",
+    name: "features" | "steps",
     title: string,
     fieldsConfig: { name: string, label: string, placeholder: string, component?: 'textarea' }[]
 }) => {
@@ -63,10 +54,6 @@ const DynamicSectionEditor = ({ control, name, title, fieldsConfig }: {
             newItem[field.name] = '';
         });
         if (name === 'features' || name === 'steps') newItem.icon = 'HelpCircle';
-        if (name === 'blogPosts') {
-            newItem.imageUrl = 'https://picsum.photos/600/400';
-            newItem.imageHint = 'placeholder';
-        }
         return newItem;
     };
 
@@ -125,7 +112,6 @@ export default function HomepageSettingsPage() {
         defaultValues: {
             features: [],
             steps: [],
-            blogPosts: [],
         },
     });
 
@@ -196,10 +182,9 @@ export default function HomepageSettingsPage() {
                 </div>
 
                 <Tabs defaultValue="steps">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="steps">4 Easy Steps</TabsTrigger>
                         <TabsTrigger value="features">Why Choose Us</TabsTrigger>
-                        <TabsTrigger value="blog">Blog Section</TabsTrigger>
                     </TabsList>
                     <TabsContent value="steps" className="mt-6">
                         <DynamicSectionEditor
@@ -222,21 +207,6 @@ export default function HomepageSettingsPage() {
                                 { name: 'icon', label: 'Icon Name', placeholder: 'e.g., Sparkles' },
                                 { name: 'title', label: 'Title', placeholder: 'e.g., Comprehensive Toolset' },
                                 { name: 'description', label: 'Description', placeholder: 'Describe the feature', component: 'textarea' }
-                            ]}
-                        />
-                    </TabsContent>
-                    <TabsContent value="blog" className="mt-6">
-                       <DynamicSectionEditor
-                            control={form.control}
-                            name="blogPosts"
-                            title="Homepage Blog Section"
-                            fieldsConfig={[
-                                { name: 'category', label: 'Category', placeholder: 'e.g., Productivity' },
-                                { name: 'title', label: 'Title', placeholder: 'e.g., 10 AI-Powered Tools' },
-                                { name: 'description', label: 'Description', placeholder: 'A short description of the blog post', component: 'textarea' },
-                                { name: 'imageUrl', label: 'Image URL', placeholder: 'https://example.com/image.png' },
-                                { name: 'imageHint', label: 'Image Hint', placeholder: 'e.g., AI productivity' },
-                                { name: 'href', label: 'Link (href)', placeholder: '/blog/your-post-slug' }
                             ]}
                         />
                     </TabsContent>
