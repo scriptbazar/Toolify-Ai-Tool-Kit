@@ -12,7 +12,7 @@ import { TypingEffect } from '@/components/common/TypingEffect';
 import { getSettings } from '@/ai/flows/settings-management';
 import * as Icons from 'lucide-react';
 import { getPosts } from '@/ai/flows/blog-management';
-import { getComments } from '@/ai/flows/blog-management';
+import { getComments } from '@/ai/flows/review-management';
 
 
 export default async function Home() {
