@@ -14,7 +14,6 @@ import { adminDb } from '@/lib/firebase-admin';
 import { AppSettingsSchema, type AppSettings } from './settings-management.types';
 import fs from 'fs/promises';
 import path from 'path';
-import { merge } from 'lodash';
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
@@ -286,23 +285,20 @@ export async function getSettings(): Promise<AppSettings> {
 /**
  * Updates the application settings in Firestore and writes API keys to .env.local.
  * It performs a deep merge to only update the provided fields.
- * @param {AppSettings} newSettings - The new settings values to save.
+ * @param {Partial<AppSettings>} newSettings - The new settings values to save.
  * @returns {Promise<{ success: boolean; message: string }>} Result of the operation.
  */
 export async function updateSettings(newSettings: Partial<AppSettings>): Promise<{ success: boolean; message: string }> {
   try {
     const currentSettings = await getSettings();
     
-    // Deep merge the new settings into the current settings
-    const mergedSettings = merge({}, currentSettings, newSettings);
-    
-    // BUG FIX: If the referral program is being disabled, ensure related numeric values
-    // are reset to their default (0) to prevent Zod validation errors on subsequent saves.
-    if (newSettings.referral && newSettings.referral.isReferralEnabled === false) {
-      mergedSettings.referral.commissionRate = 0;
-      mergedSettings.referral.cookieDuration = 0;
-      mergedSettings.referral.payoutThreshold = 0;
-    }
+    // Create the new settings state by taking the current settings
+    // and overwriting them with the partial new settings.
+    // This is safer than a deep merge for arrays of objects.
+    const mergedSettings = {
+      ...currentSettings,
+      ...newSettings,
+    };
     
     // Validate the merged object before saving to ensure data integrity
     const validationResult = AppSettingsSchema.safeParse(mergedSettings);
@@ -346,3 +342,4 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
     return { success: false, message: error.message || 'An unknown error occurred while updating settings.' };
   }
 }
+
