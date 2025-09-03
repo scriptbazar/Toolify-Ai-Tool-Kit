@@ -259,6 +259,27 @@ export const FaqSettingsSchema = z.object({
 });
 export type FaqSettings = z.infer<typeof FaqSettingsSchema>;
 
+export const ToolSidebarSettingsSchema = z.object({
+    showPopularTools: z.boolean().default(true),
+    showRecentPosts: z.boolean().default(true),
+    showAdvertisement: z.boolean().default(true),
+});
+export type ToolSidebarSettings = z.infer<typeof ToolSidebarSettingsSchema>;
+
+export const BlogSidebarSettingsSchema = z.object({
+    showPopularTools: z.boolean().default(true),
+    showRecentPosts: z.boolean().default(true),
+    showCategories: z.boolean().default(true),
+    showAdvertisement: z.boolean().default(true),
+});
+export type BlogSidebarSettings = z.infer<typeof BlogSidebarSettingsSchema>;
+
+export const SidebarSettingsSchema = z.object({
+    toolSidebar: ToolSidebarSettingsSchema.optional(),
+    blogSidebar: BlogSidebarSettingsSchema.optional(),
+});
+export type SidebarSettings = z.infer<typeof SidebarSettingsSchema>;
+
 
 export const AppSettingsSchema = z.object({
   advertisement: AdvertisementSettingsSchema.optional(),
@@ -270,6 +291,7 @@ export const AppSettingsSchema = z.object({
   footer: FooterSettingsSchema.optional(),
   homepage: HomepageSettingsSchema.optional(),
   faqs: FaqSettingsSchema.optional(),
+  sidebar: SidebarSettingsSchema.optional(),
 });
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
 

@@ -78,7 +78,7 @@ const defaultSettings = AppSettingsSchema.parse({
       id: 'terms-conditions',
       slug: 'terms-conditions',
       title: 'Terms & Conditions',
-      icon: 'FileText',
+      icon: 'Gavel',
       content: '',
     },
     {
@@ -257,6 +257,19 @@ const defaultSettings = AppSettingsSchema.parse({
     referralProgramDescription: 'Earn a commission for every new paying customer you refer. Payments are made monthly via PayPal.',
   },
   faqs: defaultFaqSettings,
+  sidebar: {
+    toolSidebar: {
+        showPopularTools: true,
+        showRecentPosts: true,
+        showAdvertisement: true,
+    },
+    blogSidebar: {
+        showPopularTools: true,
+        showRecentPosts: true,
+        showCategories: true,
+        showAdvertisement: true,
+    }
+  }
 });
 
 /**

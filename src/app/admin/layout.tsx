@@ -37,6 +37,7 @@ import {
   Loader2,
   Footprints,
   HelpCircle,
+  PanelLeft,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -180,6 +181,7 @@ export default function AdminLayout({
     { href: '/admin/settings/payment', icon: CreditCard, label: 'Payment Settings' },
     { href: '/admin/settings/page', icon: FileCog, label: 'Page Management' },
     { href: '/admin/settings/affiliate', icon: GitCommitVertical, label: 'Affiliate Settings'},
+    { href: '/admin/settings/sidebar', icon: PanelLeft, label: 'Sidebar Management'},
     { href: '/admin/settings/footer', icon: Footprints, label: 'Footer Management' },
     { href: '/admin/settings/faqs', icon: HelpCircle, label: 'FAQs Management' },
   ];
