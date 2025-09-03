@@ -17,7 +17,7 @@ export function ResponsiveHero({ allWords }: { allWords: string[] }) {
     // Render a static version on the server to avoid hydration mismatch
     return (
       <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter">
-        Your All-in-One Smart Toolkit
+        Your All-in-One <span className="text-primary">Smart</span> <span className="text-accent">Toolkit</span>
       </h1>
     );
   }
@@ -25,7 +25,9 @@ export function ResponsiveHero({ allWords }: { allWords: string[] }) {
   return (
     <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter">
       {isMobile ? (
-        'Your All-in-One Smart Toolkit'
+        <>
+         Your All-in-One <span className="text-primary">Smart</span> <span className="text-accent">Toolkit</span>
+        </>
       ) : (
         <>
           Your All-in-One Smart&nbsp;
