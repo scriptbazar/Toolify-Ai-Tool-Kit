@@ -93,38 +93,36 @@ export default async function Home() {
   );
 
   const Testimonials = () => {
-    // Only duplicate the array for a smooth marquee effect if there are enough items.
-    const useMarquee = testimonials.length > 5;
-    const displayTestimonials = useMarquee ? [...testimonials, ...testimonials] : testimonials;
-    
-    return (
-        <section className="py-16 md:py-24 bg-card">
-            <div className="container mx-auto px-4 text-center">
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Loved by Professionals Worldwide</h2>
-                <p className="mt-3 max-w-2xl mx-auto text-muted-foreground mb-12">
-                    Our tools are trusted by thousands of developers, designers, and content creators to streamline their work and boost productivity.
-                </p>
+    // Only use marquee if there are enough items to justify it.
+    const useMarquee = testimonials.length >= 10;
+
+    if (useMarquee) {
+        const midPoint = Math.ceil(testimonials.length / 2);
+        const topRowItems = testimonials.slice(0, midPoint);
+        const bottomRowItems = testimonials.slice(midPoint);
+        
+        return (
+            <div className="relative flex flex-col gap-8 overflow-hidden">
+                 <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
+                     {[...topRowItems, ...topRowItems].map((testimonial, index) => (
+                        <TestimonialCard key={`top-${testimonial.id}-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
+                    ))}
+                 </div>
+                 <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
+                    {[...bottomRowItems, ...bottomRowItems].map((testimonial, index) => (
+                        <TestimonialCard key={`bottom-${testimonial.id}-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
+                    ))}
+                 </div>
             </div>
-            {testimonials.length > 0 ? (
-                 <div className="relative flex flex-col gap-8 overflow-hidden">
-                    {useMarquee ? (
-                        <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
-                            {displayTestimonials.map((testimonial, index) => (
-                                <TestimonialCard key={`rtl-${testimonial.id}-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
-                            ))}
-                        </div>
-                    ) : (
-                       <div className="flex justify-center flex-wrap gap-8">
-                         {testimonials.map((testimonial) => (
-                            <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
-                        ))}
-                       </div>
-                    )}
-                </div>
-            ) : (
-                <div className="text-center text-muted-foreground">No approved reviews yet.</div>
-            )}
-        </section>
+        );
+    }
+
+    return (
+        <div className="flex justify-center flex-wrap gap-8">
+            {testimonials.map((testimonial) => (
+            <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
+            ))}
+        </div>
     );
   };
 
@@ -245,11 +243,23 @@ export default async function Home() {
         </div>
       </section>
 
-      <Testimonials />
-
       <section className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Loved by Professionals Worldwide</h2>
+            <p className="mt-3 max-w-2xl mx-auto text-muted-foreground mb-12">
+                Our tools are trusted by thousands of developers, designers, and content creators to streamline their work and boost productivity.
+            </p>
+        </div>
+        {testimonials.length > 0 ? (
+            <Testimonials />
+        ) : (
+            <div className="text-center text-muted-foreground">No approved reviews yet.</div>
+        )}
+      </section>
+
+      <section className="py-16 md:py-24 bg-card">
         <div className="container mx-auto px-4">
-          <Card className="bg-card">
+          <Card className="bg-background">
             <CardContent className="p-12 text-center">
               <h2 className="text-3xl font-bold tracking-tight">Join Thousands of Satisfied Users</h2>
               <p className="mt-3 max-w-xl mx-auto text-muted-foreground">
