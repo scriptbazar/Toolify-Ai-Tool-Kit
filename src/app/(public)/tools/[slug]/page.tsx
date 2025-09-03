@@ -43,8 +43,9 @@ const toolComponents: { [key: string]: React.ComponentType } = {
 };
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
+  const awaitedParams = await Promise.resolve(params);
   const allTools = await getTools();
-  const tool = allTools.find((t) => t.slug === params.slug);
+  const tool = allTools.find((t) => t.slug === awaitedParams.slug);
   const settings = await getSettings();
   
   if (!tool) {
