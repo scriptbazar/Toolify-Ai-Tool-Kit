@@ -13,12 +13,8 @@ import { z } from 'zod';
 import { ai } from '@/ai/genkit';
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
-// To use a real email service, you would uncomment the following lines
-// and install the necessary package, e.g., `npm install mailgun.js`
-import formData from 'form-data';
-import Mailgun from 'mailgun.js';
 
-const SENDER_EMAIL = `ToolifyAI <no-reply@${process.env.MAILGUN_DOMAIN || 'example.com'}>`;
+const SENDER_EMAIL = `ToolifyAI <no-reply@toolifyai.com>`;
 
 
 const PasswordChangeEmailSchema = z.object({
@@ -80,37 +76,17 @@ export async function getEmailLog(): Promise<EmailLog[]> {
 async function sendEmail(to: string, subject: string, body: string, isHtml: boolean = false) {
     let status: EmailLog['status'] = 'sent';
     try {
-        const mailgunApiKey = process.env.MAILGUN_API_KEY;
-        const mailgunDomain = process.env.MAILGUN_DOMAIN;
-
-        if (mailgunApiKey && mailgunDomain) {
-            const mailgun = new Mailgun(formData);
-            const mg = mailgun.client({ username: 'api', key: mailgunApiKey });
-            
-            const messageData: any = {
-                from: SENDER_EMAIL,
-                to: [to],
-                subject: subject,
-            };
-
-            if (isHtml) {
-                messageData.html = body;
-            } else {
-                messageData.text = body;
-            }
-
-            await mg.messages.create(mailgunDomain, messageData);
-        } else {
-            console.log("--- SIMULATED EMAIL (Mailgun keys not configured) ---");
-            console.log(`To: ${to}`);
-            console.log(`From: ${SENDER_EMAIL}`);
-            console.log(`Subject: ${subject}`);
-            console.log(`Body: ${body}`);
-            console.log("-----------------------------------------------------");
-        }
+        // Email sending is simulated by logging to the console.
+        console.log("--- SIMULATED EMAIL ---");
+        console.log(`To: ${to}`);
+        console.log(`From: ${SENDER_EMAIL}`);
+        console.log(`Subject: ${subject}`);
+        console.log(`Body: ${body}`);
+        console.log("-----------------------");
+        
         return { success: true, message: `Email sent to ${to}.` };
     } catch (error: any) {
-        console.error("Mailgun error:", error);
+        console.error("Simulated email error:", error);
         status = 'failed';
         return { success: false, message: `Failed to send email: ${error.message}` };
     } finally {
