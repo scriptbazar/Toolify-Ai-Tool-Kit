@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import { FooterSettingsSchema, type FooterSettings } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 
 type FooterFormValues = z.infer<typeof FooterSettingsSchema>;
 
