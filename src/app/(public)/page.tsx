@@ -32,10 +32,9 @@ export default async function Home() {
   const activeTools = tools.filter(tool => tool.status === 'Active');
   
   const categoryNames = toolCategories
-    .filter(c => c.id !== 'cal_con' && c.id !== 'dev')
     .map(c => c.name.replace(' Tools', ''));
 
-  const TestimonialCard = ({ name, role, avatar, comment }: { name: string, role: string, avatar: string, comment: string }) => (
+  const TestimonialCard = ({ name, role, avatar, comment, rating }: { name: string, role: string, avatar: string, comment: string, rating: number }) => (
     <Card className="w-[350px] shrink-0 bg-card text-card-foreground">
         <CardContent className="p-6 flex flex-col items-start text-left">
             <div className="flex items-center gap-4 mb-4">
@@ -47,6 +46,11 @@ export default async function Home() {
                     <p className="font-semibold text-lg">{name}</p>
                     <p className="text-sm text-muted-foreground">{role}</p>
                 </div>
+            </div>
+             <div className="flex items-center mb-4">
+                {[...Array(5)].map((_, i) => (
+                    <Star key={i} className={`h-5 w-5 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}`} />
+                ))}
             </div>
             <p className="text-muted-foreground text-base">"{comment}"</p>
         </CardContent>
@@ -66,12 +70,12 @@ export default async function Home() {
         <div className="relative flex flex-col gap-8 overflow-hidden">
           <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
             {[...topRowItems, ...topRowItems].map((testimonial, index) => (
-              <TestimonialCard key={`top-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} />
+              <TestimonialCard key={`top-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
             ))}
           </div>
           <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
             {[...bottomRowItems, ...bottomRowItems].map((testimonial, index) => (
-              <TestimonialCard key={`bottom-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} />
+              <TestimonialCard key={`bottom-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
             ))}
           </div>
         </div>
@@ -81,7 +85,7 @@ export default async function Home() {
     return (
       <div className="flex justify-center flex-wrap gap-8">
         {displayTestimonials.map((testimonial) => (
-          <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} />
+          <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
         ))}
       </div>
     );
