@@ -66,7 +66,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getAffiliateRequests, updateAffiliateRequestStatus, getAffiliates, deleteUser, type Affiliate, type ReferralRequest } from '@/ai/flows/user-management';
+import { getAffiliateRequests, updateAffiliateRequestStatus, getAffiliates, type Affiliate, type ReferralRequest } from '@/ai/flows/user-management';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StatCard } from '@/components/common/StatCard';
 
@@ -112,10 +112,10 @@ export default function AffiliateManagementPage() {
     }
   }
   
-  const handleDeleteAffiliate = async (affiliate: Affiliate) => {
-    const result = await deleteUser(affiliate.id);
+  const handleRemoveAffiliate = async (affiliate: Affiliate) => {
+    const result = await updateAffiliateRequestStatus(affiliate.id, 'rejected');
      if (result.success) {
-        toast({ title: 'Affiliate Deleted', description: `${affiliate.name} has been removed.`});
+        toast({ title: 'Affiliate Removed', description: `${affiliate.name} has been removed from the affiliate program.`});
         fetchData(); // Re-fetch data
     } else {
         toast({ title: 'Error', description: result.message, variant: 'destructive'});
@@ -249,19 +249,19 @@ export default function AffiliateManagementPage() {
                                      <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500">
-                                                <Trash2 className="mr-2 h-4 w-4" /> Delete User
+                                                <Trash2 className="mr-2 h-4 w-4" /> Remove from Program
                                             </DropdownMenuItem>
                                         </AlertDialogTrigger>
                                         <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                                             <AlertDialogHeader>
                                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    This action cannot be undone. This will permanently delete the affiliate's account and remove their data from our servers.
+                                                    This will remove the user from the affiliate program. They will no longer be an affiliate but their user account will NOT be deleted.
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDeleteAffiliate(affiliate)}>
+                                                <AlertDialogAction onClick={() => handleRemoveAffiliate(affiliate)}>
                                                     Continue
                                                 </AlertDialogAction>
                                             </AlertDialogFooter>
@@ -320,7 +320,7 @@ export default function AffiliateManagementPage() {
                                             </Button>
                                              <Button variant="destructive" size="sm" onClick={() => handleRequestUpdate(req.id, 'rejected')}>
                                                 <ThumbsDown className="mr-2 h-4 w-4" />Reject
-                                            </Button>
+                                             </Button>
                                         </div>
                                     </TableCell>
                                 </TableRow>

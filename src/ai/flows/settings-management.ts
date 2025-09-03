@@ -21,44 +21,7 @@ const MAIN_SETTINGS_DOC_ID = 'main';
 const defaultFaqSettings = {
     contactFaqs: [],
     pricingFaqs: [],
-    affiliateFaqs: [
-    {
-      id: 'affiliate-q1',
-      icon: 'HelpCircle' as const,
-      question: 'How does the affiliate program work?',
-      answer: 'Our affiliate program allows you to earn a commission for every new paying customer you refer to ToolifyAI through your unique referral link. When someone clicks your link, a cookie is stored in their browser for 30 days. If they purchase a paid plan within that period, you get credit for the sale.',
-    },
-    {
-      id: 'affiliate-q2',
-      icon: 'DollarSign' as const,
-      question: 'What is the commission rate?',
-      answer: 'We offer a competitive commission rate of 20% on all payments for the first year of the referred customer\'s subscription. This includes initial purchases and renewals within that first year.',
-    },
-    {
-      id: 'affiliate-q3',
-      icon: 'CreditCard' as const,
-      question: 'How and when do I get paid?',
-      answer: 'Payouts are made monthly via PayPal. You must reach a minimum payout threshold of $50 to receive your earnings. Ensure your PayPal email is correctly set up in your affiliate dashboard.',
-    },
-    {
-      id: 'affiliate-q4',
-      icon: 'MousePointerClick' as const,
-      question: 'How are referrals tracked?',
-      answer: 'We use a combination of cookies and your unique affiliate ID to track referrals. The cookie lasts for 30 days, meaning you will get credit for any purchase made within 30 days of a user clicking your link.',
-    },
-    {
-      id: 'affiliate-q5',
-      icon: 'BarChart' as const,
-      question: 'Where can I track my performance?',
-      answer: 'You can track your clicks, referrals, and earnings in real-time directly from your Affiliate Dashboard. You\'ll see a detailed breakdown of your performance to help you optimize your strategies.',
-    },
-    {
-      id: 'affiliate-q6',
-      icon: 'Users' as const,
-      question: 'Who can join the affiliate program?',
-      answer: 'Anyone can apply to join our affiliate program! We welcome bloggers, YouTubers, social media influencers, and website owners who want to promote our tools. We review all applications to ensure a good fit.',
-    },
-  ],
+    affiliateFaqs: [],
 };
 
 
