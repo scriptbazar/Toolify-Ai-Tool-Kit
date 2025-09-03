@@ -80,26 +80,40 @@ export async function getTools(): Promise<Tool[]> {
   }
   try {
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
-    let snapshot = await toolsRef.orderBy('name').get();
+    const snapshot = await toolsRef.get();
 
-    // If the collection is empty, populate it with initial tools
-    if (snapshot.empty) {
-        const batch = adminDb.batch();
-        for (const toolData of initialTools) {
-            const slug = toolData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+    const existingSlugs = new Set(snapshot.docs.map(doc => doc.data().slug));
+    const batch = adminDb.batch();
+    let hasNewTools = false;
+
+    for (const toolData of initialTools) {
+        const slug = toolData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+        if (!existingSlugs.has(slug)) {
             const docRef = toolsRef.doc(slug);
             batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
+            hasNewTools = true;
         }
-        await batch.commit();
-        // Re-fetch the data after populating
-        snapshot = await toolsRef.orderBy('name').get();
     }
 
-    const tools = snapshot.docs.map(doc => {
+    if (hasNewTools) {
+        await batch.commit();
+        // Re-fetch the data after populating to get a complete, sorted list
+        const updatedSnapshot = await toolsRef.orderBy('name').get();
+        const tools = updatedSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return ToolSchema.parse({ ...data, id: doc.id });
+        });
+        return tools;
+    }
+
+    // If no new tools were added, just return the originally fetched and sorted data
+    const sortedDocs = snapshot.docs.sort((a, b) => a.data().name.localeCompare(b.data().name));
+    const tools = sortedDocs.map(doc => {
         const data = doc.data();
         return ToolSchema.parse({ ...data, id: doc.id });
     });
     return tools;
+
   } catch (error) {
     console.error("Error fetching tools:", error);
     return [];
