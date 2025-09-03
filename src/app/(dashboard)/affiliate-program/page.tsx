@@ -37,8 +37,8 @@ interface AffiliateStats {
 
 const getIconComponent = (iconName?: string): React.ElementType => {
     if (!iconName) return HelpCircle;
-    const Icon = (Icons as any)[iconName];
-    return Icon || HelpCircle;
+    const IconComponent = (Icons as any)[iconName as keyof typeof Icons];
+    return IconComponent || HelpCircle;
 };
 
 export default function AffiliateProgramPage() {
@@ -205,17 +205,17 @@ export default function AffiliateProgramPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center mb-12">
                          <div className="p-4 border rounded-lg">
                             <Percent className="mx-auto h-8 w-8 mb-2 text-primary"/>
-                            <h3 className="font-bold">{referralSettings?.commissionRate || 20}% Commission</h3>
+                            <h3 className="font-bold">{referralSettings?.commissionRate ?? 20}% Commission</h3>
                             <p className="text-sm text-muted-foreground">On all payments for the first year.</p>
                          </div>
                          <div className="p-4 border rounded-lg">
                             <Calendar className="mx-auto h-8 w-8 mb-2 text-primary"/>
-                            <h3 className="font-bold">{referralSettings?.cookieDuration || 30}-Day Cookie</h3>
+                            <h3 className="font-bold">{referralSettings?.cookieDuration ?? 30}-Day Cookie</h3>
                             <p className="text-sm text-muted-foreground">Get credit for referrals up to a month later.</p>
                          </div>
                           <div className="p-4 border rounded-lg">
                             <DollarSign className="mx-auto h-8 w-8 mb-2 text-primary"/>
-                            <h3 className="font-bold">${referralSettings?.payoutThreshold || 50} Payout Threshold</h3>
+                            <h3 className="font-bold">${referralSettings?.payoutThreshold ?? 50} Payout Threshold</h3>
                             <p className="text-sm text-muted-foreground">Receive your earnings via PayPal.</p>
                          </div>
                     </div>
@@ -249,7 +249,7 @@ export default function AffiliateProgramPage() {
                     )}
                 </CardContent>
                 <CardFooter className="flex-col gap-4 pt-6 border-t mt-8">
-                    <p className="text-sm text-muted-foreground">{referralSettings?.referralProgramDescription || ''}</p>
+                    <p className="text-sm text-muted-foreground">{referralSettings?.referralProgramDescription ?? ''}</p>
                     <Button onClick={handleJoinRequest} disabled={isSubmitting}>
                          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Request to Join Affiliate Program
