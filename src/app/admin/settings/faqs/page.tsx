@@ -20,7 +20,7 @@ import * as Icons from 'lucide-react';
 
 const iconNames = Object.keys(Icons) as [string, ...string[]];
 
-const FaqManagementFormSchema = FaqSettingsSchema.extend({
+const FaqManagementFormSchema = z.object({
   contactFaqs: z.array(z.object({
       id: z.string(),
       icon: z.enum(iconNames),

@@ -254,6 +254,22 @@ export const HomepageSettingsSchema = z.object({
 export type HomepageSettings = z.infer<typeof HomepageSettingsSchema>;
 
 
+export const FaqItemSchema = z.object({
+  id: z.string(),
+  icon: IconEnum,
+  question: z.string().min(1, "Question is required."),
+  answer: z.string().min(1, "Answer is required."),
+});
+export type FaqItem = z.infer<typeof FaqItemSchema>;
+
+export const FaqSettingsSchema = z.object({
+  contactFaqs: z.array(FaqItemSchema).optional(),
+  pricingFaqs: z.array(FaqItemSchema).optional(),
+  affiliateFaqs: z.array(FaqItemSchema).optional(),
+});
+export type FaqSettings = z.infer<typeof FaqSettingsSchema>;
+
+
 export const AppSettingsSchema = z.object({
   advertisement: AdvertisementSettingsSchema.optional(),
   referral: ReferralSettingsSchema.optional(),
@@ -263,6 +279,7 @@ export const AppSettingsSchema = z.object({
   page: PageSettingsSchema.optional(),
   footer: FooterSettingsSchema.optional(),
   homepage: HomepageSettingsSchema.optional(),
+  faqs: FaqSettingsSchema.optional(),
 });
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
 
