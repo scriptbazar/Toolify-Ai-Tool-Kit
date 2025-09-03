@@ -43,7 +43,7 @@ export async function getPosts(): Promise<Post[]> {
  * @param {Omit<Post, 'id' | 'createdAt'> & { id?: string }} postData - The data for the post.
  * @returns {Promise<{ success: boolean; message: string; postId?: string }>}
  */
-export async function upsertPost(postData: Omit<Post, 'id' | 'createdAt'> & { id?: string }): Promise<{ success: boolean; message: string; postId?: string }> {
+export async function upsertPost(postData: Partial<Omit<Post, 'id' | 'createdAt'>> & { id?: string }): Promise<{ success: boolean; message: string; postId?: string }> {
   try {
     const { id, ...data } = postData;
     

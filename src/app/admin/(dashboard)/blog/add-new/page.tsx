@@ -1,8 +1,7 @@
 
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,14 +13,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { aiWriter, type AiWriterInput } from '@/ai/flows/ai-writer';
-import { Wand2, PlusCircle, UploadCloud, Send, Loader2, Save, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { aiWriter } from '@/ai/flows/ai-writer';
+import { upsertPost } from '@/ai/flows/blog-management';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { Wand2, UploadCloud, Send, Loader2, Save, Calendar as CalendarIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-
+import { useRouter } from 'next/navigation';
 
 const postSchema = z.object({
   title: z.string().min(5, { message: 'Title must be at least 5 characters long.' }),
@@ -29,17 +30,19 @@ const postSchema = z.object({
   content: z.string().min(50, { message: 'Content must be at least 50 characters long.' }),
   category: z.string().min(1, { message: 'Please select a category.' }),
   tags: z.string().optional(),
-  scheduledDate: z.date().optional(),
+  status: z.enum(['Published', 'Draft', 'Scheduled', 'Trash']),
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
 
 export default function AddNewPostPage() {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [isSavingDraft, setIsSavingDraft] = useState(false);
-  const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
+  const [isSaving, setIsSaving] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
@@ -49,6 +52,7 @@ export default function AddNewPostPage() {
       content: '',
       category: '',
       tags: '',
+      status: 'Draft',
     },
   });
 
@@ -60,6 +64,18 @@ export default function AddNewPostPage() {
       .replace(/\s+/g, '-')
       .replace(/[^\w-]+/g, '');
     form.setValue('slug', slug, { shouldValidate: true });
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({ title: "File too large", description: "Image must be smaller than 5MB.", variant: "destructive" });
+        return;
+      }
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const handleGenerateContent = async () => {
@@ -93,28 +109,44 @@ export default function AddNewPostPage() {
     }
   };
 
-  const handlePublish = async (values: PostFormValues) => {
-    setIsPublishing(true);
-    console.log('Publishing post:', { ...values, scheduledDate });
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    toast({
-      title: scheduledDate ? 'Post Scheduled!' : 'Post Published!',
-      description: `Your post "${values.title}" has been successfully ${scheduledDate ? 'scheduled' : 'published'}.`,
-    });
-    setIsPublishing(false);
-  };
-  
-  const handleSaveDraft = async () => {
-    const values = form.getValues();
-    setIsSavingDraft(true);
-    console.log('Saving draft:', values);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    toast({
-      title: 'Draft Saved',
-      description: `Your post "${values.title}" has been saved as a draft.`,
-    });
-    setIsSavingDraft(false);
-  };
+  const handlePostSubmit = async (values: PostFormValues, status: PostFormValues['status']) => {
+    setIsSaving(true);
+    try {
+      let imageUrl: string | undefined = undefined;
+      if (imageFile) {
+        const storage = getStorage();
+        const storageRef = ref(storage, `blog-images/${Date.now()}-${imageFile.name}`);
+        const snapshot = await uploadBytes(storageRef, imageFile);
+        imageUrl = await getDownloadURL(snapshot.ref);
+      }
+      
+      const postData = {
+          ...values,
+          status,
+          imageUrl,
+          imageHint: values.title.split(' ').slice(0, 2).join(' '),
+          tags: values.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [],
+      };
+
+      const result = await upsertPost(postData);
+
+      if (result.success) {
+         toast({
+          title: `Post ${status}!`,
+          description: `Your post "${values.title}" has been successfully saved.`,
+        });
+        router.push('/admin/blog/all-posts');
+      } else {
+        throw new Error(result.message);
+      }
+
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Could not save the post.', variant: 'destructive'});
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
 
   return (
     <div className="space-y-6">
@@ -125,7 +157,7 @@ export default function AddNewPostPage() {
         </p>
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handlePublish)} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <form onSubmit={form.handleSubmit((values) => handlePostSubmit(values, 'Published'))} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
@@ -202,44 +234,14 @@ export default function AddNewPostPage() {
                 <CardTitle>Publishing Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Status:</span>
-                  <span className="font-semibold">Draft</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Visibility:</span>
-                  <span className="font-semibold">Public</span>
-                </div>
-                 <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4 text-muted-foreground"/>
-                    <span className="text-muted-foreground">Publish:</span>
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="link" className="p-0 h-auto font-semibold">
-                          {scheduledDate ? format(scheduledDate, "PPP") : "Immediately"}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={scheduledDate}
-                        onSelect={setScheduledDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-2 pt-4">
-                  <Button type="button" variant="outline" className="w-full" onClick={handleSaveDraft} disabled={isSavingDraft}>
-                     {isSavingDraft ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button type="button" variant="outline" className="w-full" onClick={() => form.handleSubmit((values) => handlePostSubmit(values, 'Draft'))()} disabled={isSaving}>
+                     <Save className="mr-2 h-4 w-4" />
                      Save Draft
                   </Button>
-                  <Button type="submit" className="w-full" disabled={isPublishing}>
-                    {isPublishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                    {scheduledDate ? 'Schedule' : 'Publish'}
+                  <Button type="submit" className="w-full" disabled={isSaving}>
+                    <Send className="mr-2 h-4 w-4" />
+                    Publish
                   </Button>
                 </div>
               </CardContent>
@@ -303,14 +305,23 @@ export default function AddNewPostPage() {
                 <CardTitle>Featured Image</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="w-full border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50">
-                    <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">Click to upload image</p>
-                    <p className="text-xs text-muted-foreground">PNG, JPG, WEBP up to 5MB</p>
+                <div 
+                    className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative"
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/png, image/jpeg, image/webp" />
+                    {imagePreview ? (
+                        <Image src={imagePreview} alt="Featured image preview" layout="fill" objectFit="cover" className="rounded-md" />
+                    ) : (
+                        <div className="flex flex-col items-center">
+                            <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                            <p className="text-sm text-muted-foreground">Click to upload image</p>
+                            <p className="text-xs text-muted-foreground">PNG, JPG, WEBP up to 5MB</p>
+                        </div>
+                    )}
                 </div>
               </CardContent>
             </Card>
-
           </div>
         </form>
       </Form>
