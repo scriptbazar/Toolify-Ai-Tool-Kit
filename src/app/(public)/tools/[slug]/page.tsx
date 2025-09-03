@@ -20,7 +20,8 @@ import { ReviewForm } from '@/components/tools/ReviewForm';
 import { getReviews } from '@/ai/flows/review-management';
 import { Star } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
+import { getPosts } from '@/ai/flows/blog-management';
+import Link from 'next/link';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -42,6 +43,17 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'color-picker': ColorPicker,
 };
 
+const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
+    <Card>
+        <CardHeader className="p-4">
+            <CardTitle className="text-base">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-0">
+            {children}
+        </CardContent>
+    </Card>
+);
+
 export default async function ToolPage({ params }: { params: { slug: string } }) {
   const awaitedParams = await Promise.resolve(params);
   const allTools = await getTools();
@@ -57,6 +69,11 @@ export default async function ToolPage({ params }: { params: { slug: string } })
 
   const ToolComponent = toolComponents[tool.slug];
   const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
+  
+  const sidebarSettings = settings.sidebar?.toolSidebar;
+  const popularTools = allTools.filter(t => t.status === 'Active' && t.slug !== tool.slug).slice(0, 5);
+  const recentPosts = (await getPosts()).filter(p => p.status === 'Published').slice(0, 5);
+
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -149,6 +166,36 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         </div>
          <aside className="w-full lg:w-64 xl:w-80 mt-8 lg:mt-0 space-y-6">
             <AdPlaceholder adSlotId="toolpage-sidebar" adSettings={settings.advertisement ?? null} />
+             {sidebarSettings?.showPopularTools && popularTools.length > 0 && (
+                <SidebarWidget title="Popular Tools">
+                    <ul className="space-y-2">
+                        {popularTools.map(t => {
+                            const ToolIcon = (Icons as any)[t.icon] || Icons.HelpCircle;
+                            return (
+                            <li key={t.id}>
+                                <Link href={`/tools/${t.slug}`} className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-muted">
+                                    <ToolIcon className="h-5 w-5" />
+                                    <span>{t.name}</span>
+                                </Link>
+                            </li>
+                        )})}
+                    </ul>
+                </SidebarWidget>
+            )}
+            {sidebarSettings?.showRecentPosts && recentPosts.length > 0 && (
+                 <SidebarWidget title="Recent Posts">
+                     <ul className="space-y-3">
+                        {recentPosts.map(post => (
+                            <li key={post.id}>
+                                <Link href={`/blog/${post.slug}`} className="group">
+                                    <p className="font-medium text-sm group-hover:text-primary transition-colors leading-tight">{post.title}</p>
+                                    <p className="text-xs text-muted-foreground">{new Date(post.publishedAt!).toLocaleDateString()}</p>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </SidebarWidget>
+            )}
         </aside>
       </div>
       <AdPlaceholder adSlotId="toolpage-banner-bottom" adSettings={settings.advertisement ?? null} className="mt-6" />
