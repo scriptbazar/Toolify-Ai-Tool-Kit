@@ -11,12 +11,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Save, Loader2, PlusCircle, Trash2, GripVertical } from 'lucide-react';
+import { Save, Loader2, PlusCircle, Trash2, GripVertical, CaseUpper } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import { FooterSettingsSchema, type FooterSettings } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 type FooterFormValues = z.infer<typeof FooterSettingsSchema>;
 
@@ -80,6 +80,10 @@ export default function FooterManagementPage() {
     defaultValues: {
       showLogo: true,
       description: '',
+      topToolsTitle: 'Top Tools',
+      quickLinksTitle: 'Quick Links',
+      hostingLinksTitle: 'Best Hostings',
+      moreToolsTitle: 'More Tools',
       topTools: [],
       quickLinks: [],
       hostingLinks: [],
@@ -192,6 +196,26 @@ export default function FooterManagementPage() {
                                 </FormItem>
                             )}
                         />
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><CaseUpper/> Column Titles</CardTitle>
+                        <CardDescription>Customize the titles for each link column in the footer.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                         <FormField control={form.control} name="topToolsTitle" render={({ field }) => (
+                            <FormItem><FormLabel>Top Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                         )}/>
+                         <FormField control={form.control} name="quickLinksTitle" render={({ field }) => (
+                            <FormItem><FormLabel>Quick Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                         )}/>
+                         <FormField control={form.control} name="moreToolsTitle" render={({ field }) => (
+                            <FormItem><FormLabel>More Tools Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                         )}/>
+                         <FormField control={form.control} name="hostingLinksTitle" render={({ field }) => (
+                            <FormItem><FormLabel>Hosting Links Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                         )}/>
                     </CardContent>
                 </Card>
             </div>
