@@ -11,58 +11,23 @@ import { Star } from 'lucide-react';
 import { TypingEffect } from '@/components/common/TypingEffect';
 import { getSettings } from '@/ai/flows/settings-management';
 import * as Icons from 'lucide-react';
-
-// Dummy data from review-management, will be replaced by a proper data fetch
-const allReviews = [
-    {
-        id: '1',
-        user: { name: 'Jane Doe', avatar: 'https://i.pravatar.cc/150?u=jane' },
-        toolSlug: 'case-converter',
-        comment: 'This tool is a lifesaver! It saves me so much time when formatting text for my blog posts. Highly recommended!',
-        rating: 5,
-        date: '2024-05-10',
-        status: 'Approved',
-    },
-    {
-        id: '2',
-        user: { name: 'John Smith', avatar: 'https://i.pravatar.cc/150?u=john' },
-        toolSlug: 'password-generator',
-        comment: 'Great for creating strong, secure passwords. The options for length and character types are very useful.',
-        rating: 4,
-        date: '2024-05-12',
-        status: 'Approved',
-    },
-    {
-        id: '3',
-        user: { name: 'Emily White', avatar: 'https://i.pravatar.cc/150?u=emily' },
-        toolSlug: 'json-formatter',
-        comment: 'It works, but sometimes it hangs on very large JSON files. Could be better.',
-        rating: 3,
-        date: '2024-05-15',
-        status: 'Pending',
-    },
-     {
-        id: '4',
-        user: { name: 'Michael Brown', avatar: 'https://i.pravatar.cc/150?u=michael' },
-        toolSlug: 'text-to-speech',
-        comment: 'The voice sounds a bit robotic. I was expecting something more natural for a Pro tool.',
-        rating: 4,
-        date: '2024-05-18',
-        status: 'Rejected',
-    },
-];
+import { getPosts } from '@/ai/flows/blog-management';
+import { getComments } from '@/ai/flows/blog-management';
 
 
 export default async function Home() {
   const tools = await getTools();
   const settings = await getSettings();
+  const allPosts = await getPosts();
+  const allReviews = await getComments();
+
   const homepageSettings = settings.homepage || {};
   
-  const testimonials = allReviews.filter(review => review.status === 'Approved');
+  const testimonials = allReviews.filter(review => review.status === 'approved');
+  const blogPosts = allPosts.filter(post => post.status === 'Published').slice(0, 3);
   
   const steps = homepageSettings.steps || [];
   const features = homepageSettings.features || [];
-  const blogPosts = homepageSettings.blogPosts || [];
 
   const activeTools = tools.filter(tool => tool.status === 'Active');
   const categoryNames = toolCategories.map(c => c.name.replace(' Tools', ''));
@@ -93,36 +58,36 @@ export default async function Home() {
   );
 
   const Testimonials = () => {
-    // Only use marquee if there are enough items to justify it.
-    const useMarquee = testimonials.length >= 10;
+    const displayTestimonials = testimonials.slice(0, 12);
+    const useMarquee = displayTestimonials.length >= 10;
 
     if (useMarquee) {
-        const midPoint = Math.ceil(testimonials.length / 2);
-        const topRowItems = testimonials.slice(0, midPoint);
-        const bottomRowItems = testimonials.slice(midPoint);
-        
-        return (
-            <div className="relative flex flex-col gap-8 overflow-hidden">
-                 <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
-                     {[...topRowItems, ...topRowItems].map((testimonial, index) => (
-                        <TestimonialCard key={`top-${testimonial.id}-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
-                    ))}
-                 </div>
-                 <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
-                    {[...bottomRowItems, ...bottomRowItems].map((testimonial, index) => (
-                        <TestimonialCard key={`bottom-${testimonial.id}-${index}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
-                    ))}
-                 </div>
-            </div>
-        );
+      const midPoint = Math.ceil(displayTestimonials.length / 2);
+      const topRowItems = displayTestimonials.slice(0, midPoint);
+      const bottomRowItems = displayTestimonials.slice(midPoint);
+      
+      return (
+        <div className="relative flex flex-col gap-8 overflow-hidden">
+          <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
+            {[...topRowItems, ...topRowItems].map((testimonial, index) => (
+              <TestimonialCard key={`top-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.postTitle} avatar={testimonial.authorAvatar} comment={testimonial.comment} />
+            ))}
+          </div>
+          <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
+            {[...bottomRowItems, ...bottomRowItems].map((testimonial, index) => (
+              <TestimonialCard key={`bottom-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.postTitle} avatar={testimonial.authorAvatar} comment={testimonial.comment} />
+            ))}
+          </div>
+        </div>
+      );
     }
 
     return (
-        <div className="flex justify-center flex-wrap gap-8">
-            {testimonials.map((testimonial) => (
-            <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.user.name} role={testimonial.toolSlug} avatar={testimonial.user.avatar} comment={testimonial.comment} />
-            ))}
-        </div>
+      <div className="flex justify-center flex-wrap gap-8">
+        {displayTestimonials.map((testimonial) => (
+          <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.authorName} role={testimonial.postTitle} avatar={testimonial.authorAvatar} comment={testimonial.comment} />
+        ))}
+      </div>
     );
   };
 
@@ -221,15 +186,15 @@ export default async function Home() {
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {blogPosts.map((post, index) => (
+                {blogPosts.map((post) => (
                     <BlogPostCard
-                        key={index}
+                        key={post.id}
                         category={post.category}
                         title={post.title}
-                        description={post.description}
-                        imageUrl={post.imageUrl}
-                        imageHint={post.imageHint}
-                        href={post.href}
+                        description={post.content.substring(0, 100) + '...'}
+                        imageUrl={post.imageUrl || 'https://picsum.photos/600/400'}
+                        imageHint={post.imageHint || 'blog post'}
+                        href={`/blog/${post.slug}`}
                     />
                 ))}
             </div>
