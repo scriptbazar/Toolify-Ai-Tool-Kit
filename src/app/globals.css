@@ -99,4 +99,23 @@
     .faq-accordion-trigger[data-state=open] > svg {
         @apply rotate-180;
     }
+
+    /* Typing Effect Cursor */
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background-color: hsl(var(--primary));
+      margin-left: 4px;
+      animation: blink 1s infinite;
+      vertical-align: middle;
+    }
+    .typing-container {
+      min-height: 1.2em; /* Prevents layout shift */
+    }
 }
