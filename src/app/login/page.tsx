@@ -21,6 +21,7 @@ import { logUserLogin } from "@/ai/flows/user-activity";
 import ReCAPTCHA from "react-google-recaptcha";
 import { getSettings } from "@/ai/flows/settings-management";
 import type { SecuritySettings } from '@/ai/flows/settings-management.types';
+import { verifyRecaptcha } from '@/ai/flows/verify-recaptcha';
 
 
 const formSchema = z.object({
@@ -57,13 +58,29 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (securitySettings?.enableRecaptcha && !recaptchaValue) {
-        toast({
-            title: "Verification Failed",
-            description: "Please complete the reCAPTCHA verification.",
-            variant: "destructive",
-        });
-        return;
+    if (securitySettings?.enableRecaptcha) {
+        if (!recaptchaValue) {
+            toast({
+                title: "Verification Failed",
+                description: "Please complete the reCAPTCHA verification.",
+                variant: "destructive",
+            });
+            return;
+        }
+        try {
+            const verification = await verifyRecaptcha(recaptchaValue);
+            if (!verification.success) {
+                throw new Error(verification.message);
+            }
+        } catch (error: any) {
+             toast({
+                title: "reCAPTCHA Verification Failed",
+                description: error.message || 'Could not verify reCAPTCHA. Please try again.',
+                variant: "destructive",
+            });
+            recaptchaRef.current?.reset();
+            return;
+        }
     }
 
     try {
