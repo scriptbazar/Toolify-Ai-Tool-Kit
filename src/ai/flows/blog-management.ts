@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -6,10 +7,9 @@
  */
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { PostSchema, type Post, CommentSchema, type Comment } from './blog-management.types';
+import { PostSchema, type Post } from './blog-management.types';
 
 const POSTS_COLLECTION = 'blogPosts';
-const COMMENTS_COLLECTION = 'blogComments';
 
 /**
  * Fetches all posts from Firestore, ordered by creation date.
@@ -109,36 +109,4 @@ export async function deletePost(postId: string): Promise<{ success: boolean; me
     console.error(`Error deleting post ${postId}:`, error);
     return { success: false, message: error.message || 'An unknown error occurred.' };
   }
-}
-
-
-/**
- * Fetches all comments from Firestore.
- * @returns {Promise<Comment[]>} A list of all comments.
- */
-export async function getComments(): Promise<Comment[]> {
-    if (!adminDb) {
-      console.error("Database not initialized, cannot fetch comments.");
-      return [];
-    }
-    try {
-        const snapshot = await adminDb.collection(COMMENTS_COLLECTION).orderBy('submittedOn', 'desc').get();
-        if (snapshot.empty) {
-            return [];
-        }
-
-        const comments = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return CommentSchema.parse({
-                id: doc.id,
-                ...data,
-                submittedOn: (data.submittedOn as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-            });
-        });
-
-        return comments;
-    } catch (error) {
-        console.error("Error fetching comments:", error);
-        return [];
-    }
 }

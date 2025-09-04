@@ -65,8 +65,6 @@ export default function SubscribersPage() {
     return emails
       .filter(email => {
         if (activeFilter === 'all') return true;
-        // The 'Comment' filter is prepared for future implementation
-        if (activeFilter === 'Comment') return false; 
         return email.source === activeFilter;
       })
       .filter(email =>
@@ -78,7 +76,7 @@ export default function SubscribersPage() {
     all: emails.length,
     Signup: emails.filter(e => e.source === 'Signup').length,
     Lead: emails.filter(e => e.source === 'Lead').length,
-    Comment: 0, // Placeholder for future implementation
+    Comment: emails.filter(e => e.source === 'Comment').length,
   }), [emails]);
 
   return (
@@ -135,7 +133,7 @@ export default function SubscribersPage() {
                   placeholder="Search by email..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-9 w-full sm:w-52"
+                  className="pl-9 w-full sm:w-auto"
                 />
               </div>
             </div>
@@ -187,7 +185,7 @@ export default function SubscribersPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={email.source === 'Signup' ? 'default' : 'secondary'}>
+                      <Badge variant={email.source === 'Signup' ? 'default' : (email.source === 'Lead' ? 'secondary' : 'outline')}>
                         {email.source}
                       </Badge>
                     </TableCell>

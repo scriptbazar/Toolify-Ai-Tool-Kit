@@ -14,7 +14,7 @@
 
 import { z } from 'zod';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, ReferralRequestSchema, type Affiliate, AffiliateSchema } from './user-management.types';
+import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, ReferralRequestSchema, type Affiliate, AffiliateSchema, CommentSchema, type Comment } from './user-management.types';
 import { adminDb } from '@/lib/firebase-admin';
 
 
@@ -63,40 +63,85 @@ export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: b
   }
 }
 
+/**
+ * Fetches all comments from Firestore.
+ * @returns {Promise<Comment[]>} A list of all comments.
+ */
+export async function getComments(): Promise<Comment[]> {
+    if (!adminDb) {
+      console.error("Database not initialized, cannot fetch comments.");
+      return [];
+    }
+    try {
+        const snapshot = await adminDb.collection('blogComments').orderBy('submittedOn', 'desc').get();
+        if (snapshot.empty) {
+            return [];
+        }
+
+        const comments = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return CommentSchema.parse({
+                id: doc.id,
+                ...data,
+                submittedOn: (data.submittedOn as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+            });
+        });
+
+        return comments;
+    } catch (error) {
+        console.error("Error fetching comments:", error);
+        return [];
+    }
+}
+
+
 export async function getAllEmails(): Promise<{ email: string; source: string; date: string }[]> {
    if (!adminDb) {
     console.error("Firebase Admin is not initialized. Cannot fetch emails.");
     return [];
   }
   try {
-    const usersSnapshot = await adminDb.collection('users').get();
-    const leadsSnapshot = await adminDb.collection('leads').get();
-    
+    const usersSnapshot = await getDocs(adminDb.collection('users'));
+    const leadsSnapshot = await getDocs(adminDb.collection('leads'));
+    const commentsSnapshot = await getDocs(adminDb.collection('blogComments'));
+
     const emailMap = new Map<string, { source: string; date: string }>();
 
-    const processDoc = (doc: FirebaseFirestore.QueryDocumentSnapshot, source: 'Signup' | 'Lead') => {
+    const processDoc = (doc: FirebaseFirestore.QueryDocumentSnapshot, source: 'Signup' | 'Lead' | 'Comment') => {
       const data = doc.data();
-      const email = data.email;
-      if (email && !emailMap.has(email)) {
-        const timestamp = data.createdAt;
-        let dateString: string;
+      // Assume email exists; validation can be added.
+      const email = data.email || (source === 'Comment' ? data.authorEmail : undefined);
+      
+      if (!email || typeof email !== 'string') return;
 
-        if (timestamp && typeof timestamp.toDate === 'function') {
-          dateString = timestamp.toDate().toISOString();
-        } else if (timestamp instanceof Date) {
-          dateString = timestamp.toISOString();
-        } else {
-          // Fallback for missing or malformed dates
-          dateString = new Date().toISOString();
-        }
-        
-        emailMap.set(email, { source, date: dateString });
+      // Signup users take precedence. If a lead/commenter signs up, their source becomes 'Signup'.
+      if (emailMap.has(email) && emailMap.get(email)!.source === 'Signup') {
+        return;
       }
+
+      // If a lead comments, they're still a lead. Signup is the highest precedence.
+      if (emailMap.has(email) && emailMap.get(email)!.source === 'Lead' && source === 'Comment') {
+        return;
+      }
+      
+      const timestamp = data.createdAt || data.submittedOn;
+      let dateString: string;
+
+      if (timestamp && typeof timestamp.toDate === 'function') {
+        dateString = timestamp.toDate().toISOString();
+      } else if (timestamp instanceof Date) {
+        dateString = timestamp.toISOString();
+      } else {
+        dateString = new Date().toISOString();
+      }
+      
+      emailMap.set(email, { source, date: dateString });
     };
     
     usersSnapshot.forEach(doc => processDoc(doc, 'Signup'));
     leadsSnapshot.forEach(doc => processDoc(doc, 'Lead'));
-    
+    commentsSnapshot.forEach(doc => processDoc(doc, 'Comment'));
+
     const allEmails = Array.from(emailMap.entries()).map(([email, { source, date }]) => ({
       email,
       source,
@@ -108,8 +153,6 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
     return allEmails;
   } catch (error: any) {
     console.error("Error fetching all emails:", error);
-    // Instead of throwing, return an empty array to allow the UI to render gracefully.
-    // The error is logged on the server for debugging.
     return [];
   }
 }
