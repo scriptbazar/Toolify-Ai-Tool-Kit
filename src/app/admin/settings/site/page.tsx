@@ -21,6 +21,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { AdBlockerDetector } from '@/components/common/AdBlockerDetector';
+import { clearCache } from '@/ai/flows/utility-actions';
+
 
 export const runtime = 'nodejs';
 
@@ -77,6 +79,7 @@ export default function SiteSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>('general');
+  const [isClearingCache, setIsClearingCache] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -201,6 +204,30 @@ export default function SiteSettingsPage() {
       setIsSaving(false);
     }
   };
+
+  const handleClearCache = async () => {
+    setIsClearingCache(true);
+    try {
+        const result = await clearCache();
+        if (result.success) {
+            toast({
+                title: 'Cache Cleared!',
+                description: 'The website data cache has been successfully cleared.',
+            });
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error: any) {
+        toast({
+            title: 'Error',
+            description: error.message || 'Could not clear cache.',
+            variant: 'destructive',
+        });
+    } finally {
+        setIsClearingCache(false);
+    }
+  };
+
 
   const handleUtilityClick = (action: string) => {
     toast({
@@ -528,7 +555,10 @@ export default function SiteSettingsPage() {
                     <div className="space-y-4 rounded-lg border p-4">
                         <Label className="font-medium">Site Utilities</Label>
                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            <Button variant="outline" type="button" onClick={() => handleUtilityClick('Clear Cache')}><Eraser className="mr-2 h-4 w-4" />Clear Cache</Button>
+                            <Button variant="outline" type="button" onClick={handleClearCache} disabled={isClearingCache}>
+                                {isClearingCache ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Eraser className="mr-2 h-4 w-4" />}
+                                Clear Cache
+                            </Button>
                             <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Sitemap')}><FileCode className="mr-2 h-4 w-4" />Generate sitemap.xml</Button>
                             <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Robots.txt')}><FileText className="mr-2 h-4 w-4" />Generate robots.txt</Button>
                          </div>
