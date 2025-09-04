@@ -36,11 +36,14 @@ const SupportTicketEmailSchema = z.object({
 });
 export type SupportTicketEmailInput = z.infer<typeof SupportTicketEmailSchema>;
 
+export const EmailStatusSchema = z.enum(['sent', 'opened', 'clicked', 'unsubscribed', 'failed', 'blocked']);
+export type EmailStatus = z.infer<typeof EmailStatusSchema>;
+
 const EmailLogSchema = z.object({
   id: z.string(),
   recipient: z.string(),
   subject: z.string(),
-  status: z.enum(['sent', 'opened', 'failed', 'blocked']),
+  status: EmailStatusSchema,
   date: z.string(),
 });
 export type EmailLog = z.infer<typeof EmailLogSchema>;
