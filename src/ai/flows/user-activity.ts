@@ -10,6 +10,20 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { type UserActivity, type UserActivityDetails, type UserActivityType, type UserLoginHistory } from './user-activity.types';
 import { headers } from 'next/headers';
 
+export type ToolUsageStat = {
+    toolName: string;
+    count: number;
+};
+
+export type RecentToolActivity = {
+    id: string;
+    toolName: string;
+    userId: string;
+    userName: string;
+    timestamp: string;
+};
+
+
 /**
  * Adds a new activity log for a user.
  * @param userId - The ID of the user.
@@ -137,6 +151,73 @@ export async function getLoginHistory(userId: string): Promise<UserLoginHistory[
 
     } catch (error) {
         console.error(`Error fetching login history for user ${userId}:`, error);
+        return [];
+    }
+}
+
+
+/**
+ * Fetches and aggregates tool usage statistics.
+ */
+export async function getToolUsageStats(): Promise<ToolUsageStat[]> {
+    if (!adminDb) return [];
+    try {
+        const activitySnapshot = await adminDb.collectionGroup('activity').where('type', '==', 'tool_usage').get();
+        
+        const stats: { [key: string]: number } = {};
+        
+        activitySnapshot.forEach(doc => {
+            const toolName = doc.data().details.name;
+            if (toolName) {
+                stats[toolName] = (stats[toolName] || 0) + 1;
+            }
+        });
+
+        return Object.entries(stats)
+            .map(([toolName, count]) => ({ toolName, count }))
+            .sort((a, b) => b.count - a.count);
+
+    } catch (error) {
+        console.error("Error fetching tool usage stats:", error);
+        return [];
+    }
+}
+
+/**
+ * Fetches the most recent tool usage activities.
+ */
+export async function getRecentToolActivity(count = 20): Promise<RecentToolActivity[]> {
+    if (!adminDb) return [];
+    try {
+        const activitySnapshot = await adminDb.collectionGroup('activity')
+            .where('type', '==', 'tool_usage')
+            .orderBy('timestamp', 'desc')
+            .limit(count)
+            .get();
+        
+        if (activitySnapshot.empty) return [];
+        
+        // Fetch user data in parallel to avoid multiple awaits in a loop
+        const userIds = [...new Set(activitySnapshot.docs.map(doc => doc.ref.parent.parent!.id))];
+        const userDocs = await Promise.all(userIds.map(id => adminDb.collection('users').doc(id).get()));
+        const userMap = new Map(userDocs.map(doc => [doc.id, doc.data()]));
+
+        return activitySnapshot.docs.map(doc => {
+            const data = doc.data();
+            const userId = doc.ref.parent.parent!.id;
+            const user = userMap.get(userId);
+            
+            return {
+                id: doc.id,
+                toolName: data.details.name,
+                userId: userId,
+                userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+                timestamp: (data.timestamp as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+            };
+        });
+
+    } catch (error) {
+        console.error("Error fetching recent tool activity:", error);
         return [];
     }
 }

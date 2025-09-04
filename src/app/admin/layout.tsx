@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -38,6 +37,8 @@ import {
   Footprints,
   HelpCircle,
   PanelLeft,
+  Lightbulb,
+  TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -146,7 +147,6 @@ export default function AdminLayout({
   const navLinks = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: Home },
     { href: '/admin/users', label: 'User Management', icon: Users },
-    { href: '/admin/tools', label: 'Tool Management', icon: Package },
     { href: '/admin/analytics', label: 'Analytics', icon: LineChart },
     { href: '/admin/ticket-management', label: 'Ticket Management', icon: Ticket },
     { href: '/admin/announcement', label: 'Announcement', icon: Megaphone },
@@ -155,7 +155,13 @@ export default function AdminLayout({
     { href: '/admin/affiliate-management', label: 'Affiliate Management', icon: GitCommitVertical },
     { href: '/admin/review-management', label: 'Review Management', icon: Star },
     { href: '/admin/advertisement', label: 'Advertisement', icon: Megaphone },
-    { href: '/admin/backup-restore', label: 'Backup & Restore', icon: DatabaseBackup },
+  ];
+
+  const toolManagementLinks = [
+    { href: '/admin/tools', icon: Package, label: 'All Tools' },
+    { href: '/admin/tools/new', icon: PlusCircle, label: 'Add New Tool' },
+    { href: '/admin/tool-management/requests', icon: Lightbulb, label: 'Tool Requests' },
+    { href: '/admin/tool-management/usage', icon: TrendingUp, label: 'Tool Usage' },
   ];
 
   const blogManagementLinks = [
@@ -186,10 +192,30 @@ export default function AdminLayout({
     { href: '/admin/settings/faqs', icon: HelpCircle, label: 'FAQs Management' },
   ];
 
+  const isToolRouteActive = pathname.startsWith('/admin/tools') || pathname.startsWith('/admin/tool-management');
   const isBlogRouteActive = pathname.startsWith('/admin/blog');
   const isEmailRouteActive = pathname.startsWith('/admin/email');
   const isSettingsRouteActive = pathname.startsWith('/admin/settings');
   
+  const NavAccordion = ({ title, icon: Icon, links, isActive, ...props }: any) => (
+      <Accordion type="single" collapsible defaultValue={isActive ? title : undefined} {...props}>
+          <AccordionItem value={title} className="border-b-0">
+              <AccordionTrigger className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
+                  isActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+              )}>
+                  <div className="flex items-center gap-3">
+                      <Icon className="h-4 w-4" />
+                      <span>{title}</span>
+                  </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-1 pl-4">
+                  <SubmenuItems links={links} />
+              </AccordionContent>
+          </AccordionItem>
+      </Accordion>
+  );
+
   const SubmenuItems = ({ links }: { links: { href: string; icon: React.ElementType; label: string }[] }) => (
      <nav className="grid gap-1">
       {links.map((link, index) => (
@@ -237,54 +263,10 @@ export default function AdminLayout({
               {link.label}
             </Link>
           ))}
-          <Accordion type="single" collapsible defaultValue={isEmailRouteActive ? 'email-management' : undefined} className="w-full">
-            <AccordionItem value="email-management" className="border-b-0">
-              <AccordionTrigger className={cn(
-                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
-                  isEmailRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-              )}>
-                 <div className="flex items-center gap-4">
-                  <Mail className="h-5 w-5" />
-                  <span>Email Management</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pl-4 pt-1">
-                 <SubmenuItems links={emailManagementLinks} />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-          <Accordion type="single" collapsible defaultValue={isBlogRouteActive ? 'blog-management' : undefined} className="w-full">
-            <AccordionItem value="blog-management" className="border-b-0">
-              <AccordionTrigger className={cn(
-                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
-                  isBlogRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-              )}>
-                 <div className="flex items-center gap-4">
-                  <BookText className="h-5 w-5" />
-                  <span>Blog Management</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pl-4 pt-1">
-                 <SubmenuItems links={blogManagementLinks} />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-          <Accordion type="single" collapsible defaultValue={isSettingsRouteActive ? 'settings' : undefined} className="w-full">
-            <AccordionItem value="settings" className="border-b-0">
-              <AccordionTrigger className={cn(
-                  'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
-                  isSettingsRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-              )}>
-                 <div className="flex items-center gap-4">
-                  <Settings className="h-5 w-5" />
-                  <span>Settings</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pl-4 pt-1">
-                 <SubmenuItems links={settingsLinks} />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+           <NavAccordion title="Tool Management" icon={Package} links={toolManagementLinks} isActive={isToolRouteActive} className="w-full" />
+           <NavAccordion title="Email Management" icon={Mail} links={emailManagementLinks} isActive={isEmailRouteActive} className="w-full" />
+           <NavAccordion title="Blog Management" icon={BookText} links={blogManagementLinks} isActive={isBlogRouteActive} className="w-full" />
+           <NavAccordion title="Settings" icon={Settings} links={settingsLinks} isActive={isSettingsRouteActive} className="w-full" />
         </nav>
       </ScrollArea>
       <div className="mt-auto p-4 border-t">
@@ -333,54 +315,10 @@ export default function AdminLayout({
                     {link.label}
                   </Link>
                 ))}
-                <Accordion type="single" collapsible defaultValue={isEmailRouteActive ? 'email-management' : undefined}>
-                  <AccordionItem value="email-management" className="border-b-0">
-                    <AccordionTrigger className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
-                        isEmailRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                    )}>
-                       <div className="flex items-center gap-3">
-                        <Mail className="h-4 w-4" />
-                        <span>Email Management</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="pt-1 pl-4">
-                       <SubmenuItems links={emailManagementLinks} />
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-                 <Accordion type="single" collapsible defaultValue={isBlogRouteActive ? 'blog-management' : undefined}>
-                  <AccordionItem value="blog-management" className="border-b-0">
-                    <AccordionTrigger className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
-                        isBlogRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                    )}>
-                       <div className="flex items-center gap-3">
-                        <BookText className="h-4 w-4" />
-                        <span>Blog Management</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="pt-1 pl-4">
-                       <SubmenuItems links={blogManagementLinks} />
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-                <Accordion type="single" collapsible defaultValue={isSettingsRouteActive ? 'settings' : undefined}>
-                  <AccordionItem value="settings" className="border-b-0">
-                    <AccordionTrigger className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline',
-                        isSettingsRouteActive && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                    )}>
-                       <div className="flex items-center gap-3">
-                        <Settings className="h-4 w-4" />
-                        <span>Settings</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="pt-1 pl-4">
-                       <SubmenuItems links={settingsLinks} />
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                <NavAccordion title="Tool Management" icon={Package} links={toolManagementLinks} isActive={isToolRouteActive} />
+                <NavAccordion title="Email Management" icon={Mail} links={emailManagementLinks} isActive={isEmailRouteActive} />
+                <NavAccordion title="Blog Management" icon={BookText} links={blogManagementLinks} isActive={isBlogRouteActive} />
+                <NavAccordion title="Settings" icon={Settings} links={settingsLinks} isActive={isSettingsRouteActive} />
               </nav>
             </ScrollArea>
              <div className="mt-auto p-4 border-t">

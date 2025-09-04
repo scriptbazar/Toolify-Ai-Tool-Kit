@@ -5,7 +5,7 @@
  * @fileOverview Manages tools in Firestore.
  */
 import { adminDb } from '@/lib/firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { type Tool, ToolSchema, UpsertToolInputSchema, type ToolRequest, ToolRequestSchema } from './tool-management.types';
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
@@ -320,5 +320,42 @@ const generateToolDescriptionFlow = ai.defineFlow(
     return output;
   }
 );
+
+
+/**
+ * Fetches all tool requests from Firestore.
+ */
+export async function getToolRequests(): Promise<ToolRequest[]> {
+    if (!adminDb) return [];
+    try {
+        const snapshot = await adminDb.collection(TOOL_REQUESTS_COLLECTION).orderBy('requestedAt', 'desc').get();
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                requestedAt: (data.requestedAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+            } as ToolRequest;
+        });
+    } catch (error) {
+        console.error("Error fetching tool requests:", error);
+        return [];
+    }
+}
+
+/**
+ * Updates the status of a tool request.
+ */
+export async function updateToolRequestStatus(requestId: string, status: 'approved' | 'rejected'): Promise<{ success: boolean, message: string }> {
+    if (!adminDb) return { success: false, message: 'Database not initialized.' };
+    try {
+        const requestRef = adminDb.collection(TOOL_REQUESTS_COLLECTION).doc(requestId);
+        await requestRef.update({ status });
+        return { success: true, message: 'Request status updated.' };
+    } catch (error: any) {
+        return { success: false, message: error.message || 'An unknown error occurred.' };
+    }
+}
     
+
 
