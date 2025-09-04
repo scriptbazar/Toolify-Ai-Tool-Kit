@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef } from 'react';
@@ -7,7 +8,6 @@ import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -15,13 +15,10 @@ import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Wand2, UploadCloud, Send, Loader2, Save, Calendar as CalendarIcon } from 'lucide-react';
+import { Wand2, UploadCloud, Send, Loader2, Save, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const postSchema = z.object({
   title: z.string().min(5, { message: 'Title must be at least 5 characters long.' }),
@@ -152,178 +149,165 @@ export default function AddNewPostPage() {
 
   return (
     <div className="space-y-6">
-       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Add New Post</h1>
-        <p className="text-muted-foreground">
-          Create a new blog post for your audience.
-        </p>
-      </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(processAndSavePost)} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Post Content</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={form.handleSubmit(processAndSavePost)}>
+          <div className="flex items-center justify-between mb-6">
+             <div>
+                <Link href="/admin/blog/all-posts" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Back To All Posts
+                </Link>
+                <h1 className="text-3xl font-bold tracking-tight">Add New Post</h1>
+              </div>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => handlePostSubmit('Draft')} disabled={isSaving}>
+                   <Save className="mr-2 h-4 w-4" />
+                   Save Draft
+                </Button>
+                <Button type="button" onClick={() => handlePostSubmit('Published')} disabled={isSaving}>
+                  {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4" />}
+                  Publish
+                </Button>
+              </div>
+          </div>
+        
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Post Content</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Post Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., The Future of AI" {...field} onChange={handleTitleChange} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="slug"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Post Slug</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., the-future-of-ai" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Post Title</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., The Future of AI" {...field} onChange={handleTitleChange} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="slug"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Post Slug</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., the-future-of-ai" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <div className="relative">
+                  <div className="relative">
+                     <FormField
+                      control={form.control}
+                      name="content"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Post Body</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Write your amazing blog post here, or generate it with AI..."
+                              className="min-h-[400px] resize-y"
+                              {...field}
+                            />
+                          </FormControl>
+                           <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="button" 
+                      onClick={handleGenerateContent} 
+                      disabled={isGenerating}
+                      variant="outline"
+                      className="absolute bottom-4 right-4"
+                      size="sm"
+                    >
+                      {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                      Generate with AI
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="lg:col-span-1 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Categories & Tags</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                    <FormField
                     control={form.control}
-                    name="content"
+                    name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Post Body</FormLabel>
+                        <FormLabel>Category</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="technology">Technology</SelectItem>
+                            <SelectItem value="ai">Artificial Intelligence</SelectItem>
+                            <SelectItem value="productivity">Productivity</SelectItem>
+                            <SelectItem value="news">News</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="tags"
+                    render={({ field }) => (
+                      <FormItem>
+                         <FormLabel>Tags</FormLabel>
                         <FormControl>
-                          <Textarea
-                            placeholder="Write your amazing blog post here, or generate it with AI..."
-                            className="min-h-[400px] resize-y"
-                            {...field}
-                          />
+                          <Input placeholder="AI, SaaS, Tech..." {...field} />
                         </FormControl>
+                        <p className="text-xs text-muted-foreground">Separate tags with commas.</p>
                          <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button 
-                    type="button" 
-                    onClick={handleGenerateContent} 
-                    disabled={isGenerating}
-                    variant="outline"
-                    className="absolute bottom-4 right-4"
-                    size="sm"
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Featured Image</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div 
+                      className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative"
+                      onClick={() => fileInputRef.current?.click()}
                   >
-                    {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                    Generate with AI
-                  </Button>
-                </div>
-
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="lg:col-span-1 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Publishing Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Button type="button" variant="outline" className="w-full" onClick={() => handlePostSubmit('Draft')} disabled={isSaving}>
-                     <Save className="mr-2 h-4 w-4" />
-                     Save Draft
-                  </Button>
-                  <Button type="button" className="w-full" onClick={() => handlePostSubmit('Published')} disabled={isSaving}>
-                    <Send className="mr-2 h-4 w-4" />
-                    Publish
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Categories</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Post Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="technology">Technology</SelectItem>
-                          <SelectItem value="ai">Artificial Intelligence</SelectItem>
-                          <SelectItem value="productivity">Productivity</SelectItem>
-                          <SelectItem value="news">News</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Tags</CardTitle>
-              </CardHeader>
-              <CardContent>
-                 <FormField
-                  control={form.control}
-                  name="tags"
-                  render={({ field }) => (
-                    <FormItem>
-                       <FormLabel>Post Tags</FormLabel>
-                      <FormControl>
-                        <Input placeholder="AI, SaaS, Tech..." {...field} />
-                      </FormControl>
-                      <p className="text-xs text-muted-foreground">Separate tags with commas.</p>
-                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Featured Image</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div 
-                    className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative"
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/png, image/jpeg, image/webp" />
-                    {imagePreview ? (
-                        <Image src={imagePreview} alt="Featured image preview" fill objectFit="cover" className="rounded-md" />
-                    ) : (
-                        <div className="flex flex-col items-center">
-                            <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                            <p className="text-sm text-muted-foreground">Click to upload image</p>
-                            <p className="text-xs text-muted-foreground">PNG, JPG, WEBP up to 5MB</p>
-                        </div>
-                    )}
-                </div>
-              </CardContent>
-            </Card>
+                      <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/png, image/jpeg, image/webp" />
+                      {imagePreview ? (
+                          <Image src={imagePreview} alt="Featured image preview" fill className="object-cover rounded-md" />
+                      ) : (
+                          <div className="flex flex-col items-center">
+                              <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                              <p className="text-sm text-muted-foreground">Click to upload image</p>
+                              <p className="text-xs text-muted-foreground">PNG, JPG, WEBP up to 5MB</p>
+                          </div>
+                      )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </form>
       </Form>
