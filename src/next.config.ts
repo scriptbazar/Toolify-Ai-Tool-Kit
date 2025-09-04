@@ -48,7 +48,8 @@ const nextConfig: NextConfig = {
   },
    webpack: (config, { isServer }) => {
     config.externals.push({
-      "handlebars": "commonjs handlebars"
+      "handlebars": "commonjs handlebars",
+      "@opentelemetry/instrumentation": "commonjs @opentelemetry/instrumentation",
     })
     
     config.resolve.alias = {
