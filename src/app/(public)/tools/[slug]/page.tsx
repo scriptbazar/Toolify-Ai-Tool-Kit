@@ -582,9 +582,9 @@ export default async function ToolPage({ params }: { params: { slug: string } })
       <div className="flex flex-col lg:flex-row lg:gap-8">
         <div className="flex-1">
           <Card>
-            <CardHeader className="flex-col items-center">
+            <CardHeader className="flex flex-row items-center justify-center gap-4">
               <Icon className="h-10 w-10 text-primary" />
-              <CardTitle className="text-3xl font-bold mt-2">{tool.name}</CardTitle>
+              <CardTitle className="text-3xl font-bold">{tool.name}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-6 text-center">{tool.description}</p>
