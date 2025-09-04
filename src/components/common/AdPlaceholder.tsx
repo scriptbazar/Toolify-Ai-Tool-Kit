@@ -17,34 +17,32 @@ type AdPlaceholderProps = {
 };
 
 interface UserData {
-  plan?: 'Free' | 'Pro' | 'Team';
+  planId?: 'free' | 'pro' | 'team';
   role?: 'user' | 'admin';
 }
 
 export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholderProps) {
-  const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        setUser(firebaseUser);
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         try {
           const userDocSnap = await getDoc(userDocRef);
           if (userDocSnap.exists()) {
-            setUserData(userDocSnap.data() as UserData);
+            const data = userDocSnap.data();
+            setUserData({ planId: data.planId || 'free', role: data.role || 'user' });
           } else {
-            setUserData({ plan: 'Free', role: 'user' }); // Default if no doc
+            setUserData({ planId: 'free', role: 'user' }); // Default if no doc
           }
         } catch (error) {
           console.error("Failed to fetch user data:", error);
-          setUserData({ plan: 'Free', role: 'user' }); // Default on error
+          setUserData({ planId: 'free', role: 'user' }); // Default on error
         }
       } else {
-        setUser(null);
-        setUserData(null);
+        setUserData({ planId: 'free', role: 'user' }); // Treat non-logged-in users as free users
       }
       setLoading(false);
     });
@@ -56,7 +54,7 @@ export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholder
     return <Skeleton className={cn('h-[100px] w-full', className)} />;
   }
   
-  const isProUser = userData?.plan === 'Pro' || userData?.plan === 'Team';
+  const isProUser = userData?.planId === 'pro' || userData?.planId === 'team';
   const isAdmin = userData?.role === 'admin';
   const showAdsToPro = adSettings?.showAdsForPro ?? false;
   const adType = adSettings?.adType ?? 'none';
@@ -76,11 +74,8 @@ export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholder
   if (adType === 'manual' && adSlotId) {
     const slot = adSettings?.manualAdSlots?.find(s => s.id === adSlotId);
     
-    // Case 3a: The slot has ad code.
+    // Case 3a: The slot has ad code. Render it for everyone (respecting pro user rule).
     if (slot?.code) {
-      // If user is pro and ads are disabled for them, hide it. Admins still see it.
-      if(isProUser && !showAdsToPro && !isAdmin) return null;
-      
       return (
         <div
           className={cn('ad-slot-container', className)}
@@ -90,7 +85,7 @@ export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholder
     }
     
     // Case 3b: The slot is empty, and the user is an admin. Show the placeholder.
-    if (slot && !slot.code && isAdmin) {
+    if (isAdmin) {
        return (
           <div
             className={cn(

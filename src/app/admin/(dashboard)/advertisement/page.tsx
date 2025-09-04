@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,25 +8,49 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Save, Ban, Edit, Bot, Loader2 } from 'lucide-react';
+import { Save, Ban, Bot, Edit, Loader2, SlidersHorizontal, Code, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { AdvertisementSettings, ManualAdSlot } from '@/ai/flows/settings-management.types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 
-const defaultManualAdSlots: ManualAdSlot[] = [
-    { id: 'site-header-banner', name: 'Site-wide: Header Banner', code: '' },
-    { id: 'homepage-banner-top', name: 'Homepage: Top Banner', code: '' },
-    { id: 'homepage-banner-bottom', name: 'Homepage: Bottom Banner', code: '' },
-    { id: 'toolpage-sidebar', name: 'Tool Page: Sidebar', code: '' },
-    { id: 'toolpage-banner-top', name: 'Tool Page: Top Banner', code: '' },
-    { id: 'toolpage-banner-bottom', name: 'Tool Page: Bottom Banner', code: '' },
-    { id: 'toolpage-in-description', name: 'Tool Page: In-description Ad', code: '' },
-    { id: 'blog-post-sidebar', name: 'Blog Post: Sidebar', code: '' },
-    { id: 'blog-post-in-content', name: 'Blog Post: In-content Ad', code: '' },
-    { id: 'footer-banner', name: 'Footer: Banner Ad', code: '' },
+const defaultManualAdSlots: { group: string, slots: ManualAdSlot[] }[] = [
+    {
+        group: 'Homepage',
+        slots: [
+            { id: 'homepage-banner-top', name: 'Top Banner', code: '' },
+            { id: 'homepage-banner-bottom', name: 'Bottom Banner', code: '' },
+        ]
+    },
+    {
+        group: 'Tool Page',
+        slots: [
+            { id: 'toolpage-sidebar', name: 'Sidebar Ad', code: '' },
+            { id: 'toolpage-banner-top', name: 'Top Banner', code: '' },
+            { id: 'toolpage-in-description', name: 'In-description Ad', code: '' },
+            { id: 'toolpage-banner-bottom', name: 'Bottom Banner', code: '' },
+        ]
+    },
+     {
+        group: 'Blog Page',
+        slots: [
+            { id: 'blog-post-sidebar', name: 'Sidebar Ad', code: '' },
+            { id: 'blog-post-banner-top', name: 'Top Banner', code: '' },
+            { id: 'blog-post-in-content-start', name: 'In-content Ad (Start)', code: '' },
+            { id: 'blog-post-in-content-end', name: 'In-content Ad (End)', code: '' },
+            { id: 'blog-post-banner-bottom', name: 'Bottom Banner', code: '' },
+        ]
+    },
+    {
+        group: 'Site-wide',
+        slots: [
+            { id: 'site-header-banner', name: 'Header Banner', code: '' },
+            { id: 'footer-banner', name: 'Footer Banner', code: '' },
+        ]
+    }
 ];
 
 
@@ -41,13 +64,14 @@ export default function AdvertisementPage() {
     async function fetchSettings() {
       try {
         const appSettings = await getSettings();
-        // Ensure manualAdSlots are populated even if they don't exist in Firestore
         const adSettings = appSettings.advertisement || {};
         const existingSlots = adSettings.manualAdSlots || [];
-        const mergedSlots = defaultManualAdSlots.map(defaultSlot => {
-          const existing = existingSlots.find(s => s.id === defaultSlot.id);
-          return existing ? { ...defaultSlot, ...existing } : defaultSlot;
-        });
+        
+        const allSlotIds = new Set(defaultManualAdSlots.flatMap(group => group.slots.map(slot => slot.id)));
+        const mergedSlots = [
+            ...existingSlots.filter(s => allSlotIds.has(s.id)), // Keep existing, valid slots
+            ...defaultManualAdSlots.flatMap(group => group.slots).filter(s => !existingSlots.some(es => es.id === s.id)) // Add new default slots
+        ];
 
         setSettings({
             ...adSettings,
@@ -102,13 +126,11 @@ export default function AdvertisementPage() {
       <div className="space-y-6">
         <Skeleton className="h-10 w-1/3" />
         <Skeleton className="h-8 w-2/3" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <Card>
             <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
             <CardContent className="space-y-4">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-24 w-full" />
             </CardContent>
           </Card>
            <Card>
@@ -122,68 +144,46 @@ export default function AdvertisementPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Advertisement Management</h1>
-        <p className="text-muted-foreground">
-          Manage and place ads across your application.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+            <h1 className="text-3xl font-bold tracking-tight">Advertisement Management</h1>
+            <p className="text-muted-foreground">
+            Manage and place ads across your application.
+            </p>
+        </div>
+        <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            Save Settings
+        </Button>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="lg:col-span-1">
+      
+      <Card>
           <CardHeader>
-            <CardTitle>Ad Configuration</CardTitle>
-            <CardDescription>
-              Choose your ad strategy. Ads are disabled by default.
-            </CardDescription>
+              <CardTitle className="flex items-center gap-2"><SlidersHorizontal/>General Settings</CardTitle>
           </CardHeader>
-          <CardContent>
-            <RadioGroup 
-                value={settings.adType} 
-                onValueChange={(value) => setSettings(prev => prev ? { ...prev, adType: value as any } : null)} 
-                className="space-y-4">
-              <div className="flex items-center space-x-3 p-4 border rounded-lg has-[[data-state=checked]]:bg-muted">
-                <RadioGroupItem value="none" id="none" />
-                <Label htmlFor="none" className="flex items-center gap-3 w-full cursor-pointer">
-                   <Ban className="h-5 w-5"/>
-                   <div>
-                      <p className="font-semibold">Disable All Ads</p>
-                      <p className="text-sm text-muted-foreground">No ads will be shown anywhere on the site.</p>
-                   </div>
-                </Label>
-              </div>
-               <div className="flex items-center space-x-3 p-4 border rounded-lg has-[[data-state=checked]]:bg-muted">
-                <RadioGroupItem value="auto" id="auto" />
-                <Label htmlFor="auto" className="flex items-center gap-3 w-full cursor-pointer">
-                  <Bot className="h-5 w-5"/>
-                   <div>
-                      <p className="font-semibold">Auto Ads (e.g., AdSense)</p>
-                      <p className="text-sm text-muted-foreground">Let the ad provider place ads automatically.</p>
-                   </div>
-                </Label>
-              </div>
-               <div className="flex items-center space-x-3 p-4 border rounded-lg has-[[data-state=checked]]:bg-muted">
-                <RadioGroupItem value="manual" id="manual" />
-                <Label htmlFor="manual" className="flex items-center gap-3 w-full cursor-pointer">
-                  <Edit className="h-5 w-5"/>
-                   <div>
-                      <p className="font-semibold">Manual Ad Slots</p>
-                      <p className="text-sm text-muted-foreground">Place ad code in specific, predefined locations.</p>
-                   </div>
-                </Label>
-              </div>
+          <CardContent className="space-y-6">
+            <RadioGroup
+                value={settings.adType}
+                onValueChange={(value) => setSettings(prev => prev ? { ...prev, adType: value as any } : null)}
+                className="grid grid-cols-1 md:grid-cols-3 gap-4"
+            >
+              <Label htmlFor="none" className="flex flex-col items-center justify-center gap-3 p-4 border rounded-lg has-[[data-state=checked]]:bg-muted has-[[data-state=checked]]:border-primary cursor-pointer transition-all">
+                <RadioGroupItem value="none" id="none" className="sr-only" />
+                <Ban className="h-8 w-8"/>
+                <p className="font-semibold">Disable All Ads</p>
+              </Label>
+              <Label htmlFor="auto" className="flex flex-col items-center justify-center gap-3 p-4 border rounded-lg has-[[data-state=checked]]:bg-muted has-[[data-state=checked]]:border-primary cursor-pointer transition-all">
+                <RadioGroupItem value="auto" id="auto" className="sr-only" />
+                <Bot className="h-8 w-8"/>
+                <p className="font-semibold">Auto Ads (e.g., AdSense)</p>
+              </Label>
+               <Label htmlFor="manual" className="flex flex-col items-center justify-center gap-3 p-4 border rounded-lg has-[[data-state=checked]]:bg-muted has-[[data-state=checked]]:border-primary cursor-pointer transition-all">
+                <RadioGroupItem value="manual" id="manual" className="sr-only" />
+                <Edit className="h-8 w-8"/>
+                <p className="font-semibold">Manual Ad Slots</p>
+              </Label>
             </RadioGroup>
-          </CardContent>
-        </Card>
-        
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Audience Settings</CardTitle>
-            <CardDescription>
-              Customize ad visibility for different user groups.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
                 <Label htmlFor="pro-user-ads" className="text-base">
@@ -200,66 +200,65 @@ export default function AdvertisementPage() {
               />
             </div>
           </CardContent>
-        </Card>
+      </Card>
+      
+      {settings.adType === 'auto' && (
+         <Card className="animate-in fade-in-0 duration-300">
+            <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Bot/>Auto Ads Script</CardTitle>
+            <CardDescription>
+                Paste your ad script (e.g., from Google AdSense) here. It will be added to your site's header.
+            </CardDescription>
+            </CardHeader>
+            <CardContent>
+            <Textarea
+                id="auto-ads-script"
+                placeholder='<script async src="..."></script>'
+                value={settings.autoAdsScript || ''}
+                onChange={(e) => setSettings(prev => prev ? { ...prev, autoAdsScript: e.target.value } : null)}
+                className="min-h-[150px] font-mono"
+                />
+            </CardContent>
+         </Card>
+      )}
 
-        {settings.adType === 'auto' && (
-           <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Auto Ads Script</CardTitle>
-                <CardDescription>
-                  Paste your ad script here. It will be added to your site's header.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Textarea
-                    id="auto-ads-script"
-                    placeholder='<script async src="..."></script>'
-                    value={settings.autoAdsScript || ''}
-                    onChange={(e) => setSettings(prev => prev ? { ...prev, autoAdsScript: e.target.value } : null)}
-                    className="min-h-[150px] font-mono"
-                  />
-              </CardContent>
-            </Card>
-          </div>
-        )}
-        
-        {settings.adType === 'manual' && (
-           <div className='lg:col-span-2'>
-            <Card>
-              <CardHeader>
-                <CardTitle>Manual Ad Slots</CardTitle>
-                <CardDescription>
-                  Place specific ads in predefined locations.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {settings.manualAdSlots?.map((slot) => (
-                    <div key={slot.id} className="space-y-2">
-                      <Label htmlFor={`manual-ad-${slot.id}`}>{slot.name}</Label>
-                      <Textarea
-                        id={`manual-ad-${slot.id}`}
-                        placeholder={`Paste ad code for ${slot.name}`}
-                        value={slot.code || ''}
-                        onChange={(e) => handleManualAdSlotChange(slot.id, e.target.value)}
-                        className="min-h-[100px] font-mono text-xs"
-                      />
+       {settings.adType === 'manual' && (
+         <Card className="animate-in fade-in-0 duration-300">
+            <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Edit/>Manual Ad Slots</CardTitle>
+            <CardDescription>
+                Place specific ads in predefined locations by pasting your ad code.
+            </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {defaultManualAdSlots.map(group => (
+                <Collapsible key={group.group} className="space-y-2">
+                  <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 font-semibold [&[data-state=open]>svg]:rotate-180">
+                      <span>{group.group} Slots</span>
+                      <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-4 p-4 pt-0">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                        {group.slots.map(slot => (
+                          <div key={slot.id} className="space-y-2">
+                            <Label htmlFor={`manual-ad-${slot.id}`}>{slot.name}</Label>
+                            <Textarea
+                                id={`manual-ad-${slot.id}`}
+                                placeholder={`Paste ad code for ${slot.name}`}
+                                value={settings.manualAdSlots?.find(s => s.id === slot.id)?.code || ''}
+                                onChange={(e) => handleManualAdSlotChange(slot.id, e.target.value)}
+                                className="min-h-[100px] font-mono text-xs"
+                            />
+                            </div>  
+                        ))}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-           </div>
-        )}
-      </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
+            </CardContent>
+         </Card>
+       )}
 
-      <div className="flex justify-end pt-6">
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-          Save Ad Settings
-        </Button>
-      </div>
     </div>
   );
 }
