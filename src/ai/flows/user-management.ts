@@ -63,38 +63,6 @@ export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: b
   }
 }
 
-/**
- * Fetches all comments from Firestore.
- * @returns {Promise<Comment[]>} A list of all comments.
- */
-export async function getComments(): Promise<Comment[]> {
-    if (!adminDb) {
-      console.error("Database not initialized, cannot fetch comments.");
-      return [];
-    }
-    try {
-        const snapshot = await adminDb.collection('comments').orderBy('submittedOn', 'desc').get();
-        if (snapshot.empty) {
-            return [];
-        }
-
-        const comments = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return CommentSchema.parse({
-                id: doc.id,
-                ...data,
-                submittedOn: (data.submittedOn as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-            });
-        });
-
-        return comments;
-    } catch (error) {
-        console.error("Error fetching comments:", error);
-        return [];
-    }
-}
-
-
 export async function getAllEmails(): Promise<{ email: string; source: string; date: string }[]> {
    if (!adminDb) {
     console.error("Firebase Admin is not initialized. Cannot fetch emails.");
@@ -103,7 +71,7 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
   try {
     const usersSnapshot = await adminDb.collection('users').get();
     const leadsSnapshot = await adminDb.collection('leads').get();
-    const commentsSnapshot = await adminDb.collection('blogComments').get();
+    const commentsSnapshot = await adminDb.collection('comments').get();
 
     const emailMap = new Map<string, { source: string; date: string }>();
 

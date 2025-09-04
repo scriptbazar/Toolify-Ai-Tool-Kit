@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 
 export const CommentStatusSchema = z.enum(['approved', 'pending', 'rejected']);
@@ -8,6 +9,7 @@ export const CommentSchema = z.object({
   id: z.string(),
   authorId: z.string(),
   authorName: z.string(),
+  authorEmail: z.string().email(),
   authorAvatar: z.string().url(),
   comment: z.string(),
   postId: z.string(),
