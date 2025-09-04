@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +26,7 @@ import {
   HardDrive,
   CalendarClock,
   PlusCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -41,9 +42,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDesc,
+  DialogDescription,
   DialogFooter,
-  DialogTrigger,
   DialogClose,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -56,26 +56,17 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { StatCard } from '@/components/common/StatCard';
+import { createBackup, getBackups, deleteBackup, restoreBackup, type BackupInfo } from '@/ai/flows/backup-restore';
 
-type BackupType = 'Full Database' | 'Users Only' | 'Settings Only';
-type BackupStatus = 'Completed' | 'Processing' | 'Failed';
-
-interface Backup {
-  id: string;
-  type: BackupType;
-  date: Date;
-  size: string;
-  status: BackupStatus;
-}
+type BackupType = 'all' | 'users' | 'settings';
 
 const BackupTypeSelector = ({ value, onChange }: { value: BackupType, onChange: (value: BackupType) => void }) => {
   const backupOptions = [
-    { value: 'Full Database' as BackupType, icon: Database, label: 'Full Database', description: 'Backup all collections and documents.' },
-    { value: 'Users Only' as BackupType, icon: Users, label: 'Users Only', description: 'Backup only the users collection.' },
-    { value: 'Settings Only' as BackupType, icon: Settings, label: 'Settings Only', description: 'Backup only the application settings.' },
+    { value: 'all' as BackupType, icon: Database, label: 'Full Database', description: 'Backup all collections and documents.' },
+    { value: 'users' as BackupType, icon: Users, label: 'Users Only', description: 'Backup only the users collection.' },
+    { value: 'settings' as BackupType, icon: Settings, label: 'Settings Only', description: 'Backup only the application settings.' },
   ];
 
   return (
@@ -93,71 +84,89 @@ const BackupTypeSelector = ({ value, onChange }: { value: BackupType, onChange: 
 }
 
 export default function BackupRestorePage() {
-    const [backups, setBackups] = useState<Backup[]>([]);
-    const [selectedBackupType, setSelectedBackupType] = useState<BackupType>('Full Database');
+    const [backups, setBackups] = useState<BackupInfo[]>([]);
+    const [selectedBackupType, setSelectedBackupType] = useState<BackupType>('all');
     const [isCreating, setIsCreating] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
     const { toast } = useToast();
 
-    const handleCreateBackup = () => {
+    const fetchBackups = async () => {
+        setIsLoading(true);
+        try {
+            const backupList = await getBackups();
+            setBackups(backupList);
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message || 'Could not fetch backup history.', variant: 'destructive'});
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchBackups();
+    }, []);
+
+    const handleCreateBackup = async () => {
         setIsCreating(true);
-        const newBackup: Backup = {
-            id: `backup-${Date.now()}`,
-            type: selectedBackupType,
-            date: new Date(),
-            size: '...',
-            status: 'Processing',
-        };
-        
-        let updatedBackups = [newBackup, ...backups];
-        
-        // Auto-delete the oldest backup if the count exceeds 5
-        if (updatedBackups.length > 5) {
-          updatedBackups.pop();
-        }
-
-        setBackups(updatedBackups);
-        setIsCreateModalOpen(false);
-
-        // Simulate backup process
-        setTimeout(() => {
-            setBackups(prev => prev.map(b => 
-                b.id === newBackup.id 
-                ? { ...b, status: 'Completed', size: `${(Math.random() * 20).toFixed(1)} MB` } 
-                : b
-            ));
+        try {
+            const result = await createBackup(selectedBackupType);
+            if (result.success) {
+                toast({
+                    title: 'Backup Started',
+                    description: 'The database backup process has been initiated. It may take a few minutes to complete.',
+                });
+                setTimeout(fetchBackups, 3000); // Re-fetch after a short delay
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error: any) {
+             toast({ title: 'Error', description: error.message || 'Could not start backup process.', variant: 'destructive'});
+        } finally {
             setIsCreating(false);
-            toast({
-                title: 'Backup Created',
-                description: `A new "${selectedBackupType}" backup has been successfully created.`,
-            });
-        }, 2500);
+            setIsCreateModalOpen(false);
+        }
     };
 
-    const handleDeleteBackup = (id: string) => {
-        setBackups(prev => prev.filter(b => b.id !== id));
-        toast({ title: "Backup Deleted", description: "The backup has been removed."});
+    const handleDeleteBackup = async (backupId: string) => {
+        setIsDeleting(backupId);
+        try {
+            const result = await deleteBackup(backupId);
+            if (result.success) {
+                toast({ title: "Backup Deleted", description: "The backup has been successfully removed."});
+                setBackups(prev => prev.filter(b => b.id !== backupId));
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message || 'Could not delete the backup.', variant: 'destructive'});
+        } finally {
+            setIsDeleting(null);
+        }
     };
 
-    const getBackupIcon = (type: BackupType) => {
-        switch(type) {
-            case 'Full Database': return <Database className="h-4 w-4" />;
-            case 'Users Only': return <Users className="h-4 w-4" />;
-            case 'Settings Only': return <Settings className="h-4 w-4" />;
+    const handleRestoreBackup = async (backupId: string) => {
+        try {
+            const result = await restoreBackup(backupId);
+            if (result.success) {
+                toast({ title: 'Restore Started', description: 'Database restore process initiated. This may take several minutes.' });
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error: any) {
+             toast({ title: 'Restore Error', description: error.message || 'Could not start restore process.', variant: 'destructive'});
         }
+    };
+
+    const getBackupIcon = (type: string) => {
+        if (type.includes('users')) return <Users className="h-4 w-4" />;
+        if (type.includes('settings')) return <Settings className="h-4 w-4" />;
+        return <Database className="h-4 w-4" />;
     }
     
-    const getStatusBadge = (status: BackupStatus) => {
-        switch(status) {
-            case 'Completed': return <Badge className="bg-green-500 hover:bg-green-600">Completed</Badge>;
-            case 'Processing': return <Badge variant="secondary" className="bg-yellow-500 hover:bg-yellow-600 text-white"><Loader2 className="mr-1 h-3 w-3 animate-spin"/>Processing</Badge>;
-            case 'Failed': return <Badge variant="destructive">Failed</Badge>;
-        }
-    }
-    
-    const totalStorage = backups.reduce((acc, b) => acc + (parseFloat(b.size) || 0), 0).toFixed(1);
-    const lastBackupDate = backups.length > 0 ? backups[0].date.toLocaleDateString() : "N/A";
+    const lastBackupDate = backups.length > 0 ? new Date(backups[0].updated).toLocaleDateString() : "N/A";
 
   return (
     <div className="space-y-6">
@@ -182,9 +191,12 @@ export default function BackupRestorePage() {
       
        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard title="Total Backups" value={backups.length.toString()} icon={History} />
-          <StatCard title="Total Storage Used" value={`${totalStorage} MB`} icon={HardDrive} />
+          <StatCard title="Total Storage Used" value="N/A" icon={HardDrive} />
           <StatCard title="Last Backup" value={lastBackupDate} icon={CalendarClock} />
-          <StatCard title="Next Scheduled Backup" value="Tomorrow" icon={CalendarClock} />
+          <Button variant="outline" className="h-full" onClick={fetchBackups} disabled={isLoading}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh List
+          </Button>
         </div>
 
        <Card>
@@ -198,32 +210,56 @@ export default function BackupRestorePage() {
               <TableRow>
                 <TableHead>Type</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Size</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {backups.map(backup => (
+              {isLoading && [...Array(3)].map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell colSpan={4}><div className="h-8 bg-muted animate-pulse rounded-md" /></TableCell>
+                  </TableRow>
+              ))}
+              {!isLoading && backups.map(backup => (
                 <TableRow key={backup.id}>
                   <TableCell className="font-medium flex items-center gap-2">
-                    {getBackupIcon(backup.type)}
-                    {backup.type}
+                    {getBackupIcon(backup.id)}
+                    <span className="capitalize">{backup.id.split('_').slice(0, -1).join(' ')}</span>
                   </TableCell>
-                  <TableCell>{backup.date.toLocaleString()}</TableCell>
-                  <TableCell>{backup.size}</TableCell>
-                  <TableCell>{getStatusBadge(backup.status)}</TableCell>
+                  <TableCell>{new Date(backup.updated).toLocaleString()}</TableCell>
+                  <TableCell><Badge>Completed</Badge></TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button size="icon" variant="ghost" disabled={backup.status === 'Processing'}>
-                          <MoreHorizontal className="h-4 w-4" />
+                        <Button size="icon" variant="ghost" disabled={isDeleting === backup.id}>
+                           {isDeleting === backup.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <MoreHorizontal className="h-4 w-4" />}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem disabled>
                            <Download className="mr-2 h-4 w-4" /> Download
                         </DropdownMenuItem>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <UploadCloud className="mr-2 h-4 w-4 text-green-500" /> Restore
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Restore Database?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This will overwrite your entire current database with the selected backup. This action cannot be undone. Are you sure you want to proceed?
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleRestoreBackup(backup.id)}>
+                                        Restore
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                          <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500">
@@ -250,7 +286,7 @@ export default function BackupRestorePage() {
                   </TableCell>
                 </TableRow>
               ))}
-               {backups.length === 0 && (
+               {!isLoading && backups.length === 0 && (
                     <TableRow>
                         <TableCell colSpan={5} className="h-24 text-center">No backups found.</TableCell>
                     </TableRow>
@@ -264,9 +300,9 @@ export default function BackupRestorePage() {
         <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
                 <DialogTitle>Create New Backup</DialogTitle>
-                <DialogDesc>
+                <DialogDescription>
                     Select the type of data you want to back up. The process will run in the background.
-                </DialogDesc>
+                </DialogDescription>
             </DialogHeader>
             <div className="py-6">
               <BackupTypeSelector value={selectedBackupType} onChange={setSelectedBackupType} />
@@ -285,19 +321,15 @@ export default function BackupRestorePage() {
         <DialogContent>
             <DialogHeader>
                 <DialogTitle>Restore from Backup</DialogTitle>
-                <DialogDesc>
-                   Upload a backup file to restore your application data. This action cannot be undone.
-                </DialogDesc>
+                <DialogDescription>
+                   This feature is under development. In a real application, you would upload a backup file here.
+                </DialogDescription>
             </DialogHeader>
             <div className="py-6">
                 <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg">
                     <FileUp className="h-12 w-12 text-muted-foreground mb-4"/>
-                    <p className="text-lg font-medium mb-1">Click to select or drag & drop a file</p>
-                    <p className="text-sm text-muted-foreground">Supported file: .json, .zip</p>
-                    <Button variant="outline" type="button" className="mt-4" onClick={() => toast({ title: "Feature not implemented"})}>
-                       <UploadCloud className="mr-2 h-4 w-4" />
-                       Select File
-                    </Button>
+                    <p className="text-lg font-medium mb-1">Feature Coming Soon</p>
+                    <p className="text-sm text-muted-foreground">Manual restore from file is not yet implemented.</p>
                 </div>
             </div>
         </DialogContent>

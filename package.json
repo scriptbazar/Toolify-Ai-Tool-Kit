@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@google-cloud/firestore": "^7.8.0",
     "@genkit-ai/googleai": "^1.14.1",
     "@genkit-ai/next": "^1.14.1",
     "@hookform/resolvers": "^3.9.0",
@@ -69,4 +70,3 @@
     "typescript": "^5"
   }
 }
-
