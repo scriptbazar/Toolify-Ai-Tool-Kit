@@ -73,7 +73,7 @@ export async function getComments(): Promise<Comment[]> {
       return [];
     }
     try {
-        const snapshot = await adminDb.collection('blogComments').orderBy('submittedOn', 'desc').get();
+        const snapshot = await adminDb.collection('comments').orderBy('submittedOn', 'desc').get();
         if (snapshot.empty) {
             return [];
         }
