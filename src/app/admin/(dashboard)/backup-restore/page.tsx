@@ -71,11 +71,6 @@ interface Backup {
   status: BackupStatus;
 }
 
-const initialBackups: Backup[] = [
-  { id: 'backup-1', type: 'Full Database', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), size: '15.2 MB', status: 'Completed' },
-  { id: 'backup-2', type: 'Settings Only', date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), size: '1.1 MB', status: 'Completed' },
-];
-
 const BackupTypeSelector = ({ value, onChange }: { value: BackupType, onChange: (value: BackupType) => void }) => {
   const backupOptions = [
     { value: 'Full Database' as BackupType, icon: Database, label: 'Full Database', description: 'Backup all collections and documents.' },
@@ -98,7 +93,7 @@ const BackupTypeSelector = ({ value, onChange }: { value: BackupType, onChange: 
 }
 
 export default function BackupRestorePage() {
-    const [backups, setBackups] = useState<Backup[]>(initialBackups);
+    const [backups, setBackups] = useState<Backup[]>([]);
     const [selectedBackupType, setSelectedBackupType] = useState<BackupType>('Full Database');
     const [isCreating, setIsCreating] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -114,7 +109,15 @@ export default function BackupRestorePage() {
             size: '...',
             status: 'Processing',
         };
-        setBackups(prev => [newBackup, ...prev]);
+        
+        let updatedBackups = [newBackup, ...backups];
+        
+        // Auto-delete the oldest backup if the count exceeds 5
+        if (updatedBackups.length > 5) {
+          updatedBackups.pop();
+        }
+
+        setBackups(updatedBackups);
         setIsCreateModalOpen(false);
 
         // Simulate backup process
