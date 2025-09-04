@@ -35,7 +35,7 @@ export default function ToolUsagePage() {
             }
         }
         fetchData();
-    }, []);
+    }, [toast]);
     
     const chartData = useMemo(() => {
         return stats.slice(0, 10).sort((a,b) => a.count - b.count); // For horizontal bar chart, sort ascending
