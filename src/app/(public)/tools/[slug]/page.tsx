@@ -523,7 +523,55 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         features: ['Reduce File Size: Significantly compress video files without major quality loss.', 'Adjustable Quality: Choose from different compression presets.', 'See Estimated Size: Get an estimate of the output file size before you start.', 'Supports MP4, MOV, and other popular formats.'],
         howTo: ['Upload your large video file.', 'Select a compression level (e.g., High Quality, Medium Size).', 'Click "Compress Video".', 'Download the smaller, optimized video file.'],
         why: 'Make your videos easier to share, upload, and store. Compressed videos use less bandwidth, upload faster to social media, and are easier to send via email or messaging apps.'
-    }
+    },
+    'add-watermark-to-video': {
+      title: '✨ About the Add Watermark to Video Tool',
+      features: ['Text and Image Watermarks.', 'Customizable opacity, position, and size.', 'Preview watermark before applying.', 'Supports various video formats.'],
+      howTo: ['Upload your video.', 'Choose a text or image watermark.', 'Customize its appearance and position.', 'Click "Add Watermark" and download.'],
+      why: 'Protect your video content and brand your creations before sharing them online.'
+    },
+    'mute-video': {
+      title: '✨ About the Mute Video Tool',
+      features: ['Completely remove audio from any video.', 'Fast processing.', 'Supports MP4, MOV, AVI, and more.', 'Simple one-click operation.'],
+      howTo: ['Upload your video file.', 'Click the "Mute Video" button.', 'Download the video without sound.'],
+      why: 'Perfect for creating silent clips for presentations, social media stories, or when you only need the visual content.'
+    },
+    'video-to-mp3': {
+      title: '✨ About the Video to MP3 Tool',
+      features: ['Extract audio from video files.', 'High-quality MP3 output.', 'Supports a wide range of video formats.', 'Fast and easy to use.'],
+      howTo: ['Upload your video.', 'The tool will automatically extract the audio.', 'Click "Download MP3" to save the audio file.'],
+      why: 'Easily convert video podcasts, music videos, or lectures into audio files that you can listen to on the go.'
+    },
+    'resize-video': {
+      title: '✨ About the Resize Video Tool',
+      features: ['Resize video dimensions.', 'Presets for social media (e.g., Instagram Story, YouTube).', 'Custom resolution input.', 'Maintain aspect ratio option.'],
+      howTo: ['Upload your video.', 'Choose a preset or enter custom dimensions.', 'Click "Resize Video".', 'Download the resized video file.'],
+      why: 'Optimize your videos for different platforms and devices, ensuring they look perfect everywhere.'
+    },
+    'trim-video': {
+      title: '✨ About the Trim Video Tool',
+      features: ['Cut videos by setting start and end times.', 'Precise frame-by-frame trimming.', 'Interactive timeline preview.', 'Fast processing without re-encoding.'],
+      howTo: ['Upload your video.', 'Drag the handles on the timeline to select the desired part.', 'Click "Trim Video" to process.', 'Download your shortened video clip.'],
+      why: 'Remove unwanted parts from your videos and create shorter, more impactful clips for sharing.'
+    },
+    'rotate-video': {
+      title: '✨ About the Rotate Video Tool',
+      features: ['Rotate video by 90, 180, or 270 degrees.', 'Fix videos recorded in the wrong orientation.', 'Simple and intuitive interface.', 'Supports all major video formats.'],
+      howTo: ['Upload your video.', 'Click the rotate buttons until it\'s correctly oriented.', 'Click "Save Video" to download.'],
+      why: 'A lifesaver for fixing videos that were accidentally shot vertically instead of horizontally, or vice versa.'
+    },
+    'loop-video': {
+      title: '✨ About the Loop Video Tool',
+      features: ['Create seamlessly looping videos.', 'Set the loop count (e.g., 2x, 5x, infinite).', 'Perfect for creating short, eye-catching clips.', 'Download as a video or GIF.'],
+      howTo: ['Upload a short video clip.', 'Choose how many times you want it to loop.', 'Click "Create Loop".', 'Download the resulting looped video.'],
+      why: 'Grab attention on social media with perfectly looped videos, similar to Instagram\'s Boomerang effect.'
+    },
+    'video-subtitle-extractor': {
+      title: '✨ About the Video Subtitle Extractor',
+      features: ['Extracts embedded subtitles from video files.', 'Supports common subtitle formats (SRT, VTT).', 'Outputs a plain text or formatted subtitle file.', 'Works with MP4, MKV files.'],
+      howTo: ['Upload your video file.', 'The tool will detect and extract any embedded subtitle tracks.', 'Choose your desired format and download.'],
+      why: 'Get a transcript of your videos or re-purpose subtitle content without manual transcription.'
+    },
   }
 
   const toolDesc = detailedDescriptions[tool.slug];
@@ -534,14 +582,12 @@ export default async function ToolPage({ params }: { params: { slug: string } })
       <div className="flex flex-col lg:flex-row lg:gap-8">
         <div className="flex-1">
           <Card>
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <Icon className="h-8 w-8 text-primary" />
-                <CardTitle className="text-3xl font-bold">{tool.name}</CardTitle>
-              </div>
+            <CardHeader className="flex-col items-center">
+              <Icon className="h-10 w-10 text-primary" />
+              <CardTitle className="text-3xl font-bold mt-2">{tool.name}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-6">{tool.description}</p>
+              <p className="text-muted-foreground mb-6 text-center">{tool.description}</p>
               
               <div className="min-h-[300px] rounded-lg bg-muted/50 p-4 sm:p-8">
                 {ToolComponent ? <ToolComponent /> : (
