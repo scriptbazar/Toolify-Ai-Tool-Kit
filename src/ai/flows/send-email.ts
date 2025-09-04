@@ -37,15 +37,13 @@ const SupportTicketEmailSchema = z.object({
 export type SupportTicketEmailInput = z.infer<typeof SupportTicketEmailSchema>;
 
 export const EmailStatusSchema = z.enum(['sent', 'opened', 'clicked', 'unsubscribed', 'failed', 'blocked']);
-
-const EmailLogSchema = z.object({
-  id: z.string(),
-  recipient: z.string(),
-  subject: z.string(),
-  status: EmailStatusSchema,
-  date: z.string(),
-});
-export type EmailLog = z.infer<typeof EmailLogSchema>;
+export type EmailLog = {
+    id: string;
+    recipient: string;
+    subject: string;
+    status: 'sent' | 'opened' | 'clicked' | 'unsubscribed' | 'failed' | 'blocked';
+    date: string;
+};
 
 
 async function logEmail(recipient: string, subject: string, status: EmailLog['status']) {
@@ -67,8 +65,6 @@ export async function getEmailLog(): Promise<EmailLog[]> {
         return snapshot.docs.map(doc => {
             const data = doc.data();
             const date = (data.date as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
-            // Directly cast to EmailLog, assuming data from Firestore is valid.
-            // This avoids Zod parsing errors if new statuses are added without updating the schema here.
             return {
               id: doc.id,
               recipient: data.recipient,
@@ -141,4 +137,3 @@ export const sendSupportTicketConfirmationEmail = ai.defineFlow(
         return sendEmail(to, subject, body, true);
     }
 );
-
