@@ -22,6 +22,7 @@ const defaultFaqSettings = {
     contactFaqs: [],
     pricingFaqs: [],
     affiliateFaqs: [],
+    requestToolFaqs: [],
 };
 
 

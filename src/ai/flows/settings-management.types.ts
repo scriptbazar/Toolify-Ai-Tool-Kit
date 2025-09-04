@@ -256,6 +256,7 @@ export const FaqSettingsSchema = z.object({
   contactFaqs: z.array(FaqItemSchema).optional(),
   pricingFaqs: z.array(FaqItemSchema).optional(),
   affiliateFaqs: z.array(FaqItemSchema).optional(),
+  requestToolFaqs: z.array(FaqItemSchema).optional(),
 });
 export type FaqSettings = z.infer<typeof FaqSettingsSchema>;
 

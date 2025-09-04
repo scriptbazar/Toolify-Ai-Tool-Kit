@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -40,11 +41,17 @@ const FaqManagementFormSchema = z.object({
       question: z.string().min(1, "Question is required."),
       answer: z.string().min(1, "Answer is required."),
   })).optional(),
+  requestToolFaqs: z.array(z.object({
+      id: z.string(),
+      icon: z.enum(iconNames),
+      question: z.string().min(1, "Question is required."),
+      answer: z.string().min(1, "Answer is required."),
+  })).optional(),
 });
 
 type FaqManagementFormValues = z.infer<typeof FaqManagementFormSchema>;
 
-const FaqArrayEditor = ({ form, name, title }: { form: any, name: "contactFaqs" | "pricingFaqs" | "affiliateFaqs", title: string }) => {
+const FaqArrayEditor = ({ form, name, title }: { form: any, name: "contactFaqs" | "pricingFaqs" | "affiliateFaqs" | "requestToolFaqs", title: string }) => {
     const { control } = form;
     const { fields, append, remove } = useFieldArray({
         control,
@@ -154,6 +161,7 @@ export default function FaqManagementPage() {
             contactFaqs: [],
             pricingFaqs: [],
             affiliateFaqs: [],
+            requestToolFaqs: [],
         },
     });
 
@@ -225,10 +233,11 @@ export default function FaqManagementPage() {
                 </div>
                 
                  <Tabs defaultValue="contact">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
                         <TabsTrigger value="contact">Contact Us Page</TabsTrigger>
                         <TabsTrigger value="pricing">Pricing Page</TabsTrigger>
                         <TabsTrigger value="affiliate">Affiliate Page</TabsTrigger>
+                        <TabsTrigger value="requestTool">Request Tool Page</TabsTrigger>
                     </TabsList>
                     <TabsContent value="contact" className="mt-6">
                         <FaqArrayEditor form={form} name="contactFaqs" title="Contact Us Page FAQs" />
@@ -238,6 +247,9 @@ export default function FaqManagementPage() {
                     </TabsContent>
                      <TabsContent value="affiliate" className="mt-6">
                         <FaqArrayEditor form={form} name="affiliateFaqs" title="Affiliate Program FAQs" />
+                    </TabsContent>
+                     <TabsContent value="requestTool" className="mt-6">
+                        <FaqArrayEditor form={form} name="requestToolFaqs" title="Request a Tool Page FAQs" />
                     </TabsContent>
                  </Tabs>
             </form>
