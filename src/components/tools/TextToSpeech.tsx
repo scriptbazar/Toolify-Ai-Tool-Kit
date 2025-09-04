@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Volume2, Loader2, PlayCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { textToSpeech } from '@/ai/flows/text-to-speech';
 
 export function TextToSpeech() {
   const [text, setText] = useState('');
@@ -21,11 +22,13 @@ export function TextToSpeech() {
     }
     setIsLoading(true);
     setAudioUrl(null);
-    // This would be a call to an AI flow in a real app
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    // const result = await textToSpeechFlow({ text });
-    // setAudioUrl(result.audioDataUri);
-    toast({ title: 'Audio generation is not implemented yet.' });
+    try {
+      const result = await textToSpeech({ text });
+      setAudioUrl(result.audioDataUri);
+    } catch (error: any) {
+      console.error("Text to speech error:", error);
+      toast({ title: 'Error generating audio', description: 'Could not generate audio. Please try again.', variant: 'destructive' });
+    }
     setIsLoading(false);
   };
 

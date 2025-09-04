@@ -7,7 +7,7 @@
  */
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { PostSchema, type Post, CommentSchema, type Comment, CategorySchema, type Category } from './blog-management.types';
+import { PostSchema, type Post, CommentSchema, type Comment, CategorySchema, type Category, CommentStatusSchema } from './blog-management.types';
 
 const POSTS_COLLECTION = 'blogPosts';
 const COMMENTS_COLLECTION = 'comments';
@@ -75,6 +75,28 @@ export async function getComments(): Promise<Comment[]> {
         console.error("Error fetching comments:", error);
         return [];
     }
+}
+
+/**
+ * Updates the status of a blog comment.
+ * @param {string} commentId - The ID of the comment to update.
+ * @param {CommentStatus} status - The new status ('approved' or 'rejected').
+ * @returns {Promise<{ success: boolean; message: string }>} Result of the operation.
+ */
+export async function updateCommentStatus(commentId: string, status: 'approved' | 'rejected' | 'pending'): Promise<{ success: boolean; message: string }> {
+  if (!adminDb) {
+    return { success: false, message: 'Database not initialized.' };
+  }
+  try {
+    const validatedStatus = CommentStatusSchema.parse(status);
+    await adminDb.collection(COMMENTS_COLLECTION).doc(commentId).update({
+      status: validatedStatus,
+    });
+    return { success: true, message: `Comment status updated to ${validatedStatus}.` };
+  } catch (error: any) {
+    console.error(`Error updating comment ${commentId}:`, error);
+    return { success: false, message: error.message || 'An unknown error occurred.' };
+  }
 }
 
 /**
