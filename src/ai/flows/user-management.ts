@@ -101,9 +101,9 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
     return [];
   }
   try {
-    const usersSnapshot = await getDocs(adminDb.collection('users'));
-    const leadsSnapshot = await getDocs(adminDb.collection('leads'));
-    const commentsSnapshot = await getDocs(adminDb.collection('blogComments'));
+    const usersSnapshot = await adminDb.collection('users').get();
+    const leadsSnapshot = await adminDb.collection('leads').get();
+    const commentsSnapshot = await adminDb.collection('blogComments').get();
 
     const emailMap = new Map<string, { source: string; date: string }>();
 
@@ -114,15 +114,11 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
       
       if (!email || typeof email !== 'string') return;
 
-      // Signup users take precedence. If a lead/commenter signs up, their source becomes 'Signup'.
-      if (emailMap.has(email) && emailMap.get(email)!.source === 'Signup') {
-        return;
-      }
-
-      // If a lead comments, they're still a lead. Signup is the highest precedence.
-      if (emailMap.has(email) && emailMap.get(email)!.source === 'Lead' && source === 'Comment') {
-        return;
-      }
+      // If an email already exists from a "higher" source, don't overwrite it.
+      // Precedence: Signup > Lead > Comment
+      const existingSource = emailMap.get(email)?.source;
+      if (existingSource === 'Signup') return;
+      if (existingSource === 'Lead' && source === 'Comment') return;
       
       const timestamp = data.createdAt || data.submittedOn;
       let dateString: string;
