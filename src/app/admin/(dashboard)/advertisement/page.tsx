@@ -58,6 +58,7 @@ export default function AdvertisementPage() {
   const [settings, setSettings] = useState<AdvertisementSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [openCollapsible, setOpenCollapsible] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -91,6 +92,10 @@ export default function AdvertisementPage() {
     }
     fetchSettings();
   }, [toast]);
+  
+  const handleToggle = (id: string) => {
+    setOpenCollapsible(prevId => (prevId === id ? null : id));
+  };
 
   const handleManualAdSlotChange = (id: string, code: string) => {
     if (!settings) return;
@@ -227,17 +232,25 @@ export default function AdvertisementPage() {
             <CardHeader>
             <CardTitle className="flex items-center gap-2"><Edit/>Manual Ad Slots</CardTitle>
             <CardDescription>
-                Place specific ads in predefined locations by pasting your ad code.
+                Place specific ads in predefined locations by pasting your ad code. Click on a group to expand and edit.
             </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {defaultManualAdSlots.map(group => (
-                <Collapsible key={group.group} className="space-y-2">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 font-semibold [&[data-state=open]>svg]:rotate-180">
+                <Collapsible
+                  key={group.group}
+                  open={openCollapsible === group.group}
+                  onOpenChange={() => handleToggle(group.group)}
+                  className={cn(
+                    "space-y-2 transition-all duration-300",
+                    openCollapsible === group.group && "md:col-span-2"
+                  )}
+                >
+                  <CollapsibleTrigger className="flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 font-semibold hover:bg-muted/50 [&[data-state=open]>svg]:rotate-180">
                       <span>{group.group} Slots</span>
                       <ChevronDown className="h-4 w-4 transition-transform duration-200" />
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-4 p-4 pt-0">
+                  <CollapsibleContent className="space-y-4 p-4 pt-2 -mt-2 border-x border-b rounded-b-lg">
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                         {group.slots.map(slot => (
                           <div key={slot.id} className="space-y-2">
