@@ -172,7 +172,7 @@ export default function EditToolPage() {
                             <CardDescription>Provide the core information for your tool.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <FormField control={form.control} name="name" render={({ field }) => (
                                     <FormItem><FormLabel>Tool Name</FormLabel><FormControl><Input {...field} placeholder="e.g., Case Converter" /></FormControl><FormMessage /></FormItem>
                                 )} />
@@ -189,28 +189,24 @@ export default function EditToolPage() {
                                         <FormMessage />
                                     </FormItem>
                                 )} />
+                                <FormField control={form.control} name="icon" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Icon</FormLabel>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-10 h-10 flex items-center justify-center rounded-lg border bg-muted">
+                                                <IconComponent className="h-5 w-5 text-muted-foreground" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <FormControl>
+                                                    <Input {...field} placeholder="e.g., 'FileText'" />
+                                                </FormControl>
+                                            </div>
+                                        </div>
+                                    </FormItem>
+                                )} />
                             </div>
                             <FormField control={form.control} name="description" render={({ field }) => (
                                 <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} placeholder="A short description of what this tool does." /></FormControl><FormMessage /></FormItem>
-                            )} />
-                            <FormField control={form.control} name="icon" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Icon</FormLabel>
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-16 h-16 flex items-center justify-center rounded-lg border bg-muted">
-                                            <IconComponent className="h-8 w-8 text-muted-foreground" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <FormControl>
-                                                <Input {...field} placeholder="Enter a Lucide icon name (e.g., 'FileText')" />
-                                            </FormControl>
-                                            <p className="text-xs text-muted-foreground mt-1">
-                                                Browse icons at <a href="https://lucide.dev/icons/" target="_blank" rel="noopener noreferrer" className="text-primary underline">lucide.dev</a>. Use the exact name (e.g., 'CaseSensitive').
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
                             )} />
                         </CardContent>
                     </Card>
