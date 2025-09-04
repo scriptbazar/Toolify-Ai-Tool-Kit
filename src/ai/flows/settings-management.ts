@@ -22,7 +22,68 @@ const defaultFaqSettings = {
     contactFaqs: [],
     pricingFaqs: [],
     affiliateFaqs: [],
-    requestToolFaqs: [],
+    requestToolFaqs: [
+      {
+        id: 'faq_req_1',
+        icon: 'Send' as const,
+        question: 'How do I request a new tool?',
+        answer: 'It\'s simple! Just fill out the form with your name, email, the name of the tool you\'d like, and a brief description of what it should do. You can even use our AI to help generate the description. Once you\'re done, click "Submit Request".'
+      },
+      {
+        id: 'faq_req_2',
+        icon: 'Workflow' as const,
+        question: 'What happens after I submit a request?',
+        answer: 'Our team reviews every request to assess its feasibility, usefulness, and potential impact. If your idea is selected, it will be added to our development pipeline. We prioritize tools that are in high demand and align with our platform\'s goals.'
+      },
+      {
+        id: 'faq_req_3',
+        icon: 'Clock' as const,
+        question: 'How long does it take for a requested tool to be developed?',
+        answer: 'The development time varies based on the tool\'s complexity. A simple tool might take a few weeks, while a more complex one could take several months. We focus on quality and can\'t always provide a fixed timeline.'
+      },
+      {
+        id: 'faq_req_4',
+        icon: 'CircleDollarSign' as const,
+        question: 'Is there a fee for requesting or using a new tool?',
+        answer: 'Requesting a tool is completely free! We value our community\'s input. Once a tool is developed, it will be available on our platform under either a Free or Pro plan, depending on its features.'
+      },
+      {
+        id: 'faq_req_5',
+        icon: 'Mail' as const,
+        question: 'Will I be notified about the status of my request?',
+        answer: 'Yes! If your tool request is chosen for development, we will notify you via the email you provided. You\'ll also receive an update when the tool goes live on our platform.'
+      },
+      {
+        id: 'faq_req_6',
+        icon: 'Lightbulb' as const,
+        question: 'What kind of tools can I request?',
+        answer: 'You can request any kind of online utility that you believe would be a valuable addition. Whether it\'s for text manipulation, image editing, development, or an AI-powered feature, we\'re open to all innovative ideas.'
+      },
+      {
+        id: 'faq_req_7',
+        icon: 'Sparkles' as const,
+        question: 'Do I get any credit if my tool idea is selected?',
+        answer: 'We love to recognize our community contributors! With your permission, we often feature a "Suggested by" credit on the tool\'s page. We may also offer you a special discount on our Pro plan as a thank you.'
+      },
+      {
+        id: 'faq_req_8',
+        icon: 'PlusCircle' as const,
+        question: 'Can I submit more than one tool request?',
+        answer: 'Absolutely! Feel free to submit as many ideas as you have. Please use a separate form for each request so we can track each idea effectively.'
+      },
+      {
+        id: 'faq_req_9',
+        icon: 'MessageSquare' as const,
+        question: 'How is this different from creating a support ticket?',
+        answer: 'Requesting a tool is for new ideas and features that don\'t exist yet. A support ticket is for reporting issues with existing tools or for help with your account.'
+      },
+      {
+        id: 'faq_req_10',
+        icon: 'Users' as const,
+        question: 'What if someone else has already requested the same tool?',
+        answer: 'That often happens, and it helps us know that the tool is in high demand! We track all requests. If the tool is built, we do our best to notify everyone who initially suggested it.'
+      }
+    ],
 };
 
 
