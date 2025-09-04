@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { LogIn, Menu, UserPlus, Home, LayoutGrid, Newspaper, Info, Mail, DollarSign, MessageSquare, User, LayoutDashboard, LogOut as LogoutIcon, ShieldCheck } from 'lucide-react';
+import { LogIn, Menu, UserPlus, Home, LayoutGrid, Newspaper, Info, Mail, DollarSign, MessageSquare, User, LayoutDashboard, LogOut as LogoutIcon, ShieldCheck, Lightbulb } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname, useRouter } from 'next/navigation';
 import { Logo } from './Logo';
@@ -20,9 +20,8 @@ import { doc, getDoc } from 'firebase/firestore';
 
 const mainNavLinks = [
   { href: '/', label: 'Home', icon: Home },
-  { href: '/#features', label: 'Features', icon: LayoutGrid },
   { href: '/blog', label: 'Blog', icon: Newspaper },
-  { href: '/about-us', label: 'About Us', icon: Info },
+  { href: '/request-a-tool', label: 'Request a Tool', icon: Lightbulb },
   { href: '/contact-us', label: 'Contact Us', icon: Mail },
   { href: '/pricing', label: 'Pricing', icon: DollarSign },
 ];

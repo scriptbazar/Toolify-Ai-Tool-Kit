@@ -19,3 +19,14 @@ export type Tool = z.infer<typeof ToolSchema>;
 
 export const UpsertToolInputSchema = ToolSchema.omit({ id: true, slug: true });
 export type UpsertToolInput = z.infer<typeof UpsertToolInputSchema>;
+
+export const ToolRequestSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+  toolName: z.string(),
+  description: z.string(),
+  status: z.enum(['pending', 'approved', 'rejected']),
+  requestedAt: z.string().datetime(),
+});
+export type ToolRequest = z.infer<typeof ToolRequestSchema>;

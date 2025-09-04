@@ -6,9 +6,12 @@
  */
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
-import { type Tool, ToolSchema, UpsertToolInputSchema } from './tool-management.types';
+import { type Tool, ToolSchema, UpsertToolInputSchema, type ToolRequest, ToolRequestSchema } from './tool-management.types';
+import { ai } from '@/ai/genkit';
+import { z } from 'zod';
 
 const TOOLS_COLLECTION = 'tools';
+const TOOL_REQUESTS_COLLECTION = 'toolRequests';
 
 const initialTools: Omit<Tool, 'id' | 'slug'>[] = [
     // Text Tools (10)
@@ -252,4 +255,70 @@ export async function getFavoriteTools(userId: string): Promise<Tool[]> {
   }
 }
 
+const RequestToolInputSchema = ToolRequestSchema.pick({
+    name: true,
+    email: true,
+    toolName: true,
+    description: true,
+});
+type RequestToolInput = z.infer<typeof RequestToolInputSchema>;
+
+export async function requestNewTool(input: RequestToolInput): Promise<{ success: boolean; message: string }> {
+    if (!adminDb) {
+        return { success: false, message: "Database not initialized." };
+    }
+    try {
+        const validatedInput = RequestToolInputSchema.parse(input);
+        await adminDb.collection(TOOL_REQUESTS_COLLECTION).add({
+            ...validatedInput,
+            status: 'pending',
+            requestedAt: FieldValue.serverTimestamp(),
+        });
+        return { success: true, message: "Your tool request has been submitted successfully!" };
+    } catch (error: any) {
+        console.error("Error submitting tool request:", error);
+        return { success: false, message: error.message || 'An unknown error occurred.' };
+    }
+}
+
+const GenerateToolDescInputSchema = z.object({
+  toolName: z.string().describe('The name of the tool for which to generate a description.'),
+});
+
+const GenerateToolDescOutputSchema = z.object({
+  description: z.string().describe('The AI-generated description of the tool.'),
+});
+
+export async function generateToolDescription(input: z.infer<typeof GenerateToolDescInputSchema>): Promise<z.infer<typeof GenerateToolDescOutputSchema>> {
+  return generateToolDescriptionFlow(input);
+}
+
+const generateToolDescPrompt = ai.definePrompt({
+  name: 'generateToolDescriptionPrompt',
+  input: { schema: GenerateToolDescInputSchema },
+  output: { schema: GenerateToolDescOutputSchema },
+  prompt: `You are an expert at writing clear and concise descriptions for web tools.
+A user has requested a new tool. Based on the tool's name, generate a helpful and engaging description for it.
+Explain what the tool does and who it might be useful for. Keep it to one or two sentences.
+
+Tool Name: {{{toolName}}}
+
+Generated Description:`,
+});
+
+const generateToolDescriptionFlow = ai.defineFlow(
+  {
+    name: 'generateToolDescriptionFlow',
+    inputSchema: GenerateToolDescInputSchema,
+    outputSchema: GenerateToolDescOutputSchema,
+  },
+  async (input) => {
+    const { output } = await generateToolDescPrompt(input);
+    if (!output) {
+      throw new Error('Failed to generate tool description.');
+    }
+    return output;
+  }
+);
     
+
