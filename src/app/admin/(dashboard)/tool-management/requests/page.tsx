@@ -16,6 +16,8 @@ import {
   ThumbsUp,
   ThumbsDown,
   XCircle,
+  ArrowLeft,
+  ArrowRight
 } from 'lucide-react';
 import {
     DropdownMenu,
@@ -29,6 +31,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
 type FilterType = 'all' | 'pending' | 'approved' | 'rejected';
+
+const REQUESTS_PER_PAGE = 5;
 
 const getStatusBadge = (status: FilterType) => {
   switch (status) {
@@ -48,6 +52,7 @@ export default function ToolRequestsPage() {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
   const fetchRequests = async () => {
@@ -90,6 +95,14 @@ export default function ToolRequestsPage() {
         return filterMatch && searchMatch;
     });
   }, [requests, activeFilter, searchQuery]);
+  
+  const paginatedRequests = useMemo(() => {
+    const startIndex = (currentPage - 1) * REQUESTS_PER_PAGE;
+    return filteredRequests.slice(startIndex, startIndex + REQUESTS_PER_PAGE);
+  }, [filteredRequests, currentPage]);
+
+  const totalPages = Math.ceil(filteredRequests.length / REQUESTS_PER_PAGE);
+
 
   const tabs: { id: FilterType; label: string; count: number }[] = [
     { id: 'all', label: 'All', count: requests.length },
@@ -118,7 +131,7 @@ export default function ToolRequestsPage() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
               {tabs.map(tab => (
-                <Button key={tab.id} variant={activeFilter === tab.id ? 'default' : 'outline'} onClick={() => setActiveFilter(tab.id)} className="shrink-0">
+                <Button key={tab.id} variant={activeFilter === tab.id ? 'default' : 'outline'} onClick={() => { setActiveFilter(tab.id); setCurrentPage(1); }} className="shrink-0">
                   {tab.label} ({tab.count})
                 </Button>
               ))}
@@ -128,7 +141,7 @@ export default function ToolRequestsPage() {
               <Input
                 placeholder="Search requests..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 className="pl-9 w-full sm:w-64"
               />
             </div>
@@ -149,8 +162,8 @@ export default function ToolRequestsPage() {
                 {loading && [...Array(5)].map((_, i) => (
                   <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-10 w-full" /></TableCell></TableRow>
                 ))}
-                {!loading && filteredRequests.length > 0 ? (
-                  filteredRequests.map(req => (
+                {!loading && paginatedRequests.length > 0 ? (
+                  paginatedRequests.map(req => (
                     <TableRow key={req.id}>
                       <TableCell>{req.name}</TableCell>
                       <TableCell className="font-medium">{req.toolName}</TableCell>
@@ -176,6 +189,29 @@ export default function ToolRequestsPage() {
               </TableBody>
             </Table>
           </div>
+           {totalPages > 1 && (
+            <div className="flex items-center justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
