@@ -22,38 +22,7 @@ const defaultFaqSettings = {
     contactFaqs: [],
     pricingFaqs: [],
     affiliateFaqs: [],
-    requestToolFaqs: [
-      {
-        id: 'faq_req_1',
-        icon: 'Send' as const,
-        question: 'What happens after I submit a tool request?',
-        answer: "Our product team reviews all suggestions to see if they align with our goals and would benefit our community. While we can't build every request, we appreciate every idea!",
-      },
-      {
-        id: 'faq_req_2',
-        icon: 'Clock' as const,
-        question: 'How long does it take to build a new tool?',
-        answer: "Development time varies based on the tool's complexity. It can range from a few days for simple utilities to several weeks for more advanced tools. We prioritize requests based on user demand and feasibility.",
-      },
-      {
-        id: 'faq_req_3',
-        icon: 'Mail' as const,
-        question: 'Will I be notified if my tool is developed?',
-        answer: "Yes! If we decide to build your suggested tool, we will notify you via email when it's launched. We might even give you a special shoutout in our announcements (with your permission, of course!).",
-      },
-      {
-        id: 'faq_req_4',
-        icon: 'Cpu' as const,
-        question: 'Can I request an AI-powered tool?',
-        answer: "Absolutely! We love building cutting-edge AI tools. Please be as descriptive as possible about what the AI should do, what inputs it needs, and what kind of output you expect.",
-      },
-      {
-        id: 'faq_req_5',
-        icon: 'MessageSquare' as const,
-        question: 'What if I have feedback on an existing tool?',
-        answer: "We'd love to hear it! Please use the 'Contact Us' page or the support ticket system in your dashboard to provide feedback on existing tools. This helps us make our current tools even better.",
-      },
-    ],
+    requestToolFaqs: [],
 };
 
 
