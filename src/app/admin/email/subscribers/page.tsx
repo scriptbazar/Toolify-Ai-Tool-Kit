@@ -123,7 +123,6 @@ export default function SubscribersPage() {
                <Button 
                 variant={activeFilter === 'Comment' ? 'default' : 'outline'}
                 onClick={() => setActiveFilter('Comment')}
-                disabled // Disabled until backend support is added
                 >
                 <MessageSquare className="h-4 w-4" />
                 Comment Subscribers ({counts.Comment})
@@ -136,7 +135,7 @@ export default function SubscribersPage() {
                   placeholder="Search by email..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-9 w-full sm:w-64"
+                  className="pl-9 w-full sm:w-52"
                 />
               </div>
             </div>
