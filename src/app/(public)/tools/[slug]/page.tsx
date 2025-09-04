@@ -11,6 +11,7 @@ import { TextToSpeech } from '@/components/tools/TextToSpeech';
 import { PdfMerger } from '@/components/tools/PdfMerger';
 import { UnitConverter } from '@/components/tools/UnitConverter';
 import { ColorPicker } from '@/components/tools/ColorPicker';
+import { TextRepeater } from '@/components/tools/TextRepeater';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -41,6 +42,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'pdf-merger': PdfMerger,
   'unit-converter': UnitConverter,
   'color-picker': ColorPicker,
+  'text-repeater': TextRepeater,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
@@ -74,6 +76,44 @@ export default async function ToolPage({ params }: { params: { slug: string } })
   const popularTools = allTools.filter(t => t.status === 'Active' && t.slug !== tool.slug).slice(0, 10);
   const recentPosts = (await getPosts()).filter(p => p.status === 'Published').slice(0, 10);
 
+  const detailedDescriptions: Record<string, { title: string; features: string[]; howTo: string[]; why: string; }> = {
+     'case-converter': {
+        title: '✨ About the Case Converter Tool',
+        features: [
+          '<strong>Sentence case:</strong> Automatically capitalizes the first letter of each sentence.',
+          '<strong>lowercase:</strong> Converts all characters in your text to their lowercase equivalents.',
+          '<strong>UPPERCASE:</strong> Transforms all characters into their uppercase form.',
+          '<strong>Title Case:</strong> Capitalizes the first letter of every word.',
+          '<strong>Word & Character Count:</strong> Get a real-time count of words and characters.',
+        ],
+        howTo: [
+          '<strong>Enter Text:</strong> Type or paste the text into the text area.',
+          '<strong>Choose Conversion:</strong> Click one of the conversion buttons.',
+          '<strong>Copy Result:</strong> Use the copy button to grab your formatted text.',
+        ],
+        why: "Our Case Converter provides a clean, intuitive interface that ensures a seamless user experience. With its variety of conversion options, you can format your text exactly how you need it in seconds.",
+    },
+    'text-repeater': {
+        title: '✨ About the Text Repeater Tool',
+        features: [
+            '<strong>Repeat Text:</strong> Enter any text or string you want to duplicate.',
+            '<strong>Set Repetition Count:</strong> Specify exactly how many times the text should be repeated.',
+            '<strong>Add New Lines:</strong> Choose to add a line break after each repetition for clear formatting.',
+            '<strong>Instant Results:</strong> Get your repeated text instantly in the output box.',
+            '<strong>One-Click Copy:</strong> Easily copy the entire generated text to your clipboard.',
+        ],
+        howTo: [
+            '<strong>Enter Text:</strong> Type or paste the text you want to repeat.',
+            '<strong>Specify Count:</strong> Enter the number of times to repeat the text.',
+            '<strong>Choose Formatting:</strong> Check the "Add new line" box if you want each repetition on a new line.',
+            '<strong>Generate:</strong> Click the "Repeat Text" button to see the result.',
+            '<strong>Copy:</strong> Use the copy button to take your result.',
+        ],
+        why: "Whether you're a developer testing data, a marketer creating bulk content, or just having some fun, the Text Repeater tool saves you manual effort and time. It's fast, simple, and effective.",
+    },
+  }
+
+  const toolDesc = detailedDescriptions[tool.slug];
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -101,29 +141,20 @@ export default async function ToolPage({ params }: { params: { slug: string } })
               </div>
               <AdPlaceholder adSlotId="toolpage-in-description" adSettings={settings.advertisement ?? null} className="my-6" />
 
-              {tool.slug === 'case-converter' && (
+              {toolDesc && (
                 <div className="prose prose-sm dark:prose-invert max-w-none mt-8 pt-6 border-t">
-                    <h2 className="text-2xl font-bold">✨ About the Case Converter Tool</h2>
-                    <p>Our Case Converter is a powerful and easy-to-use utility designed to make text manipulation effortless. Whether you are a writer, developer, designer, or student, this tool will help you instantly transform your text into the desired format with just a single click. It's built to save you time and streamline your workflow.</p>
+                    <h2 className="text-2xl font-bold">{toolDesc.title}</h2>
+                    <p>{toolDesc.why}</p>
                     
                     <h3 className="text-xl font-semibold mt-6">🔑 Key Features:</h3>
                     <ul>
-                        <li><strong>Sentence case:</strong> Automatically capitalizes the first letter of each sentence. Ideal for standard writing and proofreading.</li>
-                        <li><strong>lowercase:</strong> Converts all characters in your text to their lowercase equivalents, perfect for standardizing data or text.</li>
-                        <li><strong>UPPERCASE:</strong> Transforms all characters into their uppercase form, which is great for creating headlines, titles, or for emphasis.</li>
-                        <li><strong>Title Case:</strong> Capitalizes the first letter of every word. This is particularly useful for formatting headlines, titles of articles, and headings in documents.</li>
-                        <li><strong>Word & Character Count:</strong> Get a real-time count of words and characters as you type, helping you stay on top of your writing metrics.</li>
+                       {toolDesc.features.map((feature, i) => <li key={i} dangerouslySetInnerHTML={{ __html: feature }} />)}
                     </ul>
 
                     <h3 className="text-xl font-semibold mt-6">🚀 How to Use:</h3>
                     <ol>
-                        <li><strong>Enter Text:</strong> Simply type or paste the text you want to convert into the provided text area.</li>
-                        <li><strong>Choose Conversion:</strong> Click one of the four conversion buttons (Sentence case, lowercase, UPPERCASE, Title Case) to instantly transform your text.</li>
-                        <li><strong>Copy Result:</strong> Use the copy button to grab your newly formatted text and use it wherever you need.</li>
+                         {toolDesc.howTo.map((step, i) => <li key={i} dangerouslySetInnerHTML={{ __html: step }} />)}
                     </ol>
-
-                    <h3 className="text-xl font-semibold mt-6">💡 Why Use Our Tool?</h3>
-                    <p>The Case Converter provides a clean, intuitive interface that ensures a seamless user experience. With its variety of conversion options and helpful metrics, you can format your text exactly how you need it in seconds. Simply type or paste, choose a conversion, and copy the result. It's that easy!</p>
                 </div>
               )}
 
