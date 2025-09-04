@@ -36,7 +36,6 @@ const SupportTicketEmailSchema = z.object({
 });
 export type SupportTicketEmailInput = z.infer<typeof SupportTicketEmailSchema>;
 
-export const EmailStatusSchema = z.enum(['sent', 'opened', 'clicked', 'unsubscribed', 'failed', 'blocked']);
 export type EmailLog = {
     id: string;
     recipient: string;
@@ -59,7 +58,7 @@ async function logEmail(recipient: string, subject: string, status: EmailLog['st
     }
 }
 
-export async function getEmailLog(): Promise<EmailLog[]> {
+export async function getEmailLog(): Promise<any[]> {
     try {
         const snapshot = await adminDb.collection('emailLog').orderBy('date', 'desc').get();
         return snapshot.docs.map(doc => {
@@ -71,7 +70,7 @@ export async function getEmailLog(): Promise<EmailLog[]> {
               subject: data.subject,
               status: data.status,
               date,
-            } as EmailLog;
+            };
         });
     } catch (error) {
         console.error("Error fetching email log:", error);
