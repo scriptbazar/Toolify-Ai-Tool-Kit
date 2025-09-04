@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -18,8 +18,9 @@ import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import Link from "next/link";
 import { getSettings } from "@/ai/flows/settings-management";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Checkbox } from "@/components/ui/checkbox";
+import type { SecuritySettings } from '@/ai/flows/settings-management.types';
+import ReCAPTCHA from "react-google-recaptcha";
+
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -30,6 +31,21 @@ export default function AdminLoginPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
+  const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+   useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const appSettings = await getSettings();
+        setSecuritySettings(appSettings.general?.security ?? null);
+      } catch (error) {
+        console.error("Failed to load security settings", error);
+      }
+    }
+    fetchSettings();
+  }, []);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,6 +56,15 @@ export default function AdminLoginPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+     if (securitySettings?.enableRecaptcha && !recaptchaValue) {
+        toast({
+            title: "Verification Failed",
+            description: "Please complete the reCAPTCHA verification.",
+            variant: "destructive",
+        });
+        return;
+    }
+
     try {
       // 1. Sign in the user with Firebase Auth
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
@@ -78,6 +103,8 @@ export default function AdminLoginPage() {
         description,
         variant: "destructive",
       });
+    } finally {
+        recaptchaRef.current?.reset();
     }
   }
 
@@ -145,6 +172,15 @@ export default function AdminLoginPage() {
                   )}
                 />
               </div>
+              {securitySettings?.enableRecaptcha && securitySettings.recaptchaSiteKey && (
+                <div className="flex justify-center">
+                    <ReCAPTCHA
+                        ref={recaptchaRef}
+                        sitekey={securitySettings.recaptchaSiteKey}
+                        onChange={(value) => setRecaptchaValue(value)}
+                    />
+                </div>
+               )}
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Logging in..." : "Log In"}
               </Button>

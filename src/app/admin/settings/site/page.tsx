@@ -539,9 +539,9 @@ export default function SiteSettingsPage() {
                             </div>
                         )}
                     </div>
-                    <div className="rounded-lg border p-4 space-y-4">
+                     <div className="rounded-lg border p-4 space-y-4">
                         <div className="flex items-center justify-between">
-                             <div className="space-y-0.5">
+                            <div className="space-y-0.5">
                                 <Label htmlFor="enableRecaptcha" className="font-medium">Google reCAPTCHA</Label>
                                 <p className="text-sm text-muted-foreground">Protect your forms from spam.</p>
                             </div>
@@ -552,7 +552,7 @@ export default function SiteSettingsPage() {
                             />
                         </div>
                         {settings.security?.enableRecaptcha && (
-                             <div className="space-y-4 pt-4 border-t">
+                            <div className="space-y-4 pt-4 border-t">
                                 <div className="space-y-2">
                                     <Label htmlFor="recaptchaSiteKey">reCAPTCHA Site Key</Label>
                                     <Input id="recaptchaSiteKey" value={settings.security?.recaptchaSiteKey || ''} onChange={(e) => handleSecurityChange('recaptchaSiteKey', e.target.value)} />
@@ -561,7 +561,7 @@ export default function SiteSettingsPage() {
                                     <Label htmlFor="recaptchaSecretKey">reCAPTCHA Secret Key</Label>
                                     <Input id="recaptchaSecretKey" value={settings.security?.recaptchaSecretKey || ''} onChange={(e) => handleSecurityChange('recaptchaSecretKey', e.target.value)} />
                                 </div>
-                             </div>
+                            </div>
                         )}
                     </div>
                 </div>

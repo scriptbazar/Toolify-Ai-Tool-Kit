@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -18,6 +18,9 @@ import { auth, db } from "@/lib/firebase";
 import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { trackAffiliateClick } from "@/ai/flows/user-management";
+import ReCAPTCHA from "react-google-recaptcha";
+import { getSettings } from "@/ai/flows/settings-management";
+import type { SecuritySettings } from '@/ai/flows/settings-management.types';
 
 
 const formSchema = z.object({
@@ -43,6 +46,21 @@ export default function SignupPage() {
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
+  const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const appSettings = await getSettings();
+        setSecuritySettings(appSettings.general?.security ?? null);
+      } catch (error) {
+        console.error("Failed to load security settings", error);
+      }
+    }
+    fetchSettings();
+  }, []);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -79,6 +97,15 @@ export default function SignupPage() {
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (securitySettings?.enableRecaptcha && !recaptchaValue) {
+        toast({
+            title: "Verification Failed",
+            description: "Please complete the reCAPTCHA verification.",
+            variant: "destructive",
+        });
+        return;
+    }
+
     try {
       const { email, password, firstName, lastName, userName } = values;
       // Create user with email and password
@@ -136,6 +163,8 @@ export default function SignupPage() {
         description: error.message || "There was a problem with your request.",
         variant: "destructive",
       });
+    } finally {
+        recaptchaRef.current?.reset();
     }
   }
 
@@ -281,6 +310,15 @@ export default function SignupPage() {
                   )}
                 />
               </div>
+              {securitySettings?.enableRecaptcha && securitySettings.recaptchaSiteKey && (
+                <div className="flex justify-center">
+                    <ReCAPTCHA
+                        ref={recaptchaRef}
+                        sitekey={securitySettings.recaptchaSiteKey}
+                        onChange={(value) => setRecaptchaValue(value)}
+                    />
+                </div>
+               )}
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Creating account..." : "Sign Up"}
               </Button>
