@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,46 +16,142 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { PlusCircle, Trash2, Edit, MoreHorizontal } from 'lucide-react';
+import { PlusCircle, Trash2, Edit, MoreHorizontal, Loader2, Save } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getPosts } from '@/ai/flows/blog-management';
+import { getCategories, addCategory, updateCategory, deleteCategory } from '@/ai/flows/blog-management';
+import type { Post } from '@/ai/flows/blog-management.types';
+import type { Category } from '@/ai/flows/blog-management.types';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+ import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 
-const dummyCategories = [
-    { name: 'Technology', slug: 'technology', description: 'All about the latest in tech.', count: 5 },
-    { name: 'Artificial Intelligence', slug: 'ai', description: 'News and articles about AI.', count: 8 },
-    { name: 'Productivity', slug: 'productivity', description: 'Hacks and tips to boost your productivity.', count: 3 },
-    { name: 'News', slug: 'news', description: 'Latest news from the industry.', count: 12 },
-];
 
+interface CategoryWithCount extends Category {
+    count: number;
+}
 
 export default function CategoriesPage() {
-    const [categories, setCategories] = useState(dummyCategories);
+    const [categories, setCategories] = useState<CategoryWithCount[]>([]);
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [loading, setLoading] = useState(true);
     const [newCategory, setNewCategory] = useState({ name: '', slug: '', description: '' });
+    const [isAdding, setIsAdding] = useState(false);
+    const [isEditing, setIsEditing] = useState<Category | null>(null);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const { toast } = useToast();
+    
+    const fetchCategoriesAndPosts = async () => {
+        setLoading(true);
+        try {
+            const [fetchedCategories, fetchedPosts] = await Promise.all([
+                getCategories(),
+                getPosts(),
+            ]);
+            
+            const categoryCounts = fetchedPosts.reduce((acc, post) => {
+                acc[post.category] = (acc[post.category] || 0) + 1;
+                return acc;
+            }, {} as Record<string, number>);
 
-    const handleAddCategory = (e: React.FormEvent) => {
+            const categoriesWithCounts = fetchedCategories.map(cat => ({
+                ...cat,
+                count: categoryCounts[cat.name] || 0,
+            }));
+            
+            setCategories(categoriesWithCounts);
+            setPosts(fetchedPosts);
+
+        } catch (error) {
+             toast({ title: 'Error', description: 'Could not load data.', variant: 'destructive' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategoriesAndPosts();
+    }, []);
+
+
+    const handleAddCategory = async (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, you would add logic to save to a database.
-        setCategories([...categories, { ...newCategory, count: 0 }]);
-        setNewCategory({ name: '', slug: '', description: '' }); // Reset form
+        if (!newCategory.name) {
+            toast({ title: 'Name is required', variant: 'destructive'});
+            return;
+        }
+        setIsAdding(true);
+        const result = await addCategory(newCategory);
+        if (result.success) {
+            toast({ title: 'Category added!' });
+            setNewCategory({ name: '', slug: '', description: '' });
+            fetchCategoriesAndPosts(); // Refresh list
+        } else {
+            toast({ title: 'Error', description: result.message, variant: 'destructive'});
+        }
+        setIsAdding(false);
+    };
+
+    const handleUpdateCategory = async () => {
+        if (!isEditing) return;
+        
+        const result = await updateCategory(isEditing.id, { name: isEditing.name, slug: isEditing.slug, description: isEditing.description });
+        if (result.success) {
+            toast({ title: 'Category updated!' });
+            setIsEditing(null);
+            fetchCategoriesAndPosts();
+        } else {
+            toast({ title: 'Error', description: result.message, variant: 'destructive'});
+        }
+    };
+
+    const handleDeleteCategory = async (categoryId: string) => {
+        setIsDeleting(categoryId);
+        const result = await deleteCategory(categoryId);
+        if (result.success) {
+            toast({ title: 'Category deleted!' });
+            fetchCategoriesAndPosts();
+        } else {
+            toast({ title: 'Error', description: result.message, variant: 'destructive'});
+        }
+        setIsDeleting(null);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        if (name === 'name') {
-             setNewCategory(prev => ({
-                ...prev,
-                name: value,
-                slug: value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, ''),
-            }));
-        } else {
-             setNewCategory(prev => ({ ...prev, [name]: value }));
-        }
+        const slug = name === 'name' ? value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '') : newCategory.slug;
+        setNewCategory(prev => ({ ...prev, [name]: value, slug }));
     };
-
+    
+    const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (!isEditing) return;
+        const { name, value } = e.target;
+        const slug = name === 'name' ? value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '') : isEditing.slug;
+        setIsEditing(prev => prev ? { ...prev, [name]: value, slug } : null);
+    };
 
   return (
     <div className="space-y-6">
@@ -94,6 +190,7 @@ export default function CategoriesPage() {
                             value={newCategory.slug}
                             onChange={handleInputChange}
                             placeholder="e.g., technology" 
+                            disabled
                         />
                          <p className="text-xs text-muted-foreground mt-1">The "slug" is the URL-friendly version of the name.</p>
                     </div>
@@ -107,8 +204,8 @@ export default function CategoriesPage() {
                             placeholder="A short description of the category." 
                         />
                     </div>
-                    <Button type="submit" className="w-full">
-                        <PlusCircle className="mr-2 h-4 w-4" />
+                    <Button type="submit" className="w-full" disabled={isAdding}>
+                        {isAdding ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <PlusCircle className="mr-2 h-4 w-4" />}
                         Add New Category
                     </Button>
                 </form>
@@ -131,7 +228,12 @@ export default function CategoriesPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                             {categories.length > 0 ? (
+                             {loading && [...Array(3)].map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell colSpan={4}><Skeleton className="h-8 w-full" /></TableCell>
+                                </TableRow>
+                             ))}
+                             {!loading && categories.length > 0 ? (
                                 categories.map(cat => (
                                     <TableRow key={cat.slug}>
                                         <TableCell className="font-medium">{cat.name}</TableCell>
@@ -140,17 +242,35 @@ export default function CategoriesPage() {
                                         <TableCell className="text-right">
                                              <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button size="icon" variant="ghost">
-                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    <Button size="icon" variant="ghost" disabled={isDeleting === cat.id}>
+                                                        {isDeleting === cat.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => setIsEditing(cat)}>
                                                         <Edit className="mr-2 h-4 w-4"/> Edit
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-red-500">
-                                                        <Trash2 className="mr-2 h-4 w-4"/> Delete
-                                                    </DropdownMenuItem>
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500">
+                                                                <Trash2 className="mr-2 h-4 w-4"/> Delete
+                                                            </DropdownMenuItem>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    This action cannot be undone. This will permanently delete the category. Posts in this category will not be deleted.
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction onClick={() => handleDeleteCategory(cat.id)}>
+                                                                    Continue
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </TableCell>
@@ -169,6 +289,36 @@ export default function CategoriesPage() {
             </Card>
         </div>
       </div>
+      
+       <Dialog open={!!isEditing} onOpenChange={(open) => !open && setIsEditing(null)}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Edit Category</DialogTitle>
+                <DialogDescription>
+                    Update the details for the "{isEditing?.name}" category.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                    <Label htmlFor="edit-name">Name</Label>
+                    <Input id="edit-name" name="name" value={isEditing?.name || ''} onChange={handleEditInputChange} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="edit-slug">Slug</Label>
+                    <Input id="edit-slug" name="slug" value={isEditing?.slug || ''} onChange={handleEditInputChange} disabled/>
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="edit-description">Description</Label>
+                    <Textarea id="edit-description" name="description" value={isEditing?.description || ''} onChange={handleEditInputChange} />
+                </div>
+            </div>
+            <DialogFooter>
+                <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                <Button onClick={handleUpdateCategory}><Save className="mr-2 h-4 w-4"/>Save Changes</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+

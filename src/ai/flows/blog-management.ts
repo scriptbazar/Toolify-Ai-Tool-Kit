@@ -7,10 +7,11 @@
  */
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { PostSchema, type Post, CommentSchema, type Comment } from './blog-management.types';
+import { PostSchema, type Post, CommentSchema, type Comment, CategorySchema, type Category } from './blog-management.types';
 
 const POSTS_COLLECTION = 'blogPosts';
 const COMMENTS_COLLECTION = 'comments';
+const CATEGORIES_COLLECTION = 'blogCategories';
 
 
 /**
@@ -141,5 +142,59 @@ export async function deletePost(postId: string): Promise<{ success: boolean; me
   } catch (error: any) {
     console.error(`Error deleting post ${postId}:`, error);
     return { success: false, message: error.message || 'An unknown error occurred.' };
+  }
+}
+
+/**
+ * Fetches all blog categories from Firestore.
+ */
+export async function getCategories(): Promise<Category[]> {
+  if (!adminDb) return [];
+  try {
+    const snapshot = await adminDb.collection(CATEGORIES_COLLECTION).get();
+    return snapshot.docs.map(doc => CategorySchema.parse({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
+}
+
+/**
+ * Adds a new blog category.
+ */
+export async function addCategory(category: Omit<Category, 'id'>): Promise<{ success: boolean; message: string }> {
+  if (!adminDb) return { success: false, message: 'Database not initialized.' };
+  try {
+    const docRef = adminDb.collection(CATEGORIES_COLLECTION).doc(category.slug);
+    await docRef.set(category);
+    return { success: true, message: 'Category added successfully.' };
+  } catch (error: any) {
+    return { success: false, message: error.message || 'Could not add category.' };
+  }
+}
+
+/**
+ * Updates an existing blog category.
+ */
+export async function updateCategory(categoryId: string, data: Partial<Omit<Category, 'id'>>): Promise<{ success: boolean; message: string }> {
+  if (!adminDb) return { success: false, message: 'Database not initialized.' };
+  try {
+    await adminDb.collection(CATEGORIES_COLLECTION).doc(categoryId).update(data);
+    return { success: true, message: 'Category updated successfully.' };
+  } catch (error: any) {
+    return { success: false, message: error.message || 'Could not update category.' };
+  }
+}
+
+/**
+ * Deletes a blog category.
+ */
+export async function deleteCategory(categoryId: string): Promise<{ success: boolean; message: string }> {
+  if (!adminDb) return { success: false, message: 'Database not initialized.' };
+  try {
+    await adminDb.collection(CATEGORIES_COLLECTION).doc(categoryId).delete();
+    return { success: true, message: 'Category deleted successfully.' };
+  } catch (error: any) {
+    return { success: false, message: error.message || 'Could not delete category.' };
   }
 }

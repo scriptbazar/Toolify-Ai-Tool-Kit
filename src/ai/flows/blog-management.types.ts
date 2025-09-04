@@ -37,3 +37,12 @@ export const PostSchema = z.object({
   publishedAt: z.string().datetime({ offset: true }).optional(),
 });
 export type Post = z.infer<typeof PostSchema>;
+
+export const CategorySchema = z.object({
+    id: z.string(),
+    name: z.string().min(1, "Category name is required."),
+    slug: z.string().min(1, "Slug is required."),
+    description: z.string().optional(),
+});
+export type Category = z.infer<typeof CategorySchema>;
+
