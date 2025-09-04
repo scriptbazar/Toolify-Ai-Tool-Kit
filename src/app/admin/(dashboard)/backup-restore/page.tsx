@@ -41,7 +41,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogDesc,
   DialogFooter,
   DialogTrigger,
   DialogClose,
@@ -264,9 +264,9 @@ export default function BackupRestorePage() {
         <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
                 <DialogTitle>Create New Backup</DialogTitle>
-                <DialogDescription>
+                <DialogDesc>
                     Select the type of data you want to back up. The process will run in the background.
-                </DialogDescription>
+                </DialogDesc>
             </DialogHeader>
             <div className="py-6">
               <BackupTypeSelector value={selectedBackupType} onChange={setSelectedBackupType} />
@@ -285,9 +285,9 @@ export default function BackupRestorePage() {
         <DialogContent>
             <DialogHeader>
                 <DialogTitle>Restore from Backup</DialogTitle>
-                <DialogDescription>
+                <DialogDesc>
                    Upload a backup file to restore your application data. This action cannot be undone.
-                </DialogDescription>
+                </DialogDesc>
             </DialogHeader>
             <div className="py-6">
                 <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg">
