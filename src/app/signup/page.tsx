@@ -15,9 +15,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc, updateDoc, increment, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
-import { trackAffiliateClick, getSettings } from "@/ai/flows/user-management";
+import { trackAffiliateClick } from "@/ai/flows/user-management";
+import { getSettings } from "@/ai/flows/settings-management";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
+
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required." }),
@@ -31,6 +35,7 @@ const formSchema = z.object({
     .regex(/[0-9]/, { message: "Password must contain at least one number." })
     .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character." }),
   confirmPassword: z.string(),
+  recaptcha: z.boolean().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -42,6 +47,8 @@ export default function SignupPage() {
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [recaptchaEnabled, setRecaptchaEnabled] = useState(false);
+  const [loadingSettings, setLoadingSettings] = useState(true);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,10 +59,25 @@ export default function SignupPage() {
       email: "",
       password: "",
       confirmPassword: "",
+      recaptcha: false,
     },
   });
 
   useEffect(() => {
+    async function fetchRecaptchaSettings() {
+        try {
+            const settings = await getSettings();
+            if (settings.general?.security?.enableRecaptcha) {
+                setRecaptchaEnabled(true);
+            }
+        } catch (error) {
+            console.error("Failed to load reCAPTCHA settings", error);
+        } finally {
+            setLoadingSettings(false);
+        }
+    }
+    fetchRecaptchaSettings();
+
     const referrerId = searchParams.get('ref');
     if (referrerId) {
       // Store the referrer ID in local storage to persist it across sessions if needed
@@ -78,6 +100,11 @@ export default function SignupPage() {
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (recaptchaEnabled && !values.recaptcha) {
+        form.setError("recaptcha", { type: "manual", message: "Please verify you are not a robot." });
+        return;
+    }
+
     try {
       const { email, password, firstName, lastName, userName } = values;
       // Create user with email and password
@@ -282,6 +309,28 @@ export default function SignupPage() {
                   )}
                 />
               </div>
+               {loadingSettings ? <Skeleton className="h-10 w-full" /> : recaptchaEnabled && (
+                  <FormField
+                    control={form.control}
+                    name="recaptcha"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="flex items-center gap-2">
+                              <ShieldCheck className="h-5 w-5 text-green-600" /> I am not a robot
+                          </FormLabel>
+                        </div>
+                          <FormMessage className="pl-2" />
+                      </FormItem>
+                    )}
+                  />
+              )}
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Creating account..." : "Sign Up"}
               </Button>

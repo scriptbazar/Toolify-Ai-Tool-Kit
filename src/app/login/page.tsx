@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -14,29 +14,59 @@ import { z } from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { doc, getDoc } from "firebase/firestore";
 import { logUserLogin } from "@/ai/flows/user-activity";
+import { getSettings } from "@/ai/flows/settings-management";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
+
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  recaptcha: z.boolean().optional(),
 });
 
 export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [recaptchaEnabled, setRecaptchaEnabled] = useState(false);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
+      recaptcha: false,
     },
   });
 
+  useEffect(() => {
+    async function fetchRecaptchaSettings() {
+        try {
+            const settings = await getSettings();
+            if (settings.general?.security?.enableRecaptcha) {
+                setRecaptchaEnabled(true);
+            }
+        } catch (error) {
+            console.error("Failed to load reCAPTCHA settings", error);
+        } finally {
+            setLoadingSettings(false);
+        }
+    }
+    fetchRecaptchaSettings();
+  }, []);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (recaptchaEnabled && !values.recaptcha) {
+        form.setError("recaptcha", { type: "manual", message: "Please verify you are not a robot." });
+        return;
+    }
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
@@ -142,6 +172,28 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
+                 {loadingSettings ? <Skeleton className="h-10 w-full" /> : recaptchaEnabled && (
+                    <FormField
+                      control={form.control}
+                      name="recaptcha"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                           <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="flex items-center gap-2">
+                               <ShieldCheck className="h-5 w-5 text-green-600" /> I am not a robot
+                            </FormLabel>
+                          </div>
+                           <FormMessage className="pl-2" />
+                        </FormItem>
+                      )}
+                    />
+                )}
               </div>
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Logging in..." : "Log In"}
