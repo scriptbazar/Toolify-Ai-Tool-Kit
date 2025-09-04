@@ -18,9 +18,6 @@ import { auth, db } from "@/lib/firebase";
 import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { trackAffiliateClick } from "@/ai/flows/user-management";
-import { getSettings } from "@/ai/flows/settings-management";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Checkbox } from "@/components/ui/checkbox";
 
 
 const formSchema = z.object({
@@ -35,7 +32,6 @@ const formSchema = z.object({
     .regex(/[0-9]/, { message: "Password must contain at least one number." })
     .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character." }),
   confirmPassword: z.string(),
-  recaptcha: z.boolean().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -47,8 +43,6 @@ export default function SignupPage() {
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [recaptchaEnabled, setRecaptchaEnabled] = useState(false);
-  const [loadingSettings, setLoadingSettings] = useState(true);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,25 +53,10 @@ export default function SignupPage() {
       email: "",
       password: "",
       confirmPassword: "",
-      recaptcha: false,
     },
   });
 
   useEffect(() => {
-    async function fetchRecaptchaSettings() {
-        try {
-            const settings = await getSettings();
-            if (settings.general?.security?.enableRecaptcha) {
-                setRecaptchaEnabled(true);
-            }
-        } catch (error) {
-            console.error("Failed to load reCAPTCHA settings", error);
-        } finally {
-            setLoadingSettings(false);
-        }
-    }
-    fetchRecaptchaSettings();
-
     const referrerId = searchParams.get('ref');
     if (referrerId) {
       // Store the referrer ID in local storage to persist it across sessions if needed
@@ -100,11 +79,6 @@ export default function SignupPage() {
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (recaptchaEnabled && !values.recaptcha) {
-        form.setError("recaptcha", { type: "manual", message: "Please verify you are not a robot." });
-        return;
-    }
-
     try {
       const { email, password, firstName, lastName, userName } = values;
       // Create user with email and password
@@ -123,8 +97,6 @@ export default function SignupPage() {
       const referrerId = localStorage.getItem('referrerId');
       if (referrerId) {
         const referrerRef = doc(db, "users", referrerId);
-        const settings = await getSettings(); // Fetch settings to get commission rate
-        const commissionRate = settings.referral?.commissionRate || 20;
         
         // In a real app, earnings would be calculated based on payments.
         // For now, let's assume a fixed earning on signup for demonstration.
@@ -309,35 +281,6 @@ export default function SignupPage() {
                   )}
                 />
               </div>
-               {loadingSettings ? <Skeleton className="h-14 w-full" /> : recaptchaEnabled && (
-                    <FormField
-                      control={form.control}
-                      name="recaptcha"
-                      render={({ field }) => (
-                         <FormItem>
-                            <FormControl>
-                                <div className="recaptcha-container">
-                                    <Checkbox
-                                        id="recaptcha-checkbox"
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                        className="recaptcha-checkbox"
-                                    />
-                                    <Label htmlFor="recaptcha-checkbox" className="recaptcha-label">
-                                        I'm not a robot
-                                    </Label>
-                                    <div className="recaptcha-logo">
-                                        <div className="recaptcha-icon"></div>
-                                        <p className="recaptcha-text">reCAPTCHA</p>
-                                        <p className="recaptcha-subtext">Privacy - Terms</p>
-                                    </div>
-                                </div>
-                            </FormControl>
-                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-              )}
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Creating account..." : "Sign Up"}
               </Button>

@@ -54,7 +54,7 @@ const CollapsibleSection = ({ id, title, description, children, isOpen, onToggle
                     <Icon className="h-6 w-6 text-primary"/>
                     <div>
                         <CardTitle className="text-lg">{title}</CardTitle>
-                        <CardDescription className="mt-1">{description}</CardDescription>
+                        {description && <CardDescription className="mt-1">{description}</CardDescription>}
                     </div>
                 </div>
                 <Button variant="ghost" size="icon">

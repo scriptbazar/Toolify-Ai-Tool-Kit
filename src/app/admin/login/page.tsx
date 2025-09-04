@@ -24,47 +24,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  recaptcha: z.boolean().optional(),
 });
 
 export default function AdminLoginPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [recaptchaEnabled, setRecaptchaEnabled] = useState(false);
-  const [loadingSettings, setLoadingSettings] = useState(true);
-
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
-      recaptcha: false,
     },
   });
 
-  useEffect(() => {
-    async function fetchRecaptchaSettings() {
-        try {
-            const settings = await getSettings();
-            if (settings.general?.security?.enableRecaptcha) {
-                setRecaptchaEnabled(true);
-            }
-        } catch (error) {
-            console.error("Failed to load reCAPTCHA settings", error);
-        } finally {
-            setLoadingSettings(false);
-        }
-    }
-    fetchRecaptchaSettings();
-  }, []);
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (recaptchaEnabled && !values.recaptcha) {
-        form.setError("recaptcha", { type: "manual", message: "Please verify you are not a robot." });
-        return;
-    }
-    
     try {
       // 1. Sign in the user with Firebase Auth
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
@@ -169,35 +144,6 @@ export default function AdminLoginPage() {
                     </FormItem>
                   )}
                 />
-                {loadingSettings ? <Skeleton className="h-14 w-full" /> : recaptchaEnabled && (
-                    <FormField
-                      control={form.control}
-                      name="recaptcha"
-                      render={({ field }) => (
-                         <FormItem>
-                            <FormControl>
-                                <div className="recaptcha-container">
-                                    <Checkbox
-                                        id="recaptcha-checkbox"
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                        className="recaptcha-checkbox"
-                                    />
-                                    <Label htmlFor="recaptcha-checkbox" className="recaptcha-label">
-                                        I'm not a robot
-                                    </Label>
-                                    <div className="recaptcha-logo">
-                                        <div className="recaptcha-icon"></div>
-                                        <p className="recaptcha-text">reCAPTCHA</p>
-                                        <p className="recaptcha-subtext">Privacy - Terms</p>
-                                    </div>
-                                </div>
-                            </FormControl>
-                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                )}
               </div>
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Logging in..." : "Log In"}
