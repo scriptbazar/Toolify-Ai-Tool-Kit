@@ -70,7 +70,7 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
   }
   try {
     const usersSnapshot = await adminDb.collection('users').get();
-    const leadsSnapshot = await adminDb.collection('leads');
+    const leadsSnapshot = await adminDb.collection('leads').get();
     
     const emailMap = new Map<string, { source: string; date: string }>();
 
