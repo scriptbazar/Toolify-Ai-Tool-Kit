@@ -172,24 +172,31 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                 {loadingSettings ? <Skeleton className="h-10 w-full" /> : recaptchaEnabled && (
-                    <FormField
+                 {loadingSettings ? <Skeleton className="h-14 w-full" /> : recaptchaEnabled && (
+                     <FormField
                       control={form.control}
                       name="recaptcha"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="flex items-center gap-2">
-                               <ShieldCheck className="h-5 w-5 text-green-600" /> I am not a robot
-                            </FormLabel>
-                          </div>
-                           <FormMessage className="pl-2" />
+                        <FormItem>
+                            <FormControl>
+                                <div className="recaptcha-container">
+                                    <Checkbox
+                                        id="recaptcha-checkbox"
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                        className="recaptcha-checkbox"
+                                    />
+                                    <Label htmlFor="recaptcha-checkbox" className="recaptcha-label">
+                                        I'm not a robot
+                                    </Label>
+                                    <div className="recaptcha-logo">
+                                        <div className="recaptcha-icon"></div>
+                                        <p className="recaptcha-text">reCAPTCHA</p>
+                                        <p className="recaptcha-subtext">Privacy - Terms</p>
+                                    </div>
+                                </div>
+                            </FormControl>
+                           <FormMessage />
                         </FormItem>
                       )}
                     />
