@@ -12,7 +12,7 @@
 import { z } from 'zod';
 import { ai } from '@/ai/genkit';
 import { adminDb } from '@/lib/firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
 const SENDER_EMAIL = `ToolifyAI <no-reply@toolifyai.com>`;
 
@@ -37,7 +37,6 @@ const SupportTicketEmailSchema = z.object({
 export type SupportTicketEmailInput = z.infer<typeof SupportTicketEmailSchema>;
 
 export const EmailStatusSchema = z.enum(['sent', 'opened', 'clicked', 'unsubscribed', 'failed', 'blocked']);
-export type EmailStatus = z.infer<typeof EmailStatusSchema>;
 
 const EmailLogSchema = z.object({
   id: z.string(),
@@ -67,8 +66,16 @@ export async function getEmailLog(): Promise<EmailLog[]> {
         const snapshot = await adminDb.collection('emailLog').orderBy('date', 'desc').get();
         return snapshot.docs.map(doc => {
             const data = doc.data();
-            const date = data.date?.toDate()?.toISOString() || new Date().toISOString();
-            return { ...data, id: doc.id, date } as EmailLog;
+            const date = (data.date as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
+            // Directly cast to EmailLog, assuming data from Firestore is valid.
+            // This avoids Zod parsing errors if new statuses are added without updating the schema here.
+            return {
+              id: doc.id,
+              recipient: data.recipient,
+              subject: data.subject,
+              status: data.status,
+              date,
+            } as EmailLog;
         });
     } catch (error) {
         console.error("Error fetching email log:", error);
@@ -134,3 +141,4 @@ export const sendSupportTicketConfirmationEmail = ai.defineFlow(
         return sendEmail(to, subject, body, true);
     }
 );
+
