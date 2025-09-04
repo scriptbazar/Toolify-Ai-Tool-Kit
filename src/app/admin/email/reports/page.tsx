@@ -76,8 +76,11 @@ export default function EmailReportsPage() {
                 
                 // Calculate Stats
                 const totalSent = emails.length;
-                // Note: Open/Click/Unsubscribe rates require webhooks and are placeholders for now.
-                setStats({ totalSent, openRate: 48.6, clickRate: 15.2, unsubscribeRate: 1.2 });
+                const totalOpened = emails.filter(e => e.status === 'opened').length;
+                const openRate = totalSent > 0 ? (totalOpened / totalSent) * 100 : 0;
+                
+                // Note: Click/Unsubscribe rates require webhooks and are placeholders for now.
+                setStats({ totalSent, openRate: parseFloat(openRate.toFixed(1)), clickRate: 15.2, unsubscribeRate: 1.2 });
 
                 // Process Engagement Data for the selected time range
                 const days = parseInt(timeRange);
@@ -175,7 +178,7 @@ export default function EmailReportsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.openRate}%</div>
-            <p className="text-xs text-muted-foreground">+2.1% from last month</p>
+            <p className="text-xs text-muted-foreground">Based on tracked opens.</p>
           </CardContent>
         </Card>
         <Card>
@@ -185,7 +188,7 @@ export default function EmailReportsPage() {
           </CardHeader>
           <CardContent>
              <div className="text-2xl font-bold">{stats.clickRate}%</div>
-            <p className="text-xs text-muted-foreground">+0.5% from last month</p>
+            <p className="text-xs text-muted-foreground">Requires webhook integration.</p>
           </CardContent>
         </Card>
         <Card>
@@ -195,7 +198,7 @@ export default function EmailReportsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.unsubscribeRate}%</div>
-            <p className="text-xs text-muted-foreground">-0.1% from last month</p>
+            <p className="text-xs text-muted-foreground">Requires webhook integration.</p>
           </CardContent>
         </Card>
       </div>
