@@ -265,7 +265,7 @@ export default function AddNewPostPage() {
                                      <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <Button type="button" variant="ghost" size="sm">
-                                                <Heading className="mr-2 h-4 w-4" /> Add Heading
+                                                <Heading className="h-4 w-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
