@@ -29,7 +29,20 @@ const prompt = ai.definePrompt({
   name: 'aiWriterPrompt',
   input: {schema: AiWriterInputSchema},
   output: {schema: AiWriterOutputSchema},
-  prompt: `You are an expert content writer. Generate an original and relevant article, blog post, or marketing copy based on the following topic or keywords: {{{topic}}}.`,
+  prompt: `You are an expert content writer and SEO specialist. Your task is to generate a comprehensive, engaging, and well-structured blog post based on the provided topic. The output must be in HTML format.
+
+Topic: "{{{topic}}}"
+
+Instructions:
+1.  **Title:** Create a compelling and SEO-friendly \`<h1>\` title for the blog post.
+2.  **Introduction:** Write a captivating introductory paragraph that hooks the reader and briefly explains what the post is about.
+3.  **Body:**
+    *   Structure the main content with multiple sections using \`<h2>\` headings for each key point.
+    *   Write detailed, informative, and easy-to-read paragraphs (\`<p>\` tags).
+    *   Use bullet points (\`<ul><li>...\`</li></ul>\`) for lists where appropriate to improve readability.
+4.  **Conclusion:** End with a strong concluding paragraph that summarizes the main points and provides a final thought or call-to-action.
+
+Ensure the entire output is a single HTML block, starting with \`<h1>\` and ending with the final \`</p>\`. Do not include \`<html>\` or \`<body>\` tags.`,
 });
 
 const aiWriterFlow = ai.defineFlow(
