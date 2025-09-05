@@ -32,7 +32,7 @@ export default async function Home() {
   const activeTools = tools.filter(tool => tool.status === 'Active');
   
   const categoryNames = toolCategories
-    .filter(c => c.name !== 'Developer Tools' && c.name !== 'Calculators & Converters')
+    .filter(c => c.name !== 'Developer Tools' && c.name !== 'Calculators & Converters' && c.name !== 'Ecommerce Tools')
     .map(c => c.name.replace(' Tools', ''));
 
   const TestimonialCard = ({ name, role, avatar, comment, rating }: { name: string, role: string, avatar: string, comment: string, rating: number }) => (
