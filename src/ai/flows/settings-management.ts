@@ -12,8 +12,6 @@
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase-admin';
 import { AppSettingsSchema, type AppSettings } from './settings-management.types';
-import fs from 'fs/promises';
-import path from 'path';
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
@@ -338,7 +336,7 @@ export async function getSettings(): Promise<AppSettings> {
 }
 
 /**
- * Updates the application settings in Firestore and writes API keys to .env.local.
+ * Updates the application settings in Firestore.
  * It performs a deep merge to only update the provided fields.
  * @param {Partial<AppSettings>} newSettings - The new settings values to save.
  * @returns {Promise<{ success: boolean; message: string }>} Result of the operation.
@@ -366,29 +364,6 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
     // `merge: true` is crucial to avoid overwriting unrelated settings fields.
     await docRef.set(validationResult.data, { merge: true });
     
-    // Handle environment variable updates separately
-    const geminiApiKey = mergedSettings.general?.apiKeys?.gemini;
-    if (geminiApiKey && geminiApiKey.trim() !== '') {
-      const envLocalPath = path.resolve(process.cwd(), '.env.local');
-      let envContent = '';
-      try {
-        envContent = await fs.readFile(envLocalPath, 'utf-8');
-      } catch (e: any) {
-        if (e.code !== 'ENOENT') throw e;
-      }
-
-      const key = 'GEMINI_API_KEY';
-      const value = geminiApiKey;
-
-      if (envContent.includes(`${key}=`)) {
-        envContent = envContent.replace(new RegExp(`^${key}=.*$`, 'm'), `${key}=${value}`);
-      } else {
-        envContent += `\n${key}=${value}`;
-      }
-      
-      await fs.writeFile(envLocalPath, envContent.trim());
-    }
-
     return { success: true, message: 'Settings updated successfully.' };
   } catch (error: any) {
     console.error("Error updating settings:", error);
