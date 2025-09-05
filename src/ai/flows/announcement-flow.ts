@@ -10,7 +10,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { z } from 'zod';
 import { type Announcement } from './announcement-flow.types';
@@ -69,6 +69,7 @@ export type SaveAnnouncementInput = z.infer<typeof SaveAnnouncementInputSchema>;
 
 
 export async function saveAnnouncement(input: SaveAnnouncementInput): Promise<{ success: boolean; message: string }> {
+    const adminDb = getAdminDb();
     if (!adminDb) {
         return { success: false, message: "Database not initialized." };
     }
@@ -96,6 +97,7 @@ export async function saveAnnouncement(input: SaveAnnouncementInput): Promise<{ 
 
 
 export async function getAnnouncementsForUser(userId: string): Promise<Announcement[]> {
+  const adminDb = getAdminDb();
   if (!adminDb) {
     console.warn("Cannot get announcements: DB not initialized.");
     return [];
@@ -127,6 +129,7 @@ export async function getAnnouncementsForUser(userId: string): Promise<Announcem
 }
 
 export async function markAnnouncementsAsRead(userId: string, announcementIds: string[]): Promise<{ success: boolean }> {
+  const adminDb = getAdminDb();
   if (!adminDb || !userId || announcementIds.length === 0) {
     return { success: false };
   }

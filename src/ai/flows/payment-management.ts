@@ -5,7 +5,7 @@
  * @fileOverview Manages payment history in Firestore and integrates with payment gateways.
  */
 
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { type Payment } from './payment-management.types';
 import { getSettings } from './settings-management';
 import { z } from 'zod';
@@ -258,6 +258,7 @@ export async function createStripeCheckoutSession(input: CreateStripeSessionInpu
  * Fetches all payment records from Firestore.
  */
 export async function getPayments(): Promise<Payment[]> {
+    const adminDb = getAdminDb();
     try {
         const snapshot = await adminDb.collection('payments').orderBy('date', 'desc').get();
         if (snapshot.empty) {

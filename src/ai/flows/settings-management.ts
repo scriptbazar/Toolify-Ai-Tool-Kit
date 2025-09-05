@@ -10,7 +10,7 @@
  */
 
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { AppSettingsSchema, type AppSettings } from './settings-management.types';
 
 const SETTINGS_COLLECTION = 'settings';
@@ -309,6 +309,7 @@ const defaultSettings = AppSettingsSchema.parse({
  * @returns {Promise<AppSettings>} The application settings.
  */
 export async function getSettings(): Promise<AppSettings> {
+  const adminDb = getAdminDb();
   try {
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
     const docSnap = await docRef.get();
@@ -342,6 +343,7 @@ export async function getSettings(): Promise<AppSettings> {
  * @returns {Promise<{ success: boolean; message: string }>} Result of the operation.
  */
 export async function updateSettings(newSettings: Partial<AppSettings>): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
   try {
     const currentSettings = await getSettings();
     

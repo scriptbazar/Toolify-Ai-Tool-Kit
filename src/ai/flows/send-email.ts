@@ -11,7 +11,7 @@
 
 import { z } from 'zod';
 import { ai } from '@/ai/genkit';
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
 const SENDER_EMAIL = `ToolifyAI <no-reply@toolifyai.com>`;
@@ -46,6 +46,7 @@ export type EmailLog = {
 
 
 async function logEmail(recipient: string, subject: string, status: EmailLog['status']) {
+    const adminDb = getAdminDb();
     try {
         await adminDb.collection('emailLog').add({
             recipient,
@@ -59,6 +60,7 @@ async function logEmail(recipient: string, subject: string, status: EmailLog['st
 }
 
 export async function getEmailLog(): Promise<any[]> {
+    const adminDb = getAdminDb();
     try {
         const snapshot = await adminDb.collection('emailLog').orderBy('date', 'desc').get();
         return snapshot.docs.map(doc => {

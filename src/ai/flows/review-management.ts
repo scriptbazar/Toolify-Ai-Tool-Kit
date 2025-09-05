@@ -4,7 +4,7 @@
 /**
  * @fileOverview Manages reviews and comments.
  */
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp }from 'firebase-admin/firestore';
 import { type Review, ReviewSchema, AddReviewInputSchema, AddReviewInput, ReviewStatusSchema } from './review-management.types';
 
@@ -15,6 +15,7 @@ import { type Review, ReviewSchema, AddReviewInputSchema, AddReviewInput, Review
  */
 export async function getReviews(): Promise<Review[]> {
     try {
+        const adminDb = getAdminDb();
         if (!adminDb) {
             throw new Error("Database not initialized");
         }
@@ -47,6 +48,7 @@ export async function getReviews(): Promise<Review[]> {
  */
 export async function addReview(input: AddReviewInput): Promise<{ success: boolean; message: string }> {
   try {
+    const adminDb = getAdminDb();
     if (!adminDb) {
       throw new Error("Database not initialized");
     }
@@ -73,6 +75,7 @@ export async function addReview(input: AddReviewInput): Promise<{ success: boole
  */
 export async function updateReviewStatus(reviewId: string, status: 'approved' | 'rejected'): Promise<{ success: boolean; message: string }> {
   try {
+    const adminDb = getAdminDb();
     if (!adminDb) {
       throw new Error("Database not initialized");
     }
@@ -97,6 +100,7 @@ export async function updateReviewStatus(reviewId: string, status: 'approved' | 
  * @returns {Promise<{ success: boolean; message: string }>}
  */
 export async function deleteReview(reviewId: string): Promise<{ success: boolean; message: string }> {
+    const adminDb = getAdminDb();
     if (!adminDb) {
         return { success: false, message: "Database not initialized." };
     }

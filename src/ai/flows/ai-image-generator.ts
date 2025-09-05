@@ -13,7 +13,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
 const GenerateImageInputSchema = z.object({
@@ -63,6 +63,7 @@ const generateImageFlow = ai.defineFlow(
       throw new Error('No image was generated.');
     }
     
+    const adminDb = getAdminDb();
     if (adminDb) {
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7);
@@ -83,6 +84,7 @@ const generateImageFlow = ai.defineFlow(
 
 
 export async function getUserMedia(userId: string): Promise<UserMedia[]> {
+    const adminDb = getAdminDb();
     if (!adminDb) {
         console.error('Database not initialized');
         return [];
@@ -131,6 +133,7 @@ const SaveCommunityMediaInputSchema = z.object({
 });
 
 export async function saveCommunityMedia(input: z.infer<typeof SaveCommunityMediaInputSchema>): Promise<{ success: boolean }> {
+  const adminDb = getAdminDb();
   if (!adminDb) {
     console.error('Database not initialized, cannot save community media.');
     return { success: false };

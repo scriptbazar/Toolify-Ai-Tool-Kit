@@ -15,10 +15,11 @@
 import { z } from 'zod';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, ReferralRequestSchema, type Affiliate, AffiliateSchema, CommentSchema, type Comment } from './user-management.types';
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 
 
 export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
   if (!adminDb) {
     const message = "Firebase Admin is not initialized. Check server environment variables.";
     console.error(message);
@@ -39,6 +40,7 @@ export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ succ
 }
 
 export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
   if (!adminDb) {
     const message = "Firebase Admin is not initialized. Check server environment variables.";
     console.error(message);
@@ -64,6 +66,7 @@ export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: b
 }
 
 export async function getAllEmails(): Promise<{ email: string; source: string; date: string }[]> {
+   const adminDb = getAdminDb();
    if (!adminDb) {
     console.error("Firebase Admin is not initialized. Cannot fetch emails.");
     return [];
@@ -128,6 +131,7 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
  * @returns An object indicating success or failure.
  */
 export async function updateUserActivity(userId: string): Promise<{ success: boolean }> {
+  const adminDb = getAdminDb();
   if (!adminDb) {
     console.error("Firebase Admin is not initialized. Cannot update user activity.");
     return { success: false };
@@ -157,6 +161,7 @@ export async function updateUserActivity(userId: string): Promise<{ success: boo
  * Fetches all signed-up users for the community chat.
  */
 export async function getChatUsers(): Promise<any[]> {
+    const adminDb = getAdminDb();
     if (!adminDb) {
         console.error("Firebase Admin is not initialized. Cannot fetch chat users.");
         return [];
@@ -192,6 +197,7 @@ export async function getChatUsers(): Promise<any[]> {
  * Sets their affiliate status to 'pending'.
  */
 export async function requestToJoinAffiliateProgram(userId: string): Promise<{ success: boolean; message: string }> {
+    const adminDb = getAdminDb();
     if (!adminDb || !userId) {
         return { success: false, message: 'Invalid user or database connection.' };
     }
@@ -213,6 +219,7 @@ export async function requestToJoinAffiliateProgram(userId: string): Promise<{ s
  * Fetches all users who have a 'pending' affiliate status.
  */
 export async function getAffiliateRequests(): Promise<ReferralRequest[]> {
+  const adminDb = getAdminDb();
   if (!adminDb) return [];
   try {
     const snapshot = await adminDb.collection('users')
@@ -240,6 +247,7 @@ export async function getAffiliateRequests(): Promise<ReferralRequest[]> {
  * Fetches all users who have an 'approved' affiliate status.
  */
 export async function getAffiliates(): Promise<Affiliate[]> {
+    const adminDb = getAdminDb();
     if (!adminDb) return [];
     try {
         const snapshot = await adminDb.collection('users')
@@ -269,6 +277,7 @@ export async function getAffiliates(): Promise<Affiliate[]> {
  * Updates a user's affiliate status.
  */
 export async function updateAffiliateRequestStatus(userId: string, status: 'approved' | 'rejected'): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
   if (!adminDb || !userId) {
     return { success: false, message: 'Invalid user or database connection.' };
   }
@@ -291,6 +300,7 @@ export async function updateAffiliateRequestStatus(userId: string, status: 'appr
  * @returns An object indicating success or failure.
  */
 export async function trackAffiliateClick(referrerId: string): Promise<{ success: boolean; message: string }> {
+    const adminDb = getAdminDb();
     if (!adminDb || !referrerId) {
         return { success: false, message: 'Invalid referrer ID or database connection.' };
     }
@@ -332,6 +342,7 @@ export async function trackAffiliateClick(referrerId: string): Promise<{ success
  * @returns {Promise<{ success: boolean; message: string }>} Result of the operation.
  */
 export async function deleteUser(userId: string): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
   if (!adminDb || !userId) {
     return { success: false, message: 'Invalid user or database connection.' };
   }

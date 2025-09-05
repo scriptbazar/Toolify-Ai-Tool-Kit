@@ -5,32 +5,42 @@
  */
 import { initializeApp, getApps, App, cert, ServiceAccount } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
-// The service account key is imported directly from the JSON file.
-// Ensure this file is present and correctly configured.
 import serviceAccount from '../../firebase-service-account-key.json';
 
-let adminDb: Firestore;
+let adminApp: App | undefined;
 
-// Check if Firebase Admin SDK has already been initialized.
-if (!getApps().length) {
+function getAdminApp(): App {
+  if (adminApp) {
+    return adminApp;
+  }
+
+  if (getApps().length > 0) {
+    adminApp = getApps()[0];
+    return adminApp;
+  }
+
   try {
-    // Initialize the app with service account credentials.
-    initializeApp({
+    adminApp = initializeApp({
       credential: cert(serviceAccount as ServiceAccount),
     });
+    return adminApp;
   } catch (error: any) {
-     // This error is critical for server functionality, so we log it.
-     // In a real production environment, you might use a more robust logging service.
     console.error("CRITICAL: Firebase Admin SDK initialization failed:", error.message);
+    throw error; // Re-throw the error to prevent the app from continuing in a broken state
   }
 }
 
-// Get the Firestore instance from the initialized app.
-// This will be undefined if initialization failed.
-try {
-    adminDb = getFirestore();
-} catch (error: any) {
-     console.error("CRITICAL: Failed to get Firestore instance. Server-side database features will be disabled.", error);
-}
+let adminDbInstance: Firestore | null = null;
 
-export { adminDb };
+export function getAdminDb(): Firestore {
+  if (adminDbInstance) {
+    return adminDbInstance;
+  }
+  try {
+    adminDbInstance = getFirestore(getAdminApp());
+    return adminDbInstance;
+  } catch (error: any) {
+    console.error("CRITICAL: Failed to get Firestore instance. Server-side database features will be disabled.", error);
+    throw error;
+  }
+}

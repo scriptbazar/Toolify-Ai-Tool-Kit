@@ -5,7 +5,7 @@
  * @fileOverview Manages user activity logs in Firestore.
  */
 
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { type UserActivity, type UserActivityDetails, type UserActivityType, type UserLoginHistory } from './user-activity.types';
 import { headers } from 'next/headers';
@@ -32,6 +32,7 @@ export type RecentToolActivity = {
  * @returns An object indicating success or failure.
  */
 export async function addUserActivity(userId: string, type: UserActivityType, details: UserActivityDetails): Promise<{ success: boolean }> {
+  const adminDb = getAdminDb();
   if (!userId || !type || !details) {
     return { success: false };
   }
@@ -56,6 +57,7 @@ export async function addUserActivity(userId: string, type: UserActivityType, de
  * @returns A promise that resolves to an array of user activities.
  */
 export async function getUserActivity(userId: string, count = 25): Promise<UserActivity[]> {
+  const adminDb = getAdminDb();
   if (!userId) return [];
   try {
     const activityRef = adminDb.collection('users').doc(userId).collection('activity');
@@ -100,6 +102,7 @@ export async function getUserActivity(userId: string, count = 25): Promise<UserA
  * This should be called from the server-side after a successful login.
  */
 export async function logUserLogin(userId: string): Promise<{ success: boolean }> {
+  const adminDb = getAdminDb();
   if (!userId) return { success: false };
 
   try {
@@ -129,6 +132,7 @@ export async function logUserLogin(userId: string): Promise<{ success: boolean }
  * Fetches the login history for a specific user.
  */
 export async function getLoginHistory(userId: string): Promise<UserLoginHistory[]> {
+    const adminDb = getAdminDb();
     if (!userId) return [];
     try {
         const historyRef = adminDb.collection('users').doc(userId).collection('loginHistory');
@@ -160,6 +164,7 @@ export async function getLoginHistory(userId: string): Promise<UserLoginHistory[
  * Fetches and aggregates tool usage statistics.
  */
 export async function getToolUsageStats(): Promise<ToolUsageStat[]> {
+    const adminDb = getAdminDb();
     if (!adminDb) return [];
     try {
         const activitySnapshot = await adminDb.collectionGroup('activity').where('type', '==', 'tool_usage').get();
@@ -187,6 +192,7 @@ export async function getToolUsageStats(): Promise<ToolUsageStat[]> {
  * Fetches the most recent tool usage activities.
  */
 export async function getRecentToolActivity(count = 20): Promise<RecentToolActivity[]> {
+    const adminDb = getAdminDb();
     if (!adminDb) return [];
     try {
         const activitySnapshot = await adminDb.collectionGroup('activity')

@@ -5,7 +5,7 @@
 /**
  * @fileOverview Manages blog-related data, such as posts and comments, in Firestore.
  */
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { PostSchema, type Post, CommentSchema, type Comment, CategorySchema, type Category, CommentStatusSchema } from './blog-management.types';
 
@@ -19,6 +19,7 @@ const CATEGORIES_COLLECTION = 'blogCategories';
  * @returns {Promise<Post[]>} A list of all posts.
  */
 export async function getPosts(): Promise<Post[]> {
+  const adminDb = getAdminDb();
   if (!adminDb) {
     console.error("Database not initialized, cannot fetch posts.");
     return [];
@@ -51,6 +52,7 @@ export async function getPosts(): Promise<Post[]> {
  * @returns {Promise<Comment[]>} A list of all comments.
  */
 export async function getComments(): Promise<Comment[]> {
+    const adminDb = getAdminDb();
     if (!adminDb) {
       console.error("Database not initialized, cannot fetch comments.");
       return [];
@@ -84,6 +86,7 @@ export async function getComments(): Promise<Comment[]> {
  * @returns {Promise<{ success: boolean; message: string }>} Result of the operation.
  */
 export async function updateCommentStatus(commentId: string, status: 'approved' | 'rejected' | 'pending'): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
   if (!adminDb) {
     return { success: false, message: 'Database not initialized.' };
   }
@@ -105,6 +108,7 @@ export async function updateCommentStatus(commentId: string, status: 'approved' 
  * @returns {Promise<{ success: boolean; message: string; postId?: string }>}
  */
 export async function upsertPost(postData: Partial<Omit<Post, 'id' | 'createdAt'>> & { id?: string }): Promise<{ success: boolean; message: string; postId?: string }> {
+  const adminDb = getAdminDb();
   if (!adminDb) {
     return { success: false, message: "Database not initialized" };
   }
@@ -154,6 +158,7 @@ export async function upsertPost(postData: Partial<Omit<Post, 'id' | 'createdAt'
  * @returns {Promise<{ success: boolean; message: string }>}
  */
 export async function deletePost(postId: string): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
   if (!adminDb) {
     return { success: false, message: "Database not initialized" };
   }
@@ -171,6 +176,7 @@ export async function deletePost(postId: string): Promise<{ success: boolean; me
  * Fetches all blog categories from Firestore.
  */
 export async function getCategories(): Promise<Category[]> {
+  const adminDb = getAdminDb();
   if (!adminDb) return [];
   try {
     const snapshot = await adminDb.collection(CATEGORIES_COLLECTION).get();
@@ -185,6 +191,7 @@ export async function getCategories(): Promise<Category[]> {
  * Adds a new blog category.
  */
 export async function addCategory(category: Omit<Category, 'id'>): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
   if (!adminDb) return { success: false, message: 'Database not initialized.' };
   try {
     const docRef = adminDb.collection(CATEGORIES_COLLECTION).doc(category.slug);
@@ -199,6 +206,7 @@ export async function addCategory(category: Omit<Category, 'id'>): Promise<{ suc
  * Updates an existing blog category.
  */
 export async function updateCategory(categoryId: string, data: Partial<Omit<Category, 'id'>>): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
   if (!adminDb) return { success: false, message: 'Database not initialized.' };
   try {
     await adminDb.collection(CATEGORIES_COLLECTION).doc(categoryId).update(data);
@@ -212,6 +220,7 @@ export async function updateCategory(categoryId: string, data: Partial<Omit<Cate
  * Deletes a blog category.
  */
 export async function deleteCategory(categoryId: string): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
   if (!adminDb) return { success: false, message: 'Database not initialized.' };
   try {
     await adminDb.collection(CATEGORIES_COLLECTION).doc(categoryId).delete();
