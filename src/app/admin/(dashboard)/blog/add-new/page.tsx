@@ -38,6 +38,7 @@ export default function AddNewPostPage() {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const contentTextAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
@@ -63,6 +64,20 @@ export default function AddNewPostPage() {
       .replace(/\s+/g, '-')
       .replace(/[^\w-]+/g, '');
     form.setValue('slug', slug, { shouldValidate: true });
+  };
+  
+  const handleAddHeading = (tag: 'h1' | 'h2' | 'h3') => {
+    const textarea = contentTextAreaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentText = form.getValues('content');
+    const selectedText = currentText.substring(start, end);
+    
+    const newText = `${currentText.substring(0, start)}<${tag}>${selectedText}</${tag}>${currentText.substring(end)}`;
+    
+    form.setValue('content', newText, { shouldValidate: true });
   };
 
   const handleGenerateContent = async () => {
@@ -231,16 +246,6 @@ export default function AddNewPostPage() {
                         <div className="space-y-1.5">
                             <CardTitle>Post Content</CardTitle>
                         </div>
-                        <Button 
-                        type="button" 
-                        onClick={handleGenerateContent} 
-                        disabled={isGenerating}
-                        variant="outline"
-                        size="sm"
-                        >
-                        {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                        Generate with AI
-                        </Button>
                     </CardHeader>
                     <CardContent>
                        <FormField
@@ -249,12 +254,30 @@ export default function AddNewPostPage() {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel className="sr-only">Post Body</FormLabel>
+                                <div className="p-2 border rounded-md bg-muted flex items-center gap-2">
+                                     <Button type="button" variant="ghost" size="sm" onClick={() => handleAddHeading('h1')}>H1</Button>
+                                     <Button type="button" variant="ghost" size="sm" onClick={() => handleAddHeading('h2')}>H2</Button>
+                                     <Button type="button" variant="ghost" size="sm" onClick={() => handleAddHeading('h3')}>H3</Button>
+                                    <div className="ml-auto">
+                                        <Button 
+                                            type="button" 
+                                            onClick={handleGenerateContent} 
+                                            disabled={isGenerating}
+                                            variant="outline"
+                                            size="sm"
+                                            >
+                                            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                                            Generate with AI
+                                        </Button>
+                                    </div>
+                                </div>
                                 <FormControl>
                                     <Textarea
+                                        ref={contentTextAreaRef}
                                         value={field.value}
                                         onChange={field.onChange}
                                         placeholder="Write your amazing blog post here, or generate it with AI..."
-                                        className="min-h-[400px]"
+                                        className="min-h-[400px] mt-2"
                                     />
                                 </FormControl>
                                 <FormMessage />
