@@ -1,6 +1,4 @@
 
-'use client';
-
 import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
 import { toolCategories } from '@/lib/constants';
@@ -43,59 +41,49 @@ import {
   PlusCircle,
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { useEffect, useState, useMemo } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useMemo } from 'react';
 
-export default function AdminToolsPage() {
-  const [allTools, setAllTools] = useState<Tool[]>([]);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+const ITEMS_PER_PAGE = 10;
 
-  useEffect(() => {
-    setLoading(true);
-    getTools()
-      .then(tools => setAllTools(tools))
-      .catch(err => console.error("Failed to load tools", err))
-      .finally(() => setLoading(false));
-  }, []);
+export default async function AdminToolsPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const allTools = await getTools();
 
-  const searchQuery = searchParams.get('q') || '';
-  const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
-  const activeFilter = searchParams.get('filter') || 'all';
-  const page = Number(searchParams.get('page')) || 1;
+  const searchQuery = typeof searchParams.q === 'string' ? searchParams.q : '';
+  const activeCategory = typeof searchParams.category === 'string' ? (searchParams.category as ToolCategory) : 'all';
+  const activeFilter = typeof searchParams.filter === 'string' ? searchParams.filter : 'all';
+  const page = typeof searchParams.page === 'string' ? Number(searchParams.page) : 1;
 
-  const ITEMS_PER_PAGE = 10;
-
-  const counts = useMemo(() => ({
+  const counts = {
     all: allTools.length,
     pro: allTools.filter(t => t.plan === 'Pro').length,
     free: allTools.filter(t => t.plan === 'Free').length,
     new: allTools.filter(t => t.isNew).length,
     active: allTools.filter(t => t.status === 'Active').length,
     disabled: allTools.filter(t => t.status === 'Disabled').length,
-  }), [allTools]);
+  };
 
-  const filteredTools = useMemo(() => allTools
-      .filter(tool => {
-        if (activeFilter === 'all') return true;
-        if (activeFilter === 'pro') return tool.plan === 'Pro';
-        if (activeFilter === 'free') return tool.plan === 'Free';
-        if (activeFilter === 'new') return tool.isNew;
-        if (activeFilter === 'active') return tool.status === 'Active';
-        if (activeFilter === 'disabled') return tool.status === 'Disabled';
-        return true;
-      })
-      .filter(tool => {
-        if (activeCategory === 'all') return true;
-        return tool.category === activeCategory;
-      })
-      .filter(tool =>
-        tool.name.toLowerCase().includes(searchQuery.toLowerCase())
-      ), [allTools, activeFilter, activeCategory, searchQuery]);
-    
+  const filteredTools = allTools
+    .filter(tool => {
+      if (activeFilter === 'all') return true;
+      if (activeFilter === 'pro') return tool.plan === 'Pro';
+      if (activeFilter === 'free') return tool.plan === 'Free';
+      if (activeFilter === 'new') return tool.isNew;
+      if (activeFilter === 'active') return tool.status === 'Active';
+      if (activeFilter === 'disabled') return tool.status === 'Disabled';
+      return true;
+    })
+    .filter(tool => {
+      if (activeCategory === 'all') return true;
+      return tool.category === activeCategory;
+    })
+    .filter(tool =>
+      tool.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
   const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
   const paginatedTools = filteredTools.slice(
     (page - 1) * ITEMS_PER_PAGE,
@@ -114,9 +102,12 @@ export default function AdminToolsPage() {
     { id: 'active', label: 'Active', icon: CheckCircle, count: counts.active },
     { id: 'disabled', label: 'Disabled', icon: XCircle, count: counts.disabled },
   ];
-  
+
   const createQueryString = (params: Record<string, string | number | null>) => {
-    const newSearchParams = new URLSearchParams(searchParams.toString());
+    const newSearchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(searchParams)) {
+        if(typeof value === 'string') newSearchParams.set(key, value);
+    }
     for (const [key, value] of Object.entries(params)) {
       if (value === null) {
         newSearchParams.delete(key);
@@ -126,12 +117,6 @@ export default function AdminToolsPage() {
     }
     return newSearchParams.toString();
   };
-  
-  const handleUrlUpdate = (params: Record<string, string | number | null>) => {
-    const newQuery = createQueryString(params);
-    router.push(`${pathname}?${newQuery}`);
-  };
-
 
   return (
     <div className="space-y-6">
@@ -155,25 +140,20 @@ export default function AdminToolsPage() {
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
              <div className="flex flex-wrap items-center gap-2 flex-grow">
                {tabs.map((tab) => (
-                <Button
-                  key={tab.id}
-                  variant={activeFilter === tab.id ? 'default' : 'outline'}
-                  size="sm"
-                  className="shrink-0 gap-1.5 px-3"
-                  onClick={() => handleUrlUpdate({ filter: tab.id, page: '1' })}
-                >
-                  <tab.icon className="h-4 w-4" />
-                  {tab.label} ({tab.count})
-                </Button>
+                <Link key={tab.id} href={`?${createQueryString({ filter: tab.id, page: '1' })}`} scroll={false}>
+                    <Button
+                      variant={activeFilter === tab.id ? 'default' : 'outline'}
+                      size="sm"
+                      className="shrink-0 gap-1.5 px-3"
+                    >
+                      <tab.icon className="h-4 w-4" />
+                      {tab.label} ({tab.count})
+                    </Button>
+                </Link>
               ))}
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
-                <form className="relative w-full sm:w-auto" onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  const newSearchQuery = formData.get('q') as string;
-                  handleUrlUpdate({ q: newSearchQuery, page: '1' });
-                }}>
+                <form className="relative w-full sm:w-auto" action="/admin/tools" method="GET">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         name="q"
@@ -181,8 +161,10 @@ export default function AdminToolsPage() {
                         placeholder="Search tools..."
                         className="pl-9 w-full sm:max-w-xs h-10"
                     />
+                     <input type="hidden" name="filter" value={activeFilter} />
+                     <input type="hidden" name="category" value={activeCategory} />
                 </form>
-                <Select value={activeCategory} onValueChange={(value) => handleUrlUpdate({ category: value, page: '1' })}>
+                <Select value={activeCategory} onValueChange={(value) => router.push(`?${createQueryString({ category: value, page: '1' })}`)}>
                     <SelectTrigger className="w-full sm:w-[180px] h-10">
                         <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
@@ -206,11 +188,6 @@ export default function AdminToolsPage() {
             </div>
           </div>
 
-           {loading ? (
-             <div className="space-y-2">
-                {[...Array(ITEMS_PER_PAGE)].map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
-             </div>
-            ) : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -259,19 +236,22 @@ export default function AdminToolsPage() {
                 )}
               </TableBody>
             </Table>
-            )}
           
            {totalPages > 1 && (
             <div className="flex items-center justify-end space-x-2 pt-4">
-              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => handleUrlUpdate({ page: page - 1 })}>
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
+              <Link href={`?${createQueryString({ page: page - 1 })}`} scroll={false}>
+                <Button variant="outline" size="sm" disabled={page <= 1}>
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+                </Button>
+              </Link>
               <span className="text-sm text-muted-foreground">
                 Page {page} of {totalPages}
               </span>
-              <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => handleUrlUpdate({ page: page + 1 })}>
-                  Next <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Link href={`?${createQueryString({ page: page + 1 })}`} scroll={false}>
+                <Button variant="outline" size="sm" disabled={page >= totalPages}>
+                    Next <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           )}
         </CardContent>
