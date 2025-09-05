@@ -73,7 +73,7 @@ export default function AddNewPostPage() {
     form.setValue('slug', slug, { shouldValidate: true });
   };
   
-  const handleWrapTag = (tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'pre' | 'b' | 'i') => {
+  const handleWrapTag = (tag: 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'pre' | 'b' | 'i') => {
     const textarea = contentTextAreaRef.current;
     if (!textarea) return;
 
@@ -305,6 +305,7 @@ export default function AddNewPostPage() {
                                      <Button type="button" variant="outline" size="sm" onClick={() => handleWrapTag('i')}><Italic className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="sm" onClick={() => handleAddList('ul')}><List className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="sm" onClick={() => handleAddList('ol')}><ListOrdered className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="sm"><LinkIcon className="h-4 w-4"/></Button>
                                     <div className="ml-auto">
                                         <Button 
                                             type="button" 
@@ -358,30 +359,6 @@ export default function AddNewPostPage() {
                                     <FormItem>
                                     <FormLabel className="flex items-center gap-2"><Target className="h-4 w-4"/> Target Keyword</FormLabel>
                                     <FormControl><Input {...field} placeholder="e.g., 'best ai tools'" /></FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="inboundLinks"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel className="flex items-center gap-2"><LinkIcon className="h-4 w-4"/> Inbound Links</FormLabel>
-                                    <FormControl><Textarea {...field} placeholder="One URL per line" /></FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="outboundLinks"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel className="flex items-center gap-2"><LinkIcon className="h-4 w-4"/> Outbound Links</FormLabel>
-                                    <FormControl><Textarea {...field} placeholder="One URL per line" /></FormControl>
                                     <FormMessage />
                                     </FormItem>
                                 )}
