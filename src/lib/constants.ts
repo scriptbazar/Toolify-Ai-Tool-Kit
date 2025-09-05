@@ -73,7 +73,7 @@ export const toolCategories: ToolCategoryDetails[] = [
   },
   {
     id: 'calculator',
-    name: 'Calculators &amp; Converters',
+    name: 'Calculators & Converters',
     description: 'Perform calculations and unit conversions.',
     Icon: Calculator,
   }
