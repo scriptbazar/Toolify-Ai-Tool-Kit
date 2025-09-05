@@ -9,10 +9,11 @@ import {
   Search,
   Video,
   Calculator,
+  ShoppingCart,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-export type ToolCategory = 'text' | 'pdf' | 'ai' | 'dev' | 'image' | 'seo' | 'video' | 'cal_con';
+export type ToolCategory = 'text' | 'pdf' | 'ai' | 'dev' | 'image' | 'seo' | 'video' | 'ecommerce' | 'calculator';
 
 export interface ToolCategoryDetails {
   id: ToolCategory;
@@ -65,8 +66,14 @@ export const toolCategories: ToolCategoryDetails[] = [
     Icon: Component,
   },
   {
-    id: 'cal_con',
-    name: 'Calculators & Converters',
+    id: 'ecommerce',
+    name: 'Ecommerce Tools',
+    description: 'Utilities for your online business.',
+    Icon: ShoppingCart,
+  },
+  {
+    id: 'calculator',
+    name: 'Calculators &amp; Converters',
     description: 'Perform calculations and unit conversions.',
     Icon: Calculator,
   }

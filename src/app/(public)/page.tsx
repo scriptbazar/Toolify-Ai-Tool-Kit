@@ -109,7 +109,7 @@ export default async function Home() {
             </Button>
           </div>
            <div className="mt-12 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 max-w-6xl mx-auto">
-            {toolCategories.map(category => (
+            {toolCategories.filter(c => c.id !== 'calculator').map(category => (
                 <CategoryCard key={category.id} category={category} />
             ))}
           </div>

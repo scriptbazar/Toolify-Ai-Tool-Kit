@@ -86,18 +86,20 @@ const initialTools: Omit<Tool, 'id' | 'slug'>[] = [
     { name: 'Favicon Checker', description: 'Check if your website has a valid and properly configured favicon.', icon: 'Star', category: 'seo', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Schema Generator', description: 'Create structured data (schema markup) for your website to enhance SERP visibility.', icon: 'Braces', category: 'seo', plan: 'Pro', isNew: false, status: 'Active' },
 
-    // Calculators & Converters (10)
-    { name: 'BMI Calculator', description: 'Calculate your Body Mass Index to assess your weight status.', icon: 'HeartPulse', category: 'cal_con', plan: 'Free', isNew: false, status: 'Active' },
-    { name: 'Unit Converter', description: 'Convert between different units of measurement (length, mass, temp, etc.).', icon: 'Ruler', category: 'cal_con', plan: 'Free', isNew: false, status: 'Active' },
-    { name: 'Age Calculator', description: 'Calculate your age in years, months, and days from your birth date.', icon: 'Calendar', category: 'cal_con', plan: 'Free', isNew: false, status: 'Active' },
-    { name: 'Percentage Calculator', description: 'Calculate percentages, fractions, and percentage changes easily.', icon: 'Percent', category: 'cal_con', plan: 'Free', isNew: false, status: 'Active' },
-    { name: 'Discount Calculator', description: 'Calculate the final price after applying a discount.', icon: 'BadgePercent', category: 'cal_con', plan: 'Free', isNew: false, status: 'Active' },
-    { name: 'Loan Calculator', description: 'Estimate your monthly loan payments, interest, and total cost.', icon: 'Landmark', category: 'cal_con', plan: 'Pro', isNew: false, status: 'Active' },
-    { name: 'Time Zone Converter', description: 'Convert times between different time zones around the world.', icon: 'Globe', category: 'cal_con', plan: 'Free', isNew: false, status: 'Active' },
-    { name: 'GPA Calculator', description: 'Calculate your Grade Point Average (GPA) for any grading scale.', icon: 'GraduationCap', category: 'cal_con', plan: 'Free', isNew: false, status: 'Active' },
-    { name: 'Fuel Cost Calculator', description: 'Estimate the fuel cost for a trip based on distance, fuel efficiency, and price.', icon: 'Fuel', category: 'cal_con', plan: 'Pro', isNew: false, status: 'Active' },
-    { name: 'Date Calculator', description: 'Add or subtract days, weeks, months, and years from a date.', icon: 'CalendarDays', category: 'cal_con', plan: 'Free', isNew: false, status: 'Active' },
+    // Calculators (5)
+    { name: 'BMI Calculator', description: 'Calculate your Body Mass Index to assess your weight status.', icon: 'HeartPulse', category: 'calculator', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Unit Converter', description: 'Convert between different units of measurement (length, mass, temp, etc.).', icon: 'Ruler', category: 'calculator', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Age Calculator', description: 'Calculate your age in years, months, and days from your birth date.', icon: 'Calendar', category: 'calculator', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Percentage Calculator', description: 'Calculate percentages, fractions, and percentage changes easily.', icon: 'Percent', category: 'calculator', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Date Calculator', description: 'Add or subtract days, weeks, months, and years from a date.', icon: 'CalendarDays', category: 'calculator', plan: 'Free', isNew: false, status: 'Active' },
     
+    // Ecommerce Tools (5)
+    { name: 'Discount Calculator', description: 'Calculate the final price after applying a discount.', icon: 'BadgePercent', category: 'ecommerce', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Loan Calculator', description: 'Estimate your monthly loan payments, interest, and total cost.', icon: 'Landmark', category: 'ecommerce', plan: 'Pro', isNew: false, status: 'Active' },
+    { name: 'GPA Calculator', description: 'Calculate your Grade Point Average (GPA) for any grading scale.', icon: 'GraduationCap', category: 'ecommerce', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Fuel Cost Calculator', description: 'Estimate the fuel cost for a trip based on distance, fuel efficiency, and price.', icon: 'Fuel', category: 'ecommerce', plan: 'Pro', isNew: false, status: 'Active' },
+    { name: 'Time Zone Converter', description: 'Convert times between different time zones around the world.', icon: 'Globe', category: 'ecommerce', plan: 'Free', isNew: false, status: 'Active' },
+
     // Video Tools (10)
     { name: 'Video to GIF', description: 'Convert a video clip into a high-quality animated GIF.', icon: 'Video', category: 'video', plan: 'Pro', isNew: false, status: 'Active' },
     { name: 'Video Compressor', description: 'Reduce the file size of your video without significant quality loss.', icon: 'Minimize', category: 'video', plan: 'Pro', isNew: false, status: 'Active' },
@@ -357,5 +359,3 @@ export async function updateToolRequestStatus(requestId: string, status: 'approv
     }
 }
     
-
-
