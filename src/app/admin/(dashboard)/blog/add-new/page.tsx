@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon, Image as ImageIcon, Clock } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon, Image as ImageIcon, Clock, UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -25,6 +25,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db } from '@/lib/firebase';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 const postSchema = z.object({
@@ -48,10 +51,13 @@ type PostFormValues = z.infer<typeof postSchema>;
 export default function AddNewPostPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
   const contentTextAreaRef = useRef<HTMLTextAreaElement>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
@@ -194,6 +200,30 @@ export default function AddNewPostPage() {
     
     form.setValue('content', newText, { shouldValidate: true });
     textarea.focus();
+  };
+  
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const storage = getStorage();
+      const storagePath = `blog-images/${Date.now()}_${file.name}`;
+      const imageRef = storageRef(storage, storagePath);
+      
+      await uploadBytes(imageRef, file);
+      const downloadURL = await getDownloadURL(imageRef);
+      
+      form.setValue('imageUrl', downloadURL);
+      setUploadedImageUrl(downloadURL);
+      toast({ title: "Image Uploaded", description: "The image has been successfully uploaded and the URL has been set."});
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      toast({ title: "Upload Failed", description: "Could not upload the image.", variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
 
@@ -362,43 +392,65 @@ export default function AddNewPostPage() {
                                 )}
                             />
                         </div>
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                 <FormField
-                                    control={form.control}
-                                    name="imageUrl"
-                                    render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Featured Image URL</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="https://..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="imageHint"
-                                    render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Image Hint</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="e.g., 'blue robot'" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                    )}
-                                />
+                         <Tabs defaultValue="url" className="w-full">
+                          <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="url">Image by URL</TabsTrigger>
+                            <TabsTrigger value="upload">Upload Image</TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="url">
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start pt-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="imageUrl"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Featured Image URL</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="https://..." {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="imageHint"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Image Hint</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g., 'blue robot'" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className="w-full sm:w-24 h-24 bg-muted rounded-lg flex items-center justify-center border">
+                                {imageUrlValue ? (
+                                    <Image src={imageUrlValue} alt="Image Preview" width={96} height={96} className="object-cover rounded-md" onError={(e) => e.currentTarget.style.display='none'} />
+                                ) : (
+                                    <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                                )}
+                                </div>
                             </div>
-                            <div className="w-full sm:w-24 h-24 bg-muted rounded-lg flex items-center justify-center border">
-                            {imageUrlValue ? (
-                                <Image src={imageUrlValue} alt="Image Preview" width={96} height={96} className="object-cover rounded-md" onError={(e) => e.currentTarget.style.display='none'} />
-                            ) : (
-                                <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                            )}
-                            </div>
-                        </div>
+                          </TabsContent>
+                           <TabsContent value="upload">
+                            <Card className="mt-4">
+                              <CardContent className="p-6">
+                                <div className="flex flex-col items-center justify-center gap-4">
+                                  <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+                                  <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <UploadCloud className="mr-2 h-4 w-4" />}
+                                    {isUploading ? "Uploading..." : "Choose an Image"}
+                                  </Button>
+                                  {uploadedImageUrl && <p className="text-sm text-muted-foreground">Image uploaded successfully.</p>}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </TabsContent>
+                        </Tabs>
                     </CardContent>
                 </Card>
                 <Card>
