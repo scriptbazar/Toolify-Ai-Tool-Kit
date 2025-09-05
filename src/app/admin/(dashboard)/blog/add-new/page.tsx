@@ -73,7 +73,7 @@ export default function AddNewPostPage() {
     form.setValue('slug', slug, { shouldValidate: true });
   };
   
-  const handleAddHeading = (tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') => {
+  const handleAddHeading = (tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'pre') => {
     const textarea = contentTextAreaRef.current;
     if (!textarea) return;
 
@@ -269,12 +269,14 @@ export default function AddNewPostPage() {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
+                                            <DropdownMenuItem onClick={() => handleAddHeading('p')}>Paragraph</DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => handleAddHeading('h1')}>Heading 1</DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => handleAddHeading('h2')}>Heading 2</DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => handleAddHeading('h3')}>Heading 3</DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => handleAddHeading('h4')}>Heading 4</DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => handleAddHeading('h5')}>Heading 5</DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => handleAddHeading('h6')}>Heading 6</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleAddHeading('pre')}>Preformatted</DropdownMenuItem>
                                         </DropdownMenuContent>
                                      </DropdownMenu>
                                     <div className="ml-auto">
@@ -312,7 +314,7 @@ export default function AddNewPostPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
+                             <FormField
                                 control={form.control}
                                 name="metaDescription"
                                 render={({ field }) => (
