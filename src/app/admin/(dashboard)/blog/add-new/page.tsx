@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -15,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter, generateMetaDescription, generateTargetKeywords } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon, Image as ImageIcon, Clock, UploadCloud } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon, Image as ImageIcon, Clock, UploadCloud, Eye, Code } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -59,6 +58,7 @@ export default function AddNewPostPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'code' | 'visual'>('code');
   const { toast } = useToast();
   const router = useRouter();
   const contentTextAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -113,7 +113,7 @@ export default function AddNewPostPage() {
     const selectedText = currentText.substring(start, end);
     
     if (!selectedText) {
-        toast({ title: "No text selected", description: `Please select the text you want to format.`, variant: "destructive" });
+        toast({ title: "No text selected", description: `Please select the text you want to format as <${tag}>.`, variant: "destructive" });
         return;
     }
     
@@ -598,6 +598,8 @@ export default function AddNewPostPage() {
                                             onChange={(e) => handleColorChange(e.target.value)}
                                           />
                                      </div>
+                                      <Button type="button" variant="outline" size="icon" title="Visual Preview" onClick={() => setViewMode('visual')}><Eye className="h-4 w-4"/></Button>
+                                      <Button type="button" variant="outline" size="icon" title="Code View" onClick={() => setViewMode('code')}><Code className="h-4 w-4"/></Button>
                                     <div className="ml-auto">
                                         <Button 
                                             type="button" 
@@ -613,13 +615,20 @@ export default function AddNewPostPage() {
                                     </div>
                                 </div>
                                 <FormControl>
-                                    <Textarea
-                                        ref={contentTextAreaRef}
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        placeholder="Write your amazing blog post here, or generate it with AI..."
-                                        className="min-h-[400px] mt-2"
-                                    />
+                                    {viewMode === 'code' ? (
+                                        <Textarea
+                                            ref={contentTextAreaRef}
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="Write your amazing blog post here, or generate it with AI..."
+                                            className="min-h-[400px] mt-2 font-mono"
+                                        />
+                                    ) : (
+                                        <div
+                                            className="min-h-[400px] mt-2 p-3 border rounded-md prose dark:prose-invert"
+                                            dangerouslySetInnerHTML={{ __html: field.value }}
+                                        />
+                                    )}
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
