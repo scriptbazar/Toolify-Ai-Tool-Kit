@@ -12,6 +12,7 @@
 import { z } from 'zod';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { AppSettingsSchema, type AppSettings } from './settings-management.types';
+import { cache } from 'react';
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
@@ -306,9 +307,10 @@ const defaultSettings = AppSettingsSchema.parse({
 /**
  * Retrieves the application settings from Firestore.
  * If no settings exist, it returns the default values defined in the schema.
+ * This function is cached to prevent excessive database reads.
  * @returns {Promise<AppSettings>} The application settings.
  */
-export async function getSettings(): Promise<AppSettings> {
+export const getSettings = cache(async (): Promise<AppSettings> => {
   try {
     const adminDb = getAdminDb();
     if (!adminDb) {
@@ -331,9 +333,11 @@ export async function getSettings(): Promise<AppSettings> {
     }
   } catch (error: any) {
     console.error("Error getting settings:", error.message);
+    // Return default settings on error to prevent site crash, e.g., due to quota exceeded.
     return defaultSettings;
   }
-}
+});
+
 
 /**
  * Updates the application settings in Firestore.

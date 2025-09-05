@@ -1,4 +1,3 @@
-
 // Since Next.js now handles dotenv, we don't need it here for the dev server
 // if it shares the same environment. If running separately, you might need it.
 // For now, we assume a unified environment.
@@ -15,3 +14,8 @@ import '@/ai/flows/tool-management.ts';
 import '@/ai/flows/user-activity.ts';
 import '@/ai/flows/announcement-flow.ts';
 import '@/ai/flows/review-management.ts';
+import '@/ai/flows/backup-restore.ts';
+import '@/ai/flows/utility-actions.ts';
+import '@/ai/flows/verify-recaptcha.ts';
+import '@/ai/flows/pdf-management.ts';
+import '@/ai/flows/text-to-speech.ts';
