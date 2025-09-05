@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon, Image as ImageIcon, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -36,6 +36,7 @@ const postSchema = z.object({
   imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   imageHint: z.string().optional(),
   status: z.enum(['Published', 'Draft', 'Scheduled', 'Trash']),
+  publishedAt: z.string().datetime().optional(),
   metaDescription: z.string().optional(),
   targetKeyword: z.string().optional(),
   seoTitle: z.string().optional(),
@@ -63,6 +64,7 @@ export default function AddNewPostPage() {
       imageUrl: '',
       imageHint: '',
       status: 'Draft',
+      publishedAt: undefined,
       metaDescription: '',
       targetKeyword: '',
       seoTitle: '',
@@ -269,6 +271,10 @@ export default function AddNewPostPage() {
                 <Button type="button" variant="outline" onClick={() => handlePostSubmit('Draft')} disabled={isSaving}>
                    <Save className="mr-2 h-4 w-4" />
                    Save Draft
+                </Button>
+                 <Button type="button" variant="secondary" onClick={() => handlePostSubmit('Scheduled')} disabled={isSaving}>
+                   <Clock className="mr-2 h-4 w-4" />
+                   Schedule
                 </Button>
                 <Button type="button" onClick={() => handlePostSubmit('Published')} disabled={isSaving}>
                   {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4" />}
