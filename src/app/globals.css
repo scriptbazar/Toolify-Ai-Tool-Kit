@@ -144,4 +144,15 @@
     .recaptcha-subtext {
         @apply text-[10px] text-gray-500;
     }
+
+    /* React Quill Editor Styles */
+    .ql-toolbar {
+        @apply rounded-t-lg border-input bg-muted;
+    }
+    .ql-container {
+        @apply rounded-b-lg border-input;
+    }
+    .ql-editor {
+      min-height: 200px;
+    }
 }
