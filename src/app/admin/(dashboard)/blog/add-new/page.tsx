@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -282,7 +282,7 @@ export default function AddNewPostPage() {
                                 <div className="p-2 border rounded-md bg-muted flex items-center gap-2">
                                      <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button type="button" variant="outline" size="icon">
+                                            <Button type="button" variant="outline" size="icon" title="Headings">
                                                 <Heading className="h-4 w-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
@@ -297,12 +297,15 @@ export default function AddNewPostPage() {
                                             <DropdownMenuItem onClick={() => handleWrapTag('pre')}>Preformatted</DropdownMenuItem>
                                         </DropdownMenuContent>
                                      </DropdownMenu>
-                                     <Button type="button" variant="outline" size="sm" onClick={() => handleWrapTag('b')}><Bold className="h-4 w-4"/></Button>
-                                     <Button type="button" variant="outline" size="sm" onClick={() => handleWrapTag('i')}><Italic className="h-4 w-4"/></Button>
-                                     <Button type="button" variant="outline" size="sm" onClick={() => handleAddList('ul')}><List className="h-4 w-4"/></Button>
-                                     <Button type="button" variant="outline" size="sm" onClick={() => handleAddList('ol')}><ListOrdered className="h-4 w-4"/></Button>
-                                     <Button type="button" variant="outline" size="sm" title="Inbound Links"><ArrowDownLeft className="h-4 w-4"/></Button>
-                                     <Button type="button" variant="outline" size="sm" title="Outbound Links"><ArrowUpRight className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" onClick={() => handleWrapTag('b')} title="Bold"><Bold className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" onClick={() => handleWrapTag('i')} title="Italic"><Italic className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" onClick={() => handleAddList('ul')} title="Bulleted List"><List className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" onClick={() => handleAddList('ol')} title="Numbered List"><ListOrdered className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" title="Inbound Links"><ArrowDownLeft className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" title="Outbound Links"><ArrowUpRight className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" title="Align Left"><AlignLeft className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" title="Align Center"><AlignCenter className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" title="Align Right"><AlignRight className="h-4 w-4"/></Button>
                                     <div className="ml-auto">
                                         <Button 
                                             type="button" 
@@ -310,9 +313,10 @@ export default function AddNewPostPage() {
                                             disabled={isGenerating}
                                             variant="outline"
                                             size="sm"
+                                            title="Generate with AI"
                                             >
                                             {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                                            Generate with AI
+                                            Generate
                                         </Button>
                                     </div>
                                 </div>
