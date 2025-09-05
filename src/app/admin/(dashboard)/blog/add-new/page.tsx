@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter, generateMetaDescription, generateTargetKeywords } from '@/ai/flows/ai-writer';
-import { upsertPost } from '@/ai/flows/blog-management';
+import { upsertPost, getCategories, getPosts, type Category, type Post } from '@/ai/flows/blog-management';
 import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon, Image as ImageIcon, Clock, UploadCloud, Eye, Code } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -49,6 +49,11 @@ const postSchema = z.object({
 
 type PostFormValues = z.infer<typeof postSchema>;
 
+interface CategoryWithCount extends Category {
+  count: number;
+}
+
+
 export default function AddNewPostPage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -59,6 +64,8 @@ export default function AddNewPostPage() {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'code' | 'visual'>('code');
+  const [categories, setCategories] = useState<CategoryWithCount[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
   const contentTextAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -88,8 +95,43 @@ export default function AddNewPostPage() {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         setUser(currentUser);
     });
+    
+    async function fetchCategoriesAndPosts() {
+      try {
+        const [fetchedCategories, fetchedPosts] = await Promise.all([
+          getCategories(),
+          getPosts(),
+        ]);
+        
+        const categoryCounts = fetchedPosts.reduce((acc, post) => {
+          const categoryName = post.category;
+          if (categoryName) {
+              acc[categoryName] = (acc[categoryName] || 0) + 1;
+          }
+          return acc;
+        }, {} as Record<string, number>);
+
+        const categoriesWithCounts = fetchedCategories.map(cat => ({
+          ...cat,
+          count: categoryCounts[cat.name] || 0,
+        }));
+        
+        setCategories(categoriesWithCounts);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Could not load categories.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingCategories(false);
+      }
+    }
+
+    fetchCategoriesAndPosts();
+    
     return () => unsubscribe();
-  }, []);
+  }, [toast]);
 
   const imageUrlValue = form.watch('imageUrl');
 
@@ -394,6 +436,7 @@ export default function AddNewPostPage() {
   };
 
   const handlePostSubmit = (status: PostFormValues['status']) => {
+    form.setValue('status', status);
     form.handleSubmit(processAndSavePost)();
   };
 
@@ -465,23 +508,24 @@ export default function AddNewPostPage() {
                             />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <FormField
+                             <FormField
                                 control={form.control}
                                 name="category"
                                 render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Category</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loadingCategories}>
                                     <FormControl>
                                         <SelectTrigger>
-                                        <SelectValue placeholder="Select a category" />
+                                        <SelectValue placeholder={loadingCategories ? "Loading..." : "Select a category"} />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="technology">Technology</SelectItem>
-                                        <SelectItem value="ai">Artificial Intelligence</SelectItem>
-                                        <SelectItem value="productivity">Productivity</SelectItem>
-                                        <SelectItem value="news">News</SelectItem>
+                                        {categories.map(cat => (
+                                            <SelectItem key={cat.id} value={cat.name}>
+                                                {cat.name} ({cat.count})
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                     </Select>
                                     <FormMessage />
