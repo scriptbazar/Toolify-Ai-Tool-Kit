@@ -29,7 +29,7 @@ if (!getApps().length) {
 // This will be undefined if initialization failed.
 try {
     adminDb = getFirestore();
-} catch (error) {
+} catch (error: any) {
      console.error("CRITICAL: Failed to get Firestore instance. Server-side database features will be disabled.", error);
 }
 
