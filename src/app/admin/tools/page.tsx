@@ -112,8 +112,9 @@ export default async function AdminToolsPage({
         newSearchParams.set(key, String(value));
       }
     }
-    return `?${newSearchParams.toString()}`;
-  }
+    const queryString = newSearchParams.toString();
+    return queryString ? `?${queryString}` : '/admin/tools';
+  };
 
 
   return (
@@ -165,23 +166,23 @@ export default async function AdminToolsPage({
                     <input type="hidden" name="filter" value={activeFilter} />
                     <input type="hidden" name="category" value={activeCategory} />
                 </form>
-                <Select value={activeCategory}>
-                    <SelectTrigger className="w-full sm:w-auto h-10">
+                <Select value={activeCategory} onValueChange={(value) => router.push(createQueryString({ category: value, page: 1 }))}>
+                    <SelectTrigger className="w-full sm:w-[180px] h-10">
                         <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
                        <SelectItem value="all">
-                            <Link href={createQueryString({ category: 'all', page: 1 })} className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <LayoutGrid className="h-4 w-4" />
                                 All Categories
-                            </Link>
+                            </div>
                         </SelectItem>
                         {toolCategories.map(cat => (
                            <SelectItem key={cat.id} value={cat.id}>
-                             <Link href={createQueryString({ category: cat.id, page: 1 })} className="flex items-center gap-2">
+                             <div className="flex items-center gap-2">
                                <cat.Icon className="h-4 w-4" />
                                {cat.name}
-                             </Link>
+                             </div>
                            </SelectItem>
                         ))}
                     </SelectContent>
