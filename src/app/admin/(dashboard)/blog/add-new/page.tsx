@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { aiWriter } from '@/ai/flows/ai-writer';
+import { aiWriter, generateMetaDescription } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
 import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon, Image as ImageIcon, Clock, UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -53,6 +53,7 @@ type PostFormValues = z.infer<typeof postSchema>;
 export default function AddNewPostPage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingMeta, setIsGeneratingMeta] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -111,7 +112,7 @@ export default function AddNewPostPage() {
     const selectedText = currentText.substring(start, end);
     
     if (!selectedText) {
-        toast({ title: "No text selected", description: `Please select the text you want to make ${tag}.`, variant: "destructive" });
+        toast({ title: "No text selected", description: `Please select the text you want to format.`, variant: "destructive" });
         return;
     }
     
@@ -294,6 +295,26 @@ export default function AddNewPostPage() {
       });
     } finally {
       setIsGenerating(false);
+    }
+  };
+  
+  const handleGenerateMetaDescription = async () => {
+    const { title, content, targetKeyword } = form.getValues();
+    if (!title || !content) {
+        toast({ title: "Content is required", description: "Please provide a title and post content to generate a meta description.", variant: "destructive" });
+        return;
+    }
+    
+    setIsGeneratingMeta(true);
+    try {
+        const result = await generateMetaDescription({ title, content, targetKeyword });
+        form.setValue('metaDescription', result.metaDescription, { shouldValidate: true });
+        toast({ title: 'Meta Description Generated!', description: 'An SEO-friendly meta description has been created.' });
+    } catch (error: any) {
+        console.error('Meta description generation failed:', error);
+        toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' });
+    } finally {
+        setIsGeneratingMeta(false);
     }
   };
 
@@ -609,7 +630,20 @@ export default function AddNewPostPage() {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Meta Description</FormLabel>
-                                <FormControl><Textarea {...field} placeholder="A short, compelling description for search results (max 160 characters)." maxLength={160} /></FormControl>
+                                 <div className="relative">
+                                    <FormControl><Textarea {...field} placeholder="A short, compelling description for search results (max 160 characters)." maxLength={160} /></FormControl>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="absolute top-1 right-1 h-7 w-7"
+                                        onClick={handleGenerateMetaDescription}
+                                        disabled={isGeneratingMeta}
+                                        title="Generate with AI"
+                                        >
+                                            {isGeneratingMeta ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                                    </Button>
+                                </div>
                                 <FormMessage />
                                 </FormItem>
                             )}
