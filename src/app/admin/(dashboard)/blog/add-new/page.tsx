@@ -93,6 +93,11 @@ export default function AddNewPostPage() {
     const currentText = form.getValues('content');
     const selectedText = currentText.substring(start, end);
     
+    if (!selectedText) {
+        toast({ title: "No text selected", description: `Please select the text you want to make ${tag}.`, variant: "destructive" });
+        return;
+    }
+    
     const newText = `${currentText.substring(0, start)}<${tag}>${selectedText}</${tag}>${currentText.substring(end)}`;
     
     form.setValue('content', newText, { shouldValidate: true });
