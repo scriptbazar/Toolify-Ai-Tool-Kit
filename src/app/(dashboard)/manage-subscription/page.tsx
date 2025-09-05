@@ -15,13 +15,15 @@ import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { createStripeCheckoutSession, createPayPalOrder } from '@/ai/flows/payment-management';
+import { createStripeCheckoutSession, createPayPalOrder, createRazorpayOrder, createPayUPayment, createCashfreePayment, createPhonePePayment } from '@/ai/flows/payment-management';
 import { loadStripe } from '@stripe/stripe-js';
 
 
 interface UserProfile {
   planId?: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 export default function ManageSubscriptionPage() {
@@ -129,15 +131,7 @@ export default function ManageSubscriptionPage() {
     }
 
     // Other Gateways
-    const anyOtherGatewayEnabled = Object.values(paymentSettings || {}).some(gateway => gateway?.isEnabled);
-    if (anyOtherGatewayEnabled) {
-         toast({ title: 'Coming Soon!', description: 'This payment gateway is not yet supported. Please contact support.', variant: 'default'});
-         setIsProcessing(null);
-         return;
-    }
-
-    // No Gateway enabled
-    toast({ title: 'Not Available', description: 'Online payment is currently not available. Please contact support.', variant: 'destructive'});
+    toast({ title: 'Not Available', description: 'This payment gateway is not yet supported. Please contact support.', variant: 'destructive'});
     setIsProcessing(null);
   };
 
@@ -229,3 +223,5 @@ export default function ManageSubscriptionPage() {
     </div>
   );
 }
+
+    
