@@ -15,10 +15,11 @@ import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Wand2, UploadCloud, Send, Loader2, Save, ArrowLeft } from 'lucide-react';
+import { Wand2, UploadCloud, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { RichTextEditor } from '@/components/common/RichTextEditor';
 
 const postSchema = z.object({
   title: z.string().min(5, { message: 'Title must be at least 5 characters long.' }),
@@ -27,6 +28,10 @@ const postSchema = z.object({
   category: z.string().min(1, { message: 'Please select a category.' }),
   tags: z.string().optional(),
   status: z.enum(['Published', 'Draft', 'Scheduled', 'Trash']),
+  metaDescription: z.string().optional(),
+  targetKeyword: z.string().optional(),
+  inboundLinks: z.string().optional(),
+  outboundLinks: z.string().optional(),
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
@@ -49,6 +54,10 @@ export default function AddNewPostPage() {
       category: '',
       tags: '',
       status: 'Draft',
+      metaDescription: '',
+      targetKeyword: '',
+      inboundLinks: '',
+      outboundLinks: '',
     },
   });
 
@@ -150,7 +159,7 @@ export default function AddNewPostPage() {
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(processAndSavePost)}>
+        <form>
           <div className="flex items-center justify-between mb-6">
              <div>
                 <Link href="/admin/blog/all-posts" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-2">
@@ -252,33 +261,88 @@ export default function AddNewPostPage() {
                     <CardContent>
                        <div className="relative">
                             <FormField
-                            control={form.control}
-                            name="content"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel className="sr-only">Post Body</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                    placeholder="Write your amazing blog post here, or generate it with AI..."
-                                    className="min-h-[400px] resize-y"
-                                    {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
+                                control={form.control}
+                                name="content"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel className="sr-only">Post Body</FormLabel>
+                                    <FormControl>
+                                        <RichTextEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="Write your amazing blog post here, or generate it with AI..."
+                                            className="min-h-[400px]"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
                             />
                             <Button 
                             type="button" 
                             onClick={handleGenerateContent} 
                             disabled={isGenerating}
                             variant="outline"
-                            className="absolute bottom-4 right-4"
+                            className="absolute bottom-4 right-4 z-10"
                             size="sm"
                             >
                             {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
                             Generate with AI
                             </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>SEO Settings</CardTitle>
+                        <CardDescription>Optimize your post for search engines.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="metaDescription"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Meta Description</FormLabel>
+                                <FormControl><Textarea {...field} placeholder="A short, compelling description for search results (max 160 characters)." maxLength={160} /></FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="targetKeyword"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel className="flex items-center gap-2"><Target className="h-4 w-4"/> Target Keyword</FormLabel>
+                                <FormControl><Input {...field} placeholder="e.g., 'best ai tools'" /></FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="inboundLinks"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel className="flex items-center gap-2"><LinkIcon className="h-4 w-4"/> Inbound Links</FormLabel>
+                                    <FormControl><Textarea {...field} placeholder="One URL per line" /></FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="outboundLinks"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel className="flex items-center gap-2"><LinkIcon className="h-4 w-4"/> Outbound Links</FormLabel>
+                                    <FormControl><Textarea {...field} placeholder="One URL per line" /></FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         </div>
                     </CardContent>
                 </Card>
