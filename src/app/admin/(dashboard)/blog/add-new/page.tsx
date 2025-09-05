@@ -122,7 +122,7 @@ export default function AddNewPostPage() {
     form.setValue('content', newText, { shouldValidate: true });
     textarea.focus();
   };
-
+  
   const handleAddList = (type: 'ul' | 'ol') => {
     const textarea = contentTextAreaRef.current;
     if (!textarea) return;
@@ -211,6 +211,23 @@ export default function AddNewPostPage() {
     const currentText = form.getValues('content');
     const newText = `${currentText.substring(0, start)}\n${embedCode}\n${currentText.substring(start)}`;
     
+    form.setValue('content', newText, { shouldValidate: true });
+    textarea.focus();
+  };
+  
+  const handleInsertToc = () => {
+    const textarea = contentTextAreaRef.current;
+    if (!textarea) return;
+    const tocPlaceholder = `\n<div class="table-of-contents">
+  <h4>Table of Contents</h4>
+  <ul>
+    <li><a href="#section-1">Section 1</a></li>
+    <li><a href="#section-2">Section 2</a></li>
+  </ul>
+</div>\n`;
+    const start = textarea.selectionStart;
+    const currentText = form.getValues('content');
+    const newText = `${currentText.substring(0, start)}${tocPlaceholder}${currentText.substring(start)}`;
     form.setValue('content', newText, { shouldValidate: true });
     textarea.focus();
   };
@@ -591,7 +608,7 @@ export default function AddNewPostPage() {
                                      <Button type="button" variant="outline" size="icon" onClick={() => handleWrapTag('b')} title="Bold"><Bold className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" onClick={() => handleWrapTag('i')} title="Italic"><Italic className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" onClick={() => handleAddList('ul')} title="Bulleted List"><List className="h-4 w-4"/></Button>
-                                     <Button type="button" variant="outline" size="icon" onClick={() => handleAddList('ol')} title="Numbered List"><ListOrdered className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" onClick={handleInsertToc} title="Table of Contents"><ListOrdered className="h-4 w-4" /></Button>
                                      <Button type="button" variant="outline" size="icon" title="Inbound Links"><ArrowDownLeft className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Outbound Links"><ArrowUpRight className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Insert Image" onClick={handleInsertImage}><ImageIcon className="h-4 w-4" /></Button>
@@ -619,11 +636,10 @@ export default function AddNewPostPage() {
                                             onClick={handleGenerateContent} 
                                             disabled={isGenerating}
                                             variant="outline"
-                                            size="sm"
+                                            size="icon"
                                             title="Generate with AI"
                                             >
-                                            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                                            Generate
+                                            {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
                                         </Button>
                                     </div>
                                 </div>
