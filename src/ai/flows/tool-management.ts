@@ -136,13 +136,11 @@ export async function getTools(): Promise<Tool[]> {
       const batch = adminDb.batch();
       for (const toolData of initialTools) {
           const slug = toolData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-          // Use the slug as the document ID for consistency
           const docRef = toolsRef.doc(slug);
           batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
       }
       await batch.commit();
       
-      // After populating, re-fetch to get the data with IDs
       const populatedSnapshot = await toolsRef.orderBy('name').get();
       return populatedSnapshot.docs.map(doc => {
           const data = doc.data();
@@ -150,13 +148,15 @@ export async function getTools(): Promise<Tool[]> {
       });
     }
     
-    // If collection is not empty, sort and return the fetched tools.
-    const sortedDocs = snapshot.docs.sort((a, b) => a.data().name.localeCompare(b.data().name));
-    
-    return sortedDocs.map(doc => {
+    const fetchedTools = snapshot.docs.map(doc => {
         const data = doc.data();
         return ToolSchema.parse({ ...data, id: doc.id });
     });
+    
+    // Sort tools by name
+    fetchedTools.sort((a, b) => a.name.localeCompare(b.name));
+    
+    return fetchedTools;
 
   } catch (error) {
     console.error("Error fetching tools:", error);
