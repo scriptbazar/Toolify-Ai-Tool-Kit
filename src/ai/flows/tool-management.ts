@@ -120,44 +120,30 @@ const initialTools: Omit<Tool, 'id' | 'slug'>[] = [
  */
 export async function getTools(): Promise<Tool[]> {
   if (!adminDb) {
-    console.warn("Firebase Admin is not initialized. Skipping Firestore call and returning initial tools.");
-    return initialTools.map(tool => ({...tool, id: tool.name.toLowerCase().replace(/\s+/g, '-'), slug: tool.name.toLowerCase().replace(/\s+/g, '-')}));
+    console.warn("Firebase Admin is not initialized. Skipping Firestore call.");
+    return [];
   }
   try {
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
-    const snapshot = await toolsRef.get();
+    const snapshot = await toolsRef.orderBy('name').get();
 
-    const existingSlugs = new Set(snapshot.docs.map(doc => doc.data().slug));
-    const batch = adminDb.batch();
-    let hasNewTools = false;
-
-    for (const toolData of initialTools) {
-        const slug = toolData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-        if (!existingSlugs.has(slug)) {
-            const docRef = toolsRef.doc(slug);
-            batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
-            hasNewTools = true;
-        }
+    if (snapshot.empty) {
+      // If the collection is empty, populate it with the initial tools.
+      const batch = adminDb.batch();
+      for (const toolData of initialTools) {
+          const slug = toolData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+          const docRef = toolsRef.doc(slug);
+          batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
+      }
+      await batch.commit();
+      
+      // Re-fetch after populating
+      const populatedSnapshot = await toolsRef.orderBy('name').get();
+      return populatedSnapshot.docs.map(doc => ToolSchema.parse({ ...doc.data(), id: doc.id }));
     }
-
-    if (hasNewTools) {
-        await batch.commit();
-        // Re-fetch the data after populating to get a complete, sorted list
-        const updatedSnapshot = await toolsRef.orderBy('name').get();
-        const tools = updatedSnapshot.docs.map(doc => {
-            const data = doc.data();
-            return ToolSchema.parse({ ...data, id: doc.id });
-        });
-        return tools;
-    }
-
-    // If no new tools were added, just return the originally fetched and sorted data
-    const sortedDocs = snapshot.docs.sort((a, b) => a.data().name.localeCompare(b.data().name));
-    const tools = sortedDocs.map(doc => {
-        const data = doc.data();
-        return ToolSchema.parse({ ...data, id: doc.id });
-    });
-    return tools;
+    
+    // If collection is not empty, just return the fetched tools.
+    return snapshot.docs.map(doc => ToolSchema.parse({ ...doc.data(), id: doc.id }));
 
   } catch (error) {
     console.error("Error fetching tools:", error);
@@ -358,4 +344,6 @@ export async function updateToolRequestStatus(requestId: string, status: 'approv
         return { success: false, message: error.message || 'An unknown error occurred.' };
     }
 }
+    
+
     
