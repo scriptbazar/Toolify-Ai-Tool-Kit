@@ -1,4 +1,6 @@
 
+'use client';
+
 import { ToolCard } from '@/components/tools/ToolCard';
 import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
@@ -42,31 +44,40 @@ import {
   PlusCircle,
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState, useMemo } from 'react';
 
-export default async function AdminToolsPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  const allTools = await getTools();
+export default function AdminToolsPage() {
+  const [allTools, setAllTools] = useState<Tool[]>([]);
+  const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const searchQuery = typeof searchParams.q === 'string' ? searchParams.q : '';
-  const activeCategory = typeof searchParams.category === 'string' ? searchParams.category as ToolCategory : 'all';
-  const activeFilter = typeof searchParams.filter === 'string' ? searchParams.filter : 'all';
-  const page = typeof searchParams.page === 'string' ? Number(searchParams.page) : 1;
+  useEffect(() => {
+    setLoading(true);
+    getTools()
+      .then(tools => setAllTools(tools))
+      .catch(err => console.error("Failed to load tools", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const searchQuery = searchParams.get('q') || '';
+  const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
+  const activeFilter = searchParams.get('filter') || 'all';
+  const page = Number(searchParams.get('page')) || 1;
 
   const ITEMS_PER_PAGE = 10;
 
-  const counts = {
+  const counts = useMemo(() => ({
     all: allTools.length,
     pro: allTools.filter(t => t.plan === 'Pro').length,
     free: allTools.filter(t => t.plan === 'Free').length,
     new: allTools.filter(t => t.isNew).length,
     active: allTools.filter(t => t.status === 'Active').length,
     disabled: allTools.filter(t => t.status === 'Disabled').length,
-  };
+  }), [allTools]);
 
-  const filteredTools = allTools
+  const filteredTools = useMemo(() => allTools
       .filter(tool => {
         if (activeFilter === 'all') return true;
         if (activeFilter === 'pro') return tool.plan === 'Pro';
@@ -82,7 +93,7 @@ export default async function AdminToolsPage({
       })
       .filter(tool =>
         tool.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      ), [allTools, activeFilter, activeCategory, searchQuery]);
     
   const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
   const paginatedTools = filteredTools.slice(
@@ -104,7 +115,7 @@ export default async function AdminToolsPage({
   ];
   
   const createQueryString = (params: Record<string, string | number | null>) => {
-    const newSearchParams = new URLSearchParams(searchParams as any);
+    const newSearchParams = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(params)) {
       if (value === null) {
         newSearchParams.delete(key);
@@ -112,10 +123,8 @@ export default async function AdminToolsPage({
         newSearchParams.set(key, String(value));
       }
     }
-    const queryString = newSearchParams.toString();
-    return queryString ? `?${queryString}` : '/admin/tools';
+    return newSearchParams.toString();
   };
-
 
   return (
     <div className="space-y-6">
@@ -146,7 +155,7 @@ export default async function AdminToolsPage({
                   size="sm"
                   className="shrink-0 gap-1.5 px-3"
                 >
-                  <Link href={createQueryString({ filter: tab.id, page: 1 })}>
+                  <Link href={`/admin/tools?${createQueryString({ filter: tab.id, page: '1' })}`}>
                     <tab.icon className="h-4 w-4" />
                     {tab.label} ({tab.count})
                   </Link>
@@ -162,11 +171,10 @@ export default async function AdminToolsPage({
                         placeholder="Search tools..."
                         className="pl-9 w-full sm:max-w-xs h-10"
                     />
-                     {/* Hidden inputs to preserve other filters */}
                     <input type="hidden" name="filter" value={activeFilter} />
                     <input type="hidden" name="category" value={activeCategory} />
                 </form>
-                <Select value={activeCategory} onValueChange={(value) => router.push(createQueryString({ category: value, page: 1 }))}>
+                <Select value={activeCategory} onValueChange={(value) => router.push(`/admin/tools?${createQueryString({ category: value, page: '1' })}`)}>
                     <SelectTrigger className="w-full sm:w-[180px] h-10">
                         <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
@@ -242,7 +250,7 @@ export default async function AdminToolsPage({
            {totalPages > 1 && (
             <div className="flex items-center justify-end space-x-2 pt-4">
               <Button asChild variant="outline" size="sm" disabled={page <= 1}>
-                <Link href={createQueryString({ page: page - 1 })}>
+                <Link href={`/admin/tools?${createQueryString({ page: page - 1 })}`}>
                   <ArrowLeft className="mr-2 h-4 w-4" /> Previous
                 </Link>
               </Button>
@@ -250,7 +258,7 @@ export default async function AdminToolsPage({
                 Page {page} of {totalPages}
               </span>
               <Button asChild variant="outline" size="sm" disabled={page >= totalPages}>
-                <Link href={createQueryString({ page: page + 1 })}>
+                <Link href={`/admin/tools?${createQueryString({ page: page + 1 })}`}>
                   Next <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
