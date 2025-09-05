@@ -129,10 +129,11 @@ export async function getTools(): Promise<Tool[]> {
   }
   try {
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
-    const snapshot = await toolsRef.orderBy('name').get();
+    const snapshot = await toolsRef.get();
 
     if (snapshot.empty) {
       // If the collection is empty, populate it with the initial tools.
+      console.log('Tools collection is empty, populating with initial tools...');
       const batch = adminDb.batch();
       for (const toolData of initialTools) {
           const slug = toolData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
@@ -147,7 +148,8 @@ export async function getTools(): Promise<Tool[]> {
     }
     
     // If collection is not empty, just return the fetched tools.
-    return snapshot.docs.map(doc => ToolSchema.parse({ ...doc.data(), id: doc.id }));
+    const sortedDocs = snapshot.docs.sort((a, b) => a.data().name.localeCompare(b.data().name));
+    return sortedDocs.map(doc => ToolSchema.parse({ ...doc.data(), id: doc.id }));
 
   } catch (error) {
     console.error("Error fetching tools:", error);
