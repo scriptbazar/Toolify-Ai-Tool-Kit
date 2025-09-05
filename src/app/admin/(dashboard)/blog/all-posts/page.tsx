@@ -73,11 +73,7 @@ export default function AllPostsPage() {
   const filteredPosts = useMemo(() => {
     let posts = allPosts;
     if (activeFilter !== 'All') {
-        if (activeFilter === 'Draft') {
-            posts = posts.filter(p => p.status === 'Draft' || p.status === 'Scheduled');
-        } else {
-            posts = posts.filter(p => p.status === activeFilter);
-        }
+        posts = posts.filter(p => p.status === activeFilter);
     }
     return posts.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [allPosts, searchQuery, activeFilter]);
@@ -119,12 +115,12 @@ export default function AllPostsPage() {
     { id: 'All', label: 'All', icon: FileText },
     { id: 'Published', label: 'Published', icon: CheckCircle },
     { id: 'Draft', label: 'Drafts', icon: Edit },
+    { id: 'Scheduled', label: 'Scheduled', icon: Clock },
     { id: 'Trash', label: 'Trash', icon: Trash2 },
   ];
 
   const getCount = (status: PostStatus | 'All') => {
     if (status === 'All') return allPosts.length;
-    if (status === 'Draft') return allPosts.filter(p => p.status === 'Draft' || p.status === 'Scheduled').length;
     return allPosts.filter(p => p.status === status).length;
   }
 
@@ -169,12 +165,6 @@ export default function AllPostsPage() {
                   className="pl-9 w-full sm:w-52"
                 />
               </div>
-              <Button asChild>
-                <Link href="/admin/blog/add-new">
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add New
-                </Link>
-              </Button>
             </div>
           </div>
 
