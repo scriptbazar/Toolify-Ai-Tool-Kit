@@ -132,24 +132,31 @@ export async function getTools(): Promise<Tool[]> {
     const snapshot = await toolsRef.get();
 
     if (snapshot.empty) {
-      // If the collection is empty, populate it with the initial tools.
       console.log('Tools collection is empty, populating with initial tools...');
       const batch = adminDb.batch();
       for (const toolData of initialTools) {
           const slug = toolData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+          // Use the slug as the document ID for consistency
           const docRef = toolsRef.doc(slug);
           batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
       }
       await batch.commit();
       
-      // Re-fetch after populating
+      // After populating, re-fetch to get the data with IDs
       const populatedSnapshot = await toolsRef.orderBy('name').get();
-      return populatedSnapshot.docs.map(doc => ToolSchema.parse({ ...doc.data(), id: doc.id }));
+      return populatedSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return ToolSchema.parse({ ...data, id: doc.id });
+      });
     }
     
-    // If collection is not empty, just return the fetched tools.
+    // If collection is not empty, sort and return the fetched tools.
     const sortedDocs = snapshot.docs.sort((a, b) => a.data().name.localeCompare(b.data().name));
-    return sortedDocs.map(doc => ToolSchema.parse({ ...doc.data(), id: doc.id }));
+    
+    return sortedDocs.map(doc => {
+        const data = doc.data();
+        return ToolSchema.parse({ ...data, id: doc.id });
+    });
 
   } catch (error) {
     console.error("Error fetching tools:", error);
@@ -355,3 +362,4 @@ export async function updateToolRequestStatus(requestId: string, status: 'approv
     
 
     
+
