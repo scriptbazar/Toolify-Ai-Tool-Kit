@@ -28,19 +28,16 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import {
-  List,
   ListChecks,
   ListX,
-  Sparkle,
+  Sparkles,
   LayoutGrid,
   ArrowLeft,
   ArrowRight,
-  MoreHorizontal,
   Edit,
   CheckCircle,
   XCircle,
   Star,
-  Sparkles,
   PlusCircle,
   Loader2,
 } from 'lucide-react';
@@ -183,16 +180,16 @@ export default function AdminToolsPage() {
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
              <div className="flex flex-wrap items-center gap-2 flex-grow">
                {tabs.map((tab) => (
-                <Link key={tab.id} href={`?${createQueryString({ filter: tab.id, page: '1' })}`} scroll={false}>
-                    <Button
-                      variant={activeFilter === tab.id ? 'default' : 'outline'}
-                      size="sm"
-                      className="shrink-0 gap-1.5 px-3"
-                    >
-                      <tab.icon className="h-4 w-4" />
-                      {tab.label} ({tab.count})
-                    </Button>
-                </Link>
+                <Button
+                  key={tab.id}
+                  variant={activeFilter === tab.id ? 'default' : 'outline'}
+                  size="sm"
+                  className="shrink-0 gap-1.5 px-3"
+                  onClick={() => handleFilterChange(tab.id)}
+                >
+                  <tab.icon className="h-4 w-4" />
+                  {tab.label} ({tab.count})
+                </Button>
               ))}
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -287,19 +284,15 @@ export default function AdminToolsPage() {
           
            {totalPages > 1 && (
             <div className="flex items-center justify-end space-x-2 pt-4">
-              <Link href={`?${createQueryString({ page: page - 1 })}`} scroll={false}>
-                <Button variant="outline" size="sm" disabled={page <= 1}>
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-                </Button>
-              </Link>
+              <Button variant="outline" size="sm" onClick={() => router.push(`?${createQueryString({ page: page - 1 })}`)} disabled={page <= 1}>
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
               <span className="text-sm text-muted-foreground">
                 Page {page} of {totalPages}
               </span>
-              <Link href={`?${createQueryString({ page: page + 1 })}`} scroll={false}>
-                <Button variant="outline" size="sm" disabled={page >= totalPages}>
-                    Next <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+              <Button variant="outline" size="sm" onClick={() => router.push(`?${createQueryString({ page: page + 1 })}`)} disabled={page >= totalPages}>
+                  Next <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           )}
         </CardContent>
