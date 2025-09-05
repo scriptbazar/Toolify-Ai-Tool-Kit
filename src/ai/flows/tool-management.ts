@@ -4,7 +4,7 @@
 /**
  * @fileOverview Manages tools in Firestore.
  */
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { type Tool, ToolSchema, UpsertToolInputSchema, type ToolRequest, ToolRequestSchema } from './tool-management.types';
 
@@ -121,10 +121,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
-  if (!adminDb) {
-    console.warn("Firebase Admin is not initialized. Skipping Firestore call.");
-    return [];
-  }
+  const adminDb = getAdminDb();
   try {
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
     let snapshot = await toolsRef.get();
@@ -164,9 +161,7 @@ export async function getTools(): Promise<Tool[]> {
  * @returns {Promise<{ success: boolean; message: string; toolId?: string }>}
  */
 export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: boolean; message: string; toolId?: string }> {
-  if (!adminDb) {
-    return { success: false, message: 'Firebase Admin is not initialized.' };
-  }
+  const adminDb = getAdminDb();
   try {
     const { id, ...data } = toolData;
     
@@ -197,9 +192,7 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
  * @returns {Promise<{ success: boolean; message: string }>}
  */
 export async function deleteTool(toolId: string): Promise<{ success: boolean; message: string }> {
-    if (!adminDb) {
-      return { success: false, message: 'Firebase Admin is not initialized.' };
-    }
+    const adminDb = getAdminDb();
     if (!toolId) {
         return { success: false, message: 'Tool ID is required.' };
     }
@@ -218,10 +211,7 @@ export async function deleteTool(toolId: string): Promise<{ success: boolean; me
  * @returns {Promise<Tool[]>} A list of the user's favorite tools.
  */
 export async function getFavoriteTools(userId: string): Promise<Tool[]> {
-  if (!adminDb) {
-    console.error("Firebase Admin is not initialized. Cannot fetch favorite tools.");
-    return [];
-  }
+  const adminDb = getAdminDb();
   try {
     const userDocRef = adminDb.collection('users').doc(userId);
     const userDocSnap = await userDocRef.get();
@@ -261,9 +251,7 @@ type RequestToolInput = {
 };
 
 export async function requestNewTool(input: RequestToolInput): Promise<{ success: boolean; message: string }> {
-    if (!adminDb) {
-        return { success: false, message: "Database not initialized." };
-    }
+    const adminDb = getAdminDb();
     try {
         const validatedInput = RequestToolInputSchema.parse(input);
         await adminDb.collection(TOOL_REQUESTS_COLLECTION).add({
@@ -282,7 +270,7 @@ export async function requestNewTool(input: RequestToolInput): Promise<{ success
  * Fetches all tool requests from Firestore.
  */
 export async function getToolRequests(): Promise<ToolRequest[]> {
-    if (!adminDb) return [];
+    const adminDb = getAdminDb();
     try {
         const snapshot = await adminDb.collection(TOOL_REQUESTS_COLLECTION).orderBy('requestedAt', 'desc').get();
         return snapshot.docs.map(doc => {
@@ -303,7 +291,7 @@ export async function getToolRequests(): Promise<ToolRequest[]> {
  * Updates the status of a tool request.
  */
 export async function updateToolRequestStatus(requestId: string, status: 'approved' | 'rejected'): Promise<{ success: boolean, message: string }> {
-    if (!adminDb) return { success: false, message: 'Database not initialized.' };
+    const adminDb = getAdminDb();
     try {
         const requestRef = adminDb.collection(TOOL_REQUESTS_COLLECTION).doc(requestId);
         await requestRef.update({ status });
@@ -312,6 +300,8 @@ export async function updateToolRequestStatus(requestId: string, status: 'approv
         return { success: false, message: error.message || 'An unknown error occurred.' };
     }
 }
+    
+
     
 
     
