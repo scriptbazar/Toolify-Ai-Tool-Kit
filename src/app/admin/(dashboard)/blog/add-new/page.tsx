@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target, Heading, Bold, Italic, List, ListOrdered } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -34,8 +34,6 @@ const postSchema = z.object({
   status: z.enum(['Published', 'Draft', 'Scheduled', 'Trash']),
   metaDescription: z.string().optional(),
   targetKeyword: z.string().optional(),
-  inboundLinks: z.string().optional(),
-  outboundLinks: z.string().optional(),
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
@@ -58,8 +56,6 @@ export default function AddNewPostPage() {
       status: 'Draft',
       metaDescription: '',
       targetKeyword: '',
-      inboundLinks: '',
-      outboundLinks: '',
     },
   });
 
@@ -73,7 +69,7 @@ export default function AddNewPostPage() {
     form.setValue('slug', slug, { shouldValidate: true });
   };
   
-  const handleWrapTag = (tag: 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'pre' | 'b' | 'i') => {
+  const handleWrapTag = (tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'pre' | 'b' | 'i') => {
     const textarea = contentTextAreaRef.current;
     if (!textarea) return;
 
@@ -286,7 +282,7 @@ export default function AddNewPostPage() {
                                 <div className="p-2 border rounded-md bg-muted flex items-center gap-2">
                                      <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button type="button" variant="outline" size="sm">
+                                            <Button type="button" variant="outline" size="icon">
                                                 <Heading className="h-4 w-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
@@ -305,7 +301,8 @@ export default function AddNewPostPage() {
                                      <Button type="button" variant="outline" size="sm" onClick={() => handleWrapTag('i')}><Italic className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="sm" onClick={() => handleAddList('ul')}><List className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="sm" onClick={() => handleAddList('ol')}><ListOrdered className="h-4 w-4"/></Button>
-                                     <Button type="button" variant="outline" size="sm"><LinkIcon className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="sm" title="Inbound Links"><ArrowDownLeft className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="sm" title="Outbound Links"><ArrowUpRight className="h-4 w-4"/></Button>
                                     <div className="ml-auto">
                                         <Button 
                                             type="button" 
