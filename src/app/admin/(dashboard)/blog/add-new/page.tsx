@@ -14,9 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Wand2, UploadCloud, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target } from 'lucide-react';
-import Image from 'next/image';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -38,9 +36,6 @@ type PostFormValues = z.infer<typeof postSchema>;
 export default function AddNewPostPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -68,18 +63,6 @@ export default function AddNewPostPage() {
       .replace(/\s+/g, '-')
       .replace(/[^\w-]+/g, '');
     form.setValue('slug', slug, { shouldValidate: true });
-  };
-  
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast({ title: "File too large", description: "Image must be smaller than 5MB.", variant: "destructive" });
-        return;
-      }
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
   };
 
   const handleGenerateContent = async () => {
@@ -116,18 +99,8 @@ export default function AddNewPostPage() {
   const processAndSavePost = async (values: PostFormValues) => {
     setIsSaving(true);
     try {
-      let imageUrl: string | undefined = undefined;
-      if (imageFile) {
-        const storage = getStorage();
-        const storageRef = ref(storage, `blog-images/${Date.now()}-${imageFile.name}`);
-        const snapshot = await uploadBytes(storageRef, imageFile);
-        imageUrl = await getDownloadURL(snapshot.ref);
-      }
-      
       const postData = {
           ...values,
-          imageUrl,
-          imageHint: values.title.split(' ').slice(0, 2).join(' '),
           tags: values.tags?.split(',').map(tag => tag.trim()).filter(Boolean) || [],
       };
 
@@ -180,7 +153,7 @@ export default function AddNewPostPage() {
           </div>
         
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-3 space-y-6">
                 <Card>
                     <CardHeader>
                         <CardTitle>Post Details</CardTitle>
@@ -204,7 +177,7 @@ export default function AddNewPostPage() {
                                 control={form.control}
                                 name="slug"
                                 render={({ field }) => (
-                                    <FormItem className="lg:col-span-2">
+                                    <FormItem>
                                     <FormLabel>Post Slug</FormLabel>
                                     <FormControl>
                                         <Input placeholder="e.g., the-future-of-ai" {...field} />
@@ -213,11 +186,11 @@ export default function AddNewPostPage() {
                                     </FormItem>
                                 )}
                             />
-                             <FormField
+                            <FormField
                                 control={form.control}
                                 name="category"
                                 render={({ field }) => (
-                                <FormItem className="lg:col-span-2">
+                                <FormItem>
                                     <FormLabel>Category</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
@@ -240,7 +213,7 @@ export default function AddNewPostPage() {
                                 control={form.control}
                                 name="tags"
                                 render={({ field }) => (
-                                <FormItem className="lg:col-span-2">
+                                <FormItem className="lg:col-span-4">
                                     <FormLabel>Tags</FormLabel>
                                     <FormControl>
                                     <Input placeholder="AI, SaaS, Tech..." {...field} />
@@ -342,30 +315,6 @@ export default function AddNewPostPage() {
                                 )}
                             />
                         </div>
-                    </CardContent>
-                </Card>
-            </div>
-            <div className="lg:col-span-1 space-y-6">
-                 <Card>
-                    <CardHeader>
-                    <CardTitle>Featured Image</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                    <div 
-                        className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative"
-                        onClick={() => fileInputRef.current?.click()}
-                    >
-                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/png, image/jpeg, image/webp" />
-                        {imagePreview ? (
-                            <Image src={imagePreview} alt="Featured image preview" fill className="object-cover rounded-md" />
-                        ) : (
-                            <div className="flex flex-col items-center">
-                                <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                                <p className="text-sm text-muted-foreground">Click to upload image</p>
-                                <p className="text-xs text-muted-foreground">PNG, JPG, WEBP up to 5MB</p>
-                            </div>
-                        )}
-                    </div>
                     </CardContent>
                 </Card>
             </div>
