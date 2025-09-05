@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -17,7 +18,7 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Sparkles, CheckCircle, XCircle, Package, MoreHorizontal, Edit, PlusCircle, List, ListChecks, ListX, Sparkle, LayoutGrid } from 'lucide-react';
+import { Search, Star, Sparkles, CheckCircle, XCircle, Package, MoreHorizontal, Edit, PlusCircle, List, ListChecks, ListX, Sparkle, LayoutGrid, ArrowLeft, ArrowRight } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -172,6 +173,9 @@ export default function AdminToolsPage() {
             View, manage, and filter all available tools.
           </p>
         </div>
+         <Button asChild>
+            <Link href="/admin/tools/new"><PlusCircle className="mr-2 h-4 w-4"/>Add New Tool</Link>
+         </Button>
       </div>
       <Card>
         <CardHeader>
@@ -331,7 +335,7 @@ export default function AdminToolsPage() {
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
               >
-                Previous
+                <ArrowLeft className="mr-2 h-4 w-4" /> Previous
               </Button>
               <span className="text-sm text-muted-foreground">
                 Page {currentPage} of {totalPages}
@@ -342,7 +346,7 @@ export default function AdminToolsPage() {
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
               >
-                Next
+                Next <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           )}
