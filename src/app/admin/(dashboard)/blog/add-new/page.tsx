@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target, Heading } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target, Heading, Bold, Italic, List, ListOrdered } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -73,7 +73,7 @@ export default function AddNewPostPage() {
     form.setValue('slug', slug, { shouldValidate: true });
   };
   
-  const handleAddHeading = (tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'pre') => {
+  const handleWrapTag = (tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'pre' | 'b' | 'i') => {
     const textarea = contentTextAreaRef.current;
     if (!textarea) return;
 
@@ -85,7 +85,31 @@ export default function AddNewPostPage() {
     const newText = `${currentText.substring(0, start)}<${tag}>${selectedText}</${tag}>${currentText.substring(end)}`;
     
     form.setValue('content', newText, { shouldValidate: true });
+    textarea.focus();
   };
+
+  const handleAddList = (type: 'ul' | 'ol') => {
+    const textarea = contentTextAreaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentText = form.getValues('content');
+    const selectedText = currentText.substring(start, end);
+
+    let listHtml;
+    if (selectedText) {
+        const listItems = selectedText.split('\n').map(line => `  <li>${line}</li>`).join('\n');
+        listHtml = `<${type}>\n${listItems}\n</${type}>`;
+    } else {
+        listHtml = `<${type}>\n  <li>List item 1</li>\n  <li>List item 2</li>\n</${type}>`;
+    }
+    
+    const newText = `${currentText.substring(0, start)}${listHtml}${currentText.substring(end)}`;
+    form.setValue('content', newText, { shouldValidate: true });
+    textarea.focus();
+  };
+
 
   const handleGenerateContent = async () => {
     const title = form.getValues('title');
@@ -249,10 +273,8 @@ export default function AddNewPostPage() {
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div className="space-y-1.5">
-                            <CardTitle>Post Content</CardTitle>
-                        </div>
+                    <CardHeader>
+                        <CardTitle>Post Content</CardTitle>
                     </CardHeader>
                     <CardContent>
                        <FormField
@@ -269,16 +291,20 @@ export default function AddNewPostPage() {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            <DropdownMenuItem onClick={() => handleAddHeading('p')}>Paragraph</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleAddHeading('h1')}>Heading 1</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleAddHeading('h2')}>Heading 2</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleAddHeading('h3')}>Heading 3</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleAddHeading('h4')}>Heading 4</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleAddHeading('h5')}>Heading 5</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleAddHeading('h6')}>Heading 6</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleAddHeading('pre')}>Preformatted</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleWrapTag('p')}>Paragraph</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleWrapTag('h1')}>Heading 1</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleWrapTag('h2')}>Heading 2</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleWrapTag('h3')}>Heading 3</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleWrapTag('h4')}>Heading 4</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleWrapTag('h5')}>Heading 5</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleWrapTag('h6')}>Heading 6</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleWrapTag('pre')}>Preformatted</DropdownMenuItem>
                                         </DropdownMenuContent>
                                      </DropdownMenu>
+                                     <Button type="button" variant="outline" size="sm" onClick={() => handleWrapTag('b')}><Bold className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="sm" onClick={() => handleWrapTag('i')}><Italic className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="sm" onClick={() => handleAddList('ul')}><List className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="sm" onClick={() => handleAddList('ol')}><ListOrdered className="h-4 w-4"/></Button>
                                     <div className="ml-auto">
                                         <Button 
                                             type="button" 
