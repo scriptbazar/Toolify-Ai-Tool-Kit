@@ -14,9 +14,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target, Heading } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 
 const postSchema = z.object({
   title: z.string().min(5, { message: 'Title must be at least 5 characters long.' }),
@@ -66,7 +73,7 @@ export default function AddNewPostPage() {
     form.setValue('slug', slug, { shouldValidate: true });
   };
   
-  const handleAddHeading = (tag: 'h1' | 'h2' | 'h3') => {
+  const handleAddHeading = (tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') => {
     const textarea = contentTextAreaRef.current;
     if (!textarea) return;
 
@@ -255,9 +262,21 @@ export default function AddNewPostPage() {
                                 <FormItem>
                                 <FormLabel className="sr-only">Post Body</FormLabel>
                                 <div className="p-2 border rounded-md bg-muted flex items-center gap-2">
-                                     <Button type="button" variant="ghost" size="sm" onClick={() => handleAddHeading('h1')}>H1</Button>
-                                     <Button type="button" variant="ghost" size="sm" onClick={() => handleAddHeading('h2')}>H2</Button>
-                                     <Button type="button" variant="ghost" size="sm" onClick={() => handleAddHeading('h3')}>H3</Button>
+                                     <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button type="button" variant="ghost" size="sm">
+                                                <Heading className="mr-2 h-4 w-4" /> Add Heading
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                            <DropdownMenuItem onClick={() => handleAddHeading('h1')}>Heading 1</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleAddHeading('h2')}>Heading 2</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleAddHeading('h3')}>Heading 3</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleAddHeading('h4')}>Heading 4</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleAddHeading('h5')}>Heading 5</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleAddHeading('h6')}>Heading 6</DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                     </DropdownMenu>
                                     <div className="ml-auto">
                                         <Button 
                                             type="button" 
