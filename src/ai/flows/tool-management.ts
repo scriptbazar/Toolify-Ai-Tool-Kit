@@ -11,7 +11,7 @@ import { type Tool, ToolSchema, UpsertToolInputSchema, type ToolRequest, ToolReq
 const TOOLS_COLLECTION = 'tools';
 const TOOL_REQUESTS_COLLECTION = 'toolRequests';
 
-const initialTools: Omit<Tool, 'id' | 'slug'>[] = [
+const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     // Text Tools (10)
     { name: 'Case Converter', description: 'Convert text between different letter cases (e.g., uppercase, lowercase, title case).', icon: 'CaseSensitive', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Word Counter', description: 'Count words, characters, sentences, and paragraphs in your text.', icon: 'Calculator', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
@@ -144,7 +144,8 @@ export async function getTools(): Promise<Tool[]> {
     
     const fetchedTools = snapshot.docs.map(doc => {
         const data = doc.data();
-        return { ...data, id: doc.id } as Tool;
+        const createdAt = (data.createdAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
+        return { ...data, id: doc.id, createdAt } as Tool;
     });
     
     fetchedTools.sort((a, b) => a.name.localeCompare(b.name));
@@ -311,4 +312,6 @@ export async function updateToolRequestStatus(requestId: string, status: 'approv
         return { success: false, message: error.message || 'An unknown error occurred.' };
     }
 }
+    
+
     
