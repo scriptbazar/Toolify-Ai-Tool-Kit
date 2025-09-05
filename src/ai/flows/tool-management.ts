@@ -141,7 +141,7 @@ export async function getTools(): Promise<Tool[]> {
       }
       await batch.commit();
       // Re-fetch the data after populating
-      snapshot = await toolsRef.get();
+      snapshot = await toolsRef.orderBy('name').get();
     }
     
     const fetchedTools = snapshot.docs.map(doc => {
