@@ -264,7 +264,7 @@ export default function AddNewPostPage() {
                                 <div className="p-2 border rounded-md bg-muted flex items-center gap-2">
                                      <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button type="button" variant="ghost" size="sm">
+                                            <Button type="button" variant="outline" size="sm">
                                                 <Heading className="h-4 w-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
