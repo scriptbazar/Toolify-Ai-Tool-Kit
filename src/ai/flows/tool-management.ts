@@ -129,7 +129,7 @@ export async function getTools(): Promise<Tool[]> {
   }
   try {
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
-    const snapshot = await toolsRef.get();
+    let snapshot = await toolsRef.get();
 
     if (snapshot.empty) {
       console.log('Tools collection is empty, populating with initial tools...');
@@ -140,12 +140,8 @@ export async function getTools(): Promise<Tool[]> {
           batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
       }
       await batch.commit();
-      
-      const populatedSnapshot = await toolsRef.orderBy('name').get();
-      return populatedSnapshot.docs.map(doc => {
-          const data = doc.data();
-          return ToolSchema.parse({ ...data, id: doc.id });
-      });
+      // Re-fetch the data after populating
+      snapshot = await toolsRef.get();
     }
     
     const fetchedTools = snapshot.docs.map(doc => {
@@ -363,3 +359,5 @@ export async function updateToolRequestStatus(requestId: string, status: 'approv
 
     
 
+
+    
