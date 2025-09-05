@@ -26,8 +26,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { generateImage } from '@/ai/flows/ai-image-generator';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 
 
 const postSchema = z.object({
@@ -49,9 +51,11 @@ const postSchema = z.object({
 type PostFormValues = z.infer<typeof postSchema>;
 
 export default function AddNewPostPage() {
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
@@ -77,6 +81,13 @@ export default function AddNewPostPage() {
       canonicalUrl: '',
     },
   });
+  
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const imageUrlValue = form.watch('imageUrl');
 
@@ -223,6 +234,34 @@ export default function AddNewPostPage() {
       toast({ title: "Upload Failed", description: "Could not upload the image.", variant: "destructive" });
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleGenerateImage = async () => {
+    const title = form.getValues('title');
+    if (!title) {
+        toast({ title: "Title is required", description: "Please enter a post title to generate an image.", variant: "destructive" });
+        return;
+    }
+    if (!user) {
+        toast({ title: "Authentication Error", description: "You must be logged in to generate images.", variant: "destructive" });
+        return;
+    }
+
+    setIsGeneratingImage(true);
+    try {
+        const result = await generateImage({
+            promptText: `A captivating and high-quality featured image for a blog post titled: "${title}". The image should be visually appealing and relevant to the topic.`,
+            userId: user.uid,
+        });
+        form.setValue('imageUrl', result.imageDataUri, { shouldValidate: true });
+        form.setValue('imageHint', title.split(" ").slice(0, 2).join(" ")); // Use first two words as hint
+        toast({ title: "Image Generated!", description: "AI has created a featured image for your post." });
+    } catch (error: any) {
+        console.error("AI image generation failed:", error);
+        toast({ title: 'Image Generation Failed', description: error.message, variant: 'destructive' });
+    } finally {
+        setIsGeneratingImage(false);
     }
   };
 
@@ -393,9 +432,10 @@ export default function AddNewPostPage() {
                             />
                         </div>
                          <Tabs defaultValue="url" className="w-full">
-                          <TabsList className="grid w-full grid-cols-2">
+                          <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="url">Image by URL</TabsTrigger>
                             <TabsTrigger value="upload">Upload Image</TabsTrigger>
+                            <TabsTrigger value="ai">Generate with AI</TabsTrigger>
                           </TabsList>
                           <TabsContent value="url">
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start pt-4">
@@ -450,6 +490,17 @@ export default function AddNewPostPage() {
                               </CardContent>
                             </Card>
                           </TabsContent>
+                           <TabsContent value="ai">
+                               <Card className="mt-4">
+                                <CardContent className="p-6 flex flex-col items-center justify-center gap-4">
+                                  <Button type="button" variant="outline" onClick={handleGenerateImage} disabled={isGeneratingImage}>
+                                    {isGeneratingImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
+                                    {isGeneratingImage ? "Generating Image..." : "Generate Image from Title"}
+                                  </Button>
+                                  <p className="text-xs text-muted-foreground">Uses the post title as a prompt for the AI.</p>
+                                </CardContent>
+                               </Card>
+                           </TabsContent>
                         </Tabs>
                     </CardContent>
                 </Card>
