@@ -17,18 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-  DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from '@/components/ui/badge';
 import {
     Card,
@@ -175,9 +163,9 @@ export default async function AdminToolsPage({
                     />
                      {/* Hidden inputs to preserve other filters */}
                     <input type="hidden" name="filter" value={activeFilter} />
-                    <input type="hidden" name="category" value={selectedCategory} />
+                    <input type="hidden" name="category" value={activeCategory} />
                 </form>
-                <Select value={selectedCategory} onValueChange={(value) => router.push(createQueryString({ category: value, page: 1 }))}>
+                <Select value={activeCategory} onValueChange={(value) => window.location.href = createQueryString({ category: value, page: 1 })}>
                     <SelectTrigger className="w-full sm:w-auto h-10">
                         <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
