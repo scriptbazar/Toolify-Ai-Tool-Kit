@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -128,7 +129,7 @@ export async function getTools(): Promise<Tool[]> {
   }
   try {
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
-    let snapshot = await toolsRef.get();
+    let snapshot = await toolsRef.orderBy('name').get();
 
     if (snapshot.empty) {
       console.log('Tools collection is empty, populating with initial tools...');
@@ -139,7 +140,7 @@ export async function getTools(): Promise<Tool[]> {
           batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
       }
       await batch.commit();
-      // Re-fetch the data after populating
+      // Re-fetch the data after populating, ensuring it's ordered
       snapshot = await toolsRef.orderBy('name').get();
     }
     
@@ -149,9 +150,6 @@ export async function getTools(): Promise<Tool[]> {
         const createdAt = (data.createdAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
         return { ...data, id: doc.id, createdAt } as Tool;
     });
-    
-    // Sort tools alphabetically by name
-    fetchedTools.sort((a, b) => a.name.localeCompare(b.name));
     
     return fetchedTools;
 
@@ -306,8 +304,3 @@ export async function updateToolRequestStatus(requestId: string, status: 'approv
         return { success: false, message: error.message || 'An unknown error occurred.' };
     }
 }
-    
-
-    
-
-    

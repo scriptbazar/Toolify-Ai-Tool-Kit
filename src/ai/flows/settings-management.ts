@@ -343,6 +343,9 @@ export async function getSettings(): Promise<AppSettings> {
  */
 export async function updateSettings(newSettings: Partial<AppSettings>): Promise<{ success: boolean; message: string }> {
   const adminDb = getAdminDb();
+  if (!adminDb) {
+      return { success: false, message: 'Database not initialized.' };
+  }
   try {
     const currentSettings = await getSettings();
     

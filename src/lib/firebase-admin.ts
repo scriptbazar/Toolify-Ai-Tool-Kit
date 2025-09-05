@@ -44,3 +44,5 @@ export function getAdminDb(): Firestore {
     throw error;
   }
 }
+
+export const adminDb = getAdminDb();
