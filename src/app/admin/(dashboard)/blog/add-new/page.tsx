@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -127,6 +127,35 @@ export default function AddNewPostPage() {
       });
     }
     textarea.focus();
+  };
+
+  const handleEmbedYouTube = () => {
+    const url = window.prompt("Enter the YouTube video URL:");
+    if (!url) return;
+
+    let videoId = '';
+    const urlParts = url.split(/(vi\/|v=|\/v\/|youtu\.be\/|\/embed\/)/);
+    videoId = (urlParts[2] !== undefined) ? urlParts[2].split(/[^0-9a-z_\-]/i)[0] : urlParts[0];
+
+    if (videoId) {
+      const textarea = contentTextAreaRef.current;
+      if (!textarea) return;
+
+      const embedCode = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+      
+      const start = textarea.selectionStart;
+      const currentText = form.getValues('content');
+      const newText = `${currentText.substring(0, start)}\n${embedCode}\n${currentText.substring(start)}`;
+      
+      form.setValue('content', newText, { shouldValidate: true });
+      textarea.focus();
+    } else {
+      toast({
+        title: "Invalid YouTube URL",
+        description: "Could not extract the video ID. Please check the URL and try again.",
+        variant: "destructive"
+      });
+    }
   };
 
 
@@ -330,6 +359,7 @@ export default function AddNewPostPage() {
                                      <Button type="button" variant="outline" size="icon" title="Align Center"><AlignCenter className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Align Right"><AlignRight className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Align Justify"><AlignJustify className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" title="Embed YouTube" onClick={handleEmbedYouTube}><Youtube className="h-4 w-4" /></Button>
                                      <div className="relative">
                                          <Button type="button" variant="outline" size="icon" title="Text Color" onClick={() => colorInputRef.current?.click()}>
                                             <Palette className="h-4 w-4"/>
