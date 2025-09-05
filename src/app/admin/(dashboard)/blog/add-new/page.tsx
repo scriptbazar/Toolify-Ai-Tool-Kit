@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { aiWriter, generateMetaDescription } from '@/ai/flows/ai-writer';
+import { aiWriter, generateMetaDescription, generateTargetKeywords } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
 import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon, Image as ImageIcon, Clock, UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -54,6 +54,7 @@ export default function AddNewPostPage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingMeta, setIsGeneratingMeta] = useState(false);
+  const [isGeneratingKeywords, setIsGeneratingKeywords] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -317,6 +318,27 @@ export default function AddNewPostPage() {
         setIsGeneratingMeta(false);
     }
   };
+  
+  const handleGenerateKeywords = async () => {
+    const { title, content } = form.getValues();
+    if (!title || !content) {
+      toast({ title: "Content is required", description: "Please provide a title and post content to generate keywords.", variant: "destructive" });
+      return;
+    }
+    
+    setIsGeneratingKeywords(true);
+    try {
+      const result = await generateTargetKeywords({ title, content });
+      form.setValue('targetKeyword', result.keywords, { shouldValidate: true });
+      toast({ title: 'Keywords Generated!', description: 'SEO target keywords have been created.' });
+    } catch (error: any) {
+      console.error('Keyword generation failed:', error);
+      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsGeneratingKeywords(false);
+    }
+  };
+
 
   const processAndSavePost = async (values: PostFormValues) => {
     setIsSaving(true);
@@ -346,7 +368,6 @@ export default function AddNewPostPage() {
   }
 
   const handlePostSubmit = (status: PostFormValues['status']) => {
-    form.setValue('status', status);
     form.handleSubmit(processAndSavePost)();
   };
 
@@ -655,7 +676,20 @@ export default function AddNewPostPage() {
                                 render={({ field }) => (
                                     <FormItem>
                                     <FormLabel className="flex items-center gap-2"><Target className="h-4 w-4"/> Target Keyword</FormLabel>
-                                    <FormControl><Input {...field} placeholder="e.g., 'best ai tools'" /></FormControl>
+                                     <div className="relative">
+                                        <FormControl><Input {...field} placeholder="e.g., 'best ai tools'" /></FormControl>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute top-1/2 right-1 -translate-y-1/2 h-7 w-7"
+                                            onClick={handleGenerateKeywords}
+                                            disabled={isGeneratingKeywords}
+                                            title="Generate with AI"
+                                            >
+                                                {isGeneratingKeywords ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                                        </Button>
+                                     </div>
                                     <FormMessage />
                                     </FormItem>
                                 )}

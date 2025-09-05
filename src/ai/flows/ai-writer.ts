@@ -5,12 +5,11 @@
  *
  * - aiWriter - A function that generates content based on the provided topic or keywords.
  * - generateMetaDescription - Generates an SEO-friendly meta description for a blog post.
- * - AiWriterInput - The input type for the aiWriter function.
- * - AiWriterOutput - The return type for the aiWriter function.
+ * - generateTargetKeywords - Generates a list of SEO-friendly keywords for a blog post.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 
 const AiWriterInputSchema = z.object({
   topic: z.string().describe('The topic or keywords for the AI to generate content about.'),
@@ -99,6 +98,53 @@ const generateMetaDescriptionFlow = ai.defineFlow({
     const { output } = await metaDescPrompt(input);
     if (!output) {
         throw new Error("Failed to generate a meta description.");
+    }
+    return output;
+});
+
+
+// New flow for Target Keywords
+const GenerateKeywordsInputSchema = z.object({
+    title: z.string().describe('The title of the blog post.'),
+    content: z.string().describe('The full content of the blog post.'),
+});
+export type GenerateKeywordsInput = z.infer<typeof GenerateKeywordsInputSchema>;
+
+const GenerateKeywordsOutputSchema = z.object({
+    keywords: z.string().describe('A comma-separated string of 5-7 relevant, high-ranking keywords.'),
+});
+export type GenerateKeywordsOutput = z.infer<typeof GenerateKeywordsOutputSchema>;
+
+export async function generateTargetKeywords(input: GenerateKeywordsInput): Promise<GenerateKeywordsOutput> {
+    return generateTargetKeywordsFlow(input);
+}
+
+const keywordsPrompt = ai.definePrompt({
+    name: 'generateKeywordsPrompt',
+    input: { schema: GenerateKeywordsInputSchema },
+    output: { schema: GenerateKeywordsOutputSchema },
+    prompt: `You are an SEO keyword specialist. Based on the blog post title and content, generate a list of 5-7 relevant, high-ranking, and long-tail keywords that will help this post rank well in search engines.
+
+The keywords should be highly relevant to the main topic. Provide the output as a single comma-separated string.
+
+Blog Post Title:
+"{{{title}}}"
+
+Blog Post Content:
+---
+{{{content}}}
+---
+`,
+});
+
+const generateTargetKeywordsFlow = ai.defineFlow({
+    name: 'generateTargetKeywordsFlow',
+    inputSchema: GenerateKeywordsInputSchema,
+    outputSchema: GenerateKeywordsOutputSchema,
+}, async (input) => {
+    const { output } = await keywordsPrompt(input);
+    if (!output) {
+        throw new Error("Failed to generate target keywords.");
     }
     return output;
 });
