@@ -366,6 +366,15 @@ export default function AddNewPostPage() {
       setIsSaving(false);
     }
   }
+  
+  const handlePreview = () => {
+    const slug = form.getValues('slug');
+    if (slug) {
+        window.open(`/blog/${slug}`, '_blank');
+    } else {
+        toast({ title: 'Slug is required', description: 'Please enter a title to generate a slug for the preview.', variant: 'destructive' });
+    }
+  };
 
   const handlePostSubmit = (status: PostFormValues['status']) => {
     form.handleSubmit(processAndSavePost)();
@@ -384,6 +393,10 @@ export default function AddNewPostPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Add New Post</h1>
               </div>
               <div className="flex gap-2">
+                 <Button type="button" variant="outline" onClick={handlePreview}>
+                   <Eye className="mr-2 h-4 w-4" />
+                   Preview
+                </Button>
                 <Button type="button" variant="outline" onClick={() => handlePostSubmit('Draft')} disabled={isSaving}>
                    <Save className="mr-2 h-4 w-4" />
                    Save Draft
