@@ -292,6 +292,8 @@ export default function AddNewPostPage() {
                                     </FormItem>
                                 )}
                             />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormField
                                 control={form.control}
                                 name="category"
@@ -315,13 +317,11 @@ export default function AddNewPostPage() {
                                 </FormItem>
                                 )}
                             />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                            <FormField
+                             <FormField
                                 control={form.control}
                                 name="tags"
                                 render={({ field }) => (
-                                <FormItem className="md:col-span-1">
+                                <FormItem>
                                     <FormLabel>Tags</FormLabel>
                                     <FormControl>
                                     <Input placeholder="AI, SaaS, Tech..." {...field} />
@@ -331,42 +331,42 @@ export default function AddNewPostPage() {
                                 </FormItem>
                                 )}
                             />
-                             <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-[1fr,auto] gap-4 items-start">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                     <FormField
-                                        control={form.control}
-                                        name="imageUrl"
-                                        render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Featured Image URL</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="https://..." {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="imageHint"
-                                        render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Image Hint</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g., 'blue robot'" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                        )}
-                                    />
-                                </div>
-                                <div className="w-full sm:w-24 h-24 bg-muted rounded-lg flex items-center justify-center border">
-                                {imageUrlValue ? (
-                                    <Image src={imageUrlValue} alt="Image Preview" width={96} height={96} className="object-cover rounded-md" onError={(e) => e.currentTarget.style.display='none'} />
-                                ) : (
-                                    <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                                )}
-                                </div>
+                        </div>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                 <FormField
+                                    control={form.control}
+                                    name="imageUrl"
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Featured Image URL</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="https://..." {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="imageHint"
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Image Hint</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., 'blue robot'" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                            </div>
+                            <div className="w-full sm:w-24 h-24 bg-muted rounded-lg flex items-center justify-center border">
+                            {imageUrlValue ? (
+                                <Image src={imageUrlValue} alt="Image Preview" width={96} height={96} className="object-cover rounded-md" onError={(e) => e.currentTarget.style.display='none'} />
+                            ) : (
+                                <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                            )}
                             </div>
                         </div>
                     </CardContent>
