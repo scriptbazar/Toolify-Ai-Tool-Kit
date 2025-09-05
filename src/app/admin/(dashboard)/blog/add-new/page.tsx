@@ -159,7 +159,7 @@ export default function AddNewPostPage() {
                         <CardTitle>Post Details</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <FormField
                                 control={form.control}
                                 name="title"
@@ -186,8 +186,6 @@ export default function AddNewPostPage() {
                                     </FormItem>
                                 )}
                             />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                              <FormField
                                 control={form.control}
                                 name="category"
@@ -220,7 +218,7 @@ export default function AddNewPostPage() {
                                     <FormControl>
                                     <Input placeholder="AI, SaaS, Tech..." {...field} />
                                     </FormControl>
-                                    <p className="text-xs text-muted-foreground">Separate tags with commas.</p>
+                                    <p className="text-xs text-muted-foreground">Separate with commas.</p>
                                     <FormMessage />
                                 </FormItem>
                                 )}
