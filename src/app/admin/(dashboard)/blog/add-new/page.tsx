@@ -15,9 +15,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +33,8 @@ const postSchema = z.object({
   content: z.string().min(50, { message: 'Content must be at least 50 characters long.' }),
   category: z.string().min(1, { message: 'Please select a category.' }),
   tags: z.string().optional(),
+  imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  imageHint: z.string().optional(),
   status: z.enum(['Published', 'Draft', 'Scheduled', 'Trash']),
   metaDescription: z.string().optional(),
   targetKeyword: z.string().optional(),
@@ -57,6 +60,8 @@ export default function AddNewPostPage() {
       content: '',
       category: '',
       tags: '',
+      imageUrl: '',
+      imageHint: '',
       status: 'Draft',
       metaDescription: '',
       targetKeyword: '',
@@ -64,6 +69,8 @@ export default function AddNewPostPage() {
       canonicalUrl: '',
     },
   });
+
+  const imageUrlValue = form.watch('imageUrl');
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;
@@ -258,12 +265,12 @@ export default function AddNewPostPage() {
                         <CardTitle>Post Details</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormField
                                 control={form.control}
                                 name="title"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-2">
+                                    <FormItem>
                                     <FormLabel>Post Title</FormLabel>
                                     <FormControl>
                                         <Input placeholder="e.g., The Future of AI" {...field} onChange={handleTitleChange} />
@@ -308,11 +315,13 @@ export default function AddNewPostPage() {
                                 </FormItem>
                                 )}
                             />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                             <FormField
                                 control={form.control}
                                 name="tags"
                                 render={({ field }) => (
-                                <FormItem className="md:col-span-4">
+                                <FormItem className="md:col-span-1">
                                     <FormLabel>Tags</FormLabel>
                                     <FormControl>
                                     <Input placeholder="AI, SaaS, Tech..." {...field} />
@@ -322,6 +331,43 @@ export default function AddNewPostPage() {
                                 </FormItem>
                                 )}
                             />
+                             <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-[1fr,auto] gap-4 items-start">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                     <FormField
+                                        control={form.control}
+                                        name="imageUrl"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Featured Image URL</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="https://..." {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="imageHint"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Image Hint</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g., 'blue robot'" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className="w-full sm:w-24 h-24 bg-muted rounded-lg flex items-center justify-center border">
+                                {imageUrlValue ? (
+                                    <Image src={imageUrlValue} alt="Image Preview" width={96} height={96} className="object-cover rounded-md" onError={(e) => e.currentTarget.style.display='none'} />
+                                ) : (
+                                    <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                                )}
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
