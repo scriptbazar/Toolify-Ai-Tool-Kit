@@ -19,7 +19,6 @@ import { Wand2, UploadCloud, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, T
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { RichTextEditor } from '@/components/common/RichTextEditor';
 
 const postSchema = z.object({
   title: z.string().min(5, { message: 'Title must be at least 5 characters long.' }),
@@ -255,41 +254,40 @@ export default function AddNewPostPage() {
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Post Content</CardTitle>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div className="space-y-1.5">
+                            <CardTitle>Post Content</CardTitle>
+                        </div>
+                        <Button 
+                        type="button" 
+                        onClick={handleGenerateContent} 
+                        disabled={isGenerating}
+                        variant="outline"
+                        size="sm"
+                        >
+                        {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                        Generate with AI
+                        </Button>
                     </CardHeader>
                     <CardContent>
-                       <div className="relative">
-                            <FormField
-                                control={form.control}
-                                name="content"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel className="sr-only">Post Body</FormLabel>
-                                    <FormControl>
-                                        <RichTextEditor
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                            placeholder="Write your amazing blog post here, or generate it with AI..."
-                                            className="min-h-[400px]"
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <Button 
-                            type="button" 
-                            onClick={handleGenerateContent} 
-                            disabled={isGenerating}
-                            variant="outline"
-                            className="absolute bottom-4 right-4 z-10"
-                            size="sm"
-                            >
-                            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                            Generate with AI
-                            </Button>
-                        </div>
+                       <FormField
+                            control={form.control}
+                            name="content"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel className="sr-only">Post Body</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="Write your amazing blog post here, or generate it with AI..."
+                                        className="min-h-[400px]"
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </CardContent>
                 </Card>
                  <Card>
