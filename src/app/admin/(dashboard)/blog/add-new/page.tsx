@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -44,6 +44,7 @@ export default function AddNewPostPage() {
   const { toast } = useToast();
   const router = useRouter();
   const contentTextAreaRef = useRef<HTMLTextAreaElement>(null);
+  const colorInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
@@ -103,6 +104,28 @@ export default function AddNewPostPage() {
     
     const newText = `${currentText.substring(0, start)}${listHtml}${currentText.substring(end)}`;
     form.setValue('content', newText, { shouldValidate: true });
+    textarea.focus();
+  };
+  
+  const handleColorChange = (color: string) => {
+    const textarea = contentTextAreaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentText = form.getValues('content');
+    const selectedText = currentText.substring(start, end);
+
+    if (selectedText) {
+      const newText = `${currentText.substring(0, start)}<span style="color: ${color};">${selectedText}</span>${currentText.substring(end)}`;
+      form.setValue('content', newText, { shouldValidate: true });
+    } else {
+      toast({
+        title: "No text selected",
+        description: "Please select the text you want to color.",
+        variant: "destructive"
+      });
+    }
     textarea.focus();
   };
 
@@ -279,7 +302,7 @@ export default function AddNewPostPage() {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel className="sr-only">Post Body</FormLabel>
-                                <div className="p-2 border rounded-md bg-muted flex items-center gap-2">
+                                <div className="p-2 border rounded-md bg-muted flex items-center flex-wrap gap-2">
                                      <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <Button type="button" variant="outline" size="icon" title="Headings">
@@ -307,6 +330,17 @@ export default function AddNewPostPage() {
                                      <Button type="button" variant="outline" size="icon" title="Align Center"><AlignCenter className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Align Right"><AlignRight className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Align Justify"><AlignJustify className="h-4 w-4"/></Button>
+                                     <div className="relative">
+                                         <Button type="button" variant="outline" size="icon" title="Text Color" onClick={() => colorInputRef.current?.click()}>
+                                            <Palette className="h-4 w-4"/>
+                                         </Button>
+                                         <input
+                                            ref={colorInputRef}
+                                            type="color"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            onChange={(e) => handleColorChange(e.target.value)}
+                                          />
+                                     </div>
                                     <div className="ml-auto">
                                         <Button 
                                             type="button" 
