@@ -4,14 +4,16 @@
 import React from 'react';
 import 'react-quill/dist/quill.snow.css';
 import dynamic from 'next/dynamic';
-import type { ComponentProps } from 'react';
 
-// Use dynamic import for react-quill
 const ReactQuill = dynamic(
   async () => {
     const { default: RQ } = await import('react-quill');
+    // The type for forwardedRef is complex, so we use 'any' here for simplicity.
+    // The forwardRef wrapper will handle the types correctly.
     // eslint-disable-next-line react/display-name
-    return ({ forwardedRef, ...props }: any) => <RQ ref={forwardedRef} {...props} />;
+    return ({ forwardedRef, ...props }: { forwardedRef: any; [key: string]: any }) => (
+      <RQ ref={forwardedRef} {...props} />
+    );
   },
   { ssr: false }
 );
