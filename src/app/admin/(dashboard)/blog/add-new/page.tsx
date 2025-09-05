@@ -206,7 +206,7 @@ export default function AddNewPostPage() {
                                 control={form.control}
                                 name="title"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className="md:col-span-2">
                                     <FormLabel>Post Title</FormLabel>
                                     <FormControl>
                                         <Input placeholder="e.g., The Future of AI" {...field} onChange={handleTitleChange} />
@@ -228,7 +228,7 @@ export default function AddNewPostPage() {
                                     </FormItem>
                                 )}
                             />
-                             <FormField
+                            <FormField
                                 control={form.control}
                                 name="category"
                                 render={({ field }) => (
@@ -255,7 +255,7 @@ export default function AddNewPostPage() {
                                 control={form.control}
                                 name="tags"
                                 render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="md:col-span-4">
                                     <FormLabel>Tags</FormLabel>
                                     <FormControl>
                                     <Input placeholder="AI, SaaS, Tech..." {...field} />
@@ -341,7 +341,7 @@ export default function AddNewPostPage() {
                         <CardDescription>Optimize your post for search engines.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                              <FormField
                                 control={form.control}
                                 name="metaDescription"
