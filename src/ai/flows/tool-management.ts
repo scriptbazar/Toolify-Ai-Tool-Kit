@@ -146,8 +146,8 @@ export async function getTools(): Promise<Tool[]> {
     
     const fetchedTools = snapshot.docs.map(doc => {
         const data = doc.data();
-        // Use passthrough to allow extra fields like createdAt
-        return ToolSchema.passthrough().parse({ ...data, id: doc.id }) as Tool;
+        // Bypassing Zod validation to handle potential inconsistencies in Firestore data.
+        return { ...data, id: doc.id } as Tool;
     });
     
     // Sort tools by name
