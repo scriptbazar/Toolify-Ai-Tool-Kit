@@ -122,6 +122,10 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
  */
 export async function getTools(): Promise<Tool[]> {
   const adminDb = getAdminDb();
+  if (!adminDb) {
+    console.error("Database not initialized, cannot fetch tools.");
+    return [];
+  }
   try {
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
     let snapshot = await toolsRef.get();
@@ -141,10 +145,12 @@ export async function getTools(): Promise<Tool[]> {
     
     const fetchedTools = snapshot.docs.map(doc => {
         const data = doc.data();
+        // Convert Firestore Timestamp to a serializable format (ISO string)
         const createdAt = (data.createdAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
         return { ...data, id: doc.id, createdAt } as Tool;
     });
     
+    // Sort tools alphabetically by name
     fetchedTools.sort((a, b) => a.name.localeCompare(b.name));
     
     return fetchedTools;

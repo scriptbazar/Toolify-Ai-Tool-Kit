@@ -309,29 +309,28 @@ const defaultSettings = AppSettingsSchema.parse({
  * @returns {Promise<AppSettings>} The application settings.
  */
 export async function getSettings(): Promise<AppSettings> {
-  const adminDb = getAdminDb();
   try {
+    const adminDb = getAdminDb();
+    if (!adminDb) {
+      console.warn("Database not initialized, returning default settings.");
+      return defaultSettings;
+    }
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
     const docSnap = await docRef.get();
 
     if (docSnap.exists) {
-      // Validate data against schema, falling back to defaults if fields are missing
       const parsedData = AppSettingsSchema.safeParse(docSnap.data());
       if (parsedData.success) {
         return parsedData.data;
       } else {
-        // This case handles situations where the data in Firestore is malformed.
-        // It returns default settings to prevent the app from crashing.
         console.warn("Firestore settings data is invalid, returning defaults.", parsedData.error);
-        return defaultSettings; 
+        return defaultSettings;
       }
     } else {
-      // If the document doesn't exist, return the default settings.
       return defaultSettings;
     }
   } catch (error: any) {
     console.error("Error getting settings:", error.message);
-    // On error, return default settings to ensure app stability.
     return defaultSettings;
   }
 }

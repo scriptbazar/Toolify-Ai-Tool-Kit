@@ -19,12 +19,12 @@ const CATEGORIES_COLLECTION = 'blogCategories';
  * @returns {Promise<Post[]>} A list of all posts.
  */
 export async function getPosts(): Promise<Post[]> {
-  const adminDb = getAdminDb();
-  if (!adminDb) {
-    console.error("Database not initialized, cannot fetch posts.");
-    return [];
-  }
   try {
+    const adminDb = getAdminDb();
+    if (!adminDb) {
+      console.warn("Database not initialized, cannot fetch posts.");
+      return [];
+    }
     const snapshot = await adminDb.collection(POSTS_COLLECTION).orderBy('createdAt', 'desc').get();
     if (snapshot.empty) {
       return [];

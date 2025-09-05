@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -17,7 +18,8 @@ export async function getReviews(): Promise<Review[]> {
     try {
         const adminDb = getAdminDb();
         if (!adminDb) {
-            throw new Error("Database not initialized");
+            console.warn("Database not initialized, cannot fetch reviews.");
+            return [];
         }
         const snapshot = await adminDb.collection('reviews').orderBy('submittedOn', 'desc').get();
         if (snapshot.empty) {
