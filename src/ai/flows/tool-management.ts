@@ -99,6 +99,10 @@ const initialTools: Omit<Tool, 'id' | 'slug'>[] = [
     { name: 'GPA Calculator', description: 'Calculate your Grade Point Average (GPA) for any grading scale.', icon: 'GraduationCap', category: 'ecommerce', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Fuel Cost Calculator', description: 'Estimate the fuel cost for a trip based on distance, fuel efficiency, and price.', icon: 'Fuel', category: 'ecommerce', plan: 'Pro', isNew: false, status: 'Active' },
     { name: 'Time Zone Converter', description: 'Convert times between different time zones around the world.', icon: 'Globe', category: 'ecommerce', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Flipkart Shipping Label Cropper', description: 'Easily crop Flipkart shipping labels to the required size.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Amazon Shipping Label Cropper', description: 'Crop your Amazon shipping labels perfectly for printing.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Meesho Shipping Label Cropper', description: 'Quickly crop Meesho shipping labels for easy printing.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Myntra Shipping Label Cropper', description: 'Crop Myntra shipping labels with a single click.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },
 
     // Video Tools (10)
     { name: 'Video to GIF', description: 'Convert a video clip into a high-quality animated GIF.', icon: 'Video', category: 'video', plan: 'Pro', isNew: false, status: 'Active' },
