@@ -37,8 +37,8 @@ export const PostSchema = z.object({
   publishedAt: z.string().datetime({ offset: true }).optional(),
   metaDescription: z.string().optional(),
   targetKeyword: z.string().optional(),
-  inboundLinks: z.string().optional(),
-  outboundLinks: z.string().optional(),
+  seoTitle: z.string().optional(),
+  canonicalUrl: z.string().url().optional(),
 });
 export type Post = z.infer<typeof PostSchema>;
 
@@ -49,5 +49,6 @@ export const CategorySchema = z.object({
     description: z.string().optional(),
 });
 export type Category = z.infer<typeof CategorySchema>;
+
 
 

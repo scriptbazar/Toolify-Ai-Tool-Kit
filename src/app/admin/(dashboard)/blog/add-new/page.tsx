@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useRef } from 'react';
@@ -14,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette, Youtube, Link as LinkIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -34,6 +35,8 @@ const postSchema = z.object({
   status: z.enum(['Published', 'Draft', 'Scheduled', 'Trash']),
   metaDescription: z.string().optional(),
   targetKeyword: z.string().optional(),
+  seoTitle: z.string().optional(),
+  canonicalUrl: z.string().url().optional().or(z.literal('')),
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
@@ -57,6 +60,8 @@ export default function AddNewPostPage() {
       status: 'Draft',
       metaDescription: '',
       targetKeyword: '',
+      seoTitle: '',
+      canonicalUrl: '',
     },
   });
 
@@ -406,18 +411,30 @@ export default function AddNewPostPage() {
                         <CardDescription>Optimize your post for search engines.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="seoTitle"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>SEO Title</FormLabel>
+                                <FormControl><Input {...field} placeholder="A catchy, keyword-rich title for search results." /></FormControl>
+                                <p className="text-xs text-muted-foreground">If empty, the main post title will be used.</p>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="metaDescription"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Meta Description</FormLabel>
+                                <FormControl><Textarea {...field} placeholder="A short, compelling description for search results (max 160 characters)." maxLength={160} /></FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             <FormField
-                                control={form.control}
-                                name="metaDescription"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Meta Description</FormLabel>
-                                    <FormControl><Textarea {...field} placeholder="A short, compelling description for search results (max 160 characters)." maxLength={160} /></FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
                             <FormField
                                 control={form.control}
                                 name="targetKeyword"
@@ -425,6 +442,18 @@ export default function AddNewPostPage() {
                                     <FormItem>
                                     <FormLabel className="flex items-center gap-2"><Target className="h-4 w-4"/> Target Keyword</FormLabel>
                                     <FormControl><Input {...field} placeholder="e.g., 'best ai tools'" /></FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="canonicalUrl"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel className="flex items-center gap-2"><LinkIcon className="h-4 w-4"/> Canonical URL</FormLabel>
+                                    <FormControl><Input {...field} type="url" placeholder="https://example.com/original-post" /></FormControl>
+                                     <p className="text-xs text-muted-foreground">The original source of this content, if it exists elsewhere.</p>
                                     <FormMessage />
                                     </FormItem>
                                 )}
