@@ -269,28 +269,30 @@ export default function AddNewPostPage() {
                         <CardDescription>Optimize your post for search engines.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="metaDescription"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Meta Description</FormLabel>
-                                <FormControl><Textarea {...field} placeholder="A short, compelling description for search results (max 160 characters)." maxLength={160} /></FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="targetKeyword"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel className="flex items-center gap-2"><Target className="h-4 w-4"/> Target Keyword</FormLabel>
-                                <FormControl><Input {...field} placeholder="e.g., 'best ai tools'" /></FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="metaDescription"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Meta Description</FormLabel>
+                                    <FormControl><Textarea {...field} placeholder="A short, compelling description for search results (max 160 characters)." maxLength={160} /></FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="targetKeyword"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel className="flex items-center gap-2"><Target className="h-4 w-4"/> Target Keyword</FormLabel>
+                                    <FormControl><Input {...field} placeholder="e.g., 'best ai tools'" /></FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
