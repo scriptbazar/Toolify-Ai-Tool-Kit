@@ -170,6 +170,25 @@ export default function AddNewPostPage() {
     }
   };
 
+  const handleInsertImage = () => {
+    const url = window.prompt("Enter the image URL:");
+    if (!url) return;
+
+    const textarea = contentTextAreaRef.current;
+    if (!textarea) return;
+
+    const altText = window.prompt("Enter alternative text for the image:", "Image");
+
+    const embedCode = `<img src="${url}" alt="${altText || 'Image'}" style="max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1rem 0;" />`;
+    
+    const start = textarea.selectionStart;
+    const currentText = form.getValues('content');
+    const newText = `${currentText.substring(0, start)}\n${embedCode}\n${currentText.substring(start)}`;
+    
+    form.setValue('content', newText, { shouldValidate: true });
+    textarea.focus();
+  };
+
 
   const handleGenerateContent = async () => {
     const title = form.getValues('title');
@@ -406,6 +425,7 @@ export default function AddNewPostPage() {
                                      <Button type="button" variant="outline" size="icon" onClick={() => handleAddList('ol')} title="Numbered List"><ListOrdered className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Inbound Links"><ArrowDownLeft className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Outbound Links"><ArrowUpRight className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" title="Insert Image" onClick={handleInsertImage}><ImageIcon className="h-4 w-4" /></Button>
                                      <Button type="button" variant="outline" size="icon" title="Align Left"><AlignLeft className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Align Center"><AlignCenter className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Align Right"><AlignRight className="h-4 w-4"/></Button>
