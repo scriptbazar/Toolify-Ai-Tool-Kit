@@ -7,8 +7,6 @@
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { type Tool, ToolSchema, UpsertToolInputSchema, type ToolRequest, ToolRequestSchema } from './tool-management.types';
-import { ai } from '@/ai/genkit';
-import { z } from 'zod';
 
 const TOOLS_COLLECTION = 'tools';
 const TOOL_REQUESTS_COLLECTION = 'toolRequests';
@@ -146,11 +144,9 @@ export async function getTools(): Promise<Tool[]> {
     
     const fetchedTools = snapshot.docs.map(doc => {
         const data = doc.data();
-        // Bypassing Zod validation to handle potential inconsistencies in Firestore data.
         return { ...data, id: doc.id } as Tool;
     });
     
-    // Sort tools by name
     fetchedTools.sort((a, b) => a.name.localeCompare(b.name));
     
     return fetchedTools;
@@ -173,18 +169,15 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
   try {
     const { id, ...data } = toolData;
     
-    // Auto-generate slug from the name if it's a new tool or name is changed
     if (data.name) {
       data.slug = data.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
     }
 
     if (id) {
-      // Update existing tool
       const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(id);
       await toolRef.update(data);
       return { success: true, message: 'Tool updated successfully.', toolId: id };
     } else {
-      // Add new tool
       if (!data.slug) throw new Error("Slug is required for a new tool.");
       const docRef = adminDb.collection(TOOLS_COLLECTION).doc(data.slug);
       await docRef.set({ ...data, createdAt: FieldValue.serverTimestamp() });
@@ -259,7 +252,12 @@ const RequestToolInputSchema = ToolRequestSchema.pick({
     toolName: true,
     description: true,
 });
-type RequestToolInput = z.infer<typeof RequestToolInputSchema>;
+type RequestToolInput = {
+    name: string;
+    email: string;
+    toolName: string;
+    description: string;
+};
 
 export async function requestNewTool(input: RequestToolInput): Promise<{ success: boolean; message: string }> {
     if (!adminDb) {
@@ -278,47 +276,6 @@ export async function requestNewTool(input: RequestToolInput): Promise<{ success
         return { success: false, message: error.message || 'An unknown error occurred.' };
     }
 }
-
-const GenerateToolDescInputSchema = z.object({
-  toolName: z.string().describe('The name of the tool for which to generate a description.'),
-});
-
-const GenerateToolDescOutputSchema = z.object({
-  description: z.string().describe('The AI-generated description of the tool.'),
-});
-
-export async function generateToolDescription(input: z.infer<typeof GenerateToolDescInputSchema>): Promise<z.infer<typeof GenerateToolDescOutputSchema>> {
-  return generateToolDescriptionFlow(input);
-}
-
-const generateToolDescPrompt = ai.definePrompt({
-  name: 'generateToolDescriptionPrompt',
-  input: { schema: GenerateToolDescInputSchema },
-  output: { schema: GenerateToolDescOutputSchema },
-  prompt: `You are an expert at writing clear and concise descriptions for web tools.
-A user has requested a new tool. Based on the tool's name, generate a helpful and engaging description for it.
-Explain what the tool does and who it might be useful for. Keep it to one or two sentences.
-
-Tool Name: {{{toolName}}}
-
-Generated Description:`,
-});
-
-const generateToolDescriptionFlow = ai.defineFlow(
-  {
-    name: 'generateToolDescriptionFlow',
-    inputSchema: GenerateToolDescInputSchema,
-    outputSchema: GenerateToolDescOutputSchema,
-  },
-  async (input) => {
-    const { output } = await generateToolDescPrompt(input);
-    if (!output) {
-      throw new Error('Failed to generate tool description.');
-    }
-    return output;
-  }
-);
-
 
 /**
  * Fetches all tool requests from Firestore.
@@ -355,11 +312,3 @@ export async function updateToolRequestStatus(requestId: string, status: 'approv
     }
 }
     
-
-    
-
-    
-
-
-    
-
