@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { upsertPost } from '@/ai/flows/blog-management';
-import { Wand2, Send, Loader2, Save, ArrowLeft, Link as LinkIcon, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { Wand2, Send, Loader2, Save, ArrowLeft, Target, Heading, Bold, Italic, List, ListOrdered, ArrowDownLeft, ArrowUpRight, AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -306,6 +306,7 @@ export default function AddNewPostPage() {
                                      <Button type="button" variant="outline" size="icon" title="Align Left"><AlignLeft className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Align Center"><AlignCenter className="h-4 w-4"/></Button>
                                      <Button type="button" variant="outline" size="icon" title="Align Right"><AlignRight className="h-4 w-4"/></Button>
+                                     <Button type="button" variant="outline" size="icon" title="Align Justify"><AlignJustify className="h-4 w-4"/></Button>
                                     <div className="ml-auto">
                                         <Button 
                                             type="button" 
