@@ -1,4 +1,7 @@
 
+'use client';
+
+import { useState, useEffect, useMemo } from 'react';
 import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
 import { toolCategories } from '@/lib/constants';
@@ -39,34 +42,58 @@ import {
   Star,
   Sparkles,
   PlusCircle,
+  Loader2,
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ITEMS_PER_PAGE = 10;
 
-export default async function AdminToolsPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  const allTools = await getTools();
+export default function AdminToolsPage() {
+  const [allTools, setAllTools] = useState<Tool[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
 
-  const searchQuery = typeof searchParams.q === 'string' ? searchParams.q : '';
-  const activeCategory = typeof searchParams.category === 'string' ? (searchParams.category as ToolCategory) : 'all';
-  const activeFilter = typeof searchParams.filter === 'string' ? searchParams.filter : 'all';
-  const page = typeof searchParams.page === 'string' ? Number(searchParams.page) : 1;
+  const searchQuery = searchParams.get('q') || '';
+  const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
+  const activeFilter = searchParams.get('filter') || 'all';
+  const page = Number(searchParams.get('page')) || 1;
 
-  const counts = {
+   useEffect(() => {
+    async function fetchTools() {
+      setLoading(true);
+      try {
+        const tools = await getTools();
+        setAllTools(tools);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Could not load tools from the database.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTools();
+  }, [toast]);
+
+
+  const counts = useMemo(() => ({
     all: allTools.length,
     pro: allTools.filter(t => t.plan === 'Pro').length,
     free: allTools.filter(t => t.plan === 'Free').length,
     new: allTools.filter(t => t.isNew).length,
     active: allTools.filter(t => t.status === 'Active').length,
     disabled: allTools.filter(t => t.status === 'Disabled').length,
-  };
+  }), [allTools]);
 
-  const filteredTools = allTools
+  const filteredTools = useMemo(() => {
+    return allTools
     .filter(tool => {
       if (activeFilter === 'all') return true;
       if (activeFilter === 'pro') return tool.plan === 'Pro';
@@ -83,15 +110,46 @@ export default async function AdminToolsPage({
     .filter(tool =>
       tool.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+  }, [allTools, activeFilter, activeCategory, searchQuery]);
+  
 
   const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
-  const paginatedTools = filteredTools.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE
-  );
+  const paginatedTools = useMemo(() => {
+    return filteredTools.slice(
+      (page - 1) * ITEMS_PER_PAGE,
+      page * ITEMS_PER_PAGE
+    );
+  }, [filteredTools, page]);
 
   const getCategoryName = (categoryId: string) => {
     return toolCategories.find(c => c.id === categoryId)?.name || 'Unknown';
+  };
+  
+  const createQueryString = (params: Record<string, string | number | null>) => {
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(params)) {
+      if (value === null || value === '') {
+        newSearchParams.delete(key);
+      } else {
+        newSearchParams.set(key, String(value));
+      }
+    }
+    return newSearchParams.toString();
+  };
+  
+  const handleCategoryChange = (value: string) => {
+    router.push(`?${createQueryString({ category: value, page: '1' })}`);
+  };
+  
+  const handleFilterChange = (value: string) => {
+    router.push(`?${createQueryString({ filter: value, page: '1' })}`);
+  };
+  
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newSearchQuery = formData.get('q') as string;
+    router.push(`?${createQueryString({ q: newSearchQuery, page: '1' })}`);
   };
 
   const tabs: { id: string; label: string; icon: React.ElementType, count: number }[] = [
@@ -102,21 +160,6 @@ export default async function AdminToolsPage({
     { id: 'active', label: 'Active', icon: CheckCircle, count: counts.active },
     { id: 'disabled', label: 'Disabled', icon: XCircle, count: counts.disabled },
   ];
-
-  const createQueryString = (params: Record<string, string | number | null>) => {
-    const newSearchParams = new URLSearchParams();
-    for (const [key, value] of Object.entries(searchParams)) {
-        if(typeof value === 'string') newSearchParams.set(key, value);
-    }
-    for (const [key, value] of Object.entries(params)) {
-      if (value === null) {
-        newSearchParams.delete(key);
-      } else {
-        newSearchParams.set(key, String(value));
-      }
-    }
-    return newSearchParams.toString();
-  };
 
   return (
     <div className="space-y-6">
@@ -153,7 +196,7 @@ export default async function AdminToolsPage({
               ))}
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
-                <form className="relative w-full sm:w-auto" action="/admin/tools" method="GET">
+                <form className="relative w-full sm:w-auto" onSubmit={handleSearch}>
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         name="q"
@@ -164,7 +207,7 @@ export default async function AdminToolsPage({
                      <input type="hidden" name="filter" value={activeFilter} />
                      <input type="hidden" name="category" value={activeCategory} />
                 </form>
-                <Select value={activeCategory} onValueChange={(value) => router.push(`?${createQueryString({ category: value, page: '1' })}`)}>
+                <Select value={activeCategory} onValueChange={handleCategoryChange}>
                     <SelectTrigger className="w-full sm:w-[180px] h-10">
                         <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
@@ -187,7 +230,11 @@ export default async function AdminToolsPage({
                 </Select>
             </div>
           </div>
-
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            ) : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -236,6 +283,7 @@ export default async function AdminToolsPage({
                 )}
               </TableBody>
             </Table>
+            )}
           
            {totalPages > 1 && (
             <div className="flex items-center justify-end space-x-2 pt-4">
