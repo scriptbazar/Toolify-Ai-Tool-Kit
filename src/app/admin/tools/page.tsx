@@ -165,24 +165,24 @@ export default async function AdminToolsPage({
                     <input type="hidden" name="filter" value={activeFilter} />
                     <input type="hidden" name="category" value={activeCategory} />
                 </form>
-                <Select value={activeCategory} onValueChange={(value) => window.location.href = createQueryString({ category: value, page: 1 })}>
+                <Select value={activeCategory}>
                     <SelectTrigger className="w-full sm:w-auto h-10">
                         <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">
-                            <div className="flex items-center gap-2">
+                       <SelectItem value="all">
+                            <Link href={createQueryString({ category: 'all', page: 1 })} className="flex items-center gap-2">
                                 <LayoutGrid className="h-4 w-4" />
                                 All Categories
-                            </div>
+                            </Link>
                         </SelectItem>
                         {toolCategories.map(cat => (
-                            <SelectItem key={cat.id} value={cat.id}>
-                                <div className="flex items-center gap-2">
-                                    <cat.Icon className="h-4 w-4" />
-                                    {cat.name}
-                                </div>
-                            </SelectItem>
+                           <SelectItem key={cat.id} value={cat.id}>
+                             <Link href={createQueryString({ category: cat.id, page: 1 })} className="flex items-center gap-2">
+                               <cat.Icon className="h-4 w-4" />
+                               {cat.name}
+                             </Link>
+                           </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
