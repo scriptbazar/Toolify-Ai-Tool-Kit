@@ -159,12 +159,12 @@ export default function AddNewPostPage() {
                         <CardTitle>Post Details</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormField
                                 control={form.control}
                                 name="title"
                                 render={({ field }) => (
-                                    <FormItem className="lg:col-span-2">
+                                    <FormItem>
                                     <FormLabel>Post Title</FormLabel>
                                     <FormControl>
                                         <Input placeholder="e.g., The Future of AI" {...field} onChange={handleTitleChange} />
@@ -186,7 +186,9 @@ export default function AddNewPostPage() {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             <FormField
                                 control={form.control}
                                 name="category"
                                 render={({ field }) => (
@@ -213,7 +215,7 @@ export default function AddNewPostPage() {
                                 control={form.control}
                                 name="tags"
                                 render={({ field }) => (
-                                <FormItem className="lg:col-span-4">
+                                <FormItem>
                                     <FormLabel>Tags</FormLabel>
                                     <FormControl>
                                     <Input placeholder="AI, SaaS, Tech..." {...field} />
