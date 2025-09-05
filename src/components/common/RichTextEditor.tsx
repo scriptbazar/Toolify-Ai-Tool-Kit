@@ -4,8 +4,17 @@
 import React from 'react';
 import 'react-quill/dist/quill.snow.css';
 import dynamic from 'next/dynamic';
+import type { ComponentProps } from 'react';
 
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+// Use dynamic import for react-quill
+const ReactQuill = dynamic(
+  async () => {
+    const { default: RQ } = await import('react-quill');
+    // eslint-disable-next-line react/display-name
+    return ({ forwardedRef, ...props }: any) => <RQ ref={forwardedRef} {...props} />;
+  },
+  { ssr: false }
+);
 
 interface RichTextEditorProps {
   value: string;
