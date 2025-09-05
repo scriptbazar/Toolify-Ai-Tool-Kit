@@ -11,6 +11,9 @@ import { getSettings } from './settings-management';
 import { z } from 'zod';
 import Stripe from 'stripe';
 import paypal from '@paypal/checkout-server-sdk';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
+
 
 const CreateStripeSessionInputSchema = z.object({
   planId: z.string(),
@@ -44,6 +47,93 @@ const CreatePayPalOrderOutputSchema = z.object({
     method: z.string(),
   })),
 });
+
+const CreateRazorpayOrderInputSchema = z.object({
+    planId: z.string(),
+    planName: z.string(),
+    planPrice: z.number(),
+    userId: z.string(),
+    userEmail: z.string().email(),
+    userName: z.string(),
+});
+type CreateRazorpayOrderInput = z.infer<typeof CreateRazorpayOrderInputSchema>;
+
+const CreateRazorpayOrderOutputSchema = z.object({
+    id: z.string(),
+    amount: z.number(),
+    currency: z.string(),
+    name: z.string(),
+    description: z.string(),
+    key: z.string(),
+    prefill: z.object({
+        name: z.string(),
+        email: z.string().email(),
+    }),
+    notes: z.object({
+        userId: z.string(),
+        planId: z.string(),
+    }),
+});
+type CreateRazorpayOrderOutput = z.infer<typeof CreateRazorpayOrderOutputSchema>;
+
+
+const CreatePayUPaymentInputSchema = z.object({
+    planId: z.string(),
+    planName: z.string(),
+    planPrice: z.number(),
+    userId: z.string(),
+    userEmail: z.string().email(),
+    userName: z.string(),
+});
+type CreatePayUPaymentInput = z.infer<typeof CreatePayUPaymentInputSchema>;
+
+const CreatePayUPaymentOutputSchema = z.object({
+  action: z.string(),
+  hash: z.string(),
+  txnid: z.string(),
+  key: z.string(),
+  amount: z.string(),
+  productinfo: z.string(),
+  firstname: z.string(),
+  email: z.string(),
+  surl: z.string(),
+  furl: z.string(),
+});
+
+type CreatePayUPaymentOutput = z.infer<typeof CreatePayUPaymentOutputSchema>;
+
+const CreateCashfreeOrderInputSchema = z.object({
+  planId: z.string(),
+  planName: z.string(),
+  planPrice: z.number(),
+  userId: z.string(),
+  userEmail: z.string().email(),
+  userName: z.string(),
+});
+type CreateCashfreeOrderInput = z.infer<typeof CreateCashfreeOrderInputSchema>;
+
+const CreateCashfreeOrderOutputSchema = z.object({
+  payment_session_id: z.string(),
+  order_id: z.string(),
+  appId: z.string(),
+  mode: z.enum(['sandbox', 'production']),
+});
+type CreateCashfreeOrderOutput = z.infer<typeof CreateCashfreeOrderOutputSchema>;
+
+const CreatePhonePePaymentInputSchema = z.object({
+  planId: z.string(),
+  planName: z.string(),
+  planPrice: z.number(),
+  userId: z.string(),
+  userEmail: z.string().email(),
+  userName: z.string(),
+});
+type CreatePhonePePaymentInput = z.infer<typeof CreatePhonePePaymentInputSchema>;
+
+const CreatePhonePePaymentOutputSchema = z.object({
+  redirectUrl: z.string(),
+});
+type CreatePhonePePaymentOutput = z.infer<typeof CreatePhonePePaymentOutputSchema>;
 
 
 function getPayPalClient() {
@@ -196,4 +286,202 @@ export async function getPayments(): Promise<Payment[]> {
         // but for now, we'll return an empty array to prevent crashing the client.
         return [];
     }
+}
+
+/**
+ * Creates a Razorpay order.
+ */
+export async function createRazorpayOrder(input: CreateRazorpayOrderInput): Promise<CreateRazorpayOrderOutput> {
+  const { planId, planName, planPrice, userId, userEmail, userName } = CreateRazorpayOrderInputSchema.parse(input);
+  const settings = await getSettings();
+  const razorpaySettings = settings.payment?.razorpay;
+
+  if (!razorpaySettings?.isEnabled || !razorpaySettings.keyId || !razorpaySettings.keySecret) {
+    throw new Error('Razorpay is not configured or enabled.');
+  }
+
+  const instance = new Razorpay({
+    key_id: razorpaySettings.keyId,
+    key_secret: razorpaySettings.keySecret,
+  });
+
+  const options = {
+    amount: planPrice * 100, // amount in the smallest currency unit
+    currency: "INR",
+    receipt: `receipt_order_${Date.now()}`,
+    notes: {
+      userId,
+      planId,
+    }
+  };
+
+  try {
+    const order = await instance.orders.create(options);
+    return {
+      ...order,
+      key: razorpaySettings.keyId,
+      name: settings.general?.siteTitle || 'ToolifyAI',
+      description: `Payment for ${planName}`,
+      prefill: {
+        name: userName,
+        email: userEmail,
+      },
+    };
+  } catch (error: any) {
+    console.error("Razorpay Error:", error);
+    throw new Error(`Failed to create Razorpay order: ${error.message}`);
+  }
+}
+
+/**
+ * Creates a PayU payment.
+ */
+export async function createPayUPayment(input: CreatePayUPaymentInput): Promise<CreatePayUPaymentOutput> {
+  const { planId, planName, planPrice, userId, userEmail, userName } = CreatePayUPaymentInputSchema.parse(input);
+  const settings = await getSettings();
+  const payuSettings = settings.payment?.payu;
+
+  if (!payuSettings?.isEnabled || !payuSettings.merchantKey || !payuSettings.merchantSalt) {
+    throw new Error('PayU is not configured or enabled.');
+  }
+  
+  const siteUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+  const txnid = `txn_${Date.now()}`;
+  const amount = planPrice.toFixed(2);
+  
+  const hashString = `${payuSettings.merchantKey}|${txnid}|${amount}|${planName}|${userName}|${userEmail}|||||||||||${payuSettings.merchantSalt}`;
+  const hash = crypto.createHash('sha512').update(hashString).digest('hex');
+
+  const action = payuSettings.mode === 'live' 
+    ? 'https://secure.payu.in/_payment' 
+    : 'https://test.payu.in/_payment';
+
+  return {
+    action,
+    key: payuSettings.merchantKey,
+    txnid,
+    amount,
+    productinfo: planName,
+    firstname: userName,
+    email: userEmail,
+    surl: `${siteUrl}/payment/success`,
+    furl: `${siteUrl}/payment/cancel`,
+    hash,
+  };
+}
+
+/**
+ * Creates a Cashfree payment session.
+ */
+export async function createCashfreePayment(input: CreateCashfreeOrderInput): Promise<CreateCashfreeOrderOutput> {
+  const { planId, planPrice, userId, userEmail, userName } = CreateCashfreeOrderInputSchema.parse(input);
+  const settings = await getSettings();
+  const cashfreeSettings = settings.payment?.cashfree;
+  
+  if (!cashfreeSettings?.isEnabled || !cashfreeSettings.appId || !cashfreeSettings.secretKey) {
+    throw new Error('Cashfree is not configured or enabled.');
+  }
+  
+  const siteUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+  const orderId = `order_${Date.now()}`;
+  const url = cashfreeSettings.mode === 'production'
+    ? 'https://api.cashfree.com/pg/orders'
+    : 'https://sandbox.cashfree.com/pg/orders';
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-client-id': cashfreeSettings.appId,
+      'x-client-secret': cashfreeSettings.secretKey,
+      'x-api-version': '2022-09-01',
+    },
+    body: JSON.stringify({
+      order_id: orderId,
+      order_amount: planPrice,
+      order_currency: 'INR',
+      customer_details: {
+        customer_id: userId,
+        customer_email: userEmail,
+        customer_phone: '9999999999', // Placeholder
+        customer_name: userName,
+      },
+      order_meta: {
+        return_url: `${siteUrl}/payment/success?order_id={order_id}`,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Cashfree Error:", errorData);
+    throw new Error(errorData.message || 'Failed to create Cashfree order.');
+  }
+
+  const data = await response.json();
+  return {
+      payment_session_id: data.payment_session_id,
+      order_id: data.order_id,
+      appId: cashfreeSettings.appId,
+      mode: cashfreeSettings.mode,
+  };
+}
+
+
+/**
+ * Creates a PhonePe payment request.
+ */
+export async function createPhonePePayment(input: CreatePhonePePaymentInput): Promise<CreatePhonePePaymentOutput> {
+  const { planPrice, userId } = CreatePhonePePaymentInputSchema.parse(input);
+  const settings = await getSettings();
+  const phonepeSettings = settings.payment?.phonepe;
+
+  if (!phonepeSettings?.isEnabled || !phonepeSettings.merchantId || !phonepeSettings.saltKey || !phonepeSettings.saltIndex) {
+    throw new Error('PhonePe is not configured or enabled.');
+  }
+  
+  const siteUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+  const merchantTransactionId = `MT${Date.now()}`;
+  const amount = planPrice * 100; // in paise
+  
+  const payload = {
+    merchantId: phonepeSettings.merchantId,
+    merchantTransactionId,
+    merchantUserId: phonepeSettings.merchantUserId || `MUID${userId}`,
+    amount,
+    redirectUrl: `${siteUrl}/payment/success`,
+    redirectMode: 'POST',
+    callbackUrl: `${siteUrl}/api/phonepe-callback`,
+    mobileNumber: '9999999999', // Placeholder
+    paymentInstrument: { type: 'PAY_PAGE' },
+  };
+
+  const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64');
+  const verifyString = `${base64Payload}/pg/v1/pay${phonepeSettings.saltKey}`;
+  const sha256 = crypto.createHash('sha256').update(verifyString).digest('hex');
+  const xVerify = `${sha256}###${phonepeSettings.saltIndex}`;
+  
+  const url = phonepeSettings.mode === 'production'
+      ? 'https://api.phonepe.com/apis/hermes/pg/v1/pay'
+      : 'https://api-preprod.phonepe.com/apis/hermes/pg/v1/pay';
+
+  const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-VERIFY': xVerify,
+      },
+      body: JSON.stringify({ request: base64Payload }),
+  });
+
+  const responseData = await response.json();
+
+  if (!responseData.success) {
+      console.error("PhonePe Error:", responseData);
+      throw new Error(responseData.message || 'Failed to initiate PhonePe payment.');
+  }
+
+  return {
+    redirectUrl: responseData.data.instrumentResponse.redirectInfo.url,
+  };
 }

@@ -1,11 +1,12 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, CreditCard, DollarSign, Users, ArrowRight, Newspaper, Package, Star, Megaphone } from "lucide-react";
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -23,10 +24,13 @@ interface UserProfile {
   firstName?: string;
   lastName?: string;
   planId?: string;
-  referrals?: number;
-  toolsUsed?: number;
   nextPaymentDate?: string;
   subscriptionPrice?: number;
+}
+
+interface UserStats {
+    toolsUsed: number;
+    referrals: number;
 }
 
 const AnnouncementItem = ({ announcement }: { announcement: Announcement }) => (
@@ -51,6 +55,7 @@ const AnnouncementItem = ({ announcement }: { announcement: Announcement }) => (
 export default function UserDashboard() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [stats, setStats] = useState<UserStats>({ toolsUsed: 0, referrals: 0 });
   const [plan, setPlan] = useState<Plan | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,10 +68,12 @@ export default function UserDashboard() {
         if (firebaseUser) {
             setUser(firebaseUser);
             try {
-                const [settings, userDocSnap, fetchedAnnouncements] = await Promise.all([
+                const [settings, userDocSnap, fetchedAnnouncements, referralsSnapshot, activitySnapshot] = await Promise.all([
                     getSettings(),
                     getDoc(doc(db, "users", firebaseUser.uid)),
                     getAnnouncementsForUser(firebaseUser.uid),
+                    getDocs(query(collection(db, "users"), where("referredBy", "==", firebaseUser.uid))),
+                    getDocs(query(collection(db, `users/${firebaseUser.uid}/activity`), where('type', '==', 'tool_usage')))
                 ]);
                 
                 if (userDocSnap.exists()) {
@@ -75,6 +82,11 @@ export default function UserDashboard() {
                     const userPlan = settings.plan?.plans.find(p => p.id === userData.planId) || settings.plan?.plans.find(p => p.id === 'free') || null;
                     setPlan(userPlan);
                 }
+
+                setStats({
+                    toolsUsed: activitySnapshot.size,
+                    referrals: referralsSnapshot.size,
+                });
                 
                 setAnnouncements(fetchedAnnouncements);
 
@@ -139,9 +151,9 @@ export default function UserDashboard() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{profile?.toolsUsed || 0}</div>
+            <div className="text-2xl font-bold">{stats.toolsUsed}</div>
             <p className="text-xs text-muted-foreground">
-              in the last 30 days
+              in total
             </p>
           </CardContent>
         </Card>
@@ -167,7 +179,7 @@ export default function UserDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+{profile?.referrals || 0}</div>
+            <div className="text-2xl font-bold">+{stats.referrals}</div>
             <p className="text-xs text-muted-foreground">
               friends joined
             </p>

@@ -29,7 +29,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -94,6 +94,14 @@ const pieChartConfig = {
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))'];
 const ITEMS_PER_PAGE = 10;
 
+const calculatePercentageChange = (current: number, previous: number) => {
+  if (previous === 0) {
+    return current > 0 ? '+100%' : '0%';
+  }
+  const change = ((current - previous) / previous) * 100;
+  return `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+};
+
 
 export default function AdminAnalyticsPage() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -103,6 +111,9 @@ export default function AdminAnalyticsPage() {
     newUsers: 0,
     totalLeads: 0,
     activeUsers: 0,
+    totalUsersChange: '0%',
+    totalLeadsChange: '0%',
+    newUsersChange: '0%',
   });
   const [lineChartData, setLineChartData] = useState<ChartData[]>([]);
   const [pieChartData, setPieChartData] = useState<PieChartData[]>([]);
@@ -126,26 +137,39 @@ export default function AdminAnalyticsPage() {
             getDocs(leadsRef)
         ]);
 
-        const totalUsers = usersSnapshot.size;
-        const totalLeads = leadsSnapshot.size;
         const allUsersList = usersSnapshot.docs.map(doc => doc.data());
+        const allLeadsList = leadsSnapshot.docs.map(doc => doc.data());
 
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const now = new Date();
+        const thirtyDaysAgo = new Date(new Date().setDate(now.getDate() - 30));
+        const sixtyDaysAgo = new Date(new Date().setDate(now.getDate() - 60));
+
+        // Current period stats
+        const totalUsers = allUsersList.length;
+        const totalLeads = allLeadsList.length;
         const newUsersCount = allUsersList.filter(user => 
-            user.createdAt && user.createdAt.toDate() >= thirtyDaysAgo
+            user.createdAt && (user.createdAt as Timestamp).toDate() >= thirtyDaysAgo
         ).length;
-
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-        const activeUsersCount = allUsersList.filter(user =>
-          user.lastActive && user.lastActive.toDate() >= fiveMinutesAgo
+         const activeUsersCount = allUsersList.filter(user =>
+          user.lastActive && (user.lastActive as Timestamp).toDate() >= new Date(Date.now() - 5 * 60 * 1000)
         ).length;
+        
+        // Previous period stats for percentage change
+        const prevTotalUsers = allUsersList.filter(user => (user.createdAt as Timestamp).toDate() < thirtyDaysAgo).length;
+        const prevTotalLeads = allLeadsList.filter(lead => (lead.createdAt as Timestamp).toDate() < thirtyDaysAgo).length;
+        const prevNewUsersCount = allUsersList.filter(user => {
+            const createdAt = (user.createdAt as Timestamp).toDate();
+            return createdAt >= sixtyDaysAgo && createdAt < thirtyDaysAgo;
+        }).length;
         
         setStats({ 
             totalUsers, 
             totalLeads,
             newUsers: newUsersCount,
-            activeUsers: activeUsersCount
+            activeUsers: activeUsersCount,
+            totalUsersChange: calculatePercentageChange(totalUsers, prevTotalUsers),
+            totalLeadsChange: calculatePercentageChange(totalLeads, prevTotalLeads),
+            newUsersChange: calculatePercentageChange(newUsersCount, prevNewUsersCount)
         });
 
         const monthlySignups: { [key: string]: number } = {};
@@ -221,7 +245,7 @@ export default function AdminAnalyticsPage() {
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground">
-                    +5.2% from last month
+                    {stats.totalUsersChange} from last month
                   </p>
                 </CardContent>
               </Card>
@@ -233,7 +257,7 @@ export default function AdminAnalyticsPage() {
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.totalLeads.toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground">
-                    +18.3% from last month
+                    {stats.totalLeadsChange} from last month
                   </p>
                 </CardContent>
               </Card>
@@ -247,7 +271,7 @@ export default function AdminAnalyticsPage() {
                 <CardContent>
                   <div className="text-2xl font-bold">+{stats.newUsers.toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground">
-                    +180.1% from last month
+                     {stats.newUsersChange} from last month
                   </p>
                 </CardContent>
               </Card>
