@@ -168,21 +168,27 @@ export async function getTools(): Promise<Tool[]> {
  */
 export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: boolean; message: string; toolId?: string }> {
   const adminDb = getAdminDb();
+  if (!adminDb) {
+    return { success: false, message: 'Database not initialized.' };
+  }
   try {
     const { id, ...data } = toolData;
     
     if (data.name) {
       data.slug = data.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
     }
+    
+    // Validate data before saving
+    const validatedData = UpsertToolInputSchema.parse(data);
 
     if (id) {
       const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(id);
-      await toolRef.update(data);
+      await toolRef.update(validatedData);
       return { success: true, message: 'Tool updated successfully.', toolId: id };
     } else {
       if (!data.slug) throw new Error("Slug is required for a new tool.");
       const docRef = adminDb.collection(TOOLS_COLLECTION).doc(data.slug);
-      await docRef.set({ ...data, createdAt: FieldValue.serverTimestamp() });
+      await docRef.set({ ...validatedData, createdAt: FieldValue.serverTimestamp() });
       return { success: true, message: 'Tool added successfully.', toolId: docRef.id };
     }
   } catch (error: any) {
@@ -218,6 +224,9 @@ export async function deleteTool(toolId: string): Promise<{ success: boolean; me
  */
 export async function getFavoriteTools(userId: string): Promise<Tool[]> {
   const adminDb = getAdminDb();
+  if (!adminDb) {
+      return [];
+  }
   try {
     const userDocRef = adminDb.collection('users').doc(userId);
     const userDocSnap = await userDocRef.get();
@@ -258,6 +267,9 @@ type RequestToolInput = {
 
 export async function requestNewTool(input: RequestToolInput): Promise<{ success: boolean; message: string }> {
     const adminDb = getAdminDb();
+    if (!adminDb) {
+      return { success: false, message: 'Database not initialized.' };
+    }
     try {
         const validatedInput = RequestToolInputSchema.parse(input);
         await adminDb.collection(TOOL_REQUESTS_COLLECTION).add({
@@ -277,6 +289,9 @@ export async function requestNewTool(input: RequestToolInput): Promise<{ success
  */
 export async function getToolRequests(): Promise<ToolRequest[]> {
     const adminDb = getAdminDb();
+    if (!adminDb) {
+      return [];
+    }
     try {
         const snapshot = await adminDb.collection(TOOL_REQUESTS_COLLECTION).orderBy('requestedAt', 'desc').get();
         return snapshot.docs.map(doc => {
@@ -298,6 +313,9 @@ export async function getToolRequests(): Promise<ToolRequest[]> {
  */
 export async function updateToolRequestStatus(requestId: string, status: 'approved' | 'rejected'): Promise<{ success: boolean, message: string }> {
     const adminDb = getAdminDb();
+    if (!adminDb) {
+      return { success: false, message: 'Database not initialized.' };
+    }
     try {
         const requestRef = adminDb.collection(TOOL_REQUESTS_COLLECTION).doc(requestId);
         await requestRef.update({ status });
