@@ -41,13 +41,13 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'AI Blog Post Writer', description: 'Generate high-quality, SEO-friendly blog posts on any topic.', icon: 'PenSquare', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Image Generator', description: 'Create stunning and unique images from text prompts.', icon: 'Image', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Email Composer', description: 'Compose professional and effective emails for any situation with AI.', icon: 'Mail', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'AI Chatbot', description: 'Engage in intelligent conversations with our advanced AI assistant.', icon: 'Bot', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'AI Social Media Post Generator', description: 'Generate engaging posts for various social media platforms.', icon: 'Share2', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'AI Code Assistant', description: 'Get help with writing, debugging, and explaining code snippets in various languages.', icon: 'CodeXml', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Text to Speech', description: 'Convert written text into natural-sounding spoken audio in various voices.', icon: 'Volume2', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Content Summarizer', description: 'Summarize long articles, documents, or texts into concise points.', icon: 'AlignJustify', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Story Generator', description: 'Create compelling stories and narratives from a simple prompt.', icon: 'BookOpen', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Tweet Generator', description: 'Generate engaging and viral tweets for your social media.', icon: 'Twitter', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Product Description Writer', description: 'Craft persuasive product descriptions for your e-commerce store.', icon: 'ShoppingCart', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'AI Code Assistant', description: 'Get help with writing, debugging, and explaining code snippets in various languages.', icon: 'CodeXml', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
 
     // PDF Tools (10)
     { name: 'PDF Merger', description: 'Combine multiple PDF files into a single, organized document.', icon: 'FilePlus2', category: 'pdf', plan: 'Pro', isNew: false, status: 'Active' },
@@ -122,14 +122,15 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
+  const adminDb = getAdminDb();
+  if (!adminDb) {
+    console.error("Database not initialized, cannot fetch tools.");
+    return [];
+  }
+  
+  const toolsRef = adminDb.collection(TOOLS_COLLECTION);
+  
   try {
-    const adminDb = getAdminDb();
-    if (!adminDb) {
-      console.error("Database not initialized, cannot fetch tools.");
-      return [];
-    }
-    
-    const toolsRef = adminDb.collection(TOOLS_COLLECTION);
     let snapshot = await toolsRef.orderBy('name').get();
 
     if (snapshot.empty) {
@@ -147,7 +148,6 @@ export async function getTools(): Promise<Tool[]> {
     
     const fetchedTools = snapshot.docs.map(doc => {
         const data = doc.data();
-        // Convert Firestore Timestamp to a serializable format (ISO string)
         const createdAt = (data.createdAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
         return { ...data, id: doc.id, createdAt } as Tool;
     });
@@ -305,3 +305,4 @@ export async function updateToolRequestStatus(requestId: string, status: 'approv
         return { success: false, message: error.message || 'An unknown error occurred.' };
     }
 }
+
