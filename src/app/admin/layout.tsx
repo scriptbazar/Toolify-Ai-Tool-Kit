@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -14,7 +15,6 @@ import {
   Megaphone,
   DatabaseBackup,
   UserCog,
-  Star,
   Mail,
   BookText,
   Ticket,
@@ -28,7 +28,6 @@ import {
   SlidersHorizontal,
   ListChecks,
   CreditCard,
-  FileCog,
   LogOut,
   User,
   Shield,
@@ -153,7 +152,7 @@ export default function AdminLayout({
     { href: '/admin/community-chat', label: 'Community Chat', icon: MessageSquare },
     { href: '/admin/payment-history', label: 'Payment History', icon: History },
     { href: '/admin/affiliate-management', label: 'Affiliate Management', icon: GitCommitVertical },
-    { href: '/admin/review-management', label: 'Review Management', icon: Star },
+    { href: '/admin/review-management', label: 'Review Management', icon: TrendingUp },
     { href: '/admin/advertisement', label: 'Advertisement', icon: Megaphone },
   ];
 
@@ -185,7 +184,7 @@ export default function AdminLayout({
     { href: '/admin/settings/homepage', icon: Home, label: 'Homepage Settings' },
     { href: '/admin/settings/plan', icon: ListChecks, label: 'Plan Management' },
     { href: '/admin/settings/payment', icon: CreditCard, label: 'Payment Settings' },
-    { href: '/admin/settings/page', icon: FileCog, label: 'Page Management' },
+    { href: '/admin/settings/page', icon: FileTextIcon, label: 'Page Management' },
     { href: '/admin/settings/affiliate', icon: GitCommitVertical, label: 'Affiliate Settings'},
     { href: '/admin/settings/sidebar', icon: PanelLeft, label: 'Sidebar Management'},
     { href: '/admin/settings/footer', icon: Footprints, label: 'Footer Management' },
@@ -241,7 +240,7 @@ export default function AdminLayout({
   const mobileNavContent = (
     <>
       <SheetHeader className="text-left border-b p-4">
-        <SheetTitle>
+         <SheetTitle>
            <Link href="/" className="flex items-center gap-2 font-semibold">
             <Logo />
             <span className="text-lg">ToolifyAI</span>

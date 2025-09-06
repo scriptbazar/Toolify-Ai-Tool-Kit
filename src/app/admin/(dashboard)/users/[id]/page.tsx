@@ -1,0 +1,334 @@
+
+
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import {
+  ArrowLeft,
+  UploadCloud,
+  Save,
+  User,
+  Loader2,
+  MailCheck,
+  Smartphone,
+  MessageSquare,
+  AlertTriangle,
+  X,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
+import { countries } from '@/lib/countries';
+import { Combobox } from '@/components/ui/combobox';
+import { sendPasswordChangeEmail } from '@/ai/flows/send-email';
+import { useParams, useRouter } from 'next/navigation';
+
+
+interface UserProfile {
+  firstName: string;
+  lastName: string;
+  userName: string;
+  email: string;
+  mobileNumber?: string;
+  countryCode?: string;
+  enable2FA?: boolean;
+  twoFactorAuthMethods?: {
+    email?: boolean;
+    authenticatorApp?: boolean;
+    mobileNumber?: boolean;
+  };
+}
+
+const TwoFactorAuthOptionCard = ({
+  icon: Icon,
+  label,
+  checked,
+  onCheckedChange,
+}: {
+  icon: React.ElementType;
+  label: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}) => {
+  return (
+    <div
+      onClick={() => onCheckedChange(!checked)}
+      className={cn(
+        'flex flex-col items-center justify-center gap-3 rounded-lg border-2 p-6 cursor-pointer transition-all',
+        checked ? 'border-primary bg-primary/5' : 'border-muted bg-transparent hover:bg-muted/50'
+      )}
+    >
+      <Icon className={cn("h-8 w-8", checked ? 'text-primary' : 'text-muted-foreground')} />
+      <span className="font-medium text-center">{label}</span>
+      <Checkbox checked={checked} className="sr-only" />
+    </div>
+  );
+};
+
+
+export default function EditUserDetailPage() {
+  const { toast } = useToast();
+  const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
+
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      // Ensure there's a logged-in admin to perform edits
+      if (currentUser) {
+         // Now fetch the profile of the user being edited
+        const userDocRef = doc(db, 'users', id);
+        try {
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+             setProfile(userDocSnap.data() as UserProfile);
+          } else {
+            toast({ title: "User not found", variant: "destructive" });
+          }
+        } catch (error) {
+          console.error("Error fetching user document:", error);
+          toast({
+            title: "Error",
+            description: "Could not load user profile.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        router.push('/admin/login');
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [id, toast, router]);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setProfile(prev => prev ? { ...prev, [id]: value } : null);
+  };
+  
+  const handleSelectChange = (id: string, value: string) => {
+    setProfile(prev => prev ? { ...prev, [id]: value } : null);
+  }
+
+  const handleSwitchChange = (id: string, checked: boolean) => {
+     setProfile(prev => prev ? { ...prev, [id]: checked } : null);
+  };
+  
+  const handle2faMethodChange = (method: 'email' | 'authenticatorApp' | 'mobileNumber', checked: boolean) => {
+     setProfile(prev => {
+        if (!prev) return null;
+        return {
+            ...prev,
+            twoFactorAuthMethods: {
+                ...(prev.twoFactorAuthMethods || {}),
+                [method]: checked,
+            }
+        }
+     });
+  };
+
+  const handleSaveChanges = async () => {
+    if (!id || !profile) return;
+
+    setIsSaving(true);
+    try {
+      // Update profile in Firestore
+      const userDocRef = doc(db, 'users', id);
+      await updateDoc(userDocRef, { ...profile });
+
+       toast({
+        title: 'Profile Updated',
+        description: 'User profile has been saved successfully.',
+      });
+    } catch (error: any) {
+        toast({
+            title: 'Error',
+            description: error.message || 'Could not save user profile.',
+            variant: 'destructive',
+        });
+    } finally {
+        setIsSaving(false);
+    }
+  };
+  
+  if (loading) {
+    return <div className="space-y-6">
+        <Skeleton className="h-6 w-48" />
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-10 w-1/3" />
+          <Skeleton className="h-10 w-24" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1"><Skeleton className="h-64 w-full" /></div>
+            <div className="lg:col-span-2"><Skeleton className="h-64 w-full" /></div>
+        </div>
+        <Skeleton className="h-64 w-full" />
+    </div>;
+  }
+  
+  if (!profile) {
+      return <div>User not found or you do not have permission to view this page.</div>
+  }
+
+  return (
+    <div className="space-y-6">
+      <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="h-4 w-4" />
+        Back To Dashboard
+      </Link>
+      
+      <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold tracking-tight">Edit User Profile</h1>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => router.back()}>
+                <X className="mr-2 h-4 w-4"/>
+                Cancel
+            </Button>
+            <Button onClick={handleSaveChanges} disabled={isSaving}>
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save Changes
+            </Button>
+          </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-1">
+             <Card className="h-full">
+                <CardHeader>
+                    <CardTitle>Profile Picture</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center gap-6">
+                   <Avatar className="h-40 w-40 text-6xl">
+                     <AvatarFallback>{profile.firstName?.[0]?.toUpperCase()}</AvatarFallback>
+                   </Avatar>
+                   <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+                   <Button variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()}>
+                       <UploadCloud className="mr-2 h-4 w-4" />
+                       Upload Profile
+                   </Button>
+                </CardContent>
+             </Card>
+        </div>
+        <div className="lg:col-span-2">
+            <Card className="h-full">
+                <CardHeader>
+                    <CardTitle>Personal Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="firstName">First Name</Label>
+                            <Input id="firstName" value={profile.firstName || ''} onChange={handleInputChange} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="lastName">Last Name</Label>
+                            <Input id="lastName" value={profile.lastName || ''} onChange={handleInputChange} />
+                        </div>
+                    </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div className="space-y-2">
+                            <Label htmlFor="email">Email Address</Label>
+                            <Input id="email" type="email" value={profile.email || ''} disabled />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="userName">Username</Label>
+                            <Input id="userName" value={profile.userName || ''} onChange={handleInputChange} />
+                        </div>
+                    </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="countryCode">Country Code</Label>
+                           <Combobox
+                                items={countries.map(country => ({
+                                    value: country.dial_code,
+                                    label: `${country.flag} ${country.name} (${country.dial_code})`,
+                                }))}
+                                value={profile.countryCode || ''}
+                                onValueChange={(value) => handleSelectChange('countryCode', value)}
+                                placeholder="Select country..."
+                                searchPlaceholder="Search country..."
+                                notFoundMessage="No country found."
+                            />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="mobileNumber">Mobile Number</Label>
+                          <Input id="mobileNumber" value={profile.mobileNumber || ''} onChange={handleInputChange} placeholder="Enter mobile number" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+      </div>
+
+       <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Security Settings
+            </CardTitle>
+            <CardDescription>Manage user's two-factor authentication.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-8">
+             <div className="space-y-4">
+                <div className="flex items-start justify-between rounded-lg border p-4">
+                  <div>
+                    <Label htmlFor="enable2FA" className="text-base font-medium">Enable Two-Factor Authentication</Label>
+                    <p className="text-sm text-muted-foreground">Add an extra layer of security to the user's account.</p>
+                  </div>
+                  <Switch id="enable2FA" checked={profile.enable2FA || false} onCheckedChange={(checked) => handleSwitchChange('enable2FA', checked)} />
+                </div>
+                
+                 {profile.enable2FA && (
+                    <Card className="p-4">
+                        <Label className="text-base font-medium">Enabled 2FA Methods</Label>
+                        <p className="text-sm text-muted-foreground mb-4">Click on a card to enable or disable a method. At least one method must be selected.</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <TwoFactorAuthOptionCard 
+                                icon={MailCheck}
+                                label="Email Authentication"
+                                checked={profile.twoFactorAuthMethods?.email || false}
+                                onCheckedChange={(checked) => handle2faMethodChange('email', checked)}
+                            />
+                            <TwoFactorAuthOptionCard 
+                                icon={Smartphone}
+                                label="Authenticator App"
+                                checked={profile.twoFactorAuthMethods?.authenticatorApp || false}
+                                onCheckedChange={(checked) => handle2faMethodChange('authenticatorApp', checked)}
+                            />
+                            <TwoFactorAuthOptionCard 
+                                icon={MessageSquare}
+                                label="Mobile Number (SMS)"
+                                checked={profile.twoFactorAuthMethods?.mobileNumber || false}
+                                onCheckedChange={(checked) => handle2faMethodChange('mobileNumber', checked)}
+                            />
+                        </div>
+                        {profile.twoFactorAuthMethods?.mobileNumber && !profile.mobileNumber && (
+                          <div className="mt-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4"/>
+                            <span>Please add and verify user's mobile number in 'Personal Information' to use SMS-based authentication.</span>
+                          </div>
+                        )}
+                    </Card>
+                )}
+             </div>
+          </CardContent>
+       </Card>
+    </div>
+  );
+}
