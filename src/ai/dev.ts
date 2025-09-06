@@ -19,3 +19,5 @@ import '@/ai/flows/utility-actions.ts';
 import '@/ai/flows/verify-recaptcha.ts';
 import '@/ai/flows/pdf-management.ts';
 import '@/ai/flows/text-to-speech.ts';
+import '@/ai/flows/prompt-generator.ts';
+

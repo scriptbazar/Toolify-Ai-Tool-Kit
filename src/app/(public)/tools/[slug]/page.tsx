@@ -12,6 +12,7 @@ import { PdfMerger } from '@/components/tools/PdfMerger';
 import { UnitConverter } from '@/components/tools/UnitConverter';
 import { ColorPicker } from '@/components/tools/ColorPicker';
 import { TextRepeater } from '@/components/tools/TextRepeater';
+import { PromptGenerator } from '@/components/tools/PromptGenerator';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -43,6 +44,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'unit-converter': UnitConverter,
   'color-picker': ColorPicker,
   'text-repeater': TextRepeater,
+  'prompt-generator': PromptGenerator,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
@@ -202,6 +204,12 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     },
 
     // AI Tools
+    'prompt-generator': {
+        title: '✨ About the Prompt Generator',
+        features: ['Topic-Based Generation: Provide a topic and get a structured, creative prompt.', 'Multiple Styles: Generate prompts for different needs (e.g., creative writing, technical questions, brainstorming).', 'Customizable Detail Level: Get simple or highly detailed and constrained prompts.', 'One-Click Copy: Easily copy the generated prompt to use in other AI tools.'],
+        howTo: ['Enter your main topic or keyword (e.g., "space exploration", "healthy breakfast ideas").', 'Choose the desired style or complexity.', 'Click "Generate Prompt".', 'Use the generated prompt with AI image generators, writers, or chatbots.'],
+        why: 'Unlock the full potential of your AI tools. A well-crafted prompt is the key to getting high-quality results. This tool helps you create detailed and effective prompts, saving you time and improving your AI-generated content.'
+    },
     'ai-blog-post-writer': {
         title: '✨ About the AI Blog Post Writer',
         features: ['Topic-Based Generation: Provide a topic and get a full blog post.', 'Keyword Integration: Suggest keywords for better SEO focus.', 'Multiple Tones: Choose from various writing styles (professional, casual, etc.).', 'Structured Output: Generates titles, intros, body, and conclusions.'],
