@@ -8,6 +8,7 @@
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { type Tool, ToolSchema, UpsertToolInputSchema, type ToolRequest, ToolRequestSchema } from './tool-management.types';
+import { z } from 'zod';
 
 const TOOLS_COLLECTION = 'tools';
 const TOOL_REQUESTS_COLLECTION = 'toolRequests';
@@ -41,8 +42,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'AI Blog Post Writer', description: 'Generate high-quality, SEO-friendly blog posts on any topic.', icon: 'PenSquare', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Image Generator', description: 'Create stunning and unique images from text prompts.', icon: 'Image', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Email Composer', description: 'Compose professional and effective emails for any situation with AI.', icon: 'Mail', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'AI Social Media Post Generator', description: 'Generate engaging posts for various social media platforms.', icon: 'Share2', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Code Assistant', description: 'Get help with writing, debugging, and explaining code snippets in various languages.', icon: 'CodeXml', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'AI Social Media Post Generator', description: 'Generate engaging posts for various social media platforms.', icon: 'Share2', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Text to Speech', description: 'Convert written text into natural-sounding spoken audio in various voices.', icon: 'Volume2', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Content Summarizer', description: 'Summarize long articles, documents, or texts into concise points.', icon: 'AlignJustify', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Story Generator', description: 'Create compelling stories and narratives from a simple prompt.', icon: 'BookOpen', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
