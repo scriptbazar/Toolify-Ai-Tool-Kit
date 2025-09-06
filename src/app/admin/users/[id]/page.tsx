@@ -87,12 +87,7 @@ export default function EditUserDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -107,15 +102,6 @@ export default function EditUserDetailPage() {
           const userDocSnap = await getDoc(userDocRef);
           if (userDocSnap.exists()) {
              setProfile(userDocSnap.data() as UserProfile);
-             // Find the user object in auth if needed, though not required for profile edits
-             // For password changes, we need to re-authenticate the admin, which is complex and risky.
-             // We will handle password changes via a separate, more secure flow.
-             // For now, let's assume the admin can edit profile data.
-             const authUser = auth.currentUser;
-             if (authUser && authUser.uid === id) {
-                setUser(authUser);
-             }
-
           } else {
             toast({ title: "User not found", variant: "destructive" });
           }
@@ -163,35 +149,12 @@ export default function EditUserDetailPage() {
 
   const handleSaveChanges = async () => {
     if (!id || !profile) return;
-    
-    if (newPassword && newPassword !== confirmPassword) {
-        toast({ title: 'Error', description: 'New passwords do not match.', variant: 'destructive' });
-        return;
-    }
-     if (newPassword && !user) {
-        toast({ title: 'Error', description: 'You can only change your own password.', variant: 'destructive' });
-        return;
-    }
 
     setIsSaving(true);
     try {
       // Update profile in Firestore
       const userDocRef = doc(db, 'users', id);
       await updateDoc(userDocRef, { ...profile });
-
-      // Update password in Firebase Auth if a new one is provided
-      if (newPassword && user) {
-        await updatePassword(user, newPassword);
-        
-        // Send password change notification email
-        await sendPasswordChangeEmail({
-            to: profile.email,
-            name: profile.firstName
-        });
-        
-        setNewPassword('');
-        setConfirmPassword('');
-      }
 
        toast({
         title: 'Profile Updated',
@@ -323,38 +286,14 @@ export default function EditUserDetailPage() {
               <Lock className="w-5 h-5" />
               Security Settings
             </CardTitle>
-            <CardDescription>Manage your password and two-factor authentication.</CardDescription>
+            <CardDescription>Manage user's two-factor authentication.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-8">
-             <div>
-                <h3 className="text-lg font-medium mb-4">Change Password</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="new-password">New Password</Label>
-                    <div className="relative">
-                        <Input id="new-password" type={showPassword ? 'text' : 'password'} placeholder="Enter new password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-                        <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowPassword(!showPassword)}>
-                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                    </div>
-                  </div>
-                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm New Password</Label>
-                    <div className="relative">
-                        <Input id="confirm-password" type={showConfirmPassword ? 'text' : 'password'} placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-                         <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                    </div>
-                  </div>
-                </div>
-             </div>
-
              <div className="space-y-4">
                 <div className="flex items-start justify-between rounded-lg border p-4">
                   <div>
                     <Label htmlFor="enable2FA" className="text-base font-medium">Enable Two-Factor Authentication</Label>
-                    <p className="text-sm text-muted-foreground">Add an extra layer of security to your account.</p>
+                    <p className="text-sm text-muted-foreground">Add an extra layer of security to the user's account.</p>
                   </div>
                   <Switch id="enable2FA" checked={profile.enable2FA || false} onCheckedChange={(checked) => handleSwitchChange('enable2FA', checked)} />
                 </div>
@@ -386,7 +325,7 @@ export default function EditUserDetailPage() {
                         {profile.twoFactorAuthMethods?.mobileNumber && !profile.mobileNumber && (
                           <div className="mt-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm flex items-center gap-2">
                             <AlertTriangle className="h-4 w-4"/>
-                            <span>Please add and verify your mobile number in 'Personal Information' to use SMS-based authentication.</span>
+                            <span>Please add and verify user's mobile number in 'Personal Information' to use SMS-based authentication.</span>
                           </div>
                         )}
                     </Card>
