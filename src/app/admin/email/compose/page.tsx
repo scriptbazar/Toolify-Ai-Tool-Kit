@@ -35,7 +35,6 @@ type ComposeFormValues = z.infer<typeof formSchema>;
 export default function ComposeEmailPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [generatedBody, setGeneratedBody] = useState('');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [sendToAll, setSendToAll] = useState(false);
   const { toast } = useToast();
@@ -77,7 +76,6 @@ export default function ComposeEmailPage() {
     setIsGenerating(true);
     try {
       const result = await composeEmail({ subject, keyPoints, tone: tone as AiEmailComposerInput['tone'] });
-      setGeneratedBody(result.emailBody);
       form.setValue('keyPoints', result.emailBody);
       toast({
         title: 'Content Generated!',
@@ -112,7 +110,6 @@ export default function ComposeEmailPage() {
     });
     setIsSending(false);
     // form.reset();
-    // setGeneratedBody('');
   };
 
 
@@ -263,7 +260,7 @@ export default function ComposeEmailPage() {
                       <div className="space-y-4 py-4">
                          <h3 className="font-semibold">Subject: {form.getValues().subject || '...'}</h3>
                         <div className="p-4 border rounded-lg bg-muted min-h-[200px] whitespace-pre-wrap">
-                          {form.getValues().keyPoints || 'Email body will appear here...'}
+                          {form.watch('keyPoints') || 'Email body will appear here...'}
                         </div>
                       </div>
                     </DialogContent>
@@ -280,5 +277,3 @@ export default function ComposeEmailPage() {
     </div>
   );
 }
-
-    
