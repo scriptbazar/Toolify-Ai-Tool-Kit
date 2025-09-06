@@ -1,3 +1,4 @@
+
 // Since Next.js now handles dotenv, we don't need it here for the dev server
 // if it shares the same environment. If running separately, you might need it.
 // For now, we assume a unified environment.

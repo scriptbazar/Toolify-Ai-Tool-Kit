@@ -17,7 +17,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Case Converter', description: 'Convert text between different letter cases (e.g., uppercase, lowercase, title case).', icon: 'CaseSensitive', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Word Counter', description: 'Count words, characters, sentences, and paragraphs in your text.', icon: 'Calculator', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Lorem Ipsum Generator', description: 'Generate placeholder text in various lengths and formats.', icon: 'FileText', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
-    { name: 'Text Repeater', description: 'Repeat a piece of text multiple times with optional new lines.', icon: 'Repeat', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Text Repeater', description: 'Repeat a piece of text with optional new lines.', icon: 'Repeat', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Reverse Text', description: 'Reverse your text string, word by word, or the entire block.', icon: 'ArrowLeftRight', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Remove Extra Spaces', description: 'Clean up text by removing extra spaces, tabs, and line breaks.', icon: 'Eraser', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Text to Binary', description: 'Convert plain text into binary code (0s and 1s).', icon: 'Binary', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
@@ -148,6 +148,7 @@ export async function getTools(): Promise<Tool[]> {
     
     const fetchedTools = snapshot.docs.map(doc => {
         const data = doc.data();
+        // Ensure createdAt is a serializable string
         const createdAt = (data.createdAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
         return { ...data, id: doc.id, createdAt } as Tool;
     });
@@ -306,3 +307,21 @@ export async function updateToolRequestStatus(requestId: string, status: 'approv
     }
 }
 
+
+const GenerateToolDescriptionInputSchema = z.object({
+  toolName: z.string().describe('The name of the tool to generate a description for.'),
+});
+
+const GenerateToolDescriptionOutputSchema = z.object({
+  description: z.string().describe('A detailed, user-friendly description of what the tool does.'),
+});
+
+export async function generateToolDescription(input: z.infer<typeof GenerateToolDescriptionInputSchema>): Promise<z.infer<typeof GenerateToolDescriptionOutputSchema>> {
+  const prompt = `Generate a concise and user-friendly description for a web tool called "${input.toolName}". The description should be a single sentence, starting with a verb, and clearly explain the tool's primary function. For example, for a "Case Converter" tool, a good description would be "Convert text between different letter cases (e.g., uppercase, lowercase, title case)."`;
+
+  // This would be a call to a Genkit flow in a real app
+  // For now, we simulate a simple response.
+  const generatedDesc = `A new, amazing tool that helps you with ${input.toolName}.`;
+
+  return { description: generatedDesc };
+}
