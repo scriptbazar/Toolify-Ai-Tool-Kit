@@ -11,7 +11,6 @@ import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { addLeadUser } from '@/ai/flows/user-management';
-import { aiChat } from '@/ai/flows/ai-chat';
 import { ScrollArea } from '../ui/scroll-area';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 
@@ -87,9 +86,9 @@ export function ChatWidget() {
     setIsSendingMessage(true);
 
     try {
-      const chatHistory = messages.slice(); 
-      const result = await aiChat({ history: chatHistory, message: input });
-      const aiMessage: ChatMessage = { role: 'model', content: result.response };
+      // Simulate AI response since the aiChat flow is removed.
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const aiMessage: ChatMessage = { role: 'model', content: "Thank you for your message. An agent will be with you shortly." };
       setMessages(prev => [...prev, aiMessage]);
     } catch (error: any) {
         console.error("AI chat error:", error);
