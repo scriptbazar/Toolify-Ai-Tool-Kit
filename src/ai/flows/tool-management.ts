@@ -151,7 +151,7 @@ export async function getTools(): Promise<Tool[]> {
         const data = doc.data();
         // Ensure createdAt is a serializable string
         const createdAt = (data.createdAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
-        return { ...data, id: doc.id, createdAt } as Tool;
+        return ToolSchema.parse({ ...data, id: doc.id, createdAt });
     });
     
     return fetchedTools;
@@ -210,7 +210,20 @@ export async function deleteTool(toolId: string): Promise<{ success: boolean; me
         return { success: false, message: 'Tool ID is required.' };
     }
     try {
-        await adminDb.collection(TOOLS_COLLECTION).doc(toolId).delete();
+        const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(toolId);
+        const doc = await toolRef.get();
+        if (!doc.exists) {
+            return { success: false, message: 'Tool not found.' };
+        }
+        
+        await toolRef.delete();
+
+        // Log the component file path for manual deletion
+        const toolName = doc.data()?.name || toolId;
+        const componentName = toolName.replace(/\s+/g, '');
+        const componentPath = `src/components/tools/${componentName}.tsx`;
+        console.log(`ACTION REQUIRED: Tool '${toolName}' deleted from database. Please manually delete the component file: ${componentPath}`);
+
         return { success: true, message: 'Tool deleted successfully.' };
     } catch (error: any) {
         console.error(`Error deleting tool ${toolId}:`, error);
