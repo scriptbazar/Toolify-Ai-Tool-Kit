@@ -100,11 +100,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
-  if (!adminDb) {
-    console.error("Database not initialized, cannot fetch tools.");
-    return [];
-  }
-  
   const toolsRef = adminDb.collection(TOOLS_COLLECTION);
   
   try {
