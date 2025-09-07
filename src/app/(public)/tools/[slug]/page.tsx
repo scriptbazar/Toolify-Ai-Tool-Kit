@@ -25,6 +25,9 @@ import { AddWatermarkToPdf } from '@/components/tools/AddWatermarkToPdf';
 import { AddWatermarkToVideo } from '@/components/tools/AddWatermarkToVideo';
 import { AgeCalculator } from '@/components/tools/AgeCalculator';
 import { AmazonShippingLabelCropper } from '@/components/tools/AmazonShippingLabelCropper';
+import { MyntraShippingLabelCropper } from '@/components/tools/MyntraShippingLabelCropper';
+import { FlipkartShippingLabelCropper } from '@/components/tools/FlipkartShippingLabelCropper';
+import { MeeshoShippingLabelCropper } from '@/components/tools/MeeshoShippingLabelCropper';
 import { Base64Converter } from '@/components/tools/Base64Converter';
 import { BinaryConverter } from '@/components/tools/BinaryConverter';
 import { CssMinifier } from '@/components/tools/CssMinifier';
@@ -76,6 +79,9 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'add-watermark-to-video': AddWatermarkToVideo,
   'age-calculator': AgeCalculator,
   'amazon-shipping-label-cropper': AmazonShippingLabelCropper,
+  'myntra-shipping-label-cropper': MyntraShippingLabelCropper,
+  'flipkart-shipping-label-cropper': FlipkartShippingLabelCropper,
+  'meesho-shipping-label-cropper': MeeshoShippingLabelCropper,
   'base64-encoder-decoder': Base64Converter,
   'binary-to-text': BinaryConverter,
   'css-minifier': CssMinifier,
