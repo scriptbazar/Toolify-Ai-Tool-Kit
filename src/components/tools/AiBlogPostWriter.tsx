@@ -1,0 +1,103 @@
+
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Wand2, Loader2, Copy } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { aiWriter } from '@/ai/flows/ai-writer';
+import { Input } from '../ui/input';
+
+export function AiBlogPostWriter() {
+  const [topic, setTopic] = useState('');
+  const [generatedContent, setGeneratedContent] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleGenerate = async () => {
+    if (!topic.trim()) {
+      toast({
+        title: 'Topic is required',
+        description: 'Please enter a topic to generate a blog post.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setIsLoading(true);
+    setGeneratedContent('');
+    try {
+      const result = await aiWriter({ topic });
+      setGeneratedContent(result.content);
+    } catch (error: any) {
+      toast({
+        title: 'Generation Failed',
+        description: error.message || 'Could not generate a blog post.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCopy = () => {
+    if (!generatedContent) {
+        toast({ title: 'Nothing to copy!', variant: 'destructive'});
+        return;
+    }
+    navigator.clipboard.writeText(generatedContent);
+    toast({ title: 'HTML content copied to clipboard!'});
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="topic-input">Blog Post Topic</Label>
+        <Input
+          id="topic-input"
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+          placeholder="e.g., The Future of Renewable Energy"
+        />
+      </div>
+      <Button onClick={handleGenerate} disabled={isLoading} className="w-full">
+        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+        Generate Post
+      </Button>
+
+      {(generatedContent || isLoading) && (
+        <div className="pt-4 border-t">
+          <Label>Generated Blog Post</Label>
+          <Card className="mt-2">
+            <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                    <span>Preview</span>
+                     <Button variant="outline" size="sm" onClick={handleCopy}>
+                        <Copy className="mr-2 h-4 w-4"/>
+                        Copy HTML
+                    </Button>
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                {isLoading ? (
+                     <div className="space-y-4">
+                        <div className="h-8 w-3/4 bg-muted animate-pulse rounded-md" />
+                        <div className="h-4 w-full bg-muted animate-pulse rounded-md" />
+                        <div className="h-4 w-5/6 bg-muted animate-pulse rounded-md" />
+                        <div className="h-4 w-full bg-muted animate-pulse rounded-md" />
+                    </div>
+                ) : (
+                    <div
+                        className="prose dark:prose-invert max-w-none"
+                        dangerouslySetInnerHTML={{ __html: generatedContent }}
+                    />
+                )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
