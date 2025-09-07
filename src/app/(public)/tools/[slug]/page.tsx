@@ -21,6 +21,7 @@ import { AiImageGenerator } from '@/components/tools/AiImageGenerator';
 import { AiProductDescriptionWriter } from '@/components/tools/AiProductDescriptionWriter';
 import { AiStoryGenerator } from '@/components/tools/AiStoryGenerator';
 import { AiTweetGenerator } from '@/components/tools/AiTweetGenerator';
+import { AddWatermarkToPdf } from '@/components/tools/AddWatermarkToPdf';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -61,6 +62,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-product-description-writer': AiProductDescriptionWriter,
   'ai-story-generator': AiStoryGenerator,
   'ai-tweet-generator': AiTweetGenerator,
+  'add-watermark-to-pdf': AddWatermarkToPdf,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
