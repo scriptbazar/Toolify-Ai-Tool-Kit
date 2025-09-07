@@ -30,19 +30,15 @@ function getAdminApp(): App {
   }
 }
 
-let adminDbInstance: Firestore | null = null;
+// Initialize the app first
+getAdminApp();
 
+// Now, it's safe to get the Firestore instance
+export const adminDb = getFirestore();
+
+/**
+ * @deprecated Use the exported `adminDb` instance instead.
+ */
 export function getAdminDb(): Firestore {
-  if (adminDbInstance) {
-    return adminDbInstance;
-  }
-  try {
-    adminDbInstance = getFirestore(getAdminApp());
-    return adminDbInstance;
-  } catch (error: any) {
-    console.error("CRITICAL: Failed to get Firestore instance. Server-side database features will be disabled.", error);
-    throw error;
-  }
+    return adminDb;
 }
-
-export const adminDb = getAdminDb();
