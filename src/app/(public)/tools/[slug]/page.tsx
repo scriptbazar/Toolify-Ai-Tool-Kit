@@ -18,6 +18,7 @@ import { AiContentSummarizer } from '@/components/tools/AiContentSummarizer';
 import { AiCodeAssistant } from '@/components/tools/AiCodeAssistant';
 import { AiEmailComposer } from '@/components/tools/AiEmailComposer';
 import { AiImageGenerator } from '@/components/tools/AiImageGenerator';
+import { AiProductDescriptionWriter } from '@/components/tools/AiProductDescriptionWriter';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -55,6 +56,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-code-assistant': AiCodeAssistant,
   'ai-email-composer': AiEmailComposer,
   'ai-image-generator': AiImageGenerator,
+  'ai-product-description-writer': AiProductDescriptionWriter,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (

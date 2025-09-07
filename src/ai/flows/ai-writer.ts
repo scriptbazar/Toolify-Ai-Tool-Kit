@@ -6,6 +6,7 @@
  * - aiWriter - A function that generates content based on the provided topic or keywords.
  * - generateMetaDescription - Generates an SEO-friendly meta description for a blog post.
  * - generateTargetKeywords - Generates a list of SEO-friendly keywords for a blog post.
+ * - generateProductDescription - Generates a persuasive product description.
  */
 
 import {ai} from '@/ai/genkit';
@@ -165,4 +166,58 @@ const generateTargetKeywordsFlow = ai.defineFlow({
         throw new Error("Failed to generate target keywords.");
     }
     return output;
+});
+
+// New flow for Product Description
+const GenerateProductDescriptionInputSchema = z.object({
+  productName: z.string().describe('The name of the product.'),
+  keyFeatures: z.string().describe('A list of key features, one per line.'),
+  targetAudience: z.string().describe('The intended customer for this product (e.g., students, developers, busy moms).'),
+});
+export type GenerateProductDescriptionInput = z.infer<typeof GenerateProductDescriptionInputSchema>;
+
+const GenerateProductDescriptionOutputSchema = z.object({
+  description: z.string().describe('The generated persuasive and SEO-friendly product description.'),
+});
+export type GenerateProductDescriptionOutput = z.infer<typeof GenerateProductDescriptionOutputSchema>;
+
+export async function generateProductDescription(input: GenerateProductDescriptionInput): Promise<GenerateProductDescriptionOutput> {
+  return generateProductDescriptionFlow(input);
+}
+
+const productDescriptionPrompt = ai.definePrompt({
+  name: 'generateProductDescriptionPrompt',
+  input: { schema: GenerateProductDescriptionInputSchema },
+  output: { schema: GenerateProductDescriptionOutputSchema },
+  prompt: `You are an expert e-commerce copywriter and SEO specialist. Your task is to write a compelling, persuasive, and benefit-oriented product description.
+
+Product Name: {{{productName}}}
+
+Target Audience: {{{targetAudience}}}
+
+Key Features:
+---
+{{{keyFeatures}}}
+---
+
+Instructions:
+1.  Start with a catchy opening that grabs the attention of the target audience.
+2.  Convert each feature into a clear benefit for the user. Explain how each feature solves a problem or improves their life.
+3.  Use persuasive language and a tone appropriate for the target audience.
+4.  Keep the description concise and easy to scan. Use bullet points for the features/benefits.
+5.  End with a strong call-to-action that encourages the user to buy.
+6.  The output should be a single block of text, well-structured for a product page.
+`,
+});
+
+const generateProductDescriptionFlow = ai.defineFlow({
+  name: 'generateProductDescriptionFlow',
+  inputSchema: GenerateProductDescriptionInputSchema,
+  outputSchema: GenerateProductDescriptionOutputSchema,
+}, async (input) => {
+  const { output } = await productDescriptionPrompt(input);
+  if (!output) {
+    throw new Error('Failed to generate a product description.');
+  }
+  return output;
 });
