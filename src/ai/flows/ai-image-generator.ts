@@ -15,6 +15,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 
 const GenerateImageInputSchema = z.object({
   promptText: z.string().describe('The text prompt to use for image generation.'),
@@ -52,11 +53,8 @@ const generateImageFlow = ai.defineFlow(
   },
   async ({ promptText, userId }) => {
     const {media} = await ai.generate({
-      model: 'googleai/gemini-2.5-flash-image-preview',
+      model: 'googleai/imagen-4.0-fast-generate-001',
       prompt: promptText,
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
     });
 
     if (!media || !media.url) {
@@ -67,11 +65,32 @@ const generateImageFlow = ai.defineFlow(
     if (adminDb) {
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7);
+
+      // Convert data URI to buffer
+      const base64Data = media.url.split(',')[1];
+      const imageBuffer = Buffer.from(base64Data, 'base64');
       
+      // Upload to Firebase Storage
+      const bucket = getStorage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+      const fileName = `userMedia/${userId}/ai-generated/${Date.now()}.png`;
+      const file = bucket.file(fileName);
+
+      await file.save(imageBuffer, {
+        metadata: {
+          contentType: 'image/png',
+        },
+      });
+
+      // Get the public URL
+      const publicUrl = await file.getSignedUrl({
+          action: 'read',
+          expires: expiresAt,
+      });
+
       await adminDb.collection('userMedia').add({
           userId,
           type: 'ai-generated',
-          mediaUrl: media.url,
+          mediaUrl: publicUrl[0], // getSignedUrl returns an array with one element
           prompt: promptText,
           createdAt: FieldValue.serverTimestamp(),
           expiresAt: expiresAt,
