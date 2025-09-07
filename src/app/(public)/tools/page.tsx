@@ -1,4 +1,7 @@
 
+'use client';
+
+import { useState, useEffect, useMemo } from 'react';
 import { ToolCard } from '@/components/tools/ToolCard';
 import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
@@ -7,26 +10,64 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
-import * as Icons from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default async function ToolsDashboardPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  const allTools = await getTools();
-  const activeTools = allTools.filter(tool => tool.status === 'Active');
+export default function ToolsDashboardPage() {
+  const [allTools, setAllTools] = useState<Tool[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const searchQuery = typeof searchParams.q === 'string' ? searchParams.q : '';
-  const activeCategory = typeof searchParams.category === 'string' ? searchParams.category as ToolCategory : 'all';
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const [activeCategory, setActiveCategory] = useState<ToolCategory | 'all'>(
+    (searchParams.get('category') as ToolCategory) || 'all'
+  );
 
-  const filteredTools = activeTools.filter(tool => {
-    const categoryMatch = activeCategory === 'all' || tool.category === activeCategory;
-    const searchMatch = tool.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return categoryMatch && searchMatch;
-  });
+  useEffect(() => {
+    async function fetchTools() {
+      setLoading(true);
+      try {
+        const tools = await getTools();
+        const activeTools = tools.filter(tool => tool.status === 'Active');
+        setAllTools(activeTools);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Could not load tools.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTools();
+  }, [toast]);
+
+  const filteredTools = useMemo(() => {
+    return allTools.filter(tool => {
+      const categoryMatch = activeCategory === 'all' || tool.category === activeCategory;
+      const searchMatch = tool.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return categoryMatch && searchMatch;
+    });
+  }, [allTools, activeCategory, searchQuery]);
+  
+  const handleCategoryClick = (category: ToolCategory | 'all') => {
+    setActiveCategory(category);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('category', category);
+    router.push(`/tools?${params.toString()}`, { scroll: false });
+  };
+  
+   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('q', query);
+    router.push(`/tools?${params.toString()}`, { scroll: false });
+  };
+
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -38,36 +79,42 @@ export default async function ToolsDashboardPage({
       </div>
 
       <div className="mt-12 sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40 py-4">
-        <form className="relative max-w-2xl mx-auto mb-6">
+        <div className="relative max-w-2xl mx-auto mb-6">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             name="q"
-            defaultValue={searchQuery}
+            value={searchQuery}
+            onChange={handleSearchChange}
             placeholder="Search for a tool..."
             className="w-full h-12 pl-12 pr-4 rounded-full text-lg shadow-lg"
           />
-        </form>
+        </div>
         <div className="flex justify-center flex-wrap gap-2">
-          <Link href="/tools" scroll={false}>
-            <Button variant={activeCategory === 'all' ? 'default' : 'outline'}>
-              All Tools
-            </Button>
-          </Link>
+          <Button 
+            variant={activeCategory === 'all' ? 'default' : 'outline'}
+            onClick={() => handleCategoryClick('all')}
+          >
+            All Tools
+          </Button>
           {toolCategories.map(category => (
-            <Link key={category.id} href={`?category=${category.id}`} scroll={false}>
-              <Button
-                variant={activeCategory === category.id ? 'default' : 'outline'}
-              >
-                <category.Icon className="mr-2 h-4 w-4" />
-                {category.name}
-              </Button>
-            </Link>
+            <Button
+              key={category.id}
+              variant={activeCategory === category.id ? 'default' : 'outline'}
+              onClick={() => handleCategoryClick(category.id)}
+            >
+              <category.Icon className="mr-2 h-4 w-4" />
+              {category.name}
+            </Button>
           ))}
         </div>
       </div>
       
       <div className="mt-8">
-        {filteredTools.length > 0 ? (
+        {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {[...Array(10)].map((_, i) => <Skeleton key={i} className="h-40 w-full" />)}
+            </div>
+        ) : filteredTools.length > 0 ? (
            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {filteredTools.map(tool => (
                   <ToolCard key={tool.id} tool={tool} />
