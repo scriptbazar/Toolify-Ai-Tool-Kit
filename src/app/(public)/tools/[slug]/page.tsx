@@ -75,6 +75,16 @@ import { RotatePdf } from '@/components/tools/RotatePdf';
 import { PptToPdf } from '@/components/tools/PptToPdf';
 import { PdfToWord } from '@/components/tools/PdfToWord';
 import { PdfToJpg } from '@/components/tools/PdfToJpg';
+import { MetaTagGenerator } from '@/components/tools/MetaTagGenerator';
+import { RobotsTxtGenerator } from '@/components/tools/RobotsTxtGenerator';
+import { XmlSitemapGenerator } from '@/components/tools/XmlSitemapGenerator';
+import { FaviconChecker } from '@/components/tools/FaviconChecker';
+import { KeywordDensityChecker } from '@/components/tools/KeywordDensityChecker';
+import { SerpChecker } from '@/components/tools/SerpChecker';
+import { RedirectChecker } from '@/components/tools/RedirectChecker';
+import { SchemaGenerator } from '@/components/tools/SchemaGenerator';
+import { TitleTagChecker } from '@/components/tools/TitleTagChecker';
+import { WebsiteWordCounter } from '@/components/tools/WebsiteWordCounter';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -147,6 +157,16 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ppt-to-pdf': PptToPdf,
   'pdf-to-word': PdfToWord,
   'pdf-to-jpg': PdfToJpg,
+  'meta-tag-generator': MetaTagGenerator,
+  'robots-txt-generator': RobotsTxtGenerator,
+  'xml-sitemap-generator': XmlSitemapGenerator,
+  'favicon-checker': FaviconChecker,
+  'keyword-density-checker': KeywordDensityChecker,
+  'serp-checker': SerpChecker,
+  'redirect-checker': RedirectChecker,
+  'schema-generator': SchemaGenerator,
+  'title-tag-checker': TitleTagChecker,
+  'website-word-counter': WebsiteWordCounter,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
