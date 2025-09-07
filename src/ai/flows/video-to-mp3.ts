@@ -6,14 +6,13 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import wav from 'wav';
-import Lame from 'lame';
-import { PassThrough } from 'stream';
+import lamejs from 'lamejs';
 
 const VideoToMp3InputSchema = z.object({
   videoDataUri: z
     .string()
     .describe(
-      "A video file, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+      "A video file, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'"
     ),
 });
 export type VideoToMp3Input = z.infer<typeof VideoToMp3InputSchema>;
@@ -23,17 +22,36 @@ const VideoToMp3OutputSchema = z.object({
 });
 export type VideoToMp3Output = z.infer<typeof VideoToMp3OutputSchema>;
 
-async function toMp3(pcmData: Buffer): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const encoder = new Lame({
-            'output': 'buffer',
-            'bitrate': 128
-        }).setBuffer(pcmData);
+async function toMp3(wavBuffer: Buffer): Promise<string> {
+    const wavHeader = wav.Reader.readHeader(wavBuffer);
+    const pcmData = wavBuffer.slice(wavHeader.dataOffset);
+    
+    // Convert buffer to Int16Array
+    const samples = new Int16Array(
+        pcmData.buffer, 
+        pcmData.byteOffset, 
+        pcmData.length / Int16Array.BYTES_PER_ELEMENT
+    );
 
-        encoder.encode();
-        const mp3Buffer = encoder.getBuffer();
-        resolve(mp3Buffer.toString('base64'));
-    });
+    const mp3encoder = new lamejs.Mp3Encoder(wavHeader.channels, wavHeader.sampleRate, 128); // 128kbps
+    const mp3Data = [];
+
+    const sampleBlockSize = 1152; // 1152 samples per frame
+
+    for (let i = 0; i < samples.length; i += sampleBlockSize) {
+        const sampleChunk = samples.subarray(i, i + sampleBlockSize);
+        const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
+        if (mp3buf.length > 0) {
+            mp3Data.push(mp3buf);
+        }
+    }
+    const mp3buf = mp3encoder.flush();
+    if (mp3buf.length > 0) {
+        mp3Data.push(mp3buf);
+    }
+    
+    const mp3Buffer = Buffer.from(mp3Data.flat());
+    return mp3Buffer.toString('base64');
 }
 
 async function toWav(
