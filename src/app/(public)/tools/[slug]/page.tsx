@@ -14,6 +14,7 @@ import { ColorPicker } from '@/components/tools/ColorPicker';
 import { TextRepeater } from '@/components/tools/TextRepeater';
 import { PromptGenerator } from '@/components/tools/PromptGenerator';
 import { AiBlogPostWriter } from '@/components/tools/AiBlogPostWriter';
+import { AiContentSummarizer } from '@/components/tools/AiContentSummarizer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -47,6 +48,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'text-repeater': TextRepeater,
   'prompt-generator': PromptGenerator,
   'ai-blog-post-writer': AiBlogPostWriter,
+  'ai-content-summarizer': AiContentSummarizer,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
