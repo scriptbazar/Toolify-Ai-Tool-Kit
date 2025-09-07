@@ -36,6 +36,10 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Add Watermark to PDF', description: 'Add a text or image watermark to your PDF documents.', icon: 'Fingerprint', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Add Watermark to Video', description: 'Add a text or image watermark to your videos.', icon: 'Video', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Age Calculator', description: 'Calculate age from date of birth.', icon: 'Gift', category: 'calculator', plan: 'Free', isNew: false, status: 'Active' },
+    { name: 'Amazon Shipping Label Cropper', description: 'Crop Amazon FBA shipping labels to 4x6 size.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Base64 Encoder/Decoder', description: 'Encode to and decode from Base64 format.', icon: 'Package', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Binary to Text', description: 'Convert binary code to human-readable text.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'CSS Minifier', description: 'Minify CSS code to reduce file size and improve load times.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
 ];
 
 /**

@@ -57,6 +57,13 @@ You must explain the following code snippet in a clear, concise, and easy-to-und
 ---
 Your response should be a step-by-step explanation of what the code does.
 {{/if}}
+
+{{#if (eq requestType "minify")}}
+You must minify the following {{language}} code. Remove all unnecessary characters, whitespace, and comments without altering the functionality. Provide only the minified code as the response.
+---
+{{{code}}}
+---
+{{/if}}
 `,
 });
 

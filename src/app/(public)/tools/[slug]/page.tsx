@@ -24,6 +24,10 @@ import { AiTweetGenerator } from '@/components/tools/AiTweetGenerator';
 import { AddWatermarkToPdf } from '@/components/tools/AddWatermarkToPdf';
 import { AddWatermarkToVideo } from '@/components/tools/AddWatermarkToVideo';
 import { AgeCalculator } from '@/components/tools/AgeCalculator';
+import { AmazonShippingLabelCropper } from '@/components/tools/AmazonShippingLabelCropper';
+import { Base64Converter } from '@/components/tools/Base64Converter';
+import { BinaryConverter } from '@/components/tools/BinaryConverter';
+import { CssMinifier } from '@/components/tools/CssMinifier';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -67,6 +71,10 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'add-watermark-to-pdf': AddWatermarkToPdf,
   'add-watermark-to-video': AddWatermarkToVideo,
   'age-calculator': AgeCalculator,
+  'amazon-shipping-label-cropper': AmazonShippingLabelCropper,
+  'base64-encoder-decoder': Base64Converter,
+  'binary-to-text': BinaryConverter,
+  'css-minifier': CssMinifier,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (

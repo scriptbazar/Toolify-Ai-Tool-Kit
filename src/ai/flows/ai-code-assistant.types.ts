@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const AiCodeAssistantInputSchema = z.object({
   language: z.string().describe('The programming language of the code.'),
-  requestType: z.enum(['generate', 'debug', 'explain']).describe('The type of assistance requested.'),
+  requestType: z.enum(['generate', 'debug', 'explain', 'minify']).describe('The type of assistance requested.'),
   code: z.string().describe('The code snippet or a description of the code to generate.'),
 });
 export type AiCodeAssistantInput = z.infer<typeof AiCodeAssistantInputSchema>;
