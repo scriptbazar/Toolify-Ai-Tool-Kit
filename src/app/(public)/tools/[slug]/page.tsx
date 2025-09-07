@@ -624,6 +624,31 @@ export default async function ToolPage({ params }: { params: { slug: string } })
       howTo: ['Upload your video file.', 'The tool will detect and extract any embedded subtitle tracks.', 'Choose your desired format and download.'],
       why: 'Get a transcript of your videos or re-purpose subtitle content without manual transcription.'
     },
+    // Ecommerce Tools
+    'amazon-shipping-label-cropper': {
+        title: '✨ About the Amazon FBA Label Cropper',
+        features: ['One-Click Cropping: Automatically crops standard 8.5x11 inch PDF labels.', '4x6 Inch Output: Perfectly formatted for thermal printers (like Zebra, Rollo).', 'Time-Saving: Eliminates the need for manual screenshotting or editing.', 'Cost-Effective: Reduces label waste by using the correct size.'],
+        howTo: ['Upload your Amazon FBA shipping label PDF (the one with two labels on a page).', 'Click the "Crop Label" button.', 'The tool will generate a new PDF with each label on a separate 4x6 inch page.', 'Download and print on your thermal printer.'],
+        why: 'Streamline your Amazon FBA shipping process. This tool saves you time and money by instantly converting your shipping labels into the correct format for thermal printers, eliminating wasted labels and manual effort.'
+    },
+    'flipkart-shipping-label-cropper': {
+        title: '✨ About the Flipkart Label Cropper',
+        features: ['Effortless Conversion: Converts Flipkart\'s default PDF labels to a 4x6 inch format.', 'Thermal Printer Ready: Ideal for all popular 4x6 thermal shipping label printers.', 'Improves Workflow: Speeds up your packing and dispatch process significantly.', 'No More Wasted Paper: Print labels efficiently without using a full A4 sheet.'],
+        howTo: ['Upload the shipping label PDF you downloaded from your Flipkart seller account.', 'Click the "Crop Flipkart Label" button.', 'A new PDF, perfectly sized to 4x6 inches, will be generated.', 'Download your print-ready label.'],
+        why: 'A must-have tool for any serious Flipkart seller. Stop wasting time and resources on manually adjusting labels. Get perfect, scannable 4x6 inch labels in one click and make your packing process faster and more professional.'
+    },
+    'meesho-shipping-label-cropper': {
+        title: '✨ About the Meesho Label Cropper',
+        features: ['One-Click Solution: Instantly crops standard Meesho shipping labels.', 'Perfect 4x6 Format: Creates labels ready for any 4x6 inch thermal printer.', 'Reduces Costs: Save on label sheets by printing on cost-effective thermal labels.', 'User-Friendly: Simple upload-and-crop interface requires no technical skill.'],
+        howTo: ['Download your shipping label from the Meesho Supplier Panel.', 'Upload the PDF file to our tool.', 'Click the "Crop Meesho Label" button.', 'Download the generated 4x6 inch PDF and print it.'],
+        why: 'Optimize your Meesho order fulfillment. This tool helps you quickly prepare shipping labels in the most efficient format, reducing your packing time and material costs, and helping you ship orders faster.'
+    },
+    'myntra-shipping-label-cropper': {
+        title: '✨ About the Myntra Label Cropper',
+        features: ['Myntra-Specific: Designed specifically for Myntra seller shipping labels.', '4x6 Thermal Format: Converts labels to the industry-standard 4x6 inch size.', 'Professional Labels: Creates clean, professional-looking labels for your packages.', 'Saves Time: Automates the previously manual task of resizing labels.'],
+        howTo: ['Upload your Myntra shipping label PDF.', 'Click the "Crop Myntra Label" button.', 'Your new, perfectly cropped 4x6 inch label will be ready for download.', 'Print the downloaded PDF on your thermal printer.'],
+        why: 'Ship your Myntra orders more efficiently. This tool is designed to save you valuable time during the packing process, ensuring your labels are always the right size and look professional, enhancing your brand image.'
+    },
   }
 
   const toolDesc = detailedDescriptions[tool.slug];
