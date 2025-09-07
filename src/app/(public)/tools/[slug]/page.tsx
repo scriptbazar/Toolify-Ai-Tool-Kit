@@ -89,6 +89,8 @@ import { FuelCostCalculator } from '@/components/tools/FuelCostCalculator';
 import { GpaCalculator } from '@/components/tools/GpaCalculator';
 import { LoanCalculator } from '@/components/tools/LoanCalculator';
 import { PercentageCalculator } from '@/components/tools/PercentageCalculator';
+import { TimeZoneConverter } from '@/components/tools/TimeZoneConverter';
+import { UnixTimestampConverter } from '@/components/tools/UnixTimestampConverter';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -175,6 +177,8 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'gpa-calculator': GpaCalculator,
   'loan-calculator': LoanCalculator,
   'percentage-calculator': PercentageCalculator,
+  'time-zone-converter': TimeZoneConverter,
+  'unix-timestamp-converter': UnixTimestampConverter,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (

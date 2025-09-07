@@ -90,6 +90,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'GPA Calculator', description: 'Calculate your Grade Point Average (GPA).', icon: 'GraduationCap', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Loan Calculator', description: 'Estimate your monthly loan payments.', icon: 'Landmark', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Percentage Calculator', description: 'Perform various percentage calculations.', icon: 'BadgePercent', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Time Zone Converter', description: 'Compare time across different cities and time zones.', icon: 'Clock', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Unix Timestamp Converter', description: 'Convert Unix timestamps to human-readable dates and vice-versa.', icon: 'Timer', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
 ];
 
 /**
