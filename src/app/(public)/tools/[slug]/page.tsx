@@ -15,6 +15,7 @@ import { TextRepeater } from '@/components/tools/TextRepeater';
 import { PromptGenerator } from '@/components/tools/PromptGenerator';
 import { AiBlogPostWriter } from '@/components/tools/AiBlogPostWriter';
 import { AiContentSummarizer } from '@/components/tools/AiContentSummarizer';
+import { AiCodeAssistant } from '@/components/tools/AiCodeAssistant';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -49,6 +50,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'prompt-generator': PromptGenerator,
   'ai-blog-post-writer': AiBlogPostWriter,
   'ai-content-summarizer': AiContentSummarizer,
+  'ai-code-assistant': AiCodeAssistant,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
@@ -270,8 +272,8 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     },
     'ai-code-assistant': {
         title: '✨ About the AI Code Assistant',
-        features: ['Code Generation: Describe what you want in plain English and get code snippets.', 'Code Explanation: Paste code to get a detailed explanation of what it does.', 'Debugging Help: Describe an error and get suggestions on how to fix it.', 'Multi-Language Support: Works with Python, JavaScript, Java, C++, and more.'],
-        howTo: ['Select your programming language.', 'Choose an action (Generate, Explain, Debug).', 'Provide your code or description.', 'The AI will provide the corresponding code or explanation.'],
+        features: ['Generate Code: Describe what you want in plain English and get code snippets.', 'Explain Code: Paste code to get a detailed explanation of what it does.', 'Debug Code: Describe an error and get suggestions on how to fix it.', 'Multi-Language Support: Works with Python, JavaScript, Java, and more.'],
+        howTo: ['Select a language and an action (Generate, Explain, Debug).', 'Provide your code or description.', 'Click "Execute" and let the AI assist you.'],
         why: 'Your personal coding pair programmer. Speed up your development workflow, learn new languages, and debug complex problems faster with an AI that understands code.'
     },
 

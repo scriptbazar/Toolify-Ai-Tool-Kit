@@ -27,6 +27,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Prompt Generator', description: 'Generate creative prompts for AI models based on your topic.', icon: 'Lightbulb', category: 'ai', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'AI Blog Post Writer', description: 'Generate a complete, SEO-friendly blog post from just a topic.', icon: 'PenSquare', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Content Summarizer', description: 'Summarize long articles, documents, or texts into concise points.', icon: 'AlignLeft', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'AI Code Assistant', description: 'Get help with writing, debugging, and explaining code snippets.', icon: 'Code', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
 ];
 
 /**
