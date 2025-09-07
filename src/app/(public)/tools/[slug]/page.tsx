@@ -28,6 +28,10 @@ import { AmazonShippingLabelCropper } from '@/components/tools/AmazonShippingLab
 import { Base64Converter } from '@/components/tools/Base64Converter';
 import { BinaryConverter } from '@/components/tools/BinaryConverter';
 import { CssMinifier } from '@/components/tools/CssMinifier';
+import { DiscountCalculator } from '@/components/tools/DiscountCalculator';
+import { DateCalculator } from '@/components/tools/DateCalculator';
+import { CompressPdf } from '@/components/tools/CompressPdf';
+import { ExcelToPdf } from '@/components/tools/ExcelToPdf';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -75,6 +79,10 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'base64-encoder-decoder': Base64Converter,
   'binary-to-text': BinaryConverter,
   'css-minifier': CssMinifier,
+  'discount-calculator': DiscountCalculator,
+  'date-calculator': DateCalculator,
+  'compress-pdf': CompressPdf,
+  'excel-to-pdf': ExcelToPdf,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
