@@ -31,6 +31,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'AI Email Composer', description: 'Generate professional emails for various purposes based on your key points.', icon: 'Mail', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Image Generator', description: 'Create stunning, unique images from text descriptions.', icon: 'Image', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Product Description Writer', description: 'Craft persuasive and engaging descriptions for your e-commerce products.', icon: 'ShoppingCart', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'AI Story Generator', description: 'Craft compelling stories in various genres from a simple prompt.', icon: 'BookOpen', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
 ];
 
 /**
