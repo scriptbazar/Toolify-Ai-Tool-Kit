@@ -10,9 +10,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { aiWriter } from '@/ai/flows/ai-writer';
 import { Input } from '../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function AiBlogPostWriter() {
   const [topic, setTopic] = useState('');
+  const [length, setLength] = useState('Medium');
+  const [tone, setTone] = useState('Professional');
   const [generatedContent, setGeneratedContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -29,7 +32,7 @@ export function AiBlogPostWriter() {
     setIsLoading(true);
     setGeneratedContent('');
     try {
-      const result = await aiWriter({ topic });
+      const result = await aiWriter({ topic, length: length as any, tone: tone as any });
       setGeneratedContent(result.content);
     } catch (error: any) {
       toast({
@@ -62,6 +65,37 @@ export function AiBlogPostWriter() {
           placeholder="e.g., The Future of Renewable Energy"
         />
       </div>
+
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="length-select">Post Length</Label>
+            <Select value={length} onValueChange={setLength}>
+                <SelectTrigger id="length-select">
+                    <SelectValue placeholder="Select length" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="Short">Short (~300 words)</SelectItem>
+                    <SelectItem value="Medium">Medium (~700 words)</SelectItem>
+                    <SelectItem value="Long">Long (~1200+ words)</SelectItem>
+                </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tone-select">Tone of Voice</Label>
+            <Select value={tone} onValueChange={setTone}>
+                 <SelectTrigger id="tone-select">
+                    <SelectValue placeholder="Select tone" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="Professional">Professional</SelectItem>
+                    <SelectItem value="Casual">Casual</SelectItem>
+                    <SelectItem value="Informative">Informative</SelectItem>
+                    <SelectItem value="Engaging">Engaging</SelectItem>
+                </SelectContent>
+            </Select>
+          </div>
+       </div>
+
       <Button onClick={handleGenerate} disabled={isLoading} className="w-full">
         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
         Generate Post

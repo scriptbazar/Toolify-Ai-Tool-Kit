@@ -13,6 +13,8 @@ import {z} from 'zod';
 
 const AiWriterInputSchema = z.object({
   topic: z.string().describe('The topic or keywords for the AI to generate content about.'),
+  length: z.enum(['Short', 'Medium', 'Long']).describe('The desired length of the blog post.'),
+  tone: z.enum(['Professional', 'Casual', 'Informative', 'Engaging']).describe('The desired tone of voice for the content.'),
 });
 export type AiWriterInput = z.infer<typeof AiWriterInputSchema>;
 
@@ -29,18 +31,21 @@ const prompt = ai.definePrompt({
   name: 'aiWriterPrompt',
   input: {schema: AiWriterInputSchema},
   output: {schema: AiWriterOutputSchema},
-  prompt: `You are an expert content writer and SEO specialist. Your task is to generate a comprehensive, engaging, and well-structured blog post based on the provided topic. The output must be in HTML format.
+  prompt: `You are an expert content writer and SEO specialist. Your task is to generate a comprehensive, engaging, and well-structured blog post based on the provided topic, desired length, and tone. The output must be in HTML format.
 
 Topic: "{{{topic}}}"
+Desired Length: {{{length}}} (Short: ~300 words, Medium: ~700 words, Long: ~1200+ words)
+Tone of Voice: {{{tone}}}
 
 Instructions:
-1.  **Title:** Create a compelling and SEO-friendly \`<h1>\` title for the blog post.
-2.  **Introduction:** Write a captivating introductory paragraph that hooks the reader and briefly explains what the post is about.
+1.  **Title:** Create a compelling and SEO-friendly \`<h1>\` title for the blog post that reflects the topic and tone.
+2.  **Introduction:** Write a captivating introductory paragraph that hooks the reader and briefly explains what the post is about, keeping the chosen tone in mind.
 3.  **Body:**
     *   Structure the main content with multiple sections using \`<h2>\` headings for each key point.
     *   Write detailed, informative, and easy-to-read paragraphs (\`<p>\` tags).
     *   Use bullet points (\`<ul><li>...\`</li></ul>\`) for lists where appropriate to improve readability.
-4.  **Conclusion:** End with a strong concluding paragraph that summarizes the main points and provides a final thought or call-to-action.
+    *   Ensure the content length aligns with the user's "Desired Length" request.
+4.  **Conclusion:** End with a strong concluding paragraph that summarizes the main points and provides a final thought or call-to-action consistent with the post's tone.
 
 Ensure the entire output is a single HTML block, starting with \`<h1>\` and ending with the final \`</p>\`. Do not include \`<html>\` or \`<body>\` tags.`,
 });
