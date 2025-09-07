@@ -86,6 +86,10 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Schema Generator', description: 'Generate structured data markup for FAQs, articles, and more.', icon: 'BookCopy', category: 'seo', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Title Tag Checker', description: 'Check the length and preview your title tag for SERPs.', icon: 'TextCursorInput', category: 'seo', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Website Word Counter', description: 'Count the total words on any live webpage.', icon: 'Calculator', category: 'seo', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Fuel Cost Calculator', description: 'Estimate the total fuel cost for a journey.', icon: 'Fuel', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'GPA Calculator', description: 'Calculate your Grade Point Average (GPA).', icon: 'GraduationCap', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Loan Calculator', description: 'Estimate your monthly loan payments.', icon: 'Landmark', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Percentage Calculator', description: 'Perform various percentage calculations.', icon: 'BadgePercent', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
 ];
 
 /**

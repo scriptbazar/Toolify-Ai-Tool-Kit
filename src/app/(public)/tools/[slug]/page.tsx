@@ -85,6 +85,10 @@ import { RedirectChecker } from '@/components/tools/RedirectChecker';
 import { SchemaGenerator } from '@/components/tools/SchemaGenerator';
 import { TitleTagChecker } from '@/components/tools/TitleTagChecker';
 import { WebsiteWordCounter } from '@/components/tools/WebsiteWordCounter';
+import { FuelCostCalculator } from '@/components/tools/FuelCostCalculator';
+import { GpaCalculator } from '@/components/tools/GpaCalculator';
+import { LoanCalculator } from '@/components/tools/LoanCalculator';
+import { PercentageCalculator } from '@/components/tools/PercentageCalculator';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -167,6 +171,10 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'schema-generator': SchemaGenerator,
   'title-tag-checker': TitleTagChecker,
   'website-word-counter': WebsiteWordCounter,
+  'fuel-cost-calculator': FuelCostCalculator,
+  'gpa-calculator': GpaCalculator,
+  'loan-calculator': LoanCalculator,
+  'percentage-calculator': PercentageCalculator,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
