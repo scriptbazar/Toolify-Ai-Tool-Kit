@@ -126,12 +126,10 @@ export async function getTools(): Promise<Tool[]> {
     
     const fetchedTools: Tool[] = snapshot.docs.map(doc => {
         const data = doc.data();
-        // Ensure createdAt is a serializable string
         const createdAt = (data.createdAt instanceof Timestamp) 
             ? data.createdAt.toDate().toISOString() 
             : new Date().toISOString();
             
-        // Use safeParse to validate and handle potential mismatches
         const parsed = ToolSchema.safeParse({ 
             id: doc.id,
             ...data,
@@ -142,7 +140,6 @@ export async function getTools(): Promise<Tool[]> {
             return parsed.data;
         } else {
             console.warn(`Invalid tool data for doc ${doc.id}:`, parsed.error.format());
-            // Return a default or placeholder object, or filter it out
             return null;
         }
     }).filter((tool): tool is Tool => tool !== null);
