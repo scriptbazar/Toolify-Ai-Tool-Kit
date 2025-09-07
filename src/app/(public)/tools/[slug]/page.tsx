@@ -40,6 +40,24 @@ import { ReverseText } from '@/components/tools/ReverseText';
 import { RemoveExtraSpaces } from '@/components/tools/RemoveExtraSpaces';
 import { FindAndReplace } from '@/components/tools/FindAndReplace';
 import { RandomWordGenerator } from '@/components/tools/RandomWordGenerator';
+import { RotateImage } from '@/components/tools/RotateImage';
+import { PngToJpg } from '@/components/tools/PngToJpg';
+import { JpgToPng } from '@/components/tools/JpgToPng';
+import { ImageToBase64 } from '@/components/tools/ImageToBase64';
+import { ImageResizer } from '@/components/tools/ImageResizer';
+import { FlipImage } from '@/components/tools/FlipImage';
+import { IcoConverter } from '@/components/tools/IcoConverter';
+import { ImageCompressor } from '@/components/tools/ImageCompressor';
+import { ImageCropper } from '@/components/tools/ImageCropper';
+import { LoopVideo } from '@/components/tools/LoopVideo';
+import { MuteVideo } from '@/components/tools/MuteVideo';
+import { ResizeVideo } from '@/components/tools/ResizeVideo';
+import { RotateVideo } from '@/components/tools/RotateVideo';
+import { TrimVideo } from '@/components/tools/TrimVideo';
+import { VideoToGif } from '@/components/tools/VideoToGif';
+import { VideoToMp3 } from '@/components/tools/VideoToMp3';
+import { VideoSubtitleExtractor } from '@/components/tools/VideoSubtitleExtractor';
+import { VideoCompressor } from '@/components/tools/VideoCompressor';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -99,6 +117,24 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'remove-extra-spaces': RemoveExtraSpaces,
   'find-and-replace': FindAndReplace,
   'random-word-generator': RandomWordGenerator,
+  'rotate-image': RotateImage,
+  'png-to-jpg': PngToJpg,
+  'jpg-to-png': JpgToPng,
+  'image-to-base64': ImageToBase64,
+  'image-resizer': ImageResizer,
+  'flip-image': FlipImage,
+  'ico-converter': IcoConverter,
+  'image-compressor': ImageCompressor,
+  'image-cropper': ImageCropper,
+  'loop-video': LoopVideo,
+  'mute-video': MuteVideo,
+  'resize-video': ResizeVideo,
+  'rotate-video': RotateVideo,
+  'trim-video': TrimVideo,
+  'video-to-gif': VideoToGif,
+  'video-to-mp3': VideoToMp3,
+  'video-subtitle-extractor': VideoSubtitleExtractor,
+  'video-compressor': VideoCompressor,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
