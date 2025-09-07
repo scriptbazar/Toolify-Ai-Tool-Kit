@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Wand2, Loader2, Copy } from 'lucide-react';
+import { Wand2, Loader2, Copy, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { aiWriter } from '@/ai/flows/ai-writer';
@@ -45,7 +45,7 @@ export function AiBlogPostWriter() {
     }
   };
 
-  const handleCopy = () => {
+  const handleCopyHtml = () => {
     if (!generatedContent) {
         toast({ title: 'Nothing to copy!', variant: 'destructive'});
         return;
@@ -53,6 +53,19 @@ export function AiBlogPostWriter() {
     navigator.clipboard.writeText(generatedContent);
     toast({ title: 'HTML content copied to clipboard!'});
   };
+
+  const handleCopyText = () => {
+    if (!generatedContent) {
+      toast({ title: 'Nothing to copy!', variant: 'destructive' });
+      return;
+    }
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = generatedContent;
+    const textContent = tempDiv.textContent || tempDiv.innerText || "";
+    navigator.clipboard.writeText(textContent);
+    toast({ title: 'Text content copied to clipboard!' });
+  };
+
 
   return (
     <div className="space-y-6">
@@ -113,10 +126,16 @@ export function AiBlogPostWriter() {
             <CardHeader>
                 <CardTitle className="flex justify-between items-center">
                     <span>Preview</span>
-                     <Button variant="outline" size="sm" onClick={handleCopy}>
-                        <Copy className="mr-2 h-4 w-4"/>
-                        Copy HTML
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={handleCopyText}>
+                            <FileText className="mr-2 h-4 w-4"/>
+                            Copy Text
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleCopyHtml}>
+                            <Copy className="mr-2 h-4 w-4"/>
+                            Copy HTML
+                        </Button>
+                    </div>
                 </CardTitle>
             </CardHeader>
             <CardContent>

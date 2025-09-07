@@ -79,7 +79,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
   const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
   
   const sidebarSettings = settings.sidebar?.toolSidebar;
-  const popularTools = allTools.filter(t => t.status === 'Active' && t.slug !== tool.slug).slice(0, 10);
+  const popularTools = allTools.filter(t => t.status === 'Active' && t.slug !== tool.slug).slice(0, 20);
   const recentPosts = (await getPosts()).filter(p => p.status === 'Published').slice(0, 10);
 
   const detailedDescriptions: Record<string, { title: string; features: string[]; howTo: string[]; why: string; }> = {
