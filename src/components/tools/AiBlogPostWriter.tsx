@@ -91,6 +91,11 @@ export function AiBlogPostWriter() {
                     <SelectItem value="Casual">Casual</SelectItem>
                     <SelectItem value="Informative">Informative</SelectItem>
                     <SelectItem value="Engaging">Engaging</SelectItem>
+                    <SelectItem value="Humorous">Humorous</SelectItem>
+                    <SelectItem value="Persuasive">Persuasive</SelectItem>
+                    <SelectItem value="Inspirational">Inspirational</SelectItem>
+                    <SelectItem value="Technical">Technical</SelectItem>
+                    <SelectItem value="Storytelling">Storytelling</SelectItem>
                 </SelectContent>
             </Select>
           </div>

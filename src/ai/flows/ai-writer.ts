@@ -14,7 +14,7 @@ import {z} from 'zod';
 const AiWriterInputSchema = z.object({
   topic: z.string().describe('The topic or keywords for the AI to generate content about.'),
   length: z.enum(['Short', 'Medium', 'Long']).describe('The desired length of the blog post.'),
-  tone: z.enum(['Professional', 'Casual', 'Informative', 'Engaging']).describe('The desired tone of voice for the content.'),
+  tone: z.enum(['Professional', 'Casual', 'Informative', 'Engaging', 'Humorous', 'Persuasive', 'Inspirational', 'Technical', 'Storytelling']).describe('The desired tone of voice for the content.'),
 });
 export type AiWriterInput = z.infer<typeof AiWriterInputSchema>;
 
