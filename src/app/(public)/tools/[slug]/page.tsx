@@ -69,6 +69,12 @@ import { Star } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getPosts } from '@/ai/flows/blog-management';
 import Link from 'next/link';
+import { PdfSplitter } from '@/components/tools/PdfSplitter';
+import { WordToPdf } from '@/components/tools/WordToPdf';
+import { RotatePdf } from '@/components/tools/RotatePdf';
+import { PptToPdf } from '@/components/tools/PptToPdf';
+import { PdfToWord } from '@/components/tools/PdfToWord';
+import { PdfToJpg } from '@/components/tools/PdfToJpg';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -135,6 +141,12 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'video-to-mp3': VideoToMp3,
   'video-subtitle-extractor': VideoSubtitleExtractor,
   'video-compressor': VideoCompressor,
+  'pdf-splitter': PdfSplitter,
+  'word-to-pdf': WordToPdf,
+  'rotate-pdf': RotatePdf,
+  'ppt-to-pdf': PptToPdf,
+  'pdf-to-word': PdfToWord,
+  'pdf-to-jpg': PdfToJpg,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
