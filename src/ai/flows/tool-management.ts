@@ -47,6 +47,11 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Date Calculator', description: 'Calculate the duration between two dates or add/subtract from a date.', icon: 'CalendarDays', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Compress PDF', description: 'Reduce the file size of your PDF files.', icon: 'FileArchive', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Excel to PDF', description: 'Convert your Excel spreadsheets to PDF.', icon: 'FileSpreadsheet', category: 'pdf', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Text to Binary', description: 'Convert human-readable text to binary code.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Reverse Text', description: 'Reverse your text in various ways (by word, all characters, etc.).', icon: 'ArrowLeftRight', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Remove Extra Spaces', description: 'Clean up your text by removing extra spaces and line breaks.', icon: 'Eraser', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Find and Replace', description: 'Quickly find and replace words or phrases in your text.', icon: 'SearchCode', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Random Word Generator', description: 'Generate random words for creative writing, games, or brainstorming.', icon: 'Shuffle', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
 ];
 
 /**

@@ -35,8 +35,10 @@ export function WordCounter() {
     });
   };
 
-  const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+  const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
   const charCount = text.length;
+  const sentenceCount = text.split(/[.!?]+/).filter(Boolean).length;
+  const paragraphCount = text.split(/\n+/).filter(p => p.trim() !== '').length;
 
   return (
     <div className="space-y-6">
@@ -51,9 +53,19 @@ export function WordCounter() {
         />
       </div>
        <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t">
-        <div className="flex gap-4 text-sm text-muted-foreground">
-          <span>{wordCount} Words</span>
-          <span>{charCount} Characters</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+            <div className="p-2 border rounded-md text-center">
+                <span className="font-bold text-lg text-primary">{wordCount}</span> Words
+            </div>
+             <div className="p-2 border rounded-md text-center">
+                <span className="font-bold text-lg text-primary">{charCount}</span> Characters
+            </div>
+             <div className="p-2 border rounded-md text-center">
+                <span className="font-bold text-lg text-primary">{sentenceCount}</span> Sentences
+            </div>
+            <div className="p-2 border rounded-md text-center">
+                <span className="font-bold text-lg text-primary">{paragraphCount}</span> Paragraphs
+            </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="icon" onClick={handleCopy}>

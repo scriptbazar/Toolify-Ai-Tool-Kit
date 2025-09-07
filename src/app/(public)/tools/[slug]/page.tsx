@@ -35,6 +35,11 @@ import { DiscountCalculator } from '@/components/tools/DiscountCalculator';
 import { DateCalculator } from '@/components/tools/DateCalculator';
 import { CompressPdf } from '@/components/tools/CompressPdf';
 import { ExcelToPdf } from '@/components/tools/ExcelToPdf';
+import { TextToBinary } from '@/components/tools/TextToBinary';
+import { ReverseText } from '@/components/tools/ReverseText';
+import { RemoveExtraSpaces } from '@/components/tools/RemoveExtraSpaces';
+import { FindAndReplace } from '@/components/tools/FindAndReplace';
+import { RandomWordGenerator } from '@/components/tools/RandomWordGenerator';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -89,6 +94,11 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'date-calculator': DateCalculator,
   'compress-pdf': CompressPdf,
   'excel-to-pdf': ExcelToPdf,
+  'text-to-binary': TextToBinary,
+  'reverse-text': ReverseText,
+  'remove-extra-spaces': RemoveExtraSpaces,
+  'find-and-replace': FindAndReplace,
+  'random-word-generator': RandomWordGenerator,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
