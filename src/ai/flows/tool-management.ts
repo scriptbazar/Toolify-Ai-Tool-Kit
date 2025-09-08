@@ -92,6 +92,10 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Percentage Calculator', description: 'Perform various percentage calculations.', icon: 'BadgePercent', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Time Zone Converter', description: 'Compare time across different cities and time zones.', icon: 'Clock', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Unix Timestamp Converter', description: 'Convert Unix timestamps to human-readable dates and vice-versa.', icon: 'Timer', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'HTML Minifier', description: 'Minify HTML code to reduce file size and improve website loading speed.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'JavaScript Minifier', description: 'Minify JavaScript code for faster script execution and reduced file size.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'SQL Formatter', description: 'Format and beautify your SQL queries for better readability and maintenance.', icon: 'Database', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'UUID Generator', description: 'Generate universally unique identifiers (UUIDs) for your applications.', icon: 'Fingerprint', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
 ];
 
 /**
