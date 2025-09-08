@@ -28,24 +28,30 @@ export default function LoginHistoryPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const fetchHistory = async (uid: string) => {
+      try {
+        const userHistory = await getLoginHistory(uid);
+        setHistory(userHistory);
+      } catch (error) {
+        console.error("Failed to load login history:", error);
+        toast({
+          title: "Error",
+          description: "Could not load your login history.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        try {
-          const userHistory = await getLoginHistory(firebaseUser.uid);
-          setHistory(userHistory);
-        } catch (error) {
-          console.error("Failed to load login history:", error);
-          toast({
-            title: "Error",
-            description: "Could not load your login history.",
-            variant: "destructive",
-          });
-        }
+        fetchHistory(firebaseUser.uid);
       } else {
         router.push('/login');
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();

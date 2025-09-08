@@ -1,71 +1,114 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Loader2, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
-import { onAuthStateChanged, type User } from 'firebase/auth';
+import { verifyStripePayment, capturePayPalOrder } from '@/ai/flows/payment-management';
 
 
 export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();
-    const sessionId = searchParams.get('session_id'); // For Stripe
-    const token = searchParams.get('token'); // For PayPal (order ID)
     const { toast } = useToast();
+    const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
-        // Function to update the user's plan in Firestore
-        const updateUserPlan = async (user: User) => {
-            // In a real production app, you would verify the session/token on your backend
-            // using a webhook to prevent users from accessing this page directly.
-            // For this example, we'll optimistically update the user's plan.
-            try {
-                const userDocRef = doc(db, 'users', user.uid);
-                // A secure webhook would look up the session/order, get the planId from metadata,
-                // and update the user's document in Firestore.
-                // For this demo, we'll assume a successful payment means upgrading to the 'pro' plan.
-                await updateDoc(userDocRef, {
-                    planId: 'pro', 
-                    subscriptionStatus: 'active',
-                });
-                 toast({
-                    title: "Payment Successful!",
-                    description: `Your plan has been upgraded.`,
-                });
-            } catch (error) {
-                console.error("Failed to update user plan:", error);
-                 toast({
-                    title: "Update Error",
-                    description: "Your payment was successful, but we couldn't update your plan automatically. Please contact support.",
-                    variant: "destructive",
-                });
+        const processPayment = async () => {
+            const sessionId = searchParams.get('session_id'); // For Stripe
+            const token = searchParams.get('token'); // For PayPal (order ID)
+            const PayerID = searchParams.get('PayerID'); // For PayPal
+
+            if (sessionId) {
+                try {
+                    const result = await verifyStripePayment(sessionId);
+                    if (result.success) {
+                        setStatus('success');
+                        toast({
+                            title: "Payment Successful!",
+                            description: `Your plan has been upgraded to ${result.planId}.`,
+                        });
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error: any) {
+                    setStatus('error');
+                    setErrorMessage(error.message || "Failed to verify your Stripe payment. Please contact support.");
+                }
+            } else if (token) {
+                 try {
+                    const result = await capturePayPalOrder(token);
+                    if (result.success) {
+                        setStatus('success');
+                        toast({
+                            title: "Payment Successful!",
+                            description: `Your plan has been upgraded to ${result.planId}.`,
+                        });
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error: any) {
+                    setStatus('error');
+                    setErrorMessage(error.message || "Failed to process your PayPal payment. Please contact support.");
+                }
+            } else {
+                setStatus('error');
+                setErrorMessage("No payment session or token found. Your payment cannot be confirmed.");
             }
         };
 
-        if (sessionId || token) {
-             const unsubscribe = onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    await updateUserPlan(user);
-                } else {
-                    // If the user is not logged in when they hit this page,
-                    // we can't update their record. Webhooks are essential to solve this.
-                    console.warn("User not logged in on success page. Cannot update plan.");
-                     toast({
-                        title: "Please Log In",
-                        description: "Your payment was successful. Please log in to see your new plan.",
-                    });
-                }
-            });
-            return () => unsubscribe();
-        }
+        processPayment();
+    }, [searchParams, toast]);
 
-    }, [sessionId, token, toast]);
+
+    if (status === 'loading') {
+        return (
+             <div className="container flex items-center justify-center min-h-[calc(100vh-10rem)]">
+                <Card className="w-full max-w-lg text-center">
+                    <CardHeader>
+                        <div className="mx-auto p-4 rounded-full w-fit mb-4">
+                            <Loader2 className="h-16 w-16 text-primary animate-spin" />
+                        </div>
+                        <CardTitle className="text-3xl">Processing Payment...</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground">
+                            Please wait while we verify your transaction. Do not close this page.
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
+
+    if (status === 'error') {
+         return (
+             <div className="container flex items-center justify-center min-h-[calc(100vh-10rem)]">
+                <Card className="w-full max-w-lg text-center">
+                    <CardHeader>
+                        <div className="mx-auto bg-red-100 p-4 rounded-full w-fit mb-4">
+                            <AlertTriangle className="h-16 w-16 text-red-600" />
+                        </div>
+                        <CardTitle className="text-3xl">Payment Verification Failed</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground">
+                            {errorMessage}
+                        </p>
+                        <Button asChild size="lg" className="mt-6">
+                            <Link href="/dashboard">
+                                Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
 
 
   return (

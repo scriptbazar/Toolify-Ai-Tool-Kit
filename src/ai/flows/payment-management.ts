@@ -175,7 +175,7 @@ export async function createPayPalOrder(input: CreatePayPalOrderInput): Promise<
       custom_id: `${userId}|${planId}`,
     }],
     application_context: {
-      return_url: `${siteUrl}/payment/success?gateway=paypal`,
+      return_url: `${siteUrl}/payment/success`,
       cancel_url: `${siteUrl}/payment/cancel`,
       brand_name: 'ToolifyAI',
       user_action: 'PAY_NOW',
@@ -487,5 +487,86 @@ export async function createPhonePePayment(input: CreatePhonePePaymentInput): Pr
   };
 }
 
+/**
+ * Verifies a Stripe payment session and updates the user's plan.
+ * This should be called from a secure environment (e.g., after the redirect from Stripe).
+ */
+export async function verifyStripePayment(sessionId: string): Promise<{ success: boolean; message: string, planId?: string }> {
+  try {
+    const settings = await getSettings();
+    const stripeSettings = settings.payment?.stripe;
 
+    if (!stripeSettings?.isEnabled || !stripeSettings.secretKey) {
+      throw new Error('Stripe is not configured for verification.');
+    }
+
+    const stripe = new Stripe(stripeSettings.secretKey);
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status === 'paid' && session.metadata) {
+      const { userId, planId } = session.metadata;
+
+      if (!userId || !planId) {
+        throw new Error('Session metadata is missing required user or plan information.');
+      }
+
+      // Update user document in Firestore
+      const userRef = getAdminDb().collection('users').doc(userId);
+      await userRef.update({
+        planId: planId,
+        subscriptionStatus: 'active',
+      });
+
+      return { success: true, message: 'Payment verified and plan updated.', planId };
+    } else {
+      return { success: false, message: 'Payment not completed.' };
+    }
+  } catch (error: any) {
+    console.error('Stripe verification error:', error);
+    return { success: false, message: error.message || 'An unknown error occurred during verification.' };
+  }
+}
+
+/**
+ * Captures a PayPal order and updates the user's plan.
+ */
+export async function capturePayPalOrder(orderId: string): Promise<{ success: boolean; message: string; planId?: string }> {
+    try {
+        const client = await getPayPalClient();
+        const request = new paypal.orders.OrdersCaptureRequest(orderId);
+        request.requestBody({});
+
+        const capture = await client.execute(request);
+
+        if (capture.result.status === 'COMPLETED') {
+            const purchaseUnit = capture.result.purchase_units?.[0];
+            const customId = purchaseUnit?.custom_id;
+
+            if (!customId) {
+                throw new Error('PayPal order is missing required metadata (custom_id).');
+            }
+            
+            const [userId, planId] = customId.split('|');
+            
+            if (!userId || !planId) {
+                 throw new Error('Invalid metadata format in PayPal order.');
+            }
+
+            const userRef = getAdminDb().collection('users').doc(userId);
+            await userRef.update({
+                planId: planId,
+                subscriptionStatus: 'active',
+            });
+
+            return { success: true, message: 'PayPal payment captured and plan updated.', planId };
+        } else {
+            return { success: false, message: 'PayPal payment was not completed.' };
+        }
+
+    } catch (error: any) {
+        console.error('PayPal capture error:', error);
+        return { success: false, message: error.message || 'An unknown error occurred while capturing the PayPal payment.' };
+    }
+}
     
+
