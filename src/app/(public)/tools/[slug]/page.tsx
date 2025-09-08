@@ -48,7 +48,6 @@ import { FlipImage } from '@/components/tools/FlipImage';
 import { IcoConverter } from '@/components/tools/IcoConverter';
 import { ImageCompressor } from '@/components/tools/ImageCompressor';
 import { ImageCropper } from '@/components/tools/ImageCropper';
-import { VideoToMp3 } from '@/components/tools/VideoToMp3';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -146,7 +145,6 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ico-converter': IcoConverter,
   'image-compressor': ImageCompressor,
   'image-cropper': ImageCropper,
-  'video-to-mp3': VideoToMp3,
   'pdf-splitter': PdfSplitter,
   'word-to-pdf': WordToPdf,
   'rotate-pdf': RotatePdf,
