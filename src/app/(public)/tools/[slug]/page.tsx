@@ -525,7 +525,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         title: '✨ About the Meta Tag Generator',
         features: ['Generate Title & Description: Create SEO-friendly title and meta description tags.', 'Character Count: Shows real-time character counts to stay within optimal lengths.', 'SERP Preview: See how your meta tags will look on a Google search results page.', 'Easy to copy HTML code.'],
         howTo: ['Enter your desired Site Title and Meta Description.', 'The SERP preview will update in real-time.', 'Copy the generated HTML code and paste it into the `<head>` section of your website.'],
-        why: 'Improve your website\'s click-through rate from search engines. Well-crafted meta tags are crucial for attracting users and providing context to search engines about your page content.'
+        why: 'Improve your website\'s click-through rate from search engines. Well-crafted meta tags are crucial for attracting users and provide context to search engines about your page content.'
     },
     'robots-txt-generator': {
         title: '✨ About the Robots.txt Generator',
@@ -789,3 +789,5 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     </div>
   );
 }
+
+    
