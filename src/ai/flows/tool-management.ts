@@ -100,9 +100,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
-  const toolsRef = adminDb.collection(TOOLS_COLLECTION);
-  
   try {
+    const toolsRef = adminDb.collection(TOOLS_COLLECTION);
     let snapshot = await toolsRef.orderBy('name').get();
 
     if (snapshot.empty) {
