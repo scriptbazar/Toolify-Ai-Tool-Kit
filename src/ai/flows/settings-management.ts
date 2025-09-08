@@ -10,9 +10,12 @@
  */
 
 import { z } from 'zod';
-import { getAdminDb } from '@/lib/firebase-admin';
+import { getAdminDb, getSettingsData } from '@/lib/firebase-admin';
 import { AppSettingsSchema, type AppSettings } from './settings-management.types';
 import { cache } from 'react';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
@@ -311,31 +314,38 @@ const defaultSettings = AppSettingsSchema.parse({
  * @returns {Promise<AppSettings>} The application settings.
  */
 export const getSettings = cache(async (): Promise<AppSettings> => {
-  try {
-    const adminDb = getAdminDb();
-    if (!adminDb) {
-      console.warn("Database not initialized, returning default settings.");
-      return defaultSettings;
-    }
-    const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
-    const docSnap = await docRef.get();
+    try {
+        const docRef = doc(db, SETTINGS_COLLECTION, MAIN_SETTINGS_DOC_ID);
+        const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists) {
-      const parsedData = AppSettingsSchema.safeParse(docSnap.data());
-      if (parsedData.success) {
-        return parsedData.data;
-      } else {
-        console.warn("Firestore settings data is invalid, returning defaults.", parsedData.error);
+        if (docSnap.exists()) {
+            const parsedData = AppSettingsSchema.safeParse(docSnap.data());
+            if (parsedData.success) {
+                return parsedData.data;
+            } else {
+                console.warn("Firestore settings data is invalid, returning defaults.", parsedData.error);
+                return defaultSettings;
+            }
+        } else {
+            console.log("No settings document found, creating one with default values.");
+            await setDoc(docRef, defaultSettings);
+            return defaultSettings;
+        }
+    } catch (error: any) {
+        console.error("Error getting settings:", error.message);
+        // On client-side errors (e.g., network), it's better to return defaults than crash.
+        // For server-side, this indicates a more serious problem.
+        if (typeof window === 'undefined') { // Server-side check
+            // Use the server-only function as a fallback to get data directly
+            try {
+                return await getSettingsData();
+            } catch (adminError: any) {
+                 console.error("Fallback to admin fetch also failed:", adminError.message);
+                 return defaultSettings;
+            }
+        }
         return defaultSettings;
-      }
-    } else {
-      return defaultSettings;
     }
-  } catch (error: any) {
-    console.error("Error getting settings:", error.message);
-    // Return default settings on error to prevent site crash, e.g., due to quota exceeded.
-    return defaultSettings;
-  }
 });
 
 
@@ -351,7 +361,9 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
       return { success: false, message: 'Database not initialized.' };
   }
   try {
-    const currentSettings = await getSettings();
+    const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
+    const currentDoc = await docRef.get();
+    const currentSettings = currentDoc.exists ? currentDoc.data() : {};
     
     // Create the new settings state by taking the current settings
     // and overwriting them with the partial new settings.
@@ -367,9 +379,6 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
     }
 
     // Save the fully merged and validated object to Firestore
-    const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
-    // Using `set` instead of `update` to handle array deletions correctly.
-    // `merge: true` is crucial to avoid overwriting unrelated settings fields.
     await docRef.set(validationResult.data, { merge: true });
     
     return { success: true, message: 'Settings updated successfully.' };
