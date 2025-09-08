@@ -1,4 +1,5 @@
 
+
 import { getTools } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
 import { CaseConverter } from '@/components/tools/CaseConverter';
@@ -506,12 +507,6 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         howTo: ['Upload your image.', 'Click "Flip Horizontal" or "Flip Vertical".', 'The flipped image will be displayed.', 'Download your modified image.'],
         why: 'A simple but powerful tool for creative effects or correcting image orientation. Quickly mirror your images with a single click.'
     },
-    'rotate-image': {
-        title: '✨ About the Rotate Image Tool',
-        features: ['Rotate by 90, 180, or 270 degrees.', 'Clockwise and Counter-Clockwise rotation.', 'Fast processing and instant preview.', 'Correct the orientation of photos taken sideways.'],
-        howTo: ['Upload the image you need to rotate.', 'Click the rotation buttons (-90°, +90°) until you get the desired orientation.', 'Download your rotated image.'],
-        why: 'Easily fix photos that were taken in the wrong orientation. This tool provides a quick and simple way to rotate your images to the correct angle.'
-    },
     'image-cropper': {
         title: '✨ About the Image Cropper Tool',
         features: ['Freeform Cropping: Drag the handles to crop to any size.', 'Aspect Ratio Presets: Crop your image to standard aspect ratios (e.g., 16:9, 1:1, 4:3).', 'Visual and Intuitive: Easy-to-use cropping interface.', 'High-Quality Output: The cropped image maintains its original quality.'],
@@ -649,13 +644,6 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         why: 'A handy tool for project planning, event scheduling, and counting down to important dates. Quickly perform date-related calculations without manual counting.'
     },
 
-    // Video Tools
-    'video-to-mp3': {
-      title: '✨ About the Video to MP3 Tool',
-      features: ['Extract audio from video files.', 'High-quality MP3 output.', 'Supports a wide range of video formats.', 'Fast and easy to use.'],
-      howTo: ['Upload your video.', 'The tool will automatically extract the audio.', 'Click "Download MP3" to save the audio file.'],
-      why: 'Easily convert video podcasts, music videos, or lectures into audio files that you can listen to on the go.'
-    },
     // Ecommerce Tools
     'amazon-shipping-label-cropper': {
         title: '✨ About the Amazon FBA Label Cropper',

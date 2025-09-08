@@ -52,6 +52,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Remove Extra Spaces', description: 'Clean up your text by removing extra spaces and line breaks.', icon: 'Eraser', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Find and Replace', description: 'Quickly find and replace words or phrases in your text.', icon: 'SearchCode', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Random Word Generator', description: 'Generate random words for creative writing, games, or brainstorming.', icon: 'Shuffle', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Rotate Image', description: 'Rotate an image by 90, 180, or 270 degrees.', icon: 'RotateCw', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'PNG to JPG', description: 'Convert PNG images to JPG format.', icon: 'FileImage', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'JPG to PNG', description: 'Convert JPG images to PNG format.', icon: 'FileImage', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Image to Base64', description: 'Convert an image to a Base64 string.', icon: 'Code', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
