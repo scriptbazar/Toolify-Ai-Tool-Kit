@@ -4,7 +4,7 @@
 /**
  * @fileOverview Manages tools in Firestore.
  */
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { type Tool, ToolSchema, UpsertToolInputSchema, type ToolRequest, ToolRequestSchema } from './tool-management.types';
 import { z } from 'zod';
@@ -100,6 +100,11 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
+  const adminDb = getAdminDb();
+  if (!adminDb) {
+      console.error("CRITICAL: Firestore Admin DB not available in getTools.");
+      return [];
+  }
   const toolsRef = adminDb.collection(TOOLS_COLLECTION);
   
   try {
@@ -152,6 +157,7 @@ export async function getTools(): Promise<Tool[]> {
  * @returns {Promise<{ success: boolean; message: string; toolId?: string }>}
  */
 export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: boolean; message: string; toolId?: string }> {
+  const adminDb = getAdminDb();
   if (!adminDb) {
     return { success: false, message: 'Database not initialized.' };
   }
@@ -188,6 +194,7 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
  * @returns {Promise<{ success: boolean; message: string }>}
  */
 export async function deleteTool(toolId: string): Promise<{ success: boolean; message: string }> {
+    const adminDb = getAdminDb();
     if (!adminDb) {
         return { success: false, message: 'Database not initialized.' };
     }
@@ -222,6 +229,7 @@ export async function deleteTool(toolId: string): Promise<{ success: boolean; me
  * @returns {Promise<Tool[]>} A list of the user's favorite tools.
  */
 export async function getFavoriteTools(userId: string): Promise<Tool[]> {
+  const adminDb = getAdminDb();
   if (!adminDb) {
       return [];
   }
@@ -264,6 +272,7 @@ type RequestToolInput = {
 };
 
 export async function requestNewTool(input: RequestToolInput): Promise<{ success: boolean; message: string }> {
+    const adminDb = getAdminDb();
     if (!adminDb) {
       return { success: false, message: 'Database not initialized.' };
     }
@@ -285,6 +294,7 @@ export async function requestNewTool(input: RequestToolInput): Promise<{ success
  * Fetches all tool requests from Firestore.
  */
 export async function getToolRequests(): Promise<ToolRequest[]> {
+    const adminDb = getAdminDb();
     if (!adminDb) {
       return [];
     }
@@ -308,6 +318,7 @@ export async function getToolRequests(): Promise<ToolRequest[]> {
  * Updates the status of a tool request.
  */
 export async function updateToolRequestStatus(requestId: string, status: 'approved' | 'rejected'): Promise<{ success: boolean, message: string }> {
+    const adminDb = getAdminDb();
     if (!adminDb) {
       return { success: false, message: 'Database not initialized.' };
     }
