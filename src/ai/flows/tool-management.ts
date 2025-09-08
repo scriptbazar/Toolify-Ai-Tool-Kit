@@ -119,11 +119,15 @@ export async function getTools(): Promise<Tool[]> {
     
     const fetchedTools: Tool[] = snapshot.docs.map(doc => {
         const data = doc.data();
+        // Convert Firestore Timestamp to ISO string for Zod validation, if it exists
+        const createdAt = data.createdAt instanceof Timestamp 
+            ? data.createdAt.toDate().toISOString() 
+            : new Date().toISOString(); // Provide a default if it's missing
+
         const rawTool = { 
             id: doc.id,
             ...data,
-            // Convert Firestore Timestamp to ISO string for Zod validation
-            createdAt: (data.createdAt as Timestamp)?.toDate().toISOString()
+            createdAt: createdAt
         };
             
         const parsed = ToolSchema.safeParse(rawTool);
