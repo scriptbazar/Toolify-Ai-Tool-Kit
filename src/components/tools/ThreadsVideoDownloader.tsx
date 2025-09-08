@@ -1,11 +1,10 @@
 
-
 'use client';
 
 import { Card, CardContent } from '../ui/card';
 import { Construction } from 'lucide-react';
 
-export function VideoSubtitleExtractor() {
+export function ThreadsVideoDownloader() {
   return (
     <Card className="flex flex-col items-center justify-center min-h-[300px]">
       <CardContent className="text-center">

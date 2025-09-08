@@ -1,65 +1,20 @@
 
+
 'use client';
 
-import { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { UploadCloud, FileVideo, Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { Slider } from '../ui/slider';
-import { Label } from '../ui/label';
+import { Card, CardContent } from '../ui/card';
+import { Construction } from 'lucide-react';
 
 export function VideoToGif() {
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [videoSrc, setVideoSrc] = useState<string | null>(null);
-  const [fps, setFps] = useState(10);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith('video/')) {
-      setVideoFile(file);
-      setVideoSrc(URL.createObjectURL(file));
-    } else if (file) {
-      toast({ title: "Invalid File", description: "Please upload a valid video file.", variant: "destructive" });
-    }
-  };
-
-  const handleConvert = () => {
-    if (!videoFile) {
-        toast({ title: 'No video selected!', variant: 'destructive'});
-        return;
-    }
-    toast({ title: 'Coming Soon!', description: 'Video to GIF functionality is under development.' });
-  };
-
   return (
-    <div className="space-y-6">
-      <div 
-        className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="video/*" />
-        {videoSrc ? (
-            <video src={videoSrc} className="w-full h-full object-contain" controls />
-        ) : (
-             <div className="flex flex-col items-center">
-              <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">Click or drag video file to upload</p>
-            </div>
-        )}
-      </div>
-
-       <div className="space-y-2">
-            <Label>Frames per second (FPS): {fps}</Label>
-            <Slider value={[fps]} onValueChange={([val]) => setFps(val)} min={5} max={30} step={1} />
-        </div>
-
-      <Button onClick={handleConvert} disabled={isLoading || !videoFile} className="w-full">
-        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileVideo className="mr-2 h-4 w-4" />}
-        Convert to GIF
-      </Button>
-    </div>
+    <Card className="flex flex-col items-center justify-center min-h-[300px]">
+      <CardContent className="text-center">
+        <Construction className="mx-auto h-12 w-12 text-primary mb-4" />
+        <h3 className="text-xl font-semibold">Coming Soon!</h3>
+        <p className="text-muted-foreground mt-2">
+          This tool is currently under development.
+        </p>
+      </CardContent>
+    </Card>
   );
 }

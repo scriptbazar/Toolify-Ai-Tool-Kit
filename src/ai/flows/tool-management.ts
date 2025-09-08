@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -34,7 +35,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'AI Story Generator', description: 'Craft compelling stories in various genres from a simple prompt.', icon: 'BookOpen', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Tweet Generator', description: 'Generate engaging tweets and thread ideas for social media.', icon: 'Twitter', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Add Watermark to PDF', description: 'Add a text or image watermark to your PDF documents.', icon: 'Fingerprint', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'Add Watermark to Video', description: 'Add a text or image watermark to your videos.', icon: 'Video', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Age Calculator', description: 'Calculate age from date of birth.', icon: 'Gift', category: 'calculator', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Amazon Shipping Label Cropper', description: 'Effortlessly crop your standard 8.5x11 inch Amazon FBA shipping labels to a perfect 4x6 inch format, ideal for thermal printers. Save time and label costs.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Myntra Shipping Label Cropper', description: 'Quickly convert your standard Myntra shipping labels into a 4x6 inch thermal printer-friendly format. Streamline your packing process with one click.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },
@@ -61,15 +61,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'ICO Converter', description: 'Convert any image to a favicon.ico file.', icon: 'Star', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Image Compressor', description: 'Reduce the file size of your images.', icon: 'Minimize2', category: 'image', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Image Cropper', description: 'Crop images to a specific size or aspect ratio.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
-    { name: 'Loop Video', description: 'Create seamlessly looping video clips.', icon: 'Repeat', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'Mute Video', description: 'Remove the audio track from a video.', icon: 'VolumeX', category: 'video', plan: 'Free', isNew: true, status: 'Active' },
-    { name: 'Resize Video', description: 'Change the dimensions of your video.', icon: 'Scaling', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'Rotate Video', description: 'Rotate a video by 90, 180, or 270 degrees.', icon: 'RotateCw', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'Trim Video', description: 'Cut out parts of a video by setting start and end times.', icon: 'Scissors', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'Video to GIF', description: 'Convert a portion of a video into an animated GIF.', icon: 'FileVideo', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Video to MP3', description: 'Extract the audio from a video file and save as MP3.', icon: 'Music', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'Video Subtitle Extractor', description: 'Extract subtitles from a video file.', icon: 'Captions', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'Video Compressor', description: 'Reduce the file size of your videos.', icon: 'Minimize2', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'PDF Splitter', description: 'Extract pages or split a PDF into multiple files.', icon: 'FileCog', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Word to PDF', description: 'Convert a Word document (.docx) to a PDF.', icon: 'FileText', category: 'pdf', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Rotate PDF', description: 'Rotate all or specific pages in a PDF file.', icon: 'RotateCw', category: 'pdf', plan: 'Free', isNew: true, status: 'Active' },
@@ -96,6 +88,10 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'JavaScript Minifier', description: 'Minify JavaScript code for faster script execution and reduced file size.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'SQL Formatter', description: 'Format and beautify your SQL queries for better readability and maintenance.', icon: 'Database', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'UUID Generator', description: 'Generate universally unique identifiers (UUIDs) for your applications.', icon: 'Fingerprint', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'YouTube Video Downloader', description: 'Download YouTube videos in various formats and qualities.', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'X Video Downloader', description: 'Download videos from X (formerly Twitter).', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Instagram Video Downloader', description: 'Download videos and reels from Instagram.', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Threads Video Downloader', description: 'Download videos from Threads.', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
 ];
 
 /**

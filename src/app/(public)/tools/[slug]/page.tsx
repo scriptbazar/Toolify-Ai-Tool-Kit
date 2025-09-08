@@ -22,7 +22,6 @@ import { AiProductDescriptionWriter } from '@/components/tools/AiProductDescript
 import { AiStoryGenerator } from '@/components/tools/AiStoryGenerator';
 import { AiTweetGenerator } from '@/components/tools/AiTweetGenerator';
 import { AddWatermarkToPdf } from '@/components/tools/AddWatermarkToPdf';
-import { AddWatermarkToVideo } from '@/components/tools/AddWatermarkToVideo';
 import { AgeCalculator } from '@/components/tools/AgeCalculator';
 import { AmazonShippingLabelCropper } from '@/components/tools/AmazonShippingLabelCropper';
 import { MyntraShippingLabelCropper } from '@/components/tools/MyntraShippingLabelCropper';
@@ -49,15 +48,7 @@ import { FlipImage } from '@/components/tools/FlipImage';
 import { IcoConverter } from '@/components/tools/IcoConverter';
 import { ImageCompressor } from '@/components/tools/ImageCompressor';
 import { ImageCropper } from '@/components/tools/ImageCropper';
-import { LoopVideo } from '@/components/tools/LoopVideo';
-import { MuteVideo } from '@/components/tools/MuteVideo';
-import { ResizeVideo } from '@/components/tools/ResizeVideo';
-import { RotateVideo } from '@/components/tools/RotateVideo';
-import { TrimVideo } from '@/components/tools/TrimVideo';
-import { VideoToGif } from '@/components/tools/VideoToGif';
 import { VideoToMp3 } from '@/components/tools/VideoToMp3';
-import { VideoSubtitleExtractor } from '@/components/tools/VideoSubtitleExtractor';
-import { VideoCompressor } from '@/components/tools/VideoCompressor';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -91,6 +82,14 @@ import { LoanCalculator } from '@/components/tools/LoanCalculator';
 import { PercentageCalculator } from '@/components/tools/PercentageCalculator';
 import { TimeZoneConverter } from '@/components/tools/TimeZoneConverter';
 import { UnixTimestampConverter } from '@/components/tools/UnixTimestampConverter';
+import { HtmlMinifier } from '@/components/tools/HtmlMinifier';
+import { JavascriptMinifier } from '@/components/tools/JavascriptMinifier';
+import { SqlFormatter } from '@/components/tools/SqlFormatter';
+import { UuidGenerator } from '@/components/tools/UuidGenerator';
+import { YoutubeVideoDownloader } from '@/components/tools/YoutubeVideoDownloader';
+import { XVideoDownloader } from '@/components/tools/XVideoDownloader';
+import { InstagramVideoDownloader } from '@/components/tools/InstagramVideoDownloader';
+import { ThreadsVideoDownloader } from '@/components/tools/ThreadsVideoDownloader';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -121,7 +120,6 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-story-generator': AiStoryGenerator,
   'ai-tweet-generator': AiTweetGenerator,
   'add-watermark-to-pdf': AddWatermarkToPdf,
-  'add-watermark-to-video': AddWatermarkToVideo,
   'age-calculator': AgeCalculator,
   'amazon-shipping-label-cropper': AmazonShippingLabelCropper,
   'myntra-shipping-label-cropper': MyntraShippingLabelCropper,
@@ -148,15 +146,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ico-converter': IcoConverter,
   'image-compressor': ImageCompressor,
   'image-cropper': ImageCropper,
-  'loop-video': LoopVideo,
-  'mute-video': MuteVideo,
-  'resize-video': ResizeVideo,
-  'rotate-video': RotateVideo,
-  'trim-video': TrimVideo,
-  'video-to-gif': VideoToGif,
   'video-to-mp3': VideoToMp3,
-  'video-subtitle-extractor': VideoSubtitleExtractor,
-  'video-compressor': VideoCompressor,
   'pdf-splitter': PdfSplitter,
   'word-to-pdf': WordToPdf,
   'rotate-pdf': RotatePdf,
@@ -179,6 +169,14 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'percentage-calculator': PercentageCalculator,
   'time-zone-converter': TimeZoneConverter,
   'unix-timestamp-converter': UnixTimestampConverter,
+  'html-minifier': HtmlMinifier,
+  'javascript-minifier': JavascriptMinifier,
+  'sql-formatter': SqlFormatter,
+  'uuid-generator': UuidGenerator,
+  'youtube-video-downloader': YoutubeVideoDownloader,
+  'x-video-downloader': XVideoDownloader,
+  'instagram-video-downloader': InstagramVideoDownloader,
+  'threads-video-downloader': ThreadsVideoDownloader,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
@@ -654,65 +652,11 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     },
 
     // Video Tools
-    'video-to-gif': {
-        title: '✨ About the Video to GIF Converter',
-        features: ['Clip Selection: Choose the start and end time of the video clip to convert.', 'FPS and Size Control: Adjust the frame rate and dimensions of the output GIF.', 'High-Quality Output: Creates smooth, high-quality animated GIFs.', 'Supports common video formats like MP4, MOV, WEBM.'],
-        howTo: ['Upload your video file.', 'Use the sliders to select the portion of the video you want to convert.', 'Adjust the FPS and size settings.', 'Click "Create GIF".', 'Preview and download your animated GIF.'],
-        why: 'Create engaging animated GIFs from your video clips. Perfect for memes, social media posts, reaction GIFs, and email marketing to capture your audience\'s attention.'
-    },
-    'video-compressor': {
-        title: '✨ About the Video Compressor',
-        features: ['Reduce File Size: Significantly compress video files without major quality loss.', 'Adjustable Quality: Choose from different compression presets.', 'See Estimated Size: Get an estimate of the output file size before you start.', 'Supports MP4, MOV, and other popular formats.'],
-        howTo: ['Upload your large video file.', 'Select a compression level (e.g., High Quality, Medium Size).', 'Click "Compress Video".', 'Download the smaller, optimized video file.'],
-        why: 'Make your videos easier to share, upload, and store. Compressed videos use less bandwidth, upload faster to social media, and are easier to send via email or messaging apps.'
-    },
-    'add-watermark-to-video': {
-      title: '✨ About the Add Watermark to Video Tool',
-      features: ['Text and Image Watermarks.', 'Customizable opacity, position, and size.', 'Preview watermark before applying.', 'Supports various video formats.'],
-      howTo: ['Upload your video.', 'Choose a text or image watermark.', 'Customize its appearance and position.', 'Click "Add Watermark" and download.'],
-      why: 'Protect your video content and brand your creations before sharing them online.'
-    },
-    'mute-video': {
-      title: '✨ About the Mute Video Tool',
-      features: ['Completely remove audio from any video.', 'Fast processing.', 'Supports MP4, MOV, AVI, and more.', 'Simple one-click operation.'],
-      howTo: ['Upload your video file.', 'Click the "Mute Video" button.', 'Download the video without sound.'],
-      why: 'Perfect for creating silent clips for presentations, social media stories, or when you only need the visual content.'
-    },
     'video-to-mp3': {
       title: '✨ About the Video to MP3 Tool',
       features: ['Extract audio from video files.', 'High-quality MP3 output.', 'Supports a wide range of video formats.', 'Fast and easy to use.'],
       howTo: ['Upload your video.', 'The tool will automatically extract the audio.', 'Click "Download MP3" to save the audio file.'],
       why: 'Easily convert video podcasts, music videos, or lectures into audio files that you can listen to on the go.'
-    },
-    'resize-video': {
-      title: '✨ About the Resize Video Tool',
-      features: ['Resize video dimensions.', 'Presets for social media (e.g., Instagram Story, YouTube).', 'Custom resolution input.', 'Maintain aspect ratio option.'],
-      howTo: ['Upload your video.', 'Choose a preset or enter custom dimensions.', 'Click "Resize Video".', 'Download the resized video file.'],
-      why: 'Optimize your videos for different platforms and devices, ensuring they look perfect everywhere.'
-    },
-    'trim-video': {
-      title: '✨ About the Trim Video Tool',
-      features: ['Cut videos by setting start and end times.', 'Precise frame-by-frame trimming.', 'Interactive timeline preview.', 'Fast processing without re-encoding.'],
-      howTo: ['Upload your video.', 'Drag the handles on the timeline to select the desired part.', 'Click "Trim Video" to process.', 'Download your shortened video clip.'],
-      why: 'Remove unwanted parts from your videos and create shorter, more impactful clips for sharing.'
-    },
-    'rotate-video': {
-      title: '✨ About the Rotate Video Tool',
-      features: ['Rotate video by 90, 180, or 270 degrees.', 'Fix videos recorded in the wrong orientation.', 'Simple and intuitive interface.', 'Supports all major video formats.'],
-      howTo: ['Upload your video.', 'Click the rotate buttons until it\'s correctly oriented.', 'Click "Save Video" to download.'],
-      why: 'A lifesaver for fixing videos that were accidentally shot vertically instead of horizontally, or vice versa.'
-    },
-    'loop-video': {
-      title: '✨ About the Loop Video Tool',
-      features: ['Create seamlessly looping videos.', 'Set the loop count (e.g., 2x, 5x, infinite).', 'Perfect for creating short, eye-catching clips.', 'Download as a video or GIF.'],
-      howTo: ['Upload a short video clip.', 'Choose how many times you want it to loop.', 'Click "Create Loop".', 'Download the resulting looped video.'],
-      why: 'Grab attention on social media with perfectly looped videos, similar to Instagram\'s Boomerang effect.'
-    },
-    'video-subtitle-extractor': {
-      title: '✨ About the Video Subtitle Extractor',
-      features: ['Extracts embedded subtitles from video files.', 'Supports common subtitle formats (SRT, VTT).', 'Outputs a plain text or formatted subtitle file.', 'Works with MP4, MKV files.'],
-      howTo: ['Upload your video file.', 'The tool will detect and extract any embedded subtitle tracks.', 'Choose your desired format and download.'],
-      why: 'Get a transcript of your videos or re-purpose subtitle content without manual transcription.'
     },
     // Ecommerce Tools
     'amazon-shipping-label-cropper': {

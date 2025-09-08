@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Card, CardContent } from '../ui/card';
@@ -11,7 +12,7 @@ export function MuteVideo() {
         <Construction className="mx-auto h-12 w-12 text-primary mb-4" />
         <h3 className="text-xl font-semibold">Coming Soon!</h3>
         <p className="text-muted-foreground mt-2">
-          The "Mute Video" tool is currently under development.
+          This tool is currently under development.
         </p>
       </CardContent>
     </Card>
