@@ -22,6 +22,7 @@ import { AiImageGenerator } from '@/components/tools/AiImageGenerator';
 import { AiProductDescriptionWriter } from '@/components/tools/AiProductDescriptionWriter';
 import { AiStoryGenerator } from '@/components/tools/AiStoryGenerator';
 import { AiTweetGenerator } from '@/components/tools/AiTweetGenerator';
+import { AiVoiceCloning } from '@/components/tools/AiVoiceCloning';
 import { AddWatermarkToPdf } from '@/components/tools/AddWatermarkToPdf';
 import { AgeCalculator } from '@/components/tools/AgeCalculator';
 import { AmazonShippingLabelCropper } from '@/components/tools/AmazonShippingLabelCropper';
@@ -121,6 +122,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-product-description-writer': AiProductDescriptionWriter,
   'ai-story-generator': AiStoryGenerator,
   'ai-tweet-generator': AiTweetGenerator,
+  'ai-voice-cloning': AiVoiceCloning,
   'add-watermark-to-pdf': AddWatermarkToPdf,
   'age-calculator': AgeCalculator,
   'amazon-shipping-label-cropper': AmazonShippingLabelCropper,
@@ -412,6 +414,12 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         features: ['Generate Code: Describe what you want in plain English and get code snippets.', 'Explain Code: Paste code to get a detailed explanation of what it does.', 'Debug Code: Describe an error and get suggestions on how to fix it.', 'Multi-Language Support: Works with Python, JavaScript, Java, and more.'],
         howTo: ['Select a language and an action (Generate, Explain, Debug).', 'Provide your code or description.', 'Click "Execute" and let the AI assist you.'],
         why: 'Your personal coding pair programmer. Speed up your development workflow, learn new languages, and debug complex problems faster with an AI that understands code.'
+    },
+    'ai-voice-cloning': {
+        title: '✨ About the AI Voice Cloning Tool',
+        features: ['Upload Your Voice: Provide a short audio sample of your voice.', 'Text to Speech: Generate speech in your own cloned voice.', 'High-Quality Output: Creates natural-sounding audio.', 'Secure and Private: Your voice data is protected.'],
+        howTo: ['Upload a clear audio sample of your voice (a few minutes is best).', 'Wait for the AI to process and create your voice clone.', 'Enter the text you want to generate.', 'Click "Generate Speech" and listen to the output in your own voice.'],
+        why: 'Create personalized audio content like never before. Ideal for content creators, personalized assistants, or for creating voiceovers for presentations and videos in your unique voice.'
     },
 
     // PDF Tools
@@ -813,5 +821,3 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     </div>
   );
 }
-
-    
