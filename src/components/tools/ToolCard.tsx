@@ -36,10 +36,10 @@ export function ToolCard({ tool }: ToolCardProps) {
               {tool.plan === 'Pro' && <Badge className="absolute top-2 right-2">Pro</Badge>}
             </>
         )}
-        <Icon className="h-8 w-8 mb-4 text-muted-foreground transition-colors group-hover:text-primary" />
+        <Icon className="h-8 w-8 mb-4 text-primary transition-colors" />
         <CardContent className="p-0 flex flex-col flex-grow justify-center">
           <h3 className="text-sm font-medium mb-1">{name}</h3>
-          <p className="text-xs text-muted-foreground">{description}</p>
+          <p className="text-xs text-muted-foreground h-10">{description}</p>
         </CardContent>
       </Card>
     </Link>
