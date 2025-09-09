@@ -205,23 +205,27 @@ const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.Ele
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
   const awaitedParams = await Promise.resolve(params);
-  const allTools = await getTools();
+  
+  const [allTools, settings, allReviews, allPosts] = await Promise.all([
+    getTools(),
+    getSettings(),
+    getReviews(),
+    getPosts()
+  ]);
+
   const tool = allTools.find((t) => t.slug === awaitedParams.slug);
-  const settings = await getSettings();
   
   if (!tool || tool.status === 'Disabled') {
     notFound();
   }
 
-  const allReviews = await getReviews();
   const toolReviews = allReviews.filter(r => r.toolId === tool.slug && r.status === 'approved');
-
   const ToolComponent = toolComponents[tool.slug];
   const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
   
   const sidebarSettings = settings.sidebar?.toolSidebar;
   const popularTools = allTools.filter(t => t.status === 'Active' && t.slug !== tool.slug).slice(0, 20);
-  const recentPosts = (await getPosts()).filter(p => p.status === 'Published').slice(0, 10);
+  const recentPosts = allPosts.filter(p => p.status === 'Published').slice(0, 10);
 
   const detailedDescriptions: Record<string, { title: string; features: string[]; howTo: string[]; why: string; }> = {
     // Text Tools
@@ -821,3 +825,5 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     </div>
   );
 }
+
+    
