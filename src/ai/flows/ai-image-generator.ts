@@ -34,7 +34,7 @@ const generateImageFlow = ai.defineFlow(
     try {
         const { text } = await ai.generate({
             model: 'googleai/gemini-1.5-flash-latest',
-            prompt: `Generate an SVG image based on the following prompt. The SVG should be a single, complete XML block, starting with "<svg" and ending with "</svg>". Do not include any markdown like \`\`\`svg or other explanatory text. The SVG should be visually appealing, use a modern flat design style, and have a beautiful color palette.
+            prompt: `Generate a SVG image based on the following prompt. The SVG should be a single, complete XML block, starting with "<svg" and ending with "</svg>". Do not include any markdown like \`\`\`svg or other explanatory text. The SVG should be visually appealing, use a modern flat design style, and have a beautiful color palette.
 
 User's Prompt: "${promptText}"`,
         });
