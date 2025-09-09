@@ -28,8 +28,17 @@ export function TextToSpeech() {
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState<string | null>(null);
-  const [sampleAudio, setSampleAudio] = useState<HTMLAudioElement | null>(null);
   const { toast } = useToast();
+
+  const filteredVoices = voices.filter(v => v.gender === selectedGender);
+  
+  useEffect(() => {
+    // When gender changes, reset the selected voice to the first one in the new list
+    const firstVoiceOfGender = filteredVoices[0]?.value;
+    if (firstVoiceOfGender) {
+        setSelectedVoice(firstVoiceOfGender);
+    }
+  }, [selectedGender]);
 
   const handleGenerateAudio = async () => {
     if (!text.trim()) {
@@ -54,7 +63,6 @@ export function TextToSpeech() {
     try {
         const result = await textToSpeech({ text: "Hello, you can select this voice to generate your audio.", voice });
         const audio = new Audio(result.audioDataUri);
-        setSampleAudio(audio);
         audio.play();
         audio.onended = () => setSampleLoading(null);
     } catch (error) {
@@ -63,16 +71,6 @@ export function TextToSpeech() {
     }
   }
 
-  const filteredVoices = voices.filter(v => v.gender === selectedGender);
-  
-  useEffect(() => {
-    // When gender changes, reset the selected voice to the first one in the new list
-    if (selectedGender === 'Female') {
-      setSelectedVoice('Algenib');
-    } else {
-      setSelectedVoice('Achernar');
-    }
-  }, [selectedGender]);
 
   return (
     <div className="space-y-6">
