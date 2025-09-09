@@ -10,13 +10,19 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { 
     GenerateImageInputSchema,
-    GenerateImageOutputSchema,
     SaveMediaInputSchema,
     type GenerateImageInput,
-    type GenerateImageOutput,
     type SaveMediaInput,
     type UserMedia
 } from './ai-image-generator.types';
+
+
+// Define a Zod schema for the output of the image generation flow.
+// It will now return a data URI for an SVG image.
+const GenerateImageOutputSchema = z.object({
+  imageDataUri: z.string().describe('The generated SVG image as a data URI.'),
+});
+type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
 
 
 // --- Main Flow for Image Generation ---
@@ -32,16 +38,35 @@ const generateImageFlow = ai.defineFlow(
   },
   async ({ promptText, userId }) => {
     try {
-        const { media } = await ai.generate({
-          model: 'googleai/imagen-4.0-fast-generate-001',
-          prompt: promptText,
+        const prompt = `
+          Generate a clean, modern, vector-style SVG image based on the following description: "${promptText}".
+
+          **Instructions for the SVG:**
+          - The SVG should be a complete, valid XML file.
+          - It must have a viewBox attribute, e.g., 'viewBox="0 0 100 100"'.
+          - Do NOT include any text elements (<text>) in the SVG, especially not in Hindi or other non-Latin scripts.
+          - Use simple shapes and a pleasant, modern color palette.
+          - The output must be ONLY the SVG code, starting with <svg> and ending with </svg>. Do not include any other text, markdown, or explanations.
+        `;
+        
+        const { text } = await ai.generate({
+          model: 'gemini-1.5-flash-latest',
+          prompt: prompt,
         });
 
-        if (!media?.url) {
+        if (!text) {
              throw new Error('The model did not return any image content.');
         }
+
+        // Clean the response to ensure only the SVG code is present.
+        const svgMatch = text.match(/<svg.*<\/svg>/s);
+        const cleanSvg = svgMatch ? svgMatch[0] : '';
         
-        const imageDataUri = media.url;
+        if (!cleanSvg) {
+            throw new Error('Could not extract valid SVG code from the AI response.');
+        }
+
+        const imageDataUri = `data:image/svg+xml;base64,${Buffer.from(cleanSvg).toString('base64')}`;
 
         await saveUserMedia({
             userId,
