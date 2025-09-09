@@ -47,6 +47,10 @@ export type EmailLog = {
 
 async function logEmail(recipient: string, subject: string, status: EmailLog['status']) {
     const adminDb = getAdminDb();
+    if (!adminDb) {
+      console.error("Database not initialized, cannot log email.");
+      return;
+    }
     try {
         await adminDb.collection('emailLog').add({
             recipient,
@@ -61,6 +65,10 @@ async function logEmail(recipient: string, subject: string, status: EmailLog['st
 
 export async function getEmailLog(): Promise<any[]> {
     const adminDb = getAdminDb();
+    if (!adminDb) {
+      console.error("Database not initialized, cannot fetch email log.");
+      return [];
+    }
     try {
         const snapshot = await adminDb.collection('emailLog').orderBy('date', 'desc').get();
         return snapshot.docs.map(doc => {

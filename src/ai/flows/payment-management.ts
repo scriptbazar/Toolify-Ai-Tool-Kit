@@ -259,6 +259,10 @@ export async function createStripeCheckoutSession(input: CreateStripeSessionInpu
  */
 export async function getPayments(): Promise<Payment[]> {
     const adminDb = getAdminDb();
+    if (!adminDb) {
+      console.error("Database not initialized, cannot fetch payments.");
+      return [];
+    }
     try {
         const snapshot = await adminDb.collection('payments').orderBy('date', 'desc').get();
         if (snapshot.empty) {
@@ -492,6 +496,10 @@ export async function createPhonePePayment(input: CreatePhonePePaymentInput): Pr
  * This should be called from a secure environment (e.g., after the redirect from Stripe).
  */
 export async function verifyStripePayment(sessionId: string): Promise<{ success: boolean; message: string, planId?: string }> {
+  const adminDb = getAdminDb();
+  if (!adminDb) {
+    throw new Error('Database not initialized for verification.');
+  }
   try {
     const settings = await getSettings();
     const stripeSettings = settings.payment?.stripe;
@@ -511,7 +519,7 @@ export async function verifyStripePayment(sessionId: string): Promise<{ success:
       }
 
       // Update user document in Firestore
-      const userRef = getAdminDb().collection('users').doc(userId);
+      const userRef = adminDb.collection('users').doc(userId);
       await userRef.update({
         planId: planId,
         subscriptionStatus: 'active',
@@ -531,6 +539,10 @@ export async function verifyStripePayment(sessionId: string): Promise<{ success:
  * Captures a PayPal order and updates the user's plan.
  */
 export async function capturePayPalOrder(orderId: string): Promise<{ success: boolean; message: string; planId?: string }> {
+    const adminDb = getAdminDb();
+    if (!adminDb) {
+      throw new Error('Database not initialized for verification.');
+    }
     try {
         const client = await getPayPalClient();
         const request = new paypal.orders.OrdersCaptureRequest(orderId);
@@ -552,7 +564,7 @@ export async function capturePayPalOrder(orderId: string): Promise<{ success: bo
                  throw new Error('Invalid metadata format in PayPal order.');
             }
 
-            const userRef = getAdminDb().collection('users').doc(userId);
+            const userRef = adminDb.collection('users').doc(userId);
             await userRef.update({
                 planId: planId,
                 subscriptionStatus: 'active',
@@ -568,5 +580,3 @@ export async function capturePayPalOrder(orderId: string): Promise<{ success: bo
         return { success: false, message: error.message || 'An unknown error occurred while capturing the PayPal payment.' };
     }
 }
-    
-
