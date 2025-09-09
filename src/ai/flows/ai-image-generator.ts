@@ -34,33 +34,42 @@ const generateImageFlow = ai.defineFlow(
     try {
         const { text } = await ai.generate({
             model: 'googleai/gemini-1.5-flash-latest',
-            prompt: `Based on the following user prompt, generate a detailed, vivid, and artistic description of an image. The description should be in English.
+            prompt: `Generate an SVG image based on the following prompt. The SVG should be a single, complete XML block, starting with "<svg" and ending with "</svg>". Do not include any markdown like \`\`\`svg or other explanatory text. The SVG should be visually appealing, use a modern flat design style, and have a beautiful color palette.
 
-User's Prompt: "${promptText}"
-
-Generated Description:`,
+User's Prompt: "${promptText}"`,
+            config: {
+                // Requesting a JSON response with an "svg" field to encourage structured output.
+                responseFormat: "json", 
+            }
         });
-
+        
         if (!text) {
-            throw new Error('No description was generated. The model may have failed to produce an output.');
+             throw new Error('No SVG code was generated. The model may have failed to produce an output.');
         }
 
-        // Instead of generating an image, we now return the description.
-        // The frontend will use a placeholder image and display this description.
-        const imageDataUri = `https://picsum.photos/512/512?random=${Date.now()}`;
+        // Clean the response to extract only the SVG code.
+        const svgMatch = text.match(/<svg.*<\/svg>/s);
+        const svgCode = svgMatch ? svgMatch[0] : '';
+        
+        if (!svgCode) {
+            console.error("Failed to extract SVG from model response:", text);
+            throw new Error('The AI returned an invalid format. Could not extract the SVG image.');
+        }
+        
+        const imageDataUri = `data:image/svg+xml;base64,${Buffer.from(svgCode).toString('base64')}`;
         
         await saveUserMedia({
             userId,
             type: 'ai-generated',
             mediaUrl: imageDataUri,
-            prompt: text, // Save the generated description as the prompt
+            prompt: promptText,
         });
         
-        return { imageDataUri, generatedDescription: text };
+        return { imageDataUri };
 
     } catch (error: any) {
-        console.error("AI Description Generation Error:", error);
-        throw new Error(error.message || "An unexpected error occurred during description generation.");
+        console.error("AI SVG Generation Error:", error);
+        throw new Error(error.message || "An unexpected error occurred during SVG generation.");
     }
   }
 );
