@@ -13,8 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 export function PromptGenerator() {
   const [topic, setTopic] = useState('');
-  const [style, setStyle] = useState('Photorealistic');
-  const [mood, setMood] = useState('Cinematic');
+  const [category, setCategory] = useState('Image');
+  const [detailLevel, setDetailLevel] = useState('Detailed');
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -31,7 +31,7 @@ export function PromptGenerator() {
     setIsLoading(true);
     setGeneratedPrompt('');
     try {
-      const result = await generatePrompt({ topic, style: style as any, mood: mood as any });
+      const result = await generatePrompt({ topic, category: category as any, detailLevel: detailLevel as any });
       setGeneratedPrompt(result.prompt);
     } catch (error: any) {
       toast({
@@ -68,30 +68,26 @@ export function PromptGenerator() {
 
        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-            <Label htmlFor="style-select">Artistic Style</Label>
-            <Select value={style} onValueChange={setStyle}>
-                <SelectTrigger id="style-select"><SelectValue /></SelectTrigger>
+            <Label htmlFor="category-select">Prompt Category</Label>
+            <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger id="category-select"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="Photorealistic">Photorealistic</SelectItem>
-                    <SelectItem value="Cartoon">Cartoon</SelectItem>
-                    <SelectItem value="Oil Painting">Oil Painting</SelectItem>
-                    <SelectItem value="Abstract">Abstract</SelectItem>
-                    <SelectItem value="Anime">Anime</SelectItem>
-                    <SelectItem value="Minimalist">Minimalist</SelectItem>
+                    <SelectItem value="Image">Image</SelectItem>
+                    <SelectItem value="Website">Website</SelectItem>
+                    <SelectItem value="App">App</SelectItem>
+                    <SelectItem value="General">General</SelectItem>
                 </SelectContent>
             </Select>
         </div>
          <div className="space-y-2">
-            <Label htmlFor="mood-select">Mood / Atmosphere</Label>
-             <Select value={mood} onValueChange={setMood}>
-                <SelectTrigger id="mood-select"><SelectValue /></SelectTrigger>
+            <Label htmlFor="detail-level-select">Prompt Detail Level</Label>
+             <Select value={detailLevel} onValueChange={setDetailLevel}>
+                <SelectTrigger id="detail-level-select"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="Cinematic">Cinematic</SelectItem>
-                    <SelectItem value="Dramatic">Dramatic</SelectItem>
-                    <SelectItem value="Cheerful">Cheerful</SelectItem>
-                    <SelectItem value="Mysterious">Mysterious</SelectItem>
-                    <SelectItem value="Calm">Calm</SelectItem>
-                    <SelectItem value="Futuristic">Futuristic</SelectItem>
+                    <SelectItem value="Short">Short</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="Detailed">Detailed</SelectItem>
+                    <SelectItem value="Advanced">Advanced</SelectItem>
                 </SelectContent>
             </Select>
         </div>

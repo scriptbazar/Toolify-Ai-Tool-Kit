@@ -16,23 +16,29 @@ const prompt = ai.definePrompt({
   name: 'generatePrompt',
   input: { schema: GeneratePromptInputSchema },
   output: { schema: GeneratePromptOutputSchema },
-  prompt: `You are an expert prompt engineer. Your task is to expand a simple user-provided topic into a detailed, well-structured, and creative prompt suitable for an AI image generator or a text-based AI model.
+  prompt: `You are an expert prompt engineer. Your task is to expand a simple user-provided topic into a detailed, well-structured, and creative prompt suitable for an AI model.
 
-The generated prompt should be descriptive and provide clear instructions to the AI, incorporating the specified style and mood.
+The generated prompt should be descriptive and provide clear instructions to the AI, incorporating the specified category and detail level.
 
 User's Topic:
 "{{{topic}}}"
 
-Artistic Style: {{{style}}}
-Desired Mood: {{{mood}}}
+Prompt Category: {{{category}}}
+Desired Detail Level: {{{detailLevel}}}
 
 Instructions:
-1.  Analyze the user's topic to understand the core concept.
-2.  Expand upon the topic by adding descriptive details about the subject, setting, lighting, and composition.
-3.  Incorporate the specified artistic style (e.g., '{{style}}') and mood (e.g., '{{mood}}') into the narrative of the prompt.
-4.  Suggest specific elements that would enhance the desired mood, such as color palettes, weather conditions, or character expressions.
-5.  Structure the output as a single, coherent paragraph.
-6.  The final prompt should be highly creative and inspire a high-quality, detailed response from an AI.
+1.  Analyze the user's topic and the selected category to understand the core concept.
+2.  Based on the **category**, tailor the prompt.
+    - If **Image**: Describe the subject, setting, lighting, composition, colors, and artistic style.
+    - If **Website**: Describe the purpose, target audience, key features, pages, and desired look and feel.
+    - If **App**: Describe the app's core functionality, user flow, main screens, and design aesthetic.
+    - If **General**: Create a universally applicable, detailed prompt.
+3.  Adjust the length and complexity based on the **detail level**:
+    - **Short**: A concise, single-paragraph prompt.
+    - **Medium**: A few paragraphs with bullet points for key elements.
+    - **Detailed**: A comprehensive, multi-paragraph prompt with specific instructions.
+    - **Advanced**: A highly detailed, professional-grade prompt with constraints, examples, and persona instructions for the AI.
+4.  The final prompt should be highly creative and inspire a high-quality, detailed response from an AI.
 
 Generate only the prompt text itself.
 `,
@@ -53,4 +59,3 @@ const generatePromptFlow = ai.defineFlow(
     return output;
   }
 );
-
