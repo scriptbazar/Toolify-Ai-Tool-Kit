@@ -1,5 +1,5 @@
 
-import { z } from 'genkit';
+import { z } from 'zod';
 
 // --- Input/Output Schemas for Image Generation ---
 export const GenerateImageInputSchema = z.object({
