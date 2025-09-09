@@ -30,8 +30,9 @@ export default function ToolsDashboardPage() {
       setLoading(true);
       try {
         const tools = await getTools();
-        const activeTools = tools.filter(tool => tool.status === 'Active');
-        setAllTools(activeTools);
+        // Show all tools except those that are explicitly disabled
+        const visibleTools = tools.filter(tool => tool.status !== 'Disabled');
+        setAllTools(visibleTools);
       } catch (error) {
         toast({
           title: "Error",

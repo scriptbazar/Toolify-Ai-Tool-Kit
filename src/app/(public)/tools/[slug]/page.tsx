@@ -56,7 +56,7 @@ import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { Separator } from '@/components/ui/separator';
 import { ReviewForm } from '@/components/tools/ReviewForm';
 import { getReviews } from '@/ai/flows/review-management';
-import { Star } from 'lucide-react';
+import { Star, Construction, Sparkles } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getPosts } from '@/ai/flows/blog-management';
 import Link from 'next/link';
@@ -193,13 +193,21 @@ const SidebarWidget = ({ title, children }: { title: string, children: React.Rea
     </Card>
 );
 
+const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
+    <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-8 bg-muted/50 rounded-lg">
+        <Icon className="w-16 h-16 text-primary mb-4" />
+        <h2 className="text-2xl font-bold mb-2">{title}</h2>
+        <p className="text-muted-foreground">{description}</p>
+    </div>
+);
+
 export default async function ToolPage({ params }: { params: { slug: string } }) {
   const awaitedParams = await Promise.resolve(params);
   const allTools = await getTools();
   const tool = allTools.find((t) => t.slug === awaitedParams.slug);
   const settings = await getSettings();
   
-  if (!tool) {
+  if (!tool || tool.status === 'Disabled') {
     notFound();
   }
 
@@ -677,6 +685,24 @@ export default async function ToolPage({ params }: { params: { slug: string } })
 
   const toolDesc = detailedDescriptions[tool.slug];
 
+  const renderToolContent = () => {
+    switch(tool.status) {
+        case 'Maintenance':
+            return <ToolStatusDisplay icon={Construction} title="Under Maintenance" description="This tool is currently undergoing maintenance to improve its features. Please check back later." />;
+        case 'Coming Soon':
+            return <ToolStatusDisplay icon={Sparkles} title="Coming Soon!" description="Our team is hard at work on this new tool. It will be available shortly!" />;
+        default:
+            return ToolComponent ? <ToolComponent /> : (
+                <div className="flex h-full items-center justify-center">
+                    <p className="text-lg text-muted-foreground">
+                        Tool interface coming soon!
+                    </p>
+                </div>
+            );
+    }
+  }
+
+
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <AdPlaceholder adSlotId="toolpage-banner-top" adSettings={settings.advertisement ?? null} className="mb-6" />
@@ -691,13 +717,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
               <p className="text-muted-foreground mb-6 text-center">{tool.description}</p>
               
               <div className="min-h-[300px] rounded-lg bg-muted/50 p-4 sm:p-8">
-                {ToolComponent ? <ToolComponent /> : (
-                  <div className="flex h-full items-center justify-center">
-                    <p className="text-lg text-muted-foreground">
-                      Tool interface coming soon!
-                    </p>
-                  </div>
-                )}
+                {renderToolContent()}
               </div>
               <AdPlaceholder adSlotId="toolpage-in-description" adSettings={settings.advertisement ?? null} className="my-6" />
 
