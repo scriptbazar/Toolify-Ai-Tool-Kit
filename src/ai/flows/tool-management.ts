@@ -99,14 +99,16 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
 /**
  * Fetches all tools from Firestore, ordered by name.
  * If the collection is empty, it populates it with initial tools.
+ * It also self-heals by adding any missing tools from the initial list.
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
   try {
     const adminDb = getAdminDb();
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
-    let snapshot = await toolsRef.orderBy('name').get();
+    let snapshot = await toolsRef.get();
 
+    // If the collection is empty, populate it.
     if (snapshot.empty) {
       console.log('Tools collection is empty, populating with initial tools...');
       const batch = adminDb.batch();
@@ -116,8 +118,26 @@ export async function getTools(): Promise<Tool[]> {
           batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
       }
       await batch.commit();
-      // Re-fetch the data after populating, ensuring it's ordered
-      snapshot = await toolsRef.orderBy('name').get();
+      snapshot = await toolsRef.get(); // Re-fetch after populating
+    } else {
+        // Self-healing: Check for and add any missing tools
+        const existingToolSlugs = new Set(snapshot.docs.map(doc => doc.id));
+        const missingTools = initialTools.filter(tool => {
+            const slug = tool.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+            return !existingToolSlugs.has(slug);
+        });
+
+        if (missingTools.length > 0) {
+            console.log(`Found ${missingTools.length} missing tools. Adding them to the database...`);
+            const batch = adminDb.batch();
+            for (const toolData of missingTools) {
+                const slug = toolData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+                const docRef = toolsRef.doc(slug);
+                batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
+            }
+            await batch.commit();
+            snapshot = await toolsRef.get(); // Re-fetch to include newly added tools
+        }
     }
     
     const fetchedTools: Tool[] = snapshot.docs.map(doc => {
@@ -140,7 +160,8 @@ export async function getTools(): Promise<Tool[]> {
             console.warn(`Invalid tool data for doc ${doc.id}:`, parsed.error.format());
             return null;
         }
-    }).filter((tool): tool is Tool => tool !== null);
+    }).filter((tool): tool is Tool => tool !== null)
+      .sort((a, b) => a.name.localeCompare(b.name)); // Ensure final list is sorted by name
     
     return fetchedTools;
 

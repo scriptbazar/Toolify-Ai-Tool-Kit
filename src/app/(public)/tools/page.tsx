@@ -57,7 +57,11 @@ export default function ToolsDashboardPage() {
   const handleCategoryClick = (category: ToolCategory | 'all') => {
     setActiveCategory(category);
     const params = new URLSearchParams(searchParams.toString());
-    params.set('category', category);
+    if (category === 'all') {
+      params.delete('category');
+    } else {
+      params.set('category', category);
+    }
     router.push(`/tools?${params.toString()}`, { scroll: false });
   };
   
@@ -65,7 +69,11 @@ export default function ToolsDashboardPage() {
     const query = e.target.value;
     setSearchQuery(query);
     const params = new URLSearchParams(searchParams.toString());
-    params.set('q', query);
+    if (query) {
+      params.set('q', query);
+    } else {
+      params.delete('q');
+    }
     router.push(`/tools?${params.toString()}`, { scroll: false });
   };
 
