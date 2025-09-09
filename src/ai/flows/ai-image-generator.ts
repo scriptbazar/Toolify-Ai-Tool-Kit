@@ -37,10 +37,6 @@ const generateImageFlow = ai.defineFlow(
             prompt: `Generate an SVG image based on the following prompt. The SVG should be a single, complete XML block, starting with "<svg" and ending with "</svg>". Do not include any markdown like \`\`\`svg or other explanatory text. The SVG should be visually appealing, use a modern flat design style, and have a beautiful color palette.
 
 User's Prompt: "${promptText}"`,
-            config: {
-                // Requesting a JSON response with an "svg" field to encourage structured output.
-                responseFormat: "json", 
-            }
         });
         
         if (!text) {
