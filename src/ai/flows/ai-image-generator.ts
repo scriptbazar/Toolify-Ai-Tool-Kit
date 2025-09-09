@@ -32,27 +32,16 @@ const generateImageFlow = ai.defineFlow(
   },
   async ({ promptText, userId }) => {
     try {
-        const { text } = await ai.generate({
-            model: 'googleai/gemini-1.5-flash-latest',
-            prompt: `Generate a SVG image based on the following prompt. The SVG should be a single, complete XML block, starting with "<svg" and ending with "</svg>". Do not include any markdown like \`\`\`svg or other explanatory text. The SVG should be visually appealing, use a modern flat design style, and have a beautiful color palette.
-
-User's Prompt: "${promptText}"`,
+        const { media } = await ai.generate({
+            model: 'googleai/imagen-4.0-fast-generate-001',
+            prompt: `Generate a high-quality, visually appealing image based on the following prompt: "${promptText}"`,
         });
         
-        if (!text) {
-             throw new Error('No SVG code was generated. The model may have failed to produce an output.');
+        if (!media || !media.url) {
+             throw new Error('No image was generated. The model may have failed to produce an output.');
         }
 
-        // Clean the response to extract only the SVG code.
-        const svgMatch = text.match(/<svg.*<\/svg>/s);
-        const svgCode = svgMatch ? svgMatch[0] : '';
-        
-        if (!svgCode) {
-            console.error("Failed to extract SVG from model response:", text);
-            throw new Error('The AI returned an invalid format. Could not extract the SVG image.');
-        }
-        
-        const imageDataUri = `data:image/svg+xml;base64,${Buffer.from(svgCode).toString('base64')}`;
+        const imageDataUri = media.url;
         
         await saveUserMedia({
             userId,
@@ -64,8 +53,12 @@ User's Prompt: "${promptText}"`,
         return { imageDataUri };
 
     } catch (error: any) {
-        console.error("AI SVG Generation Error:", error);
-        throw new Error(error.message || "An unexpected error occurred during SVG generation.");
+        console.error("AI Image Generation Error:", error);
+        // Provide a more user-friendly error message for billing issues.
+        if (error.message && error.message.includes('billing account')) {
+            throw new Error('This feature requires a billing-enabled Google Cloud account. Please upgrade your account to use the image generator.');
+        }
+        throw new Error(error.message || "An unexpected error occurred during image generation.");
     }
   }
 );
