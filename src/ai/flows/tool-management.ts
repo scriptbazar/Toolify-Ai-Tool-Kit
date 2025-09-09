@@ -87,10 +87,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'JavaScript Minifier', description: 'Minify JavaScript code for faster script execution and reduced file size.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'SQL Formatter', description: 'Format and beautify your SQL queries for better readability and maintenance.', icon: 'Database', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'UUID Generator', description: 'Generate universally unique identifiers (UUIDs) for your applications.', icon: 'Fingerprint', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
-    { name: 'YouTube Video Downloader', description: 'Download YouTube videos in various formats and qualities.', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'X Video Downloader', description: 'Download videos from X (formerly Twitter).', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'Instagram Video Downloader', description: 'Download videos and reels from Instagram.', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'Threads Video Downloader', description: 'Download videos from Threads.', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
 ];
 
 /**
