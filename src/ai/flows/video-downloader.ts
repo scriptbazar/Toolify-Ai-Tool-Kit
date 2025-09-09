@@ -6,7 +6,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import ytdl from 'ytdl-core-discord';
+import ytdl from 'ytdl-core';
 
 const VideoDownloaderInputSchema = z.object({
   url: z.string().url('Please enter a valid URL.'),
@@ -50,10 +50,15 @@ const videoDownloaderFlow = ai.defineFlow(
                 message: 'Invalid YouTube URL provided.',
             };
         }
+        
+        // Adding requestOptions to force IPv4 can resolve some fetching issues
+        const requestOptions = {
+          requestOptions: {
+            family: 4,
+          },
+        };
 
-        const info = await ytdl.getInfo(url, {
-          lang: 'en'
-        });
+        const info = await ytdl.getInfo(url, requestOptions);
         const format = ytdl.chooseFormat(info.formats, { quality: 'highest' });
         
         if (format) {
