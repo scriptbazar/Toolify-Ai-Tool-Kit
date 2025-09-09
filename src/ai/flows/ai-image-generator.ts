@@ -52,52 +52,62 @@ const generateImageFlow = ai.defineFlow(
     outputSchema: GenerateImageOutputSchema,
   },
   async ({ promptText, userId }) => {
-    const {media} = await ai.generate({
-      model: 'googleai/imagen-4.0-fast-generate-001',
-      prompt: promptText,
-    });
+    try {
+        const {media} = await ai.generate({
+        model: 'googleai/imagen-4.0-fast-generate-001',
+        prompt: promptText,
+        });
 
-    if (!media || !media.url) {
-      throw new Error('No image was generated.');
+        if (!media || !media.url) {
+        throw new Error('No image was generated.');
+        }
+        
+        const adminDb = getAdminDb();
+        if (adminDb) {
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+
+        // Convert data URI to buffer
+        const base64Data = media.url.split(',')[1];
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+        
+        // Upload to Firebase Storage
+        const bucket = getStorage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+        const fileName = `userMedia/${userId}/ai-generated/${Date.now()}.png`;
+        const file = bucket.file(fileName);
+
+        await file.save(imageBuffer, {
+            metadata: {
+            contentType: 'image/png',
+            },
+        });
+
+        // Get the public URL
+        const publicUrl = await file.getSignedUrl({
+            action: 'read',
+            expires: expiresAt,
+        });
+
+        await adminDb.collection('userMedia').add({
+            userId,
+            type: 'ai-generated',
+            mediaUrl: publicUrl[0], // getSignedUrl returns an array with one element
+            prompt: promptText,
+            createdAt: FieldValue.serverTimestamp(),
+            expiresAt: expiresAt,
+        });
+        }
+
+        return {imageDataUri: media.url};
+    } catch (error: any) {
+        console.error("AI Image Generation Error:", error.message);
+        // Check for specific billing error from Imagen
+        if (error.message && error.message.includes("Imagen API is only accessible to billed users at this time")) {
+            throw new Error("The image generation model requires a billed Google Cloud account. Please set up billing to use this feature.");
+        }
+        // Throw a generic error for other issues
+        throw new Error(error.message || "An unexpected error occurred during image generation.");
     }
-    
-    const adminDb = getAdminDb();
-    if (adminDb) {
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7);
-
-      // Convert data URI to buffer
-      const base64Data = media.url.split(',')[1];
-      const imageBuffer = Buffer.from(base64Data, 'base64');
-      
-      // Upload to Firebase Storage
-      const bucket = getStorage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
-      const fileName = `userMedia/${userId}/ai-generated/${Date.now()}.png`;
-      const file = bucket.file(fileName);
-
-      await file.save(imageBuffer, {
-        metadata: {
-          contentType: 'image/png',
-        },
-      });
-
-      // Get the public URL
-      const publicUrl = await file.getSignedUrl({
-          action: 'read',
-          expires: expiresAt,
-      });
-
-      await adminDb.collection('userMedia').add({
-          userId,
-          type: 'ai-generated',
-          mediaUrl: publicUrl[0], // getSignedUrl returns an array with one element
-          prompt: promptText,
-          createdAt: FieldValue.serverTimestamp(),
-          expiresAt: expiresAt,
-      });
-    }
-
-    return {imageDataUri: media.url};
   }
 );
 
