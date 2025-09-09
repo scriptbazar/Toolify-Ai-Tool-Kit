@@ -15,6 +15,7 @@ import {
     type SaveMediaInput,
     type UserMedia
 } from './ai-image-generator.types';
+import { z } from 'zod';
 
 
 // Define a Zod schema for the output of the image generation flow.
