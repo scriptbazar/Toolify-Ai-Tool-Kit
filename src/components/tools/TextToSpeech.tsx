@@ -14,10 +14,7 @@ import { cn } from '@/lib/utils';
 
 const voices = [
   { value: 'Algenib', label: 'Female Voice 1', gender: 'Female' },
-  { value: 'Muscida', label: 'Female Voice 2', gender: 'Female' },
   { value: 'Achernar', label: 'Male Voice 1', gender: 'Male' },
-  { value: 'Enif', label: 'Male Voice 2', gender: 'Male' },
-  { value: 'Hadar', label: 'Male Voice 3', gender: 'Male' },
 ];
 
 
@@ -34,7 +31,7 @@ export function TextToSpeech() {
   
   useEffect(() => {
     // When gender changes, reset the selected voice to the first one in the new list
-    const firstVoiceOfGender = filteredVoices[0]?.value;
+    const firstVoiceOfGender = voices.find(v => v.gender === selectedGender)?.value;
     if (firstVoiceOfGender) {
         setSelectedVoice(firstVoiceOfGender);
     }
