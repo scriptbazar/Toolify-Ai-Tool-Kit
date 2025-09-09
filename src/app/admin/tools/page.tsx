@@ -49,17 +49,20 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const ITEMS_PER_PAGE = 10;
 
-export default function AdminToolsPage() {
+export default function AdminToolsPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const [allTools, setAllTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
 
-  const searchQuery = searchParams.get('q') || '';
-  const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
-  const activeFilter = searchParams.get('filter') || 'all';
-  const page = Number(searchParams.get('page')) || 1;
+  const searchQuery = (searchParams?.q as string) || '';
+  const activeCategory = (searchParams?.category as ToolCategory) || 'all';
+  const activeFilter = (searchParams?.filter as string) || 'all';
+  const page = Number(searchParams?.page) || 1;
 
    useEffect(() => {
     async function fetchTools() {
@@ -128,30 +131,30 @@ export default function AdminToolsPage() {
   };
   
   const createQueryString = (params: Record<string, string | number | null>) => {
-    const newSearchParams = new URLSearchParams(searchParams.toString());
+    const currentParams = new URLSearchParams(window.location.search);
     for (const [key, value] of Object.entries(params)) {
       if (value === null || value === '') {
-        newSearchParams.delete(key);
+        currentParams.delete(key);
       } else {
-        newSearchParams.set(key, String(value));
+        currentParams.set(key, String(value));
       }
     }
-    return newSearchParams.toString();
+    return currentParams.toString();
   };
   
   const handleCategoryChange = (value: string) => {
-    router.push(`?${createQueryString({ category: value, page: '1' })}`);
+    router.push(`/admin/tools?${createQueryString({ category: value, page: '1' })}`);
   };
   
   const handleFilterChange = (value: string) => {
-    router.push(`?${createQueryString({ filter: value, page: '1' })}`);
+    router.push(`/admin/tools?${createQueryString({ filter: value, page: '1' })}`);
   };
   
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const newSearchQuery = formData.get('q') as string;
-    router.push(`?${createQueryString({ q: newSearchQuery, page: '1' })}`);
+    router.push(`/admin/tools?${createQueryString({ q: newSearchQuery, page: '1' })}`);
   };
 
   const tabs: { id: string; label: string; icon: React.ElementType, count: number }[] = [
@@ -301,13 +304,13 @@ export default function AdminToolsPage() {
           
            {totalPages > 1 && (
             <div className="flex items-center justify-end space-x-2 pt-4">
-              <Button variant="outline" size="sm" onClick={() => router.push(`?${createQueryString({ page: page - 1 })}`)} disabled={page <= 1}>
+              <Button variant="outline" size="sm" onClick={() => router.push(`/admin/tools?${createQueryString({ page: page - 1 })}`)} disabled={page <= 1}>
                   <ArrowLeft className="mr-2 h-4 w-4" /> Previous
               </Button>
               <span className="text-sm text-muted-foreground">
                 Page {page} of {totalPages}
               </span>
-              <Button variant="outline" size="sm" onClick={() => router.push(`?${createQueryString({ page: page + 1 })}`)} disabled={page >= totalPages}>
+              <Button variant="outline" size="sm" onClick={() => router.push(`/admin/tools?${createQueryString({ page: page + 1 })}`)} disabled={page >= totalPages}>
                   Next <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
