@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -64,6 +64,15 @@ export function TextToSpeech() {
   }
 
   const filteredVoices = voices.filter(v => v.gender === selectedGender);
+  
+  useEffect(() => {
+    // When gender changes, reset the selected voice to the first one in the new list
+    if (selectedGender === 'Female') {
+      setSelectedVoice('Algenib');
+    } else {
+      setSelectedVoice('Achernar');
+    }
+  }, [selectedGender]);
 
   return (
     <div className="space-y-6">
@@ -81,10 +90,10 @@ export function TextToSpeech() {
           <div className="space-y-2">
             <Label>1. Select Voice Gender</Label>
             <div className="grid grid-cols-2 gap-4">
-                <Button variant={selectedGender === 'Female' ? 'default' : 'outline'} onClick={() => { setSelectedGender('Female'); setSelectedVoice('Algenib'); }}>
+                <Button variant={selectedGender === 'Female' ? 'default' : 'outline'} onClick={() => setSelectedGender('Female')}>
                     <User className="mr-2 h-5 w-5"/> Female
                 </Button>
-                <Button variant={selectedGender === 'Male' ? 'default' : 'outline'} onClick={() => { setSelectedGender('Male'); setSelectedVoice('Achernar'); }}>
+                <Button variant={selectedGender === 'Male' ? 'default' : 'outline'} onClick={() => setSelectedGender('Male')}>
                     <UserCog className="mr-2 h-5 w-5"/> Male
                 </Button>
             </div>
