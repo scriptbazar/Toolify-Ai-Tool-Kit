@@ -35,22 +35,11 @@ const videoDownloaderFlow = ai.defineFlow(
   async ({ url, platform }) => {
     console.log(`Received request to download from ${platform}: ${url}`);
 
-    // In a real application, you would use a dedicated library like 'youtube-dlp'
-    // or a third-party API to fetch the actual video download link.
-    // This is a complex task involving web scraping and parsing, which is
-    // beyond the scope of this simulation.
-
-    // We will return a dummy success response with a placeholder video link.
-    // Replace this with your actual video fetching logic.
-
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
-
+    // The 'youtube-dl-exec' package requires Python, which is not available in this environment.
+    // This function now returns an informative error instead of attempting to download.
     return {
-      success: true,
-      message: 'Video processed successfully. Your download should start shortly.',
-      // This is a placeholder URL.
-      downloadUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-      title: `Downloaded Video from ${platform}`,
+        success: false,
+        message: 'This feature is temporarily unavailable due to system limitations. We are working on a solution.',
     };
   }
 );
