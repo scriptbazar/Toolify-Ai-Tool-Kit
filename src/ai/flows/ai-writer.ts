@@ -39,15 +39,15 @@ Tone of Voice: {{{tone}}}
 
 Instructions:
 1.  **Title:** Create a compelling and SEO-friendly \`<h1>\` title for the blog post that reflects the topic and tone.
-2.  **Introduction:** Write a captivating introductory paragraph that hooks the reader and briefly explains what the post is about, keeping the chosen tone in mind.
+2.  **Introduction:** Write a captivating introductory paragraph that hooks the reader and briefly explains what the post is about, keeping the chosen tone in mind. Use a single \`<p>\` tag for the introduction.
 3.  **Body:**
     *   Structure the main content with multiple sections using \`<h2>\` headings for each key point.
-    *   Write detailed, informative, and easy-to-read paragraphs (\`<p>\` tags).
+    *   Write detailed, informative, and easy-to-read paragraphs using \`<p>\` tags for each paragraph.
     *   Use bullet points (\`<ul><li>...\`</li></ul>\`) for lists where appropriate to improve readability.
     *   Ensure the content length aligns with the user's "Desired Length" request.
-4.  **Conclusion:** End with a strong concluding paragraph that summarizes the main points and provides a final thought or call-to-action consistent with the post's tone.
+4.  **Conclusion:** End with a strong concluding paragraph that summarizes the main points and provides a final thought or call-to-action consistent with the post's tone. Use a single \`<p>\` tag for the conclusion.
 
-Ensure the entire output is a single HTML block, starting with \`<h1>\` and ending with the final \`</p>\`. Do not include \`<html>\` or \`<body>\` tags.`,
+Ensure the entire output is a single HTML block, starting with \`<h1>\` and ending with the final \`</p>\`. Do not include \`<html>\` or \`<body>\` tags. Do not add extra line breaks like <br> between paragraphs.`,
 });
 
 const aiWriterFlow = ai.defineFlow(
