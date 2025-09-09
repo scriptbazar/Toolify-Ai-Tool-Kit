@@ -90,6 +90,8 @@ import { YoutubeVideoDownloader } from '@/components/tools/YoutubeVideoDownloade
 import { XVideoDownloader } from '@/components/tools/XVideoDownloader';
 import { InstagramVideoDownloader } from '@/components/tools/InstagramVideoDownloader';
 import { ThreadsVideoDownloader } from '@/components/tools/ThreadsVideoDownloader';
+import { LinkedinVideoDownloader } from '@/components/tools/LinkedinVideoDownloader';
+import { PinterestVideoDownloader } from '@/components/tools/PinterestVideoDownloader';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -176,6 +178,8 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'x-video-downloader': XVideoDownloader,
   'instagram-video-downloader': InstagramVideoDownloader,
   'threads-video-downloader': ThreadsVideoDownloader,
+  'linkedin-video-downloader': LinkedinVideoDownloader,
+  'pinterest-video-downloader': PinterestVideoDownloader,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
