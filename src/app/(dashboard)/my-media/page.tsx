@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bot, MessageSquare, Image as ImageIcon, AlertCircle, Ticket } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Image from 'next/image';
-import { getUserMedia, type UserMedia } from '@/ai/flows/ai-image-generator';
+import { getUserMedia } from '@/ai/flows/ai-image-generator';
+import { type UserMedia } from '@/ai/flows/ai-image-generator.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 
