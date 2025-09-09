@@ -33,6 +33,7 @@ const MediaCard = ({ src, alt, onDownload }: { src: string, alt: string, onDownl
 export function AiImageGenerator() {
   const [prompt, setPrompt] = useState('');
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [generatedDescription, setGeneratedDescription] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMedia, setLoadingMedia] = useState(true);
   const [user, setUser] = useState<User | null>(null);
@@ -80,15 +81,17 @@ export function AiImageGenerator() {
     }
     setIsLoading(true);
     setGeneratedImage(null);
+    setGeneratedDescription(null);
     try {
       const result = await generateImage({ promptText: prompt, userId: user.uid });
       setGeneratedImage(result.imageDataUri);
+      setGeneratedDescription(result.generatedDescription || null);
       // Refresh media gallery after generation
       fetchUserMedia(user.uid);
     } catch (error: any) {
       toast({
         title: 'Generation Failed',
-        description: error.message || 'Could not generate the image.',
+        description: error.message || 'Could not generate the image description.',
         variant: 'destructive',
       });
     } finally {
@@ -122,27 +125,33 @@ export function AiImageGenerator() {
 
       <Button onClick={handleGenerate} disabled={isLoading} className="w-full">
         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-        Generate Image
+        Generate Image Description
       </Button>
 
         <div className="pt-4 border-t">
           {(isLoading || generatedImage) && (
               <Card>
                  <CardHeader><CardTitle>Generated Image</CardTitle></CardHeader>
-                 <CardContent className="flex justify-center items-center">
+                 <CardContent className="flex flex-col md:flex-row gap-4 justify-center items-center">
                     {isLoading ? (
                         <div className="w-full h-64 flex flex-col items-center justify-center bg-muted rounded-md">
                             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-2"/>
                             <p className="text-muted-foreground">Generating your image...</p>
                         </div>
                     ) : generatedImage && (
-                        <div className="relative group">
+                        <div className="relative group w-full md:w-1/2">
                             <Image src={generatedImage} alt={prompt} width={512} height={512} className="rounded-md" />
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <Button onClick={() => handleDownload(generatedImage, `generated_${Date.now()}.svg`)}>
+                                <Button onClick={() => handleDownload(generatedImage, `placeholder_${Date.now()}.png`)}>
                                     <Download className="mr-2 h-4 w-4" /> Download
                                 </Button>
                             </div>
+                        </div>
+                    )}
+                    {generatedDescription && (
+                        <div className="w-full md:w-1/2 p-4 bg-muted rounded-md">
+                           <h4 className="font-semibold mb-2">AI Generated Description:</h4>
+                           <p className="text-sm text-muted-foreground italic">"{generatedDescription}"</p>
                         </div>
                     )}
                  </CardContent>
@@ -165,7 +174,7 @@ export function AiImageGenerator() {
                                     key={item.id} 
                                     src={item.mediaUrl} 
                                     alt={item.prompt || 'AI generated image'}
-                                    onDownload={() => handleDownload(item.mediaUrl, `${item.prompt?.substring(0, 20) || 'image'}.svg`)}
+                                    onDownload={() => handleDownload(item.mediaUrl, `placeholder_${item.id}.png`)}
                                 />
                             ))}
                         </div>

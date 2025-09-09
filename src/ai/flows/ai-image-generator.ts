@@ -33,46 +33,34 @@ const generateImageFlow = ai.defineFlow(
   async ({ promptText, userId }) => {
     try {
         const { text } = await ai.generate({
-            model: 'googleai/imagen-4.0-fast-generate-001',
-            prompt: `Generate a high-quality, clean, and visually appealing vector-style SVG image based on the following prompt: "${promptText}". 
-            The image should have a modern aesthetic with a balanced color palette.
-            - The SVG must be self-contained and not link to external resources.
-            - Ensure the SVG has a viewBox attribute and appropriate dimensions (e.g., width="512" height="512").
-            - The background should be transparent or a simple, non-intrusive color.
-            - Provide only the raw <svg>...</svg> code as the response, without any explanation, preamble, or markdown formatting like \`\`\`svg.`,
+            model: 'googleai/gemini-1.5-flash-latest',
+            prompt: `Based on the following user prompt, generate a detailed, vivid, and artistic description of an image. The description should be in English.
+
+User's Prompt: "${promptText}"
+
+Generated Description:`,
         });
 
         if (!text) {
-            throw new Error('No SVG code was generated. The model may have failed to produce an output.');
+            throw new Error('No description was generated. The model may have failed to produce an output.');
         }
 
-        // Sanitize the output to get only the SVG code.
-        const svgMatch = text.match(/<svg.*<\/svg>/s);
-        const svgCode = svgMatch ? svgMatch[0] : '';
-
-        if (!svgCode) {
-            throw new Error('Could not find valid SVG code in the model\'s response.');
-        }
-
-        const base64Svg = Buffer.from(svgCode).toString('base64');
-        const imageDataUri = `data:image/svg+xml;base64,${base64Svg}`;
-
-        // Save the generated image data to the user's media library in Firestore
+        // Instead of generating an image, we now return the description.
+        // The frontend will use a placeholder image and display this description.
+        const imageDataUri = `https://picsum.photos/512/512?random=${Date.now()}`;
+        
         await saveUserMedia({
             userId,
             type: 'ai-generated',
-            mediaUrl: imageDataUri, // Store the data URI directly
-            prompt: promptText,
+            mediaUrl: imageDataUri,
+            prompt: text, // Save the generated description as the prompt
         });
         
-        return { imageDataUri };
+        return { imageDataUri, generatedDescription: text };
+
     } catch (error: any) {
-        console.error("AI Image Generation Error:", error);
-        // Provide a more user-friendly error for billing issues.
-        if (error.message && error.message.includes('billed users')) {
-             throw new Error("The image generation model requires a billed Google Cloud account. Please upgrade your account to use this feature.");
-        }
-        throw new Error(error.message || "An unexpected error occurred during image generation.");
+        console.error("AI Description Generation Error:", error);
+        throw new Error(error.message || "An unexpected error occurred during description generation.");
     }
   }
 );
