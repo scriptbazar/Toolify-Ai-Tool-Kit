@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -41,6 +42,7 @@ import {
   PlusCircle,
   Loader2,
   Construction,
+  GitCommitVertical,
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -93,6 +95,7 @@ export default function AdminToolsPage({
     disabled: allTools.filter(t => t.status === 'Disabled').length,
     maintenance: allTools.filter(t => t.status === 'Maintenance').length,
     comingSoon: allTools.filter(t => t.status === 'Coming Soon').length,
+    newVersion: allTools.filter(t => t.status === 'New Version').length,
   }), [allTools]);
 
   const filteredTools = useMemo(() => {
@@ -106,6 +109,7 @@ export default function AdminToolsPage({
       if (activeFilter === 'disabled') return tool.status === 'Disabled';
       if (activeFilter === 'maintenance') return tool.status === 'Maintenance';
       if (activeFilter === 'comingSoon') return tool.status === 'Coming Soon';
+      if (activeFilter === 'newVersion') return tool.status === 'New Version';
       return true;
     })
     .filter(tool => {
@@ -163,9 +167,10 @@ export default function AdminToolsPage({
     { id: 'free', label: 'Free', icon: Package, count: counts.free },
     { id: 'new', label: 'New', icon: Sparkles, count: counts.new },
     { id: 'active', label: 'Active', icon: CheckCircle, count: counts.active },
-    { id: 'disabled', label: 'Disabled', icon: XCircle, count: counts.disabled },
-    { id: 'maintenance', label: 'Maintenance', icon: Construction, count: counts.maintenance },
+    { id: 'newVersion', label: 'New Version', icon: GitCommitVertical, count: counts.newVersion },
     { id: 'comingSoon', label: 'Coming Soon', icon: Sparkles, count: counts.comingSoon },
+    { id: 'maintenance', label: 'Maintenance', icon: Construction, count: counts.maintenance },
+    { id: 'disabled', label: 'Disabled', icon: XCircle, count: counts.disabled },
   ];
   
   const getStatusBadge = (status: Tool['status']) => {
@@ -174,6 +179,7 @@ export default function AdminToolsPage({
         case 'Disabled': return <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3"/>Disabled</Badge>;
         case 'Maintenance': return <Badge className="bg-yellow-500 hover:bg-yellow-600"><Construction className="mr-1 h-3 w-3"/>Maintenance</Badge>;
         case 'Coming Soon': return <Badge className="bg-blue-500 hover:bg-blue-600"><Sparkles className="mr-1 h-3 w-3"/>Coming Soon</Badge>;
+        case 'New Version': return <Badge className="bg-green-500 hover:bg-green-600"><GitCommitVertical className="mr-1 h-3 w-3"/>New Version</Badge>;
         default: return <Badge variant="outline">{status}</Badge>;
     }
   }

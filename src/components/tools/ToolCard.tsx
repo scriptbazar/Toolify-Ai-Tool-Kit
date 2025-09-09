@@ -17,6 +17,8 @@ const getStatusBadge = (status: Tool['status']) => {
             return <Badge className="absolute top-2 right-2 bg-yellow-500 hover:bg-yellow-600">Maintenance</Badge>;
         case 'Coming Soon':
             return <Badge className="absolute top-2 right-2 bg-blue-500 hover:bg-blue-600">Coming Soon</Badge>;
+        case 'New Version':
+            return <Badge className="absolute top-2 right-2 bg-green-500 hover:bg-green-600">New Version</Badge>;
         default:
             return null;
     }

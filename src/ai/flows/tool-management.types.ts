@@ -13,7 +13,7 @@ export const ToolSchema = z.object({
   category: ToolCategorySchema,
   plan: z.enum(['Free', 'Pro']).default('Free'),
   isNew: z.boolean().default(false),
-  status: z.enum(['Active', 'Disabled', 'Maintenance', 'Coming Soon']).default('Active'),
+  status: z.enum(['Active', 'Disabled', 'Maintenance', 'Coming Soon', 'New Version']).default('Active'),
   createdAt: z.string().datetime({ offset: true }),
 });
 export type Tool = z.infer<typeof ToolSchema>;
