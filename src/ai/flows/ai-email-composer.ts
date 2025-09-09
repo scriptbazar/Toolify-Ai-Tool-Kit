@@ -31,6 +31,7 @@ const prompt = ai.definePrompt({
   input: {schema: AiEmailComposerInputSchema},
   output: {schema: AiEmailComposerOutputSchema},
   prompt: `You are an expert email copywriter. Your task is to write a clear, concise, and effective email based on the provided information.
+The email should sound like it was written by a human admin, not an AI.
 
 Subject: {{{subject}}}
 
