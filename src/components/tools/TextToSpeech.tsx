@@ -11,16 +11,15 @@ import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { Card, CardContent } from '../ui/card';
 import { cn } from '@/lib/utils';
 
-
 const voices = [
-  { value: 'Algenib', label: 'Female Voice 1', gender: 'Female' },
-  { value: 'Achernar', label: 'Male Voice 1', gender: 'Male' },
+  { value: 'Algenib', label: 'Male Voice 1', gender: 'Male' },
+  { value: 'Achernar', label: 'Female Voice 1', gender: 'Female' },
 ];
 
 
 export function TextToSpeech() {
   const [text, setText] = useState('');
-  const [selectedGender, setSelectedGender] = useState<'Female' | 'Male'>('Female');
+  const [selectedGender, setSelectedGender] = useState<'Female' | 'Male'>('Male');
   const [selectedVoice, setSelectedVoice] = useState('Algenib');
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -85,11 +84,11 @@ export function TextToSpeech() {
           <div className="space-y-2">
             <Label>1. Select Voice Gender</Label>
             <div className="grid grid-cols-2 gap-4">
-                <Button variant={selectedGender === 'Female' ? 'default' : 'outline'} onClick={() => setSelectedGender('Female')}>
-                    <User className="mr-2 h-5 w-5"/> Female
-                </Button>
                 <Button variant={selectedGender === 'Male' ? 'default' : 'outline'} onClick={() => setSelectedGender('Male')}>
                     <UserCog className="mr-2 h-5 w-5"/> Male
+                </Button>
+                <Button variant={selectedGender === 'Female' ? 'default' : 'outline'} onClick={() => setSelectedGender('Female')}>
+                    <User className="mr-2 h-5 w-5"/> Female
                 </Button>
             </div>
           </div>
