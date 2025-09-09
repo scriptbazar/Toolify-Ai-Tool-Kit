@@ -54,12 +54,14 @@ const generateImageFlow = ai.defineFlow(
   async ({ promptText, userId }) => {
     try {
         const {media} = await ai.generate({
-        model: 'googleai/imagen-4.0-fast-generate-001',
-        prompt: promptText,
+        // Using a vision model which is generally available on free tiers.
+        // It's not a dedicated image generator like Imagen, but can produce images.
+        model: 'googleai/gemini-pro-vision', 
+        prompt: `Draw a picture of: ${promptText}`,
         });
 
         if (!media || !media.url) {
-        throw new Error('No image was generated.');
+        throw new Error('No image was generated. The vision model may not have understood the request as an image generation task.');
         }
         
         const adminDb = getAdminDb();
@@ -101,10 +103,6 @@ const generateImageFlow = ai.defineFlow(
         return {imageDataUri: media.url};
     } catch (error: any) {
         console.error("AI Image Generation Error:", error.message);
-        // Check for specific billing error from Imagen
-        if (error.message && error.message.includes("Imagen API is only accessible to billed users at this time")) {
-            throw new Error("The image generation model requires a billed Google Cloud account. Please set up billing to use this feature.");
-        }
         // Throw a generic error for other issues
         throw new Error(error.message || "An unexpected error occurred during image generation.");
     }
