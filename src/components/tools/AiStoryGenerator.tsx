@@ -70,7 +70,29 @@ export function AiStoryGenerator() {
 
   return (
     <div className="space-y-6">
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+         <div className="space-y-2">
+            <Label htmlFor="topic-input">Story Topic / Prompt</Label>
+            <Input
+              id="topic-input"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="e.g., A detective who can talk to ghosts"
+            />
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="language-select">Language</Label>
+            <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger id="language-select">
+                    <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                    {languages.map(lang => (
+                        <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
         <div className="space-y-2">
             <Label htmlFor="genre-select">Genre</Label>
             <Select value={genre} onValueChange={setGenre}>
@@ -88,31 +110,8 @@ export function AiStoryGenerator() {
               </SelectContent>
             </Select>
         </div>
-        <div className="space-y-2">
-            <Label htmlFor="topic-input">Story Topic / Prompt</Label>
-            <Input
-              id="topic-input"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g., A detective who can talk to ghosts"
-            />
-        </div>
       </div>
       
-       <div className="space-y-2">
-            <Label htmlFor="language-select">Language</Label>
-            <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger id="language-select">
-                    <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent>
-                    {languages.map(lang => (
-                        <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-        </div>
-
       <Button onClick={handleGenerate} disabled={isLoading} className="w-full">
         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
         Generate Story
