@@ -16,16 +16,17 @@ import { useToast } from '@/hooks/use-toast';
 import { getTools, upsertTool, deleteTool } from '@/ai/flows/tool-management';
 import { UpsertToolInputSchema, type Tool, type ToolCategory } from '@/ai/flows/tool-management.types';
 import { toolCategories } from '@/lib/constants';
-import { Loader2, Save, ArrowLeft, Trash2, Package, CheckCircle, XCircle, Star, Sparkles } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, Trash2, Package, CheckCircle, XCircle, Star, Sparkles, Construction } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import * as Icons from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 
 const EditToolFormSchema = UpsertToolInputSchema.extend({
     isNew: z.boolean().default(false),
-    status: z.enum(['Active', 'Disabled']).default('Active'),
+    status: z.enum(['Active', 'Disabled', 'Maintenance', 'Coming Soon']).default('Active'),
 });
 
 type EditToolFormValues = z.infer<typeof EditToolFormSchema>;
@@ -219,31 +220,21 @@ export default function EditToolPage() {
                         <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <FormField control={form.control} name="plan" render={({ field }) => (
                                 <FormItem><FormLabel className="mb-2 block">Plan</FormLabel>
-                                    <div className="flex items-center gap-2 rounded-lg border p-2">
-                                        <Package className="h-5 w-5" />
-                                        <div className="flex-1"><FormLabel>Free</FormLabel><p className="text-xs text-muted-foreground">Accessible to all users.</p></div>
-                                        <FormControl><input type="radio" {...field} value="Free" checked={field.value === 'Free'} className="accent-primary w-4 h-4" /></FormControl>
-                                    </div>
-                                    <div className="flex items-center gap-2 rounded-lg border p-2">
-                                        <Star className="h-5 w-5 text-yellow-500" />
-                                        <div className="flex-1"><FormLabel>Pro</FormLabel><p className="text-xs text-muted-foreground">Requires a subscription.</p></div>
-                                        <FormControl><input type="radio" {...field} value="Pro" checked={field.value === 'Pro'} className="accent-primary w-4 h-4" /></FormControl>
-                                    </div>
+                                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="space-y-2">
+                                        <Label htmlFor="plan-free" className="flex items-center gap-2 rounded-lg border p-2 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><RadioGroupItem value="Free" id="plan-free" /><Package className="h-5 w-5" /><div className="flex-1"><p>Free</p><p className="text-xs text-muted-foreground">Accessible to all users.</p></div></Label>
+                                        <Label htmlFor="plan-pro" className="flex items-center gap-2 rounded-lg border p-2 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><RadioGroupItem value="Pro" id="plan-pro" /><Star className="h-5 w-5 text-yellow-500" /><div className="flex-1"><p>Pro</p><p className="text-xs text-muted-foreground">Requires a subscription.</p></div></Label>
+                                    </RadioGroup>
                                     <FormMessage />
                                 </FormItem>
                             )} />
-                            <FormField control={form.control} name="status" render={({ field }) => (
+                           <FormField control={form.control} name="status" render={({ field }) => (
                                 <FormItem><FormLabel className="mb-2 block">Status</FormLabel>
-                                    <div className="flex items-center gap-2 rounded-lg border p-2">
-                                        <CheckCircle className="h-5 w-5 text-green-500" />
-                                        <div className="flex-1"><FormLabel>Active</FormLabel><p className="text-xs text-muted-foreground">Visible and usable by users.</p></div>
-                                        <FormControl><input type="radio" {...field} value="Active" checked={field.value === 'Active'} className="accent-primary w-4 h-4" /></FormControl>
-                                    </div>
-                                    <div className="flex items-center gap-2 rounded-lg border p-2">
-                                        <XCircle className="h-5 w-5 text-red-500" />
-                                        <div className="flex-1"><FormLabel>Disabled</FormLabel><p className="text-xs text-muted-foreground">Hidden from all users.</p></div>
-                                        <FormControl><input type="radio" {...field} value="Disabled" checked={field.value === 'Disabled'} className="accent-primary w-4 h-4" /></FormControl>
-                                    </div>
+                                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="space-y-2">
+                                        <Label htmlFor="status-active" className="flex items-center gap-2 rounded-lg border p-2 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><RadioGroupItem value="Active" id="status-active" /><CheckCircle className="h-5 w-5 text-green-500" /><div className="flex-1"><p>Active</p><p className="text-xs text-muted-foreground">Visible to users.</p></div></Label>
+                                        <Label htmlFor="status-disabled" className="flex items-center gap-2 rounded-lg border p-2 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><RadioGroupItem value="Disabled" id="status-disabled" /><XCircle className="h-5 w-5 text-red-500" /><div className="flex-1"><p>Disabled</p><p className="text-xs text-muted-foreground">Hidden from users.</p></div></Label>
+                                        <Label htmlFor="status-maintenance" className="flex items-center gap-2 rounded-lg border p-2 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><RadioGroupItem value="Maintenance" id="status-maintenance" /><Construction className="h-5 w-5 text-yellow-500" /><div className="flex-1"><p>Maintenance</p><p className="text-xs text-muted-foreground">Show maintenance page.</p></div></Label>
+                                        <Label htmlFor="status-coming-soon" className="flex items-center gap-2 rounded-lg border p-2 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><RadioGroupItem value="Coming Soon" id="status-coming-soon" /><Sparkles className="h-5 w-5 text-blue-500" /><div className="flex-1"><p>Coming Soon</p><p className="text-xs text-muted-foreground">Show coming soon page.</p></div></Label>
+                                    </RadioGroup>
                                     <FormMessage />
                                 </FormItem>
                             )} />

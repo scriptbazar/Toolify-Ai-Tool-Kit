@@ -40,6 +40,7 @@ import {
   Star,
   PlusCircle,
   Loader2,
+  Construction,
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -87,6 +88,8 @@ export default function AdminToolsPage() {
     new: allTools.filter(t => t.isNew).length,
     active: allTools.filter(t => t.status === 'Active').length,
     disabled: allTools.filter(t => t.status === 'Disabled').length,
+    maintenance: allTools.filter(t => t.status === 'Maintenance').length,
+    comingSoon: allTools.filter(t => t.status === 'Coming Soon').length,
   }), [allTools]);
 
   const filteredTools = useMemo(() => {
@@ -98,6 +101,8 @@ export default function AdminToolsPage() {
       if (activeFilter === 'new') return tool.isNew;
       if (activeFilter === 'active') return tool.status === 'Active';
       if (activeFilter === 'disabled') return tool.status === 'Disabled';
+      if (activeFilter === 'maintenance') return tool.status === 'Maintenance';
+      if (activeFilter === 'comingSoon') return tool.status === 'Coming Soon';
       return true;
     })
     .filter(tool => {
@@ -156,7 +161,19 @@ export default function AdminToolsPage() {
     { id: 'new', label: 'New', icon: Sparkles, count: counts.new },
     { id: 'active', label: 'Active', icon: CheckCircle, count: counts.active },
     { id: 'disabled', label: 'Disabled', icon: XCircle, count: counts.disabled },
+    { id: 'maintenance', label: 'Maintenance', icon: Construction, count: counts.maintenance },
+    { id: 'comingSoon', label: 'Coming Soon', icon: Sparkles, count: counts.comingSoon },
   ];
+  
+  const getStatusBadge = (status: Tool['status']) => {
+    switch (status) {
+        case 'Active': return <Badge className="bg-green-500 hover:bg-green-600"><CheckCircle className="mr-1 h-3 w-3"/>Active</Badge>;
+        case 'Disabled': return <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3"/>Disabled</Badge>;
+        case 'Maintenance': return <Badge className="bg-yellow-500 hover:bg-yellow-600"><Construction className="mr-1 h-3 w-3"/>Maintenance</Badge>;
+        case 'Coming Soon': return <Badge className="bg-blue-500 hover:bg-blue-600"><Sparkles className="mr-1 h-3 w-3"/>Coming Soon</Badge>;
+        default: return <Badge variant="outline">{status}</Badge>;
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -259,7 +276,7 @@ export default function AdminToolsPage() {
                         <Badge variant={tool.plan === 'Pro' ? 'secondary' : 'outline'}>{tool.plan}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={tool.status === 'Active' ? 'default' : 'destructive'} className={cn(tool.status === 'Active' && 'bg-green-500 hover:bg-green-600')}>{tool.status}</Badge>
+                        {getStatusBadge(tool.status)}
                       </TableCell>
                       <TableCell className="text-right">
                          <Button asChild variant="outline" size="sm">
