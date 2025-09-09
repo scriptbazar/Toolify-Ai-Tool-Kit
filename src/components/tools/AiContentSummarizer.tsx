@@ -48,7 +48,10 @@ export function AiContentSummarizer() {
         toast({ title: 'Nothing to copy!', variant: 'destructive'});
         return;
     }
-    navigator.clipboard.writeText(generatedSummary);
+    // To copy the text content from HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = generatedSummary;
+    navigator.clipboard.writeText(tempDiv.textContent || tempDiv.innerText || "");
     toast({ title: 'Summary copied to clipboard!'});
   };
 
@@ -58,28 +61,28 @@ export function AiContentSummarizer() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="space-y-4">
-          <div className="space-y-2">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div className="space-y-4 flex flex-col h-full">
+          <div className="space-y-2 flex-grow flex flex-col">
             <Label htmlFor="text-to-summarize">Text to Summarize</Label>
             <Textarea
               id="text-to-summarize"
               value={textToSummarize}
               onChange={(e) => setTextToSummarize(e.target.value)}
               placeholder="Paste your long article, document, or text here..."
-              className="min-h-[300px] resize-y"
+              className="flex-grow resize-y"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="summary-length">Summary Length</Label>
+            <Label htmlFor="summary-length">Summary Format</Label>
             <Select value={summaryLength} onValueChange={setSummaryLength}>
                 <SelectTrigger id="summary-length">
-                    <SelectValue placeholder="Select length" />
+                    <SelectValue placeholder="Select format" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="Short">Short</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="Detailed">Detailed</SelectItem>
+                    <SelectItem value="Short">Short Paragraph</SelectItem>
+                    <SelectItem value="Medium">Key Bullet Points</SelectItem>
+                    <SelectItem value="Detailed">Detailed Summary</SelectItem>
                 </SelectContent>
             </Select>
           </div>
@@ -94,13 +97,13 @@ export function AiContentSummarizer() {
 
       <div className="space-y-2">
         <Label>Generated Summary</Label>
-        <Card className="h-full min-h-[400px]">
+        <Card className="min-h-[440px]">
             <CardHeader className="p-4">
                 <div className="flex justify-between items-center">
                     <CardTitle className="text-base">Summary</CardTitle>
                     <Button variant="outline" size="sm" onClick={handleCopy} disabled={!generatedSummary}>
                         <Copy className="mr-2 h-4 w-4"/>
-                        Copy
+                        Copy Text
                     </Button>
                 </div>
             </CardHeader>
@@ -115,7 +118,7 @@ export function AiContentSummarizer() {
                 ) : (
                     <div
                         className="prose dark:prose-invert max-w-none text-sm"
-                        dangerouslySetInnerHTML={{ __html: generatedSummary.replace(/\n/g, '<br />') }}
+                        dangerouslySetInnerHTML={{ __html: generatedSummary }}
                     />
                 )}
             </CardContent>
