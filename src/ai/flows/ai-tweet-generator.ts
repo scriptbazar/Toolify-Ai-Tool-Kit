@@ -30,11 +30,12 @@ Topic: "{{{topic}}}"
 Tone: {{{tone}}}
 
 Instructions:
-1.  Craft a tweet that is under 280 characters.
+1.  Craft a tweet that is under 280 characters but makes good use of the space. It should be substantial and not too short.
 2.  The tweet should be engaging and relevant to the topic.
-3.  Include 2-3 relevant and popular hashtags.
-4.  Ensure the tweet matches the selected tone.
-5.  Generate only the tweet text.
+3.  Include 2-3 relevant and popular hashtags to maximize reach.
+4.  Where appropriate, end with a question to encourage replies and engagement.
+5.  Ensure the tweet matches the selected tone.
+6.  Generate only the tweet text.
 `,
 });
 
