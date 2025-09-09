@@ -189,7 +189,6 @@ const generateTargetKeywordsFlow = ai.defineFlow({
 // New flow for Product Description
 const GenerateProductDescriptionInputSchema = z.object({
   productName: z.string().describe('The name of the product.'),
-  keyFeatures: z.string().describe('A list of key features, one per line.'),
   targetAudience: z.string().describe('The intended customer for this product (e.g., students, developers, busy moms).'),
   tone: z.enum(['Persuasive', 'Playful', 'Professional', 'Luxury']).describe('The desired tone for the description.'),
   format: z.enum(['Paragraph with Bullets', 'Paragraph Only', 'Bulleted List Only']).describe('The desired format for the description.'),
@@ -212,12 +211,10 @@ const productDescriptionPrompt = ai.definePrompt({
   output: { schema: GenerateProductDescriptionOutputSchema },
   prompt: `You are an expert e-commerce copywriter and SEO specialist. Your task is to write a compelling, persuasive, and benefit-oriented product description in HTML format based on the provided details.
 
+First, use your internal knowledge to research the product based on its name to understand its key features and specifications.
+
 Product Name: {{{productName}}}
 Target Audience: {{{targetAudience}}}
-Key Features (one per line):
----
-{{{keyFeatures}}}
----
 Desired Tone: {{{tone}}}
 Desired Format: {{{format}}}
 {{#if targetKeywords}}
@@ -227,7 +224,7 @@ SEO Keywords to include: {{{targetKeywords}}}
 Instructions:
 1.  **Headline:** Start with a catchy and benefit-driven headline for the product, wrapped in an \`<h3>\` tag.
 2.  **Opening:** Write an engaging opening paragraph that connects with the target audience and introduces the product's main value. Wrap this in a \`<p>\` tag.
-3.  **Feature-to-Benefit:** Convert each key feature into a clear benefit for the user. Explain how it solves a problem or improves their life.
+3.  **Feature-to-Benefit:** Based on your research of the product, identify its key features and convert each one into a clear benefit for the user. Explain how it solves a problem or improves their life.
 4.  **Formatting:** Structure the output according to the "Desired Format" using HTML tags:
     *   If "Paragraph with Bullets", write a few paragraphs (\`<p>\` tags) followed by a bulleted list (\`<ul><li>...\`</li></ul>\`) of the key benefits.
     *   If "Paragraph Only", write several detailed paragraphs (\`<p>\` tags).

@@ -14,7 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 export function AiProductDescriptionWriter() {
   const [productName, setProductName] = useState('');
-  const [keyFeatures, setKeyFeatures] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
   const [tone, setTone] = useState('Persuasive');
   const [format, setFormat] = useState('Paragraph with Bullets');
@@ -24,10 +23,10 @@ export function AiProductDescriptionWriter() {
   const { toast } = useToast();
 
   const handleGenerate = async () => {
-    if (!productName.trim() || !keyFeatures.trim()) {
+    if (!productName.trim()) {
       toast({
-        title: 'Fields are required',
-        description: 'Please provide a product name and key features.',
+        title: 'Product Name is required',
+        description: 'Please provide a product name for the AI to search for.',
         variant: 'destructive',
       });
       return;
@@ -37,7 +36,6 @@ export function AiProductDescriptionWriter() {
     try {
       const result = await generateProductDescription({
         productName,
-        keyFeatures,
         targetAudience: targetAudience || 'general consumers',
         tone: tone as any,
         format: format as any,
@@ -76,7 +74,7 @@ export function AiProductDescriptionWriter() {
             id="product-name"
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
-            placeholder="e.g., Smart Mug 2.0"
+            placeholder="e.g., Sony WH-1000XM5 Headphones"
           />
         </div>
         <div className="space-y-2">
@@ -85,7 +83,7 @@ export function AiProductDescriptionWriter() {
             id="target-audience"
             value={targetAudience}
             onChange={(e) => setTargetAudience(e.target.value)}
-            placeholder="e.g., Tech enthusiasts, busy professionals"
+            placeholder="e.g., Tech enthusiasts, audiophiles, frequent travelers"
           />
         </div>
       </div>
@@ -115,26 +113,14 @@ export function AiProductDescriptionWriter() {
             </Select>
           </div>
            <div className="space-y-2">
-              <Label htmlFor="keywords">Target Keywords</Label>
+              <Label htmlFor="keywords">Target Keywords (Optional)</Label>
               <Input
                 id="keywords"
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value)}
-                placeholder="e.g., smart mug, temperature control"
+                placeholder="e.g., noise cancelling, bluetooth headset"
               />
           </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="key-features">Key Features & Benefits</Label>
-        <Textarea
-          id="key-features"
-          value={keyFeatures}
-          onChange={(e) => setKeyFeatures(e.target.value)}
-          placeholder="- Keeps drinks at the perfect temperature&#10;- Controlled via a mobile app&#10;- 3-hour battery life"
-          className="min-h-[150px]"
-        />
-        <p className="text-xs text-muted-foreground">Enter one feature per line.</p>
       </div>
 
       <Button onClick={handleGenerate} disabled={isLoading} className="w-full">
