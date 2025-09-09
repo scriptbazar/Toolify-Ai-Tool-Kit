@@ -7,12 +7,11 @@
 
 import { ai } from '@/ai/genkit';
 import { getAdminDb } from '@/lib/firebase-admin';
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { 
     GenerateImageInputSchema,
     GenerateImageOutputSchema,
     SaveMediaInputSchema,
-    UserMediaSchema,
     type GenerateImageInput,
     type GenerateImageOutput,
     type SaveMediaInput,
@@ -34,8 +33,13 @@ const generateImageFlow = ai.defineFlow(
   async ({ promptText, userId }) => {
     try {
         const { text } = await ai.generate({
-            model: 'googleai/gemini-1.5-flash-latest',
-            prompt: `Generate an SVG code for an image based on the following prompt: "${promptText}". The SVG should be creative, visually appealing, and directly represent the user's request. Do not include any explanation, preamble, or markdown formatting like \`\`\`svg. Just provide the raw <svg>...</svg> code. Ensure the SVG has a viewBox and appropriate dimensions.`,
+            model: 'googleai/imagen-4.0-fast-generate-001',
+            prompt: `Generate a high-quality, clean, and visually appealing vector-style SVG image based on the following prompt: "${promptText}". 
+            The image should have a modern aesthetic with a balanced color palette.
+            - The SVG must be self-contained and not link to external resources.
+            - Ensure the SVG has a viewBox attribute and appropriate dimensions (e.g., width="512" height="512").
+            - The background should be transparent or a simple, non-intrusive color.
+            - Provide only the raw <svg>...</svg> code as the response, without any explanation, preamble, or markdown formatting like \`\`\`svg.`,
         });
 
         if (!text) {
@@ -64,6 +68,10 @@ const generateImageFlow = ai.defineFlow(
         return { imageDataUri };
     } catch (error: any) {
         console.error("AI Image Generation Error:", error);
+        // Provide a more user-friendly error for billing issues.
+        if (error.message && error.message.includes('billed users')) {
+             throw new Error("The image generation model requires a billed Google Cloud account. Please upgrade your account to use this feature.");
+        }
         throw new Error(error.message || "An unexpected error occurred during image generation.");
     }
   }
@@ -126,8 +134,9 @@ export async function getUserMedia(userId: string): Promise<UserMedia[]> {
 
         const mediaList: UserMedia[] = snapshot.docs.map(doc => {
             const data = doc.data();
-            const createdAt = (data.createdAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
-            const expiresAt = (data.expiresAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
+            // Firestore timestamps need to be converted to ISO strings
+            const createdAt = (data.createdAt as any)?.toDate ? (data.createdAt.toDate().toISOString()) : new Date().toISOString();
+            const expiresAt = (data.expiresAt as any)?.toDate ? (data.expiresAt.toDate().toISOString()) : new Date().toISOString();
             
             return {
                 id: doc.id,
