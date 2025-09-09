@@ -7,23 +7,37 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Download, Linkedin, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { downloadVideo } from '@/ai/flows/video-downloader';
 
 export function LinkedinVideoDownloader() {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleDownload = () => {
-    if (!url.trim()) {
+  const handleDownload = async () => {
+    if (!url.trim() || !URL.canParse(url)) {
       toast({ title: 'Please enter a valid LinkedIn URL.', variant: 'destructive' });
       return;
     }
     setIsLoading(true);
-    // Dummy function - a real implementation would call a backend service here.
-    setTimeout(() => {
-      toast({ title: 'Download Started (Simulated)', description: 'In a real app, the video would start downloading now.' });
+    try {
+      const result = await downloadVideo({ url, platform: 'linkedin' });
+      if (result.success && result.downloadUrl) {
+        toast({ title: 'Download Ready!', description: result.message });
+        const link = document.createElement('a');
+        link.href = result.downloadUrl;
+        link.setAttribute('download', result.title || 'linkedin-video.mp4');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error: any) {
+      toast({ title: 'Download Failed', description: error.message, variant: 'destructive' });
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (

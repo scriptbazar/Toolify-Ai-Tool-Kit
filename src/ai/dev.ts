@@ -26,3 +26,5 @@ import '@/ai/flows/ai-writer.ts';
 import '@/ai/flows/ai-image-generator.ts';
 import '@/ai/flows/ai-story-generator.ts';
 import '@/ai/flows/ai-tweet-generator.ts';
+import '@/ai/flows/video-downloader.ts';
+
