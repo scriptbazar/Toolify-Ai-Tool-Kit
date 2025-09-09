@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -32,6 +31,8 @@ Instructions:
     - If **Image**: Describe the subject, setting, lighting, composition, colors, and artistic style.
     - If **Website**: Describe the purpose, target audience, key features, pages, and desired look and feel.
     - If **App**: Describe the app's core functionality, user flow, main screens, and design aesthetic.
+    - If **Social Media Ad**: Describe the target platform (e.g., Instagram, Facebook), the product/service being advertised, the target audience, the key message, a call-to-action, and the desired tone (e.g., urgent, friendly, humorous). Include requests for ad copy (headline, body text) and visual ideas.
+    - If **Video Script**: Describe the video type (e.g., tutorial, commercial, vlog), the core message, target audience, desired length, and tone. Include instructions for scene-by-scene descriptions, dialogue, voiceover text, and on-screen graphics.
     - If **General**: Create a universally applicable, detailed prompt.
 3.  Adjust the length and complexity based on the **detail level**:
     - **Short**: A concise, single-paragraph prompt.
