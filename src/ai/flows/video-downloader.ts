@@ -6,7 +6,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import ytdl from 'ytdl-core';
+import ytdl from 'ytdl-core-discord';
 
 const VideoDownloaderInputSchema = z.object({
   url: z.string().url('Please enter a valid URL.'),
@@ -51,7 +51,9 @@ const videoDownloaderFlow = ai.defineFlow(
             };
         }
 
-        const info = await ytdl.getInfo(url);
+        const info = await ytdl.getInfo(url, {
+          lang: 'en'
+        });
         const format = ytdl.chooseFormat(info.formats, { quality: 'highest' });
         
         if (format) {
