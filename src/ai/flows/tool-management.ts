@@ -122,15 +122,14 @@ export async function getTools(): Promise<Tool[]> {
     
     const fetchedTools: Tool[] = snapshot.docs.map(doc => {
         const data = doc.data();
-        // Convert Firestore Timestamp to ISO string for Zod validation, if it exists
-        const createdAt = data.createdAt instanceof Timestamp 
+        const createdAt = (data.createdAt instanceof Timestamp) 
             ? data.createdAt.toDate().toISOString() 
-            : new Date().toISOString(); // Provide a default if it's missing
+            : new Date().toISOString();
 
         const rawTool = { 
             id: doc.id,
             ...data,
-            createdAt: createdAt
+            createdAt: createdAt,
         };
             
         const parsed = ToolSchema.safeParse(rawTool);
@@ -138,11 +137,10 @@ export async function getTools(): Promise<Tool[]> {
         if (parsed.success) {
             return parsed.data;
         } else {
-            // Log the detailed error for debugging, but don't crash the entire function
             console.warn(`Invalid tool data for doc ${doc.id}:`, parsed.error.format());
-            return null; // Return null for invalid data
+            return null;
         }
-    }).filter((tool): tool is Tool => tool !== null); // Filter out any nulls from failed parsing
+    }).filter((tool): tool is Tool => tool !== null);
     
     return fetchedTools;
 
