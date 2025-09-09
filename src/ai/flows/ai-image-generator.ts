@@ -32,21 +32,42 @@ const generateImageFlow = ai.defineFlow(
   },
   async ({ promptText, userId }) => {
     try {
-        const { media } = await ai.generate({
-            model: 'googleai/imagen-4.0-fast-generate-001',
-            prompt: `Generate a high-quality, visually appealing image based on the following prompt: "${promptText}"`,
-        });
+        // Use a text model to generate SVG code. This is a workaround to avoid billing errors
+        // from dedicated image models like Imagen.
+        const prompt = `Generate a clean, modern, vector-style SVG image based on the following description: "${promptText}".
         
-        if (!media || !media.url) {
-             throw new Error('No image was generated. The model may have failed to produce an output.');
+        IMPORTANT:
+        - The output must be ONLY the SVG code, starting with "<svg" and ending with "</svg>".
+        - Do not include any text, titles, or markdown formatting like "\`\`\`svg" in your response.
+        - Do not include any text (like Hindi, English, etc.) inside the SVG artwork itself. The image should be purely graphical.
+        - Ensure the SVG is well-formed and visually appealing. Use a vibrant but cohesive color palette.
+        - The SVG should be scalable and render clearly.
+        `;
+
+        const { text } = await ai.generate({
+          model: 'googleai/gemini-1.5-flash-latest',
+          prompt: prompt,
+        });
+
+        if (!text) {
+             throw new Error('The model did not return any content.');
         }
 
-        const imageDataUri = media.url;
+        // Clean up the response to ensure it's a valid SVG
+        const svgMatch = text.match(/<svg.*<\/svg>/s);
+        if (!svgMatch) {
+            console.error("Raw AI response:", text);
+            throw new Error("The model did not generate a valid SVG. Please try a different prompt.");
+        }
+        const cleanSvg = svgMatch[0];
         
+        // Convert clean SVG to Base64 Data URI
+        const imageDataUri = `data:image/svg+xml;base64,${Buffer.from(cleanSvg).toString('base64')}`;
+
         await saveUserMedia({
             userId,
             type: 'ai-generated',
-            mediaUrl: imageDataUri,
+            mediaUrl: imageDataUri, // Save the Data URI directly
             prompt: promptText,
         });
         
@@ -54,10 +75,6 @@ const generateImageFlow = ai.defineFlow(
 
     } catch (error: any) {
         console.error("AI Image Generation Error:", error);
-        // Provide a more user-friendly error message for billing issues.
-        if (error.message && error.message.includes('billing account')) {
-            throw new Error('This feature requires a billing-enabled Google Cloud account. Please upgrade your account to use the image generator.');
-        }
         throw new Error(error.message || "An unexpected error occurred during image generation.");
     }
   }
