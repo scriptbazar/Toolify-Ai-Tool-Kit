@@ -92,7 +92,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Instagram Video Downloader', description: 'Download videos and reels from Instagram.', icon: 'Instagram', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Threads Video Downloader', description: 'Download videos from Threads.', icon: 'AtSign', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'LinkedIn Video Downloader', description: 'Download videos from LinkedIn posts.', icon: 'Linkedin', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'Pinterest Video Downloader', description: 'Download videos from Pinterest pins.', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Pinterest Video Downloader', description: 'Download videos from Pinterest pins.', icon: 'BookImage', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
 ];
 
 /**
@@ -324,3 +324,5 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
 
   return { description: generatedDesc };
 }
+
+    
