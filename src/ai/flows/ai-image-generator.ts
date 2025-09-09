@@ -42,7 +42,14 @@ const generateImageFlow = ai.defineFlow(
             throw new Error('No SVG code was generated. The model may have failed to produce an output.');
         }
 
-        const svgCode = text.trim();
+        // Sanitize the output to get only the SVG code.
+        const svgMatch = text.match(/<svg.*<\/svg>/s);
+        const svgCode = svgMatch ? svgMatch[0] : '';
+
+        if (!svgCode) {
+            throw new Error('Could not find valid SVG code in the model\'s response.');
+        }
+
         const base64Svg = Buffer.from(svgCode).toString('base64');
         const imageDataUri = `data:image/svg+xml;base64,${base64Svg}`;
 
