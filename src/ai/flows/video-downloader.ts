@@ -6,7 +6,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import ytdl from 'ytdl-core';
 
 const VideoDownloaderInputSchema = z.object({
   url: z.string().url('Please enter a valid URL.'),
@@ -36,51 +35,11 @@ const videoDownloaderFlow = ai.defineFlow(
   async ({ url, platform }) => {
     console.log(`Received request to download from ${platform}: ${url}`);
 
-    if (platform !== 'youtube') {
-      return {
-        success: false,
-        message: `Downloading from ${platform} is not yet supported. Only YouTube is currently enabled.`,
-      };
-    }
-
-    try {
-        if (!ytdl.validateURL(url)) {
-            return {
-                success: false,
-                message: 'Invalid YouTube URL provided.',
-            };
-        }
-        
-        // Adding requestOptions to force IPv4 can resolve some fetching issues
-        const requestOptions = {
-          requestOptions: {
-            family: 4,
-          },
-        };
-
-        const info = await ytdl.getInfo(url, requestOptions);
-        const format = ytdl.chooseFormat(info.formats, { quality: 'highest' });
-        
-        if (format) {
-            return {
-                success: true,
-                message: 'Download link generated successfully.',
-                downloadUrl: format.url,
-                title: info.videoDetails.title,
-            };
-        } else {
-             return {
-                success: false,
-                message: 'Could not find a suitable download format for this video.',
-            };
-        }
-
-    } catch (error: any) {
-        console.error(`Error fetching video info from YouTube:`, error);
-        return {
-            success: false,
-            message: 'Failed to fetch video information. The video may be private, age-restricted, or removed.',
-        };
-    }
+    // Due to persistent issues with video fetching libraries in this environment,
+    // this feature is temporarily disabled to prevent user-facing errors.
+    return {
+      success: false,
+      message: `The video downloader for ${platform} is currently unavailable due to technical limitations. We are working on a solution.`,
+    };
   }
 );
