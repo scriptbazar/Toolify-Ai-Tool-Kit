@@ -15,6 +15,7 @@ export function PromptGenerator() {
   const [topic, setTopic] = useState('');
   const [category, setCategory] = useState('Image');
   const [detailLevel, setDetailLevel] = useState('Detailed');
+  const [imageStyle, setImageStyle] = useState('Photorealistic');
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -31,7 +32,12 @@ export function PromptGenerator() {
     setIsLoading(true);
     setGeneratedPrompt('');
     try {
-      const result = await generatePrompt({ topic, category: category as any, detailLevel: detailLevel as any });
+      const result = await generatePrompt({ 
+          topic, 
+          category: category as any, 
+          detailLevel: detailLevel as any,
+          ...(category === 'Image' && { imageStyle: imageStyle as any }),
+      });
       setGeneratedPrompt(result.prompt);
     } catch (error: any) {
       toast({
@@ -96,6 +102,24 @@ export function PromptGenerator() {
             </Select>
         </div>
       </div>
+
+       {category === 'Image' && (
+           <div className="space-y-2">
+            <Label htmlFor="image-style-select">Image Style</Label>
+             <Select value={imageStyle} onValueChange={setImageStyle}>
+                <SelectTrigger id="image-style-select"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="Photorealistic">Photorealistic</SelectItem>
+                    <SelectItem value="Cartoon">Cartoon</SelectItem>
+                    <SelectItem value="Abstract">Abstract</SelectItem>
+                    <SelectItem value="Painting">Painting</SelectItem>
+                    <SelectItem value="3D Render">3D Render</SelectItem>
+                    <SelectItem value="Anime/Manga">Anime/Manga</SelectItem>
+                    <SelectItem value="Pixel Art">Pixel Art</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+       )}
 
 
       <Button onClick={handleGenerate} disabled={isLoading} className="w-full">

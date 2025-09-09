@@ -29,7 +29,10 @@ Desired Detail Level: {{{detailLevel}}}
 Instructions:
 1.  Analyze the user's topic and the selected category to understand the core concept.
 2.  Based on the **category**, tailor the prompt with specific, actionable instructions:
-    - If **Image**: Describe the subject, setting, lighting, composition, colors, and artistic style (e.g., photorealistic, cartoon, abstract).
+    - If **Image**: Describe the subject, setting, lighting, composition, and colors.
+    {{#if imageStyle}}
+    The artistic style should be: **{{{imageStyle}}}**.
+    {{/if}}
     - If **Website**: Describe the purpose, target audience, key features, required pages (Home, About, Contact, etc.), and desired look and feel (e.g., minimalist, corporate, playful).
     - If **App**: Describe the app's core functionality, target user, main screens or user flow, platform (iOS, Android, web), and design aesthetic (e.g., clean, modern, gamified).
     - If **Social Media Ad**: Describe the target platform (e.g., Instagram, Facebook, TikTok), the product/service, the target audience, the key message, a clear call-to-action, and the desired tone (e.g., urgent, friendly, humorous). Include requests for ad copy (headline, body text) and visual ideas.
