@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview A flow for downloading videos from various platforms.
+ * @fileOverview A flow for downloading videos from various platforms using the Cobalt API.
  */
 
 import { ai } from '@/ai/genkit';
@@ -32,14 +32,49 @@ const videoDownloaderFlow = ai.defineFlow(
     inputSchema: VideoDownloaderInputSchema,
     outputSchema: VideoDownloaderOutputSchema,
   },
-  async ({ url, platform }) => {
-    console.log(`Received request to download from ${platform}: ${url}`);
+  async ({ url }) => {
+    try {
+        const cobaltApiUrl = 'https://co.wuk.sh/api/json';
 
-    // Due to persistent issues with video fetching libraries in this environment,
-    // this feature is temporarily disabled to prevent user-facing errors.
-    return {
-      success: false,
-      message: `The video downloader for ${platform} is currently unavailable due to technical limitations. We are working on a solution.`,
-    };
+        const response = await fetch(cobaltApiUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                url: url,
+                isNoTTWatermark: true,
+                isAudioOnly: false,
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to process video. Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.status === 'error' || !result.url) {
+            return {
+                success: false,
+                message: result.text || 'Could not find a downloadable video at this URL.',
+            };
+        }
+
+        return {
+            success: true,
+            message: 'Your video is ready for download!',
+            downloadUrl: result.url,
+            title: result.picker?.find((p: any) => p.type === 'video')?.filename || 'video.mp4',
+        };
+
+    } catch (error: any) {
+        console.error("Video Downloader Error:", error);
+        return {
+            success: false,
+            message: error.message || 'An unknown error occurred while processing the video.',
+        };
+    }
   }
 );
