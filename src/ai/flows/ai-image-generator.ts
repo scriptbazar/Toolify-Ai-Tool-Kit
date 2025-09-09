@@ -2,29 +2,47 @@
 'use server';
 
 /**
- * @fileOverview Generates images based on text prompts.
- *
- * - generateImage - A function that takes a text prompt and returns a data URI of the generated image.
- * - GenerateImageInput - The input type for the generateImage function.
- * - GenerateImageOutput - The return type for the generateImage function.
+ * @fileOverview Generates images based on text prompts and manages user media.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
+import { getAdminDb } from '@/lib/firebase-admin';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
+// --- Input/Output Schemas for Image Generation ---
 const GenerateImageInputSchema = z.object({
   promptText: z.string().describe('The text prompt to use for image generation.'),
   userId: z.string().describe('The ID of the user generating the image.'),
 });
-
 export type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
 
 const GenerateImageOutputSchema = z.object({
   imageDataUri: z.string().describe('The generated image as a data URI.'),
 });
-
 export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
 
+// --- Media Management Schemas & Types ---
+export const UserMediaSchema = z.object({
+    id: z.string(),
+    userId: z.string(),
+    type: z.enum(['ai-generated', 'community-chat', 'ticket-media']),
+    mediaUrl: z.string().url(),
+    prompt: z.string().optional(),
+    createdAt: z.string().datetime({ offset: true }),
+    expiresAt: z.string().datetime({ offset: true }),
+});
+export type UserMedia = z.infer<typeof UserMediaSchema>;
+
+export const SaveMediaInputSchema = UserMediaSchema.pick({
+    userId: true,
+    type: true,
+    mediaUrl: true,
+    prompt: true,
+});
+export type SaveMediaInput = z.infer<typeof SaveMediaInputSchema>;
+
+// --- Main Flow for Image Generation ---
 export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
   return generateImageFlow(input);
 }
@@ -49,6 +67,14 @@ const generateImageFlow = ai.defineFlow(
         const svgCode = text.trim();
         const base64Svg = Buffer.from(svgCode).toString('base64');
         const imageDataUri = `data:image/svg+xml;base64,${base64Svg}`;
+
+        // Save the generated image data to the user's media library in Firestore
+        await saveUserMedia({
+            userId,
+            type: 'ai-generated',
+            mediaUrl: imageDataUri, // Store the data URI directly
+            prompt: promptText,
+        });
         
         return { imageDataUri };
     } catch (error: any) {
@@ -57,3 +83,83 @@ const generateImageFlow = ai.defineFlow(
     }
   }
 );
+
+
+// --- Functions for Media Management ---
+
+/**
+ * Saves media metadata to a user's subcollection in Firestore.
+ */
+export async function saveUserMedia(input: SaveMediaInput): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
+  if (!adminDb) {
+    return { success: false, message: "Database not initialized." };
+  }
+  
+  try {
+    const { userId, type, mediaUrl, prompt } = SaveMediaInputSchema.parse(input);
+    const expiresAt = new Date();
+    if (type === 'community-chat') {
+        expiresAt.setDate(expiresAt.getDate() + 2); // Expires in 2 days
+    } else if (type === 'ticket-media') {
+        expiresAt.setDate(expiresAt.getDate() + 15); // Expires in 15 days
+    } else {
+        expiresAt.setDate(expiresAt.getDate() + 7); // Expires in 7 days
+    }
+
+    await adminDb.collection('users').doc(userId).collection('userMedia').add({
+      type,
+      mediaUrl,
+      prompt,
+      createdAt: FieldValue.serverTimestamp(),
+      expiresAt,
+    });
+    
+    return { success: true, message: "Media saved successfully." };
+  } catch (error: any) {
+    console.error("Error saving media:", error);
+    return { success: false, message: error.message || "Failed to save media." };
+  }
+}
+
+/**
+ * Fetches all media for a specific user from Firestore.
+ */
+export async function getUserMedia(userId: string): Promise<UserMedia[]> {
+    const adminDb = getAdminDb();
+    if (!userId || !adminDb) {
+        return [];
+    }
+    
+    try {
+        const mediaRef = adminDb.collection('users').doc(userId).collection('userMedia');
+        const snapshot = await mediaRef.orderBy('createdAt', 'desc').get();
+        
+        if (snapshot.empty) {
+            return [];
+        }
+
+        const mediaList: UserMedia[] = snapshot.docs.map(doc => {
+            const data = doc.data();
+            const createdAt = (data.createdAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
+            const expiresAt = (data.expiresAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
+            
+            return {
+                id: doc.id,
+                userId: userId,
+                type: data.type,
+                mediaUrl: data.mediaUrl,
+                prompt: data.prompt,
+                createdAt,
+                expiresAt,
+            } as UserMedia;
+        });
+        
+        return mediaList;
+
+    } catch (error: any) {
+        console.error(`Error fetching media for user ${userId}:`, error);
+        // Throw the error so the client can handle it, which seems to be the current behavior (showing a toast).
+        throw new Error("Could not load your media gallery.");
+    }
+}

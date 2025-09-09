@@ -139,7 +139,7 @@ export function AiImageGenerator() {
                         <div className="relative group">
                             <Image src={generatedImage} alt={prompt} width={512} height={512} className="rounded-md" />
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <Button onClick={() => handleDownload(generatedImage, `generated_${Date.now()}.png`)}>
+                                <Button onClick={() => handleDownload(generatedImage, `generated_${Date.now()}.svg`)}>
                                     <Download className="mr-2 h-4 w-4" /> Download
                                 </Button>
                             </div>
@@ -165,7 +165,7 @@ export function AiImageGenerator() {
                                     key={item.id} 
                                     src={item.mediaUrl} 
                                     alt={item.prompt || 'AI generated image'}
-                                    onDownload={() => handleDownload(item.mediaUrl, `${item.prompt?.substring(0, 20) || 'image'}.png`)}
+                                    onDownload={() => handleDownload(item.mediaUrl, `${item.prompt?.substring(0, 20) || 'image'}.svg`)}
                                 />
                             ))}
                         </div>
