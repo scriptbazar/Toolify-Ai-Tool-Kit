@@ -14,8 +14,9 @@ import { ModeToggle } from './ModeToggle';
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { UserNav } from './UserNav';
 import { doc, getDoc } from 'firebase/firestore';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 
 const mainNavLinks = [
@@ -61,9 +62,16 @@ const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }) => 
   );
 };
 
+interface AppUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 export default function Header() {
   const isMobile = useIsMobile();
   const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [userData, setUserData] = useState<AppUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -75,10 +83,13 @@ export default function Header() {
         setUser(firebaseUser);
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
+        if (userDocSnap.exists()) {
+          setUserData(userDocSnap.data() as AppUser);
+          if (userDocSnap.data().role === 'admin') {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
         }
       } else {
         setUser(null);
@@ -185,7 +196,42 @@ export default function Header() {
                     </Button>
                   </>
                 ) : (
-                   <UserNav user={user} onLogout={handleLogout} />
+                   <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="secondary" size="icon" className="rounded-full">
+                         <Avatar className="h-8 w-8">
+                           <AvatarFallback>{userData?.firstName?.[0] || 'A'}</AvatarFallback>
+                        </Avatar>
+                        <span className="sr-only">Toggle user menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">
+                            {userData ? `${userData.firstName} ${userData.lastName}` : 'User'}
+                          </p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {user?.email || ''}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => router.push(dashboardHref)}>
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
+                      </DropdownMenuItem>
+                       <DropdownMenuItem onClick={() => router.push(`/profile`)}>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout}>
+                         <LogoutIcon className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
             </div>
           </>
