@@ -210,7 +210,7 @@ const productDescriptionPrompt = ai.definePrompt({
   name: 'generateProductDescriptionPrompt',
   input: { schema: GenerateProductDescriptionInputSchema },
   output: { schema: GenerateProductDescriptionOutputSchema },
-  prompt: `You are an expert e-commerce copywriter and SEO specialist. Your task is to write a compelling, persuasive, and benefit-oriented product description based on the provided details.
+  prompt: `You are an expert e-commerce copywriter and SEO specialist. Your task is to write a compelling, persuasive, and benefit-oriented product description in HTML format based on the provided details.
 
 Product Name: {{{productName}}}
 Target Audience: {{{targetAudience}}}
@@ -225,16 +225,16 @@ SEO Keywords to include: {{{targetKeywords}}}
 {{/if}}
 
 Instructions:
-1.  **Headline:** Start with a catchy and benefit-driven headline for the product.
-2.  **Opening:** Write an engaging opening paragraph that connects with the target audience and introduces the product's main value.
+1.  **Headline:** Start with a catchy and benefit-driven headline for the product, wrapped in an \`<h3>\` tag.
+2.  **Opening:** Write an engaging opening paragraph that connects with the target audience and introduces the product's main value. Wrap this in a \`<p>\` tag.
 3.  **Feature-to-Benefit:** Convert each key feature into a clear benefit for the user. Explain how it solves a problem or improves their life.
-4.  **Formatting:** Structure the output according to the "Desired Format":
-    *   If "Paragraph with Bullets", write a few paragraphs followed by a bulleted list of the key benefits.
-    *   If "Paragraph Only", write several detailed paragraphs.
-    *   If "Bulleted List Only", provide a concise introductory sentence followed by a detailed bulleted list.
+4.  **Formatting:** Structure the output according to the "Desired Format" using HTML tags:
+    *   If "Paragraph with Bullets", write a few paragraphs (\`<p>\` tags) followed by a bulleted list (\`<ul><li>...\`</li></ul>\`) of the key benefits.
+    *   If "Paragraph Only", write several detailed paragraphs (\`<p>\` tags).
+    *   If "Bulleted List Only", provide a concise introductory sentence in a \`<p>\` tag, followed by a detailed bulleted list (\`<ul><li>...\`</li></ul>\`).
 5.  **Tone & Keywords:** Maintain the specified "Tone" throughout the copy. If "SEO Keywords" are provided, weave them naturally into the description.
-6.  **Call-to-Action:** End with a strong and persuasive call-to-action that encourages the user to buy.
-7.  **Output:** Provide a single, clean block of text ready to be pasted into a product page. Do not include markdown like \`###\`.
+6.  **Call-to-Action:** End with a strong and persuasive call-to-action that encourages the user to buy, wrapped in a final \`<p>\` tag.
+7.  **Output:** Provide a single, clean block of HTML. Do NOT use markdown like \`**\` or \`###\`.
 `,
 });
 

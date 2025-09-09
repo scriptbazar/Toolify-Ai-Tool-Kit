@@ -60,7 +60,10 @@ export function AiProductDescriptionWriter() {
       toast({ title: 'Nothing to copy!', variant: 'destructive' });
       return;
     }
-    navigator.clipboard.writeText(generatedDescription);
+     // To copy the text content from HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = generatedDescription;
+    navigator.clipboard.writeText(tempDiv.textContent || tempDiv.innerText || "");
     toast({ title: 'Description copied to clipboard!' });
   };
 
@@ -157,7 +160,10 @@ export function AiProductDescriptionWriter() {
                   <div className="h-4 w-full bg-muted animate-pulse rounded-md" />
                 </div>
               ) : (
-                <p className="text-muted-foreground whitespace-pre-wrap">{generatedDescription}</p>
+                <div 
+                    className="prose dark:prose-invert max-w-none text-sm"
+                    dangerouslySetInnerHTML={{ __html: generatedDescription }} 
+                 />
               )}
             </CardContent>
           </Card>
