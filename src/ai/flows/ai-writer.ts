@@ -66,7 +66,7 @@ Instructions:
     *   Ensure the content length aligns with the user's "Desired Length" request.
 4.  **Conclusion:** End with a strong concluding paragraph that summarizes the main points and provides a final thought or call-to-action consistent with the post's tone. Use a single \`<p>\` tag for the conclusion.
 
-Ensure the entire output is a single HTML block, starting with \`<h1>\` and ending with the final \`</p>\`. Do not include \`<html>\` or \`<body>\` tags. Do not add extra line breaks like <br> between paragraphs.`,
+Ensure the entire output is a single HTML block, starting with \`<h1>\` and ending with the final \`</p>\`. Do not include \`<html>\` or \`<body>\` tags. Do not add extra line breaks between paragraphs.`,
 });
 
 const aiWriterFlow = ai.defineFlow(
@@ -191,6 +191,9 @@ const GenerateProductDescriptionInputSchema = z.object({
   productName: z.string().describe('The name of the product.'),
   keyFeatures: z.string().describe('A list of key features, one per line.'),
   targetAudience: z.string().describe('The intended customer for this product (e.g., students, developers, busy moms).'),
+  tone: z.enum(['Persuasive', 'Playful', 'Professional', 'Luxury']).describe('The desired tone for the description.'),
+  format: z.enum(['Paragraph with Bullets', 'Paragraph Only', 'Bulleted List Only']).describe('The desired format for the description.'),
+  targetKeywords: z.string().optional().describe('Comma-separated SEO keywords to include.'),
 });
 export type GenerateProductDescriptionInput = z.infer<typeof GenerateProductDescriptionInputSchema>;
 
@@ -207,24 +210,31 @@ const productDescriptionPrompt = ai.definePrompt({
   name: 'generateProductDescriptionPrompt',
   input: { schema: GenerateProductDescriptionInputSchema },
   output: { schema: GenerateProductDescriptionOutputSchema },
-  prompt: `You are an expert e-commerce copywriter and SEO specialist. Your task is to write a compelling, persuasive, and benefit-oriented product description.
+  prompt: `You are an expert e-commerce copywriter and SEO specialist. Your task is to write a compelling, persuasive, and benefit-oriented product description based on the provided details.
 
 Product Name: {{{productName}}}
-
 Target Audience: {{{targetAudience}}}
-
-Key Features:
+Key Features (one per line):
 ---
 {{{keyFeatures}}}
 ---
+Desired Tone: {{{tone}}}
+Desired Format: {{{format}}}
+{{#if targetKeywords}}
+SEO Keywords to include: {{{targetKeywords}}}
+{{/if}}
 
 Instructions:
-1.  Start with a catchy opening that grabs the attention of the target audience.
-2.  Convert each feature into a clear benefit for the user. Explain how each feature solves a problem or improves their life.
-3.  Use persuasive language and a tone appropriate for the target audience.
-4.  Keep the description concise and easy to scan. Use bullet points for the features/benefits.
-5.  End with a strong call-to-action that encourages the user to buy.
-6.  The output should be a single block of text, well-structured for a product page.
+1.  **Headline:** Start with a catchy and benefit-driven headline for the product.
+2.  **Opening:** Write an engaging opening paragraph that connects with the target audience and introduces the product's main value.
+3.  **Feature-to-Benefit:** Convert each key feature into a clear benefit for the user. Explain how it solves a problem or improves their life.
+4.  **Formatting:** Structure the output according to the "Desired Format":
+    *   If "Paragraph with Bullets", write a few paragraphs followed by a bulleted list of the key benefits.
+    *   If "Paragraph Only", write several detailed paragraphs.
+    *   If "Bulleted List Only", provide a concise introductory sentence followed by a detailed bulleted list.
+5.  **Tone & Keywords:** Maintain the specified "Tone" throughout the copy. If "SEO Keywords" are provided, weave them naturally into the description.
+6.  **Call-to-Action:** End with a strong and persuasive call-to-action that encourages the user to buy.
+7.  **Output:** Provide a single, clean block of text ready to be pasted into a product page. Do not include markdown like \`###\`.
 `,
 });
 

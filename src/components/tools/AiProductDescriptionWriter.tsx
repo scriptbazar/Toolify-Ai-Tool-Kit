@@ -10,11 +10,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
 import { generateProductDescription } from '@/ai/flows/ai-writer';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 export function AiProductDescriptionWriter() {
   const [productName, setProductName] = useState('');
   const [keyFeatures, setKeyFeatures] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
+  const [tone, setTone] = useState('Persuasive');
+  const [format, setFormat] = useState('Paragraph with Bullets');
+  const [keywords, setKeywords] = useState('');
   const [generatedDescription, setGeneratedDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -35,6 +39,9 @@ export function AiProductDescriptionWriter() {
         productName,
         keyFeatures,
         targetAudience: targetAudience || 'general consumers',
+        tone: tone as any,
+        format: format as any,
+        targetKeywords: keywords,
       });
       setGeneratedDescription(result.description);
     } catch (error: any) {
@@ -78,6 +85,41 @@ export function AiProductDescriptionWriter() {
             placeholder="e.g., Tech enthusiasts, busy professionals"
           />
         </div>
+      </div>
+      
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="tone-select">Tone of Voice</Label>
+            <Select value={tone} onValueChange={setTone}>
+                <SelectTrigger id="tone-select"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="Persuasive">Persuasive</SelectItem>
+                    <SelectItem value="Playful">Playful</SelectItem>
+                    <SelectItem value="Professional">Professional</SelectItem>
+                    <SelectItem value="Luxury">Luxury</SelectItem>
+                </SelectContent>
+            </Select>
+          </div>
+           <div className="space-y-2">
+            <Label htmlFor="format-select">Description Format</Label>
+            <Select value={format} onValueChange={setFormat}>
+                <SelectTrigger id="format-select"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="Paragraph with Bullets">Paragraph with Bullets</SelectItem>
+                    <SelectItem value="Paragraph Only">Paragraph Only</SelectItem>
+                    <SelectItem value="Bulleted List Only">Bulleted List Only</SelectItem>
+                </SelectContent>
+            </Select>
+          </div>
+           <div className="space-y-2">
+              <Label htmlFor="keywords">Target Keywords</Label>
+              <Input
+                id="keywords"
+                value={keywords}
+                onChange={(e) => setKeywords(e.target.value)}
+                placeholder="e.g., smart mug, temperature control"
+              />
+          </div>
       </div>
 
       <div className="space-y-2">
