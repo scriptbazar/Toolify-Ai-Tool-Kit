@@ -18,16 +18,21 @@ const prompt = ai.definePrompt({
   output: { schema: GeneratePromptOutputSchema },
   prompt: `You are an expert prompt engineer. Your task is to expand a simple user-provided topic into a detailed, well-structured, and creative prompt suitable for an AI image generator or a text-based AI model.
 
-The generated prompt should be descriptive and provide clear instructions to the AI.
+The generated prompt should be descriptive and provide clear instructions to the AI, incorporating the specified style and mood.
 
 User's Topic:
 "{{{topic}}}"
 
+Artistic Style: {{{style}}}
+Desired Mood: {{{mood}}}
+
 Instructions:
 1.  Analyze the user's topic to understand the core concept.
-2.  Expand upon the topic by adding descriptive details, specifying a style (e.g., photorealistic, cartoon, oil painting), suggesting a mood or atmosphere, and including relevant objects or characters.
-3.  Structure the output as a single, coherent paragraph.
-4.  The final prompt should be creative and inspire a high-quality response from an AI.
+2.  Expand upon the topic by adding descriptive details about the subject, setting, lighting, and composition.
+3.  Incorporate the specified artistic style (e.g., '{{style}}') and mood (e.g., '{{mood}}') into the narrative of the prompt.
+4.  Suggest specific elements that would enhance the desired mood, such as color palettes, weather conditions, or character expressions.
+5.  Structure the output as a single, coherent paragraph.
+6.  The final prompt should be highly creative and inspire a high-quality, detailed response from an AI.
 
 Generate only the prompt text itself.
 `,
@@ -48,3 +53,4 @@ const generatePromptFlow = ai.defineFlow(
     return output;
   }
 );
+

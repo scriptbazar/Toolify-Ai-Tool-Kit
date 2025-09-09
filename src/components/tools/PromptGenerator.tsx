@@ -9,9 +9,12 @@ import { Wand2, Loader2, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '../ui/card';
 import { generatePrompt } from '@/ai/flows/prompt-generator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 export function PromptGenerator() {
   const [topic, setTopic] = useState('');
+  const [style, setStyle] = useState('Photorealistic');
+  const [mood, setMood] = useState('Cinematic');
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -28,7 +31,7 @@ export function PromptGenerator() {
     setIsLoading(true);
     setGeneratedPrompt('');
     try {
-      const result = await generatePrompt({ topic });
+      const result = await generatePrompt({ topic, style: style as any, mood: mood as any });
       setGeneratedPrompt(result.prompt);
     } catch (error: any) {
       toast({
@@ -62,9 +65,42 @@ export function PromptGenerator() {
           className="min-h-[100px]"
         />
       </div>
+
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+            <Label htmlFor="style-select">Artistic Style</Label>
+            <Select value={style} onValueChange={setStyle}>
+                <SelectTrigger id="style-select"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="Photorealistic">Photorealistic</SelectItem>
+                    <SelectItem value="Cartoon">Cartoon</SelectItem>
+                    <SelectItem value="Oil Painting">Oil Painting</SelectItem>
+                    <SelectItem value="Abstract">Abstract</SelectItem>
+                    <SelectItem value="Anime">Anime</SelectItem>
+                    <SelectItem value="Minimalist">Minimalist</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+         <div className="space-y-2">
+            <Label htmlFor="mood-select">Mood / Atmosphere</Label>
+             <Select value={mood} onValueChange={setMood}>
+                <SelectTrigger id="mood-select"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="Cinematic">Cinematic</SelectItem>
+                    <SelectItem value="Dramatic">Dramatic</SelectItem>
+                    <SelectItem value="Cheerful">Cheerful</SelectItem>
+                    <SelectItem value="Mysterious">Mysterious</SelectItem>
+                    <SelectItem value="Calm">Calm</SelectItem>
+                    <SelectItem value="Futuristic">Futuristic</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+      </div>
+
+
       <Button onClick={handleGenerate} disabled={isLoading} className="w-full">
         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-        Generate Prompt
+        Generate Advanced Prompt
       </Button>
 
       {(generatedPrompt || isLoading) && (
