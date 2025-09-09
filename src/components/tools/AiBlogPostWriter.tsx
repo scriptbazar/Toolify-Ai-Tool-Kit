@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -11,10 +12,25 @@ import { aiWriter } from '@/ai/flows/ai-writer';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+const languages = [
+    { value: 'English', label: 'English' },
+    { value: 'Hindi', label: 'Hindi' },
+    { value: 'Spanish', label: 'Spanish' },
+    { value: 'French', label: 'French' },
+    { value: 'German', label: 'German' },
+    { value: 'Chinese', label: 'Chinese' },
+    { value: 'Japanese', label: 'Japanese' },
+    { value: 'Russian', label: 'Russian' },
+    { value: 'Arabic', label: 'Arabic' },
+    { value: 'Portuguese', label: 'Portuguese' },
+];
+
 export function AiBlogPostWriter() {
   const [topic, setTopic] = useState('');
   const [length, setLength] = useState('Medium');
   const [tone, setTone] = useState('Professional');
+  const [language, setLanguage] = useState('English');
+  const [customWordCount, setCustomWordCount] = useState(2000);
   const [generatedContent, setGeneratedContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -31,7 +47,13 @@ export function AiBlogPostWriter() {
     setIsLoading(true);
     setGeneratedContent('');
     try {
-      const result = await aiWriter({ topic, length: length as any, tone: tone as any });
+      const result = await aiWriter({ 
+          topic, 
+          length: length as any, 
+          tone: tone as any,
+          language,
+          wordCount: length === 'Ultra Long' ? customWordCount : undefined,
+      });
       setGeneratedContent(result.content);
     } catch (error: any) {
       toast({
@@ -68,18 +90,33 @@ export function AiBlogPostWriter() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="topic-input">Blog Post Topic</Label>
-        <Input
-          id="topic-input"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder="e.g., The Future of Renewable Energy"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+            <Label htmlFor="topic-input">Blog Post Topic</Label>
+            <Input
+              id="topic-input"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="e.g., The Future of Renewable Energy"
+            />
+        </div>
+         <div className="space-y-2">
+            <Label htmlFor="language-select">Language</Label>
+            <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger id="language-select">
+                    <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                    {languages.map(lang => (
+                        <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
       </div>
 
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+           <div className="space-y-2">
             <Label htmlFor="length-select">Post Length</Label>
             <Select value={length} onValueChange={setLength}>
                 <SelectTrigger id="length-select">
@@ -89,9 +126,23 @@ export function AiBlogPostWriter() {
                     <SelectItem value="Short">Short (~300 words)</SelectItem>
                     <SelectItem value="Medium">Medium (~700 words)</SelectItem>
                     <SelectItem value="Long">Long (~1200+ words)</SelectItem>
+                    <SelectItem value="Ultra Long">Ultra Long (Custom)</SelectItem>
                 </SelectContent>
             </Select>
           </div>
+          {length === 'Ultra Long' && (
+              <div className="space-y-2">
+                <Label htmlFor="word-count-input">Word Count</Label>
+                <Input
+                    id="word-count-input"
+                    type="number"
+                    value={customWordCount}
+                    onChange={(e) => setCustomWordCount(Number(e.target.value))}
+                    placeholder="e.g., 2000"
+                    step="100"
+                />
+              </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="tone-select">Tone of Voice</Label>
             <Select value={tone} onValueChange={setTone}>

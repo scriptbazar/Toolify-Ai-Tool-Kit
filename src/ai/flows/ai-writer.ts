@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview AI Writer tool that generates articles, blog posts, or marketing copy based on user input.
@@ -13,8 +14,10 @@ import {z} from 'zod';
 
 const AiWriterInputSchema = z.object({
   topic: z.string().describe('The topic or keywords for the AI to generate content about.'),
-  length: z.enum(['Short', 'Medium', 'Long']).describe('The desired length of the blog post.'),
+  length: z.enum(['Short', 'Medium', 'Long', 'Ultra Long']).describe('The desired length of the blog post.'),
   tone: z.enum(['Professional', 'Casual', 'Informative', 'Engaging', 'Humorous', 'Persuasive', 'Inspirational', 'Technical', 'Storytelling']).describe('The desired tone of voice for the content.'),
+  language: z.string().optional().describe('The language in which the blog post should be written.'),
+  wordCount: z.number().optional().describe('The desired word count for "Ultra Long" posts.'),
 });
 export type AiWriterInput = z.infer<typeof AiWriterInputSchema>;
 
@@ -33,8 +36,24 @@ const prompt = ai.definePrompt({
   output: {schema: AiWriterOutputSchema},
   prompt: `You are an expert content writer and SEO specialist. Your task is to generate a comprehensive, engaging, and well-structured blog post based on the provided topic, desired length, and tone. The output must be in HTML format.
 
+{{#if language}}
+The blog post must be written in the following language: **{{{language}}}**.
+{{/if}}
+
 Topic: "{{{topic}}}"
-Desired Length: {{{length}}} (Short: ~300 words, Medium: ~700 words, Long: ~1200+ words)
+Desired Length: {{{length}}} 
+{{#if (eq length "Short")}}
+(Aim for ~300 words)
+{{/if}}
+{{#if (eq length "Medium")}}
+(Aim for ~700 words)
+{{/if}}
+{{#if (eq length "Long")}}
+(Aim for ~1200 words)
+{{/if}}
+{{#if (eq length "Ultra Long")}}
+(Aim for ~{{{wordCount}}} words)
+{{/if}}
 Tone of Voice: {{{tone}}}
 
 Instructions:
