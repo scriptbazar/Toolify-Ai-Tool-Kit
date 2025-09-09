@@ -5,7 +5,7 @@
 /**
  * @fileOverview Manages tools in Firestore.
  */
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { type Tool, ToolSchema, UpsertToolInputSchema, type ToolRequest, ToolRequestSchema } from './tool-management.types';
 import { z } from 'zod';
@@ -102,6 +102,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
  */
 export async function getTools(): Promise<Tool[]> {
   try {
+    const adminDb = getAdminDb();
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
     let snapshot = await toolsRef.orderBy('name').get();
 
@@ -157,6 +158,7 @@ export async function getTools(): Promise<Tool[]> {
  */
 export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: boolean; message: string; toolId?: string }> {
   try {
+    const adminDb = getAdminDb();
     const { id, ...data } = toolData;
     
     if (data.name) {
@@ -189,6 +191,7 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
  * @returns {Promise<{ success: boolean; message: string }>}
  */
 export async function deleteTool(toolId: string): Promise<{ success: boolean; message: string }> {
+    const adminDb = getAdminDb();
     if (!toolId) {
         return { success: false, message: 'Tool ID is required.' };
     }
@@ -221,6 +224,7 @@ export async function deleteTool(toolId: string): Promise<{ success: boolean; me
  */
 export async function getFavoriteTools(userId: string): Promise<Tool[]> {
   try {
+    const adminDb = getAdminDb();
     const userDocRef = adminDb.collection('users').doc(userId);
     const userDocSnap = await userDocRef.get();
 
@@ -260,6 +264,7 @@ type RequestToolInput = {
 
 export async function requestNewTool(input: RequestToolInput): Promise<{ success: boolean; message: string }> {
     try {
+        const adminDb = getAdminDb();
         const validatedInput = RequestToolInputSchema.parse(input);
         await adminDb.collection(TOOL_REQUESTS_COLLECTION).add({
             ...validatedInput,
@@ -278,6 +283,7 @@ export async function requestNewTool(input: RequestToolInput): Promise<{ success
  */
 export async function getToolRequests(): Promise<ToolRequest[]> {
     try {
+        const adminDb = getAdminDb();
         const snapshot = await adminDb.collection(TOOL_REQUESTS_COLLECTION).orderBy('requestedAt', 'desc').get();
         return snapshot.docs.map(doc => {
             const data = doc.data();
@@ -298,6 +304,7 @@ export async function getToolRequests(): Promise<ToolRequest[]> {
  */
 export async function updateToolRequestStatus(requestId: string, status: 'approved' | 'rejected'): Promise<{ success: boolean, message: string }> {
     try {
+        const adminDb = getAdminDb();
         const requestRef = adminDb.collection(TOOL_REQUESTS_COLLECTION).doc(requestId);
         await requestRef.update({ status });
         return { success: true, message: 'Request status updated.' };

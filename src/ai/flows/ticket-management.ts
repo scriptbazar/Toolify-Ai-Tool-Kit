@@ -5,7 +5,7 @@
  * @fileOverview Manages support tickets in Firestore.
  */
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { 
     CreateTicketInputSchema, 
@@ -27,6 +27,7 @@ import { getStorage } from 'firebase-admin/storage';
 export async function createTicket(input: CreateTicketInput): Promise<{ success: boolean; message: string }> {
     try {
         const { ticketId, subject, priority, message, userId, userName, userEmail, expiresAt, attachments } = CreateTicketInputSchema.parse(input);
+        const adminDb = getAdminDb();
         const ticketRef = adminDb.collection('tickets').doc(ticketId);
         
         const initialMessage: TicketMessage = {
@@ -96,6 +97,7 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
  */
 export async function getTickets(): Promise<Ticket[]> {
     try {
+        const adminDb = getAdminDb();
         const now = new Date();
         const ticketsRef = adminDb.collection('tickets');
 
@@ -163,6 +165,7 @@ export async function getTickets(): Promise<Ticket[]> {
 export async function getTicketsByUser(userId: string): Promise<Ticket[]> {
     if (!userId) return [];
     try {
+        const adminDb = getAdminDb();
         const snapshot = await adminDb.collection('tickets')
             .where('userId', '==', userId)
             .orderBy('lastUpdated', 'desc')
@@ -192,6 +195,7 @@ export async function getTicketsByUser(userId: string): Promise<Ticket[]> {
 export async function addTicketReply(input: AddReplyInput): Promise<{ success: boolean; message: string }> {
     try {
         const { ticketId, message } = AddReplyInputSchema.parse(input);
+        const adminDb = getAdminDb();
         const ticketRef = adminDb.collection('tickets').doc(ticketId);
 
         await ticketRef.update({
@@ -212,6 +216,7 @@ export async function addTicketReply(input: AddReplyInput): Promise<{ success: b
 export async function updateTicketDetails(input: UpdateTicketDetailsInput): Promise<{ success: boolean; message: string }> {
    try {
         const { ticketId, ...updates } = UpdateTicketDetailsInputSchema.parse(input);
+        const adminDb = getAdminDb();
 
         if (!ticketId || Object.keys(updates).length === 0) {
             return { success: false, message: 'Ticket ID and at least one update field are required.' };

@@ -12,24 +12,36 @@ import { z } from 'zod';
 
 let adminDb: Firestore;
 
-if (!getApps().length) {
-  const adminApp = initializeApp({
-    credential: cert(serviceAccount as ServiceAccount),
-  });
-  adminDb = getFirestore(adminApp);
-} else {
-  adminDb = getFirestore(getApps()[0]);
+function initializeAdminDb() {
+    if (!getApps().length) {
+      const adminApp = initializeApp({
+        credential: cert(serviceAccount as ServiceAccount),
+      });
+      adminDb = getFirestore(adminApp);
+    } else {
+      adminDb = getFirestore(getApps()[0]);
+    }
 }
 
-export { adminDb };
+// Initialize on module load
+initializeAdminDb();
+
+
+export function getAdminDb() {
+    if (!adminDb) {
+        initializeAdminDb();
+    }
+    return adminDb;
+}
 
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
 
 export async function getSettingsData(): Promise<AppSettings> {
+    const db = getAdminDb();
     try {
-        const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
+        const docRef = db.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
         const docSnap = await docRef.get();
 
         if (docSnap.exists) {
