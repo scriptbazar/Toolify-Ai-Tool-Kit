@@ -53,58 +53,54 @@ const generateImageFlow = ai.defineFlow(
   },
   async ({ promptText, userId }) => {
     try {
-        const {media} = await ai.generate({
-            model: 'googleai/imagen-4.0-fast-generate-001',
-            prompt: promptText,
+        const { text } = await ai.generate({
+            model: 'googleai/gemini-1.5-flash-latest',
+            prompt: `Generate an SVG code for an image based on the following prompt: "${promptText}". The SVG should be creative, visually appealing, and directly represent the user's request. Do not include any explanation, preamble, or markdown formatting like \`\`\`svg. Just provide the raw <svg>...</svg> code. Ensure the SVG has a viewBox and appropriate dimensions.`,
         });
 
-        if (!media || !media.url) {
-            throw new Error('No image was generated. The model may have failed to produce an output.');
+        if (!text) {
+            throw new Error('No SVG code was generated. The model may have failed to produce an output.');
         }
+
+        const svgCode = text.trim();
+        const base64Svg = Buffer.from(svgCode).toString('base64');
+        const imageDataUri = `data:image/svg+xml;base64,${base64Svg}`;
         
         const adminDb = getAdminDb();
         if (adminDb) {
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7);
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7);
 
-        // Convert data URI to buffer
-        const base64Data = media.url.split(',')[1];
-        const imageBuffer = Buffer.from(base64Data, 'base64');
-        
-        // Upload to Firebase Storage
-        const bucket = getStorage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
-        const fileName = `userMedia/${userId}/ai-generated/${Date.now()}.png`;
-        const file = bucket.file(fileName);
+            // Upload to Firebase Storage
+            const bucket = getStorage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+            const fileName = `userMedia/${userId}/ai-generated/${Date.now()}.svg`;
+            const file = bucket.file(fileName);
 
-        await file.save(imageBuffer, {
-            metadata: {
-            contentType: 'image/png',
-            },
-        });
+            await file.save(svgCode, {
+                metadata: {
+                contentType: 'image/svg+xml',
+                },
+            });
 
-        // Get the public URL
-        const publicUrl = await file.getSignedUrl({
-            action: 'read',
-            expires: expiresAt,
-        });
+            // Get the public URL
+            const publicUrl = await file.getSignedUrl({
+                action: 'read',
+                expires: expiresAt,
+            });
 
-        await adminDb.collection('userMedia').add({
-            userId,
-            type: 'ai-generated',
-            mediaUrl: publicUrl[0], // getSignedUrl returns an array with one element
-            prompt: promptText,
-            createdAt: FieldValue.serverTimestamp(),
-            expiresAt: expiresAt,
-        });
+            await adminDb.collection('userMedia').add({
+                userId,
+                type: 'ai-generated',
+                mediaUrl: publicUrl[0],
+                prompt: promptText,
+                createdAt: FieldValue.serverTimestamp(),
+                expiresAt: expiresAt,
+            });
         }
 
-        return {imageDataUri: media.url};
+        return { imageDataUri };
     } catch (error: any) {
-        console.error("AI Image Generation Error:", error.message);
-        if (error.message && error.message.includes('billed users')) {
-             throw new Error("This action requires a billed Google Cloud account. Please enable billing for your project.");
-        }
-        // Throw a generic error for other issues
+        console.error("AI Image Generation Error:", error);
         throw new Error(error.message || "An unexpected error occurred during image generation.");
     }
   }
