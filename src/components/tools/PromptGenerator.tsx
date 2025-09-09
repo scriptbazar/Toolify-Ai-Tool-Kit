@@ -159,6 +159,11 @@ export function PromptGenerator() {
                                 <SelectItem value="Vlog">Vlog</SelectItem>
                                 <SelectItem value="Explainer">Explainer</SelectItem>
                                 <SelectItem value="Documentary">Documentary</SelectItem>
+                                <SelectItem value="Product Demo">Product Demo</SelectItem>
+                                <SelectItem value="Testimonial">Testimonial</SelectItem>
+                                <SelectItem value="Short Film">Short Film</SelectItem>
+                                <SelectItem value="Music Video">Music Video</SelectItem>
+                                <SelectItem value="Unboxing">Unboxing</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

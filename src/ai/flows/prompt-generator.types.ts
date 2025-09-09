@@ -11,7 +11,7 @@ export const GeneratePromptInputSchema = z.object({
   websiteStyle: z.enum(['Minimalist', 'Corporate', 'Playful', 'Modern', 'Luxury']).optional().describe('The design style for website prompts.'),
   appStyle: z.enum(['Clean', 'Modern', 'Gamified', 'Professional', 'Neumorphic']).optional().describe('The design aesthetic for app prompts.'),
   socialMediaAdStyle: z.enum(['Urgent', 'Friendly', 'Humorous', 'Inspirational', 'Benefit-focused']).optional().describe('The tone/style for social media ad prompts.'),
-  videoScriptStyle: z.enum(['Tutorial', 'Commercial', 'Vlog', 'Explainer', 'Documentary']).optional().describe('The type of video script to generate.'),
+  videoScriptStyle: z.enum(['Tutorial', 'Commercial', 'Vlog', 'Explainer', 'Documentary', 'Product Demo', 'Testimonial', 'Short Film', 'Music Video', 'Unboxing']).optional().describe('The type of video script to generate.'),
   marketingCopyStyle: z.enum(['Persuasive', 'Informative', 'Inspirational', 'Storytelling', 'Technical']).optional().describe('The tone for marketing copy prompts.'),
   creativeWritingStyle: z.enum(['Fantasy', 'Sci-Fi', 'Horror', 'Mystery', 'Romance']).optional().describe('The genre for creative writing prompts.'),
 });
