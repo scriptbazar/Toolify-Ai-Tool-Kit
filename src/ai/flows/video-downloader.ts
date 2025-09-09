@@ -6,6 +6,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import ytdl from 'ytdl-core';
 
 const VideoDownloaderInputSchema = z.object({
   url: z.string().url('Please enter a valid URL.'),
@@ -35,11 +36,44 @@ const videoDownloaderFlow = ai.defineFlow(
   async ({ url, platform }) => {
     console.log(`Received request to download from ${platform}: ${url}`);
 
-    // The 'youtube-dl-exec' package requires Python, which is not available in this environment.
-    // This function now returns an informative error instead of attempting to download.
-    return {
+    if (platform !== 'youtube') {
+      return {
         success: false,
-        message: 'This feature is temporarily unavailable due to system limitations. We are working on a solution.',
-    };
+        message: `Downloading from ${platform} is not yet supported. Only YouTube is currently enabled.`,
+      };
+    }
+
+    try {
+        if (!ytdl.validateURL(url)) {
+            return {
+                success: false,
+                message: 'Invalid YouTube URL provided.',
+            };
+        }
+
+        const info = await ytdl.getInfo(url);
+        const format = ytdl.chooseFormat(info.formats, { quality: 'highest' });
+        
+        if (format) {
+            return {
+                success: true,
+                message: 'Download link generated successfully.',
+                downloadUrl: format.url,
+                title: info.videoDetails.title,
+            };
+        } else {
+             return {
+                success: false,
+                message: 'Could not find a suitable download format for this video.',
+            };
+        }
+
+    } catch (error: any) {
+        console.error(`Error fetching video info from YouTube:`, error);
+        return {
+            success: false,
+            message: 'Failed to fetch video information. The video may be private, age-restricted, or removed.',
+        };
+    }
   }
 );
