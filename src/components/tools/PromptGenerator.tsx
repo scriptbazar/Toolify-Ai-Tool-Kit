@@ -196,7 +196,7 @@ export function PromptGenerator() {
                     </div>
                 );
           default:
-              return null;
+              return <div className="space-y-2"><Label>&nbsp;</Label><div className="h-10"></div></div>;
       }
   }
 
@@ -213,7 +213,7 @@ export function PromptGenerator() {
         />
       </div>
 
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
                 <Label htmlFor="category-select">Prompt Category</Label>
                 <Select value={category} onValueChange={(val) => setCategory(val as any)}>
@@ -231,19 +231,18 @@ export function PromptGenerator() {
                 </Select>
             </div>
             {renderStyleDropdown()}
-        </div>
-
-        <div className="space-y-2">
-            <Label htmlFor="detail-level-select">Prompt Detail Level</Label>
-            <Select value={detailLevel} onValueChange={(val) => setDetailLevel(val as any)}>
-                <SelectTrigger id="detail-level-select"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="Short">Short</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="Detailed">Detailed</SelectItem>
-                    <SelectItem value="Advanced">Advanced</SelectItem>
-                </SelectContent>
-            </Select>
+             <div className="space-y-2">
+                <Label htmlFor="detail-level-select">Prompt Detail Level</Label>
+                <Select value={detailLevel} onValueChange={(val) => setDetailLevel(val as any)}>
+                    <SelectTrigger id="detail-level-select"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Short">Short</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Detailed">Detailed</SelectItem>
+                        <SelectItem value="Advanced">Advanced</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
 
 
