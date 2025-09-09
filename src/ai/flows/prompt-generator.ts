@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -27,18 +28,20 @@ Desired Detail Level: {{{detailLevel}}}
 
 Instructions:
 1.  Analyze the user's topic and the selected category to understand the core concept.
-2.  Based on the **category**, tailor the prompt.
-    - If **Image**: Describe the subject, setting, lighting, composition, colors, and artistic style.
-    - If **Website**: Describe the purpose, target audience, key features, pages, and desired look and feel.
-    - If **App**: Describe the app's core functionality, user flow, main screens, and design aesthetic.
-    - If **Social Media Ad**: Describe the target platform (e.g., Instagram, Facebook), the product/service being advertised, the target audience, the key message, a call-to-action, and the desired tone (e.g., urgent, friendly, humorous). Include requests for ad copy (headline, body text) and visual ideas.
-    - If **Video Script**: Describe the video type (e.g., tutorial, commercial, vlog), the core message, target audience, desired length, and tone. Include instructions for scene-by-scene descriptions, dialogue, voiceover text, and on-screen graphics.
-    - If **General**: Create a universally applicable, detailed prompt.
+2.  Based on the **category**, tailor the prompt with specific, actionable instructions:
+    - If **Image**: Describe the subject, setting, lighting, composition, colors, and artistic style (e.g., photorealistic, cartoon, abstract).
+    - If **Website**: Describe the purpose, target audience, key features, required pages (Home, About, Contact, etc.), and desired look and feel (e.g., minimalist, corporate, playful).
+    - If **App**: Describe the app's core functionality, target user, main screens or user flow, platform (iOS, Android, web), and design aesthetic (e.g., clean, modern, gamified).
+    - If **Social Media Ad**: Describe the target platform (e.g., Instagram, Facebook, TikTok), the product/service, the target audience, the key message, a clear call-to-action, and the desired tone (e.g., urgent, friendly, humorous). Include requests for ad copy (headline, body text) and visual ideas.
+    - If **Video Script**: Describe the video type (e.g., tutorial, commercial, vlog, explainer), the core message, target audience, desired length, and tone. Include instructions for scene-by-scene descriptions, dialogue/voiceover text, and on-screen graphics or text overlays.
+    - If **Marketing Copy**: Describe the product/service, target audience, unique selling proposition (USP), desired emotional response, key benefits to highlight, and the specific format (e.g., email newsletter, landing page headline, product description).
+    - If **Creative Writing**: Describe the genre (e.g., fantasy, sci-fi, horror), a basic plot summary, key characters with brief descriptions, the desired setting or atmosphere, and the narrative style (e.g., first-person, third-person).
+    - If **General**: Create a universally applicable, detailed prompt that encourages a comprehensive and well-structured response.
 3.  Adjust the length and complexity based on the **detail level**:
-    - **Short**: A concise, single-paragraph prompt.
+    - **Short**: A concise, single-paragraph prompt with the main instructions.
     - **Medium**: A few paragraphs with bullet points for key elements.
-    - **Detailed**: A comprehensive, multi-paragraph prompt with specific instructions.
-    - **Advanced**: A highly detailed, professional-grade prompt with constraints, examples, and persona instructions for the AI.
+    - **Detailed**: A comprehensive, multi-paragraph prompt with specific instructions, examples, and constraints.
+    - **Advanced**: A highly detailed, professional-grade prompt with persona instructions for the AI (e.g., "Act as an expert marketer..."), constraints, negative constraints (what to avoid), and a clear definition of the expected output format.
 4.  The final prompt should be highly creative and inspire a high-quality, detailed response from an AI.
 
 Generate only the prompt text itself.

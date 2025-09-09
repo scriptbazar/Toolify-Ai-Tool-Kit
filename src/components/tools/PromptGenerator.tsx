@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -76,6 +77,8 @@ export function PromptGenerator() {
                     <SelectItem value="App">App</SelectItem>
                     <SelectItem value="Social Media Ad">Social Media Ad</SelectItem>
                     <SelectItem value="Video Script">Video Script</SelectItem>
+                    <SelectItem value="Marketing Copy">Marketing Copy</SelectItem>
+                    <SelectItem value="Creative Writing">Creative Writing</SelectItem>
                     <SelectItem value="General">General</SelectItem>
                 </SelectContent>
             </Select>
