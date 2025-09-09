@@ -5,26 +5,30 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Volume2, Loader2, PlayCircle } from 'lucide-react';
+import { Volume2, Loader2, PlayCircle, User, UserCog, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
+import { Card, CardContent } from '../ui/card';
+import { cn } from '@/lib/utils';
 
 
 const voices = [
-  { value: 'Algenib', label: 'Female Voice 1', group: 'Female' },
-  { value: 'Muscida', label: 'Female Voice 2', group: 'Female' },
-  { value: 'Achernar', label: 'Male Voice 1', group: 'Male' },
-  { value: 'Enif', label: 'Male Voice 2', group: 'Male' },
-  { value: 'Hadar', label: 'Male Voice 3', group: 'Male' },
+  { value: 'Algenib', label: 'Female Voice 1', gender: 'Female' },
+  { value: 'Muscida', label: 'Female Voice 2', gender: 'Female' },
+  { value: 'Achernar', label: 'Male Voice 1', gender: 'Male' },
+  { value: 'Enif', label: 'Male Voice 2', gender: 'Male' },
+  { value: 'Hadar', label: 'Male Voice 3', gender: 'Male' },
 ];
 
 
 export function TextToSpeech() {
   const [text, setText] = useState('');
-  const [voice, setVoice] = useState('Algenib');
+  const [selectedGender, setSelectedGender] = useState<'Female' | 'Male'>('Female');
+  const [selectedVoice, setSelectedVoice] = useState('Algenib');
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [sampleLoading, setSampleLoading] = useState<string | null>(null);
+  const [sampleAudio, setSampleAudio] = useState<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
   const handleGenerateAudio = async () => {
@@ -35,7 +39,7 @@ export function TextToSpeech() {
     setIsLoading(true);
     setAudioUrl(null);
     try {
-      const result = await textToSpeech({ text, voice });
+      const result = await textToSpeech({ text, voice: selectedVoice });
       setAudioUrl(result.audioDataUri);
     } catch (error: any) {
       console.error("Text to speech error:", error);
@@ -43,6 +47,23 @@ export function TextToSpeech() {
     }
     setIsLoading(false);
   };
+  
+  const playSample = async (voice: string) => {
+    if (sampleLoading) return;
+    setSampleLoading(voice);
+    try {
+        const result = await textToSpeech({ text: "Hello, you can select this voice to generate your audio.", voice });
+        const audio = new Audio(result.audioDataUri);
+        setSampleAudio(audio);
+        audio.play();
+        audio.onended = () => setSampleLoading(null);
+    } catch (error) {
+        toast({ title: 'Error', description: 'Could not play voice sample.', variant: 'destructive'});
+        setSampleLoading(null);
+    }
+  }
+
+  const filteredVoices = voices.filter(v => v.gender === selectedGender);
 
   return (
     <div className="space-y-6">
@@ -56,28 +77,41 @@ export function TextToSpeech() {
           className="min-h-[150px] resize-y"
         />
       </div>
-       <div className="space-y-2">
-        <Label htmlFor="voice-select">Select Voice</Label>
-        <Select value={voice} onValueChange={setVoice}>
-            <SelectTrigger id="voice-select">
-                <SelectValue placeholder="Select a voice" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectGroup>
-                    <SelectLabel>Female Voices</SelectLabel>
-                    {voices.filter(v => v.group === 'Female').map(v => (
-                         <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                    ))}
-                </SelectGroup>
-                <SelectGroup>
-                    <SelectLabel>Male Voices</SelectLabel>
-                     {voices.filter(v => v.group === 'Male').map(v => (
-                         <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                    ))}
-                </SelectGroup>
-            </SelectContent>
-        </Select>
-      </div>
+       <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>1. Select Voice Gender</Label>
+            <div className="grid grid-cols-2 gap-4">
+                <Button variant={selectedGender === 'Female' ? 'default' : 'outline'} onClick={() => { setSelectedGender('Female'); setSelectedVoice('Algenib'); }}>
+                    <User className="mr-2 h-5 w-5"/> Female
+                </Button>
+                <Button variant={selectedGender === 'Male' ? 'default' : 'outline'} onClick={() => { setSelectedGender('Male'); setSelectedVoice('Achernar'); }}>
+                    <UserCog className="mr-2 h-5 w-5"/> Male
+                </Button>
+            </div>
+          </div>
+           <div className="space-y-2">
+            <Label>2. Select Voice Model</Label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {filteredVoices.map(v => (
+                    <Card 
+                        key={v.value} 
+                        onClick={() => setSelectedVoice(v.value)}
+                        className={cn("cursor-pointer transition-all", selectedVoice === v.value ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50')}
+                    >
+                        <CardContent className="p-4 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <Bot className="h-6 w-6 text-primary"/>
+                                <span className="font-semibold">{v.label}</span>
+                            </div>
+                            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); playSample(v.value); }} disabled={!!sampleLoading}>
+                                {sampleLoading === v.value ? <Loader2 className="h-5 w-5 animate-spin" /> : <PlayCircle className="h-5 w-5"/>}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+          </div>
+       </div>
       <Button onClick={handleGenerateAudio} disabled={isLoading} className="w-full">
         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Volume2 className="mr-2 h-4 w-4" />}
         Generate Audio
@@ -91,12 +125,6 @@ export function TextToSpeech() {
           </audio>
         </div>
       )}
-       {!audioUrl && !isLoading && (
-         <div className="pt-4 border-t flex flex-col items-center justify-center text-muted-foreground h-24">
-            <PlayCircle className="h-8 w-8 mb-2" />
-            <p>Your audio will appear here</p>
-        </div>
-       )}
     </div>
   );
 }
