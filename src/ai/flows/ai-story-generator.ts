@@ -26,13 +26,17 @@ const prompt = ai.definePrompt({
   output: {schema: AiStoryGeneratorOutputSchema},
   prompt: `You are an expert storyteller. Your task is to write a short, engaging story based on the user's provided topic and genre.
 
+{{#if language}}
+The story must be written in the following language: **{{{language}}}**.
+{{/if}}
+
 Genre: {{{genre}}}
 Topic/Prompt: "{{{topic}}}"
 
 Instructions:
 1.  Craft a compelling narrative with a clear beginning, middle, and end.
 2.  Develop at least one interesting character.
-3.  Ensure the story fits the selected genre.
+3.  Ensure the story fits the selected genre and is engaging.
 4.  The story should be at least 300 words long.
 5.  Generate only the story text. Do not add a title or any other introductory phrases.
 `,

@@ -12,9 +12,24 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { aiStoryGenerator } from '@/ai/flows/ai-story-generator';
 
+const languages = [
+    { value: 'English', label: 'English' },
+    { value: 'Hindi', label: 'Hindi' },
+    { value: 'Spanish', label: 'Spanish' },
+    { value: 'French', label: 'French' },
+    { value: 'German', label: 'German' },
+    { value: 'Chinese', label: 'Chinese' },
+    { value: 'Japanese', label: 'Japanese' },
+    { value: 'Russian', label: 'Russian' },
+    { value: 'Arabic', label: 'Arabic' },
+    { value: 'Portuguese', label: 'Portuguese' },
+];
+
+
 export function AiStoryGenerator() {
   const [topic, setTopic] = useState('');
   const [genre, setGenre] = useState('Fantasy');
+  const [language, setLanguage] = useState('English');
   const [generatedStory, setGeneratedStory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -31,7 +46,7 @@ export function AiStoryGenerator() {
     setIsLoading(true);
     setGeneratedStory('');
     try {
-      const result = await aiStoryGenerator({ topic, genre: genre as any });
+      const result = await aiStoryGenerator({ topic, genre: genre as any, language });
       setGeneratedStory(result.story);
     } catch (error: any) {
       toast({
@@ -55,33 +70,48 @@ export function AiStoryGenerator() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="topic-input">Story Topic / Prompt</Label>
-        <Input
-          id="topic-input"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder="e.g., A detective who can talk to ghosts"
-        />
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+            <Label htmlFor="genre-select">Genre</Label>
+            <Select value={genre} onValueChange={setGenre}>
+              <SelectTrigger id="genre-select">
+                <SelectValue placeholder="Select a genre" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Fantasy">Fantasy</SelectItem>
+                <SelectItem value="Sci-Fi">Sci-Fi</SelectItem>
+                <SelectItem value="Mystery">Mystery</SelectItem>
+                <SelectItem value="Horror">Horror</SelectItem>
+                <SelectItem value="Adventure">Adventure</SelectItem>
+                <SelectItem value="Romance">Romance</SelectItem>
+                <SelectItem value="Comedy">Comedy</SelectItem>
+              </SelectContent>
+            </Select>
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="topic-input">Story Topic / Prompt</Label>
+            <Input
+              id="topic-input"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="e.g., A detective who can talk to ghosts"
+            />
+        </div>
       </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="genre-select">Genre</Label>
-        <Select value={genre} onValueChange={setGenre}>
-          <SelectTrigger id="genre-select">
-            <SelectValue placeholder="Select a genre" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Fantasy">Fantasy</SelectItem>
-            <SelectItem value="Sci-Fi">Sci-Fi</SelectItem>
-            <SelectItem value="Mystery">Mystery</SelectItem>
-            <SelectItem value="Horror">Horror</SelectItem>
-            <SelectItem value="Adventure">Adventure</SelectItem>
-            <SelectItem value="Romance">Romance</SelectItem>
-            <SelectItem value="Comedy">Comedy</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      
+       <div className="space-y-2">
+            <Label htmlFor="language-select">Language</Label>
+            <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger id="language-select">
+                    <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                    {languages.map(lang => (
+                        <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
 
       <Button onClick={handleGenerate} disabled={isLoading} className="w-full">
         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
