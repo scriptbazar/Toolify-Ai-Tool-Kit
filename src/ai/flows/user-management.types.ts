@@ -5,56 +5,49 @@
  */
 import { z } from 'zod';
 
-export const UpdateUserRoleInputSchema = z.object({
-  userId: z.string().describe("The ID of the user to update."),
-  newRole: z.enum(['user', 'admin']).describe("The new role to assign to the user."),
-});
-export type UpdateUserRoleInput = z.infer<typeof UpdateUserRoleInputSchema>;
+export type UpdateUserRoleInput = {
+  userId: string;
+  newRole: 'user' | 'admin';
+};
 
-export const AddLeadUserInputSchema = z.object({
-  name: z.string().describe("The name of the lead."),
-  email: z.string().email().describe("The email of the lead."),
-  message: z.string().optional().describe("The initial message from the lead."),
-});
-export type AddLeadUserInput = z.infer<typeof AddLeadUserInputSchema>;
+export type AddLeadUserInput = {
+  name: string;
+  email: string;
+  message?: string;
+};
 
-export const ReferralStatusSchema = z.enum(['not_joined', 'pending', 'approved', 'rejected']);
-export type ReferralStatus = z.infer<typeof ReferralStatusSchema>;
+export type ReferralStatus = 'not_joined' | 'pending' | 'approved' | 'rejected';
 
-export const ReferralRequestSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string().email(),
-    avatar: z.string().url().or(z.literal('')),
-    requestDate: z.string().datetime(),
-    status: z.literal('pending'),
-});
-export type ReferralRequest = z.infer<typeof ReferralRequestSchema>;
+export type ReferralRequest = {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string;
+    requestDate: string;
+    status: 'pending';
+};
 
-export const AffiliateSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string().email(),
-    avatar: z.string().url().or(z.literal('')),
-    referrals: z.number().default(0),
-    earnings: z.number().default(0),
-    status: z.enum(['Active', 'Inactive']).default('Active'),
-});
-export type Affiliate = z.infer<typeof AffiliateSchema>;
+export type Affiliate = {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string;
+    referrals: number;
+    earnings: number;
+    status: 'Active' | 'Inactive';
+};
 
-export const CommentStatusSchema = z.enum(['approved', 'pending', 'rejected']);
-export type CommentStatus = z.infer<typeof CommentStatusSchema>;
+export type CommentStatus = 'approved' | 'pending' | 'rejected';
 
-export const CommentSchema = z.object({
-  id: z.string(),
-  authorId: z.string(),
-  authorName: z.string(),
-  authorEmail: z.string().email(),
-  authorAvatar: z.string().url(),
-  comment: z.string(),
-  postId: z.string(),
-  postTitle: z.string(),
-  submittedOn: z.string().datetime({ offset: true }),
-  status: CommentStatusSchema,
-});
-export type Comment = z.infer<typeof CommentSchema>;
+export type Comment = {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorEmail: string;
+  authorAvatar: string;
+  comment: string;
+  postId: string;
+  postTitle: string;
+  submittedOn: string;
+  status: CommentStatus;
+};

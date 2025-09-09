@@ -12,9 +12,9 @@
  * - getChatUsers - Fetches a list of all signed-up users for the community chat.
  */
 
-import { z } from 'zod';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, ReferralRequestSchema, type Affiliate, AffiliateSchema, CommentSchema, type Comment } from './user-management.types';
+import { type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, type Affiliate, type Comment } from './user-management.types';
+import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, ReferralRequestSchema, AffiliateSchema, CommentSchema } from './user-management.schemas';
 import { getAdminDb } from '@/lib/firebase-admin';
 
 
@@ -32,8 +32,8 @@ export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ succ
     return { success: true, message: 'User role updated successfully.' };
   } catch (error: any) {
     console.error("Error updating user role:", error);
-    if (error instanceof z.ZodError) {
-      return { success: false, message: `Validation error: ${error.errors.map(e => e.message).join(', ')}` };
+    if (error.name === 'ZodError') {
+      return { success: false, message: `Validation error: ${error.errors.map((e: any) => e.message).join(', ')}` };
     }
     return { success: false, message: error.message || 'An unknown error occurred.' };
   }
@@ -58,8 +58,8 @@ export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: b
     return { success: true, message: 'Lead added successfully.' };
   } catch (error: any) {
     console.error("Error adding lead user:", error);
-     if (error instanceof z.ZodError) {
-      return { success: false, message: `Validation error: ${error.errors.map(e => e.message).join(', ')}` };
+     if (error.name === 'ZodError') {
+      return { success: false, message: `Validation error: ${error.errors.map((e: any) => e.message).join(', ')}` };
     }
     return { success: false, message: error.message || 'An unknown error occurred.' };
   }
