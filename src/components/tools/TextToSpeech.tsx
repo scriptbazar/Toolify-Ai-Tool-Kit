@@ -8,9 +8,21 @@ import { Label } from '@/components/ui/label';
 import { Volume2, Loader2, PlayCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
+
+
+const voices = [
+  { value: 'Algenib', label: 'Female Voice 1', group: 'Female' },
+  { value: 'Muscida', label: 'Female Voice 2', group: 'Female' },
+  { value: 'Achernar', label: 'Male Voice 1', group: 'Male' },
+  { value: 'Enif', label: 'Male Voice 2', group: 'Male' },
+  { value: 'Hadar', label: 'Male Voice 3', group: 'Male' },
+];
+
 
 export function TextToSpeech() {
   const [text, setText] = useState('');
+  const [voice, setVoice] = useState('Algenib');
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const { toast } = useToast();
@@ -23,7 +35,7 @@ export function TextToSpeech() {
     setIsLoading(true);
     setAudioUrl(null);
     try {
-      const result = await textToSpeech({ text });
+      const result = await textToSpeech({ text, voice });
       setAudioUrl(result.audioDataUri);
     } catch (error: any) {
       console.error("Text to speech error:", error);
@@ -43,6 +55,28 @@ export function TextToSpeech() {
           placeholder="Enter text to convert to speech..."
           className="min-h-[150px] resize-y"
         />
+      </div>
+       <div className="space-y-2">
+        <Label htmlFor="voice-select">Select Voice</Label>
+        <Select value={voice} onValueChange={setVoice}>
+            <SelectTrigger id="voice-select">
+                <SelectValue placeholder="Select a voice" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectGroup>
+                    <SelectLabel>Female Voices</SelectLabel>
+                    {voices.filter(v => v.group === 'Female').map(v => (
+                         <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                    ))}
+                </SelectGroup>
+                <SelectGroup>
+                    <SelectLabel>Male Voices</SelectLabel>
+                     {voices.filter(v => v.group === 'Male').map(v => (
+                         <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                    ))}
+                </SelectGroup>
+            </SelectContent>
+        </Select>
       </div>
       <Button onClick={handleGenerateAudio} disabled={isLoading} className="w-full">
         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Volume2 className="mr-2 h-4 w-4" />}
