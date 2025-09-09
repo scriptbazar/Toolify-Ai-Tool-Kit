@@ -5,27 +5,23 @@
  * @fileOverview An AI agent for creating and managing announcements.
  * - generateAnnouncement - Generates an announcement title and content.
  * - saveAnnouncement - Saves a new announcement to Firestore.
- * - getAnnouncementsForUser - Fetches all announcements and indicates if they are new for the user.
+ * - getAnnouncementsForUser - Fetches all announcements and indicates if they are new for a user.
  * - markAnnouncementsAsRead - Marks specific announcements as read for a user.
  */
 
 import { ai } from '@/ai/genkit';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { z } from 'zod';
-import { type Announcement } from './announcement-flow.types';
+import { 
+    GenerateAnnouncementInputSchema,
+    GenerateAnnouncementOutputSchema,
+    SaveAnnouncementInputSchema,
+    type GenerateAnnouncementInput,
+    type GenerateAnnouncementOutput,
+    type SaveAnnouncementInput,
+    type Announcement
+} from './announcement-flow.types';
 
-const GenerateAnnouncementInputSchema = z.object({
-  featureName: z.string().describe('The name of the new feature being announced.'),
-  featureDescription: z.string().describe('A brief description of what the new feature does.'),
-});
-export type GenerateAnnouncementInput = z.infer<typeof GenerateAnnouncementInputSchema>;
-
-const GenerateAnnouncementOutputSchema = z.object({
-  title: z.string().describe('A catchy and exciting title for the announcement.'),
-  content: z.string().describe('The full content of the announcement, written in an engaging and informative tone.'),
-});
-export type GenerateAnnouncementOutput = z.infer<typeof GenerateAnnouncementOutputSchema>;
 
 export async function generateAnnouncement(input: GenerateAnnouncementInput): Promise<GenerateAnnouncementOutput> {
   return generateAnnouncementFlow(input);
@@ -57,15 +53,6 @@ const generateAnnouncementFlow = ai.defineFlow(
     return output;
   }
 );
-
-
-const SaveAnnouncementInputSchema = z.object({
-    title: z.string(),
-    content: z.string(),
-    featureName: z.string(),
-    featureDescription: z.string(),
-});
-export type SaveAnnouncementInput = z.infer<typeof SaveAnnouncementInputSchema>;
 
 
 export async function saveAnnouncement(input: SaveAnnouncementInput): Promise<{ success: boolean; message: string }> {

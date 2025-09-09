@@ -6,41 +6,19 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { 
+    GenerateImageInputSchema,
+    GenerateImageOutputSchema,
+    SaveMediaInputSchema,
+    UserMediaSchema,
+    type GenerateImageInput,
+    type GenerateImageOutput,
+    type SaveMediaInput,
+    type UserMedia
+} from './ai-image-generator.types';
 
-// --- Input/Output Schemas for Image Generation ---
-const GenerateImageInputSchema = z.object({
-  promptText: z.string().describe('The text prompt to use for image generation.'),
-  userId: z.string().describe('The ID of the user generating the image.'),
-});
-export type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
-
-const GenerateImageOutputSchema = z.object({
-  imageDataUri: z.string().describe('The generated image as a data URI.'),
-});
-export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
-
-// --- Media Management Schemas & Types ---
-export const UserMediaSchema = z.object({
-    id: z.string(),
-    userId: z.string(),
-    type: z.enum(['ai-generated', 'community-chat', 'ticket-media']),
-    mediaUrl: z.string().url(),
-    prompt: z.string().optional(),
-    createdAt: z.string().datetime({ offset: true }),
-    expiresAt: z.string().datetime({ offset: true }),
-});
-export type UserMedia = z.infer<typeof UserMediaSchema>;
-
-export const SaveMediaInputSchema = UserMediaSchema.pick({
-    userId: true,
-    type: true,
-    mediaUrl: true,
-    prompt: true,
-});
-export type SaveMediaInput = z.infer<typeof SaveMediaInputSchema>;
 
 // --- Main Flow for Image Generation ---
 export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
