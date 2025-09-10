@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 
 export function AiCodeAssistant() {
   const [language, setLanguage] = useState('javascript');
-  const [requestType, setRequestType] = useState<'generate' | 'debug' | 'explain'>('generate');
+  const [requestType, setRequestType] = useState<'generate' | 'debug' | 'explain' | 'minify'>('generate');
   const [code, setCode] = useState('');
   const [generatedResponse, setGeneratedResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -64,6 +64,8 @@ export function AiCodeAssistant() {
             return 'e.g., "const x = 1\nconsole.log(y) // Why is this throwing an error?"';
           case 'explain':
             return 'e.g., "const sum = (a, b) => a + b;\nconsole.log(sum(2, 3));"';
+          case 'minify':
+             return '/* Paste your CSS, JS, or HTML code here to minify it. */\n.my-class {\n    color: #FFFFFF;\n    font-weight: bold;\n}';
           default:
             return 'Enter your code or request here...';
       }
@@ -90,13 +92,15 @@ export function AiCodeAssistant() {
           </div>
           <div className="space-y-2">
             <Label>Action</Label>
-            <RadioGroup value={requestType} onValueChange={(val) => setRequestType(val as any)} className="flex gap-2">
-                <Label htmlFor="generate" className={cn("flex-1 p-2 border rounded-md cursor-pointer text-center", requestType === 'generate' && "bg-primary text-primary-foreground border-primary")}>Generate</Label>
+            <RadioGroup value={requestType} onValueChange={(val) => setRequestType(val as any)} className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <Label htmlFor="generate" className={cn("p-2 border rounded-md cursor-pointer text-center text-sm", requestType === 'generate' && "bg-primary text-primary-foreground border-primary")}>Generate</Label>
                 <RadioGroupItem value="generate" id="generate" className="sr-only"/>
-                <Label htmlFor="debug" className={cn("flex-1 p-2 border rounded-md cursor-pointer text-center", requestType === 'debug' && "bg-primary text-primary-foreground border-primary")}>Debug</Label>
+                <Label htmlFor="debug" className={cn("p-2 border rounded-md cursor-pointer text-center text-sm", requestType === 'debug' && "bg-primary text-primary-foreground border-primary")}>Debug</Label>
                 <RadioGroupItem value="debug" id="debug" className="sr-only"/>
-                <Label htmlFor="explain" className={cn("flex-1 p-2 border rounded-md cursor-pointer text-center", requestType === 'explain' && "bg-primary text-primary-foreground border-primary")}>Explain</Label>
+                <Label htmlFor="explain" className={cn("p-2 border rounded-md cursor-pointer text-center text-sm", requestType === 'explain' && "bg-primary text-primary-foreground border-primary")}>Explain</Label>
                 <RadioGroupItem value="explain" id="explain" className="sr-only"/>
+                <Label htmlFor="minify" className={cn("p-2 border rounded-md cursor-pointer text-center text-sm", requestType === 'minify' && "bg-primary text-primary-foreground border-primary")}>Minify</Label>
+                <RadioGroupItem value="minify" id="minify" className="sr-only"/>
             </RadioGroup>
           </div>
        </div>
