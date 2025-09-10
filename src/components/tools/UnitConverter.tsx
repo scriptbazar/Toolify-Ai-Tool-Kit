@@ -1,11 +1,12 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowRightLeft } from 'lucide-react';
 
 const conversionFactors: { [key: string]: { [key: string]: number } } = {
   length: { m: 1, km: 1000, cm: 0.01, mm: 0.001, mi: 1609.34, ft: 0.3048, in: 0.0254 },
@@ -13,7 +14,7 @@ const conversionFactors: { [key: string]: { [key: string]: number } } = {
   temperature: {}, // Special handling
 };
 
-const units = {
+const units: { [key: string]: string[] } = {
   length: ['m', 'km', 'cm', 'mm', 'mi', 'ft', 'in'],
   mass: ['kg', 'g', 'mg', 'lb', 'oz'],
   temperature: ['Celsius', 'Fahrenheit', 'Kelvin'],
@@ -25,6 +26,22 @@ export function UnitConverter() {
   const [toUnit, setToUnit] = useState(units.length[1]);
   const [inputValue, setInputValue] = useState('1');
   const [outputValue, setOutputValue] = useState('');
+
+  useEffect(() => {
+    convert();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputValue, fromUnit, toUnit, category]);
+
+  const handleCategoryChange = (val: string) => {
+    setCategory(val);
+    setFromUnit((units as any)[val][0]);
+    setToUnit((units as any)[val][1]);
+  };
+  
+  const handleSwap = () => {
+    setFromUnit(toUnit);
+    setToUnit(fromUnit);
+  };
 
   const convert = () => {
     const inputNum = parseFloat(inputValue);
@@ -57,17 +74,11 @@ export function UnitConverter() {
     }
   };
 
-  useState(convert);
-
   return (
     <div className="space-y-6">
         <div className="space-y-2">
             <Label htmlFor="category">Conversion Type</Label>
-            <Select value={category} onValueChange={(val) => {
-                setCategory(val);
-                setFromUnit((units as any)[val][0]);
-                setToUnit((units as any)[val][1]);
-            }}>
+            <Select value={category} onValueChange={handleCategoryChange}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                     <SelectItem value="length">Length</SelectItem>
@@ -76,10 +87,10 @@ export function UnitConverter() {
                 </SelectContent>
             </Select>
         </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-4">
         <div className="space-y-2">
           <Label>From</Label>
-          <div className="flex gap-2">
+          <div className="space-y-2">
             <Input type="number" value={inputValue} onChange={e => setInputValue(e.target.value)} />
             <Select value={fromUnit} onValueChange={setFromUnit}>
               <SelectTrigger><SelectValue /></SelectTrigger>
@@ -87,10 +98,13 @@ export function UnitConverter() {
             </Select>
           </div>
         </div>
+        <Button variant="outline" size="icon" onClick={handleSwap}>
+          <ArrowRightLeft className="h-4 w-4" />
+        </Button>
         <div className="space-y-2">
           <Label>To</Label>
-          <div className="flex gap-2">
-            <Input value={outputValue} readOnly className="bg-muted" />
+          <div className="space-y-2">
+            <Input value={outputValue} readOnly className="bg-muted font-bold" />
              <Select value={toUnit} onValueChange={setToUnit}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>{(units as any)[category].map((u: string) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
@@ -98,7 +112,6 @@ export function UnitConverter() {
           </div>
         </div>
       </div>
-      <Button onClick={convert} className="w-full">Convert</Button>
     </div>
   );
 }
