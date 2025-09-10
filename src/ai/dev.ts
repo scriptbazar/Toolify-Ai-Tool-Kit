@@ -38,3 +38,4 @@ import '@/ai/flows/ai-tweet-generator.types.ts';
 import '@/ai/flows/video-downloader.ts';
 import '@/ai/flows/ai-voice-cloning.ts';
 import '@/ai/flows/ai-voice-cloning.types.ts';
+import '@/ai/flows/speech-to-text.ts';

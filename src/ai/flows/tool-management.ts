@@ -21,6 +21,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'JSON Formatter', description: 'Format, validate, and beautify your JSON data for readability.', icon: 'Braces', category: 'dev', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'BMI Calculator', description: 'Calculate your Body Mass Index to assess your weight status.', icon: 'HeartPulse', category: 'calculator', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Text to Speech', description: 'Convert written text into natural-sounding spoken audio in various voices.', icon: 'Volume2', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Speech to Text', description: 'Transcribe audio files into written text.', icon: 'Voicemail', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'PDF Merger', description: 'Combine multiple PDF files into a single, organized document.', icon: 'FilePlus2', category: 'pdf', plan: 'Pro', isNew: false, status: 'Active' },
     { name: 'Unlock PDF', description: 'Remove password and restrictions from PDF files.', icon: 'Unlock', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Lock PDF', description: 'Protect your PDF files with a password and set permissions.', icon: 'Lock', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active' },

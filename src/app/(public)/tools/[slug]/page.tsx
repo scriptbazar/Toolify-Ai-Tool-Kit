@@ -9,6 +9,7 @@ import { PasswordGenerator } from '@/components/tools/PasswordGenerator';
 import { JsonFormatter } from '@/components/tools/JsonFormatter';
 import { BmiCalculator } from '@/components/tools/BmiCalculator';
 import { TextToSpeech } from '@/components/tools/TextToSpeech';
+import { SpeechToText } from '@/components/tools/SpeechToText';
 import { PdfMerger } from '@/components/tools/PdfMerger';
 import { UnitConverter } from '@/components/tools/UnitConverter';
 import { ColorPicker } from '@/components/tools/ColorPicker';
@@ -113,6 +114,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'json-formatter': JsonFormatter,
   'bmi-calculator': BmiCalculator,
   'text-to-speech': TextToSpeech,
+  'speech-to-text': SpeechToText,
   'pdf-merger': PdfMerger,
   'unlock-pdf': UnlockPdf,
   'lock-pdf': LockPdf,
