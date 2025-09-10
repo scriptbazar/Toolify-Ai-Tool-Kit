@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -13,6 +13,19 @@ export function JsonFormatter() {
   const [jsonInput, setJsonInput] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!jsonInput.trim()) {
+        setIsValid(null);
+        return;
+    }
+    try {
+      JSON.parse(jsonInput);
+      setIsValid(true);
+    } catch (e) {
+      setIsValid(false);
+    }
+  }, [jsonInput]);
 
   const handleFormat = () => {
     if (!jsonInput.trim()) {
@@ -53,14 +66,11 @@ export function JsonFormatter() {
             <Textarea
               id="json-input"
               value={jsonInput}
-              onChange={(e) => {
-                setJsonInput(e.target.value);
-                setIsValid(null);
-              }}
+              onChange={(e) => setJsonInput(e.target.value)}
               placeholder="Paste your JSON here..."
               className={cn("min-h-[300px] resize-y font-mono pr-12", 
-                isValid === true && 'border-green-500',
-                isValid === false && 'border-red-500'
+                isValid === true && 'border-green-500 focus-visible:ring-green-500',
+                isValid === false && 'border-red-500 focus-visible:ring-red-500'
               )}
             />
             <div className="absolute top-3 right-3">
@@ -70,7 +80,7 @@ export function JsonFormatter() {
         </div>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t">
-        <Button onClick={handleFormat}>Format JSON</Button>
+        <Button onClick={handleFormat}>Validate & Format JSON</Button>
         <div className="flex gap-2">
           <Button variant="outline" size="icon" onClick={handleCopy}><Copy className="h-4 w-4" /></Button>
           <Button variant="destructive" size="icon" onClick={handleClear}><Trash2 className="h-4 w-4" /></Button>
