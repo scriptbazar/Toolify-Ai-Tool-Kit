@@ -48,31 +48,37 @@ export function WordCounter() {
           id="text-input"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Type or paste your text here to count words and characters..."
+          placeholder="Type or paste your text here to count words, characters, sentences, and paragraphs..."
           className="min-h-[200px] resize-y"
         />
       </div>
-       <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
-            <div className="p-2 border rounded-md text-center">
-                <span className="font-bold text-lg text-primary">{wordCount}</span> Words
-            </div>
-             <div className="p-2 border rounded-md text-center">
-                <span className="font-bold text-lg text-primary">{charCount}</span> Characters
-            </div>
-             <div className="p-2 border rounded-md text-center">
-                <span className="font-bold text-lg text-primary">{sentenceCount}</span> Sentences
-            </div>
-            <div className="p-2 border rounded-md text-center">
-                <span className="font-bold text-lg text-primary">{paragraphCount}</span> Paragraphs
-            </div>
+      
+       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-4 border rounded-lg text-center bg-muted">
+            <p className="text-2xl font-bold text-primary">{wordCount}</p>
+            <p className="text-sm text-muted-foreground">Words</p>
         </div>
+         <div className="p-4 border rounded-lg text-center bg-muted">
+            <p className="text-2xl font-bold text-primary">{charCount}</p>
+            <p className="text-sm text-muted-foreground">Characters</p>
+        </div>
+         <div className="p-4 border rounded-lg text-center bg-muted">
+            <p className="text-2xl font-bold text-primary">{sentenceCount}</p>
+            <p className="text-sm text-muted-foreground">Sentences</p>
+        </div>
+        <div className="p-4 border rounded-lg text-center bg-muted">
+            <p className="text-2xl font-bold text-primary">{paragraphCount}</p>
+            <p className="text-sm text-muted-foreground">Paragraphs</p>
+        </div>
+      </div>
+
+       <div className="flex flex-wrap items-center justify-end gap-2 pt-4 border-t">
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={handleCopy}>
+          <Button variant="outline" size="icon" onClick={handleCopy} title="Copy to clipboard">
             <Copy className="h-4 w-4" />
             <span className="sr-only">Copy</span>
           </Button>
-          <Button variant="destructive" size="icon" onClick={handleClear}>
+          <Button variant="destructive" size="icon" onClick={handleClear} title="Clear text">
             <Trash2 className="h-4 w-4" />
             <span className="sr-only">Clear</span>
           </Button>
