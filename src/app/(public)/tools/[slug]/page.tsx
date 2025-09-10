@@ -206,11 +206,9 @@ const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.Ele
 export default async function ToolPage({ params }: { params: { slug: string } }) {
   const awaitedParams = await Promise.resolve(params);
   
-  const [allTools, settings, allReviews, allPosts] = await Promise.all([
+  const [allTools, settings] = await Promise.all([
     getTools(),
     getSettings(),
-    getReviews(),
-    getPosts()
   ]);
 
   const tool = allTools.find((t) => t.slug === awaitedParams.slug);
@@ -219,7 +217,12 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     notFound();
   }
 
-  const toolReviews = allReviews.filter(r => r.toolId === tool.slug && r.status === 'approved');
+  // Fetch reviews and posts only for this specific tool
+  const [toolReviews, allPosts] = await Promise.all([
+      getReviews(tool.slug),
+      getPosts() // still needed for recent posts in sidebar
+  ]);
+
   const ToolComponent = toolComponents[tool.slug];
   const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
   

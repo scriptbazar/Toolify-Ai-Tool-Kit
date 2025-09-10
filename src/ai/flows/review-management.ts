@@ -12,16 +12,26 @@ import { type Review, ReviewSchema, AddReviewInputSchema, AddReviewInput, Review
 
 /**
  * Fetches all reviews from the 'reviews' collection in Firestore.
- * @returns {Promise<Review[]>} A list of all reviews.
+ * If a toolId is provided, it fetches reviews only for that specific tool.
+ * @param {string} [toolId] - Optional ID of the tool to fetch reviews for.
+ * @returns {Promise<Review[]>} A list of reviews.
  */
-export async function getReviews(): Promise<Review[]> {
+export async function getReviews(toolId?: string): Promise<Review[]> {
     try {
         const adminDb = getAdminDb();
         if (!adminDb) {
             console.warn("Database not initialized, cannot fetch reviews.");
             return [];
         }
-        const snapshot = await adminDb.collection('reviews').orderBy('submittedOn', 'desc').get();
+        
+        let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = adminDb.collection('reviews');
+
+        if (toolId) {
+            query = query.where('toolId', '==', toolId).where('status', '==', 'approved');
+        }
+
+        const snapshot = await query.orderBy('submittedOn', 'desc').get();
+        
         if (snapshot.empty) {
             return [];
         }
