@@ -7,10 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Wand2, Loader2, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { aiStoryGenerator } from '@/ai/flows/ai-story-generator';
+import { Skeleton } from '../ui/skeleton';
 
 const languages = [
     { value: 'English', label: 'English' },
@@ -69,80 +70,89 @@ export function AiStoryGenerator() {
   };
 
   return (
-    <div className="space-y-6">
-       <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-                <Label htmlFor="topic-input">Story Topic / Prompt</Label>
-                <Input
-                id="topic-input"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g., A detective who can talk to ghosts"
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="language-select">Language</Label>
-                <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger id="language-select">
-                        <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {languages.map(lang => (
-                            <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="genre-select">Genre</Label>
-                <Select value={genre} onValueChange={setGenre}>
-                <SelectTrigger id="genre-select">
-                    <SelectValue placeholder="Select a genre" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="Fantasy">Fantasy</SelectItem>
-                    <SelectItem value="Sci-Fi">Sci-Fi</SelectItem>
-                    <SelectItem value="Mystery">Mystery</SelectItem>
-                    <SelectItem value="Horror">Horror</SelectItem>
-                    <SelectItem value="Adventure">Adventure</SelectItem>
-                    <SelectItem value="Romance">Romance</SelectItem>
-                    <SelectItem value="Comedy">Comedy</SelectItem>
-                </SelectContent>
-                </Select>
-            </div>
-        </div>
-      </div>
-      
-      <Button onClick={handleGenerate} disabled={isLoading} className="w-full">
-        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-        Generate Story
-      </Button>
-
-      {(generatedStory || isLoading) && (
-        <div className="pt-4 border-t">
-          <div className="flex justify-between items-center mb-2">
-            <Label>Generated Story</Label>
-            <Button variant="outline" size="sm" onClick={handleCopy} disabled={!generatedStory}>
-              <Copy className="mr-2 h-4 w-4" />
-              Copy
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Story Idea</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="topic-input">Story Topic / Prompt</Label>
+                        <Input
+                            id="topic-input"
+                            value={topic}
+                            onChange={(e) => setTopic(e.target.value)}
+                            placeholder="e.g., A detective who can talk to ghosts"
+                        />
+                    </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="genre-select">Genre</Label>
+                            <Select value={genre} onValueChange={setGenre}>
+                            <SelectTrigger id="genre-select">
+                                <SelectValue placeholder="Select a genre" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Fantasy">Fantasy</SelectItem>
+                                <SelectItem value="Sci-Fi">Sci-Fi</SelectItem>
+                                <SelectItem value="Mystery">Mystery</SelectItem>
+                                <SelectItem value="Horror">Horror</SelectItem>
+                                <SelectItem value="Adventure">Adventure</SelectItem>
+                                <SelectItem value="Romance">Romance</SelectItem>
+                                <SelectItem value="Comedy">Comedy</SelectItem>
+                            </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="language-select">Language</Label>
+                            <Select value={language} onValueChange={setLanguage}>
+                                <SelectTrigger id="language-select">
+                                    <SelectValue placeholder="Select language" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {languages.map(lang => (
+                                        <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+            <Button onClick={handleGenerate} disabled={isLoading} className="w-full">
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                Generate Story
             </Button>
-          </div>
-          <Card className="mt-2">
-            <CardContent className="p-4">
-              {isLoading ? (
-                <div className="space-y-2">
-                  <div className="h-4 w-full bg-muted animate-pulse rounded-md" />
-                  <div className="h-4 w-5/6 bg-muted animate-pulse rounded-md" />
-                  <div className="h-4 w-full bg-muted animate-pulse rounded-md" />
-                </div>
-              ) : (
-                <p className="text-muted-foreground whitespace-pre-wrap">{generatedStory}</p>
-              )}
-            </CardContent>
-          </Card>
         </div>
-      )}
+
+        <div className="space-y-2">
+            <Label>Generated Story</Label>
+            <Card className="min-h-[400px]">
+                <CardHeader>
+                    <CardTitle className="flex justify-between items-center">
+                        <span>Your Story</span>
+                        <Button variant="outline" size="sm" onClick={handleCopy} disabled={!generatedStory}>
+                            <Copy className="mr-2 h-4 w-4"/>
+                            Copy
+                        </Button>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {isLoading ? (
+                        <div className="space-y-4">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-5/6" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-3/4" />
+                        </div>
+                    ) : (
+                        <p className="text-muted-foreground whitespace-pre-wrap">{generatedStory || 'Your generated story will appear here...'}</p>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
     </div>
   );
 }
