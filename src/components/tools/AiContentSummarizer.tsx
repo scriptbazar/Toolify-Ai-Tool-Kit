@@ -70,7 +70,7 @@ export function AiContentSummarizer() {
               value={textToSummarize}
               onChange={(e) => setTextToSummarize(e.target.value)}
               placeholder="Paste your long article, document, or text here..."
-              className="flex-grow resize-y"
+              className="flex-grow resize-y min-h-[300px]"
             />
           </div>
           <div className="space-y-2">
@@ -115,11 +115,15 @@ export function AiContentSummarizer() {
                         <div className="h-4 w-full bg-muted animate-pulse rounded-md" />
                         <div className="h-4 w-3/4 bg-muted animate-pulse rounded-md" />
                     </div>
-                ) : (
+                ) : generatedSummary ? (
                     <div
                         className="prose dark:prose-invert max-w-none text-sm"
                         dangerouslySetInnerHTML={{ __html: generatedSummary }}
                     />
+                ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                        Your summary will appear here.
+                    </div>
                 )}
             </CardContent>
         </Card>
