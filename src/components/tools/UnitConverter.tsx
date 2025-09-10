@@ -9,15 +9,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowRightLeft } from 'lucide-react';
 
 const conversionFactors: { [key: string]: { [key: string]: number } } = {
-  length: { m: 1, km: 1000, cm: 0.01, mm: 0.001, mi: 1609.34, ft: 0.3048, in: 0.0254 },
-  mass: { kg: 1, g: 0.001, mg: 0.000001, lb: 0.453592, oz: 0.0283495 },
+  length: { m: 1, km: 1000, cm: 0.01, mm: 0.001, mi: 1609.34, ft: 0.3048, in: 0.0254, yd: 0.9144, nm: 1e-9 },
+  mass: { kg: 1, g: 0.001, mg: 1e-6, lb: 0.453592, oz: 0.0283495, t: 1000, st: 6.35029 },
   temperature: {}, // Special handling
+  area: { sqm: 1, sqkm: 1e6, sqcm: 1e-4, sqmi: 2.59e6, sqft: 0.092903, acre: 4046.86, ha: 10000 },
+  volume: { l: 1, ml: 0.001, 'cubic-m': 1000, 'cubic-cm': 0.001, gal: 3.78541, qt: 0.946353, pt: 0.473176, cup: 0.236588 },
+  speed: { 'm/s': 1, 'km/h': 0.277778, mph: 0.44704, knot: 0.514444 },
+  time: { s: 1, ms: 0.001, min: 60, hr: 3600, day: 86400, week: 604800 },
+  data: { B: 1, KB: 1024, MB: 1024**2, GB: 1024**3, TB: 1024**4, PB: 1024**5 },
 };
 
 const units: { [key: string]: string[] } = {
-  length: ['m', 'km', 'cm', 'mm', 'mi', 'ft', 'in'],
-  mass: ['kg', 'g', 'mg', 'lb', 'oz'],
+  length: ['m', 'km', 'cm', 'mm', 'mi', 'ft', 'in', 'yd', 'nm'],
+  mass: ['kg', 'g', 'mg', 'lb', 'oz', 't', 'st'],
   temperature: ['Celsius', 'Fahrenheit', 'Kelvin'],
+  area: ['sqm', 'sqkm', 'sqcm', 'sqmi', 'sqft', 'acre', 'ha'],
+  volume: ['l', 'ml', 'cubic-m', 'cubic-cm', 'gal', 'qt', 'pt', 'cup'],
+  speed: ['m/s', 'km/h', 'mph', 'knot'],
+  time: ['s', 'ms', 'min', 'hr', 'day', 'week'],
+  data: ['B', 'KB', 'MB', 'GB', 'TB', 'PB'],
 };
 
 export function UnitConverter() {
@@ -70,7 +80,8 @@ export function UnitConverter() {
       const fromFactor = conversionFactors[category][fromUnit];
       const toFactor = conversionFactors[category][toUnit];
       const result = (inputNum * fromFactor) / toFactor;
-      setOutputValue(result.toPrecision(5));
+      // Use toPrecision for better handling of very small or large numbers
+      setOutputValue(result.toPrecision(6));
     }
   };
 
@@ -84,6 +95,11 @@ export function UnitConverter() {
                     <SelectItem value="length">Length</SelectItem>
                     <SelectItem value="mass">Mass</SelectItem>
                     <SelectItem value="temperature">Temperature</SelectItem>
+                    <SelectItem value="area">Area</SelectItem>
+                    <SelectItem value="volume">Volume</SelectItem>
+                    <SelectItem value="speed">Speed</SelectItem>
+                    <SelectItem value="time">Time</SelectItem>
+                    <SelectItem value="data">Data Storage</SelectItem>
                 </SelectContent>
             </Select>
         </div>
