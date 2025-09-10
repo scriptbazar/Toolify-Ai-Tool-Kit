@@ -4,9 +4,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Copy, Trash2 } from 'lucide-react';
+import { Copy, Trash2, Download, Pilcrow, CaseUpper, CaseLower, CaseSensitive, FlipHorizontal, Baseline } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export function CaseConverter() {
@@ -28,31 +27,55 @@ export function CaseConverter() {
     setText(newText);
   };
 
+  const toAlternatingCase = () => {
+    if (!text) return;
+    const newText = text.split('').map((char, index) => 
+        index % 2 === 0 ? char.toLowerCase() : char.toUpperCase()
+    ).join('');
+    setText(newText);
+  };
+
+  const toInverseCase = () => {
+    if (!text) return;
+    const newText = text.split('').map(char => 
+      char === char.toUpperCase() ? char.toLowerCase() : char.toUpperCase()
+    ).join('');
+    setText(newText);
+  };
+
+
   const handleCopy = () => {
     if (!text) {
-      toast({
-        title: 'Nothing to copy!',
-        description: 'The text area is empty.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Nothing to copy!', description: 'The text area is empty.', variant: 'destructive' });
       return;
     }
     navigator.clipboard.writeText(text);
-    toast({
-      title: 'Copied to clipboard!',
-      description: 'The text has been copied successfully.',
-    });
+    toast({ title: 'Copied to clipboard!' });
   };
+  
+  const handleDownload = () => {
+    if (!text) {
+      toast({ title: 'Nothing to download!', description: 'The text area is empty.', variant: 'destructive' });
+      return;
+    }
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'converted-text.txt';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 
   const handleClear = () => {
     setText('');
-    toast({
-      title: 'Text cleared!',
-    });
+    toast({ title: 'Text cleared!' });
   };
 
-  const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+  const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
   const charCount = text.length;
+  const sentenceCount = text.split(/[.!?]+/).filter(Boolean).length;
+  const paragraphCount = text.split(/\n+/).filter(p => p.trim() !== '').length;
 
   return (
     <div className="space-y-6">
@@ -66,23 +89,43 @@ export function CaseConverter() {
           className="min-h-[200px] resize-y"
         />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <Button onClick={toSentenceCase}>Sentence Case</Button>
-        <Button onClick={toLowerCase}>lowercase</Button>
-        <Button onClick={toUpperCase}>UPPERCASE</Button>
-        <Button onClick={toTitleCase}>Title Case</Button>
-      </div>
-       <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t">
-        <div className="flex gap-4 text-sm text-muted-foreground">
-          <span>{wordCount} Words</span>
-          <span>{charCount} Characters</span>
+       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-2 border rounded-md text-center bg-muted">
+            <span className="font-bold text-lg text-primary">{wordCount}</span>
+            <p className="text-xs text-muted-foreground">Words</p>
         </div>
+         <div className="p-2 border rounded-md text-center bg-muted">
+            <span className="font-bold text-lg text-primary">{charCount}</span>
+            <p className="text-xs text-muted-foreground">Characters</p>
+        </div>
+         <div className="p-2 border rounded-md text-center bg-muted">
+            <span className="font-bold text-lg text-primary">{sentenceCount}</span>
+            <p className="text-xs text-muted-foreground">Sentences</p>
+        </div>
+        <div className="p-2 border rounded-md text-center bg-muted">
+            <span className="font-bold text-lg text-primary">{paragraphCount}</span>
+            <p className="text-xs text-muted-foreground">Paragraphs</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <Button onClick={toSentenceCase} variant="outline"><CaseSensitive className="mr-2 h-4 w-4" />Sentence case</Button>
+        <Button onClick={toLowerCase} variant="outline"><CaseLower className="mr-2 h-4 w-4" />lowercase</Button>
+        <Button onClick={toUpperCase} variant="outline"><CaseUpper className="mr-2 h-4 w-4" />UPPERCASE</Button>
+        <Button onClick={toTitleCase} variant="outline"><Baseline className="mr-2 h-4 w-4" />Title Case</Button>
+        <Button onClick={toAlternatingCase} variant="outline"><Pilcrow className="mr-2 h-4 w-4" />aLtErNaTiNg cAsE</Button>
+        <Button onClick={toInverseCase} variant="outline"><FlipHorizontal className="mr-2 h-4 w-4" />iNVERSE cASE</Button>
+      </div>
+       <div className="flex flex-wrap items-center justify-end gap-2 pt-4 border-t">
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={handleCopy}>
+          <Button variant="outline" size="icon" onClick={handleDownload} title="Download as .txt">
+            <Download className="h-4 w-4" />
+            <span className="sr-only">Download</span>
+          </Button>
+          <Button variant="outline" size="icon" onClick={handleCopy} title="Copy to clipboard">
             <Copy className="h-4 w-4" />
             <span className="sr-only">Copy</span>
           </Button>
-          <Button variant="destructive" size="icon" onClick={handleClear}>
+          <Button variant="destructive" size="icon" onClick={handleClear} title="Clear text">
             <Trash2 className="h-4 w-4" />
             <span className="sr-only">Clear</span>
           </Button>
