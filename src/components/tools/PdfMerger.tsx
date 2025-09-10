@@ -8,9 +8,15 @@ import { FilePlus2, Trash2, Download, Loader2, UploadCloud } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '../ui/card';
 import { mergePdfs } from '@/ai/flows/pdf-management';
+import { Input } from '../ui/input';
+
+interface FileWithPages {
+    file: File;
+    pages: string;
+}
 
 export function PdfMerger() {
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<FileWithPages[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -22,39 +28,41 @@ export function PdfMerger() {
       if (pdfFiles.length !== newFiles.length) {
           toast({ title: 'Invalid File Type', description: 'Only PDF files are allowed.', variant: 'destructive'});
       }
-      setFiles(prev => [...prev, ...pdfFiles]);
+      setFiles(prev => [...prev, ...pdfFiles.map(file => ({ file, pages: '' }))]);
     }
   };
 
   const removeFile = (index: number) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
+
+  const handlePageChange = (index: number, pages: string) => {
+    setFiles(prev => prev.map((item, i) => i === index ? { ...item, pages } : item));
+  };
   
   const handleMerge = async () => {
-    if (files.length < 2) {
-      toast({ title: 'Please select at least two PDF files.', variant: 'destructive' });
+    if (files.length < 1) {
+      toast({ title: 'Please select at least one PDF file.', variant: 'destructive' });
       return;
     }
     setIsLoading(true);
 
     try {
-        const filePromises = files.map(file => {
-            return new Promise<string>((resolve, reject) => {
+        const filesToMerge = files.map(async (item) => {
+            const pdfDataUri = await new Promise<string>((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    if (event.target?.result) {
-                        resolve(event.target.result as string);
-                    } else {
-                        reject(new Error(`Failed to read file: ${'\'\''}${file.name}\'\'\'.`));
-                    }
+                    if (event.target?.result) resolve(event.target.result as string);
+                    else reject(new Error(`Failed to read file: ${item.file.name}.`));
                 };
                 reader.onerror = (error) => reject(error);
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(item.file);
             });
+            return { pdfDataUri, pages: item.pages };
         });
 
-        const pdfDataUris = await Promise.all(filePromises);
-        const result = await mergePdfs({ pdfDataUris });
+        const filesPayload = await Promise.all(filesToMerge);
+        const result = await mergePdfs({ files: filesPayload });
 
         // Trigger download
         const link = document.createElement('a');
@@ -84,31 +92,41 @@ export function PdfMerger() {
         <div className="flex flex-col items-center">
             <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
             <p className="text-sm text-muted-foreground">Click or drag files to upload</p>
-            <p className="text-xs text-muted-foreground">Select two or more PDF files to merge.</p>
+            <p className="text-xs text-muted-foreground">Select PDF files to merge.</p>
         </div>
       </div>
       
       {files.length > 0 && (
-        <Card>
-            <CardContent className="p-4 space-y-2">
-                <h4 className="font-medium">Selected Files ({files.length}):</h4>
-                <ul className="space-y-2 max-h-48 overflow-y-auto">
-                    {files.map((file, index) => (
-                        <li key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
-                           <span className="truncate">{file.name}</span>
-                           <Button variant="ghost" size="icon" onClick={() => removeFile(index)}>
-                             <Trash2 className="h-4 w-4 text-red-500" />
-                           </Button>
-                        </li>
-                    ))}
-                </ul>
-            </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <h4 className="font-medium">Selected Files ({files.length}):</h4>
+          <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+            {files.map((item, index) => (
+              <Card key={index} className="p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <p className="font-medium text-sm truncate flex-1">{item.file.name}</p>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor={`pages-${index}`} className="text-xs shrink-0">Pages:</Label>
+                    <Input
+                      id={`pages-${index}`}
+                      value={item.pages}
+                      onChange={(e) => handlePageChange(index, e.target.value)}
+                      placeholder="e.g. 1-3, 5, 7"
+                      className="w-32 h-8"
+                    />
+                    <Button variant="ghost" size="icon" onClick={() => removeFile(index)} className="h-8 w-8">
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
       )}
 
-      <Button onClick={handleMerge} disabled={files.length < 2 || isLoading} className="w-full">
+      <Button onClick={handleMerge} disabled={files.length === 0 || isLoading} className="w-full">
         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FilePlus2 className="mr-2 h-4 w-4" />}
-        Merge PDFs
+        Merge and Download
       </Button>
     </div>
   );
