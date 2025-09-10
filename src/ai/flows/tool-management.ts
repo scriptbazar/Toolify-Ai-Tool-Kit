@@ -64,6 +64,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'ICO Converter', description: 'Convert any image to a favicon.ico file.', icon: 'Star', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Image Compressor', description: 'Reduce the file size of your images.', icon: 'Minimize2', category: 'image', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Image Cropper', description: 'Crop images to a specific size or aspect ratio.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Image Background Remover', description: 'Automatically remove the background from any image.', icon: 'Scan', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Image Quality Enhancer', description: 'Upscale and enhance the quality of your images.', icon: 'Sparkles', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'PDF Splitter', description: 'Extract pages or split a PDF into multiple files.', icon: 'FileCog', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Word to PDF', description: 'Convert a Word document (.docx) to a PDF.', icon: 'FileText', category: 'pdf', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Rotate PDF', description: 'Rotate all or specific pages in a PDF file.', icon: 'RotateCw', category: 'pdf', plan: 'Free', isNew: true, status: 'Active' },
