@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Wand2, Loader2, Download, GalleryVertical, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Wand2, Loader2, Download, GalleryVertical, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { generateImage, getUserMedia, type UserMedia } from '@/ai/flows/ai-image-generator';
@@ -22,7 +22,7 @@ const MediaCard = ({ src, alt, onDownload }: { src: string, alt: string, onDownl
       alt={alt}
       width={300}
       height={300}
-      className="object-cover w-full h-full"
+      className="object-cover w-full h-full aspect-square"
     />
     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
        <Button size="icon" onClick={onDownload}><Download /></Button>
@@ -156,7 +156,7 @@ export function AiImageGenerator() {
                 <CardContent className="p-4">
                     {loadingMedia ? (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+                            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 w-full aspect-square" />)}
                         </div>
                     ) : aiGeneratedMedia.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
