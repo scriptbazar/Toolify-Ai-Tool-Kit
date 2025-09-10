@@ -93,6 +93,8 @@ import { InstagramVideoDownloader } from '@/components/tools/InstagramVideoDownl
 import { ThreadsVideoDownloader } from '@/components/tools/ThreadsVideoDownloader';
 import { LinkedinVideoDownloader } from '@/components/tools/LinkedinVideoDownloader';
 import { PinterestVideoDownloader } from '@/components/tools/PinterestVideoDownloader';
+import { UnlockPdf } from '@/components/tools/UnlockPdf';
+import { LockPdf } from '@/components/tools/LockPdf';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -110,6 +112,8 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'bmi-calculator': BmiCalculator,
   'text-to-speech': TextToSpeech,
   'pdf-merger': PdfMerger,
+  'unlock-pdf': UnlockPdf,
+  'lock-pdf': LockPdf,
   'unit-converter': UnitConverter,
   'color-picker': ColorPicker,
   'text-repeater': TextRepeater,
@@ -828,5 +832,4 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     </div>
   );
 }
-
     
