@@ -45,7 +45,7 @@ export function PdfMerger() {
                     if (event.target?.result) {
                         resolve(event.target.result as string);
                     } else {
-                        reject(new Error(`Failed to read file: ${file.name}`));
+                        reject(new Error(`Failed to read file: ${'\'\''}${file.name}\'\'\'.`));
                     }
                 };
                 reader.onerror = (error) => reject(error);
@@ -76,17 +76,15 @@ export function PdfMerger() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-         <div 
-            className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative"
-            onClick={() => fileInputRef.current?.click()}
-        >
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" multiple />
-            <div className="flex flex-col items-center">
-                <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">Click or drag files to upload</p>
-                <p className="text-xs text-muted-foreground">Select two or more PDF files to merge.</p>
-            </div>
+      <div 
+        className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative"
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" multiple />
+        <div className="flex flex-col items-center">
+            <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground">Click or drag files to upload</p>
+            <p className="text-xs text-muted-foreground">Select two or more PDF files to merge.</p>
         </div>
       </div>
       
@@ -108,12 +106,10 @@ export function PdfMerger() {
         </Card>
       )}
 
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button onClick={handleMerge} disabled={files.length < 2 || isLoading}>
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FilePlus2 className="mr-2 h-4 w-4" />}
-            Merge PDFs
-        </Button>
-      </div>
+      <Button onClick={handleMerge} disabled={files.length < 2 || isLoading} className="w-full">
+        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FilePlus2 className="mr-2 h-4 w-4" />}
+        Merge PDFs
+      </Button>
     </div>
   );
 }
