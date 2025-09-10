@@ -9,10 +9,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '../ui/card';
 import { mergePdfs } from '@/ai/flows/pdf-management';
 import { Input } from '../ui/input';
+import { PDFDocument } from 'pdf-lib';
 
 interface FileWithPages {
     file: File;
     pages: string;
+    totalPages?: number;
 }
 
 export function PdfMerger() {
@@ -21,14 +23,27 @@ export function PdfMerger() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       const pdfFiles = newFiles.filter(file => file.type === 'application/pdf');
       if (pdfFiles.length !== newFiles.length) {
           toast({ title: 'Invalid File Type', description: 'Only PDF files are allowed.', variant: 'destructive'});
       }
-      setFiles(prev => [...prev, ...pdfFiles.map(file => ({ file, pages: '' }))]);
+      
+      const filesWithPageCounts = await Promise.all(pdfFiles.map(async (file) => {
+        try {
+          const fileBytes = await file.arrayBuffer();
+          const pdfDoc = await PDFDocument.load(fileBytes);
+          return { file, pages: '', totalPages: pdfDoc.getPageCount() };
+        } catch (error) {
+          console.error(`Failed to read PDF ${file.name}:`, error);
+          toast({ title: `Error reading ${file.name}`, description: 'Could not determine the number of pages.', variant: 'destructive'});
+          return { file, pages: '', totalPages: undefined };
+        }
+      }));
+
+      setFiles(prev => [...prev, ...filesWithPageCounts]);
     }
   };
 
@@ -103,14 +118,19 @@ export function PdfMerger() {
             {files.map((item, index) => (
               <Card key={index} className="p-4">
                 <div className="flex items-center justify-between gap-4">
-                  <p className="font-medium text-sm truncate flex-1">{item.file.name}</p>
+                  <div className="flex-1 overflow-hidden">
+                    <p className="font-medium text-sm truncate">{item.file.name}</p>
+                    {item.totalPages !== undefined && (
+                        <p className="text-xs text-muted-foreground">({item.totalPages} pages)</p>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     <Label htmlFor={`pages-${index}`} className="text-xs shrink-0">Pages:</Label>
                     <Input
                       id={`pages-${index}`}
                       value={item.pages}
                       onChange={(e) => handlePageChange(index, e.target.value)}
-                      placeholder="e.g. 1-3, 5, 7"
+                      placeholder="e.g. 1-3, 5"
                       className="w-32 h-8"
                     />
                     <Button variant="ghost" size="icon" onClick={() => removeFile(index)} className="h-8 w-8">
