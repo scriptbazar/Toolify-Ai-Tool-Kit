@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -44,11 +45,11 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Flipkart Shipping Label Cropper', description: 'Crop your Flipkart shipping labels from a full page to a 4x6 inch size in seconds. Perfect for sellers using thermal printers for efficient dispatch.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Meesho Shipping Label Cropper', description: 'Optimize your Meesho shipping process. This tool crops your default shipping labels to a 4x6 inch format, saving paper and streamlining your workflow.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Base64 Encoder/Decoder', description: 'Encode to and decode from Base64 format.', icon: 'Package', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
-    { name: 'Binary to Text', description: 'Convert binary code to human-readable text.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Binary Converter', description: 'Convert binary code to human-readable text.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'CSS Minifier', description: 'Minify CSS code to reduce file size and improve load times.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Discount Calculator', description: 'Calculate final price after discount and see how much you save.', icon: 'BadgePercent', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Date Calculator', description: 'Calculate the duration between two dates or add/subtract from a date.', icon: 'CalendarDays', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
-    { name: 'Compress PDF', description: 'Reduce the file size of your PDF files.', icon: 'FileArchive', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Compress PDF', description: 'Reduce the file size of your PDF files.', icon: 'FileArchive', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
     { name: 'Excel to PDF', description: 'Convert your Excel spreadsheets to PDF.', icon: 'FileSpreadsheet', category: 'pdf', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Text to Binary', description: 'Convert human-readable text to binary code.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Reverse Text', description: 'Reverse your text in various ways (by word, all characters, etc.).', icon: 'ArrowLeftRight', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
@@ -70,6 +71,14 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image Compressor', description: 'Reduce the file size of your images.', icon: 'FileArchive', category: 'image', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Image Text Extractor', description: 'Extract text from an image.', icon: 'ScanText', category: 'ai', plan: 'Pro', isNew: true, status: 'Coming Soon' },
     { name: 'Image Converter', description: 'Convert images between different formats like PNG, JPG, WEBP.', icon: 'FileImage', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'PDF Splitter', description: 'Split a PDF into multiple smaller files or extract specific pages.', icon: 'Split', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'PDF Page Reorder', description: 'Rearrange the pages of your PDF document into a new order.', icon: 'Shuffle', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'PDF Page Counter', description: 'Quickly count the number of pages in a PDF file.', icon: 'ListOrdered', category: 'pdf', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'PDF Page Numberer', description: 'Add page numbers to your PDF documents.', icon: 'Hash', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'PDF Page Remover', description: 'Delete one or more pages from a PDF document.', icon: 'FileMinus', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'PDF Organizer', description: 'Visually rearrange, delete, and organize PDF pages.', icon: 'Layers', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'Website Screenshot', description: 'Take a full-page screenshot of any website.', icon: 'MonitorSmartphone', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'What Is My Browser', description: 'Get detailed information about your web browser and device.', icon: 'Globe', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
 ];
 
 /**

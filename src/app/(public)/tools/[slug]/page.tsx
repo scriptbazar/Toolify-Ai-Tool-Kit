@@ -1,4 +1,5 @@
 
+
 import { getTools } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
 import { CaseConverter } from '@/components/tools/CaseConverter';
@@ -101,6 +102,13 @@ import { LinkedinVideoDownloader } from '@/components/tools/LinkedinVideoDownloa
 import { PinterestVideoDownloader } from '@/components/tools/PinterestVideoDownloader';
 import { UnlockPdf } from '@/components/tools/UnlockPdf';
 import { LockPdf } from '@/components/tools/LockPdf';
+import { PdfPageReorder } from '@/components/tools/PdfPageReorder';
+import { PdfPageCounter } from '@/components/tools/PdfPageCounter';
+import { PdfPageNumberer } from '@/components/tools/PdfPageNumberer';
+import { PdfPageRemover } from '@/components/tools/PdfPageRemover';
+import { PdfOrganizer } from '@/components/tools/PdfOrganizer';
+import { WebsiteScreenshot } from '@/components/tools/WebsiteScreenshot';
+import { WhatIsMyBrowser } from '@/components/tools/WhatIsMyBrowser';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -167,6 +175,14 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'image-compressor': ImageCompressor,
   'image-text-extractor': ImageTextExtractor,
   'image-converter': ImageConverter,
+  'pdf-splitter': PdfSplitter,
+  'pdf-page-reorder': PdfPageReorder,
+  'pdf-page-counter': PdfPageCounter,
+  'pdf-page-numberer': PdfPageNumberer,
+  'pdf-page-remover': PdfPageRemover,
+  'pdf-organizer': PdfOrganizer,
+  'website-screenshot': WebsiteScreenshot,
+  'what-is-my-browser': WhatIsMyBrowser,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
