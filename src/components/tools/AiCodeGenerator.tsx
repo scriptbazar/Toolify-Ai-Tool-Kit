@@ -15,7 +15,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 
-const CodeBlock = ({ language, code }: { language: string, code: string }) => {
+const CodeBlock = ({ language, code }: { language: string, code: string | undefined }) => {
     if (!code) return null;
     return (
         <SyntaxHighlighter language={language.toLowerCase()} style={vscDarkPlus} showLineNumbers>
@@ -27,7 +27,7 @@ const CodeBlock = ({ language, code }: { language: string, code: string }) => {
 export function AiCodeGenerator() {
   const [prompt, setPrompt] = useState('');
   const [language, setLanguage] = useState('HTML/CSS/JS');
-  const [generatedOutput, setGeneratedOutput] = useState<Partial<AiCodeGeneratorOutput>>({ generatedCode: {}, setupInstructions: '', codeExplanation: '' });
+  const [generatedOutput, setGeneratedOutput] = useState<Partial<AiCodeGeneratorOutput> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -41,12 +41,19 @@ export function AiCodeGenerator() {
       return;
     }
     setIsLoading(true);
-    setGeneratedOutput({ generatedCode: {}, setupInstructions: '', codeExplanation: '' });
+    setGeneratedOutput({}); // Reset to an empty object for streaming
 
     try {
       const stream = await aiCodeGenerator({ prompt, language });
       for await (const chunk of stream) {
-        setGeneratedOutput(chunk);
+        setGeneratedOutput((prev) => ({
+            ...prev,
+            ...chunk,
+            generatedCode: {
+                ...prev?.generatedCode,
+                ...chunk.generatedCode,
+            }
+        }));
       }
     } catch (error: any) {
       toast({
@@ -61,7 +68,7 @@ export function AiCodeGenerator() {
   };
 
 
-  const handleCopy = (content: string, type: string) => {
+  const handleCopy = (content: string | undefined, type: string) => {
     if (!content) {
         toast({ title: 'Nothing to copy!', variant: 'destructive'});
         return;
@@ -94,7 +101,7 @@ export function AiCodeGenerator() {
         return <CodeBlock language={language.toLowerCase()} code={code} />;
     }
 
-    if (isLoading) {
+    if (isLoading && !generatedOutput) {
         return <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/></div>;
     }
 
