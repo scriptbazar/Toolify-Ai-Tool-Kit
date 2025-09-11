@@ -51,10 +51,15 @@ const nextConfig: NextConfig = {
       "handlebars": "commonjs handlebars"
     })
     
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "handlebars": require.resolve("handlebars/dist/cjs/handlebars.js"),
-    };
+    // This is the correct way to prevent webpack from trying to resolve
+    // a server-side library on the client.
+    if (!isServer) {
+        config.resolve.alias = {
+            ...config.resolve.alias,
+            "handlebars": false,
+        };
+    }
+    
     return config;
   },
 };
