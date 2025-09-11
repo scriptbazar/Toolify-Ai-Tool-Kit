@@ -1,9 +1,8 @@
 
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { getTools } from '@/ai/flows/tool-management';
+import { getTools, upsertTool } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
 import { toolCategories } from '@/lib/constants';
 import { Search, Package } from 'lucide-react';
@@ -29,6 +28,16 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDesc,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose,
+} from '@/components/ui/dialog';
+import {
   ListChecks,
   ListX,
   Sparkles,
@@ -48,6 +57,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EditToolForm } from './[id]/page';
+
 
 const ITEMS_PER_PAGE = 10;
 
@@ -58,6 +69,8 @@ export default function AdminToolsPage({
 }) {
   const [allTools, setAllTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingTool, setEditingTool] = useState<Tool | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -66,22 +79,24 @@ export default function AdminToolsPage({
   const activeFilter = (searchParams?.filter as string) || 'all';
   const page = Number(searchParams?.page) || 1;
 
-   useEffect(() => {
-    async function fetchTools() {
-      setLoading(true);
-      try {
-        const tools = await getTools();
-        setAllTools(tools);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Could not load tools from the database.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
+   const fetchTools = async () => {
+    setLoading(true);
+    try {
+      const tools = await getTools();
+      const visibleTools = tools.filter(tool => tool.status !== 'Disabled');
+      setAllTools(visibleTools);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Could not load tools from the database.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
+  };
+
+   useEffect(() => {
     fetchTools();
   }, [toast]);
 
@@ -160,6 +175,31 @@ export default function AdminToolsPage({
     const newSearchQuery = formData.get('q') as string;
     router.push(`/admin/tools?${createQueryString({ q: newSearchQuery, page: '1' })}`);
   };
+  
+  const handleEditClick = (tool: Tool) => {
+    setEditingTool(tool);
+    setIsDialogOpen(true);
+  };
+  
+  const handleFormSave = async (data: any) => {
+    const toolData = {
+        id: editingTool?.id,
+        ...data,
+    };
+    const result = await upsertTool(toolData);
+    if (result.success) {
+        toast({
+            title: `Tool updated successfully!`,
+            description: `The tool "${data.name}" has been saved.`,
+        });
+        setIsDialogOpen(false);
+        setEditingTool(null);
+        fetchTools(); // Refresh the list
+    } else {
+         toast({ title: 'Error', description: result.message, variant: 'destructive' });
+    }
+    return result.success;
+  }
 
   const tabs: { id: string; label: string; icon: React.ElementType, count: number }[] = [
     { id: 'all', label: 'All', icon: Package, count: counts.all },
@@ -288,10 +328,8 @@ export default function AdminToolsPage({
                         {getStatusBadge(tool.status)}
                       </TableCell>
                       <TableCell className="text-right">
-                         <Button asChild variant="outline" size="sm">
-                            <Link href={`/admin/tools/${tool.id}`}>
-                              <Edit className="mr-2 h-4 w-4" /> Edit
-                            </Link>
+                         <Button variant="outline" size="sm" onClick={() => handleEditClick(tool)}>
+                            <Edit className="mr-2 h-4 w-4" /> Edit
                           </Button>
                       </TableCell>
                     </TableRow>
@@ -323,6 +361,17 @@ export default function AdminToolsPage({
           )}
         </CardContent>
       </Card>
+       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-4xl">
+              <DialogHeader>
+                  <DialogTitle>Edit Tool: {editingTool?.name}</DialogTitle>
+                  <DialogDesc>Modify the details of an existing tool.</DialogDesc>
+              </DialogHeader>
+              <div className="max-h-[70vh] overflow-y-auto p-1 pr-4">
+                  <EditToolForm tool={editingTool} onSave={handleFormSave}/>
+              </div>
+          </DialogContent>
+       </Dialog>
     </div>
   );
 }
