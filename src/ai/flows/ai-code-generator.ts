@@ -7,8 +7,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { streamFlow } from 'genkit/flow';
-import type { Streamable } from 'genkit/flow';
+import { streamFlow, type Streamable } from 'genkit';
 import {
     AiCodeGeneratorInputSchema,
     AiCodeGeneratorOutputSchema,
