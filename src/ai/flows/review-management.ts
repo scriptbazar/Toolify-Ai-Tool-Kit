@@ -24,23 +24,14 @@ export async function getReviews(toolId?: string): Promise<Review[]> {
             return [];
         }
         
-        let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = adminDb.collection('reviews');
-
-        // If a toolId is provided, filter by it. Sorting will be done in code.
-        if (toolId) {
-            query = query.where('toolId', '==', toolId);
-        } else {
-            // For general review management, sort by date.
-             query = query.orderBy('submittedOn', 'desc');
-        }
-
-        const snapshot = await query.get();
+        const reviewsRef = adminDb.collection('reviews');
+        const snapshot = await reviewsRef.orderBy('submittedOn', 'desc').get();
         
         if (snapshot.empty) {
             return [];
         }
 
-        const reviews = snapshot.docs.map(doc => {
+        const allReviews = snapshot.docs.map(doc => {
             const data = doc.data();
             return ReviewSchema.parse({
                 id: doc.id,
@@ -49,14 +40,14 @@ export async function getReviews(toolId?: string): Promise<Review[]> {
             });
         });
 
-        // If a toolId was provided, filter for approved reviews and sort in the code
+        // If a toolId is provided, filter for that tool and for approved reviews
         if (toolId) {
-            return reviews
-                .filter(review => review.status === 'approved')
-                .sort((a, b) => new Date(b.submittedOn).getTime() - new Date(a.submittedOn).getTime());
+            return allReviews.filter(review => review.toolId === toolId && review.status === 'approved');
         }
 
-        return reviews;
+        // If no toolId, return all reviews (for admin panel)
+        return allReviews;
+
     } catch (error) {
         console.error("Error fetching reviews:", error);
         // Re-throwing the error so the calling component can handle it, e.g. show a toast.
