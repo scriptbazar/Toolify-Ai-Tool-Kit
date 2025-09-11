@@ -60,6 +60,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'JPG to PNG', description: 'Convert JPG images to PNG format.', icon: 'FileImage', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Image to Base64', description: 'Convert an image to a Base64 string.', icon: 'Code', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Image Resizer', description: 'Resize image dimensions by pixels or percentage.', icon: 'Scaling', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Image Background Remover', description: 'Automatically remove the background from your images with a single click.', icon: 'Scissors', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
 ];
 
 /**

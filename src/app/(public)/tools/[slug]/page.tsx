@@ -46,6 +46,7 @@ import { PngToJpg } from '@/components/tools/PngToJpg';
 import { JpgToPng } from '@/components/tools/JpgToPng';
 import { ImageToBase64 } from '@/components/tools/ImageToBase64';
 import { ImageResizer } from '@/components/tools/ImageResizer';
+import { ImageBackgroundRemover } from '@/components/tools/ImageBackgroundRemover';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -147,6 +148,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'jpg-to-png': JpgToPng,
   'image-to-base64': ImageToBase64,
   'image-resizer': ImageResizer,
+  'image-background-remover': ImageBackgroundRemover,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (

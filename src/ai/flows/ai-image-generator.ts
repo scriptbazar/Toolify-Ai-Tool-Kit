@@ -90,6 +90,69 @@ const generateImageFlow = ai.defineFlow(
 );
 
 
+const RemoveBgInputSchema = z.object({
+  imageDataUri: z.string().describe("A photo of an object, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+  userId: z.string().describe('The ID of the user requesting the background removal.'),
+});
+export type RemoveBgInput = z.infer<typeof RemoveBgInputSchema>;
+
+const RemoveBgOutputSchema = z.object({
+  imageDataUri: z.string().describe('The resulting image with a transparent background as a data URI.'),
+});
+export type RemoveBgOutput = z.infer<typeof RemoveBgOutputSchema>;
+
+
+export async function removeImageBackground(input: RemoveBgInput): Promise<RemoveBgOutput> {
+  return removeImageBackgroundFlow(input);
+}
+
+
+const removeImageBackgroundFlow = ai.defineFlow(
+  {
+    name: 'removeImageBackgroundFlow',
+    inputSchema: RemoveBgInputSchema,
+    outputSchema: RemoveBgOutputSchema,
+  },
+  async ({ imageDataUri, userId }) => {
+     try {
+        const prompt = [
+            { text: "Remove the background from this image. Make the background transparent. The output should be a PNG." },
+            { media: { url: imageDataUri } }
+        ];
+
+        const { media } = await ai.generate({
+          model: 'gemini-1.5-flash-latest',
+          prompt,
+          config: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          }
+        });
+
+        if (!media || !media.url) {
+             throw new Error('The model did not return any image content.');
+        }
+
+        await saveUserMedia({
+            userId,
+            type: 'ai-generated',
+            mediaUrl: media.url,
+            prompt: 'Background removed from image',
+        });
+        
+        return { imageDataUri: media.url };
+
+    } catch (error: any) {
+        console.error("AI Background Removal Error:", error);
+        if (error.message && error.message.includes('billing')) {
+            throw new Error("Background removal failed. This feature requires a billing-enabled Google Cloud project.");
+        }
+        throw new Error(error.message || "An unexpected error occurred during background removal.");
+    }
+  }
+);
+
+
+
 // --- Functions for Media Management ---
 
 /**
