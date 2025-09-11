@@ -124,7 +124,7 @@ export function AmazonShippingLabelCropper() {
                  <CardContent className="flex flex-col items-center gap-4">
                      <div className="flex items-center gap-4">
                         <div className="flex flex-col items-center">
-                            <FileScan className="h-20 w-20 text-muted-foreground"/>
+                            <FileUp className="h-20 w-20 text-muted-foreground"/>
                             <Badge>8.5" x 11"</Badge>
                         </div>
                         <ArrowRight className="h-8 w-8 text-primary"/>
