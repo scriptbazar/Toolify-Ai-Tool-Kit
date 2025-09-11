@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, type DragEvent } from 'react';
@@ -80,7 +81,7 @@ export function SpeechToText() {
       };
     } catch (error: any) {
       toast({ title: 'Transcription Failed', description: error.message || 'Could not transcribe the audio.', variant: 'destructive' });
-    } finally {
+      // Also reset loading state on error in reader
       setIsLoading(false);
     }
   };
@@ -94,6 +95,9 @@ export function SpeechToText() {
   const handleClear = () => {
     setAudioFile(null);
     setTranscribedText('');
+    if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+    }
   }
 
   return (

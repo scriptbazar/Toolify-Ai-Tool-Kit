@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -16,23 +17,33 @@ const SpeechToTextOutputSchema = z.object({
 });
 export type SpeechToTextOutput = z.infer<typeof SpeechToTextOutputSchema>;
 
-export async function speechToText(
-  input: SpeechToTextInput
-): Promise<SpeechToTextOutput> {
-  // Use the Gemini model for transcription
-  const { text } = await ai.generate({
-    model: 'gemini-1.5-flash-latest',
-    prompt: [
-      { text: 'Transcribe the following audio:' },
-      { media: { url: input.audioDataUri } }
-    ],
-  });
 
-  if (!text) {
-    throw new Error('The model did not return any transcribed text.');
-  }
-
-  return {
-    transcribedText: text,
-  };
+export async function speechToText(input: SpeechToTextInput): Promise<SpeechToTextOutput> {
+    return speechToTextFlow(input);
 }
+
+const speechToTextFlow = ai.defineFlow(
+  {
+    name: 'speechToTextFlow',
+    inputSchema: SpeechToTextInputSchema,
+    outputSchema: SpeechToTextOutputSchema,
+  },
+  async (input) => {
+    // Use the Gemini model for transcription
+    const { text } = await ai.generate({
+      model: 'gemini-1.5-flash-latest',
+      prompt: [
+        { text: 'Transcribe the following audio:' },
+        { media: { url: input.audioDataUri } }
+      ],
+    });
+
+    if (!text) {
+      throw new Error('The model did not return any transcribed text.');
+    }
+
+    return {
+      transcribedText: text,
+    };
+  }
+);
