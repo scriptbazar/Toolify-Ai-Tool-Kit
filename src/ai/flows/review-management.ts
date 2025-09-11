@@ -26,12 +26,15 @@ export async function getReviews(toolId?: string): Promise<Review[]> {
         
         let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = adminDb.collection('reviews');
 
+        // If a toolId is provided, filter by it. Sorting will be done in code.
         if (toolId) {
-            // Filter by toolId in the query
             query = query.where('toolId', '==', toolId);
+        } else {
+            // For general review management, sort by date.
+             query = query.orderBy('submittedOn', 'desc');
         }
 
-        const snapshot = await query.orderBy('submittedOn', 'desc').get();
+        const snapshot = await query.get();
         
         if (snapshot.empty) {
             return [];
@@ -46,9 +49,11 @@ export async function getReviews(toolId?: string): Promise<Review[]> {
             });
         });
 
-        // If a toolId was provided, filter for approved reviews in the code
+        // If a toolId was provided, filter for approved reviews and sort in the code
         if (toolId) {
-            return reviews.filter(review => review.status === 'approved');
+            return reviews
+                .filter(review => review.status === 'approved')
+                .sort((a, b) => new Date(b.submittedOn).getTime() - new Date(a.submittedOn).getTime());
         }
 
         return reviews;
