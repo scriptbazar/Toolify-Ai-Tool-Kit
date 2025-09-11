@@ -52,4 +52,3 @@ Your response must be structured according to the output schema, containing 'gen
 
   return stream;
 }
-
