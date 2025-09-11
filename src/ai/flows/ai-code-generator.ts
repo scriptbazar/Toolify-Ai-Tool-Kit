@@ -7,7 +7,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import type { Streamable } from 'genkit';
+import { Streamable } from 'genkit';
 import {
     AiCodeGeneratorInputSchema,
     AiCodeGeneratorOutputSchema,

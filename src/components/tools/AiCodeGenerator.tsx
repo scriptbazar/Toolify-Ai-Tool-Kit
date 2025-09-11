@@ -27,7 +27,7 @@ const CodeBlock = ({ language, code }: { language: string, code: string }) => {
 export function AiCodeGenerator() {
   const [prompt, setPrompt] = useState('');
   const [language, setLanguage] = useState('HTML/CSS/JS');
-  const [generatedOutput, setGeneratedOutput] = useState<AiCodeGeneratorOutput | null>(null);
+  const [generatedOutput, setGeneratedOutput] = useState<Partial<AiCodeGeneratorOutput>>({ generatedCode: {}, setupInstructions: '', codeExplanation: '' });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -44,31 +44,10 @@ export function AiCodeGenerator() {
     setGeneratedOutput({ generatedCode: {}, setupInstructions: '', codeExplanation: '' });
 
     try {
-        const stream = await aiCodeGenerator({ prompt, language });
-        const reader = stream.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            
-            buffer += decoder.decode(value, { stream: true });
-            
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || ''; // Keep the last, possibly incomplete line
-
-            for (const line of lines) {
-                if (line.trim() === '') continue;
-                try {
-                    const chunk = JSON.parse(line);
-                    setGeneratedOutput(chunk);
-                } catch (e) {
-                    console.error("Failed to parse JSON chunk:", line, e);
-                }
-            }
-        }
-        
+      const stream = await aiCodeGenerator({ prompt, language });
+      for await (const chunk of stream) {
+        setGeneratedOutput(chunk);
+      }
     } catch (error: any) {
       toast({
         title: 'Generation Failed',
@@ -142,7 +121,7 @@ export function AiCodeGenerator() {
       .replace(/^## (.*$)/gim, '<h2>$1</h2>')
       .replace(/^# (.*$)/gim, '<h1>$1</h1>')
       .replace(/^\* (.*$)/gim, '<li>$1</li>')
-      .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
+      .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
       .replace(/\n/g, '<br />');
 
     return <div dangerouslySetInnerHTML={{ __html: html }} />;
