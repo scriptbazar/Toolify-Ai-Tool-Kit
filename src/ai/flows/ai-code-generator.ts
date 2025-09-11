@@ -46,7 +46,6 @@ Programming Language: {{{language}}}
 
 Your response must be structured according to the output schema, containing 'generatedCode', 'setupInstructions', and 'codeExplanation'.
 `,
-    output: { schema: AiCodeGeneratorOutputSchema },
     input,
   });
 
