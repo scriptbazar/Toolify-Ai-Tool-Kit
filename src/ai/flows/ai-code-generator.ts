@@ -60,7 +60,7 @@ const aiCodeGeneratorFlow = ai.defineFlow(
   },
   async (input) => {
     const { output } = await prompt(input);
-    if (!output) {
+    if (!output || !output.generatedCode || !output.setupInstructions || !output.codeExplanation) {
         throw new Error("The AI failed to generate any code or instructions. Please try rephrasing your request.");
     }
     return output;
