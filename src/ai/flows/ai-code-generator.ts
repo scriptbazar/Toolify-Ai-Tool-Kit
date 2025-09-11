@@ -7,7 +7,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { streamFlow, type Streamable } from 'genkit';
+import type { Streamable } from 'genkit';
 import {
     AiCodeGeneratorInputSchema,
     AiCodeGeneratorOutputSchema,
@@ -16,16 +16,9 @@ import {
 } from './ai-code-generator.types';
 
 export async function aiCodeGenerator(input: AiCodeGeneratorInput): Promise<Streamable<AiCodeGeneratorOutput>> {
-  return streamFlow(
-    {
-      name: 'aiCodeGeneratorFlow',
-      inputSchema: AiCodeGeneratorInputSchema,
-      outputSchema: AiCodeGeneratorOutputSchema,
-    },
-    async (input) => {
-      const { stream, response } = await ai.generateStream({
-        model: 'gemini-1.5-flash-latest',
-        prompt: `You are an expert software developer and a brilliant teacher. Your task is to generate high-quality code based on a user's request and provide comprehensive guidance.
+  const { stream, response } = await ai.generateStream({
+    model: 'gemini-1.5-flash-latest',
+    prompt: `You are an expert software developer and a brilliant teacher. Your task is to generate high-quality code based on a user's request and provide comprehensive guidance.
 
 User's Request: "{{{prompt}}}"
 Programming Language: {{{language}}}
@@ -53,24 +46,9 @@ Programming Language: {{{language}}}
 
 Your response must be structured according to the output schema, containing 'generatedCode', 'setupInstructions', and 'codeExplanation'.
 `,
-        output: { schema: AiCodeGeneratorOutputSchema },
-      });
+    output: { schema: AiCodeGeneratorOutputSchema },
+    input,
+  });
 
-      let finalOutput: AiCodeGeneratorOutput = {
-        generatedCode: {},
-        setupInstructions: '',
-        codeExplanation: '',
-      };
-
-      for await (const chunk of stream) {
-        finalOutput = chunk;
-      }
-      
-      if (!finalOutput || !finalOutput.generatedCode || !finalOutput.setupInstructions || !finalOutput.codeExplanation) {
-          throw new Error("The AI failed to generate any code or instructions. Please try rephrasing your request.");
-      }
-
-      return finalOutput;
-    }
-  )(input);
+  return stream;
 }
