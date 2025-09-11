@@ -109,6 +109,19 @@ import { PdfPageRemover } from '@/components/tools/PdfPageRemover';
 import { PdfOrganizer } from '@/components/tools/PdfOrganizer';
 import { WebsiteScreenshot } from '@/components/tools/WebsiteScreenshot';
 import { WhatIsMyBrowser } from '@/components/tools/WhatIsMyBrowser';
+import { NegativeMarkingCalculator } from '@/components/tools/NegativeMarkingCalculator';
+import { YouTubeChannelBannerDownloader } from '@/components/tools/YouTubeChannelBannerDownloader';
+import { YouTubeChannelLogoDownloader } from '@/components/tools/YouTubeChannelLogoDownloader';
+import { YouTubeVideoDescriptionExtractor } from '@/components/tools/YouTubeVideoDescriptionExtractor';
+import { YouTubeVideoTitleExtractor } from '@/components/tools/YouTubeVideoTitleExtractor';
+import { YouTubeVideoThumbnailDownloader } from '@/components/tools/YouTubeVideoThumbnailDownloader';
+import { YouTubeRegionRestrictionChecker } from '@/components/tools/YouTubeRegionRestrictionChecker';
+import { GoogleDriveDirectLinkGenerator } from '@/components/tools/GoogleDriveDirectLinkGenerator';
+import { DropboxDirectLinkGenerator } from '@/components/tools/DropboxDirectLinkGenerator';
+import { OneDriveDirectLinkGenerator } from '@/components/tools/OneDriveDirectLinkGenerator';
+import { NSDLPANCardPhotoAndSignatureResizer } from '@/components/tools/NSDLPANCardPhotoAndSignatureResizer';
+import { UTIPANCardPhotoAndSignatureResizer } from '@/components/tools/UTIPANCardPhotoAndSignatureResizer';
+import { PRNToPDF } from '@/components/tools/PRNToPDF';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -183,6 +196,19 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'pdf-organizer': PdfOrganizer,
   'website-screenshot': WebsiteScreenshot,
   'what-is-my-browser': WhatIsMyBrowser,
+  'negative-marking-calculator': NegativeMarkingCalculator,
+  'youtube-channel-banner-downloader': YouTubeChannelBannerDownloader,
+  'youtube-channel-logo-downloader': YouTubeChannelLogoDownloader,
+  'youtube-video-description-extractor': YouTubeVideoDescriptionExtractor,
+  'youtube-video-title-extractor': YouTubeVideoTitleExtractor,
+  'youtube-video-thumbnail-downloader': YouTubeVideoThumbnailDownloader,
+  'youtube-region-restriction-checker': YouTubeRegionRestrictionChecker,
+  'google-drive-direct-link-generator': GoogleDriveDirectLinkGenerator,
+  'dropbox-direct-link-generator': DropboxDirectLinkGenerator,
+  'onedrive-direct-link-generator': OneDriveDirectLinkGenerator,
+  'nsdl-pan-card-photo-signature-resizer': NSDLPANCardPhotoAndSignatureResizer,
+  'uti-pan-card-photo-signature-resizer': UTIPANCardPhotoAndSignatureResizer,
+  'prn-to-pdf': PRNToPDF,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
@@ -829,3 +855,5 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     </div>
   );
 }
+
+    

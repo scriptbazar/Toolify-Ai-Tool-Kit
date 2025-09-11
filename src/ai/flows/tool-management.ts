@@ -23,8 +23,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Text to Speech', description: 'Convert written text into natural-sounding spoken audio in various voices.', icon: 'Volume2', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Speech to Text', description: 'Transcribe audio files into written text.', icon: 'Voicemail', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'PDF Merger', description: 'Combine multiple PDF files into a single, organized document.', icon: 'FilePlus2', category: 'pdf', plan: 'Pro', isNew: false, status: 'Active' },
-    { name: 'Unlock PDF', description: 'Remove password and restrictions from PDF files.', icon: 'Unlock', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'Lock PDF', description: 'Protect your PDF files with a password and set permissions.', icon: 'Lock', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Unlock PDF', description: 'Remove password and restrictions from PDF files.', icon: 'Unlock', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'Lock PDF', description: 'Protect your PDF files with a password and set permissions.', icon: 'Lock', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
     { name: 'Unit Converter', description: 'Convert between different units of measurement (length, mass, temp, etc.).', icon: 'Ruler', category: 'calculator', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Color Picker', description: 'Pick colors from an interactive color wheel or your screen.', icon: 'Pipette', category: 'image', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Text Repeater', description: 'Repeat a piece of text with optional new lines.', icon: 'Repeat', category: 'text', plan: 'Free', isNew: false, status: 'Active' },
@@ -45,12 +45,12 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Flipkart Shipping Label Cropper', description: 'Crop your Flipkart shipping labels from a full page to a 4x6 inch size in seconds. Perfect for sellers using thermal printers for efficient dispatch.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Meesho Shipping Label Cropper', description: 'Optimize your Meesho shipping process. This tool crops your default shipping labels to a 4x6 inch format, saving paper and streamlining your workflow.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Base64 Encoder/Decoder', description: 'Encode to and decode from Base64 format.', icon: 'Package', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
-    { name: 'Binary Converter', description: 'Convert binary code to human-readable text.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Binary to Text', description: 'Convert binary code to human-readable text.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'CSS Minifier', description: 'Minify CSS code to reduce file size and improve load times.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Discount Calculator', description: 'Calculate final price after discount and see how much you save.', icon: 'BadgePercent', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Date Calculator', description: 'Calculate the duration between two dates or add/subtract from a date.', icon: 'CalendarDays', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Compress PDF', description: 'Reduce the file size of your PDF files.', icon: 'FileArchive', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
-    { name: 'Excel to PDF', description: 'Convert your Excel spreadsheets to PDF.', icon: 'FileSpreadsheet', category: 'pdf', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Excel to PDF', description: 'Convert your Excel spreadsheets to PDF.', icon: 'FileSpreadsheet', category: 'pdf', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Text to Binary', description: 'Convert human-readable text to binary code.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Reverse Text', description: 'Reverse your text in various ways (by word, all characters, etc.).', icon: 'ArrowLeftRight', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Remove Extra Spaces', description: 'Clean up your text by removing extra spaces and line breaks.', icon: 'Eraser', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
@@ -79,6 +79,19 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'PDF Organizer', description: 'Visually rearrange, delete, and organize PDF pages.', icon: 'Layers', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
     { name: 'Website Screenshot', description: 'Take a full-page screenshot of any website.', icon: 'MonitorSmartphone', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'What Is My Browser', description: 'Get detailed information about your web browser and device.', icon: 'Globe', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Negative Marking Calculator', description: 'Calculate your final score in exams with negative marking.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'YouTube Channel Banner Downloader', description: 'Download the banner image from any YouTube channel.', icon: 'Download', category: 'video', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'YouTube Channel Logo Downloader', description: 'Download the profile picture/logo from any YouTube channel.', icon: 'Download', category: 'video', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'YouTube Video Description Extractor', description: 'Extract and view the full description of any YouTube video.', icon: 'FileText', category: 'video', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'YouTube Video Title Extractor', description: 'Extract the title from any YouTube video.', icon: 'FileText', category: 'video', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'YouTube Video Thumbnail Downloader', description: 'Download thumbnails from YouTube videos in all available qualities.', icon: 'Image', category: 'video', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'YouTube Region Restriction Checker', description: 'Check if a YouTube video is restricted in any country.', icon: 'Globe', category: 'video', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Google Drive Direct Link Generator', description: 'Convert Google Drive sharing links to permanent direct download links.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Dropbox Direct Link Generator', description: 'Convert Dropbox sharing links to permanent direct download links.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'OneDrive Direct Link Generator', description: 'Convert OneDrive sharing links to permanent direct download links.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'NSDL PAN Card Photo & Signature Resizer', description: 'Resize photo and signature for NSDL PAN card applications.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'UTI PAN Card Photo & Signature Resizer', description: 'Resize photo and signature for UTI PAN card applications.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'PRN to PDF', description: 'Convert PRN files to PDF format.', icon: 'FileText', category: 'pdf', plan: 'Free', isNew: true, status: 'Coming Soon' },
 ];
 
 /**
@@ -336,3 +349,5 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
 
   return { description: generatedDesc };
 }
+
+    
