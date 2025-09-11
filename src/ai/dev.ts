@@ -43,4 +43,6 @@ import '@/ai/flows/ai-story-visualizer.ts';
 import '@/ai/flows/ai-story-visualizer.types.ts';
 import '@/ai/flows/ai-code-generator.ts';
 import '@/ai/flows/ai-code-generator.types.ts';
+import '@/ai/flows/ai-rewriter.ts';
+import '@/ai/flows/ai-rewriter.types.ts';
 

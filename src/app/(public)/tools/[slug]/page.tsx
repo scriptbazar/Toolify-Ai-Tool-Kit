@@ -147,6 +147,7 @@ import { CreditCardInterestCalculator } from '@/components/tools/CreditCardInter
 import { ImageMetadataViewer } from '@/components/tools/ImageMetadataViewer';
 import { AiCodeGenerator } from '@/components/tools/AiCodeGenerator';
 import { Button } from '@/components/ui/button';
+import { AiRewriter } from '@/components/tools/AiRewriter';
 
 
 export async function generateStaticParams() {
@@ -183,6 +184,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-voice-cloning': AiVoiceCloning,
   'ai-story-visualizer': AiStoryVisualizer,
   'ai-code-generator': AiCodeGenerator,
+  'ai-rewriter': AiRewriter,
   'add-watermark-to-pdf': AddWatermarkToPdf,
   'age-calculator': AgeCalculator,
   'amazon-shipping-label-cropper': AmazonShippingLabelCropper,
@@ -948,4 +950,3 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     
 
     
-
