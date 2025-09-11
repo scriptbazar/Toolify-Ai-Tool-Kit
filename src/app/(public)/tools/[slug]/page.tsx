@@ -1,5 +1,7 @@
 
 
+'use client';
+
 import { getTools } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
 import { CaseConverter } from '@/components/tools/CaseConverter';
@@ -99,7 +101,7 @@ import { XVideoDownloader } from '@/components/tools/XVideoDownloader';
 import { InstagramVideoDownloader } from '@/components/tools/InstagramVideoDownloader';
 import { ThreadsVideoDownloader } from '@/components/tools/ThreadsVideoDownloader';
 import { LinkedinVideoDownloader } from '@/components/tools/LinkedinVideoDownloader';
-import { PinterestVideoDownloader from '@/components/tools/PinterestVideoDownloader';
+import { PinterestVideoDownloader } from '@/components/tools/PinterestVideoDownloader';
 import { UnlockPdf } from '@/components/tools/UnlockPdf';
 import { LockPdf } from '@/components/tools/LockPdf';
 import { PdfPageReorder } from '@/components/tools/PdfPageReorder';
@@ -128,7 +130,7 @@ import { MarksToPercentageCalculator } from '@/components/tools/MarksToPercentag
 import { SrmToCgpaCalculator } from '@/components/tools/SrmToCgpaCalculator';
 import { CgpaToMarksCalculator } from '@/components/tools/CgpaToMarksCalculator';
 import { GpaToPercentageConverter } from '@/components/tools/GpaToPercentageConverter';
-import { GpaToCgpaCalculator from '@/components/tools/GpaToCgpaCalculator';
+import { GpaToCgpaCalculator } from '@/components/tools/GpaToCgpaCalculator';
 import { PercentageToCgpaConverter } from '@/components/tools/PercentageToCgpaConverter';
 import { CgpaToGpaConverter } from '@/components/tools/CgpaToGpaConverter';
 import { TextEncryptionDecryption } from '@/components/tools/TextEncryptionDecryption';
