@@ -46,12 +46,6 @@ import { PngToJpg } from '@/components/tools/PngToJpg';
 import { JpgToPng } from '@/components/tools/JpgToPng';
 import { ImageToBase64 } from '@/components/tools/ImageToBase64';
 import { ImageResizer } from '@/components/tools/ImageResizer';
-import { FlipImage } from '@/components/tools/FlipImage';
-import { IcoConverter } from '@/components/tools/IcoConverter';
-import { ImageCompressor } from '@/components/tools/ImageCompressor';
-import { ImageCropper } from '@/components/tools/ImageCropper';
-import { ImageBackgroundRemover } from '@/components/tools/ImageBackgroundRemover';
-import { ImageQualityEnhancer } from '@/components/tools/ImageQualityEnhancer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -153,44 +147,6 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'jpg-to-png': JpgToPng,
   'image-to-base64': ImageToBase64,
   'image-resizer': ImageResizer,
-  'flip-image': FlipImage,
-  'ico-converter': IcoConverter,
-  'image-compressor': ImageCompressor,
-  'image-cropper': ImageCropper,
-  'image-background-remover': ImageBackgroundRemover,
-  'image-quality-enhancer': ImageQualityEnhancer,
-  'pdf-splitter': PdfSplitter,
-  'word-to-pdf': WordToPdf,
-  'rotate-pdf': RotatePdf,
-  'ppt-to-pdf': PptToPdf,
-  'pdf-to-word': PdfToWord,
-  'pdf-to-jpg': PdfToJpg,
-  'meta-tag-generator': MetaTagGenerator,
-  'robots-txt-generator': RobotsTxtGenerator,
-  'xml-sitemap-generator': XmlSitemapGenerator,
-  'favicon-checker': FaviconChecker,
-  'keyword-density-checker': KeywordDensityChecker,
-  'serp-checker': SerpChecker,
-  'redirect-checker': RedirectChecker,
-  'schema-generator': SchemaGenerator,
-  'title-tag-checker': TitleTagChecker,
-  'website-word-counter': WebsiteWordCounter,
-  'fuel-cost-calculator': FuelCostCalculator,
-  'gpa-calculator': GpaCalculator,
-  'loan-calculator': LoanCalculator,
-  'percentage-calculator': PercentageCalculator,
-  'time-zone-converter': TimeZoneConverter,
-  'unix-timestamp-converter': UnixTimestampConverter,
-  'html-minifier': HtmlMinifier,
-  'javascript-minifier': JavascriptMinifier,
-  'sql-formatter': SqlFormatter,
-  'uuid-generator': UuidGenerator,
-  'youtube-video-downloader': YoutubeVideoDownloader,
-  'x-video-downloader': XVideoDownloader,
-  'instagram-video-downloader': InstagramVideoDownloader,
-  'threads-video-downloader': ThreadsVideoDownloader,
-  'linkedin-video-downloader': LinkedinVideoDownloader,
-  'pinterest-video-downloader': PinterestVideoDownloader,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
