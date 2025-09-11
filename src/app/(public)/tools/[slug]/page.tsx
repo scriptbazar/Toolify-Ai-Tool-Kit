@@ -143,6 +143,7 @@ import { TextToMorseCode } from '@/components/tools/TextToMorseCode';
 import { CryptocurrencyConverter } from '@/components/tools/CryptocurrencyConverter';
 import { BarcodeGenerator } from '@/components/tools/BarcodeGenerator';
 import { CurrencyConverter } from '@/components/tools/CurrencyConverter';
+import { CreditCardInterestCalculator } from '@/components/tools/CreditCardInterestCalculator';
 
 
 export async function generateStaticParams() {
@@ -253,6 +254,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'cryptocurrency-converter': CryptocurrencyConverter,
   'barcode-generator': BarcodeGenerator,
   'currency-converter': CurrencyConverter,
+  'credit-card-interest-calculator': CreditCardInterestCalculator,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (

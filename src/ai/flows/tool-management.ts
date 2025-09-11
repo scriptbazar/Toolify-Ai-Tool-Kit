@@ -114,6 +114,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Cryptocurrency Converter', description: 'Convert between different cryptocurrencies and fiat.', icon: 'Bitcoin', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Barcode Generator', description: 'Generate barcodes in various formats.', icon: 'Barcode', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Currency Converter', description: 'Convert between different world currencies.', icon: 'Coins', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Credit Card Interest Calculator', description: 'Calculate the interest on your credit card balance.', icon: 'CreditCard', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
 ];
 
 /**
