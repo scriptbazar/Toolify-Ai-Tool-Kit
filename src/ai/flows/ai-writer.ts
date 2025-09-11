@@ -10,6 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import Handlebars from 'handlebars';
 import {
     AiWriterInputSchema,
     AiWriterOutputSchema,
@@ -32,6 +33,8 @@ import {
 export async function aiWriter(input: AiWriterInput): Promise<AiWriterOutput> {
   return aiWriterFlow(input);
 }
+
+Handlebars.registerHelper('eq', (a, b) => a === b);
 
 const prompt = ai.definePrompt({
   name: 'aiWriterPrompt',
