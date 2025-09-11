@@ -15,11 +15,14 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 
-const CodeBlock = ({ language, code }: { language: string, code: string }) => (
-    <SyntaxHighlighter language={language} style={vscDarkPlus} showLineNumbers>
-        {code}
-    </SyntaxHighlighter>
-);
+const CodeBlock = ({ language, code }: { language: string, code: string }) => {
+    if (!code) return null;
+    return (
+        <SyntaxHighlighter language={language.toLowerCase()} style={vscDarkPlus} showLineNumbers>
+            {code}
+        </SyntaxHighlighter>
+    );
+};
 
 export function AiCodeGenerator() {
   const [prompt, setPrompt] = useState('');
@@ -38,24 +41,46 @@ export function AiCodeGenerator() {
       return;
     }
     setIsLoading(true);
-    setGeneratedOutput({ generatedCode: {}, setupInstructions: '', codeExplanation: '' }); // Reset output
+    setGeneratedOutput({ generatedCode: {}, setupInstructions: '', codeExplanation: '' });
 
     try {
         const stream = await aiCodeGenerator({ prompt, language });
-        for await (const chunk of stream) {
-            setGeneratedOutput(chunk);
+        const reader = stream.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || ''; // Keep the last, possibly incomplete line
+
+            for (const line of lines) {
+                if (line.trim() === '') continue;
+                try {
+                    const chunk = JSON.parse(line);
+                    setGeneratedOutput(chunk);
+                } catch (e) {
+                    console.error("Failed to parse JSON chunk:", line, e);
+                }
+            }
         }
+        
     } catch (error: any) {
       toast({
         title: 'Generation Failed',
         description: error.message || 'Could not generate code.',
         variant: 'destructive',
       });
-      setGeneratedOutput(null); // Clear output on error
+      setGeneratedOutput(null);
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const handleCopy = (content: string, type: string) => {
     if (!content) {
@@ -90,8 +115,38 @@ export function AiCodeGenerator() {
         return <CodeBlock language={language.toLowerCase()} code={code} />;
     }
 
-    return isLoading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/> : <p className="text-muted-foreground">No code was generated for this request.</p>;
+    if (isLoading) {
+        return <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/></div>;
+    }
+
+    return <p className="text-muted-foreground">No code was generated for this request.</p>;
   }
+
+  const renderMarkdown = (text: string | undefined) => {
+    if (isLoading && !text) {
+      return <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+    }
+    if (!text) {
+      return <p className="text-muted-foreground">No content generated yet.</p>;
+    }
+    
+    // Naive markdown-to-HTML for demonstration
+    const html = text
+      .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+        return `<pre><code class="language-${lang || ''}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+      })
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+      .replace(/^\* (.*$)/gim, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
+      .replace(/\n/g, '<br />');
+
+    return <div dangerouslySetInnerHTML={{ __html: html }} />;
+  };
 
   return (
     <div className="space-y-6">
@@ -148,8 +203,7 @@ export function AiCodeGenerator() {
                 <Card>
                     <CardHeader><CardTitle>Setup Instructions</CardTitle></CardHeader>
                     <CardContent className="prose dark:prose-invert max-w-none">
-                       {isLoading && !generatedOutput?.setupInstructions && <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/></div>}
-                       {generatedOutput?.setupInstructions && <div dangerouslySetInnerHTML={{ __html: generatedOutput.setupInstructions }} />}
+                       {renderMarkdown(generatedOutput?.setupInstructions)}
                     </CardContent>
                 </Card>
             </TabsContent>
@@ -157,8 +211,7 @@ export function AiCodeGenerator() {
                 <Card>
                     <CardHeader><CardTitle>Code Explanation</CardTitle></CardHeader>
                     <CardContent className="prose dark:prose-invert max-w-none">
-                        {isLoading && !generatedOutput?.codeExplanation && <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/></div>}
-                        {generatedOutput?.codeExplanation && <div dangerouslySetInnerHTML={{ __html: generatedOutput.codeExplanation }} />}
+                        {renderMarkdown(generatedOutput?.codeExplanation)}
                     </CardContent>
                 </Card>
             </TabsContent>
