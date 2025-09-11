@@ -50,9 +50,8 @@ export async function getReviews(toolId?: string): Promise<Review[]> {
 
     } catch (error) {
         console.error("Error fetching reviews:", error);
-        // Re-throwing the error so the calling component can handle it, e.g. show a toast.
-        // In a production app, you might want more specific error handling or logging.
-        throw new Error("Could not fetch reviews.");
+        // Return an empty array on error to prevent crashing the calling component
+        return [];
     }
 }
 
