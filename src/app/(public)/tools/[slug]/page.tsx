@@ -743,6 +743,18 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         howTo: ['Select a start date.', 'Choose whether to add or subtract time, or calculate the duration between two dates.', 'Enter the values.', 'The resulting date or duration will be displayed.'],
         why: 'A handy tool for project planning, event scheduling, and counting down to important dates. Quickly perform date-related calculations without manual counting.'
     },
+    'admob-revenue-calculator': {
+        title: '✨ About the AdMob Revenue Calculator',
+        features: ['DAU Input: Enter your Daily Active Users.', 'Impressions per DAU: Specify how many ads a user sees on average.', 'eCPM based calculation: Use industry-standard eCPM to estimate revenue.', 'Match & Show Rates: Fine-tune the calculation with your ad network\'s performance.', 'Daily, Monthly, Yearly Projections: See your potential earnings over different timeframes.'],
+        howTo: ['Enter your app\'s DAU.', 'Provide the average ad impressions per user.', 'Set your eCPM, match rate, and show rate.', 'Click "Calculate Revenue" to see the estimates.'],
+        why: 'A crucial tool for app developers and publishers to forecast potential ad revenue from Google AdMob. It helps in financial planning, setting growth targets, and understanding the impact of user engagement on earnings.'
+    },
+    'adsense-revenue-calculator': {
+        title: '✨ About the AdSense Revenue Calculator',
+        features: ['Page Views Input: Enter your website\'s daily page views.', 'CTR & CPC: Use your average Click-Through Rate and Cost Per Click for accuracy.', 'Simple Calculation: Get straight to the point with essential metrics.', 'Daily, Monthly, Yearly Projections: Understand your revenue potential on different timelines.'],
+        howTo: ['Enter your average daily page views.', 'Input your average CTR (as a percentage).', 'Input your average CPC (in USD).', 'Click "Calculate Revenue" to view your estimated earnings.'],
+        why: 'An essential tool for bloggers, content creators, and website owners who monetize with Google AdSense. This calculator provides a quick estimate of your potential earnings, helping you to set realistic financial goals and optimize your content strategy.'
+    },
 
     // Ecommerce Tools
     'amazon-shipping-label-cropper': {
