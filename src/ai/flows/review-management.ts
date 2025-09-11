@@ -27,7 +27,8 @@ export async function getReviews(toolId?: string): Promise<Review[]> {
         let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = adminDb.collection('reviews');
 
         if (toolId) {
-            query = query.where('toolId', '==', toolId).where('status', '==', 'approved');
+            // Filter by toolId in the query
+            query = query.where('toolId', '==', toolId);
         }
 
         const snapshot = await query.orderBy('submittedOn', 'desc').get();
@@ -45,10 +46,17 @@ export async function getReviews(toolId?: string): Promise<Review[]> {
             });
         });
 
+        // If a toolId was provided, filter for approved reviews in the code
+        if (toolId) {
+            return reviews.filter(review => review.status === 'approved');
+        }
+
         return reviews;
     } catch (error) {
         console.error("Error fetching reviews:", error);
-        return [];
+        // Re-throwing the error so the calling component can handle it, e.g. show a toast.
+        // In a production app, you might want more specific error handling or logging.
+        throw new Error("Could not fetch reviews.");
     }
 }
 

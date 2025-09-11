@@ -268,9 +268,9 @@ const SidebarWidget = ({ title, children }: { title: string, children: React.Rea
     </Card>
 );
 
-const ToolStatusDisplay = ({ icon: React.ElementType, title, description }: { icon: any, title: string, description: string }) => (
+const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
     <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-8 bg-muted/50 rounded-lg">
-        <icon className="w-16 h-16 text-primary mb-4" />
+        <Icon className="w-16 h-16 text-primary mb-4" />
         <h2 className="text-2xl font-bold mb-2">{title}</h2>
         <p className="text-muted-foreground">{description}</p>
     </div>
