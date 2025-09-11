@@ -193,7 +193,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'date-calculator': DateCalculator,
   'compress-pdf': CompressPdf,
   'excel-to-pdf': ExcelToPdf,
-  'text-to-binary': TextToBinary,
+  'text-to-binary': BinaryConverter,
   'reverse-text': ReverseText,
   'remove-extra-spaces': RemoveExtraSpaces,
   'find-and-replace': FindAndReplace,
@@ -406,10 +406,10 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         why: 'Easily encode and decode strings for use in URLs. This is essential for passing data in query parameters and ensuring that your URLs are valid and work correctly across all browsers.'
     },
     'base64-encoder-decoder': {
-        title: '✨ About the Base64 Encoder/Decoder',
-        features: ['Encode to Base64: Convert any text or data into a Base64 string.', 'Decode from Base64: Convert a Base64 string back to its original data.', 'UTF-8 Support: Works with a wide range of characters.', 'Ideal for data URIs and simple data transmission.'],
-        howTo: ['Paste your text or Base64 string into the input field.', 'Click "Encode" or "Decode" to perform the respective action.', 'The result will appear in the output field.'],
-        why: 'A standard tool for web developers. Base64 is commonly used to embed binary data (like images) directly into code (like HTML or CSS) or to transmit data that might otherwise be corrupted.'
+      title: '✨ About the Base64 Encoder/Decoder',
+      features: ['Encode & Decode Text: Seamlessly convert text to and from Base64.', 'Encode & Decode Files: Upload files to convert them into a Base64 string, or decode a string back into a file.', 'One-Click Copy: Easily copy the results to your clipboard.', 'Secure client-side processing for your data.'],
+      howTo: ['Select the "Text" or "File" tab.', 'For text, simply type or paste your content and click "Encode" or "Decode".', 'For files, drag and drop or select a file to instantly get the Base64 string.', 'To decode a file, paste the Base64 string and click "Decode & Download".'],
+      why: 'Base64 is a fundamental encoding scheme for transmitting binary data over text-based mediums. This tool is essential for developers working with data URIs for images, embedding data in XML or JSON, or for any scenario where binary data needs to be safely handled as text.'
     },
     'unix-timestamp-converter': {
         title: '✨ About the Unix Timestamp Converter',
@@ -931,5 +931,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     </div>
   );
 }
+
+    
 
     
