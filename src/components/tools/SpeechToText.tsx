@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, type DragEvent } from 'react';
@@ -78,10 +77,15 @@ export function SpeechToText() {
           audioDataUri: base64Audio,
         });
         setTranscribedText(result.transcribedText);
+        setIsLoading(false);
       };
+      reader.onerror = (error) => {
+        console.error("File reading error:", error);
+        throw new Error("Failed to read the audio file.");
+      }
     } catch (error: any) {
+      console.error("Transcription process error:", error);
       toast({ title: 'Transcription Failed', description: error.message || 'Could not transcribe the audio.', variant: 'destructive' });
-      // Also reset loading state on error in reader
       setIsLoading(false);
     }
   };
