@@ -145,6 +145,7 @@ import { BarcodeGenerator } from '@/components/tools/BarcodeGenerator';
 import { CurrencyConverter } from '@/components/tools/CurrencyConverter';
 import { CreditCardInterestCalculator } from '@/components/tools/CreditCardInterestCalculator';
 import { ImageMetadataViewer } from '@/components/tools/ImageMetadataViewer';
+import { AiCodeGenerator } from '@/components/tools/AiCodeGenerator';
 
 
 export async function generateStaticParams() {
@@ -180,6 +181,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-tweet-generator': AiTweetGenerator,
   'ai-voice-cloning': AiVoiceCloning,
   'ai-story-visualizer': AiStoryVisualizer,
+  'ai-code-generator': AiCodeGenerator,
   'add-watermark-to-pdf': AddWatermarkToPdf,
   'age-calculator': AgeCalculator,
   'amazon-shipping-label-cropper': AmazonShippingLabelCropper,

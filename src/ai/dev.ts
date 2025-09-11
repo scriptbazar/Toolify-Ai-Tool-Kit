@@ -41,3 +41,6 @@ import '@/ai/flows/ai-voice-cloning.types.ts';
 import '@/ai/flows/speech-to-text.ts';
 import '@/ai/flows/ai-story-visualizer.ts';
 import '@/ai/flows/ai-story-visualizer.types.ts';
+import '@/ai/flows/ai-code-generator.ts';
+import '@/ai/flows/ai-code-generator.types.ts';
+
