@@ -102,6 +102,18 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'GPA to CGPA Calculator', description: 'Calculate CGPA from GPA.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Percentage to CGPA Converter', description: 'Convert percentage to CGPA.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'CGPA to GPA Converter', description: 'Convert CGPA to GPA.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Text Encryption & Decryption', description: 'Encrypt and decrypt text using various algorithms.', icon: 'Lock', category: 'dev', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'Password Strength Checker', description: 'Check the strength of your password.', icon: 'CheckCheck', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'SHA256 Hash Generator', description: 'Generate SHA256 hash for any text.', icon: 'Hash', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Universal Hash Generator', description: 'Generate various types of hashes (MD5, SHA1, etc.).', icon: 'Hash', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'AES Encryption & Decryption', description: 'Encrypt and decrypt files using AES.', icon: 'Key', category: 'dev', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'Universal File Converter', description: 'Convert files from one format to another.', icon: 'FileCog', category: 'dev', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'Image Shape Converter', description: 'Convert images into various shapes (circle, star, etc.).', icon: 'Shapes', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Morse to Text Translator', description: 'Translate Morse code to plain text.', icon: 'MessageSquare', category: 'text', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Text to Morse Code', description: 'Translate plain text to Morse code.', icon: 'MessageSquare', category: 'text', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Cryptocurrency Converter', description: 'Convert between different cryptocurrencies and fiat.', icon: 'Bitcoin', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Barcode Generator', description: 'Generate barcodes in various formats.', icon: 'Barcode', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Currency Converter', description: 'Convert between different world currencies.', icon: 'Coins', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
 ];
 
 /**

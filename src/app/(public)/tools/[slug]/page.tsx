@@ -131,6 +131,18 @@ import { GpaToPercentageConverter } from '@/components/tools/GpaToPercentageConv
 import { GpaToCgpaCalculator } from '@/components/tools/GpaToCgpaCalculator';
 import { PercentageToCgpaConverter } from '@/components/tools/PercentageToCgpaConverter';
 import { CgpaToGpaConverter } from '@/components/tools/CgpaToGpaConverter';
+import { TextEncryptionDecryption } from '@/components/tools/TextEncryptionDecryption';
+import { PasswordStrengthChecker } from '@/components/tools/PasswordStrengthChecker';
+import { Sha256HashGenerator } from '@/components/tools/Sha256HashGenerator';
+import { UniversalHashGenerator } from '@/components/tools/UniversalHashGenerator';
+import { AesEncryptionDecryption } from '@/components/tools/AesEncryptionDecryption';
+import { UniversalFileConverter } from '@/components/tools/UniversalFileConverter';
+import { ImageShapeConverter } from '@/components/tools/ImageShapeConverter';
+import { MorseToTextTranslator } from '@/components/tools/MorseToTextTranslator';
+import { TextToMorseCode } from '@/components/tools/TextToMorseCode';
+import { CryptocurrencyConverter } from '@/components/tools/CryptocurrencyConverter';
+import { BarcodeGenerator } from '@/components/tools/BarcodeGenerator';
+import { CurrencyConverter } from '@/components/tools/CurrencyConverter';
 
 
 export async function generateStaticParams() {
@@ -229,6 +241,18 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'gpa-to-cgpa-calculator': GpaToCgpaCalculator,
   'percentage-to-cgpa-converter': PercentageToCgpaConverter,
   'cgpa-to-gpa-converter': CgpaToGpaConverter,
+  'text-encryption-decryption': TextEncryptionDecryption,
+  'password-strength-checker': PasswordStrengthChecker,
+  'sha256-hash-generator': Sha256HashGenerator,
+  'universal-hash-generator': UniversalHashGenerator,
+  'aes-encryption-decryption': AesEncryptionDecryption,
+  'universal-file-converter': UniversalFileConverter,
+  'image-shape-converter': ImageShapeConverter,
+  'morse-to-text-translator': MorseToTextTranslator,
+  'text-to-morse-code': TextToMorseCode,
+  'cryptocurrency-converter': CryptocurrencyConverter,
+  'barcode-generator': BarcodeGenerator,
+  'currency-converter': CurrencyConverter,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
