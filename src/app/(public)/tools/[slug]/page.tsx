@@ -99,7 +99,7 @@ import { XVideoDownloader } from '@/components/tools/XVideoDownloader';
 import { InstagramVideoDownloader } from '@/components/tools/InstagramVideoDownloader';
 import { ThreadsVideoDownloader } from '@/components/tools/ThreadsVideoDownloader';
 import { LinkedinVideoDownloader } from '@/components/tools/LinkedinVideoDownloader';
-import { PinterestVideoDownloader } from '@/components/tools/PinterestVideoDownloader';
+import { PinterestVideoDownloader from '@/components/tools/PinterestVideoDownloader';
 import { UnlockPdf } from '@/components/tools/UnlockPdf';
 import { LockPdf } from '@/components/tools/LockPdf';
 import { PdfPageReorder } from '@/components/tools/PdfPageReorder';
@@ -128,7 +128,7 @@ import { MarksToPercentageCalculator } from '@/components/tools/MarksToPercentag
 import { SrmToCgpaCalculator } from '@/components/tools/SrmToCgpaCalculator';
 import { CgpaToMarksCalculator } from '@/components/tools/CgpaToMarksCalculator';
 import { GpaToPercentageConverter } from '@/components/tools/GpaToPercentageConverter';
-import { GpaToCgpaCalculator } from '@/components/tools/GpaToCgpaCalculator';
+import { GpaToCgpaCalculator from '@/components/tools/GpaToCgpaCalculator';
 import { PercentageToCgpaConverter } from '@/components/tools/PercentageToCgpaConverter';
 import { CgpaToGpaConverter } from '@/components/tools/CgpaToGpaConverter';
 import { TextEncryptionDecryption } from '@/components/tools/TextEncryptionDecryption';
@@ -148,6 +148,8 @@ import { ImageMetadataViewer } from '@/components/tools/ImageMetadataViewer';
 import { AiCodeGenerator } from '@/components/tools/AiCodeGenerator';
 import { Button } from '@/components/ui/button';
 import { AiRewriter } from '@/components/tools/AiRewriter';
+import { ImageQualityEnhancer } from '@/components/tools/ImageQualityEnhancer';
+import { AiWebContentSummarizer } from '@/components/tools/AiWebContentSummarizer';
 
 
 export async function generateStaticParams() {
@@ -185,6 +187,8 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-story-visualizer': AiStoryVisualizer,
   'ai-code-generator': AiCodeGenerator,
   'ai-rewriter': AiRewriter,
+  'ai-image-quality-enhancer': ImageQualityEnhancer,
+  'ai-web-content-summarizer-and-explainer': AiWebContentSummarizer,
   'add-watermark-to-pdf': AddWatermarkToPdf,
   'age-calculator': AgeCalculator,
   'amazon-shipping-label-cropper': AmazonShippingLabelCropper,
@@ -383,7 +387,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         why: 'Enhance your online security by creating strong, unique passwords for all your accounts. Our tool makes it easy to generate complex passwords that are difficult to crack.'
     },
     'json-formatter': {
-        title: '✨ About the JSON Formatter & Validator',
+        title: '✨ About the JSON Formatter &amp; Validator',
         features: ['Beautify/Format: Converts compact or messy JSON into a readable, indented format.', 'Validate: Instantly checks if your JSON is well-formed and valid.', 'Error Highlighting: Pinpoints syntax errors to help you debug quickly (feature in development).', 'Minify: Compacts JSON to save space.'],
         howTo: ['Paste your JSON data into the text area.', 'Click "Format JSON".', 'If the JSON is valid, it will be beautified. If not, an error will be shown.'],
         why: 'An essential tool for developers working with APIs. Quickly format, validate, and debug JSON data to ensure it\'s correct and easy to read, saving you valuable development time.'
@@ -414,8 +418,8 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     },
     'base64-encoder-decoder': {
       title: '✨ About the Base64 Encoder/Decoder',
-      features: ['Encode & Decode Text: Seamlessly convert text to and from Base64.', 'Encode & Decode Files: Upload files to convert them into a Base64 string, or decode a string back into a file.', 'One-Click Copy: Easily copy the results to your clipboard.', 'Secure client-side processing for your data.'],
-      howTo: ['Select the "Text" or "File" tab.', 'For text, simply type or paste your content and click "Encode" or "Decode".', 'For files, drag and drop or select a file to instantly get the Base64 string.', 'To decode a file, paste the Base64 string and click "Decode & Download".'],
+      features: ['Encode &amp; Decode Text: Seamlessly convert text to and from Base64.', 'Encode &amp; Decode Files: Upload files to convert them into a Base64 string, or decode a string back into a file.', 'One-Click Copy: Easily copy the results to your clipboard.', 'Secure client-side processing for your data.'],
+      howTo: ['Select the "Text" or "File" tab.', 'For text, simply type or paste your content and click "Encode" or "Decode".', 'For files, drag and drop or select a file to instantly get the Base64 string.', 'To decode a file, paste the Base64 string and click "Decode &amp; Download".'],
       why: 'Base64 is a fundamental encoding scheme for transmitting binary data over text-based mediums. This tool is essential for developers working with data URIs for images, embedding data in XML or JSON, or for any scenario where binary data needs to be safely handled as text.'
     },
     'unix-timestamp-converter': {
@@ -470,7 +474,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     },
     'text-to-speech': {
         title: '✨ About the Text to Speech Tool',
-        features: ['Natural Voices: Convert text into lifelike speech.', 'Multiple Languages & Accents: Choose from a wide variety of voices.', 'Adjustable Speed & Pitch: Customize the audio output.', 'Downloadable Audio: Save the generated speech as an MP3 file.'],
+        features: ['Natural Voices: Convert text into lifelike speech.', 'Multiple Languages &amp; Accents: Choose from a wide variety of voices.', 'Adjustable Speed &amp; Pitch: Customize the audio output.', 'Downloadable Audio: Save the generated speech as an MP3 file.'],
         howTo: ['Paste the text you want to convert.', 'Select a voice and adjust the settings.', 'Click "Generate Audio".', 'Listen to the preview and download the audio file.'],
         why: 'Make your content more accessible and engaging. Create voiceovers for videos, listen to articles on the go, or provide audio options for your users with our high-quality text-to-speech engine.'
     },
@@ -482,7 +486,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     },
     'ai-story-generator': {
         title: '✨ About the AI Story Generator',
-        features: ['Genre Selection: Choose from genres like fantasy, sci-fi, mystery, and more.', 'Character & Plot Prompts: Provide a simple prompt to guide the story.', 'Creative & Unpredictable: Generates unique and imaginative story narratives.', 'Continue Story: Let the AI continue a story you\'ve already started.'],
+        features: ['Genre Selection: Choose from genres like fantasy, sci-fi, mystery, and more.', 'Character &amp; Plot Prompts: Provide a simple prompt to guide the story.', 'Creative &amp; Unpredictable: Generates unique and imaginative story narratives.', 'Continue Story: Let the AI continue a story you\'ve already started.'],
         howTo: ['Enter a simple prompt, like "A detective finds a mysterious clock".', 'Choose a genre and story length.', 'Click "Generate Story".', 'The AI will craft a unique narrative based on your input.'],
         why: 'Kickstart your creative writing process. This tool helps you overcome writer\'s block by providing instant story ideas and fully-fledged narratives, making it a great partner for authors and hobbyists.'
     },
@@ -604,7 +608,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     },
     'image-compressor': {
         title: '✨ About the Image Compressor',
-        features: ['Significant Size Reduction: Make your image files smaller.', 'Quality Control: Adjust the compression level to balance size and quality.', 'Supports JPG & PNG: Optimize the most common web image formats.', 'Batch Processing: Compress multiple images simultaneously.'],
+        features: ['Significant Size Reduction: Make your image files smaller.', 'Quality Control: Adjust the compression level to balance size and quality.', 'Supports JPG &amp; PNG: Optimize the most common web image formats.', 'Batch Processing: Compress multiple images simultaneously.'],
         howTo: ['Upload the images you want to compress.', 'Use the slider to set the desired quality/compression level.', 'Click "Compress".', 'Download your optimized images, individually or as a zip file.'],
         why: 'Improve your website\'s performance by reducing image file sizes. Compressed images load much faster, leading to a better user experience and improved SEO rankings.'
     },
@@ -648,7 +652,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     // SEO Tools
     'meta-tag-generator': {
         title: '✨ About the Meta Tag Generator',
-        features: ['Generate Title & Description: Create SEO-friendly title and meta description tags.', 'Character Count: Shows real-time character counts to stay within optimal lengths.', 'SERP Preview: See how your meta tags will look on a Google search results page.', 'Easy to copy HTML code.'],
+        features: ['Generate Title &amp; Description: Create SEO-friendly title and meta description tags.', 'Character Count: Shows real-time character counts to stay within optimal lengths.', 'SERP Preview: See how your meta tags will look on a Google search results page.', 'Easy to copy HTML code.'],
         howTo: ['Enter your desired Site Title and Meta Description.', 'The SERP preview will update in real-time.', 'Copy the generated HTML code and paste it into the `<head>` section of your website.'],
         why: 'Improve your website\'s click-through rate from search engines. Well-crafted meta tags are crucial for attracting users and provide context to search engines about your page content.'
     },
@@ -770,13 +774,13 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     },
     'admob-revenue-calculator': {
         title: '✨ About the AdMob Revenue Calculator',
-        features: ['DAU Input: Enter your Daily Active Users.', 'Impressions per DAU: Specify how many ads a user sees on average.', 'eCPM based calculation: Use industry-standard eCPM to estimate revenue.', 'Match & Show Rates: Fine-tune the calculation with your ad network\'s performance.', 'Daily, Monthly, Yearly Projections: See your potential earnings over different timeframes.'],
+        features: ['DAU Input: Enter your Daily Active Users.', 'Impressions per DAU: Specify how many ads a user sees on average.', 'eCPM based calculation: Use industry-standard eCPM to estimate revenue.', 'Match &amp; Show Rates: Fine-tune the calculation with your ad network\'s performance.', 'Daily, Monthly, Yearly Projections: See your potential earnings over different timeframes.'],
         howTo: ['Enter your app\'s DAU.', 'Provide the average ad impressions per user.', 'Set your eCPM, match rate, and show rate.', 'Click "Calculate Revenue" to see the estimates.'],
         why: 'A crucial tool for app developers and publishers to forecast potential ad revenue from Google AdMob. It helps in financial planning, setting growth targets, and understanding the impact of user engagement on earnings.'
     },
     'adsense-revenue-calculator': {
         title: '✨ About the AdSense Revenue Calculator',
-        features: ['Page Views Input: Enter your website\'s daily page views.', 'CTR & CPC: Use your average Click-Through Rate and Cost Per Click for accuracy.', 'Simple Calculation: Get straight to the point with essential metrics.', 'Daily, Monthly, Yearly Projections: Understand your revenue potential on different timelines.'],
+        features: ['Page Views Input: Enter your website\'s daily page views.', 'CTR &amp; CPC: Use your average Click-Through Rate and Cost Per Click for accuracy.', 'Simple Calculation: Get straight to the point with essential metrics.', 'Daily, Monthly, Yearly Projections: Understand your revenue potential on different timelines.'],
         howTo: ['Enter your average daily page views.', 'Input your average CTR (as a percentage).', 'Input your average CPC (in USD).', 'Click "Calculate Revenue" to view your estimated earnings.'],
         why: 'An essential tool for bloggers, content creators, and website owners who monetize with Google AdSense. This calculator provides a quick estimate of your potential earnings, helping you to set realistic financial goals and optimize your content strategy.'
     },
