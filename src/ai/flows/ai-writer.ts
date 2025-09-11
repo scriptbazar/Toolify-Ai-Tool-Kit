@@ -34,8 +34,6 @@ export async function aiWriter(input: AiWriterInput): Promise<AiWriterOutput> {
   return aiWriterFlow(input);
 }
 
-Handlebars.registerHelper('eq', (a, b) => a === b);
-
 const prompt = ai.definePrompt({
   name: 'aiWriterPrompt',
   input: {schema: AiWriterInputSchema},
@@ -48,16 +46,16 @@ The blog post must be written in the following language: **{{{language}}}**.
 
 Topic: "{{{topic}}}"
 Desired Length: {{{length}}} 
-{{#if (eq length "Short")}}
+{{#if isShort}}
 (Aim for ~300 words)
 {{/if}}
-{{#if (eq length "Medium")}}
+{{#if isMedium}}
 (Aim for ~700 words)
 {{/if}}
-{{#if (eq length "Long")}}
+{{#if isLong}}
 (Aim for ~1200 words)
 {{/if}}
-{{#if (eq length "Ultra Long")}}
+{{#if isUltraLong}}
 (Aim for ~{{{wordCount}}} words)
 {{/if}}
 Tone of Voice: {{{tone}}}
@@ -82,7 +80,14 @@ const aiWriterFlow = ai.defineFlow(
     outputSchema: AiWriterOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const promptData = {
+        ...input,
+        isShort: input.length === 'Short',
+        isMedium: input.length === 'Medium',
+        isLong: input.length === 'Long',
+        isUltraLong: input.length === 'Ultra Long',
+    };
+    const {output} = await prompt(promptData);
     return output!;
   }
 );
