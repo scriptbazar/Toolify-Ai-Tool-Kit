@@ -1,33 +1,62 @@
-
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { UploadCloud, Copy, Mic, Loader2, FileText, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { speechToText } from '@/ai/flows/speech-to-text';
+import { cn } from '@/lib/utils';
 
 export function SpeechToText() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [transcribedText, setTranscribedText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleFile = (file: File) => {
+    if (file && (file.type.startsWith('audio/') || file.type === 'video/mp4')) {
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+            toast({ title: 'File too large', description: 'Please upload an audio file smaller than 10MB.', variant: 'destructive'});
+            return;
+        }
+        setAudioFile(file);
+        setTranscribedText('');
+    } else {
+        toast({ title: 'Invalid File Type', description: 'Please upload a valid audio or MP4 video file.', variant: 'destructive'});
+    }
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && (file.type === 'audio/mpeg' || file.type === 'audio/wav' || file.type === 'audio/webm' || file.type === 'audio/mp4')) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        toast({ title: 'File too large', description: 'Please upload an audio file smaller than 10MB.', variant: 'destructive'});
-        return;
-      }
-      setAudioFile(file);
-      setTranscribedText('');
-    } else if (file) {
-      toast({ title: 'Invalid File Type', description: 'Please upload a valid audio file (MP3, WAV, WEBM, MP4).', variant: 'destructive'});
+    if (file) {
+      handleFile(file);
     }
+  };
+  
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+      const file = e.dataTransfer.files?.[0];
+      if (file) {
+          handleFile(file);
+      }
   };
 
   const handleTranscribe = async () => {
@@ -70,10 +99,16 @@ export function SpeechToText() {
   return (
     <div className="space-y-6">
       <div 
-        className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative"
+        className={cn("w-full aspect-video border-2 border-dashed rounded-lg text-center cursor-pointer flex items-center justify-center relative transition-colors", 
+            isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/30 hover:bg-muted/50'
+        )}
         onClick={() => fileInputRef.current?.click()}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="audio/*" />
+        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="audio/*,video/mp4" />
         {audioFile ? (
             <div className="p-4 text-center">
                 <FileText className="mx-auto h-12 w-12 text-primary mb-2" />
