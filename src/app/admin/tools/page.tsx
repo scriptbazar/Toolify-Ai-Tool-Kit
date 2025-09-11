@@ -62,22 +62,19 @@ import { EditToolForm } from './[id]/page';
 
 const ITEMS_PER_PAGE = 10;
 
-export default function AdminToolsPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+export default function AdminToolsPage() {
   const [allTools, setAllTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingTool, setEditingTool] = useState<Tool | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
 
-  const searchQuery = (searchParams?.q as string) || '';
-  const activeCategory = (searchParams?.category as ToolCategory) || 'all';
-  const activeFilter = (searchParams?.filter as string) || 'all';
-  const page = Number(searchParams?.page) || 1;
+  const searchQuery = searchParams.get('q') || '';
+  const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
+  const activeFilter = searchParams.get('filter') || 'all';
+  const page = Number(searchParams.get('page')) || 1;
 
    const fetchTools = async () => {
     setLoading(true);
@@ -98,7 +95,7 @@ export default function AdminToolsPage({
 
    useEffect(() => {
     fetchTools();
-  }, [toast]);
+  }, []);
 
 
   const counts = useMemo(() => ({
@@ -150,9 +147,9 @@ export default function AdminToolsPage({
   };
   
   const createQueryString = (params: Record<string, string | number | null>) => {
-    const currentParams = new URLSearchParams(window.location.search);
+    const currentParams = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(params)) {
-      if (value === null || value === '') {
+      if (value === null || value === '' || (key === 'page' && value === 1)) {
         currentParams.delete(key);
       } else {
         currentParams.set(key, String(value));
@@ -162,18 +159,16 @@ export default function AdminToolsPage({
   };
   
   const handleCategoryChange = (value: string) => {
-    router.push(`/admin/tools?${createQueryString({ category: value, page: '1' })}`);
+    router.push(`/admin/tools?${createQueryString({ category: value === 'all' ? null : value, page: 1 })}`);
   };
   
   const handleFilterChange = (value: string) => {
-    router.push(`/admin/tools?${createQueryString({ filter: value, page: '1' })}`);
+    router.push(`/admin/tools?${createQueryString({ filter: value === 'all' ? null : value, page: 1 })}`);
   };
   
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const newSearchQuery = formData.get('q') as string;
-    router.push(`/admin/tools?${createQueryString({ q: newSearchQuery, page: '1' })}`);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSearchQuery = e.target.value;
+    router.push(`/admin/tools?${createQueryString({ q: newSearchQuery, page: 1 })}`);
   };
   
   const handleEditClick = (tool: Tool) => {
@@ -259,17 +254,16 @@ export default function AdminToolsPage({
               ))}
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
-                <form className="relative w-full sm:w-auto" onSubmit={handleSearch}>
+                <div className="relative w-full sm:w-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         name="q"
-                        defaultValue={searchQuery}
+                        value={searchQuery}
+                        onChange={handleSearchChange}
                         placeholder="Search tools..."
                         className="pl-9 w-full sm:max-w-xs h-10"
                     />
-                     <input type="hidden" name="filter" value={activeFilter} />
-                     <input type="hidden" name="category" value={activeCategory} />
-                </form>
+                </div>
                 <Select value={activeCategory} onValueChange={handleCategoryChange}>
                     <SelectTrigger className="w-full sm:w-[180px] h-10">
                         <SelectValue placeholder="All Categories" />
