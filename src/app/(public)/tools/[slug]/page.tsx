@@ -122,6 +122,8 @@ import { OneDriveDirectLinkGenerator } from '@/components/tools/OneDriveDirectLi
 import { NSDLPANCardPhotoAndSignatureResizer } from '@/components/tools/NSDLPANCardPhotoAndSignatureResizer';
 import { UTIPANCardPhotoAndSignatureResizer } from '@/components/tools/UTIPANCardPhotoAndSignatureResizer';
 import { PRNToPDF } from '@/components/tools/PRNToPDF';
+import { ImageToPdf } from '@/components/tools/ImageToPdf';
+import { PdfSigner } from '@/components/tools/PdfSigner';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -209,6 +211,9 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'nsdl-pan-card-photo-signature-resizer': NSDLPANCardPhotoAndSignatureResizer,
   'uti-pan-card-photo-signature-resizer': UTIPANCardPhotoAndSignatureResizer,
   'prn-to-pdf': PRNToPDF,
+  'image-to-pdf': ImageToPdf,
+  'pdf-signer': PdfSigner,
+  'rotate-pdf': RotatePdf,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (

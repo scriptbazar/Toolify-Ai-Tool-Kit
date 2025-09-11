@@ -92,6 +92,9 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'NSDL PAN Card Photo & Signature Resizer', description: 'Resize photo and signature for NSDL PAN card applications.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'UTI PAN Card Photo & Signature Resizer', description: 'Resize photo and signature for UTI PAN card applications.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'PRN to PDF', description: 'Convert PRN files to PDF format.', icon: 'FileText', category: 'pdf', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Image to PDF', description: 'Convert JPG, PNG, and other images to a PDF file.', icon: 'FileImage', category: 'pdf', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'PDF Signer', description: 'Sign your PDF documents electronically.', icon: 'PenSquare', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'Rotate PDF', description: 'Rotate all or specific pages in your PDF document.', icon: 'RotateCw', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
 ];
 
 /**
