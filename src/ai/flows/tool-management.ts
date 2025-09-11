@@ -95,6 +95,13 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image to PDF', description: 'Convert JPG, PNG, and other images to a PDF file.', icon: 'FileImage', category: 'pdf', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'PDF Signer', description: 'Sign your PDF documents electronically.', icon: 'PenSquare', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
     { name: 'Rotate PDF', description: 'Rotate all or specific pages in your PDF document.', icon: 'RotateCw', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'Marks to Percentage Calculator', description: 'Convert your marks or grades into a percentage.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'SRM to CGPA Calculator', description: 'Calculate CGPA for SRM University students.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'CGPA to Marks Calculator', description: 'Convert CGPA to equivalent marks.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'GPA to Percentage Converter', description: 'Convert GPA to percentage.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'GPA to CGPA Calculator', description: 'Calculate CGPA from GPA.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Percentage to CGPA Converter', description: 'Convert percentage to CGPA.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'CGPA to GPA Converter', description: 'Convert CGPA to GPA.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
 ];
 
 /**

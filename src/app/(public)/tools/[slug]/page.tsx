@@ -124,6 +124,14 @@ import { UTIPANCardPhotoAndSignatureResizer } from '@/components/tools/UTIPANCar
 import { PRNToPDF } from '@/components/tools/PRNToPDF';
 import { ImageToPdf } from '@/components/tools/ImageToPdf';
 import { PdfSigner } from '@/components/tools/PdfSigner';
+import { MarksToPercentageCalculator } from '@/components/tools/MarksToPercentageCalculator';
+import { SrmToCgpaCalculator } from '@/components/tools/SrmToCgpaCalculator';
+import { CgpaToMarksCalculator } from '@/components/tools/CgpaToMarksCalculator';
+import { GpaToPercentageConverter } from '@/components/tools/GpaToPercentageConverter';
+import { GpaToCgpaCalculator } from '@/components/tools/GpaToCgpaCalculator';
+import { PercentageToCgpaConverter } from '@/components/tools/PercentageToCgpaConverter';
+import { CgpaToGpaConverter } from '@/components/tools/CgpaToGpaConverter';
+
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -214,6 +222,13 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'image-to-pdf': ImageToPdf,
   'pdf-signer': PdfSigner,
   'rotate-pdf': RotatePdf,
+  'marks-to-percentage-calculator': MarksToPercentageCalculator,
+  'srm-to-cgpa-calculator': SrmToCgpaCalculator,
+  'cgpa-to-marks-calculator': CgpaToMarksCalculator,
+  'gpa-to-percentage-converter': GpaToPercentageConverter,
+  'gpa-to-cgpa-calculator': GpaToCgpaCalculator,
+  'percentage-to-cgpa-converter': PercentageToCgpaConverter,
+  'cgpa-to-gpa-converter': CgpaToGpaConverter,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
