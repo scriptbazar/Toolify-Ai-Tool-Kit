@@ -16,8 +16,8 @@ import {
 } from './ai-code-generator.types';
 
 export async function aiCodeGenerator(input: AiCodeGeneratorInput): Promise<Streamable<AiCodeGeneratorOutput>> {
-  const { stream, response } = await ai.generateStream({
-    model: 'gemini-1.5-flash-latest',
+  const { stream } = ai.generateStream({
+    model: 'googleai/gemini-1.5-flash-latest',
     prompt: `You are an expert software developer and a brilliant teacher. Your task is to generate high-quality code based on a user's request and provide comprehensive guidance.
 
 User's Request: "{{{prompt}}}"
