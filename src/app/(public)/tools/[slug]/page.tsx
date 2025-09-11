@@ -38,7 +38,6 @@ import { DiscountCalculator } from '@/components/tools/DiscountCalculator';
 import { DateCalculator } from '@/components/tools/DateCalculator';
 import { CompressPdf } from '@/components/tools/CompressPdf';
 import { ExcelToPdf } from '@/components/tools/ExcelToPdf';
-import { TextToBinary } from '@/components/tools/TextToBinary';
 import { ReverseText } from '@/components/tools/ReverseText';
 import { RemoveExtraSpaces } from '@/components/tools/RemoveExtraSpaces';
 import { FindAndReplace } from '@/components/tools/FindAndReplace';
@@ -188,12 +187,12 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'meesho-shipping-label-cropper': MeeshoShippingLabelCropper,
   'base64-encoder-decoder': Base64Converter,
   'binary-to-text': BinaryConverter,
+  'text-to-binary': BinaryConverter,
   'css-minifier': CssMinifier,
   'discount-calculator': DiscountCalculator,
   'date-calculator': DateCalculator,
   'compress-pdf': CompressPdf,
   'excel-to-pdf': ExcelToPdf,
-  'text-to-binary': BinaryConverter,
   'reverse-text': ReverseText,
   'remove-extra-spaces': RemoveExtraSpaces,
   'find-and-replace': FindAndReplace,
@@ -931,6 +930,8 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     </div>
   );
 }
+
+    
 
     
 
