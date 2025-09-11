@@ -38,6 +38,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'AI Story Generator', description: 'Craft compelling stories in various genres from a simple prompt.', icon: 'BookOpen', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Tweet Generator', description: 'Generate engaging tweets and thread ideas for social media.', icon: 'Twitter', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'AI Voice Cloning', description: 'Create a digital clone of your voice and generate speech in your own accent.', icon: 'Voicemail', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'AI Story Visualizer', description: 'Analyzes your story scene-by-scene and generates powerful image prompts for each scene.', icon: 'Clapperboard', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Add Watermark to PDF', description: 'Add a text or image watermark to your PDF documents.', icon: 'Fingerprint', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Age Calculator', description: 'Calculate age from date of birth.', icon: 'Gift', category: 'calculator', plan: 'Free', isNew: false, status: 'Active' },
     { name: 'Amazon Shipping Label Cropper', description: 'Effortlessly crop your standard 8.5x11 inch Amazon FBA shipping labels to a perfect 4x6 inch format, ideal for thermal printers. Save time and label costs.', icon: 'FileUp', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active' },

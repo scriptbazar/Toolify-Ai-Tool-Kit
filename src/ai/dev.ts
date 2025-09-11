@@ -39,3 +39,5 @@ import '@/ai/flows/video-downloader.ts';
 import '@/ai/flows/ai-voice-cloning.ts';
 import '@/ai/flows/ai-voice-cloning.types.ts';
 import '@/ai/flows/speech-to-text.ts';
+import '@/ai/flows/ai-story-visualizer.ts';
+import '@/ai/flows/ai-story-visualizer.types.ts';

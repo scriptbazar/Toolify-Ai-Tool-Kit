@@ -24,6 +24,7 @@ import { AiProductDescriptionWriter } from '@/components/tools/AiProductDescript
 import { AiStoryGenerator } from '@/components/tools/AiStoryGenerator';
 import { AiTweetGenerator } from '@/components/tools/AiTweetGenerator';
 import { AiVoiceCloning } from '@/components/tools/AiVoiceCloning';
+import { AiStoryVisualizer } from '@/components/tools/AiStoryVisualizer';
 import { AddWatermarkToPdf } from '@/components/tools/AddWatermarkToPdf';
 import { AgeCalculator } from '@/components/tools/AgeCalculator';
 import { AmazonShippingLabelCropper } from '@/components/tools/AmazonShippingLabelCropper';
@@ -178,6 +179,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-story-generator': AiStoryGenerator,
   'ai-tweet-generator': AiTweetGenerator,
   'ai-voice-cloning': AiVoiceCloning,
+  'ai-story-visualizer': AiStoryVisualizer,
   'add-watermark-to-pdf': AddWatermarkToPdf,
   'age-calculator': AgeCalculator,
   'amazon-shipping-label-cropper': AmazonShippingLabelCropper,
@@ -500,6 +502,22 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         features: ['Upload Your Voice: Provide a short audio sample of your voice.', 'Text to Speech: Generate speech in your own cloned voice.', 'High-Quality Output: Creates natural-sounding audio.', 'Secure and Private: Your voice data is protected.'],
         howTo: ['Upload a clear audio sample of your voice (a few minutes is best).', 'Wait for the AI to process and create your voice clone.', 'Enter the text you want to generate.', 'Click "Generate Speech" and listen to the output in your own voice.'],
         why: 'Create personalized audio content like never before. Ideal for content creators, personalized assistants, or for creating voiceovers for presentations and videos in your unique voice.'
+    },
+     'ai-story-visualizer': {
+      title: '✨ About the AI Story Visualizer',
+      features: [
+        'Scene Detection: Automatically breaks down your story into individual scenes.',
+        'Rich Prompt Generation: Creates detailed prompts covering characters, setting, mood, and style.',
+        'Concept Artist in a Click: Instantly get visual ideas for every part of your narrative.',
+        'Ideal for Image Generators: Prompts are optimized for use with AI image generation models like Midjourney or DALL-E.'
+      ],
+      howTo: [
+        'Paste your full story or a chapter into the text area.',
+        'Click "Generate Prompts".',
+        'The AI will analyze the text and display a list of scenes with corresponding image prompts.',
+        'Copy any prompt to use in your favorite AI image generator.'
+      ],
+      why: 'Bring your stories to life! This tool acts as a bridge between your narrative and visual art, helping writers, game developers, and filmmakers visualize their scenes and create stunning concept art.'
     },
 
     // PDF Tools
