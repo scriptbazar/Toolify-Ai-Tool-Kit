@@ -61,6 +61,15 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image to Base64', description: 'Convert an image to a Base64 string.', icon: 'Code', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Image Resizer', description: 'Resize image dimensions by pixels or percentage.', icon: 'Scaling', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Image Background Remover', description: 'Automatically remove the background from your images with a single click.', icon: 'Scissors', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'AdMob Revenue Calculator', description: 'Estimate your potential AdMob earnings.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'AdSense Revenue Calculator', description: 'Estimate your potential AdSense earnings.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'IFSC Code to Bank Details', description: 'Get bank details from an IFSC code.', icon: 'Banknote', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'GST Calculator', description: 'Calculate Goods and Services Tax.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Image Color Extractor', description: 'Extract a color palette from an image.', icon: 'Pipette', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Image Cropper', description: 'Crop images to your desired dimensions.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Image Compressor', description: 'Reduce the file size of your images.', icon: 'FileArchive', category: 'image', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Image Text Extractor', description: 'Extract text from an image.', icon: 'ScanText', category: 'ai', plan: 'Pro', isNew: true, status: 'Coming Soon' },
+    { name: 'Image Converter', description: 'Convert images between different formats like PNG, JPG, WEBP.', icon: 'FileImage', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
 ];
 
 /**
@@ -318,5 +327,3 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
 
   return { description: generatedDesc };
 }
-
-    

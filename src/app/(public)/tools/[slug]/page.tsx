@@ -47,6 +47,15 @@ import { JpgToPng } from '@/components/tools/JpgToPng';
 import { ImageToBase64 } from '@/components/tools/ImageToBase64';
 import { ImageResizer } from '@/components/tools/ImageResizer';
 import { ImageBackgroundRemover } from '@/components/tools/ImageBackgroundRemover';
+import { AdMobRevenueCalculator } from '@/components/tools/AdMobRevenueCalculator';
+import { AdSenseRevenueCalculator } from '@/components/tools/AdSenseRevenueCalculator';
+import { IFSCodetoBankDetails } from '@/components/tools/IFSCCodeToBankDetails';
+import { GSTCalculator } from '@/components/tools/GSTCalculator';
+import { ImageColorExtractor } from '@/components/tools/ImageColorExtractor';
+import { ImageCropper } from '@/components/tools/ImageCropper';
+import { ImageCompressor } from '@/components/tools/ImageCompressor';
+import { ImageTextExtractor } from '@/components/tools/ImageTextExtractor';
+import { ImageConverter } from '@/components/tools/ImageConverter';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import * as Icons from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -149,6 +158,15 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'image-to-base64': ImageToBase64,
   'image-resizer': ImageResizer,
   'image-background-remover': ImageBackgroundRemover,
+  'admob-revenue-calculator': AdMobRevenueCalculator,
+  'adsense-revenue-calculator': AdSenseRevenueCalculator,
+  'ifsc-code-to-bank-details': IFSCodetoBankDetails,
+  'gst-calculator': GSTCalculator,
+  'image-color-extractor': ImageColorExtractor,
+  'image-cropper': ImageCropper,
+  'image-compressor': ImageCompressor,
+  'image-text-extractor': ImageTextExtractor,
+  'image-converter': ImageConverter,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
@@ -795,6 +813,3 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     </div>
   );
 }
-    
-
-    
