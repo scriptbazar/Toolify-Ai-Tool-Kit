@@ -38,16 +38,20 @@ export function AiCodeGenerator() {
       return;
     }
     setIsLoading(true);
-    setGeneratedOutput(null);
+    setGeneratedOutput({ generatedCode: {}, setupInstructions: '', codeExplanation: '' }); // Reset output
+
     try {
-      const result = await aiCodeGenerator({ prompt, language });
-      setGeneratedOutput(result);
+        const stream = await aiCodeGenerator({ prompt, language });
+        for await (const chunk of stream) {
+            setGeneratedOutput(chunk);
+        }
     } catch (error: any) {
       toast({
         title: 'Generation Failed',
         description: error.message || 'Could not generate code.',
         variant: 'destructive',
       });
+      setGeneratedOutput(null); // Clear output on error
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +90,7 @@ export function AiCodeGenerator() {
         return <CodeBlock language={language.toLowerCase()} code={code} />;
     }
 
-    return <p className="text-muted-foreground">No code was generated for this request.</p>;
+    return isLoading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/> : <p className="text-muted-foreground">No code was generated for this request.</p>;
   }
 
   return (
@@ -136,8 +140,7 @@ export function AiCodeGenerator() {
                 <Card>
                     <CardHeader><CardTitle>Generated Code</CardTitle></CardHeader>
                     <CardContent>
-                       {isLoading && <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/></div>}
-                       {!isLoading && generatedOutput && renderCodeOutput()}
+                       {renderCodeOutput()}
                     </CardContent>
                 </Card>
             </TabsContent>
@@ -145,8 +148,8 @@ export function AiCodeGenerator() {
                 <Card>
                     <CardHeader><CardTitle>Setup Instructions</CardTitle></CardHeader>
                     <CardContent className="prose dark:prose-invert max-w-none">
-                       {isLoading && <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/></div>}
-                       {!isLoading && generatedOutput && <div dangerouslySetInnerHTML={{ __html: generatedOutput.setupInstructions }} />}
+                       {isLoading && !generatedOutput?.setupInstructions && <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/></div>}
+                       {generatedOutput?.setupInstructions && <div dangerouslySetInnerHTML={{ __html: generatedOutput.setupInstructions }} />}
                     </CardContent>
                 </Card>
             </TabsContent>
@@ -154,8 +157,8 @@ export function AiCodeGenerator() {
                 <Card>
                     <CardHeader><CardTitle>Code Explanation</CardTitle></CardHeader>
                     <CardContent className="prose dark:prose-invert max-w-none">
-                        {isLoading && <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/></div>}
-                        {!isLoading && generatedOutput && <div dangerouslySetInnerHTML={{ __html: generatedOutput.codeExplanation }} />}
+                        {isLoading && !generatedOutput?.codeExplanation && <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/></div>}
+                        {generatedOutput?.codeExplanation && <div dangerouslySetInnerHTML={{ __html: generatedOutput.codeExplanation }} />}
                     </CardContent>
                 </Card>
             </TabsContent>

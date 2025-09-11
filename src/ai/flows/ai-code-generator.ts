@@ -7,6 +7,8 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { streamFlow } from 'genkit/flow';
+import type { Streamable } from 'genkit/flow';
 import {
     AiCodeGeneratorInputSchema,
     AiCodeGeneratorOutputSchema,
@@ -14,15 +16,17 @@ import {
     type AiCodeGeneratorOutput,
 } from './ai-code-generator.types';
 
-export async function aiCodeGenerator(input: AiCodeGeneratorInput): Promise<AiCodeGeneratorOutput> {
-  return aiCodeGeneratorFlow(input);
-}
-
-const prompt = ai.definePrompt({
-  name: 'aiCodeGeneratorPrompt',
-  input: { schema: AiCodeGeneratorInputSchema },
-  output: { schema: AiCodeGeneratorOutputSchema },
-  prompt: `You are an expert software developer and a brilliant teacher. Your task is to generate high-quality code based on a user's request and provide comprehensive guidance.
+export async function aiCodeGenerator(input: AiCodeGeneratorInput): Promise<Streamable<AiCodeGeneratorOutput>> {
+  return streamFlow(
+    {
+      name: 'aiCodeGeneratorFlow',
+      inputSchema: AiCodeGeneratorInputSchema,
+      outputSchema: AiCodeGeneratorOutputSchema,
+    },
+    async (input) => {
+      const { stream, response } = await ai.generateStream({
+        model: 'gemini-1.5-flash-latest',
+        prompt: `You are an expert software developer and a brilliant teacher. Your task is to generate high-quality code based on a user's request and provide comprehensive guidance.
 
 User's Request: "{{{prompt}}}"
 Programming Language: {{{language}}}
@@ -50,19 +54,24 @@ Programming Language: {{{language}}}
 
 Your response must be structured according to the output schema, containing 'generatedCode', 'setupInstructions', and 'codeExplanation'.
 `,
-});
+        output: { schema: AiCodeGeneratorOutputSchema },
+      });
 
-const aiCodeGeneratorFlow = ai.defineFlow(
-  {
-    name: 'aiCodeGeneratorFlow',
-    inputSchema: AiCodeGeneratorInputSchema,
-    outputSchema: AiCodeGeneratorOutputSchema,
-  },
-  async (input) => {
-    const { output } = await prompt(input);
-    if (!output || !output.generatedCode || !output.setupInstructions || !output.codeExplanation) {
-        throw new Error("The AI failed to generate any code or instructions. Please try rephrasing your request.");
+      let finalOutput: AiCodeGeneratorOutput = {
+        generatedCode: {},
+        setupInstructions: '',
+        codeExplanation: '',
+      };
+
+      for await (const chunk of stream) {
+        finalOutput = chunk;
+      }
+      
+      if (!finalOutput || !finalOutput.generatedCode || !finalOutput.setupInstructions || !finalOutput.codeExplanation) {
+          throw new Error("The AI failed to generate any code or instructions. Please try rephrasing your request.");
+      }
+
+      return finalOutput;
     }
-    return output;
-  }
-);
+  )(input);
+}
