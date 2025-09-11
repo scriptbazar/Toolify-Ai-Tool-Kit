@@ -64,7 +64,7 @@ import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { Separator } from '@/components/ui/separator';
 import { ReviewForm } from '@/components/tools/ReviewForm';
 import { getReviews } from '@/ai/flows/review-management';
-import { Star, Construction, Sparkles } from 'lucide-react';
+import { Star, Construction, Sparkles, ArrowLeft } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getPosts } from '@/ai/flows/blog-management';
 import Link from 'next/link';
@@ -146,6 +146,7 @@ import { CurrencyConverter } from '@/components/tools/CurrencyConverter';
 import { CreditCardInterestCalculator } from '@/components/tools/CreditCardInterestCalculator';
 import { ImageMetadataViewer } from '@/components/tools/ImageMetadataViewer';
 import { AiCodeGenerator } from '@/components/tools/AiCodeGenerator';
+import { Button } from '@/components/ui/button';
 
 
 export async function generateStaticParams() {
@@ -827,6 +828,12 @@ export default async function ToolPage({ params }: { params: { slug: string } })
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
+      <Button asChild variant="outline" className="mb-6">
+        <Link href="/tools">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to All Tools
+        </Link>
+      </Button>
       <AdPlaceholder adSlotId="toolpage-banner-top" adSettings={settings.advertisement ?? null} className="mb-6" />
       <div className="flex flex-col lg:flex-row lg:gap-8">
         <div className="flex-1">
@@ -941,3 +948,4 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     
 
     
+
