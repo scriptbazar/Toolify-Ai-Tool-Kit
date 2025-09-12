@@ -127,7 +127,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
 /**
  * Fetches all tools from Firestore, ordered by name.
  * If the collection is empty, it populates it with initial tools.
- * It also self-heals by adding any missing tools from the initial list.
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
@@ -151,7 +150,10 @@ export async function getTools(): Promise<Tool[]> {
     
     const fetchedTools: Tool[] = snapshot.docs.map(doc => {
         const data = doc.data();
-        const createdAt = (data.createdAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
+        // Handle Firestore Timestamp to ISO String conversion safely.
+        const createdAt = data.createdAt && typeof data.createdAt.toDate === 'function' 
+            ? (data.createdAt as Timestamp).toDate().toISOString() 
+            : new Date().toISOString();
 
         const rawTool = { 
             id: doc.id,
@@ -165,6 +167,7 @@ export async function getTools(): Promise<Tool[]> {
             return parsed.data;
         } else {
             console.warn(`Invalid tool data for doc ${doc.id}:`, parsed.error.format());
+            // Return null for invalid data to filter it out later.
             return null;
         }
     }).filter((tool): tool is Tool => tool !== null)
