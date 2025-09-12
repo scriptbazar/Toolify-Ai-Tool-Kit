@@ -135,7 +135,7 @@ export async function getTools(): Promise<Tool[]> {
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
     let snapshot = await toolsRef.get();
 
-    // If the collection is empty, populate it.
+    // If the collection is empty, populate it. This is a one-time operation.
     if (snapshot.empty) {
       console.log('Tools collection is empty, populating with initial tools...');
       const batch = adminDb.batch();
@@ -146,6 +146,7 @@ export async function getTools(): Promise<Tool[]> {
       }
       await batch.commit();
       snapshot = await toolsRef.get(); // Re-fetch after populating
+      console.log('Tools collection populated successfully.');
     }
     
     const fetchedTools: Tool[] = snapshot.docs.map(doc => {
@@ -176,7 +177,8 @@ export async function getTools(): Promise<Tool[]> {
     return fetchedTools;
 
   } catch (error) {
-    console.error("Error fetching tools:", error);
+    console.error("Error in getTools:", error);
+    // On error, return an empty array to prevent the app from crashing.
     return [];
   }
 }
