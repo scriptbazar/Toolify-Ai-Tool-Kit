@@ -101,7 +101,7 @@ export default function AdminToolsPage() {
 
    useEffect(() => {
     fetchTools();
-  }, []);
+  }, [toast]);
   
   useEffect(() => {
     setSearchQuery(searchQueryParam);
@@ -160,13 +160,7 @@ export default function AdminToolsPage() {
   };
   
   const createQueryString = (params: Record<string, string | number | null>) => {
-    const currentParams = new URLSearchParams();
-    // Start with existing params that we want to keep
-    if (searchParams.get('q')) currentParams.set('q', searchParams.get('q')!);
-    if (searchParams.get('category')) currentParams.set('category', searchParams.get('category')!);
-    if (searchParams.get('filter')) currentParams.set('filter', searchParams.get('filter')!);
-    if (searchParams.get('page')) currentParams.set('page', searchParams.get('page')!);
-
+    const currentParams = new URLSearchParams(window.location.search);
     for (const [key, value] of Object.entries(params)) {
       if (value === null || value === '' || (key === 'page' && value === 1)) {
         currentParams.delete(key);
@@ -188,6 +182,7 @@ export default function AdminToolsPage() {
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchQuery = e.target.value;
+    setSearchQuery(newSearchQuery);
     router.push(`/admin/tools?${createQueryString({ q: newSearchQuery, page: 1 })}`);
   };
   
@@ -278,7 +273,7 @@ export default function AdminToolsPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         name="q"
-                        defaultValue={searchQueryParam}
+                        value={searchQuery}
                         onChange={handleSearchChange}
                         placeholder="Search tools..."
                         className="pl-9 w-full sm:max-w-xs h-10"

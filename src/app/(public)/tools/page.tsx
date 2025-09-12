@@ -26,16 +26,8 @@ export default function ToolsDashboardPage() {
   const [searchQuery, setSearchQuery] = useState(searchQueryParam);
   const [activeCategory, setActiveCategory] = useState<ToolCategory | 'all'>(categoryQueryParam);
   
-  const categoryCounts = useMemo(() => {
-    const counts: { [key: string]: number } = { all: allTools.length };
-    toolCategories.forEach(cat => {
-      counts[cat.id] = allTools.filter(tool => tool.category === cat.id).length;
-    });
-    return counts;
-  }, [allTools]);
-
   useEffect(() => {
-    const fetchTools = async () => {
+    async function fetchTools() {
       setLoading(true);
       try {
         const tools = await getTools();
@@ -59,6 +51,14 @@ export default function ToolsDashboardPage() {
     setActiveCategory(categoryQueryParam);
   }, [searchQueryParam, categoryQueryParam]);
 
+  const categoryCounts = useMemo(() => {
+    const counts: { [key: string]: number } = { all: allTools.length };
+    toolCategories.forEach(cat => {
+      counts[cat.id] = allTools.filter(tool => tool.category === cat.id).length;
+    });
+    return counts;
+  }, [allTools]);
+
 
   const filteredTools = useMemo(() => {
     return allTools.filter(tool => {
@@ -80,6 +80,7 @@ export default function ToolsDashboardPage() {
   
    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
+    setSearchQuery(query);
     const params = new URLSearchParams(searchParams.toString());
     if (query) {
       params.set('q', query);
@@ -104,7 +105,7 @@ export default function ToolsDashboardPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             name="q"
-            defaultValue={searchQueryParam}
+            value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Search for a tool..."
             className="w-full h-12 pl-12 pr-4 rounded-full text-lg shadow-lg"
