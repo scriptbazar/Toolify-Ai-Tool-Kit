@@ -188,7 +188,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-code-generator': AiCodeGenerator,
   'ai-rewriter': AiRewriter,
   'ai-image-quality-enhancer': ImageQualityEnhancer,
-  'ai-web-content-summarizer-and-explainer': AiWebContentSummarizer,
+  'ai-web-content-summarizer': AiWebContentSummarizer,
   'add-watermark-to-pdf': AddWatermarkToPdf,
   'age-calculator': AgeCalculator,
   'amazon-shipping-label-cropper': AmazonShippingLabelCropper,
@@ -470,6 +470,8 @@ export default function ToolPage() {
     </div>
   );
 }
+
+    
 
     
 

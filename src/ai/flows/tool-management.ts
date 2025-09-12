@@ -121,7 +121,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'UUID Generator', description: 'Generate universally unique identifiers (UUIDs).', icon: 'Hash', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Image Metadata Viewer', description: 'View EXIF and other metadata from your images.', icon: 'Camera', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'AI Image Quality Enhancer', description: 'Upscale and enhance the quality of your images with AI.', icon: 'Sparkles', category: 'ai', plan: 'Pro', isNew: true, status: 'Coming Soon' },
-    { name: 'AI Web Content Summarizer &amp; Explainer', description: 'Summarize and explain content from any website URL.', icon: 'Globe', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'AI Web Content Summarizer', description: 'Summarize and explain content from any website URL.', icon: 'Globe', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
 ];
 
 /**
@@ -140,7 +140,7 @@ export async function getTools(): Promise<Tool[]> {
       console.log('Tools collection is empty, populating with initial tools...');
       const batch = adminDb.batch();
       for (const toolData of initialTools) {
-          const slug = toolData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+          const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
           const docRef = toolsRef.doc(slug);
           batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
       }
@@ -151,7 +151,6 @@ export async function getTools(): Promise<Tool[]> {
     
     const fetchedTools: Tool[] = snapshot.docs.map(doc => {
         const data = doc.data();
-        // Handle Firestore Timestamp to ISO String conversion safely.
         const createdAt = data.createdAt && typeof data.createdAt.toDate === 'function' 
             ? (data.createdAt as Timestamp).toDate().toISOString() 
             : new Date().toISOString();
@@ -168,17 +167,15 @@ export async function getTools(): Promise<Tool[]> {
             return parsed.data;
         } else {
             console.warn(`Invalid tool data for doc ${doc.id}:`, parsed.error.format());
-            // Return null for invalid data to filter it out later.
             return null;
         }
     }).filter((tool): tool is Tool => tool !== null)
-      .sort((a, b) => a.name.localeCompare(b.name)); // Ensure final list is sorted by name
+      .sort((a, b) => a.name.localeCompare(b.name));
     
     return fetchedTools;
 
   } catch (error) {
     console.error("Error in getTools:", error);
-    // On error, return an empty array to prevent the app from crashing.
     return [];
   }
 }
@@ -194,7 +191,7 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
     const { id, ...data } = toolData;
     
     if (data.name) {
-      data.slug = data.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+      data.slug = data.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
     }
     
     // Validate data before saving
@@ -363,5 +360,7 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
 
   return { description: generatedDesc };
 }
+
+    
 
     
