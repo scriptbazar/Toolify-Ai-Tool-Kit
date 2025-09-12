@@ -86,7 +86,7 @@ export default function AdminToolsPage() {
     setLoading(true);
     try {
       const tools = await getTools();
-      const visibleTools = tools.filter(tool => tool.status !== 'Disabled');
+      const visibleTools = tools;
       setAllTools(visibleTools);
     } catch (error) {
       toast({
