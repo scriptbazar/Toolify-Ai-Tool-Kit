@@ -147,32 +147,11 @@ export async function getTools(): Promise<Tool[]> {
       }
       await batch.commit();
       snapshot = await toolsRef.get(); // Re-fetch after populating
-    } else {
-        // Self-healing: Check for and add any missing tools
-        const existingToolSlugs = new Set(snapshot.docs.map(doc => doc.id));
-        const missingTools = initialTools.filter(tool => {
-            const slug = tool.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-            return !existingToolSlugs.has(slug);
-        });
-
-        if (missingTools.length > 0) {
-            console.log(`Found ${missingTools.length} missing tools. Adding them to the database...`);
-            const batch = adminDb.batch();
-            for (const toolData of missingTools) {
-                const slug = toolData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-                const docRef = toolsRef.doc(slug);
-                batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
-            }
-            await batch.commit();
-            snapshot = await toolsRef.get(); // Re-fetch to include newly added tools
-        }
     }
     
     const fetchedTools: Tool[] = snapshot.docs.map(doc => {
         const data = doc.data();
-        const createdAt = (data.createdAt instanceof Timestamp) 
-            ? data.createdAt.toDate().toISOString() 
-            : new Date().toISOString();
+        const createdAt = (data.createdAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString();
 
         const rawTool = { 
             id: doc.id,

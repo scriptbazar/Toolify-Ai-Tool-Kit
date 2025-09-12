@@ -1,4 +1,7 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { getTools } from '@/ai/flows/tool-management';
 import { toolCategories } from '@/lib/constants';
@@ -14,28 +17,13 @@ import { getPosts } from '@/ai/flows/blog-management';
 import { getReviews } from '@/ai/flows/review-management';
 import { ResponsiveHero } from '@/components/common/ResponsiveHero';
 import { CategoryCard } from '@/components/tools/CategoryCard';
+import { type Tool } from '@/ai/flows/tool-management.types';
+import { type Post } from '@/ai/flows/blog-management.types';
+import { type Review } from '@/ai/flows/review-management.types';
+import { type HomepageSettings } from '@/ai/flows/settings-management.types';
 
 
-export default async function Home() {
-  const tools = await getTools();
-  const settings = await getSettings();
-  const allPosts = await getPosts();
-  const allReviews = await getReviews();
-
-  const homepageSettings = settings.homepage || {};
-  
-  const testimonials = allReviews.filter(review => review.status === 'approved');
-  
-  const steps = homepageSettings.steps || [];
-  const features = homepageSettings.features || [];
-
-  const activeTools = tools.filter(tool => tool.status === 'Active');
-  
-  const categoryNames = toolCategories
-    .filter(c => c.name !== 'Developer Tools' && c.name !== 'Calculators & Converters' && c.name !== 'Ecommerce Tools')
-    .map(c => c.name.replace(' Tools', ''));
-
-  const TestimonialCard = ({ name, role, avatar, comment, rating }: { name: string, role: string, avatar: string, comment: string, rating: number }) => (
+const TestimonialCard = ({ name, role, avatar, comment, rating }: { name: string, role: string, avatar: string, comment: string, rating: number }) => (
     <Card className="w-[350px] shrink-0 bg-card text-card-foreground">
         <CardContent className="p-6 flex flex-col items-start text-left">
             <div className="flex items-center gap-4 mb-4">
@@ -56,7 +44,47 @@ export default async function Home() {
             <p className="text-muted-foreground text-base">"{comment}"</p>
         </CardContent>
     </Card>
-  );
+);
+
+export default function Home() {
+    const [tools, setTools] = useState<Tool[]>([]);
+    const [homepageSettings, setHomepageSettings] = useState<HomepageSettings>({});
+    const [allPosts, setAllPosts] = useState<Post[]>([]);
+    const [allReviews, setAllReviews] = useState<Review[]>([]);
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const [toolsData, settingsData, postsData, reviewsData] = await Promise.all([
+                    getTools(),
+                    getSettings(),
+                    getPosts(),
+                    getReviews()
+                ]);
+                setTools(toolsData);
+                setHomepageSettings(settingsData.homepage || {});
+                setAllPosts(postsData);
+                setAllReviews(reviewsData);
+            } catch (error) {
+                console.error("Failed to load page data:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadData();
+    }, []);
+
+  const testimonials = allReviews.filter(review => review.status === 'approved');
+  
+  const steps = homepageSettings.steps || [];
+  const features = homepageSettings.features || [];
+
+  const activeTools = tools.filter(tool => tool.status === 'Active');
+  
+  const categoryNames = toolCategories
+    .filter(c => c.name !== 'Developer Tools' && c.name !== 'Calculators & Converters' && c.name !== 'Ecommerce Tools')
+    .map(c => c.name.replace(' Tools', ''));
 
   const Testimonials = () => {
     const displayTestimonials = testimonials.slice(0, 12);

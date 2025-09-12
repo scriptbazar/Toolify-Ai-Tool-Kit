@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -71,11 +72,16 @@ export default function AdminToolsPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
-  const searchQuery = searchParams.get('q') || '';
-  const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
-  const activeFilter = searchParams.get('filter') || 'all';
-  const page = Number(searchParams.get('page')) || 1;
+  const searchQueryParam = searchParams.get('q') || '';
+  const categoryQueryParam = (searchParams.get('category') as ToolCategory) || 'all';
+  const filterQueryParam = searchParams.get('filter') || 'all';
+  const pageQueryParam = Number(searchParams.get('page')) || 1;
 
+  const [searchQuery, setSearchQuery] = useState(searchQueryParam);
+  const [activeCategory, setActiveCategory] = useState<ToolCategory | 'all'>(categoryQueryParam);
+  const [activeFilter, setActiveFilter] = useState(filterQueryParam);
+  const [currentPage, setCurrentPage] = useState(pageQueryParam);
+  
    const fetchTools = async () => {
     setLoading(true);
     try {
@@ -96,6 +102,13 @@ export default function AdminToolsPage() {
    useEffect(() => {
     fetchTools();
   }, []);
+  
+  useEffect(() => {
+    setSearchQuery(searchQueryParam);
+    setActiveCategory(categoryQueryParam);
+    setActiveFilter(filterQueryParam);
+    setCurrentPage(pageQueryParam);
+  }, [searchQueryParam, categoryQueryParam, filterQueryParam, pageQueryParam]);
 
 
   const counts = useMemo(() => ({
@@ -137,17 +150,23 @@ export default function AdminToolsPage() {
   const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
   const paginatedTools = useMemo(() => {
     return filteredTools.slice(
-      (page - 1) * ITEMS_PER_PAGE,
-      page * ITEMS_PER_PAGE
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      currentPage * ITEMS_PER_PAGE
     );
-  }, [filteredTools, page]);
+  }, [filteredTools, currentPage]);
 
   const getCategoryName = (categoryId: string) => {
     return toolCategories.find(c => c.id === categoryId)?.name || 'Unknown';
   };
   
   const createQueryString = (params: Record<string, string | number | null>) => {
-    const currentParams = new URLSearchParams(searchParams.toString());
+    const currentParams = new URLSearchParams();
+    // Start with existing params that we want to keep
+    if (searchParams.get('q')) currentParams.set('q', searchParams.get('q')!);
+    if (searchParams.get('category')) currentParams.set('category', searchParams.get('category')!);
+    if (searchParams.get('filter')) currentParams.set('filter', searchParams.get('filter')!);
+    if (searchParams.get('page')) currentParams.set('page', searchParams.get('page')!);
+
     for (const [key, value] of Object.entries(params)) {
       if (value === null || value === '' || (key === 'page' && value === 1)) {
         currentParams.delete(key);
@@ -157,6 +176,7 @@ export default function AdminToolsPage() {
     }
     return currentParams.toString();
   };
+  
   
   const handleCategoryChange = (value: string) => {
     router.push(`/admin/tools?${createQueryString({ category: value === 'all' ? null : value, page: 1 })}`);
@@ -258,7 +278,7 @@ export default function AdminToolsPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         name="q"
-                        value={searchQuery}
+                        defaultValue={searchQueryParam}
                         onChange={handleSearchChange}
                         placeholder="Search tools..."
                         className="pl-9 w-full sm:max-w-xs h-10"
@@ -342,13 +362,13 @@ export default function AdminToolsPage() {
           
            {totalPages > 1 && (
             <div className="flex items-center justify-end space-x-2 pt-4">
-              <Button variant="outline" size="sm" onClick={() => router.push(`/admin/tools?${createQueryString({ page: page - 1 })}`)} disabled={page <= 1}>
+              <Button variant="outline" size="sm" onClick={() => router.push(`/admin/tools?${createQueryString({ page: currentPage - 1 })}`)} disabled={currentPage <= 1}>
                   <ArrowLeft className="mr-2 h-4 w-4" /> Previous
               </Button>
               <span className="text-sm text-muted-foreground">
-                Page {page} of {totalPages}
+                Page {currentPage} of {totalPages}
               </span>
-              <Button variant="outline" size="sm" onClick={() => router.push(`/admin/tools?${createQueryString({ page: page + 1 })}`)} disabled={page >= totalPages}>
+              <Button variant="outline" size="sm" onClick={() => router.push(`/admin/tools?${createQueryString({ page: currentPage + 1 })}`)} disabled={currentPage >= totalPages}>
                   Next <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>

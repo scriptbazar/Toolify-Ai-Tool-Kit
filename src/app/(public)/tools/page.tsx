@@ -20,17 +20,25 @@ export default function ToolsDashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-  const [activeCategory, setActiveCategory] = useState<ToolCategory | 'all'>(
-    (searchParams.get('category') as ToolCategory) || 'all'
-  );
+  const searchQueryParam = searchParams.get('q') || '';
+  const categoryQueryParam = (searchParams.get('category') as ToolCategory) || 'all';
+
+  const [searchQuery, setSearchQuery] = useState(searchQueryParam);
+  const [activeCategory, setActiveCategory] = useState<ToolCategory | 'all'>(categoryQueryParam);
+  
+  const categoryCounts = useMemo(() => {
+    const counts: { [key: string]: number } = { all: allTools.length };
+    toolCategories.forEach(cat => {
+      counts[cat.id] = allTools.filter(tool => tool.category === cat.id).length;
+    });
+    return counts;
+  }, [allTools]);
 
   useEffect(() => {
-    async function fetchTools() {
+    const fetchTools = async () => {
       setLoading(true);
       try {
         const tools = await getTools();
-        // Show all tools except those that are explicitly disabled
         const visibleTools = tools.filter(tool => tool.status !== 'Disabled');
         setAllTools(visibleTools);
       } catch (error) {
@@ -42,9 +50,15 @@ export default function ToolsDashboardPage() {
       } finally {
         setLoading(false);
       }
-    }
+    };
     fetchTools();
   }, [toast]);
+  
+  useEffect(() => {
+    setSearchQuery(searchQueryParam);
+    setActiveCategory(categoryQueryParam);
+  }, [searchQueryParam, categoryQueryParam]);
+
 
   const filteredTools = useMemo(() => {
     return allTools.filter(tool => {
@@ -55,7 +69,6 @@ export default function ToolsDashboardPage() {
   }, [allTools, activeCategory, searchQuery]);
   
   const handleCategoryClick = (category: ToolCategory | 'all') => {
-    setActiveCategory(category);
     const params = new URLSearchParams(searchParams.toString());
     if (category === 'all') {
       params.delete('category');
@@ -67,7 +80,6 @@ export default function ToolsDashboardPage() {
   
    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
-    setSearchQuery(query);
     const params = new URLSearchParams(searchParams.toString());
     if (query) {
       params.set('q', query);
@@ -92,7 +104,7 @@ export default function ToolsDashboardPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             name="q"
-            value={searchQuery}
+            defaultValue={searchQueryParam}
             onChange={handleSearchChange}
             placeholder="Search for a tool..."
             className="w-full h-12 pl-12 pr-4 rounded-full text-lg shadow-lg"
@@ -103,7 +115,7 @@ export default function ToolsDashboardPage() {
             variant={activeCategory === 'all' ? 'default' : 'outline'}
             onClick={() => handleCategoryClick('all')}
           >
-            All Tools
+            All Tools&nbsp;<span className="text-muted-foreground">({categoryCounts.all})</span>
           </Button>
           {toolCategories.map(category => (
             <Button
@@ -112,7 +124,7 @@ export default function ToolsDashboardPage() {
               onClick={() => handleCategoryClick(category.id)}
             >
               <category.Icon className="mr-2 h-4 w-4" />
-              {category.name}
+              {category.name}&nbsp;<span className="text-muted-foreground">({categoryCounts[category.id] || 0})</span>
             </Button>
           ))}
         </div>
