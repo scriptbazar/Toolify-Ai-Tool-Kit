@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -163,7 +164,6 @@ const generateSlug = (name: string) => {
  * Fetches all tools from Firestore.
  * If the collection is empty, it populates it with initial tools.
  * It also cleans up duplicate tools by normalizing their names.
- * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
   const adminDb = getAdminDb();
