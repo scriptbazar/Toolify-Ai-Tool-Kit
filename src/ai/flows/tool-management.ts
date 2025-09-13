@@ -48,13 +48,12 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Flipkart Shipping Label Cropper', description: 'Crop your Flipkart shipping labels from a full page to a 4x6 inch size in seconds. Perfect for sellers using thermal printers for efficient dispatch.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Meesho Shipping Label Cropper', description: 'Optimize your Meesho shipping process. This tool crops your default shipping labels to a 4x6 inch format, saving paper and streamlining your workflow.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Base64 Encoder/Decoder', description: 'Encode text or files to Base64 and decode from Base64 format, essential for data transmission and web development.', icon: 'Package', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
-    { name: 'Binary to Text', description: 'Convert binary code (sequences of 0s and 1s) back into human-readable text characters.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Binary Converter', description: 'Convert text to binary and binary back to text.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'CSS Minifier', description: 'Minify CSS code to reduce file size and improve website loading times.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Discount Calculator', description: 'Calculate final price after discount and see how much you save.', icon: 'BadgePercent', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Date Calculator', description: 'Calculate the duration between two dates or add/subtract from a date.', icon: 'CalendarDays', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Compress PDF', description: 'Reduce the file size of your PDF files.', icon: 'FileArchive', category: 'pdf', plan: 'Pro', isNew: true, status: 'Coming Soon' },
     { name: 'Excel to PDF', description: 'Convert your Excel spreadsheets to PDF.', icon: 'FileSpreadsheet', category: 'pdf', plan: 'Free', isNew: true, status: 'Coming Soon' },
-    { name: 'Text to Binary', description: 'Convert any text into its corresponding binary code representation.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Reverse Text', description: 'Reverse your text in various ways (by word, all characters, etc.).', icon: 'ArrowLeftRight', category: 'text', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Remove Extra Spaces', description: 'Clean up your text by removing extra spaces and line breaks.', icon: 'Eraser', category: 'text', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Find and Replace', description: 'Quickly find and replace words or phrases in your text.', icon: 'SearchCode', category: 'text', plan: 'Free', isNew: true, status: 'Coming Soon' },
@@ -127,7 +126,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
 /**
  * Fetches all tools from Firestore.
  * If the collection is empty, it populates it with initial tools.
- * It also cleans up duplicate tools caused by character encoding issues.
+ * It also cleans up duplicate tools by normalizing their names.
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
@@ -140,59 +139,18 @@ export async function getTools(): Promise<Tool[]> {
   const toolsRef = adminDb.collection(TOOLS_COLLECTION);
   const snapshot = await toolsRef.get();
   const batch = adminDb.batch();
-  
-  const toolsFromDb: Tool[] = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-          id: doc.id,
-          ...data,
-          createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-      } as Tool;
-  });
+  let hasChanges = false;
 
-  // --- De-duplication Logic ---
-  const toolsByName: { [key: string]: Tool[] } = {};
-  toolsFromDb.forEach(tool => {
-    // Normalize name to handle '&' vs '&amp;' issues
-    const normalizedName = tool.name.replace(/&amp;/g, '&');
-    if (!toolsByName[normalizedName]) {
-      toolsByName[normalizedName] = [];
-    }
-    toolsByName[normalizedName].push(tool);
-  });
-  
-  let hasDeletions = false;
-  Object.values(toolsByName).forEach(group => {
-    if (group.length > 1) {
-      // Keep the most recently created one, delete the others
-      group.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      const toDelete = group.slice(1);
-      toDelete.forEach(toolToDelete => {
-        console.log(`Queueing deletion for duplicate tool: ${toolToDelete.name} (ID: ${toolToDelete.id})`);
-        batch.delete(toolsRef.doc(toolToDelete.id));
-        hasDeletions = true;
-      });
-    }
-  });
-
-  // --- Add Missing Tools Logic ---
-  const existingToolSlugs = new Set(toolsFromDb.map(t => t.slug));
-  let hasAdditions = false;
-  initialTools.forEach(toolData => {
-    const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-    if (!existingToolSlugs.has(slug)) {
+  // If the database is empty, populate it.
+  if (snapshot.empty) {
+    console.log('Tools collection is empty. Populating with initial tools...');
+    initialTools.forEach(toolData => {
+      const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
       const docRef = toolsRef.doc(slug);
       batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
-      hasAdditions = true;
-      console.log(`Queueing addition for missing tool: ${toolData.name}`);
-    }
-  });
-
-  // Commit batch if there are any changes
-  if (hasDeletions || hasAdditions) {
+    });
     await batch.commit();
-    console.log('Committed tool database updates (additions/deletions).');
-    // Re-fetch to get the clean, updated list
+    // Re-fetch after populating
     const newSnapshot = await toolsRef.orderBy('name').get();
     return newSnapshot.docs.map(doc => ToolSchema.parse({
         id: doc.id,
@@ -200,13 +158,67 @@ export async function getTools(): Promise<Tool[]> {
         createdAt: (doc.data().createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
     }));
   }
+  
+  const toolsFromDb: Tool[] = snapshot.docs.map(doc => {
+      const data = doc.data();
+      const createdAt = (data.createdAt as Timestamp)?.toDate ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString();
+      return ToolSchema.parse({ id: doc.id, ...data, createdAt });
+  });
 
-  // If no changes, just return the parsed initial fetch
-  return toolsFromDb
-    .map(t => ToolSchema.safeParse(t))
-    .filter(result => result.success)
-    .map(result => (result as { success: true; data: Tool }).data)
-    .sort((a, b) => a.name.localeCompare(b.name));
+  // --- De-duplication and Normalization Logic ---
+  const toolsByName: { [key: string]: Tool[] } = {};
+  toolsFromDb.forEach(tool => {
+    // Normalize name to handle '&' vs '&amp;' and ' & ' vs ' and ' issues for grouping
+    const normalizedName = tool.name
+        .replace(/&amp;/g, 'and')
+        .replace(/ & /g, ' and ')
+        .trim();
+    if (!toolsByName[normalizedName]) {
+      toolsByName[normalizedName] = [];
+    }
+    toolsByName[normalizedName].push(tool);
+  });
+  
+  const finalTools: Tool[] = [];
+  Object.values(toolsByName).forEach(group => {
+    if (group.length > 1) {
+      // If there are duplicates, keep the most recently created one and delete others.
+      group.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const toKeep = group[0];
+      const toDelete = group.slice(1);
+      
+      finalTools.push(toKeep);
+      toDelete.forEach(toolToDelete => {
+        console.log(`Queueing deletion for duplicate tool: ${toolToDelete.name} (ID: ${toolToDelete.id})`);
+        batch.delete(toolsRef.doc(toolToDelete.id));
+        hasChanges = true;
+      });
+    } else {
+      finalTools.push(group[0]);
+    }
+  });
+
+  // --- Add Missing Tools Logic ---
+  const existingToolSlugs = new Set(finalTools.map(t => t.slug));
+  initialTools.forEach(toolData => {
+    const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+    if (!existingToolSlugs.has(slug)) {
+      const docRef = toolsRef.doc(slug);
+      const newData = { ...toolData, slug, createdAt: FieldValue.serverTimestamp() };
+      batch.set(docRef, newData);
+      finalTools.push(ToolSchema.parse({ ...newData, id: slug, createdAt: new Date().toISOString() }));
+      hasChanges = true;
+      console.log(`Queueing addition for missing tool: ${toolData.name}`);
+    }
+  });
+
+  // Commit batch if there are any changes
+  if (hasChanges) {
+    console.log('Committing tool database updates (additions/deletions).');
+    await batch.commit();
+  }
+
+  return finalTools.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 
