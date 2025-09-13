@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -124,8 +125,9 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
 ];
 
 /**
- * Fetches all tools from Firestore, ordered by name.
+ * Fetches all tools from Firestore.
  * If the collection is empty, it populates it with initial tools.
+ * It also cleans up duplicate tools caused by character encoding issues.
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
@@ -137,41 +139,76 @@ export async function getTools(): Promise<Tool[]> {
 
   const toolsRef = adminDb.collection(TOOLS_COLLECTION);
   const snapshot = await toolsRef.get();
+  const batch = adminDb.batch();
+  
+  const toolsFromDb: Tool[] = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+          id: doc.id,
+          ...data,
+          createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+      } as Tool;
+  });
 
-  if (snapshot.empty) {
-    console.log('Tools collection is empty, populating with initial tools...');
-    const batch = adminDb.batch();
-    const uniqueNames = new Set<string>();
-    initialTools.forEach(toolData => {
-        if (!uniqueNames.has(toolData.name)) {
-            const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-            const docRef = toolsRef.doc(slug);
-            batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
-            uniqueNames.add(toolData.name);
-        }
-    });
+  // --- De-duplication Logic ---
+  const toolsByName: { [key: string]: Tool[] } = {};
+  toolsFromDb.forEach(tool => {
+    // Normalize name to handle '&' vs '&amp;' issues
+    const normalizedName = tool.name.replace(/&amp;/g, '&');
+    if (!toolsByName[normalizedName]) {
+      toolsByName[normalizedName] = [];
+    }
+    toolsByName[normalizedName].push(tool);
+  });
+  
+  let hasDeletions = false;
+  Object.values(toolsByName).forEach(group => {
+    if (group.length > 1) {
+      // Keep the most recently created one, delete the others
+      group.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const toDelete = group.slice(1);
+      toDelete.forEach(toolToDelete => {
+        console.log(`Queueing deletion for duplicate tool: ${toolToDelete.name} (ID: ${toolToDelete.id})`);
+        batch.delete(toolsRef.doc(toolToDelete.id));
+        hasDeletions = true;
+      });
+    }
+  });
+
+  // --- Add Missing Tools Logic ---
+  const existingToolSlugs = new Set(toolsFromDb.map(t => t.slug));
+  let hasAdditions = false;
+  initialTools.forEach(toolData => {
+    const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+    if (!existingToolSlugs.has(slug)) {
+      const docRef = toolsRef.doc(slug);
+      batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
+      hasAdditions = true;
+      console.log(`Queueing addition for missing tool: ${toolData.name}`);
+    }
+  });
+
+  // Commit batch if there are any changes
+  if (hasDeletions || hasAdditions) {
     await batch.commit();
-    
-    // Re-fetch after populating to return the new data
+    console.log('Committed tool database updates (additions/deletions).');
+    // Re-fetch to get the clean, updated list
     const newSnapshot = await toolsRef.orderBy('name').get();
-    return newSnapshot.docs.map(doc => ({
+    return newSnapshot.docs.map(doc => ToolSchema.parse({
         id: doc.id,
         ...doc.data(),
         createdAt: (doc.data().createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-    } as Tool));
+    }));
   }
 
-  const tools = snapshot.docs.map(doc => {
-    const data = doc.data();
-    return ToolSchema.parse({
-      id: doc.id,
-      ...data,
-      createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-    });
-  }).sort((a, b) => a.name.localeCompare(b.name));
-  
-  return tools;
+  // If no changes, just return the parsed initial fetch
+  return toolsFromDb
+    .map(t => ToolSchema.safeParse(t))
+    .filter(result => result.success)
+    .map(result => (result as { success: true; data: Tool }).data)
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
+
 
 /**
  * Adds or updates a tool in Firestore.
@@ -359,5 +396,7 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
     
 
 
+
+    
 
     
