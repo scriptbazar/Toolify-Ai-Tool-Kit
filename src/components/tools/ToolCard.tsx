@@ -52,7 +52,7 @@ export function ToolCard({ tool }: ToolCardProps) {
         </div>
         <div className="flex-grow">
             <h3 className="text-sm font-semibold mb-1">{name}</h3>
-            <p className="text-xs text-muted-foreground h-10 overflow-hidden">
+            <p className="text-xs text-muted-foreground h-16 overflow-hidden">
                 {description}
             </p>
         </div>
