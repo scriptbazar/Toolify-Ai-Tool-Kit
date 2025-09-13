@@ -120,6 +120,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image Metadata Viewer', description: 'View EXIF and other metadata from your images.', icon: 'Camera', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'AI Image Quality Enhancer', description: 'Upscale and enhance the quality of your images with AI.', icon: 'Sparkles', category: 'ai', plan: 'Pro', isNew: true, status: 'Coming Soon' },
     { name: 'AI Web Content Summarizer', description: 'Summarize and explain content from any website URL.', icon: 'Globe', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Binary Converter', description: 'Convert text to binary code and vice versa.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
 ];
 
 /**
@@ -150,30 +151,33 @@ export async function getTools(): Promise<Tool[]> {
     snapshot = await toolsRef.get(); // Re-fetch after populating
   }
   
-  const toolsFromDb: Tool[] = snapshot.docs.map(doc => {
+  // Explicitly filter out the unwanted tools by name before parsing
+  const toolsToExclude = ["Binary to Text", "Text to Binary"];
+  const docsToProcess = snapshot.docs.filter(doc => !toolsToExclude.includes(doc.data().name));
+  
+  const toolsFromDb: Tool[] = docsToProcess.map(doc => {
       const data = doc.data();
       const createdAt = (data.createdAt as Timestamp)?.toDate ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString();
       return ToolSchema.parse({ id: doc.id, ...data, createdAt });
   });
 
-  // --- De-duplication and Normalization Logic ---
+  // De-duplication and Normalization Logic
   const normalizedToolsMap = new Map<string, Tool>();
   const duplicatesToDelete: string[] = [];
+  const namesToKeep = new Set(initialTools.map(t => t.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, ' ').trim()));
 
   toolsFromDb.forEach(tool => {
-    // Normalize name to handle '&' vs 'and' and other variations for a more robust key.
-    const normalizedName = tool.name
-        .toLowerCase()
-        .replace(/ & /g, ' and ')
-        .replace(/&amp;/g, 'and')
-        .replace(/\s+/g, ' ')
-        .trim();
+    const normalizedName = tool.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, ' ').trim();
+
+    // If a tool from the DB isn't in our master `initialTools` list, mark for deletion.
+    if (!namesToKeep.has(normalizedName)) {
+        duplicatesToDelete.push(tool.id);
+        return; // Skip to next tool
+    }
 
     const existingTool = normalizedToolsMap.get(normalizedName);
 
     if (existingTool) {
-      // If a tool with the same normalized name exists, compare them.
-      // Keep the one that was created more recently.
       if (new Date(tool.createdAt) > new Date(existingTool.createdAt)) {
         duplicatesToDelete.push(existingTool.id);
         normalizedToolsMap.set(normalizedName, tool);
@@ -184,7 +188,7 @@ export async function getTools(): Promise<Tool[]> {
       normalizedToolsMap.set(normalizedName, tool);
     }
   });
-
+  
   let finalTools: Tool[] = Array.from(normalizedToolsMap.values());
   let hasChanges = false;
   
@@ -192,30 +196,31 @@ export async function getTools(): Promise<Tool[]> {
     hasChanges = true;
     const batch = adminDb.batch();
     duplicatesToDelete.forEach(id => {
-      console.log(`Queueing deletion for duplicate tool ID: ${id}`);
+      console.log(`Queueing deletion for duplicate/unwanted tool ID: ${id}`);
       batch.delete(toolsRef.doc(id));
     });
     await batch.commit();
   }
   
-  // --- Add Missing Tools Logic ---
-  const batch = adminDb.batch();
+  // Add Missing Tools Logic
+  const addBatch = adminDb.batch();
+  let addedAny = false;
   initialTools.forEach(toolData => {
     const normalizedName = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, ' ').trim();
     if (!normalizedToolsMap.has(normalizedName)) {
       hasChanges = true;
+      addedAny = true;
       const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
       const docRef = toolsRef.doc(slug);
       const newData = { ...toolData, slug, createdAt: FieldValue.serverTimestamp() };
-      batch.set(docRef, newData);
-      // Also add to the final list to return immediately
+      addBatch.set(docRef, newData);
       finalTools.push(ToolSchema.parse({ ...newData, id: slug, createdAt: new Date().toISOString() }));
       console.log(`Queueing addition for missing tool: ${toolData.name}`);
     }
   });
 
-  if (hasChanges) {
-    await batch.commit();
+  if (addedAny) {
+    await addBatch.commit();
   }
 
   return finalTools.sort((a, b) => a.name.localeCompare(b.name));
@@ -402,14 +407,3 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
 
   return { description: generatedDesc };
 }
-
-    
-
-    
-
-
-
-    
-
-    
-
