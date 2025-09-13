@@ -34,7 +34,7 @@ export function ToolCard({ tool }: ToolCardProps) {
   const CardContent = () => (
     <div className="relative group h-full w-full">
       <div className={cn(
-        "absolute -inset-0.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 opacity-25 blur transition duration-500 group-hover:opacity-75",
+        "absolute -inset-0.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-500 opacity-25 blur transition duration-500 group-hover:opacity-75",
         !isClickable && "opacity-10 blur-sm"
       )}></div>
       <div className={cn(
