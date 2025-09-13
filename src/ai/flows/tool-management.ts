@@ -158,69 +158,7 @@ export async function getTools(): Promise<Tool[]> {
       return ToolSchema.parse({ id: doc.id, ...data, createdAt });
   });
 
-  // De-duplication and Normalization Logic
-  const normalizedToolsMap = new Map<string, Tool>();
-  const duplicatesToDelete: string[] = [];
-  const namesToKeep = new Set(initialTools.map(t => t.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, ' ').trim()));
-
-  toolsFromDb.forEach(tool => {
-    const normalizedName = tool.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, ' ').trim();
-
-    // If a tool from the DB isn't in our master `initialTools` list, mark for deletion.
-    if (!namesToKeep.has(normalizedName)) {
-        duplicatesToDelete.push(tool.id);
-        return; // Skip to next tool
-    }
-
-    const existingTool = normalizedToolsMap.get(normalizedName);
-
-    if (existingTool) {
-      if (new Date(tool.createdAt) > new Date(existingTool.createdAt)) {
-        duplicatesToDelete.push(existingTool.id);
-        normalizedToolsMap.set(normalizedName, tool);
-      } else {
-        duplicatesToDelete.push(tool.id);
-      }
-    } else {
-      normalizedToolsMap.set(normalizedName, tool);
-    }
-  });
-  
-  let finalTools: Tool[] = Array.from(normalizedToolsMap.values());
-  let hasChanges = false;
-  
-  if (duplicatesToDelete.length > 0) {
-    hasChanges = true;
-    const batch = adminDb.batch();
-    duplicatesToDelete.forEach(id => {
-      console.log(`Queueing deletion for duplicate/unwanted tool ID: ${id}`);
-      batch.delete(toolsRef.doc(id));
-    });
-    await batch.commit();
-  }
-  
-  // Add Missing Tools Logic
-  const addBatch = adminDb.batch();
-  let addedAny = false;
-  initialTools.forEach(toolData => {
-    const normalizedName = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, ' ').trim();
-    if (!normalizedToolsMap.has(normalizedName)) {
-      hasChanges = true;
-      addedAny = true;
-      const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-      const docRef = toolsRef.doc(slug);
-      const newData = { ...toolData, slug, createdAt: FieldValue.serverTimestamp() };
-      addBatch.set(docRef, newData);
-      finalTools.push(ToolSchema.parse({ ...newData, id: slug, createdAt: new Date().toISOString() }));
-      console.log(`Queueing addition for missing tool: ${toolData.name}`);
-    }
-  });
-
-  if (addedAny) {
-    await addBatch.commit();
-  }
-
-  return finalTools.sort((a, b) => a.name.localeCompare(b.name));
+  return toolsFromDb.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 
