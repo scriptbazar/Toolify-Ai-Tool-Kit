@@ -156,8 +156,9 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 import { type Review } from '@/ai/flows/review-management.types';
 import { type Post } from '@/ai/flows/blog-management.types';
 import { type AppSettings } from '@/ai/flows/settings-management.types';
-import { BinaryToText } from '@/components/tools/BinaryToText';
-import { TextToBinary } from '@/components/tools/TextToBinary';
+import { FlipImage } from '@/components/tools/FlipImage';
+import { IcoConverter } from '@/components/tools/IcoConverter';
+import { BinaryToText, TextToBinary } from '@/components/tools/BinaryConverter';
 
 
 const toolComponents: { [key: string]: React.ComponentType } = {
@@ -196,7 +197,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'myntra-shipping-label-cropper': MyntraShippingLabelCropper,
   'flipkart-shipping-label-cropper': FlipkartShippingLabelCropper,
   'meesho-shipping-label-cropper': MeeshoShippingLabelCropper,
-  'base64-encoder-decoder': Base64Converter,
+  'base64-converter': Base64Converter,
   'css-minifier': CssMinifier,
   'discount-calculator': DiscountCalculator,
   'date-calculator': DateCalculator,
@@ -269,6 +270,37 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'image-metadata-viewer': ImageMetadataViewer,
   'binary-to-text': BinaryToText,
   'text-to-binary': TextToBinary,
+  'flip-image': FlipImage,
+  'ico-converter': IcoConverter,
+  'word-to-pdf': WordToPdf,
+  'ppt-to-pdf': PptToPdf,
+  'pdf-to-word': PdfToWord,
+  'pdf-to-jpg': PdfToJpg,
+  'meta-tag-generator': MetaTagGenerator,
+  'robots.txt-generator': RobotsTxtGenerator,
+  'xml-sitemap-generator': XmlSitemapGenerator,
+  'favicon-checker': FaviconChecker,
+  'keyword-density-checker': KeywordDensityChecker,
+  'serp-checker': SerpChecker,
+  'redirect-checker': RedirectChecker,
+  'schema-generator': SchemaGenerator,
+  'title-tag-checker': TitleTagChecker,
+  'website-word-counter': WebsiteWordCounter,
+  'fuel-cost-calculator': FuelCostCalculator,
+  'gpa-calculator': GpaCalculator,
+  'loan-calculator': LoanCalculator,
+  'percentage-calculator': PercentageCalculator,
+  'time-zone-converter': TimeZoneConverter,
+  'unix-timestamp-converter': UnixTimestampConverter,
+  'html-minifier': HtmlMinifier,
+  'javascript-minifier': JavascriptMinifier,
+  'sql-formatter': SqlFormatter,
+  'youtube-video-downloader': YoutubeVideoDownloader,
+  'x-video-downloader': XVideoDownloader,
+  'instagram-video-downloader': InstagramVideoDownloader,
+  'threads-video-downloader': ThreadsVideoDownloader,
+  'linkedin-video-downloader': LinkedinVideoDownloader,
+  'pinterest-video-downloader': PinterestVideoDownloader,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
