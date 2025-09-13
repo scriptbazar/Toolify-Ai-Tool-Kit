@@ -160,6 +160,7 @@ import { FlipImage } from '@/components/tools/FlipImage';
 import { IcoConverter } from '@/components/tools/IcoConverter';
 import { BinaryToText, TextToBinary } from '@/components/tools/BinaryConverter';
 import { Logo } from '@/components/common/Logo';
+import { AiSeoKeywordGenerator } from '@/components/tools/AiSeoKeywordGenerator';
 
 
 const toolComponents: { [key: string]: React.ComponentType } = {
@@ -269,8 +270,8 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'credit-card-interest-calculator': CreditCardInterestCalculator,
   'uuid-generator': UuidGenerator,
   'image-metadata-viewer': ImageMetadataViewer,
-  'binary-to-text': BinaryToText,
-  'text-to-binary': TextToBinary,
+  'binary-to-text': BinaryConverter,
+  'text-to-binary': BinaryConverter,
   'flip-image': FlipImage,
   'ico-converter': IcoConverter,
   'word-to-pdf': WordToPdf,
@@ -302,6 +303,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'threads-video-downloader': ThreadsVideoDownloader,
   'linkedin-video-downloader': LinkedinVideoDownloader,
   'pinterest-video-downloader': PinterestVideoDownloader,
+  'ai-seo-keyword-generator': AiSeoKeywordGenerator,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
@@ -520,3 +522,6 @@ export default function ToolPage() {
     </div>
   );
 }
+
+
+    

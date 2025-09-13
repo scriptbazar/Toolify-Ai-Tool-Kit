@@ -153,6 +153,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Threads Video Downloader', description: 'Download videos from Threads posts by providing the URL of the post.', icon: 'AtSign', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'LinkedIn Video Downloader', description: 'Download videos from public LinkedIn posts to save for offline viewing or sharing.', icon: 'Linkedin', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Pinterest Video Downloader', description: 'Download videos from Pinterest pins to save your favorite ideas and tutorials.', icon: 'BookImage', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'AI SEO Keyword Generator', description: 'Get a comprehensive list of primary, secondary, and long-tail keywords for any topic to boost your search engine ranking.', icon: 'Key', category: 'seo', plan: 'Pro', isNew: true, status: 'Active' },
 ];
 
 const generateSlug = (name: string) => {
@@ -172,76 +173,74 @@ export async function getTools(): Promise<Tool[]> {
   }
 
   const toolsRef = adminDb.collection(TOOLS_COLLECTION);
-  const snapshot = await toolsRef.get();
+  let toolsFromDb: Tool[] = [];
   
-  let toolsFromDb: Tool[] = snapshot.docs.map(doc => {
-      const data = doc.data();
-      const createdAt = (data.createdAt as Timestamp)?.toDate ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString();
-      return ToolSchema.parse({ id: doc.id, ...data, createdAt });
-  });
+  try {
+      const snapshot = await toolsRef.get();
+      toolsFromDb = snapshot.docs.map(doc => {
+          const data = doc.data();
+          const createdAt = (data.createdAt as Timestamp)?.toDate ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString();
+          return ToolSchema.parse({ id: doc.id, ...data, createdAt });
+      });
+  } catch (error) {
+      console.error("Error fetching tools from Firestore, might need schema update:", error);
+      // Continue with an empty list to allow initialization logic to run
+  }
 
-  const initialToolNames = new Set(initialTools.map(t => t.name));
+  // Use a Map to ensure all tools from the initial list are present and unique by name.
+  const toolMap = new Map<string, Tool>();
+
+  // Add initial tools to the map first to establish the "source of truth"
+  for (const toolData of initialTools) {
+      if (!toolMap.has(toolData.name)) {
+          const slug = generateSlug(toolData.name);
+          toolMap.set(toolData.name, ToolSchema.parse({
+              id: slug,
+              slug: slug,
+              createdAt: new Date().toISOString(),
+              ...toolData,
+          }));
+      }
+  }
+  
+  // If the database is not in sync with the code's source of truth (initialTools),
+  // we will force a re-sync.
   const dbToolNames = new Set(toolsFromDb.map(t => t.name));
+  const initialToolNames = new Set(initialTools.map(t => t.name));
   
-  let needsSync = false;
+  // Check if every tool in the initial list is present in the database.
+  const isDbMissingTools = ![...initialToolNames].every(name => dbToolNames.has(name));
 
-  // Check for tools to delete from DB (not in the initial list)
-  const toolsToDelete = toolsFromDb.filter(t => !initialToolNames.has(t.name));
-  if (toolsToDelete.length > 0) {
-      needsSync = true;
-      console.log(`[SYNC] Found ${toolsToDelete.length} obsolete tools in DB to delete.`);
-  }
-
-  // Check for tools to add to DB (in initial list but not in DB)
-  const toolsToAdd = initialTools.filter(t => !dbToolNames.has(t.name));
-  if (toolsToAdd.length > 0) {
-      needsSync = true;
-      console.log(`[SYNC] Found ${toolsToAdd.length} new tools to add to DB.`);
-  }
-  
-  // Also sync if the counts don't match exactly.
-  if (toolsFromDb.length !== initialTools.length) {
-      needsSync = true;
-      console.log(`[SYNC] DB count (${toolsFromDb.length}) and initial list count (${initialTools.length}) mismatch. Forcing sync.`);
-  }
-
-
-  if (needsSync) {
-    console.log("[SYNC] Synchronizing database with initial tools list...");
-    const batch = adminDb.batch();
-
-    // Delete obsolete tools
-    toolsToDelete.forEach(tool => {
-        console.log(`[SYNC] Deleting: ${tool.name} (ID: ${tool.id})`);
+  if (toolsFromDb.length === 0 || toolsFromDb.length < initialTools.length || isDbMissingTools) {
+      console.log(`[SYNC] Database requires synchronization. DB count: ${toolsFromDb.length}, Code count: ${initialTools.length}.`);
+      const batch = adminDb.batch();
+      
+      // Clear existing tools to ensure a clean slate
+      toolsFromDb.forEach(tool => {
         batch.delete(toolsRef.doc(tool.id));
-    });
-
-    // Add new tools
-    const existingSlugs = new Set(toolsFromDb.map(t => t.slug));
-    toolsToAdd.forEach(toolData => {
-        let slug = generateSlug(toolData.name);
-        // Ensure slug is unique if a different tool already uses it.
-        if(existingSlugs.has(slug)) {
-            slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
-        }
-        existingSlugs.add(slug);
-        const docRef = toolsRef.doc(slug);
-        console.log(`[SYNC] Adding: ${toolData.name} (Slug: ${slug})`);
-        batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
-    });
-    
-    await batch.commit();
-    console.log("[SYNC] Synchronization complete.");
-    
-    // Re-fetch after synchronization to return the correct list
-    const newSnapshot = await toolsRef.get();
-    toolsFromDb = newSnapshot.docs.map(doc => {
+      });
+      
+      // Add all unique tools from the initial list
+      for (const tool of toolMap.values()) {
+          const docRef = toolsRef.doc(tool.slug);
+          batch.set(docRef, { ...tool, createdAt: FieldValue.serverTimestamp() });
+      }
+      
+      await batch.commit();
+      console.log("[SYNC] Database synchronized successfully.");
+      
+      // Re-fetch to return the correct, synchronized list
+      const newSnapshot = await toolsRef.get();
+      const finalTools = newSnapshot.docs.map(doc => {
         const data = doc.data();
         const createdAt = (data.createdAt as Timestamp)?.toDate ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString();
         return ToolSchema.parse({ id: doc.id, ...data, createdAt });
-    });
+      });
+      
+      return finalTools.sort((a, b) => a.name.localeCompare(b.name));
   }
-
+  
+  // If no sync was needed, just return the tools from DB.
   return toolsFromDb.sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -427,6 +426,8 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
   return { description: generatedDesc };
 }
 
+
+    
 
     
 
