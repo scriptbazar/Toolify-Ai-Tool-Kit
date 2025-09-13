@@ -111,11 +111,11 @@ export default function ToolsDashboardPage() {
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Search for a tool..."
-            className="w-full h-14 pl-12 pr-40 rounded-full text-lg shadow-lg"
+            className="w-full h-14 pl-12 md:pr-48 rounded-full text-lg shadow-lg"
           />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden md:block">
             <Select value={activeCategory} onValueChange={handleCategoryClick}>
-                <SelectTrigger className="w-[180px] h-10 rounded-full">
+                <SelectTrigger className="w-[200px] h-10 rounded-full">
                     <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
@@ -125,7 +125,7 @@ export default function ToolsDashboardPage() {
                                 <LayoutGrid className="h-4 w-4" />
                                 All Categories
                            </div>
-                           <span className="text-xs text-muted-foreground">{categoryCounts['all']}</span>
+                           <span className="text-xs text-muted-foreground ml-2">{categoryCounts['all']}</span>
                         </div>
                     </SelectItem>
                     {toolCategories.map(cat => (
