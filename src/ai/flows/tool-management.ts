@@ -172,7 +172,7 @@ export async function getTools(): Promise<Tool[]> {
   }
 
   const toolsRef = adminDb.collection(TOOLS_COLLECTION);
-  let snapshot = await toolsRef.get();
+  const snapshot = await toolsRef.get();
   
   let toolsFromDb: Tool[] = snapshot.docs.map(doc => {
       const data = doc.data();
@@ -180,55 +180,67 @@ export async function getTools(): Promise<Tool[]> {
       return ToolSchema.parse({ id: doc.id, ...data, createdAt });
   });
 
-  // One-time cleanup and population logic
-  if (snapshot.empty || toolsFromDb.length < initialTools.length) {
-    console.log(`Database has ${toolsFromDb.length} tools, but initial list has ${initialTools.length}. Synchronizing...`);
+  // Synchronization logic to ensure DB matches the initialTools list exactly.
+  const initialToolNames = new Set(initialTools.map(t => t.name));
+  const dbToolNames = new Set(toolsFromDb.map(t => t.name));
+  
+  let needsSync = false;
+
+  // Check for tools to delete from DB
+  const toolsToDelete = toolsFromDb.filter(t => !initialToolNames.has(t.name));
+  if (toolsToDelete.length > 0) {
+      needsSync = true;
+      console.log(`Found ${toolsToDelete.length} obsolete tools in DB to delete.`);
+  }
+
+  // Check for tools to add to DB
+  const toolsToAdd = initialTools.filter(t => !dbToolNames.has(t.name));
+  if (toolsToAdd.length > 0) {
+      needsSync = true;
+      console.log(`Found ${toolsToAdd.length} new tools to add to DB.`);
+  }
+  
+  // Also sync if the counts don't match, which catches complex duplicate issues.
+  if (toolsFromDb.length !== initialTools.length && !needsSync) {
+      needsSync = true;
+      console.log(`DB count (${toolsFromDb.length}) and initial list count (${initialTools.length}) mismatch. Forcing sync.`);
+  }
+
+
+  if (snapshot.empty || needsSync) {
+    console.log("Synchronizing database with initial tools list...");
     const batch = adminDb.batch();
-    
-    // Use a map to ensure slugs are unique before writing
-    const uniqueToolsByName = new Map<string, Omit<Tool, 'id' | 'slug' | 'createdAt'>>();
-    initialTools.forEach(toolData => {
-        uniqueToolsByName.set(toolData.name, toolData);
+
+    // Delete obsolete tools
+    toolsToDelete.forEach(tool => {
+        batch.delete(toolsRef.doc(tool.id));
     });
 
-    const toolsToWrite = Array.from(uniqueToolsByName.values());
-    const slugsToWrite = new Set<string>();
-
-    toolsToWrite.forEach(toolData => {
-        const slug = generateSlug(toolData.name);
-        if (!slugsToWrite.has(slug)) {
-            const docRef = toolsRef.doc(slug);
-            batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
-            slugsToWrite.add(slug);
-        } else {
-            // Handle rare slug collisions from different names
-            const uniqueSlug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
-            const docRef = toolsRef.doc(uniqueSlug);
-            batch.set(docRef, { ...toolData, slug: uniqueSlug, createdAt: FieldValue.serverTimestamp() });
-            slugsToWrite.add(uniqueSlug);
+    // Add new tools
+    const existingSlugs = new Set(toolsFromDb.map(t => t.slug));
+    toolsToAdd.forEach(toolData => {
+        let slug = generateSlug(toolData.name);
+        // Ensure slug is unique if a different tool already uses it.
+        if(existingSlugs.has(slug)) {
+            slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
         }
+        existingSlugs.add(slug);
+        const docRef = toolsRef.doc(slug);
+        batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
     });
     
     await batch.commit();
-    snapshot = await toolsRef.get(); // Re-fetch after populating
-    toolsFromDb = snapshot.docs.map(doc => {
+    
+    // Re-fetch after synchronization to return the correct list
+    const newSnapshot = await toolsRef.get();
+    toolsFromDb = newSnapshot.docs.map(doc => {
         const data = doc.data();
         const createdAt = (data.createdAt as Timestamp)?.toDate ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString();
         return ToolSchema.parse({ id: doc.id, ...data, createdAt });
     });
   }
 
-  // Final deduplication based on unique name
-  const finalUniqueTools = new Map<string, Tool>();
-  toolsFromDb.forEach(tool => {
-    if (!finalUniqueTools.has(tool.name)) {
-      finalUniqueTools.set(tool.name, tool);
-    }
-  });
-
-  const cleanedTools = Array.from(finalUniqueTools.values());
-
-  return cleanedTools.sort((a, b) => a.name.localeCompare(b.name));
+  return toolsFromDb.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 
