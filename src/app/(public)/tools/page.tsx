@@ -7,12 +7,14 @@ import { ToolCard } from '@/components/tools/ToolCard';
 import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
 import { toolCategories } from '@/lib/constants';
-import { Search } from 'lucide-react';
+import { Search, LayoutGrid } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 export default function ToolsDashboardPage() {
   const [allTools, setAllTools] = useState<Tool[]>([]);
@@ -102,33 +104,38 @@ export default function ToolsDashboardPage() {
       </div>
 
       <div className="mt-12 sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40 py-4">
-        <div className="relative max-w-2xl mx-auto mb-6">
+        <div className="relative max-w-2xl mx-auto">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             name="q"
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Search for a tool..."
-            className="w-full h-12 pl-12 pr-4 rounded-full text-lg shadow-lg"
+            className="w-full h-14 pl-12 pr-40 rounded-full text-lg shadow-lg"
           />
-        </div>
-        <div className="flex justify-center flex-wrap gap-2">
-          <Button 
-            variant={activeCategory === 'all' ? 'default' : 'outline'}
-            onClick={() => handleCategoryClick('all')}
-          >
-            All Tools&nbsp;<span className="text-muted-foreground">({categoryCounts.all})</span>
-          </Button>
-          {toolCategories.map(category => (
-            <Button
-              key={category.id}
-              variant={activeCategory === category.id ? 'default' : 'outline'}
-              onClick={() => handleCategoryClick(category.id)}
-            >
-              <category.Icon className="mr-2 h-4 w-4" />
-              {category.name}&nbsp;<span className="text-muted-foreground">({categoryCounts[category.id] || 0})</span>
-            </Button>
-          ))}
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            <Select value={activeCategory} onValueChange={handleCategoryClick}>
+                <SelectTrigger className="w-[150px] h-10 rounded-full">
+                    <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">
+                        <div className="flex items-center gap-2">
+                            <LayoutGrid className="h-4 w-4" />
+                            All Categories
+                        </div>
+                    </SelectItem>
+                    {toolCategories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                            <div className="flex items-center gap-2">
+                            <cat.Icon className="h-4 w-4" />
+                            {cat.name}
+                            </div>
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
       
