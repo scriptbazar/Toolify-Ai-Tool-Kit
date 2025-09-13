@@ -48,7 +48,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Flipkart Shipping Label Cropper', description: 'Crop your Flipkart shipping labels from a full page to a 4x6 inch size in seconds. Perfect for sellers using thermal printers for efficient dispatch.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Meesho Shipping Label Cropper', description: 'Optimize your Meesho shipping process. This tool crops your default shipping labels to a 4x6 inch format, saving paper and streamlining your workflow.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Base64 Encoder/Decoder', description: 'Encode text or files to Base64 and decode from Base64 format, essential for data transmission and web development.', icon: 'Package', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
-    { name: 'Binary Converter', description: 'Convert text to binary and binary back to text.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'CSS Minifier', description: 'Minify CSS code to reduce file size and improve website loading times.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Discount Calculator', description: 'Calculate final price after discount and see how much you save.', icon: 'BadgePercent', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Date Calculator', description: 'Calculate the duration between two dates or add/subtract from a date.', icon: 'CalendarDays', category: 'calculator', plan: 'Free', isNew: true, status: 'Coming Soon' },
@@ -137,26 +136,18 @@ export async function getTools(): Promise<Tool[]> {
   }
 
   const toolsRef = adminDb.collection(TOOLS_COLLECTION);
-  const snapshot = await toolsRef.get();
-  const batch = adminDb.batch();
-  let hasChanges = false;
-
-  // If the database is empty, populate it.
+  let snapshot = await toolsRef.get();
+  
   if (snapshot.empty) {
     console.log('Tools collection is empty. Populating with initial tools...');
+    const batch = adminDb.batch();
     initialTools.forEach(toolData => {
       const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
       const docRef = toolsRef.doc(slug);
       batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
     });
     await batch.commit();
-    // Re-fetch after populating
-    const newSnapshot = await toolsRef.orderBy('name').get();
-    return newSnapshot.docs.map(doc => ToolSchema.parse({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: (doc.data().createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-    }));
+    snapshot = await toolsRef.get(); // Re-fetch after populating
   }
   
   const toolsFromDb: Tool[] = snapshot.docs.map(doc => {
@@ -166,55 +157,64 @@ export async function getTools(): Promise<Tool[]> {
   });
 
   // --- De-duplication and Normalization Logic ---
-  const toolsByName: { [key: string]: Tool[] } = {};
+  const normalizedToolsMap = new Map<string, Tool>();
+  const duplicatesToDelete: string[] = [];
+
   toolsFromDb.forEach(tool => {
-    // Normalize name to handle '&' vs '&amp;' and ' & ' vs ' and ' issues for grouping
+    // Normalize name to handle '&' vs 'and' and other variations for a more robust key.
     const normalizedName = tool.name
-        .replace(/&amp;/g, 'and')
+        .toLowerCase()
         .replace(/ & /g, ' and ')
+        .replace(/&amp;/g, 'and')
+        .replace(/\s+/g, ' ')
         .trim();
-    if (!toolsByName[normalizedName]) {
-      toolsByName[normalizedName] = [];
-    }
-    toolsByName[normalizedName].push(tool);
-  });
-  
-  const finalTools: Tool[] = [];
-  Object.values(toolsByName).forEach(group => {
-    if (group.length > 1) {
-      // If there are duplicates, keep the most recently created one and delete others.
-      group.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      const toKeep = group[0];
-      const toDelete = group.slice(1);
-      
-      finalTools.push(toKeep);
-      toDelete.forEach(toolToDelete => {
-        console.log(`Queueing deletion for duplicate tool: ${toolToDelete.name} (ID: ${toolToDelete.id})`);
-        batch.delete(toolsRef.doc(toolToDelete.id));
-        hasChanges = true;
-      });
+
+    const existingTool = normalizedToolsMap.get(normalizedName);
+
+    if (existingTool) {
+      // If a tool with the same normalized name exists, compare them.
+      // Keep the one that was created more recently.
+      if (new Date(tool.createdAt) > new Date(existingTool.createdAt)) {
+        duplicatesToDelete.push(existingTool.id);
+        normalizedToolsMap.set(normalizedName, tool);
+      } else {
+        duplicatesToDelete.push(tool.id);
+      }
     } else {
-      finalTools.push(group[0]);
+      normalizedToolsMap.set(normalizedName, tool);
     }
   });
 
+  let finalTools: Tool[] = Array.from(normalizedToolsMap.values());
+  let hasChanges = false;
+  
+  if (duplicatesToDelete.length > 0) {
+    hasChanges = true;
+    const batch = adminDb.batch();
+    duplicatesToDelete.forEach(id => {
+      console.log(`Queueing deletion for duplicate tool ID: ${id}`);
+      batch.delete(toolsRef.doc(id));
+    });
+    await batch.commit();
+  }
+  
   // --- Add Missing Tools Logic ---
-  const existingToolSlugs = new Set(finalTools.map(t => t.slug));
+  const batch = adminDb.batch();
   initialTools.forEach(toolData => {
-    const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-    if (!existingToolSlugs.has(slug)) {
+    const normalizedName = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, ' ').trim();
+    if (!normalizedToolsMap.has(normalizedName)) {
+      hasChanges = true;
+      const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
       const docRef = toolsRef.doc(slug);
       const newData = { ...toolData, slug, createdAt: FieldValue.serverTimestamp() };
       batch.set(docRef, newData);
+      // Also add to the final list to return immediately
       finalTools.push(ToolSchema.parse({ ...newData, id: slug, createdAt: new Date().toISOString() }));
-      hasChanges = true;
       console.log(`Queueing addition for missing tool: ${toolData.name}`);
     }
   });
 
-  // Commit batch if there are any changes
   if (hasChanges) {
-    console.log('Committing tool database updates (additions/deletions).');
     await batch.commit();
   }
 
@@ -412,3 +412,4 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
     
 
     
+

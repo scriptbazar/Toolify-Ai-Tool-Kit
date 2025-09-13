@@ -35,7 +35,6 @@ import { MyntraShippingLabelCropper } from '@/components/tools/MyntraShippingLab
 import { FlipkartShippingLabelCropper } from '@/components/tools/FlipkartShippingLabelCropper';
 import { MeeshoShippingLabelCropper } from '@/components/tools/MeeshoShippingLabelCropper';
 import { Base64Converter } from '@/components/tools/Base64Converter';
-import { BinaryConverter } from '@/components/tools/BinaryConverter';
 import { CssMinifier } from '@/components/tools/CssMinifier';
 import { DiscountCalculator } from '@/components/tools/DiscountCalculator';
 import { DateCalculator } from '@/components/tools/DateCalculator';
@@ -196,7 +195,6 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'flipkart-shipping-label-cropper': FlipkartShippingLabelCropper,
   'meesho-shipping-label-cropper': MeeshoShippingLabelCropper,
   'base64-encoder-decoder': Base64Converter,
-  'binary-converter': BinaryConverter,
   'css-minifier': CssMinifier,
   'discount-calculator': DiscountCalculator,
   'date-calculator': DateCalculator,
@@ -477,3 +475,4 @@ export default function ToolPage() {
     
 
     
+
