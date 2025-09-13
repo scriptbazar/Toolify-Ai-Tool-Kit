@@ -120,6 +120,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image Metadata Viewer', description: 'View EXIF and other metadata from your images.', icon: 'Camera', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'AI Image Quality Enhancer', description: 'Upscale and enhance the quality of your images with AI.', icon: 'Sparkles', category: 'ai', plan: 'Pro', isNew: true, status: 'Coming Soon' },
     { name: 'AI Web Content Summarizer', description: 'Summarize and explain content from any website URL.', icon: 'Globe', category: 'ai', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Binary to Text', description: 'Convert binary code to plain text.', icon: 'Binary', category: 'text', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'Text to Binary', description: 'Convert plain text to binary code.', icon: 'Binary', category: 'text', plan: 'Free', isNew: true, status: 'Coming Soon' },
 ];
 
 /**
@@ -150,11 +152,7 @@ export async function getTools(): Promise<Tool[]> {
     snapshot = await toolsRef.get(); // Re-fetch after populating
   }
   
-  // Explicitly filter out the unwanted tools by name before parsing
-  const toolsToExclude = ["Binary Converter", "Binary to Text", "Text to Binary"];
-  const docsToProcess = snapshot.docs.filter(doc => !toolsToExclude.includes(doc.data().name));
-  
-  const toolsFromDb: Tool[] = docsToProcess.map(doc => {
+  const toolsFromDb: Tool[] = snapshot.docs.map(doc => {
       const data = doc.data();
       const createdAt = (data.createdAt as Timestamp)?.toDate ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString();
       return ToolSchema.parse({ id: doc.id, ...data, createdAt });

@@ -156,6 +156,7 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 import { type Review } from '@/ai/flows/review-management.types';
 import { type Post } from '@/ai/flows/blog-management.types';
 import { type AppSettings } from '@/ai/flows/settings-management.types';
+import { BinaryConverter } from '@/components/tools/BinaryConverter';
 
 
 const toolComponents: { [key: string]: React.ComponentType } = {
@@ -265,6 +266,8 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'credit-card-interest-calculator': CreditCardInterestCalculator,
   'uuid-generator': UuidGenerator,
   'image-metadata-viewer': ImageMetadataViewer,
+  'binary-to-text': BinaryConverter,
+  'text-to-binary': BinaryConverter,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
@@ -475,4 +478,3 @@ export default function ToolPage() {
     
 
     
-
