@@ -190,17 +190,16 @@ export async function getTools(): Promise<Tool[]> {
       return ToolSchema.parse({ id: doc.id, ...data, createdAt });
   });
   
-  const seen = new Set<string>();
-  const cleanedTools = toolsFromDb.filter(tool => {
-    const normalizedName = tool.name.toLowerCase().trim();
-    if (seen.has(normalizedName)) {
-      return false;
-    } else {
-      seen.add(normalizedName);
-      return true;
+  // This is the new, more robust de-duplication logic.
+  // It ensures that even if the database has duplicates, only one version of each tool (based on its unique slug) is returned.
+  const uniqueTools = new Map<string, Tool>();
+  toolsFromDb.forEach(tool => {
+    if (!uniqueTools.has(tool.slug)) {
+      uniqueTools.set(tool.slug, tool);
     }
   });
 
+  const cleanedTools = Array.from(uniqueTools.values());
 
   return cleanedTools.sort((a, b) => a.name.localeCompare(b.name));
 }
