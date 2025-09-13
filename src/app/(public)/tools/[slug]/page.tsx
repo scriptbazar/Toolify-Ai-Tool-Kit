@@ -66,7 +66,7 @@ import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { Separator } from '@/components/ui/separator';
 import { ReviewForm } from '@/components/tools/ReviewForm';
 import { getReviews } from '@/ai/flows/review-management';
-import { Star, Construction, Sparkles, ArrowLeft } from 'lucide-react';
+import { Star, Construction, Sparkles, ArrowLeft, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getPosts } from '@/ai/flows/blog-management';
 import Link from 'next/link';
@@ -159,6 +159,7 @@ import { type AppSettings } from '@/ai/flows/settings-management.types';
 import { FlipImage } from '@/components/tools/FlipImage';
 import { IcoConverter } from '@/components/tools/IcoConverter';
 import { BinaryToText, TextToBinary } from '@/components/tools/BinaryConverter';
+import { Logo } from '@/components/common/Logo';
 
 
 const toolComponents: { [key: string]: React.ComponentType } = {
@@ -366,7 +367,15 @@ export default function ToolPage() {
     }, [slug]);
 
   if (loading) {
-      return <div>Loading...</div>; // Replace with a proper skeleton loader
+      return (
+        <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 bg-background">
+            <Logo className="h-16 w-16 animate-pulse" />
+            <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <p className="text-lg">Loading Tool...</p>
+            </div>
+        </div>
+      );
   }
   
   if (tool === null) {
@@ -375,7 +384,15 @@ export default function ToolPage() {
   }
   
   if (tool === undefined) {
-      return <div>Loading tool...</div>;
+      return (
+         <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 bg-background">
+            <Logo className="h-16 w-16 animate-pulse" />
+            <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <p className="text-lg">Loading Tool...</p>
+            </div>
+        </div>
+      );
   }
 
 
