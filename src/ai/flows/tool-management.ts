@@ -202,8 +202,8 @@ export async function getTools(): Promise<Tool[]> {
   const uniqueTools = new Map<string, Tool>();
   toolsFromDb.forEach(tool => {
     // Use the document ID (which is the slug) as the unique key
-    if (!uniqueTools.has(tool.id)) {
-      uniqueTools.set(tool.id, tool);
+    if (!uniqueTools.has(tool.name)) {
+      uniqueTools.set(tool.name, tool);
     }
   });
 
