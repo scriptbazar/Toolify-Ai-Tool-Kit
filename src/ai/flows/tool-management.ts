@@ -159,11 +159,10 @@ const generateSlug = (name: string) => {
     return name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 };
 
-
 /**
  * Fetches all tools from Firestore.
  * If the collection is empty, it populates it with initial tools.
- * It also cleans up duplicate tools by normalizing their names.
+ * It also performs a one-time cleanup of duplicate tools.
  */
 export async function getTools(): Promise<Tool[]> {
   const adminDb = getAdminDb();
@@ -175,59 +174,59 @@ export async function getTools(): Promise<Tool[]> {
   const toolsRef = adminDb.collection(TOOLS_COLLECTION);
   let snapshot = await toolsRef.get();
   
-  // Force-refresh if the count is incorrect.
-  if (snapshot.size < initialTools.length) {
-    console.log(`Database has ${snapshot.size} tools, but initial list has ${initialTools.length}. Force refreshing...`);
-    const batch = adminDb.batch();
-    const uniqueSlugs = new Set<string>();
-
-    initialTools.forEach(toolData => {
-        const slug = generateSlug(toolData.name);
-        if (!uniqueSlugs.has(slug)) {
-            const docRef = toolsRef.doc(slug);
-            batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
-            uniqueSlugs.add(slug);
-        } else {
-             // Handle cases where generateSlug might create duplicates from different names
-            const uniqueSlug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
-            const docRef = toolsRef.doc(uniqueSlug);
-            batch.set(docRef, { ...toolData, slug: uniqueSlug, createdAt: FieldValue.serverTimestamp() });
-            uniqueSlugs.add(uniqueSlug);
-        }
-    });
-
-    // Delete old tools that are no longer in the initialTools list
-    snapshot.docs.forEach(doc => {
-      const docSlug = doc.id;
-      if (!uniqueSlugs.has(docSlug)) {
-        // A more robust check might be needed if slugs can change
-        const inInitialList = initialTools.some(t => generateSlug(t.name) === docSlug);
-        if (!inInitialList) {
-          batch.delete(doc.ref);
-          console.log(`Deleting old tool: ${docSlug}`);
-        }
-      }
-    });
-    
-    await batch.commit();
-    snapshot = await toolsRef.get(); // Re-fetch after populating
-  }
-  
-  const toolsFromDb: Tool[] = snapshot.docs.map(doc => {
+  let toolsFromDb: Tool[] = snapshot.docs.map(doc => {
       const data = doc.data();
       const createdAt = (data.createdAt as Timestamp)?.toDate ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString();
       return ToolSchema.parse({ id: doc.id, ...data, createdAt });
   });
-  
-  const uniqueTools = new Map<string, Tool>();
+
+  // One-time cleanup and population logic
+  if (snapshot.empty || toolsFromDb.length < initialTools.length) {
+    console.log(`Database has ${toolsFromDb.length} tools, but initial list has ${initialTools.length}. Synchronizing...`);
+    const batch = adminDb.batch();
+    
+    // Use a map to ensure slugs are unique before writing
+    const uniqueToolsByName = new Map<string, Omit<Tool, 'id' | 'slug' | 'createdAt'>>();
+    initialTools.forEach(toolData => {
+        uniqueToolsByName.set(toolData.name, toolData);
+    });
+
+    const toolsToWrite = Array.from(uniqueToolsByName.values());
+    const slugsToWrite = new Set<string>();
+
+    toolsToWrite.forEach(toolData => {
+        const slug = generateSlug(toolData.name);
+        if (!slugsToWrite.has(slug)) {
+            const docRef = toolsRef.doc(slug);
+            batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
+            slugsToWrite.add(slug);
+        } else {
+            // Handle rare slug collisions from different names
+            const uniqueSlug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+            const docRef = toolsRef.doc(uniqueSlug);
+            batch.set(docRef, { ...toolData, slug: uniqueSlug, createdAt: FieldValue.serverTimestamp() });
+            slugsToWrite.add(uniqueSlug);
+        }
+    });
+    
+    await batch.commit();
+    snapshot = await toolsRef.get(); // Re-fetch after populating
+    toolsFromDb = snapshot.docs.map(doc => {
+        const data = doc.data();
+        const createdAt = (data.createdAt as Timestamp)?.toDate ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString();
+        return ToolSchema.parse({ id: doc.id, ...data, createdAt });
+    });
+  }
+
+  // Final deduplication based on unique name
+  const finalUniqueTools = new Map<string, Tool>();
   toolsFromDb.forEach(tool => {
-    // Use tool name as the key to prevent duplicates from different slugs pointing to the same tool name.
-    if (!uniqueTools.has(tool.name)) {
-      uniqueTools.set(tool.name, tool);
+    if (!finalUniqueTools.has(tool.name)) {
+      finalUniqueTools.set(tool.name, tool);
     }
   });
 
-  const cleanedTools = Array.from(uniqueTools.values());
+  const cleanedTools = Array.from(finalUniqueTools.values());
 
   return cleanedTools.sort((a, b) => a.name.localeCompare(b.name));
 }
