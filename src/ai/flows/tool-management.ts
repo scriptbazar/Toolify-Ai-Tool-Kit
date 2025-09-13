@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -102,8 +101,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Google Drive Direct Link Generator', description: 'Convert Google Drive sharing links to permanent direct download links.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Dropbox Direct Link Generator', description: 'Convert Dropbox sharing links to permanent direct download links.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'OneDrive Direct Link Generator', description: 'Convert OneDrive sharing links to permanent direct download links.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
-    { name: 'NSDL PAN Card Photo & Signature Resizer', description: 'Resize photo and signature for NSDL PAN card applications.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
-    { name: 'UTI PAN Card Photo & Signature Resizer', description: 'Resize photo and signature for UTI PAN card applications.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'NSDL PAN Card Photo and Signature Resizer', description: 'Resize photo and signature for NSDL PAN card applications.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
+    { name: 'UTI PAN Card Photo and Signature Resizer', description: 'Resize photo and signature for UTI PAN card applications.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'PRN to PDF', description: 'Convert PRN files to PDF format.', icon: 'FileText', category: 'pdf', plan: 'Free', isNew: true, status: 'Coming Soon' },
     { name: 'Text Encryption & Decryption', description: 'Encrypt and decrypt text using various algorithms.', icon: 'Lock', category: 'dev', plan: 'Pro', isNew: true, status: 'Coming Soon' },
     { name: 'Password Strength Checker', description: 'Check the strength of your password.', icon: 'CheckCheck', category: 'dev', plan: 'Free', isNew: true, status: 'Coming Soon' },
@@ -359,3 +358,6 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
 
     
 
+
+
+    
