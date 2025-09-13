@@ -101,7 +101,7 @@ export default function AdminToolsPage() {
 
    useEffect(() => {
     fetchTools();
-  }, [toast]);
+  }, []);
   
   useEffect(() => {
     setSearchQuery(searchQueryParam);

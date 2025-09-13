@@ -125,7 +125,7 @@ export default function ToolsDashboardPage() {
                                 <LayoutGrid className="h-4 w-4" />
                                 <span>All Categories</span>
                            </div>
-                           <span className="text-xs text-muted-foreground ml-2 font-bold">{categoryCounts['all']}</span>
+                           <span className="text-xs text-muted-foreground font-bold ml-2">{categoryCounts['all']}</span>
                         </div>
                     </SelectItem>
                     {toolCategories.map(cat => (
@@ -133,9 +133,9 @@ export default function ToolsDashboardPage() {
                             <div className="flex items-center justify-between w-full">
                                 <div className="flex items-center gap-2">
                                     <cat.Icon className="h-4 w-4" />
-                                    {cat.name}
+                                    <span>{cat.name}</span>
                                 </div>
-                                <span className="text-xs text-muted-foreground font-bold">{categoryCounts[cat.id] || 0}</span>
+                                <span className="text-xs text-muted-foreground font-bold ml-2">{categoryCounts[cat.id] || 0}</span>
                             </div>
                         </SelectItem>
                     ))}
