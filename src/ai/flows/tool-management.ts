@@ -180,39 +180,39 @@ export async function getTools(): Promise<Tool[]> {
       return ToolSchema.parse({ id: doc.id, ...data, createdAt });
   });
 
-  // Synchronization logic to ensure DB matches the initialTools list exactly.
   const initialToolNames = new Set(initialTools.map(t => t.name));
   const dbToolNames = new Set(toolsFromDb.map(t => t.name));
   
   let needsSync = false;
 
-  // Check for tools to delete from DB
+  // Check for tools to delete from DB (not in the initial list)
   const toolsToDelete = toolsFromDb.filter(t => !initialToolNames.has(t.name));
   if (toolsToDelete.length > 0) {
       needsSync = true;
-      console.log(`Found ${toolsToDelete.length} obsolete tools in DB to delete.`);
+      console.log(`[SYNC] Found ${toolsToDelete.length} obsolete tools in DB to delete.`);
   }
 
-  // Check for tools to add to DB
+  // Check for tools to add to DB (in initial list but not in DB)
   const toolsToAdd = initialTools.filter(t => !dbToolNames.has(t.name));
   if (toolsToAdd.length > 0) {
       needsSync = true;
-      console.log(`Found ${toolsToAdd.length} new tools to add to DB.`);
+      console.log(`[SYNC] Found ${toolsToAdd.length} new tools to add to DB.`);
   }
   
-  // Also sync if the counts don't match, which catches complex duplicate issues.
-  if (toolsFromDb.length !== initialTools.length && !needsSync) {
+  // Also sync if the counts don't match exactly.
+  if (toolsFromDb.length !== initialTools.length) {
       needsSync = true;
-      console.log(`DB count (${toolsFromDb.length}) and initial list count (${initialTools.length}) mismatch. Forcing sync.`);
+      console.log(`[SYNC] DB count (${toolsFromDb.length}) and initial list count (${initialTools.length}) mismatch. Forcing sync.`);
   }
 
 
   if (snapshot.empty || needsSync) {
-    console.log("Synchronizing database with initial tools list...");
+    console.log("[SYNC] Synchronizing database with initial tools list...");
     const batch = adminDb.batch();
 
     // Delete obsolete tools
     toolsToDelete.forEach(tool => {
+        console.log(`[SYNC] Deleting: ${tool.name} (ID: ${tool.id})`);
         batch.delete(toolsRef.doc(tool.id));
     });
 
@@ -226,10 +226,12 @@ export async function getTools(): Promise<Tool[]> {
         }
         existingSlugs.add(slug);
         const docRef = toolsRef.doc(slug);
+        console.log(`[SYNC] Adding: ${toolData.name} (Slug: ${slug})`);
         batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
     });
     
     await batch.commit();
+    console.log("[SYNC] Synchronization complete.");
     
     // Re-fetch after synchronization to return the correct list
     const newSnapshot = await toolsRef.get();
