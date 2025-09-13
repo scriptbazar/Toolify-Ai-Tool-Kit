@@ -156,7 +156,8 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 import { type Review } from '@/ai/flows/review-management.types';
 import { type Post } from '@/ai/flows/blog-management.types';
 import { type AppSettings } from '@/ai/flows/settings-management.types';
-import { BinaryConverter } from '@/components/tools/BinaryConverter';
+import { BinaryToText } from '@/components/tools/BinaryToText';
+import { TextToBinary } from '@/components/tools/TextToBinary';
 
 
 const toolComponents: { [key: string]: React.ComponentType } = {
@@ -266,8 +267,8 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'credit-card-interest-calculator': CreditCardInterestCalculator,
   'uuid-generator': UuidGenerator,
   'image-metadata-viewer': ImageMetadataViewer,
-  'binary-to-text': BinaryConverter,
-  'text-to-binary': BinaryConverter,
+  'binary-to-text': BinaryToText,
+  'text-to-binary': TextToBinary,
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
