@@ -1,5 +1,4 @@
 
-
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Tool } from '@/ai/flows/tool-management.types';
