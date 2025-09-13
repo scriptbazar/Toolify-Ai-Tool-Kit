@@ -39,7 +39,7 @@ interface User {
 }
 
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 export default function AdminUsersPage() {
   const [allUsers, setAllUsers] = useState<User[]>([]);

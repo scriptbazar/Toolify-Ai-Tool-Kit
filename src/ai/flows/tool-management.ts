@@ -130,54 +130,48 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
  * @returns {Promise<Tool[]>} A list of all tools.
  */
 export async function getTools(): Promise<Tool[]> {
-  try {
-    const adminDb = getAdminDb();
-    const toolsRef = adminDb.collection(TOOLS_COLLECTION);
-    let snapshot = await toolsRef.get();
-
-    // If the collection is empty, populate it. This is a one-time operation.
-    if (snapshot.empty) {
-      console.log('Tools collection is empty, populating with initial tools...');
-      const batch = adminDb.batch();
-      for (const toolData of initialTools) {
-          const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-          const docRef = toolsRef.doc(slug);
-          batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
-      }
-      await batch.commit();
-      snapshot = await toolsRef.get(); // Re-fetch after populating
-      console.log('Tools collection populated successfully.');
-    }
-    
-    const fetchedTools: Tool[] = snapshot.docs.map(doc => {
-        const data = doc.data();
-        const createdAt = data.createdAt && typeof data.createdAt.toDate === 'function' 
-            ? (data.createdAt as Timestamp).toDate().toISOString() 
-            : new Date().toISOString();
-
-        const rawTool = { 
-            id: doc.id,
-            ...data,
-            createdAt: createdAt,
-        };
-            
-        const parsed = ToolSchema.safeParse(rawTool);
-
-        if (parsed.success) {
-            return parsed.data;
-        } else {
-            console.warn(`Invalid tool data for doc ${doc.id}:`, parsed.error.format());
-            return null;
-        }
-    }).filter((tool): tool is Tool => tool !== null)
-      .sort((a, b) => a.name.localeCompare(b.name));
-    
-    return fetchedTools;
-
-  } catch (error) {
-    console.error("Error in getTools:", error);
+  const adminDb = getAdminDb();
+  if (!adminDb) {
+    console.error("Firebase Admin is not initialized. Cannot fetch tools.");
     return [];
   }
+
+  const toolsRef = adminDb.collection(TOOLS_COLLECTION);
+  const snapshot = await toolsRef.get();
+
+  if (snapshot.empty) {
+    console.log('Tools collection is empty, populating with initial tools...');
+    const batch = adminDb.batch();
+    const uniqueNames = new Set<string>();
+    initialTools.forEach(toolData => {
+        if (!uniqueNames.has(toolData.name)) {
+            const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+            const docRef = toolsRef.doc(slug);
+            batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
+            uniqueNames.add(toolData.name);
+        }
+    });
+    await batch.commit();
+    
+    // Re-fetch after populating to return the new data
+    const newSnapshot = await toolsRef.orderBy('name').get();
+    return newSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: (doc.data().createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+    } as Tool));
+  }
+
+  const tools = snapshot.docs.map(doc => {
+    const data = doc.data();
+    return ToolSchema.parse({
+      id: doc.id,
+      ...data,
+      createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+    });
+  }).sort((a, b) => a.name.localeCompare(b.name));
+  
+  return tools;
 }
 
 /**
@@ -364,3 +358,4 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
     
 
     
+

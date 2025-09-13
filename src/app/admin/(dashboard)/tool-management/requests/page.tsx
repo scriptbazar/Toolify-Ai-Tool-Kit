@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -208,7 +209,7 @@ export default function ToolRequestsPage() {
                 onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
               >
-                Next <ArrowRight className="ml-2 h-4 w-4" />
+                Next <ArrowRight className="mr-2 h-4 w-4" />
               </Button>
             </div>
           )}
