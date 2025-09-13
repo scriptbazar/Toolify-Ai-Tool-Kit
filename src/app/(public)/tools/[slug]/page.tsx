@@ -503,11 +503,3 @@ export default function ToolPage() {
     </div>
   );
 }
-
-    
-
-    
-
-    
-
-    

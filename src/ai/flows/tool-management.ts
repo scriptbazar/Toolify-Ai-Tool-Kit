@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -155,6 +154,10 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Pinterest Video Downloader', description: 'Download videos from Pinterest.', icon: 'BookImage', category: 'video', plan: 'Pro', isNew: true, status: 'Active' },
 ];
 
+const generateSlug = (name: string) => {
+    return name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+};
+
 
 /**
  * Fetches all tools from Firestore.
@@ -175,10 +178,16 @@ export async function getTools(): Promise<Tool[]> {
   if (snapshot.empty) {
     console.log('Tools collection is empty. Populating with initial tools...');
     const batch = adminDb.batch();
+    const uniqueSlugs = new Set<string>();
     initialTools.forEach(toolData => {
-      const slug = toolData.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-      const docRef = toolsRef.doc(slug);
-      batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
+        const slug = generateSlug(toolData.name);
+        if (!uniqueSlugs.has(slug)) {
+            const docRef = toolsRef.doc(slug);
+            batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
+            uniqueSlugs.add(slug);
+        } else {
+            console.warn(`Duplicate slug '${slug}' detected for tool '${toolData.name}'. Skipping.`);
+        }
     });
     await batch.commit();
     snapshot = await toolsRef.get(); // Re-fetch after populating
@@ -190,12 +199,11 @@ export async function getTools(): Promise<Tool[]> {
       return ToolSchema.parse({ id: doc.id, ...data, createdAt });
   });
   
-  // This is the new, more robust de-duplication logic.
-  // It ensures that even if the database has duplicates, only one version of each tool (based on its unique slug) is returned.
   const uniqueTools = new Map<string, Tool>();
   toolsFromDb.forEach(tool => {
-    if (!uniqueTools.has(tool.slug)) {
-      uniqueTools.set(tool.slug, tool);
+    // Use the document ID (which is the slug) as the unique key
+    if (!uniqueTools.has(tool.id)) {
+      uniqueTools.set(tool.id, tool);
     }
   });
 
@@ -216,7 +224,7 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
     const { id, ...data } = toolData;
     
     if (data.name) {
-      data.slug = data.name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+      data.slug = generateSlug(data.name);
     }
     
     // Validate data before saving
