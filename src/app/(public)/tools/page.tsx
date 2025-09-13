@@ -115,21 +115,27 @@ export default function ToolsDashboardPage() {
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2">
             <Select value={activeCategory} onValueChange={handleCategoryClick}>
-                <SelectTrigger className="w-[150px] h-10 rounded-full">
+                <SelectTrigger className="w-[180px] h-10 rounded-full">
                     <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="all">
-                        <div className="flex items-center gap-2">
-                            <LayoutGrid className="h-4 w-4" />
-                            All Categories
+                        <div className="flex items-center justify-between w-full">
+                           <div className="flex items-center gap-2">
+                                <LayoutGrid className="h-4 w-4" />
+                                All Categories
+                           </div>
+                           <span className="text-xs text-muted-foreground">{categoryCounts['all']}</span>
                         </div>
                     </SelectItem>
                     {toolCategories.map(cat => (
                         <SelectItem key={cat.id} value={cat.id}>
-                            <div className="flex items-center gap-2">
-                            <cat.Icon className="h-4 w-4" />
-                            {cat.name}
+                            <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                    <cat.Icon className="h-4 w-4" />
+                                    {cat.name}
+                                </div>
+                                <span className="text-xs text-muted-foreground">{categoryCounts[cat.id] || 0}</span>
                             </div>
                         </SelectItem>
                     ))}
