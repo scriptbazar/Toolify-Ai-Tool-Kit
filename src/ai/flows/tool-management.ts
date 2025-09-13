@@ -175,10 +175,12 @@ export async function getTools(): Promise<Tool[]> {
   const toolsRef = adminDb.collection(TOOLS_COLLECTION);
   let snapshot = await toolsRef.get();
   
-  if (snapshot.empty) {
-    console.log('Tools collection is empty. Populating with initial tools...');
+  // Force-refresh if the count is incorrect.
+  if (snapshot.size < initialTools.length) {
+    console.log(`Database has ${snapshot.size} tools, but initial list has ${initialTools.length}. Force refreshing...`);
     const batch = adminDb.batch();
     const uniqueSlugs = new Set<string>();
+
     initialTools.forEach(toolData => {
         const slug = generateSlug(toolData.name);
         if (!uniqueSlugs.has(slug)) {
@@ -186,9 +188,27 @@ export async function getTools(): Promise<Tool[]> {
             batch.set(docRef, { ...toolData, slug, createdAt: FieldValue.serverTimestamp() });
             uniqueSlugs.add(slug);
         } else {
-            console.warn(`Duplicate slug '${slug}' detected for tool '${toolData.name}'. Skipping.`);
+             // Handle cases where generateSlug might create duplicates from different names
+            const uniqueSlug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+            const docRef = toolsRef.doc(uniqueSlug);
+            batch.set(docRef, { ...toolData, slug: uniqueSlug, createdAt: FieldValue.serverTimestamp() });
+            uniqueSlugs.add(uniqueSlug);
         }
     });
+
+    // Delete old tools that are no longer in the initialTools list
+    snapshot.docs.forEach(doc => {
+      const docSlug = doc.id;
+      if (!uniqueSlugs.has(docSlug)) {
+        // A more robust check might be needed if slugs can change
+        const inInitialList = initialTools.some(t => generateSlug(t.name) === docSlug);
+        if (!inInitialList) {
+          batch.delete(doc.ref);
+          console.log(`Deleting old tool: ${docSlug}`);
+        }
+      }
+    });
+    
     await batch.commit();
     snapshot = await toolsRef.get(); // Re-fetch after populating
   }
@@ -201,7 +221,7 @@ export async function getTools(): Promise<Tool[]> {
   
   const uniqueTools = new Map<string, Tool>();
   toolsFromDb.forEach(tool => {
-    // Use the document ID (which is the slug) as the unique key
+    // Use tool name as the key to prevent duplicates from different slugs pointing to the same tool name.
     if (!uniqueTools.has(tool.name)) {
       uniqueTools.set(tool.name, tool);
     }
@@ -393,3 +413,6 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
 
   return { description: generatedDesc };
 }
+
+
+    
