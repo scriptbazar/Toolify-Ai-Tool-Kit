@@ -56,25 +56,24 @@ export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholder
   
   const isProUser = userData?.planId === 'pro' || userData?.planId === 'team';
   const isAdmin = userData?.role === 'admin';
-  const showAdsToPro = adSettings?.showAdsForPro ?? false;
   const adType = adSettings?.adType ?? 'none';
-  
+  const showAdsToPro = adSettings?.showAdsForPro ?? false;
+
   // Rule 1: Ads are globally disabled.
   if (adType === 'none') {
     return null;
   }
   
-  // Rule 2: Pro users don't see ads unless specifically enabled.
-  // Admins always see placeholders, so we bypass this check for them.
+  // Rule 2: Pro users do not see ads, unless specifically enabled. Admins are exempt from this rule for debugging.
   if (isProUser && !showAdsToPro && !isAdmin) {
-      return null;
+    return null;
   }
-  
+
   // Rule 3: Process manual ad slots.
   if (adType === 'manual' && adSlotId) {
     const slot = adSettings?.manualAdSlots?.find(s => s.id === adSlotId);
     
-    // Case 3a: The slot has ad code. Render it for everyone (respecting pro user rule).
+    // If the slot has ad code, render it for everyone (respecting the pro user rule handled above).
     if (slot?.code) {
       return (
         <div
@@ -84,7 +83,7 @@ export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholder
       );
     }
     
-    // Case 3b: The slot is empty, and the user is an admin. Show the placeholder.
+    // If the slot is empty, only show the placeholder for admins.
     if (isAdmin) {
        return (
           <div
@@ -101,17 +100,13 @@ export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholder
         );
     }
 
-    // For all other cases (slot not found, or user is not admin and slot is empty), show nothing.
+    // For all other cases (slot not found, or user is not admin and slot is empty), render nothing.
     return null;
   }
 
-  // Fallback for auto-ads, which are handled by a script in the header.
-  // This can show a general placeholder for admins if no specific slot ID is relevant.
-  if (adType === 'auto' && isAdmin) {
-    // Admins see a general notice for auto-ads, but no specific placeholders
-    // as the ad network controls placement. We don't render placeholders for auto-ads.
-    return null;
-  }
-
+  // Rule 4: Handle Auto Ads. These are managed by a script in the head,
+  // so no specific placeholder needs to be rendered for users.
+  // We can show a generic placeholder for admins if needed, but it's often not necessary.
+  // Returning null is the cleanest option for auto-ads.
   return null;
 }
