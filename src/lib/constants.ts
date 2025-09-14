@@ -10,10 +10,11 @@ import {
   Video,
   Calculator,
   ShoppingCart,
+  GanttChartSquare,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-export type ToolCategory = 'text' | 'pdf' | 'ai' | 'dev' | 'image' | 'seo' | 'video' | 'ecommerce' | 'calculator';
+export type ToolCategory = 'text' | 'pdf' | 'ai' | 'dev' | 'image' | 'seo' | 'video' | 'ecommerce' | 'calculator' | 'miscellaneous';
 
 export interface ToolCategoryDetails {
   id: ToolCategory;
@@ -76,5 +77,11 @@ export const toolCategories: ToolCategoryDetails[] = [
     name: 'Calculators & Converters',
     description: 'Perform calculations and unit conversions.',
     Icon: Calculator,
+  },
+  {
+    id: 'miscellaneous',
+    name: 'Miscellaneous Tools',
+    description: 'A collection of various other tools.',
+    Icon: GanttChartSquare,
   }
 ];

@@ -1,7 +1,8 @@
 
+
 import { z } from 'zod';
 
-export const ToolCategorySchema = z.enum(['text', 'pdf', 'ai', 'dev', 'image', 'seo', 'video', 'ecommerce', 'calculator']);
+export const ToolCategorySchema = z.enum(['text', 'pdf', 'ai', 'dev', 'image', 'seo', 'video', 'ecommerce', 'calculator', 'miscellaneous']);
 export type ToolCategory = z.infer<typeof ToolCategorySchema>;
 
 export const ToolSchema = z.object({
@@ -34,4 +35,5 @@ export const ToolRequestSchema = z.object({
 export type ToolRequest = z.infer<typeof ToolRequestSchema>;
 
     
+
 
