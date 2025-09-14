@@ -31,7 +31,7 @@ const defaultManualAdSlots: { group: string, slots: ManualAdSlot[] }[] = [
             { id: 'toolpage-sidebar', name: 'Sidebar Ad', code: '' },
             { id: 'toolpage-banner-top', name: 'Top Banner', code: '' },
             { id: 'toolpage-in-description', name: 'In-description Ad', code: '' },
-            { id: 'toolpage-banner-bottom', name: 'Bottom Banner', code: '' },
+            { id: 'toolpage-banner-bottom', name: 'Bottom Banner (After Content)', code: '' },
         ]
     },
      {
