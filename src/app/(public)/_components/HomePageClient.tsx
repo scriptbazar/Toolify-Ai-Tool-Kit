@@ -219,7 +219,7 @@ export function HomePageClient({ testimonials, steps, features, toolOfTheWeek, l
            <div className="text-center mt-12">
                 <Button asChild size="lg" variant="outline">
                     <Link href="/blog">
-                        Read More Articles <ArrowRight className="ml-2 h-5 w-5" />
+                        Read More Articles <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                 </Button>
             </div>
