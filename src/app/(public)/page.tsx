@@ -83,7 +83,7 @@ export default function Home() {
   const activeTools = tools.filter(tool => tool.status === 'Active');
   
   const categoryNames = toolCategories
-    .filter(c => c.name !== 'Developer Tools' && c.name !== 'Calculators & Converters' && c.name !== 'Ecommerce Tools')
+    .filter(c => c.name !== 'Developer Tools' && c.name !== 'Calculators & Converters' && c.name !== 'Ecommerce Tools' && c.id !== 'miscellaneous')
     .map(c => c.name.replace(' Tools', ''));
 
   const Testimonials = () => {
@@ -137,7 +137,7 @@ export default function Home() {
             </Button>
           </div>
            <div className="mt-12 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 max-w-6xl mx-auto">
-            {toolCategories.filter(c => c.id !== 'calculator').map(category => (
+            {toolCategories.filter(c => c.id !== 'calculator' && c.id !== 'miscellaneous').map(category => (
                 <CategoryCard key={category.id} category={category} />
             ))}
           </div>
