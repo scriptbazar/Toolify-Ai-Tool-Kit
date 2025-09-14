@@ -456,30 +456,43 @@ export default function ToolPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-4 text-muted-foreground">
-                <li className="flex items-start gap-3">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">1</div>
-                    <div className="flex-1">
-                        <strong className="text-foreground">Provide Input:</strong> 📥 Paste your text, upload your file, or enter the required data in the designated fields.
-                    </div>
-                </li>
-                <li className="flex items-start gap-3">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">2</div>
-                    <div className="flex-1">
-                       <strong className="text-foreground">Configure Settings:</strong> ⚙️ Adjust any available options, such as language, format, or quality, to tailor the output to your needs.
-                    </div>
-                </li>
-                <li className="flex items-start gap-3">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">3</div>
-                    <div className="flex-1">
-                        <strong className="text-foreground">Process Your Request:</strong> 🚀 Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.
-                    </div>
-                </li>
-                <li className="flex items-start gap-3">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">4</div>
-                    <div className="flex-1">
-                        <strong className="text-foreground">Get Your Results:</strong> ✨ Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.
-                    </div>
-                </li>
+                {(tool.howToUse && tool.howToUse.length > 0) ? (
+                    tool.howToUse.map((step, index) => (
+                         <li key={index} className="flex items-start gap-3">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">{index + 1}</div>
+                            <div className="flex-1">
+                                {step}
+                            </div>
+                        </li>
+                    ))
+                ) : (
+                    <>
+                        <li className="flex items-start gap-3">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">1</div>
+                            <div className="flex-1">
+                                <strong className="text-foreground">Provide Input:</strong> 📥 Paste your text, upload your file, or enter the required data in the designated fields.
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">2</div>
+                            <div className="flex-1">
+                               <strong className="text-foreground">Configure Settings:</strong> ⚙️ Adjust any available options, such as language, format, or quality, to tailor the output to your needs.
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">3</div>
+                            <div className="flex-1">
+                                <strong className="text-foreground">Process Your Request:</strong> 🚀 Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">4</div>
+                            <div className="flex-1">
+                                <strong className="text-foreground">Get Your Results:</strong> ✨ Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.
+                            </div>
+                        </li>
+                    </>
+                )}
               </ul>
             </CardContent>
           </Card>
@@ -490,38 +503,26 @@ export default function ToolPage() {
                 <Sparkles /> Features of {tool.name}
               </CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-start gap-3">
-                    <span className="text-xl">⚡</span>
-                    <div>
-                        <h3 className="font-semibold">Instant Results</h3>
-                        <p className="text-sm text-muted-foreground">Get what you need in seconds, without any unnecessary waiting or complex steps.</p>
-                    </div>
-                </div>
-                <div className="flex items-start gap-3">
-                    <span className="text-xl">👍</span>
-                    <div>
-                        <h3 className="font-semibold">Easy to Use</h3>
-                        <p className="text-sm text-muted-foreground">Our intuitive interface makes it easy for anyone to use, regardless of technical skill.</p>
-                    </div>
-                </div>
-                <div className="flex items-start gap-3">
-                    <span className="text-xl">🔒</span>
-                    <div>
-                        <h3 className="font-semibold">Secure & Private</h3>
-                        <p className="text-sm text-muted-foreground">Your data is processed securely and is never stored on our servers.</p>
-                    </div>
-                </div>
-                <div className="flex items-start gap-3">
-                    <span className="text-xl">✨</span>
-                    <div>
-                        <h3 className="font-semibold">High-Quality Output</h3>
-                        <p className="text-sm text-muted-foreground">Our tools provide accurate, reliable, and high-quality results every time.</p>
-                    </div>
-                </div>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <Card className="p-4 bg-background">
+                  <h3 className="font-semibold flex items-center gap-2">⚡ Instant Results</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Get what you need in seconds, without any unnecessary waiting or complex steps.</p>
+               </Card>
+               <Card className="p-4 bg-background">
+                  <h3 className="font-semibold flex items-center gap-2">👍 Easy to Use</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Our intuitive interface makes it easy for anyone to use, regardless of technical skill.</p>
+               </Card>
+               <Card className="p-4 bg-background">
+                  <h3 className="font-semibold flex items-center gap-2">🔒 Secure & Private</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Your data is processed securely and is never stored on our servers.</p>
+               </Card>
+               <Card className="p-4 bg-background">
+                  <h3 className="font-semibold flex items-center gap-2">✨ High-Quality Output</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Our tools provide accurate, reliable, and high-quality results every time.</p>
+               </Card>
             </CardContent>
           </Card>
-
+          
           <Card className="mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
