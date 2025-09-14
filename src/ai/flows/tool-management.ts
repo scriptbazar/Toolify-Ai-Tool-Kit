@@ -120,8 +120,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image Metadata Viewer', description: 'View detailed EXIF and other metadata from your images, such as camera settings, location, and date.', icon: 'Camera', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload an image file (JPG, PNG, etc.).', 'The tool will extract and display all available metadata.', 'View details like camera model, aperture, ISO, and GPS data if available.'] },
     { name: 'AI Image Quality Enhancer', description: 'Upscale and enhance the quality, resolution, and details of your images using powerful AI algorithms.', icon: 'Sparkles', category: 'ai', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload a low-resolution or blurry image.', 'Select the enhancement factor (e.g., 2x, 4x).', 'Click "Enhance Image".', 'The AI will upscale and sharpen your image, which you can then download.'] },
     { name: 'AI Web Content Summarizer', description: 'Summarize and explain the content of any public website or article by simply providing a URL.', icon: 'Globe', category: 'ai', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Paste the URL of the webpage or article you want to process.', 'Click the "Process URL" button.', 'The AI will provide both a concise summary and a detailed explanation of the content.'] },
-    { name: 'Binary to Text', description: 'Convert binary code (0s and 1s) back into plain, readable text characters.', icon: 'Binary', category: 'text', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste your binary code (e.g., "01001000 01101001") into the binary input field.', 'The corresponding text will automatically appear in the text field.'] },
-    { name: 'Text to Binary', description: 'Convert plain text characters into their binary code representation.', icon: 'Binary', category: 'text', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your text into the text input field.', 'The binary representation will automatically appear in the binary field.'] },
+    { name: 'Binary Converter', description: 'Convert binary code to text and vice-versa.', icon: 'Binary', category: 'text', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your text or binary code in the appropriate box.', 'The conversion will happen automatically.'] },
     { name: 'Flip Image', description: 'Flip an image horizontally or vertically to create a mirrored version of your original picture.', icon: 'FlipHorizontal', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image you want to flip.', 'Click "Flip Horizontal" or "Flip Vertical".', 'Download the modified image.'] },
     { name: 'ICO Converter', description: 'Convert your images (PNG, JPG) to the ICO format, perfect for creating website favicons.', icon: 'FileHeart', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your source image (preferably square).', 'Click the "Convert & Download .ICO" button.', 'Your new .ico file will be automatically downloaded.'] },
     { name: 'Word to PDF', description: 'Convert your Microsoft Word documents (.doc, .docx) into professional PDF files while preserving formatting.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload your Word document.', 'Click the "Convert to PDF" button.', 'Download your newly created PDF file.'] },
@@ -431,6 +430,7 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
     
 
     
+
 
 
 
