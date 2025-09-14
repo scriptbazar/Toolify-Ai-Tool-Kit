@@ -6,10 +6,23 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Home, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import placeholderImages from '@/lib/placeholder-images.json';
+import { getSettings } from '@/ai/flows/settings-management';
+import { useEffect, useState } from 'react';
+import { type PlaceholderImages } from '@/ai/flows/settings-management.types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function NotFoundPage() {
-  const imageData = placeholderImages.notFound;
+  const [images, setImages] = useState<PlaceholderImages | null>(null);
+
+  useEffect(() => {
+    getSettings().then(settings => {
+      if (settings.placeholderImages) {
+        setImages(settings.placeholderImages);
+      }
+    });
+  }, []);
+
+  const imageData = images?.notFound;
 
   return (
     <div className="container mx-auto flex min-h-[calc(100vh-10rem)] items-center justify-center px-4 py-12">
@@ -39,14 +52,18 @@ export default function NotFoundPage() {
             </CardContent>
           </div>
           <div className="relative hidden md:block">
-            <Image
-              src={imageData.src}
-              alt="Abstract image representing a lost page"
-              width={imageData.width}
-              height={imageData.height}
-              className="object-cover h-full w-full"
-              data-ai-hint={imageData.hint}
-            />
+            {imageData ? (
+                <Image
+                    src={imageData.src}
+                    alt="Abstract image representing a lost page"
+                    width={imageData.width}
+                    height={imageData.height}
+                    className="object-cover h-full w-full"
+                    data-ai-hint={imageData.hint}
+                />
+            ) : (
+                <Skeleton className="h-full w-full" />
+            )}
           </div>
         </div>
       </Card>

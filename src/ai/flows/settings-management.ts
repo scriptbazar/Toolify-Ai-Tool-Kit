@@ -15,6 +15,7 @@ import { AppSettingsSchema, type AppSettings } from './settings-management.types
 import { cache } from 'react';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 
 const SETTINGS_COLLECTION = 'settings';
@@ -304,7 +305,8 @@ const defaultSettings = AppSettingsSchema.parse({
         showPopularTools: true,
         showRecentPosts: true,
     }
-  }
+  },
+  placeholderImages: placeholderImages,
 });
 
 /**

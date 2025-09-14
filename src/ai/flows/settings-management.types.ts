@@ -278,6 +278,24 @@ export const SidebarSettingsSchema = z.object({
 });
 export type SidebarSettings = z.infer<typeof SidebarSettingsSchema>;
 
+const PlaceholderImageSchema = z.object({
+  src: z.string().url(),
+  width: z.number(),
+  height: z.number(),
+  hint: z.string(),
+});
+
+const AboutUsImagesSchema = z.object({
+  mission: PlaceholderImageSchema,
+  story: PlaceholderImageSchema,
+});
+
+export const PlaceholderImagesSchema = z.object({
+  notFound: PlaceholderImageSchema,
+  aboutUs: AboutUsImagesSchema,
+});
+export type PlaceholderImages = z.infer<typeof PlaceholderImagesSchema>;
+
 
 export const AppSettingsSchema = z.object({
   advertisement: AdvertisementSettingsSchema.optional(),
@@ -290,6 +308,7 @@ export const AppSettingsSchema = z.object({
   homepage: HomepageSettingsSchema.optional(),
   faqs: FaqSettingsSchema.optional(),
   sidebar: SidebarSettingsSchema.optional(),
+  placeholderImages: PlaceholderImagesSchema.optional(),
 });
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
 

@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { TeamMemberCard } from '@/components/common/TeamMemberCard';
-import placeholderImages from '@/lib/placeholder-images.json';
+import { getSettings } from '@/ai/flows/settings-management';
 
 const coreValues = [
     {
@@ -39,9 +39,10 @@ const teamMembers = [
     { name: 'Anjali Sharma', role: 'UI/UX Designer', avatar: 'https://i.pravatar.cc/150?u=anjali' },
 ];
 
-export default function AboutUsPage() {
-  const missionImage = placeholderImages.aboutUs.mission;
-  const storyImage = placeholderImages.aboutUs.story;
+export default async function AboutUsPage() {
+  const settings = await getSettings();
+  const missionImage = settings.placeholderImages?.aboutUs.mission;
+  const storyImage = settings.placeholderImages?.aboutUs.story;
 
   return (
     <div className="bg-background">
@@ -64,14 +65,16 @@ export default function AboutUsPage() {
         <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
                 <div className="relative aspect-video w-full rounded-lg overflow-hidden shadow-lg">
-                    <Image 
-                        src={missionImage.src}
-                        alt="Our Mission"
-                        width={missionImage.width}
-                        height={missionImage.height}
-                        className="object-cover w-full h-full"
-                        data-ai-hint={missionImage.hint}
-                    />
+                    {missionImage && (
+                        <Image 
+                            src={missionImage.src}
+                            alt="Our Mission"
+                            width={missionImage.width}
+                            height={missionImage.height}
+                            className="object-cover w-full h-full"
+                            data-ai-hint={missionImage.hint}
+                        />
+                    )}
                 </div>
                 <div className="text-center md:text-left">
                     <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
@@ -116,14 +119,16 @@ export default function AboutUsPage() {
                     </div>
                 </div>
                 <div className="relative aspect-video w-full rounded-lg overflow-hidden shadow-lg">
-                    <Image 
-                        src={storyImage.src}
-                        alt="Our Story"
-                        width={storyImage.width}
-                        height={storyImage.height}
-                        className="object-cover w-full h-full"
-                        data-ai-hint={storyImage.hint}
-                    />
+                    {storyImage && (
+                        <Image 
+                            src={storyImage.src}
+                            alt="Our Story"
+                            width={storyImage.width}
+                            height={storyImage.height}
+                            className="object-cover w-full h-full"
+                            data-ai-hint={storyImage.hint}
+                        />
+                    )}
                 </div>
             </div>
         </div>
