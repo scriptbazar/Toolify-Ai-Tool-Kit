@@ -1,0 +1,23 @@
+
+{
+  "notFound": {
+    "src": "https://picsum.photos/seed/404-not-found/600/800",
+    "width": 600,
+    "height": 800,
+    "hint": "abstract texture"
+  },
+  "aboutUs": {
+    "mission": {
+      "src": "https://picsum.photos/seed/mission/600/400",
+      "width": 600,
+      "height": 400,
+      "hint": "team mission"
+    },
+    "story": {
+      "src": "https://picsum.photos/seed/story/600/400",
+      "width": 600,
+      "height": 400,
+      "hint": "passionate developers"
+    }
+  }
+}

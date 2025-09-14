@@ -1,43 +1,25 @@
 
-'use client';
-
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getPosts } from '@/ai/flows/blog-management';
 import { type Post } from '@/ai/flows/blog-management.types';
-import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
 
 const POSTS_PER_PAGE = 6;
 
-export default function BlogPage() {
-    const [allPosts, setAllPosts] = useState<Post[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
-    const { toast } = useToast();
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
+    const allPosts = await getPosts();
+    const publishedPosts = allPosts.filter(p => p.status === 'Published');
+    
+    const currentPage = Number(searchParams?.page || 1);
+    const totalPages = Math.ceil(publishedPosts.length / POSTS_PER_PAGE);
 
-    useEffect(() => {
-        async function fetchPosts() {
-            setLoading(true);
-            try {
-                const posts = await getPosts();
-                const publishedPosts = posts.filter(p => p.status === 'Published');
-                setAllPosts(publishedPosts);
-            } catch (error) {
-                console.error("Failed to fetch posts:", error);
-                toast({ title: 'Error', description: 'Could not load blog posts.', variant: 'destructive' });
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchPosts();
-    }, [toast]);
-
-    const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
-
-    const paginatedPosts = allPosts.slice(
+    const paginatedPosts = publishedPosts.slice(
         (currentPage - 1) * POSTS_PER_PAGE,
         currentPage * POSTS_PER_PAGE
     );
@@ -53,11 +35,7 @@ export default function BlogPage() {
               </p>
             </div>
 
-            {loading ? (
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-96 w-full" />)}
-                 </div>
-            ) : paginatedPosts.length > 0 ? (
+            {paginatedPosts.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {paginatedPosts.map((post) => (
                         <BlogPostCard
@@ -77,27 +55,30 @@ export default function BlogPage() {
                 </div>
             )}
 
-
             {totalPages > 1 && (
                 <div className="flex items-center justify-center space-x-4 mt-12">
                     <Button
                         variant="outline"
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        asChild
                         disabled={currentPage === 1}
                     >
+                      <Link href={`/blog?page=${currentPage - 1}`} scroll={false}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Previous
+                      </Link>
                     </Button>
                     <span className="text-sm text-muted-foreground">
                         Page {currentPage} of {totalPages}
                     </span>
                     <Button
                         variant="outline"
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        asChild
                         disabled={currentPage === totalPages}
                     >
+                      <Link href={`/blog?page=${currentPage + 1}`} scroll={false}>
                         Next
                         <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
                     </Button>
                 </div>
             )}

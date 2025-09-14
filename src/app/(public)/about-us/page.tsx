@@ -1,5 +1,4 @@
 
-
 import { Card, CardContent } from '@/components/ui/card';
 import { Target, BookOpen, Lightbulb, MousePointerClick, ShieldCheck, LifeBuoy, Users, Gem } from 'lucide-react';
 import Image from 'next/image';
@@ -7,6 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { TeamMemberCard } from '@/components/common/TeamMemberCard';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 const coreValues = [
     {
@@ -40,6 +40,9 @@ const teamMembers = [
 ];
 
 export default function AboutUsPage() {
+  const missionImage = placeholderImages.aboutUs.mission;
+  const storyImage = placeholderImages.aboutUs.story;
+
   return (
     <div className="bg-background">
       
@@ -62,11 +65,12 @@ export default function AboutUsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
                 <div className="relative aspect-video w-full rounded-lg overflow-hidden shadow-lg">
                     <Image 
-                        src="https://picsum.photos/600/400" 
+                        src={missionImage.src}
                         alt="Our Mission"
-                        fill
-                        className="object-cover"
-                        data-ai-hint="team mission"
+                        width={missionImage.width}
+                        height={missionImage.height}
+                        className="object-cover w-full h-full"
+                        data-ai-hint={missionImage.hint}
                     />
                 </div>
                 <div className="text-center md:text-left">
@@ -113,11 +117,12 @@ export default function AboutUsPage() {
                 </div>
                 <div className="relative aspect-video w-full rounded-lg overflow-hidden shadow-lg">
                     <Image 
-                        src="https://picsum.photos/600/400" 
+                        src={storyImage.src}
                         alt="Our Story"
-                        fill
-                        className="object-cover"
-                        data-ai-hint="passionate developers"
+                        width={storyImage.width}
+                        height={storyImage.height}
+                        className="object-cover w-full h-full"
+                        data-ai-hint={storyImage.hint}
                     />
                 </div>
             </div>

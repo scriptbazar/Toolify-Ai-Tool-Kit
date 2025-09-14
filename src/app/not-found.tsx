@@ -6,8 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Home, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 export default function NotFoundPage() {
+  const imageData = placeholderImages.notFound;
+
   return (
     <div className="container mx-auto flex min-h-[calc(100vh-10rem)] items-center justify-center px-4 py-12">
       <Card className="w-full max-w-2xl overflow-hidden shadow-2xl">
@@ -37,11 +40,12 @@ export default function NotFoundPage() {
           </div>
           <div className="relative hidden md:block">
             <Image
-              src="https://picsum.photos/600/800"
+              src={imageData.src}
               alt="Abstract image representing a lost page"
-              fill
-              className="object-cover"
-              data-ai-hint="abstract texture"
+              width={imageData.width}
+              height={imageData.height}
+              className="object-cover h-full w-full"
+              data-ai-hint={imageData.hint}
             />
           </div>
         </div>
