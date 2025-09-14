@@ -34,8 +34,10 @@ const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }) => 
 
   const allLinks = [
     ...mainNavLinks,
-    ...(isLoggedIn ? [{ href: '/my-favorites', label: 'My Favorites', icon: Star }] : []),
-    { href: communityChatHref, label: 'Community Chat', icon: MessageSquare }
+    ...(isLoggedIn ? [
+      { href: '/my-favorites', label: 'My Favorites', icon: Star },
+      { href: communityChatHref, label: 'Community Chat', icon: MessageSquare }
+    ] : []),
   ];
 
   return (
