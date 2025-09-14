@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -20,6 +21,7 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 import { type Post } from '@/ai/flows/blog-management.types';
 import { type Review } from '@/ai/flows/review-management.types';
 import { type HomepageSettings } from '@/ai/flows/settings-management.types';
+import { ToolOfTheWeek } from '@/components/tools/ToolOfTheWeek';
 
 
 const TestimonialCard = ({ name, role, avatar, comment, rating }: { name: string, role: string, avatar: string, comment: string, rating: number }) => (
@@ -118,6 +120,8 @@ export default function Home() {
       </div>
     );
   };
+  
+  const toolOfTheWeek = tools.find(tool => tool.isToolOfTheWeek) || null;
 
 
   return (
@@ -145,6 +149,14 @@ export default function Home() {
         </div>
       </section>
       
+      {toolOfTheWeek && (
+        <section className="py-16 md:py-24 bg-background">
+            <div className="container mx-auto px-4">
+                <ToolOfTheWeek tool={toolOfTheWeek} />
+            </div>
+        </section>
+      )}
+
       <section className="py-16 md:py-24 bg-card">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">

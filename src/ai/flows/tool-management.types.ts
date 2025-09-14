@@ -14,6 +14,7 @@ export const ToolSchema = z.object({
   category: ToolCategorySchema,
   plan: z.enum(['Free', 'Pro']).default('Free'),
   isNew: z.boolean().default(false),
+  isToolOfTheWeek: z.boolean().default(false),
   status: z.enum(['Active', 'Disabled', 'Maintenance', 'Coming Soon', 'New Version']).default('Active'),
   howToUse: z.array(z.string()).optional(),
   createdAt: z.string().datetime({ offset: true }),
@@ -35,5 +36,6 @@ export const ToolRequestSchema = z.object({
 export type ToolRequest = z.infer<typeof ToolRequestSchema>;
 
     
+
 
 
