@@ -1,5 +1,7 @@
 
-{
+import { type PlaceholderImages } from '@/ai/flows/settings-management.types';
+
+export const placeholderImages: PlaceholderImages = {
     "notFound": {
         "src": "https://picsum.photos/seed/404/800/600",
         "width": 800,

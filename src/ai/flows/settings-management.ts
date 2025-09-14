@@ -15,7 +15,7 @@ import { AppSettingsSchema, type AppSettings } from './settings-management.types
 import { cache } from 'react';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import placeholderImages from '@/lib/placeholder-images.json';
+import { placeholderImages } from '@/lib/placeholder-images';
 
 
 const SETTINGS_COLLECTION = 'settings';
