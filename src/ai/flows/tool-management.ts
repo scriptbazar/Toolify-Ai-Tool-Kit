@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -220,7 +221,7 @@ export async function getTools(): Promise<Tool[]> {
       // Add all unique tools from the initial list
       for (const tool of toolMap.values()) {
           const docRef = toolsRef.doc(tool.slug);
-          batch.set({ ...tool, createdAt: FieldValue.serverTimestamp() }, { merge: true });
+          batch.set(docRef, { ...tool, createdAt: FieldValue.serverTimestamp() }, { merge: true });
       }
       
       await batch.commit();
@@ -423,8 +424,34 @@ export async function generateToolDescription(input: z.infer<typeof GenerateTool
   return { description: generatedDesc };
 }
 
+// src/ai/flows/user-management.ts (for toggleFavoriteTool)
+export async function toggleFavoriteTool(userId: string, toolSlug: string): Promise<{ success: boolean, message: string }> {
+  const adminDb = getAdminDb();
+  if (!userId || !toolSlug) {
+    return { success: false, message: "User ID and tool slug are required." };
+  }
+  try {
+    const userRef = adminDb.collection('users').doc(userId);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) {
+      return { success: false, message: "User not found." };
+    }
+    const userData = userDoc.data();
+    const currentFavorites: string[] = userData?.favorites || [];
 
-
-
+    if (currentFavorites.includes(toolSlug)) {
+      await userRef.update({ favorites: FieldValue.arrayRemove(toolSlug) });
+      return { success: true, message: "Removed from favorites." };
+    } else {
+      await userRef.update({ favorites: FieldValue.arrayUnion(toolSlug) });
+      return { success: true, message: "Added to favorites." };
+    }
+  } catch (error: any) {
+    console.error("Error toggling favorite tool:", error);
+    return { success: false, message: "Could not update favorites." };
+  }
+}
     
+    
+
     
