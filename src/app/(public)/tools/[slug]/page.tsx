@@ -65,7 +65,7 @@ import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { Separator } from '@/components/ui/separator';
 import { ReviewForm } from '@/components/tools/ReviewForm';
 import { getReviews } from '@/ai/flows/review-management';
-import { Star, Construction, Sparkles, ArrowLeft, Loader2, ListOrdered, CheckCircle2, ShieldCheck, Zap, Cpu, MousePointerClick, DownloadCloud, BrainCircuit } from 'lucide-react';
+import { Star, Construction, Sparkles, ArrowLeft, Loader2, ListOrdered, CheckCircle2, ShieldCheck, Zap, MousePointerClick, DownloadCloud, BrainCircuit } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { getPosts } from '@/ai/flows/blog-management';
 import Link from 'next/link';
@@ -160,6 +160,7 @@ import { IcoConverter } from '@/components/tools/IcoConverter';
 import { BinaryConverter } from '@/components/tools/BinaryConverter';
 import { Logo } from '@/components/common/Logo';
 import { AiSeoKeywordGenerator } from '@/components/tools/AiSeoKeywordGenerator';
+import { Cpu } from 'lucide-react';
 
 
 const toolComponents: { [key: string]: React.ComponentType } = {
@@ -455,40 +456,44 @@ export default function ToolPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-4 text-muted-foreground">
+              <ul className="space-y-4">
                 {(tool.howToUse && tool.howToUse.length > 0) ? (
                     tool.howToUse.map((step, index) => (
-                         <li key={index} className="flex items-start gap-3">
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">{index + 1}</div>
+                         <li key={index} className="flex items-start gap-4">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">{index + 1}</div>
                             <div className="flex-1">
-                                {step}
+                                <p className="text-muted-foreground">{step}</p>
                             </div>
                         </li>
                     ))
                 ) : (
                     <>
-                        <li className="flex items-start gap-3">
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">1</div>
-                            <div className="flex-1">
-                                <strong className="text-foreground">Provide Input:</strong> 📥 Paste your text, upload your file, or enter the required data in the designated fields.
+                        <li className="flex items-start gap-4">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">1</div>
+                            <div>
+                                <h3 className="font-semibold">📥 Provide Input</h3>
+                                <p className="text-muted-foreground">Paste your text, upload your file, or enter the required data in the designated fields.</p>
                             </div>
                         </li>
-                        <li className="flex items-start gap-3">
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">2</div>
-                            <div className="flex-1">
-                               <strong className="text-foreground">Configure Settings:</strong> ⚙️ Adjust any available options, such as language, format, or quality, to tailor the output to your needs.
+                         <li className="flex items-start gap-4">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">2</div>
+                            <div>
+                                <h3 className="font-semibold">⚙️ Configure Settings</h3>
+                                <p className="text-muted-foreground">Adjust any available options, such as language, format, or quality, to tailor the output to your needs.</p>
                             </div>
                         </li>
-                        <li className="flex items-start gap-3">
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">3</div>
-                            <div className="flex-1">
-                                <strong className="text-foreground">Process Your Request:</strong> 🚀 Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.
+                        <li className="flex items-start gap-4">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">3</div>
+                            <div>
+                                <h3 className="font-semibold">🚀 Process Your Request</h3>
+                                <p className="text-muted-foreground">Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.</p>
                             </div>
                         </li>
-                        <li className="flex items-start gap-3">
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">4</div>
-                            <div className="flex-1">
-                                <strong className="text-foreground">Get Your Results:</strong> ✨ Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.
+                        <li className="flex items-start gap-4">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">4</div>
+                            <div>
+                                <h3 className="font-semibold">✨ Get Your Results</h3>
+                                <p className="text-muted-foreground">Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.</p>
                             </div>
                         </li>
                     </>
@@ -529,49 +534,31 @@ export default function ToolPage() {
                 <CheckCircle2 /> Why Choose Our Tools?
               </CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div className="flex items-start gap-3">
-                 <ShieldCheck className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-                 <div>
-                   <h3 className="font-semibold">Secure & Reliable</h3>
-                   <p className="text-sm text-muted-foreground">Your data privacy is our priority. All tools run securely in your browser, and we never store your input data.</p>
-                 </div>
-               </div>
-               <div className="flex items-start gap-3">
-                 <Zap className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-                 <div>
-                   <h3 className="font-semibold">Blazing Fast</h3>
-                   <p className="text-sm text-muted-foreground">Get your results instantly without any unnecessary delays. Our tools are optimized for speed and performance.</p>
-                 </div>
-               </div>
-               <div className="flex items-start gap-3">
-                 <Cpu className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-                 <div>
-                   <h3 className="font-semibold">AI-Powered</h3>
-                   <p className="text-sm text-muted-foreground">Many of our tools leverage cutting-edge AI to provide smarter, more accurate, and creative results.</p>
-                 </div>
-               </div>
-               <div className="flex items-start gap-3">
-                 <MousePointerClick className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-                 <div>
-                   <h3 className="font-semibold">User-Friendly Interface</h3>
-                   <p className="text-sm text-muted-foreground">No complicated setups. Our tools are designed to be intuitive and easy for everyone.</p>
-                 </div>
-               </div>
-                <div className="flex items-start gap-3">
-                 <DownloadCloud className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-                 <div>
-                   <h3 className="font-semibold">No Installation Needed</h3>
-                   <p className="text-sm text-muted-foreground">All our tools run directly in your browser. There is nothing to download or install on your device.</p>
-                 </div>
-               </div>
-               <div className="flex items-start gap-3">
-                 <BrainCircuit className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-                 <div>
-                   <h3 className="font-semibold">Constantly Evolving</h3>
-                   <p className="text-sm text-muted-foreground">We are always adding new tools and improving existing ones based on user feedback and new technology.</p>
-                 </div>
-               </div>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <Card className="p-4 bg-background">
+                 <h3 className="font-semibold flex items-center gap-2"><ShieldCheck className="text-primary"/>Secure & Reliable</h3>
+                 <p className="text-sm text-muted-foreground mt-1">Your data privacy is our priority. All tools run securely, and we never store your input data.</p>
+               </Card>
+                <Card className="p-4 bg-background">
+                 <h3 className="font-semibold flex items-center gap-2"><Zap className="text-primary"/>Blazing Fast</h3>
+                 <p className="text-sm text-muted-foreground mt-1">Get your results instantly without any unnecessary delays. Our tools are optimized for speed.</p>
+               </Card>
+                <Card className="p-4 bg-background">
+                 <h3 className="font-semibold flex items-center gap-2"><Cpu className="text-primary"/>AI-Powered</h3>
+                 <p className="text-sm text-muted-foreground mt-1">Many of our tools leverage cutting-edge AI to provide smarter, more accurate, and creative results.</p>
+               </Card>
+                <Card className="p-4 bg-background">
+                 <h3 className="font-semibold flex items-center gap-2"><MousePointerClick className="text-primary"/>User-Friendly Interface</h3>
+                 <p className="text-sm text-muted-foreground mt-1">No complicated setups. Our tools are designed to be intuitive and easy for everyone.</p>
+               </Card>
+                <Card className="p-4 bg-background">
+                 <h3 className="font-semibold flex items-center gap-2"><DownloadCloud className="text-primary"/>No Installation Needed</h3>
+                 <p className="text-sm text-muted-foreground mt-1">All our tools run directly in your browser. There is nothing to download or install on your device.</p>
+               </Card>
+               <Card className="p-4 bg-background">
+                 <h3 className="font-semibold flex items-center gap-2"><BrainCircuit className="text-primary"/>Constantly Evolving</h3>
+                 <p className="text-sm text-muted-foreground mt-1">We are always adding new tools and improving existing ones based on user feedback and new technology.</p>
+               </Card>
             </CardContent>
           </Card>
           
