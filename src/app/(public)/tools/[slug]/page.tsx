@@ -72,7 +72,6 @@ import Link from 'next/link';
 import { PdfSplitter } from '@/components/tools/PdfSplitter';
 import { WordToPdf } from '@/components/tools/WordToPdf';
 import { RotatePdf } from '@/components/tools/RotatePdf';
-import { PptToPdf } from '@/components/tools/PptToPdf';
 import { PdfToWord } from '@/components/tools/PdfToWord';
 import { PdfToJpg } from '@/components/tools/PdfToJpg';
 import { MetaTagGenerator } from '@/components/tools/MetaTagGenerator';
@@ -274,7 +273,6 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'flip-image': FlipImage,
   'ico-converter': IcoConverter,
   'word-to-pdf': WordToPdf,
-  'ppt-to-pdf': PptToPdf,
   'pdf-to-word': PdfToWord,
   'pdf-to-jpg': PdfToJpg,
   'meta-tag-generator': MetaTagGenerator,
@@ -516,16 +514,10 @@ export default function ToolPage() {
                   <h3 className="font-semibold flex items-center gap-2">👍 Easy to Use</h3>
                   <p className="text-sm text-muted-foreground mt-1">Our intuitive interface makes it easy for anyone to use, regardless of technical skill.</p>
                </Card>
-               <Card className="p-4 bg-background">
-                  <h3 className="font-semibold flex items-center gap-2">🔒 Secure & Private</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Your data is processed securely and is never stored on our servers.</p>
-               </Card>
-               <Card className="p-4 bg-background">
-                  <h3 className="font-semibold flex items-center gap-2">✨ High-Quality Output</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Our tools provide accurate, reliable, and high-quality results every time.</p>
-               </Card>
             </CardContent>
           </Card>
+          
+          <AdPlaceholder adSlotId="toolpage-banner-bottom" adSettings={settings?.advertisement ?? null} className="my-6" />
 
           <Card className="mt-8">
             <CardHeader>
@@ -561,8 +553,6 @@ export default function ToolPage() {
             </CardContent>
           </Card>
           
-          <AdPlaceholder adSlotId="toolpage-banner-bottom" adSettings={settings?.advertisement ?? null} className="my-6" />
-
           <Card className="mt-8">
               <CardHeader>
                   <CardTitle>Reviews for {tool.name}</CardTitle>
