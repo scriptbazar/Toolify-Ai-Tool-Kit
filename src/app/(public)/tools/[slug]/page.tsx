@@ -447,7 +447,7 @@ export default function ToolPage() {
               <AdPlaceholder adSlotId="toolpage-in-description" adSettings={settings?.advertisement ?? null} className="my-6" />
             </CardContent>
           </Card>
-
+          
           <Card className="mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -455,20 +455,32 @@ export default function ToolPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ol className="list-decimal list-inside space-y-3 text-muted-foreground">
-                <li>
-                  <strong>✍️ Provide Input:</strong> Paste your text, upload your file, or enter the required data in the designated fields.
+              <ul className="space-y-4 text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <span className="font-bold text-primary">✍️</span>
+                  <div>
+                    <strong>Provide Input:</strong> Paste your text, upload your file, or enter the required data in the designated fields.
+                  </div>
                 </li>
-                <li>
-                  <strong>⚙️ Configure Settings:</strong> Adjust any available options, such as language, format, or quality, to tailor the output to your needs.
+                <li className="flex items-start gap-3">
+                  <span className="font-bold text-primary">⚙️</span>
+                   <div>
+                    <strong>Configure Settings:</strong> Adjust any available options, such as language, format, or quality, to tailor the output to your needs.
+                  </div>
                 </li>
-                <li>
-                  <strong>🚀 Process Your Request:</strong> Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.
+                <li className="flex items-start gap-3">
+                  <span className="font-bold text-primary">🚀</span>
+                  <div>
+                    <strong>Process Your Request:</strong> Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.
+                  </div>
                 </li>
-                <li>
-                  <strong>📋 Get Your Results:</strong> Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.
+                <li className="flex items-start gap-3">
+                  <span className="font-bold text-primary">📋</span>
+                  <div>
+                    <strong>Get Your Results:</strong> Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.
+                  </div>
                 </li>
-              </ol>
+              </ul>
             </CardContent>
           </Card>
           
@@ -592,4 +604,3 @@ export default function ToolPage() {
   );
 }
 
-    
