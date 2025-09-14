@@ -16,13 +16,16 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search, MessageSquare, Edit, Copy } from 'lucide-react';
+import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search, MessageSquare, Edit, Copy, UserCog, Trash2, Check, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { updateUserRole, deleteUser } from '@/ai/flows/user-management';
 
 
 interface User {
@@ -111,6 +114,26 @@ export default function AdminUsersPage() {
   const copyToClipboard = (text: string, fieldName: string) => {
     navigator.clipboard.writeText(text);
     toast({ description: `Copied ${fieldName}: ${text}` });
+  };
+
+  const handleRoleChange = async (userId: string, newRole: 'user' | 'admin') => {
+    const result = await updateUserRole({ userId, newRole });
+    if (result.success) {
+      toast({ title: 'Success', description: 'User role updated successfully.' });
+      fetchUsersAndLeads(); // Refresh data
+    } else {
+      toast({ title: 'Error', description: result.message, variant: 'destructive' });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    const result = await deleteUser(userId);
+    if (result.success) {
+      toast({ title: 'Success', description: 'User has been deleted.' });
+      fetchUsersAndLeads(); // Refresh data
+    } else {
+      toast({ title: 'Error', description: result.message, variant: 'destructive' });
+    }
   };
   
   const filteredUsers = useMemo(() => {
@@ -262,12 +285,53 @@ export default function AdminUsersPage() {
                         </TableCell>
                         <TableCell>{formatDate(user.createdAt)}</TableCell>
                          <TableCell className="text-right">
-                          <Button asChild variant="outline" size="sm">
-                            <Link href={`/admin/users/${user.id}`}>
-                                <Edit className="mr-2 h-4 w-4"/>
-                                Manage
-                            </Link>
-                          </Button>
+                          <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="icon" variant="ghost">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/admin/users/${user.id}`}><Edit className="mr-2 h-4 w-4" /> Edit User</Link>
+                                </DropdownMenuItem>
+                                {user.role !== 'lead' && (
+                                <DropdownMenuSub>
+                                  <DropdownMenuSubTrigger><UserCog className="mr-2 h-4 w-4"/> Set Role</DropdownMenuSubTrigger>
+                                  <DropdownMenuSubContent>
+                                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'admin')} disabled={user.role === 'admin'}>
+                                      <Shield className="mr-2 h-4 w-4" /> Admin {user.role === 'admin' && <Check className="ml-auto h-4 w-4"/>}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'user')} disabled={user.role === 'user'}>
+                                      <User className="mr-2 h-4 w-4" /> User {user.role === 'user' && <Check className="ml-auto h-4 w-4"/>}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                                )}
+                                <DropdownMenuSeparator />
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500">
+                                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                    </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the user and their associated data.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
+                                        Yes, delete user
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     ))
