@@ -65,7 +65,7 @@ import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { Separator } from '@/components/ui/separator';
 import { ReviewForm } from '@/components/tools/ReviewForm';
 import { getReviews } from '@/ai/flows/review-management';
-import { Star, Construction, Sparkles, ArrowLeft, Loader2, ListOrdered, CheckCircle2, ShieldCheck, Zap, MousePointerClick, DownloadCloud, BrainCircuit } from 'lucide-react';
+import { Star, Construction, Sparkles, ArrowLeft, Loader2, ListOrdered, CheckCircle2, ShieldCheck, Zap, MousePointerClick, DownloadCloud, BrainCircuit, Cpu } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { getPosts } from '@/ai/flows/blog-management';
 import Link from 'next/link';
@@ -160,7 +160,6 @@ import { IcoConverter } from '@/components/tools/IcoConverter';
 import { BinaryConverter } from '@/components/tools/BinaryConverter';
 import { Logo } from '@/components/common/Logo';
 import { AiSeoKeywordGenerator } from '@/components/tools/AiSeoKeywordGenerator';
-import { Cpu } from 'lucide-react';
 
 
 const toolComponents: { [key: string]: React.ComponentType } = {
@@ -470,28 +469,28 @@ export default function ToolPage() {
                     <>
                         <li className="flex items-start gap-4">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">1</div>
-                            <div>
+                            <div className="flex-1">
                                 <h3 className="font-semibold">📥 Provide Input</h3>
                                 <p className="text-muted-foreground">Paste your text, upload your file, or enter the required data in the designated fields.</p>
                             </div>
                         </li>
                          <li className="flex items-start gap-4">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">2</div>
-                            <div>
+                             <div className="flex-1">
                                 <h3 className="font-semibold">⚙️ Configure Settings</h3>
                                 <p className="text-muted-foreground">Adjust any available options, such as language, format, or quality, to tailor the output to your needs.</p>
                             </div>
                         </li>
                         <li className="flex items-start gap-4">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">3</div>
-                            <div>
+                             <div className="flex-1">
                                 <h3 className="font-semibold">🚀 Process Your Request</h3>
                                 <p className="text-muted-foreground">Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.</p>
                             </div>
                         </li>
                         <li className="flex items-start gap-4">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">4</div>
-                            <div>
+                            <div className="flex-1">
                                 <h3 className="font-semibold">✨ Get Your Results</h3>
                                 <p className="text-muted-foreground">Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.</p>
                             </div>
@@ -543,7 +542,7 @@ export default function ToolPage() {
                  <h3 className="font-semibold flex items-center gap-2"><Zap className="text-primary"/>Blazing Fast</h3>
                  <p className="text-sm text-muted-foreground mt-1">Get your results instantly without any unnecessary delays. Our tools are optimized for speed.</p>
                </Card>
-                <Card className="p-4 bg-background">
+               <Card className="p-4 bg-background">
                  <h3 className="font-semibold flex items-center gap-2"><Cpu className="text-primary"/>AI-Powered</h3>
                  <p className="text-sm text-muted-foreground mt-1">Many of our tools leverage cutting-edge AI to provide smarter, more accurate, and creative results.</p>
                </Card>
