@@ -65,7 +65,7 @@ import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import { Separator } from '@/components/ui/separator';
 import { ReviewForm } from '@/components/tools/ReviewForm';
 import { getReviews } from '@/ai/flows/review-management';
-import { Star, Construction, Sparkles, ArrowLeft, Loader2, ListOrdered, CheckCircle2, ShieldCheck, Zap, Cpu } from 'lucide-react';
+import { Star, Construction, Sparkles, ArrowLeft, Loader2, ListOrdered, CheckCircle2, ShieldCheck, Zap, Cpu, MousePointerClick, DownloadCloud, BrainCircuit } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { getPosts } from '@/ai/flows/blog-management';
 import Link from 'next/link';
@@ -459,25 +459,25 @@ export default function ToolPage() {
                 <li className="flex items-start gap-3">
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">1</div>
                     <div className="flex-1">
-                        <strong className="text-foreground">Provide Input:</strong> Paste your text, upload your file, or enter the required data in the designated fields.
+                        <strong className="text-foreground">Provide Input:</strong> 📥 Paste your text, upload your file, or enter the required data in the designated fields.
                     </div>
                 </li>
                 <li className="flex items-start gap-3">
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">2</div>
                     <div className="flex-1">
-                       <strong className="text-foreground">Configure Settings:</strong> Adjust any available options, such as language, format, or quality, to tailor the output to your needs.
+                       <strong className="text-foreground">Configure Settings:</strong> ⚙️ Adjust any available options, such as language, format, or quality, to tailor the output to your needs.
                     </div>
                 </li>
                 <li className="flex items-start gap-3">
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">3</div>
                     <div className="flex-1">
-                        <strong className="text-foreground">Process Your Request:</strong> Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.
+                        <strong className="text-foreground">Process Your Request:</strong> 🚀 Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.
                     </div>
                 </li>
                 <li className="flex items-start gap-3">
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">4</div>
                     <div className="flex-1">
-                        <strong className="text-foreground">Get Your Results:</strong> Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.
+                        <strong className="text-foreground">Get Your Results:</strong> ✨ Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.
                     </div>
                 </li>
               </ul>
@@ -490,37 +490,35 @@ export default function ToolPage() {
                 <Sparkles /> Features of {tool.name}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                    <div className="flex items-start gap-3">
-                        <span className="text-xl">⚡</span>
-                        <div>
-                            <h3 className="font-semibold">Instant Results</h3>
-                            <p className="text-sm text-muted-foreground">Get what you need in seconds, without any unnecessary waiting.</p>
-                        </div>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-start gap-3">
+                    <span className="text-xl">⚡</span>
+                    <div>
+                        <h3 className="font-semibold">Instant Results</h3>
+                        <p className="text-sm text-muted-foreground">Get what you need in seconds, without any unnecessary waiting or complex steps.</p>
                     </div>
-                    <div className="flex items-start gap-3">
-                        <span className="text-xl">👍</span>
-                        <div>
-                            <h3 className="font-semibold">Easy to Use</h3>
-                            <p className="text-sm text-muted-foreground">Our intuitive interface makes it easy for anyone to use.</p>
-                        </div>
+                </div>
+                <div className="flex items-start gap-3">
+                    <span className="text-xl">👍</span>
+                    <div>
+                        <h3 className="font-semibold">Easy to Use</h3>
+                        <p className="text-sm text-muted-foreground">Our intuitive interface makes it easy for anyone to use, regardless of technical skill.</p>
                     </div>
-                    <div className="flex items-start gap-3">
-                        <span className="text-xl">🔒</span>
-                        <div>
-                            <h3 className="font-semibold">Secure & Private</h3>
-                            <p className="text-sm text-muted-foreground">Your data is processed securely and is never stored on our servers.</p>
-                        </div>
+                </div>
+                <div className="flex items-start gap-3">
+                    <span className="text-xl">🔒</span>
+                    <div>
+                        <h3 className="font-semibold">Secure & Private</h3>
+                        <p className="text-sm text-muted-foreground">Your data is processed securely and is never stored on our servers.</p>
                     </div>
-                    <div className="flex items-start gap-3">
-                        <span className="text-xl">✨</span>
-                        <div>
-                            <h3 className="font-semibold">High-Quality Output</h3>
-                            <p className="text-sm text-muted-foreground">Our tools provide accurate, reliable, and high-quality results.</p>
-                        </div>
+                </div>
+                <div className="flex items-start gap-3">
+                    <span className="text-xl">✨</span>
+                    <div>
+                        <h3 className="font-semibold">High-Quality Output</h3>
+                        <p className="text-sm text-muted-foreground">Our tools provide accurate, reliable, and high-quality results every time.</p>
                     </div>
-                 </div>
+                </div>
             </CardContent>
           </Card>
 
@@ -530,31 +528,52 @@ export default function ToolPage() {
                 <CheckCircle2 /> Why Choose Our Tools?
               </CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <div className="flex items-start gap-3">
                  <ShieldCheck className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
                  <div>
                    <h3 className="font-semibold">Secure & Reliable</h3>
-                   <p className="text-sm text-muted-foreground">Your data is safe and all processing happens securely.</p>
+                   <p className="text-sm text-muted-foreground">Your data privacy is our priority. All tools run securely in your browser, and we never store your input data.</p>
                  </div>
                </div>
                <div className="flex items-start gap-3">
                  <Zap className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
                  <div>
                    <h3 className="font-semibold">Blazing Fast</h3>
-                   <p className="text-sm text-muted-foreground">Get your results instantly without any unnecessary delays.</p>
+                   <p className="text-sm text-muted-foreground">Get your results instantly without any unnecessary delays. Our tools are optimized for speed and performance.</p>
                  </div>
                </div>
                <div className="flex items-start gap-3">
                  <Cpu className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
                  <div>
                    <h3 className="font-semibold">AI-Powered</h3>
-                   <p className="text-sm text-muted-foreground">Leverage cutting-edge AI for smarter, more accurate results.</p>
+                   <p className="text-sm text-muted-foreground">Many of our tools leverage cutting-edge AI to provide smarter, more accurate, and creative results.</p>
+                 </div>
+               </div>
+               <div className="flex items-start gap-3">
+                 <MousePointerClick className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                 <div>
+                   <h3 className="font-semibold">User-Friendly Interface</h3>
+                   <p className="text-sm text-muted-foreground">No complicated setups. Our tools are designed to be intuitive and easy for everyone.</p>
+                 </div>
+               </div>
+                <div className="flex items-start gap-3">
+                 <DownloadCloud className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                 <div>
+                   <h3 className="font-semibold">No Installation Needed</h3>
+                   <p className="text-sm text-muted-foreground">All our tools run directly in your browser. There is nothing to download or install on your device.</p>
+                 </div>
+               </div>
+               <div className="flex items-start gap-3">
+                 <BrainCircuit className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                 <div>
+                   <h3 className="font-semibold">Constantly Evolving</h3>
+                   <p className="text-sm text-muted-foreground">We are always adding new tools and improving existing ones based on user feedback and new technology.</p>
                  </div>
                </div>
             </CardContent>
           </Card>
-
+          
           <AdPlaceholder adSlotId="toolpage-banner-bottom" adSettings={settings?.advertisement ?? null} className="my-6" />
 
           <Card className="mt-8">
