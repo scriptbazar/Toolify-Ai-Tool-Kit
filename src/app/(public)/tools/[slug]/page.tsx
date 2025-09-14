@@ -455,49 +455,49 @@ export default function ToolPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(tool.howToUse && tool.howToUse.length > 0) ? (
                     tool.howToUse.map((step, index) => (
-                         <li key={index} className="flex items-start gap-4">
+                         <div key={index} className="flex items-start gap-4 p-4 bg-background rounded-lg">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">{index + 1}</div>
                             <div className="flex-1">
                                 <p className="text-muted-foreground">{step}</p>
                             </div>
-                        </li>
+                        </div>
                     ))
                 ) : (
                     <>
-                        <li className="flex items-start gap-4">
+                         <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">1</div>
                             <div className="flex-1">
                                 <h3 className="font-semibold">📥 Provide Input</h3>
                                 <p className="text-muted-foreground">Paste your text, upload your file, or enter the required data in the designated fields.</p>
                             </div>
-                        </li>
-                         <li className="flex items-start gap-4">
+                        </div>
+                         <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">2</div>
                              <div className="flex-1">
                                 <h3 className="font-semibold">⚙️ Configure Settings</h3>
                                 <p className="text-muted-foreground">Adjust any available options, such as language, format, or quality, to tailor the output to your needs.</p>
                             </div>
-                        </li>
-                        <li className="flex items-start gap-4">
+                        </div>
+                        <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">3</div>
                              <div className="flex-1">
                                 <h3 className="font-semibold">🚀 Process Your Request</h3>
                                 <p className="text-muted-foreground">Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.</p>
                             </div>
-                        </li>
-                        <li className="flex items-start gap-4">
+                        </div>
+                        <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">4</div>
                             <div className="flex-1">
                                 <h3 className="font-semibold">✨ Get Your Results</h3>
                                 <p className="text-muted-foreground">Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.</p>
                             </div>
-                        </li>
+                        </div>
                     </>
                 )}
-              </ul>
+              </div>
             </CardContent>
           </Card>
           
@@ -507,7 +507,7 @@ export default function ToolPage() {
                 <Sparkles /> Features of {tool.name}
               </CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <Card className="p-4 bg-background">
                   <h3 className="font-semibold flex items-center gap-2">⚡ Instant Results</h3>
                   <p className="text-sm text-muted-foreground mt-1">Get what you need in seconds, without any unnecessary waiting or complex steps.</p>
@@ -526,7 +526,7 @@ export default function ToolPage() {
                </Card>
             </CardContent>
           </Card>
-          
+
           <Card className="mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -542,15 +542,15 @@ export default function ToolPage() {
                  <h3 className="font-semibold flex items-center gap-2"><Zap className="text-primary"/>Blazing Fast</h3>
                  <p className="text-sm text-muted-foreground mt-1">Get your results instantly without any unnecessary delays. Our tools are optimized for speed.</p>
                </Card>
-               <Card className="p-4 bg-background">
-                 <h3 className="font-semibold flex items-center gap-2"><Cpu className="text-primary"/>AI-Powered</h3>
-                 <p className="text-sm text-muted-foreground mt-1">Many of our tools leverage cutting-edge AI to provide smarter, more accurate, and creative results.</p>
-               </Card>
                 <Card className="p-4 bg-background">
                  <h3 className="font-semibold flex items-center gap-2"><MousePointerClick className="text-primary"/>User-Friendly Interface</h3>
                  <p className="text-sm text-muted-foreground mt-1">No complicated setups. Our tools are designed to be intuitive and easy for everyone.</p>
                </Card>
-                <Card className="p-4 bg-background">
+               <Card className="p-4 bg-background">
+                 <h3 className="font-semibold flex items-center gap-2"><Cpu className="text-primary"/>AI-Powered</h3>
+                 <p className="text-sm text-muted-foreground mt-1">Many of our tools leverage cutting-edge AI to provide smarter, more accurate, and creative results.</p>
+               </Card>
+               <Card className="p-4 bg-background">
                  <h3 className="font-semibold flex items-center gap-2"><DownloadCloud className="text-primary"/>No Installation Needed</h3>
                  <p className="text-sm text-muted-foreground mt-1">All our tools run directly in your browser. There is nothing to download or install on your device.</p>
                </Card>
