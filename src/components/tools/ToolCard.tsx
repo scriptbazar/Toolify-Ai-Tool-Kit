@@ -1,14 +1,22 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Tool } from '@/ai/flows/tool-management.types';
 import * as Icons from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
+import { Button } from '../ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { toggleFavoriteTool } from '@/ai/flows/user-management';
+import { useAuth } from '@/hooks/use-auth';
 
 type ToolCardProps = {
   tool: Tool;
+  isFavorite: boolean;
+  onToggleFavorite: (slug: string) => void;
+  showUpgradeDialog: () => void;
 };
 
 const getStatusBadge = (status: Tool['status']) => {
@@ -24,15 +32,37 @@ const getStatusBadge = (status: Tool['status']) => {
     }
 }
 
-export function ToolCard({ tool }: ToolCardProps) {
-  const { name, description, slug, status } = tool;
+export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog }: ToolCardProps) {
+  const { name, description, slug, status, plan } = tool;
+  const { user } = useAuth();
   const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
   const statusBadge = getStatusBadge(status);
+  const { toast } = useToast();
 
   const isClickable = status === 'Active' || status === 'New Version';
 
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+        toast({ title: "Login Required", description: "Please log in to add favorites.", variant: "destructive" });
+        return;
+    }
+    onToggleFavorite(slug);
+  };
+  
+  const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+      if (plan === 'Pro' && !user?.planId?.includes('pro')) {
+          e.preventDefault();
+          showUpgradeDialog();
+      }
+  }
+
   const CardContent = () => (
-    <div className="relative group h-full w-full">
+    <div className={cn(
+        "relative group h-full w-full",
+        !isClickable && "cursor-not-allowed"
+      )}>
       <div className={cn(
         "absolute -inset-0.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 opacity-25 blur transition duration-500 group-hover:opacity-75",
         !isClickable && "opacity-10 blur-sm"
@@ -44,11 +74,24 @@ export function ToolCard({ tool }: ToolCardProps) {
         {statusBadge ? statusBadge : (
             <>
               {tool.isNew && <Badge variant="outline" className="absolute top-2 left-2 border-primary text-primary bg-background/80 shadow">New</Badge>}
-              {tool.plan === 'Pro' && <Badge className="absolute top-2 right-2 shadow">Pro</Badge>}
             </>
         )}
+        <Button
+            variant="ghost"
+            size="icon"
+            className={cn("absolute top-1 right-1 h-8 w-8 rounded-full transition-opacity", user ? "opacity-20 group-hover:opacity-100" : "opacity-0")}
+            onClick={handleFavoriteClick}
+            aria-label="Toggle favorite"
+            >
+            <Icons.Star className={cn("h-5 w-5", isFavorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground")} />
+        </Button>
+        {plan === 'Pro' && (
+            <div className="absolute bottom-3 right-3">
+                <Badge className="shadow-md">Pro</Badge>
+            </div>
+        )}
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4 transition-colors group-hover:bg-primary/20">
-          <Icon className="h-8 w-8 text-primary transition-transform group-hover:scale-110 group-hover:animate-bounce" />
+          <Icon className="h-8 w-8 text-primary transition-transform group-hover:scale-110" />
         </div>
         <div className="flex-grow">
             <h3 className="text-sm font-semibold mb-1">{name}</h3>
@@ -62,7 +105,7 @@ export function ToolCard({ tool }: ToolCardProps) {
 
   if (isClickable) {
       return (
-        <Link href={`/tools/${slug}`} className="block h-full">
+        <Link href={`/tools/${slug}`} className="block h-full" onClick={handleCardClick}>
           <CardContent />
         </Link>
       );

@@ -5,18 +5,18 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { LogIn, Menu, UserPlus, Home, LayoutGrid, Newspaper, Info, Mail, DollarSign, MessageSquare, User, LayoutDashboard, LogOut as LogoutIcon, ShieldCheck, Lightbulb } from 'lucide-react';
+import { LogIn, Menu, UserPlus, Home, Newspaper, Info, Mail, DollarSign, MessageSquare, User, LayoutDashboard, LogOut as LogoutIcon, ShieldCheck, Lightbulb, Star } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname, useRouter } from 'next/navigation';
 import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
 import { ModeToggle } from './ModeToggle';
-import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { doc, getDoc } from 'firebase/firestore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useAuth } from '@/hooks/use-auth';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 
 const mainNavLinks = [
@@ -32,9 +32,11 @@ const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }) => 
   
   const communityChatHref = isAdmin ? '/admin/community-chat' : '/community-chat';
 
-  const allLinks = isLoggedIn 
-    ? [...mainNavLinks, { href: communityChatHref, label: 'Community Chat', icon: MessageSquare }]
-    : mainNavLinks;
+  const allLinks = [
+    ...mainNavLinks,
+    ...(isLoggedIn ? [{ href: '/my-favorites', label: 'My Favorites', icon: Star }] : []),
+    { href: communityChatHref, label: 'Community Chat', icon: MessageSquare }
+  ];
 
   return (
     <>
@@ -62,44 +64,12 @@ const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }) => 
   );
 };
 
-interface AppUser {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
 export default function Header() {
   const isMobile = useIsMobile();
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [userData, setUserData] = useState<AppUser | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { user, userData, isAdmin, loading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser);
-        const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-          setUserData(userDocSnap.data() as AppUser);
-          if (userDocSnap.data().role === 'admin') {
-            setIsAdmin(true);
-          } else {
-            setIsAdmin(false);
-          }
-        }
-      } else {
-        setUser(null);
-        setIsAdmin(false);
-      }
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
   const handleLogout = async () => {
     await signOut(auth);
     toast({ title: 'Logged out successfully.' });

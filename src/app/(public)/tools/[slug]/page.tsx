@@ -159,6 +159,9 @@ import { IcoConverter } from '@/components/tools/IcoConverter';
 import { BinaryConverter } from '@/components/tools/BinaryConverter';
 import { Logo } from '@/components/common/Logo';
 import { AiSeoKeywordGenerator } from '@/components/tools/AiSeoKeywordGenerator';
+import { addUserActivity, rewardXp } from '@/ai/flows/user-activity';
+import { useAuth } from '@/hooks/use-auth';
+import { UpgradeProDialog } from '@/components/tools/UpgradeProDialog';
 
 
 const toolComponents: { [key: string]: React.ComponentType } = {
@@ -325,6 +328,7 @@ const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.Ele
 export default function ToolPage() {
     const params = useParams();
     const slug = params.slug as string;
+    const { user, userData } = useAuth();
     
     const [allTools, setAllTools] = useState<Tool[]>([]);
     const [tool, setTool] = useState<Tool | null | undefined>(undefined);
@@ -332,6 +336,7 @@ export default function ToolPage() {
     const [toolReviews, setToolReviews] = useState<Review[]>([]);
     const [allPosts, setAllPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
 
     useEffect(() => {
         async function loadData() {
@@ -351,19 +356,28 @@ export default function ToolPage() {
                     notFound();
                     return;
                 }
+                
+                if (currentTool.plan === 'Pro' && user && !userData?.planId?.includes('pro')) {
+                    setIsUpgradeDialogOpen(true);
+                }
+                
+                if (user && currentTool) {
+                    addUserActivity(user.uid, 'tool_usage', { name: currentTool.name, path: `/tools/${slug}` });
+                    rewardXp(user.uid, 'useTool');
+                }
 
                 setSettings(settingsData);
                 setToolReviews(reviewsData);
                 setAllPosts(postsData);
             } catch (error) {
                 console.error("Failed to load tool page data:", error);
-                setTool(null); // Set to null to indicate an error or not found
+                setTool(null);
             } finally {
                 setLoading(false);
             }
         }
         loadData();
-    }, [slug]);
+    }, [slug, user, userData]);
 
   if (loading) {
       return (
@@ -421,6 +435,8 @@ export default function ToolPage() {
 
 
   return (
+    <>
+    <UpgradeProDialog isOpen={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen} />
     <div className="container mx-auto px-4 py-8 md:py-12">
       <Button asChild variant="outline" className="mb-6">
         <Link href="/tools">
@@ -622,5 +638,6 @@ export default function ToolPage() {
         </aside>
       </div>
     </div>
+    </>
   );
 }
