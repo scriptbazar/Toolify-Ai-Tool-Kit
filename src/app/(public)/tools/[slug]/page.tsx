@@ -451,21 +451,23 @@ export default function ToolPage() {
 
           <Card className="mt-8">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><ListOrdered /> How to Use {tool.name}?</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <ListOrdered /> How to Use {tool.name}?
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+              <ol className="list-decimal list-inside space-y-3 text-muted-foreground">
                 <li>
-                  <strong>Provide Input:</strong> Upload your file, paste your text, or enter the required data in the designated fields.
+                  <strong>✍️ Provide Input:</strong> Paste your text, upload your file, or enter the required data in the designated fields.
                 </li>
                 <li>
-                  <strong>Configure Settings:</strong> Adjust any available options or settings to tailor the output to your needs.
+                  <strong>⚙️ Configure Settings:</strong> Adjust any available options, such as language, format, or quality, to tailor the output to your needs.
                 </li>
                 <li>
-                  <strong>Process:</strong> Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.
+                  <strong>🚀 Process Your Request:</strong> Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.
                 </li>
                 <li>
-                  <strong>Get Results:</strong> Your result will be displayed instantly. You can then copy it to your clipboard or download it.
+                  <strong>📋 Get Your Results:</strong> Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.
                 </li>
               </ol>
             </CardContent>
@@ -473,28 +475,32 @@ export default function ToolPage() {
           
           <Card className="mt-8">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Sparkles /> Features of {tool.name}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles /> Features of {tool.name}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                <li><strong>Instant Results:</strong> Get what you need in seconds, without any unnecessary waiting.</li>
-                <li><strong>Easy to Use:</strong> Our intuitive interface makes it easy for anyone to use, no technical skills required.</li>
-                <li><strong>Secure & Private:</strong> We don't store your data. All processing is done securely.</li>
-                <li><strong>High-Quality Output:</strong> Our tools are designed to provide accurate and high-quality results every time.</li>
+              <ul className="list-disc list-inside space-y-3 text-muted-foreground">
+                <li><strong>⚡ Instant Results:</strong> Get what you need in seconds, without any unnecessary waiting or complex steps.</li>
+                <li><strong>👍 Easy to Use:</strong> Our intuitive interface makes it easy for anyone to use, regardless of technical skill.</li>
+                <li><strong>🔒 Secure & Private:</strong> We respect your privacy. Your data is processed securely and is never stored on our servers.</li>
+                <li><strong>✨ High-Quality Output:</strong> Our tools are designed to provide accurate, reliable, and high-quality results every time you use them.</li>
               </ul>
             </CardContent>
           </Card>
 
           <Card className="mt-8">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><CheckCircle2 /> Why Choose Our Tools?</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle2 /> Why Choose Our Tools?
+              </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
                <div className="flex items-start gap-3">
                  <ShieldCheck className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
                  <div>
                    <h3 className="font-semibold">Secure & Reliable</h3>
-                   <p className="text-sm text-muted-foreground">Your data is processed securely and never stored on our servers.</p>
+                   <p className="text-sm text-muted-foreground">Your data is safe and all processing happens securely.</p>
                  </div>
                </div>
                <div className="flex items-start gap-3">
@@ -508,7 +514,7 @@ export default function ToolPage() {
                  <Cpu className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
                  <div>
                    <h3 className="font-semibold">AI-Powered</h3>
-                   <p className="text-sm text-muted-foreground">Leverage the latest AI technology for smarter, more accurate results.</p>
+                   <p className="text-sm text-muted-foreground">Leverage cutting-edge AI for smarter, more accurate results.</p>
                  </div>
                </div>
             </CardContent>
