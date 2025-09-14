@@ -1,9 +1,9 @@
 
+
 import { Button } from '@/components/ui/button';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getPosts } from '@/ai/flows/blog-management';
-import { type Post } from '@/ai/flows/blog-management.types';
 import Link from 'next/link';
 
 const POSTS_PER_PAGE = 6;

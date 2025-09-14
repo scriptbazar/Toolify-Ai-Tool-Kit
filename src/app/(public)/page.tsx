@@ -1,8 +1,4 @@
 
-
-'use client';
-
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { getTools } from '@/ai/flows/tool-management';
 import { toolCategories } from '@/lib/constants';
@@ -18,237 +14,32 @@ import { getPosts } from '@/ai/flows/blog-management';
 import { getReviews } from '@/ai/flows/review-management';
 import { CategoryCard } from '@/components/tools/CategoryCard';
 import { type Tool } from '@/ai/flows/tool-management.types';
-import { type Post } from '@/ai/flows/blog-management.types';
 import { type Review } from '@/ai/flows/review-management.types';
-import { type HomepageSettings } from '@/ai/flows/settings-management.types';
 import { ToolOfTheWeek } from '@/components/tools/ToolOfTheWeek';
+import { HomePageClient } from './_components/HomePageClient';
 
+export default async function Home() {
+    const [tools, settings, allPosts, allReviews] = await Promise.all([
+        getTools(),
+        getSettings(),
+        getPosts(),
+        getReviews()
+    ]);
 
-const TestimonialCard = ({ name, role, avatar, comment, rating }: { name: string, role: string, avatar: string, comment: string, rating: number }) => (
-    <Card className="w-[350px] shrink-0 bg-card text-card-foreground">
-        <CardContent className="p-6 flex flex-col items-start text-left">
-            <div className="flex items-center gap-4 mb-4">
-                <Avatar className="h-12 w-12">
-                    <AvatarImage src={avatar} alt={name} />
-                    <AvatarFallback>{name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                    <p className="font-semibold text-lg">{name}</p>
-                    <p className="text-sm text-muted-foreground">{role}</p>
-                </div>
-            </div>
-             <div className="flex items-center mb-4">
-                {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`h-5 w-5 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}`} />
-                ))}
-            </div>
-            <p className="text-muted-foreground text-base">"{comment}"</p>
-        </CardContent>
-    </Card>
-);
-
-export default function Home() {
-    const [tools, setTools] = useState<Tool[]>([]);
-    const [homepageSettings, setHomepageSettings] = useState<HomepageSettings>({});
-    const [allPosts, setAllPosts] = useState<Post[]>([]);
-    const [allReviews, setAllReviews] = useState<Review[]>([]);
-    const [loading, setLoading] = useState(true);
-    
-    useEffect(() => {
-        async function loadData() {
-            try {
-                const [toolsData, settingsData, postsData, reviewsData] = await Promise.all([
-                    getTools(),
-                    getSettings(),
-                    getPosts(),
-                    getReviews()
-                ]);
-                setTools(toolsData);
-                setHomepageSettings(settingsData.homepage || {});
-                setAllPosts(postsData);
-                setAllReviews(reviewsData);
-            } catch (error) {
-                console.error("Failed to load page data:", error);
-            } finally {
-                setLoading(false);
-            }
-        }
-        loadData();
-    }, []);
-
-  const testimonials = allReviews.filter(review => review.status === 'approved');
-  
-  const steps = homepageSettings.steps || [];
-  const features = homepageSettings.features || [];
-
-  const activeTools = tools.filter(tool => tool.status === 'Active');
-  
-  const categoryNames = toolCategories
-    .filter(c => c.name !== 'Developer Tools' && c.name !== 'Calculators & Converters' && c.name !== 'Ecommerce Tools' && c.id !== 'miscellaneous')
-    .map(c => c.name.replace(' Tools', ''));
-
-  const Testimonials = () => {
-    const displayTestimonials = testimonials.slice(0, 12);
-    const useMarquee = displayTestimonials.length >= 10;
-
-    if (useMarquee) {
-      const midPoint = Math.ceil(displayTestimonials.length / 2);
-      const topRowItems = displayTestimonials.slice(0, midPoint);
-      const bottomRowItems = displayTestimonials.slice(midPoint);
-      
-      return (
-        <div className="relative flex flex-col gap-8 overflow-hidden">
-          <div className="flex -translate-x-1/4 animate-marquee-right-to-left gap-8">
-            {[...topRowItems, ...topRowItems].map((testimonial, index) => (
-              <TestimonialCard key={`top-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
-            ))}
-          </div>
-          <div className="flex -translate-x-1/4 animate-marquee-left-to-right gap-8">
-            {[...bottomRowItems, ...bottomRowItems].map((testimonial, index) => (
-              <TestimonialCard key={`bottom-${testimonial.id}-${index}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex justify-center flex-wrap gap-8">
-        {displayTestimonials.map((testimonial) => (
-          <TestimonialCard key={`static-${testimonial.id}`} name={testimonial.authorName} role={testimonial.toolName} avatar={testimonial.authorAvatar} comment={testimonial.comment} rating={testimonial.rating} />
-        ))}
-      </div>
-    );
-  };
-  
-  const toolOfTheWeek = tools.find(tool => tool.isToolOfTheWeek) || null;
-
+    const homepageSettings = settings.homepage || {};
+    const testimonials = allReviews.filter(review => review.status === 'approved');
+    const steps = homepageSettings.steps || [];
+    const features = homepageSettings.features || [];
+    const toolOfTheWeek = tools.find(tool => tool.isToolOfTheWeek) || null;
+    const latestPosts = allPosts.filter(p => p.status === 'Published').slice(0, 3);
 
   return (
-    <>
-      <section className="text-center py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter">
-            Your All-in-One <span className="text-primary">Smart</span> <span className="text-accent">Toolkit</span>
-          </h1>
-          <p className="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground">
-            Over 100+ smart utility and AI-powered tools to boost your productivity. From text manipulation to AI image generation, we've got you covered.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <Button asChild size="lg">
-              <Link href="/tools">
-                Explore All Tools <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
-           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 max-w-6xl mx-auto">
-            {toolCategories.filter(c => c.id !== 'calculator' && c.id !== 'miscellaneous').map(category => (
-                <CategoryCard key={category.id} category={category} />
-            ))}
-          </div>
-        </div>
-      </section>
-      
-      {toolOfTheWeek && (
-        <section className="py-16 md:py-24 bg-background">
-            <div className="container mx-auto px-4">
-                <ToolOfTheWeek tool={toolOfTheWeek} />
-            </div>
-        </section>
-      )}
-
-      <section className="py-16 md:py-24 bg-card">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Get Started in 4 Easy Steps</h2>
-            <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
-              Our platform is designed to be simple and intuitive. Here's how you can get things done.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((step, index) => {
-              const Icon = (Icons as any)[step.icon] || Icons.HelpCircle;
-              return (
-              <Card key={index} className="text-center p-8 border-2 shadow-lg transition-all duration-300 hover:-translate-y-2 bg-background">
-                <CardContent className="p-0 flex flex-col items-center">
-                  <div className="flex items-center justify-center h-16 w-16 mb-6 rounded-full bg-primary/10">
-                     <Icon className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                  <p className="text-muted-foreground text-sm">{step.description}</p>
-                </CardContent>
-              </Card>
-            )})}
-          </div>
-        </div>
-      </section>
-
-       <section id="features" className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Why Choose ToolifyAI?</h2>
-            <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
-              We are committed to providing a comprehensive suite of tools that are powerful, easy to use, and reliable, helping you achieve your goals faster.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => {
-              const Icon = (Icons as any)[feature.icon] || Icons.HelpCircle;
-              return (
-              <Card key={index} className="text-center p-8 border-2 bg-card shadow-lg transition-all duration-300">
-                <CardContent className="p-0 flex flex-col items-center">
-                  <div className="flex items-center justify-center h-16 w-16 mb-6 rounded-full bg-primary/10">
-                    <Icon className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm">{feature.description}</p>
-                </CardContent>
-              </Card>
-            )})}
-          </div>
-          <div className="text-center mt-12">
-              <Button asChild size="lg">
-                <Link href="/tools">
-                    Explore Tools <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Loved by Professionals Worldwide</h2>
-            <p className="mt-3 max-w-2xl mx-auto text-muted-foreground mb-12">
-                Our tools are trusted by thousands of developers, designers, and content creators to streamline their work and boost productivity.
-            </p>
-        </div>
-        {testimonials.length > 0 ? (
-            <Testimonials />
-        ) : (
-            <div className="text-center text-muted-foreground">No approved reviews yet.</div>
-        )}
-      </section>
-
-      <section className="py-16 md:py-24 bg-card">
-        <div className="container mx-auto px-4">
-          <Card className="bg-background">
-            <CardContent className="p-12 text-center">
-              <h2 className="text-3xl font-bold tracking-tight">Join Thousands of Satisfied Users</h2>
-              <p className="mt-3 max-w-xl mx-auto text-muted-foreground">
-                Start exploring our powerful suite of tools today and see how we can help you achieve more.
-              </p>
-              <div className="mt-8 flex justify-center">
-                <Button asChild size="lg">
-                  <Link href="/tools">
-                    Explore Tools <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-    </>
+    <HomePageClient
+      testimonials={testimonials}
+      steps={steps}
+      features={features}
+      toolOfTheWeek={toolOfTheWeek}
+      latestPosts={latestPosts}
+    />
   );
 }
