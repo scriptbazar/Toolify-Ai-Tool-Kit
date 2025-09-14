@@ -490,13 +490,37 @@ export default function ToolPage() {
                 <Sparkles /> Features of {tool.name}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className="list-disc list-inside space-y-3 text-muted-foreground">
-                <li><strong>⚡ Instant Results:</strong> Get what you need in seconds, without any unnecessary waiting or complex steps.</li>
-                <li><strong>👍 Easy to Use:</strong> Our intuitive interface makes it easy for anyone to use, regardless of technical skill.</li>
-                <li><strong>🔒 Secure & Private:</strong> We respect your privacy. Your data is processed securely and is never stored on our servers.</li>
-                <li><strong>✨ High-Quality Output:</strong> Our tools are designed to provide accurate, reliable, and high-quality results every time you use them.</li>
-              </ul>
+            <CardContent className="space-y-4">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    <div className="flex items-start gap-3">
+                        <span className="text-xl">⚡</span>
+                        <div>
+                            <h3 className="font-semibold">Instant Results</h3>
+                            <p className="text-sm text-muted-foreground">Get what you need in seconds, without any unnecessary waiting.</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <span className="text-xl">👍</span>
+                        <div>
+                            <h3 className="font-semibold">Easy to Use</h3>
+                            <p className="text-sm text-muted-foreground">Our intuitive interface makes it easy for anyone to use.</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <span className="text-xl">🔒</span>
+                        <div>
+                            <h3 className="font-semibold">Secure & Private</h3>
+                            <p className="text-sm text-muted-foreground">Your data is processed securely and is never stored on our servers.</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <span className="text-xl">✨</span>
+                        <div>
+                            <h3 className="font-semibold">High-Quality Output</h3>
+                            <p className="text-sm text-muted-foreground">Our tools provide accurate, reliable, and high-quality results.</p>
+                        </div>
+                    </div>
+                 </div>
             </CardContent>
           </Card>
 
@@ -603,4 +627,3 @@ export default function ToolPage() {
     </div>
   );
 }
-
