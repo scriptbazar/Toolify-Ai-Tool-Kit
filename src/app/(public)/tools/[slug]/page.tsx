@@ -158,7 +158,7 @@ import { type Post } from '@/ai/flows/blog-management.types';
 import { type AppSettings } from '@/ai/flows/settings-management.types';
 import { FlipImage } from '@/components/tools/FlipImage';
 import { IcoConverter } from '@/components/tools/IcoConverter';
-import { BinaryToText, TextToBinary } from '@/components/tools/BinaryConverter';
+import { BinaryConverter } from '@/components/tools/BinaryConverter';
 import { Logo } from '@/components/common/Logo';
 import { AiSeoKeywordGenerator } from '@/components/tools/AiSeoKeywordGenerator';
 
