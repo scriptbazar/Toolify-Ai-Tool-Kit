@@ -11,10 +11,16 @@ interface AppUser {
   lastName: string;
   email: string;
   planId?: string;
+  role?: 'user' | 'admin';
+}
+
+interface CombinedUser extends FirebaseUser {
+    planId?: string;
+    role?: 'user' | 'admin';
 }
 
 export function useAuth() {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [user, setUser] = useState<CombinedUser | null>(null);
   const [userData, setUserData] = useState<AppUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -22,14 +28,24 @@ export function useAuth() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        setUser(firebaseUser);
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         const userDocSnap = await getDoc(userDocRef);
+        
         if (userDocSnap.exists()) {
-          const data = userDocSnap.data();
-          setUserData(data as AppUser);
+          const data = userDocSnap.data() as AppUser;
+          setUserData(data);
           setIsAdmin(data.role === 'admin');
+          // Combine Firebase user with Firestore data
+          const combinedUser: CombinedUser = Object.assign(firebaseUser, {
+              planId: data.planId,
+              role: data.role,
+          });
+          setUser(combinedUser);
+        } else {
+            // Case where auth user exists but no firestore doc
+             setUser(firebaseUser as CombinedUser);
         }
+
       } else {
         setUser(null);
         setUserData(null);

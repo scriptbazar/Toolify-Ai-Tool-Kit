@@ -160,7 +160,7 @@ export default function UserPanelLayout({
     { href: '/usage-history', label: 'Usage History', icon: History },
     { href: '/community-chat', label: 'Community Chat', icon: MessageSquare },
     { href: '/my-tickets', label: 'My Tickets', icon: Ticket },
-    { href: '/manage-subscription', label: 'Manage Subscription', icon: Star },
+    { href: '/manage-subscription', label: 'Manage Subscription', icon: CreditCard },
     { href: '/payment-history', label: 'Payment History', icon: CreditCard },
     { href: '/affiliate-program', label: 'Affiliate Program', icon: UsersIcon },
     { href: '/settings', label: 'Profile Settings', icon: Settings },
@@ -301,6 +301,10 @@ export default function UserPanelLayout({
                      <DropdownMenuItem onClick={() => router.push(`/profile`)}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
+                    </DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => router.push(`/my-favorites`)}>
+                      <Star className="mr-2 h-4 w-4" />
+                      <span>My Favorites</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>

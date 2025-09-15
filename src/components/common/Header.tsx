@@ -35,7 +35,6 @@ const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }) => 
   const allLinks = [
     ...mainNavLinks,
     ...(isLoggedIn ? [
-      { href: '/my-favorites', label: 'My Favorites', icon: Star },
       { href: communityChatHref, label: 'Community Chat', icon: MessageSquare }
     ] : []),
   ];
@@ -196,6 +195,10 @@ export default function Header() {
                        <DropdownMenuItem onClick={() => router.push(`/profile`)}>
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
+                      </DropdownMenuItem>
+                       <DropdownMenuItem onClick={() => router.push(`/my-favorites`)}>
+                        <Star className="mr-2 h-4 w-4" />
+                        <span>My Favorites</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleLogout}>
