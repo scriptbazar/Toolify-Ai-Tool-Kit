@@ -52,7 +52,7 @@ export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersP
         }
     }, 300); // Debounce time
     return () => clearTimeout(handler);
-  }, [query, router, searchQuery, createQueryString]);
+  }, [query, searchQuery, router, createQueryString]);
   
   const handleCategoryChange = (category: string) => {
     router.push(`/tools?${createQueryString({ category: category === 'all' ? null : category, page: null })}`);
