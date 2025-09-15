@@ -19,284 +19,147 @@ import { ReviewForm } from '@/components/tools/ReviewForm';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, MousePointerClick, ShieldCheck, Sparkles, Star, Zap, BrainCircuit, Construction } from 'lucide-react';
-import { CaseConverter } from '@/components/tools/CaseConverter';
-import { WordCounter } from '@/components/tools/WordCounter';
-import { LoremIpsumGenerator } from '@/components/tools/LoremIpsumGenerator';
-import { PasswordGenerator } from '@/components/tools/PasswordGenerator';
-import { JsonFormatter } from '@/components/tools/JsonFormatter';
-import { BmiCalculator } from '@/components/tools/BmiCalculator';
-import { TextToSpeech } from '@/components/tools/TextToSpeech';
-import { SpeechToText } from '@/components/tools/SpeechToText';
-import { PdfMerger } from '@/components/tools/PdfMerger';
-import { UnitConverter } from '@/components/tools/UnitConverter';
-import { ColorPicker } from '@/components/tools/ColorPicker';
-import { TextRepeater } from '@/components/tools/TextRepeater';
-import { PromptGenerator } from '@/components/tools/PromptGenerator';
-import { AiBlogPostWriter } from '@/components/tools/AiBlogPostWriter';
-import { AiContentSummarizer } from '@/components/tools/AiContentSummarizer';
-import { AiCodeAssistant } from '@/components/tools/AiCodeAssistant';
-import { AiEmailComposer } from '@/components/tools/AiEmailComposer';
-import { AiImageGenerator } from '@/components/tools/AiImageGenerator';
-import { AiProductDescriptionWriter } from '@/components/tools/AiProductDescriptionWriter';
-import { AiStoryGenerator } from '@/components/tools/AiStoryGenerator';
-import { AiTweetGenerator } from '@/components/tools/AiTweetGenerator';
-import { AiVoiceCloning } from '@/components/tools/AiVoiceCloning';
-import { AiStoryVisualizer } from '@/components/tools/AiStoryVisualizer';
-import { AddWatermarkToPdf } from '@/components/tools/AddWatermarkToPdf';
-import { AgeCalculator } from '@/components/tools/AgeCalculator';
-import { AmazonShippingLabelCropper } from '@/components/tools/AmazonShippingLabelCropper';
-import { MyntraShippingLabelCropper } from '@/components/tools/MyntraShippingLabelCropper';
-import { FlipkartShippingLabelCropper } from '@/components/tools/FlipkartShippingLabelCropper';
-import { MeeshoShippingLabelCropper } from '@/components/tools/MeeshoShippingLabelCropper';
-import { Base64Converter } from '@/components/tools/Base64Converter';
-import { CssMinifier } from '@/components/tools/CssMinifier';
-import { DiscountCalculator } from '@/components/tools/DiscountCalculator';
-import { DateCalculator } from '@/components/tools/DateCalculator';
-import { CompressPdf } from '@/components/tools/CompressPdf';
-import { ExcelToPdf } from '@/components/tools/ExcelToPdf';
-import { ReverseText } from '@/components/tools/ReverseText';
-import { RemoveExtraSpaces } from '@/components/tools/RemoveExtraSpaces';
-import { FindAndReplace } from '@/components/tools/FindAndReplace';
-import { RandomWordGenerator } from '@/components/tools/RandomWordGenerator';
-import { RotateImage } from '@/components/tools/RotateImage';
-import { PngToJpg } from '@/components/tools/PngToJpg';
-import { JpgToPng } from '@/components/tools/JpgToPng';
-import { ImageToBase64 } from '@/components/tools/ImageToBase64';
-import { ImageResizer } from '@/components/tools/ImageResizer';
-import { ImageBackgroundRemover } from '@/components/tools/ImageBackgroundRemover';
-import { AdMobRevenueCalculator } from '@/components/tools/AdMobRevenueCalculator';
-import { AdSenseRevenueCalculator } from '@/components/tools/AdSenseRevenueCalculator';
-import { IFSCodetoBankDetails } from '@/components/tools/IFSCCodeToBankDetails';
-import { GSTCalculator } from '@/components/tools/GSTCalculator';
-import { ImageColorExtractor } from '@/components/tools/ImageColorExtractor';
-import { ImageCropper } from '@/components/tools/ImageCropper';
-import { ImageCompressor } from '@/components/tools/ImageCompressor';
-import { ImageTextExtractor } from '@/components/tools/ImageTextExtractor';
-import { ImageConverter } from '@/components/tools/ImageConverter';
-import { PdfSplitter } from '@/components/tools/PdfSplitter';
-import { WordToPdf } from '@/components/tools/WordToPdf';
-import { RotatePdf } from '@/components/tools/RotatePdf';
-import { PdfToWord } from '@/components/tools/PdfToWord';
-import { PdfToJpg } from '@/components/tools/PdfToJpg';
-import { MetaTagGenerator } from '@/components/tools/MetaTagGenerator';
-import { RobotsTxtGenerator } from '@/components/tools/RobotsTxtGenerator';
-import { XmlSitemapGenerator } from '@/components/tools/XmlSitemapGenerator';
-import { FaviconChecker } from '@/components/tools/FaviconChecker';
-import { KeywordDensityChecker } from '@/components/tools/KeywordDensityChecker';
-import { SerpChecker } from '@/components/tools/SerpChecker';
-import { RedirectChecker } from '@/components/tools/RedirectChecker';
-import { SchemaGenerator } from '@/components/tools/SchemaGenerator';
-import { TitleTagChecker } from '@/components/tools/TitleTagChecker';
-import { WebsiteWordCounter } from '@/components/tools/WebsiteWordCounter';
-import { FuelCostCalculator } from '@/components/tools/FuelCostCalculator';
-import { GpaCalculator } from '@/components/tools/GpaCalculator';
-import { LoanCalculator } from '@/components/tools/LoanCalculator';
-import { PercentageCalculator } from '@/components/tools/PercentageCalculator';
-import { TimeZoneConverter } from '@/components/tools/TimeZoneConverter';
-import { UnixTimestampConverter } from '@/components/tools/UnixTimestampConverter';
-import { HtmlMinifier } from '@/components/tools/HtmlMinifier';
-import { JavascriptMinifier } from '@/components/tools/JavascriptMinifier';
-import { SqlFormatter } from '@/components/tools/SqlFormatter';
-import { UuidGenerator } from '@/components/tools/UuidGenerator';
-import { YoutubeVideoDownloader } from '@/components/tools/YoutubeVideoDownloader';
-import { XVideoDownloader } from '@/components/tools/XVideoDownloader';
-import { InstagramVideoDownloader } from '@/components/tools/InstagramVideoDownloader';
-import { ThreadsVideoDownloader } from '@/components/tools/ThreadsVideoDownloader';
-import { LinkedinVideoDownloader } from '@/components/tools/LinkedinVideoDownloader';
-import { PinterestVideoDownloader } from '@/components/tools/PinterestVideoDownloader';
-import { UnlockPdf } from '@/components/tools/UnlockPdf';
-import { LockPdf } from '@/components/tools/LockPdf';
-import { PdfPageReorder } from '@/components/tools/PdfPageReorder';
-import { PdfPageCounter } from '@/components/tools/PdfPageCounter';
-import { PdfPageNumberer } from '@/components/tools/PdfPageNumberer';
-import { PdfPageRemover } from '@/components/tools/PdfPageRemover';
-import { PdfOrganizer } from '@/components/tools/PdfOrganizer';
-import { WebsiteScreenshot } from '@/components/tools/WebsiteScreenshot';
-import { WhatIsMyBrowser } from '@/components/tools/WhatIsMyBrowser';
-import { NegativeMarkingCalculator } from '@/components/tools/NegativeMarkingCalculator';
-import { YouTubeChannelBannerDownloader } from '@/components/tools/YouTubeChannelBannerDownloader';
-import { YouTubeChannelLogoDownloader } from '@/components/tools/YouTubeChannelLogoDownloader';
-import { YouTubeVideoDescriptionExtractor } from '@/components/tools/YouTubeVideoDescriptionExtractor';
-import { YouTubeVideoTitleExtractor } from '@/components/tools/YouTubeVideoTitleExtractor';
-import { YouTubeVideoThumbnailDownloader } from '@/components/tools/YouTubeVideoThumbnailDownloader';
-import { YouTubeRegionRestrictionChecker } from '@/components/tools/YouTubeRegionRestrictionChecker';
-import { GoogleDriveDirectLinkGenerator } from '@/components/tools/GoogleDriveDirectLinkGenerator';
-import { DropboxDirectLinkGenerator } from '@/components/tools/DropboxDirectLinkGenerator';
-import { OneDriveDirectLinkGenerator } from '@/components/tools/OneDriveDirectLinkGenerator';
-import { NSDLPANCardPhotoAndSignatureResizer } from '@/components/tools/NSDLPANCardPhotoAndSignatureResizer';
-import { UTIPANCardPhotoAndSignatureResizer } from '@/components/tools/UTIPANCardPhotoAndSignatureResizer';
-import { PRNToPDF } from '@/components/tools/PRNToPDF';
-import { ImageToPdf } from '@/components/tools/ImageToPdf';
-import { PdfSigner } from '@/components/tools/PdfSigner';
-import { MarksToPercentageCalculator } from '@/components/tools/MarksToPercentageCalculator';
-import { SrmToCgpaCalculator } from '@/components/tools/SrmToCgpaCalculator';
-import { CgpaToMarksCalculator } from '@/components/tools/CgpaToMarksCalculator';
-import { GpaToPercentageConverter } from '@/components/tools/GpaToPercentageConverter';
-import { GpaToCgpaCalculator } from '@/components/tools/GpaToCgpaCalculator';
-import { PercentageToCgpaConverter } from '@/components/tools/PercentageToCgpaConverter';
-import { CgpaToGpaConverter } from '@/components/tools/CgpaToGpaConverter';
-import { TextEncryptionDecryption } from '@/components/tools/TextEncryptionDecryption';
-import { PasswordStrengthChecker } from '@/components/tools/PasswordStrengthChecker';
-import { Sha256HashGenerator } from '@/components/tools/Sha256HashGenerator';
-import { UniversalHashGenerator } from '@/components/tools/UniversalHashGenerator';
-import { AesEncryptionDecryption } from '@/components/tools/AesEncryptionDecryption';
-import { UniversalFileConverter } from '@/components/tools/UniversalFileConverter';
-import { ImageShapeConverter } from '@/components/tools/ImageShapeConverter';
-import { MorseToTextTranslator } from '@/components/tools/MorseToTextTranslator';
-import { TextToMorseCode } from '@/components/tools/TextToMorseCode';
-import { CryptocurrencyConverter } from '@/components/tools/CryptocurrencyConverter';
-import { BarcodeGenerator } from '@/components/tools/BarcodeGenerator';
-import { CurrencyConverter } from '@/components/tools/CurrencyConverter';
-import { CreditCardInterestCalculator } from '@/components/tools/CreditCardInterestCalculator';
-import { ImageMetadataViewer } from '@/components/tools/ImageMetadataViewer';
-import { AiCodeGenerator } from '@/components/tools/AiCodeGenerator';
-import { AiRewriter } from '@/components/tools/AiRewriter';
-import { ImageQualityEnhancer } from '@/components/tools/ImageQualityEnhancer';
-import { AiWebContentSummarizer } from '@/components/tools/AiWebContentSummarizer';
-import { FlipImage } from '@/components/tools/FlipImage';
-import { IcoConverter } from '@/components/tools/IcoConverter';
-import { BinaryConverter } from '@/components/tools/BinaryConverter';
-import { AiSeoKeywordGenerator } from '@/components/tools/AiSeoKeywordGenerator';
+import dynamic from 'next/dynamic';
 
 const toolComponents: { [key: string]: React.ComponentType } = {
-  'case-converter': CaseConverter,
-  'word-counter': WordCounter,
-  'lorem-ipsum-generator': LoremIpsumGenerator,
-  'password-generator': PasswordGenerator,
-  'json-formatter': JsonFormatter,
-  'bmi-calculator': BmiCalculator,
-  'text-to-speech': TextToSpeech,
-  'speech-to-text': SpeechToText,
-  'pdf-merger': PdfMerger,
-  'unlock-pdf': UnlockPdf,
-  'lock-pdf': LockPdf,
-  'unit-converter': UnitConverter,
-  'color-picker': ColorPicker,
-  'text-repeater': TextRepeater,
-  'prompt-generator': PromptGenerator,
-  'ai-blog-post-writer': AiBlogPostWriter,
-  'ai-content-summarizer': AiContentSummarizer,
-  'ai-code-assistant': AiCodeAssistant,
-  'ai-email-composer': AiEmailComposer,
-  'ai-image-generator': AiImageGenerator,
-  'ai-product-description-writer': AiProductDescriptionWriter,
-  'ai-story-generator': AiStoryGenerator,
-  'ai-tweet-generator': AiTweetGenerator,
-  'ai-voice-cloning': AiVoiceCloning,
-  'ai-story-visualizer': AiStoryVisualizer,
-  'ai-code-generator': AiCodeGenerator,
-  'ai-rewriter': AiRewriter,
-  'ai-image-quality-enhancer': ImageQualityEnhancer,
-  'ai-web-content-summarizer': AiWebContentSummarizer,
-  'add-watermark-to-pdf': AddWatermarkToPdf,
-  'age-calculator': AgeCalculator,
-  'amazon-shipping-label-cropper': AmazonShippingLabelCropper,
-  'myntra-shipping-label-cropper': MyntraShippingLabelCropper,
-  'flipkart-shipping-label-cropper': FlipkartShippingLabelCropper,
-  'meesho-shipping-label-cropper': MeeshoShippingLabelCropper,
-  'base64-converter': Base64Converter,
-  'css-minifier': CssMinifier,
-  'discount-calculator': DiscountCalculator,
-  'date-calculator': DateCalculator,
-  'compress-pdf': CompressPdf,
-  'excel-to-pdf': ExcelToPdf,
-  'reverse-text': ReverseText,
-  'remove-extra-spaces': RemoveExtraSpaces,
-  'find-and-replace': FindAndReplace,
-  'random-word-generator': RandomWordGenerator,
-  'rotate-image': RotateImage,
-  'png-to-jpg': PngToJpg,
-  'jpg-to-png': JpgToPng,
-  'image-to-base64': ImageToBase64,
-  'image-resizer': ImageResizer,
-  'image-background-remover': ImageBackgroundRemover,
-  'admob-revenue-calculator': AdMobRevenueCalculator,
-  'adsense-revenue-calculator': AdSenseRevenueCalculator,
-  'ifsc-code-to-bank-details': IFSCodetoBankDetails,
-  'gst-calculator': GSTCalculator,
-  'image-color-extractor': ImageColorExtractor,
-  'image-cropper': ImageCropper,
-  'image-compressor': ImageCompressor,
-  'image-text-extractor': ImageTextExtractor,
-  'image-converter': ImageConverter,
-  'pdf-splitter': PdfSplitter,
-  'pdf-page-reorder': PdfPageReorder,
-  'pdf-page-counter': PdfPageCounter,
-  'pdf-page-numberer': PdfPageNumberer,
-  'pdf-page-remover': PdfPageRemover,
-  'pdf-organizer': PdfOrganizer,
-  'website-screenshot': WebsiteScreenshot,
-  'what-is-my-browser': WhatIsMyBrowser,
-  'negative-marking-calculator': NegativeMarkingCalculator,
-  'youtube-channel-banner-downloader': YouTubeChannelBannerDownloader,
-  'youtube-channel-logo-downloader': YouTubeChannelLogoDownloader,
-  'youtube-video-description-extractor': YouTubeVideoDescriptionExtractor,
-  'youtube-video-title-extractor': YouTubeVideoTitleExtractor,
-  'youtube-video-thumbnail-downloader': YouTubeVideoThumbnailDownloader,
-  'youtube-region-restriction-checker': YouTubeRegionRestrictionChecker,
-  'google-drive-direct-link-generator': GoogleDriveDirectLinkGenerator,
-  'dropbox-direct-link-generator': DropboxDirectLinkGenerator,
-  'onedrive-direct-link-generator': OneDriveDirectLinkGenerator,
-  'nsdl-pan-card-photo-and-signature-resizer': NSDLPANCardPhotoAndSignatureResizer,
-  'uti-pan-card-photo-and-signature-resizer': UTIPANCardPhotoAndSignatureResizer,
-  'prn-to-pdf': PRNToPDF,
-  'image-to-pdf': ImageToPdf,
-  'pdf-signer': PdfSigner,
-  'rotate-pdf': RotatePdf,
-  'marks-to-percentage-calculator': MarksToPercentageCalculator,
-  'srm-to-cgpa-calculator': SrmToCgpaCalculator,
-  'cgpa-to-marks-calculator': CgpaToMarksCalculator,
-  'gpa-to-percentage-converter': GpaToPercentageConverter,
-  'gpa-to-cgpa-calculator': GpaToCgpaCalculator,
-  'percentage-to-cgpa-converter': PercentageToCgpaConverter,
-  'cgpa-to-gpa-converter': CgpaToGpaConverter,
-  'text-encryption-decryption': TextEncryptionDecryption,
-  'password-strength-checker': PasswordStrengthChecker,
-  'sha256-hash-generator': Sha256HashGenerator,
-  'universal-hash-generator': UniversalHashGenerator,
-  'aes-encryption-decryption': AesEncryptionDecryption,
-  'universal-file-converter': UniversalFileConverter,
-  'image-shape-converter': ImageShapeConverter,
-  'morse-to-text-translator': MorseToTextTranslator,
-  'text-to-morse-code': TextToMorseCode,
-  'cryptocurrency-converter': CryptocurrencyConverter,
-  'barcode-generator': BarcodeGenerator,
-  'currency-converter': CurrencyConverter,
-  'credit-card-interest-calculator': CreditCardInterestCalculator,
-  'uuid-generator': UuidGenerator,
-  'image-metadata-viewer': ImageMetadataViewer,
-  'binary-converter': BinaryConverter,
-  'flip-image': FlipImage,
-  'ico-converter': IcoConverter,
-  'word-to-pdf': WordToPdf,
-  'pdf-to-word': PdfToWord,
-  'pdf-to-jpg': PdfToJpg,
-  'meta-tag-generator': MetaTagGenerator,
-  'robots.txt-generator': RobotsTxtGenerator,
-  'xml-sitemap-generator': XmlSitemapGenerator,
-  'favicon-checker': FaviconChecker,
-  'keyword-density-checker': KeywordDensityChecker,
-  'serp-checker': SerpChecker,
-  'redirect-checker': RedirectChecker,
-  'schema-generator': SchemaGenerator,
-  'title-tag-checker': TitleTagChecker,
-  'website-word-counter': WebsiteWordCounter,
-  'fuel-cost-calculator': FuelCostCalculator,
-  'gpa-calculator': GpaCalculator,
-  'loan-calculator': LoanCalculator,
-  'percentage-calculator': PercentageCalculator,
-  'time-zone-converter': TimeZoneConverter,
-  'unix-timestamp-converter': UnixTimestampConverter,
-  'html-minifier': HtmlMinifier,
-  'javascript-minifier': JavascriptMinifier,
-  'sql-formatter': SqlFormatter,
-  'youtube-video-downloader': YoutubeVideoDownloader,
-  'x-video-downloader': XVideoDownloader,
-  'instagram-video-downloader': InstagramVideoDownloader,
-  'threads-video-downloader': ThreadsVideoDownloader,
-  'linkedin-video-downloader': LinkedinVideoDownloader,
-  'pinterest-video-downloader': PinterestVideoDownloader,
-  'ai-seo-keyword-generator': AiSeoKeywordGenerator,
+  'case-converter': dynamic(() => import('@/components/tools/CaseConverter').then(mod => mod.CaseConverter)),
+  'word-counter': dynamic(() => import('@/components/tools/WordCounter').then(mod => mod.WordCounter)),
+  'lorem-ipsum-generator': dynamic(() => import('@/components/tools/LoremIpsumGenerator').then(mod => mod.LoremIpsumGenerator)),
+  'password-generator': dynamic(() => import('@/components/tools/PasswordGenerator').then(mod => mod.PasswordGenerator)),
+  'json-formatter': dynamic(() => import('@/components/tools/JsonFormatter').then(mod => mod.JsonFormatter)),
+  'bmi-calculator': dynamic(() => import('@/components/tools/BmiCalculator').then(mod => mod.BmiCalculator)),
+  'text-to-speech': dynamic(() => import('@/components/tools/TextToSpeech').then(mod => mod.TextToSpeech)),
+  'speech-to-text': dynamic(() => import('@/components/tools/SpeechToText').then(mod => mod.SpeechToText)),
+  'pdf-merger': dynamic(() => import('@/components/tools/PdfMerger').then(mod => mod.PdfMerger)),
+  'unit-converter': dynamic(() => import('@/components/tools/UnitConverter').then(mod => mod.UnitConverter)),
+  'color-picker': dynamic(() => import('@/components/tools/ColorPicker').then(mod => mod.ColorPicker)),
+  'text-repeater': dynamic(() => import('@/components/tools/TextRepeater').then(mod => mod.TextRepeater)),
+  'prompt-generator': dynamic(() => import('@/components/tools/PromptGenerator').then(mod => mod.PromptGenerator)),
+  'ai-blog-post-writer': dynamic(() => import('@/components/tools/AiBlogPostWriter').then(mod => mod.AiBlogPostWriter)),
+  'ai-content-summarizer': dynamic(() => import('@/components/tools/AiContentSummarizer').then(mod => mod.AiContentSummarizer)),
+  'ai-code-assistant': dynamic(() => import('@/components/tools/AiCodeAssistant').then(mod => mod.AiCodeAssistant)),
+  'ai-email-composer': dynamic(() => import('@/components/tools/AiEmailComposer').then(mod => mod.AiEmailComposer)),
+  'ai-image-generator': dynamic(() => import('@/components/tools/AiImageGenerator').then(mod => mod.AiImageGenerator)),
+  'ai-product-description-writer': dynamic(() => import('@/components/tools/AiProductDescriptionWriter').then(mod => mod.AiProductDescriptionWriter)),
+  'ai-story-generator': dynamic(() => import('@/components/tools/AiStoryGenerator').then(mod => mod.AiStoryGenerator)),
+  'ai-tweet-generator': dynamic(() => import('@/components/tools/AiTweetGenerator').then(mod => mod.AiTweetGenerator)),
+  'ai-voice-cloning': dynamic(() => import('@/components/tools/AiVoiceCloning').then(mod => mod.AiVoiceCloning)),
+  'ai-story-visualizer': dynamic(() => import('@/components/tools/AiStoryVisualizer').then(mod => mod.AiStoryVisualizer)),
+  'add-watermark-to-pdf': dynamic(() => import('@/components/tools/AddWatermarkToPdf').then(mod => mod.AddWatermarkToPdf)),
+  'age-calculator': dynamic(() => import('@/components/tools/AgeCalculator').then(mod => mod.AgeCalculator)),
+  'amazon-shipping-label-cropper': dynamic(() => import('@/components/tools/AmazonShippingLabelCropper').then(mod => mod.AmazonShippingLabelCropper)),
+  'myntra-shipping-label-cropper': dynamic(() => import('@/components/tools/MyntraShippingLabelCropper').then(mod => mod.MyntraShippingLabelCropper)),
+  'flipkart-shipping-label-cropper': dynamic(() => import('@/components/tools/FlipkartShippingLabelCropper').then(mod => mod.FlipkartShippingLabelCropper)),
+  'meesho-shipping-label-cropper': dynamic(() => import('@/components/tools/MeeshoShippingLabelCropper').then(mod => mod.MeeshoShippingLabelCropper)),
+  'base64-converter': dynamic(() => import('@/components/tools/Base64Converter').then(mod => mod.Base64Converter)),
+  'css-minifier': dynamic(() => import('@/components/tools/CssMinifier').then(mod => mod.CssMinifier)),
+  'discount-calculator': dynamic(() => import('@/components/tools/DiscountCalculator').then(mod => mod.DiscountCalculator)),
+  'date-calculator': dynamic(() => import('@/components/tools/DateCalculator').then(mod => mod.DateCalculator)),
+  'compress-pdf': dynamic(() => import('@/components/tools/CompressPdf').then(mod => mod.CompressPdf)),
+  'excel-to-pdf': dynamic(() => import('@/components/tools/ExcelToPdf').then(mod => mod.ExcelToPdf)),
+  'reverse-text': dynamic(() => import('@/components/tools/ReverseText').then(mod => mod.ReverseText)),
+  'remove-extra-spaces': dynamic(() => import('@/components/tools/RemoveExtraSpaces').then(mod => mod.RemoveExtraSpaces)),
+  'find-and-replace': dynamic(() => import('@/components/tools/FindAndReplace').then(mod => mod.FindAndReplace)),
+  'random-word-generator': dynamic(() => import('@/components/tools/RandomWordGenerator').then(mod => mod.RandomWordGenerator)),
+  'rotate-image': dynamic(() => import('@/components/tools/RotateImage').then(mod => mod.RotateImage)),
+  'png-to-jpg': dynamic(() => import('@/components/tools/PngToJpg').then(mod => mod.PngToJpg)),
+  'jpg-to-png': dynamic(() => import('@/components/tools/JpgToPng').then(mod => mod.JpgToPng)),
+  'image-to-base64': dynamic(() => import('@/components/tools/ImageToBase64').then(mod => mod.ImageToBase64)),
+  'image-resizer': dynamic(() => import('@/components/tools/ImageResizer').then(mod => mod.ImageResizer)),
+  'image-background-remover': dynamic(() => import('@/components/tools/ImageBackgroundRemover').then(mod => mod.ImageBackgroundRemover)),
+  'admob-revenue-calculator': dynamic(() => import('@/components/tools/AdMobRevenueCalculator').then(mod => mod.AdMobRevenueCalculator)),
+  'adsense-revenue-calculator': dynamic(() => import('@/components/tools/AdSenseRevenueCalculator').then(mod => mod.AdSenseRevenueCalculator)),
+  'ifsc-code-to-bank-details': dynamic(() => import('@/components/tools/IFSCCodeToBankDetails').then(mod => mod.IFSCCodetoBankDetails)),
+  'gst-calculator': dynamic(() => import('@/components/tools/GSTCalculator').then(mod => mod.GSTCalculator)),
+  'image-color-extractor': dynamic(() => import('@/components/tools/ImageColorExtractor').then(mod => mod.ImageColorExtractor)),
+  'image-cropper': dynamic(() => import('@/components/tools/ImageCropper').then(mod => mod.ImageCropper)),
+  'image-compressor': dynamic(() => import('@/components/tools/ImageCompressor').then(mod => mod.ImageCompressor)),
+  'image-text-extractor': dynamic(() => import('@/components/tools/ImageTextExtractor').then(mod => mod.ImageTextExtractor)),
+  'image-converter': dynamic(() => import('@/components/tools/ImageConverter').then(mod => mod.ImageConverter)),
+  'pdf-splitter': dynamic(() => import('@/components/tools/PdfSplitter').then(mod => mod.PdfSplitter)),
+  'word-to-pdf': dynamic(() => import('@/components/tools/WordToPdf').then(mod => mod.WordToPdf)),
+  'rotate-pdf': dynamic(() => import('@/components/tools/RotatePdf').then(mod => mod.RotatePdf)),
+  'pdf-to-word': dynamic(() => import('@/components/tools/PdfToWord').then(mod => mod.PdfToWord)),
+  'pdf-to-jpg': dynamic(() => import('@/components/tools/PdfToJpg').then(mod => mod.PdfToJpg)),
+  'meta-tag-generator': dynamic(() => import('@/components/tools/MetaTagGenerator').then(mod => mod.MetaTagGenerator)),
+  'robots.txt-generator': dynamic(() => import('@/components/tools/RobotsTxtGenerator').then(mod => mod.RobotsTxtGenerator)),
+  'xml-sitemap-generator': dynamic(() => import('@/components/tools/XmlSitemapGenerator').then(mod => mod.XmlSitemapGenerator)),
+  'favicon-checker': dynamic(() => import('@/components/tools/FaviconChecker').then(mod => mod.FaviconChecker)),
+  'keyword-density-checker': dynamic(() => import('@/components/tools/KeywordDensityChecker').then(mod => mod.KeywordDensityChecker)),
+  'serp-checker': dynamic(() => import('@/components/tools/SerpChecker').then(mod => mod.SerpChecker)),
+  'redirect-checker': dynamic(() => import('@/components/tools/RedirectChecker').then(mod => mod.RedirectChecker)),
+  'schema-generator': dynamic(() => import('@/components/tools/SchemaGenerator').then(mod => mod.SchemaGenerator)),
+  'title-tag-checker': dynamic(() => import('@/components/tools/TitleTagChecker').then(mod => mod.TitleTagChecker)),
+  'website-word-counter': dynamic(() => import('@/components/tools/WebsiteWordCounter').then(mod => mod.WebsiteWordCounter)),
+  'fuel-cost-calculator': dynamic(() => import('@/components/tools/FuelCostCalculator').then(mod => mod.FuelCostCalculator)),
+  'gpa-calculator': dynamic(() => import('@/components/tools/GpaCalculator').then(mod => mod.GpaCalculator)),
+  'loan-calculator': dynamic(() => import('@/components/tools/LoanCalculator').then(mod => mod.LoanCalculator)),
+  'percentage-calculator': dynamic(() => import('@/components/tools/PercentageCalculator').then(mod => mod.PercentageCalculator)),
+  'time-zone-converter': dynamic(() => import('@/components/tools/TimeZoneConverter').then(mod => mod.TimeZoneConverter)),
+  'unix-timestamp-converter': dynamic(() => import('@/components/tools/UnixTimestampConverter').then(mod => mod.UnixTimestampConverter)),
+  'html-minifier': dynamic(() => import('@/components/tools/HtmlMinifier').then(mod => mod.HtmlMinifier)),
+  'javascript-minifier': dynamic(() => import('@/components/tools/JavascriptMinifier').then(mod => mod.JavascriptMinifier)),
+  'sql-formatter': dynamic(() => import('@/components/tools/SqlFormatter').then(mod => mod.SqlFormatter)),
+  'uuid-generator': dynamic(() => import('@/components/tools/UuidGenerator').then(mod => mod.UuidGenerator)),
+  'youtube-video-downloader': dynamic(() => import('@/components/tools/YoutubeVideoDownloader').then(mod => mod.YoutubeVideoDownloader)),
+  'x-video-downloader': dynamic(() => import('@/components/tools/XVideoDownloader').then(mod => mod.XVideoDownloader)),
+  'instagram-video-downloader': dynamic(() => import('@/components/tools/InstagramVideoDownloader').then(mod => mod.InstagramVideoDownloader)),
+  'threads-video-downloader': dynamic(() => import('@/components/tools/ThreadsVideoDownloader').then(mod => mod.ThreadsVideoDownloader)),
+  'linkedin-video-downloader': dynamic(() => import('@/components/tools/LinkedinVideoDownloader').then(mod => mod.LinkedinVideoDownloader)),
+  'pinterest-video-downloader': dynamic(() => import('@/components/tools/PinterestVideoDownloader').then(mod => mod.PinterestVideoDownloader)),
+  'unlock-pdf': dynamic(() => import('@/components/tools/UnlockPdf').then(mod => mod.UnlockPdf)),
+  'lock-pdf': dynamic(() => import('@/components/tools/LockPdf').then(mod => mod.LockPdf)),
+  'pdf-page-reorder': dynamic(() => import('@/components/tools/PdfPageReorder').then(mod => mod.PdfPageReorder)),
+  'pdf-page-counter': dynamic(() => import('@/components/tools/PdfPageCounter').then(mod => mod.PdfPageCounter)),
+  'pdf-page-numberer': dynamic(() => import('@/components/tools/PdfPageNumberer').then(mod => mod.PdfPageNumberer)),
+  'pdf-page-remover': dynamic(() => import('@/components/tools/PdfPageRemover').then(mod => mod.PdfPageRemover)),
+  'pdf-organizer': dynamic(() => import('@/components/tools/PdfOrganizer').then(mod => mod.PdfOrganizer)),
+  'website-screenshot': dynamic(() => import('@/components/tools/WebsiteScreenshot').then(mod => mod.WebsiteScreenshot)),
+  'what-is-my-browser': dynamic(() => import('@/components/tools/WhatIsMyBrowser').then(mod => mod.WhatIsMyBrowser)),
+  'negative-marking-calculator': dynamic(() => import('@/components/tools/NegativeMarkingCalculator').then(mod => mod.NegativeMarkingCalculator)),
+  'youtube-channel-banner-downloader': dynamic(() => import('@/components/tools/YouTubeChannelBannerDownloader').then(mod => mod.YouTubeChannelBannerDownloader)),
+  'youtube-channel-logo-downloader': dynamic(() => import('@/components/tools/YouTubeChannelLogoDownloader').then(mod => mod.YouTubeChannelLogoDownloader)),
+  'youtube-video-description-extractor': dynamic(() => import('@/components/tools/YouTubeVideoDescriptionExtractor').then(mod => mod.YouTubeVideoDescriptionExtractor)),
+  'youtube-video-title-extractor': dynamic(() => import('@/components/tools/YouTubeVideoTitleExtractor').then(mod => mod.YouTubeVideoTitleExtractor)),
+  'youtube-video-thumbnail-downloader': dynamic(() => import('@/components/tools/YouTubeVideoThumbnailDownloader').then(mod => mod.YouTubeVideoThumbnailDownloader)),
+  'youtube-region-restriction-checker': dynamic(() => import('@/components/tools/YouTubeRegionRestrictionChecker').then(mod => mod.YouTubeRegionRestrictionChecker)),
+  'google-drive-direct-link-generator': dynamic(() => import('@/components/tools/GoogleDriveDirectLinkGenerator').then(mod => mod.GoogleDriveDirectLinkGenerator)),
+  'dropbox-direct-link-generator': dynamic(() => import('@/components/tools/DropboxDirectLinkGenerator').then(mod => mod.DropboxDirectLinkGenerator)),
+  'onedrive-direct-link-generator': dynamic(() => import('@/components/tools/OneDriveDirectLinkGenerator').then(mod => mod.OneDriveDirectLinkGenerator)),
+  'nsdl-pan-card-photo-and-signature-resizer': dynamic(() => import('@/components/tools/NSDLPANCardPhotoAndSignatureResizer').then(mod => mod.NSDLPANCardPhotoAndSignatureResizer)),
+  'uti-pan-card-photo-and-signature-resizer': dynamic(() => import('@/components/tools/UTIPANCardPhotoAndSignatureResizer').then(mod => mod.UTIPANCardPhotoAndSignatureResizer)),
+  'prn-to-pdf': dynamic(() => import('@/components/tools/PRNToPDF').then(mod => mod.PRNToPDF)),
+  'image-to-pdf': dynamic(() => import('@/components/tools/ImageToPdf').then(mod => mod.ImageToPdf)),
+  'pdf-signer': dynamic(() => import('@/components/tools/PdfSigner').then(mod => mod.PdfSigner)),
+  'marks-to-percentage-calculator': dynamic(() => import('@/components/tools/MarksToPercentageCalculator').then(mod => mod.MarksToPercentageCalculator)),
+  'srm-to-cgpa-calculator': dynamic(() => import('@/components/tools/SrmToCgpaCalculator').then(mod => mod.SrmToCgpaCalculator)),
+  'cgpa-to-marks-calculator': dynamic(() => import('@/components/tools/CgpaToMarksCalculator').then(mod => mod.CgpaToMarksCalculator)),
+  'gpa-to-percentage-converter': dynamic(() => import('@/components/tools/GpaToPercentageConverter').then(mod => mod.GpaToPercentageConverter)),
+  'gpa-to-cgpa-calculator': dynamic(() => import('@/components/tools/GpaToCgpaCalculator').then(mod => mod.GpaToCgpaCalculator)),
+  'percentage-to-cgpa-converter': dynamic(() => import('@/components/tools/PercentageToCgpaConverter').then(mod => mod.PercentageToCgpaConverter)),
+  'cgpa-to-gpa-converter': dynamic(() => import('@/components/tools/CgpaToGpaConverter').then(mod => mod.CgpaToGpaConverter)),
+  'text-encryption-decryption': dynamic(() => import('@/components/tools/TextEncryptionDecryption').then(mod => mod.TextEncryptionDecryption)),
+  'password-strength-checker': dynamic(() => import('@/components/tools/PasswordStrengthChecker').then(mod => mod.PasswordStrengthChecker)),
+  'sha256-hash-generator': dynamic(() => import('@/components/tools/Sha256HashGenerator').then(mod => mod.Sha256HashGenerator)),
+  'universal-hash-generator': dynamic(() => import('@/components/tools/UniversalHashGenerator').then(mod => mod.UniversalHashGenerator)),
+  'aes-encryption-decryption': dynamic(() => import('@/components/tools/AesEncryptionDecryption').then(mod => mod.AesEncryptionDecryption)),
+  'universal-file-converter': dynamic(() => import('@/components/tools/UniversalFileConverter').then(mod => mod.UniversalFileConverter)),
+  'image-shape-converter': dynamic(() => import('@/components/tools/ImageShapeConverter').then(mod => mod.ImageShapeConverter)),
+  'morse-to-text-translator': dynamic(() => import('@/components/tools/MorseToTextTranslator').then(mod => mod.MorseToTextTranslator)),
+  'text-to-morse-code': dynamic(() => import('@/components/tools/TextToMorseCode').then(mod => mod.TextToMorseCode)),
+  'cryptocurrency-converter': dynamic(() => import('@/components/tools/CryptocurrencyConverter').then(mod => mod.CryptocurrencyConverter)),
+  'barcode-generator': dynamic(() => import('@/components/tools/BarcodeGenerator').then(mod => mod.BarcodeGenerator)),
+  'currency-converter': dynamic(() => import('@/components/tools/CurrencyConverter').then(mod => mod.CurrencyConverter)),
+  'credit-card-interest-calculator': dynamic(() => import('@/components/tools/CreditCardInterestCalculator').then(mod => mod.CreditCardInterestCalculator)),
+  'image-metadata-viewer': dynamic(() => import('@/components/tools/ImageMetadataViewer').then(mod => mod.ImageMetadataViewer)),
+  'ai-code-generator': dynamic(() => import('@/components/tools/AiCodeGenerator').then(mod => mod.AiCodeGenerator)),
+  'ai-rewriter': dynamic(() => import('@/components/tools/AiRewriter').then(mod => mod.AiRewriter)),
+  'image-quality-enhancer': dynamic(() => import('@/components/tools/ImageQualityEnhancer').then(mod => mod.ImageQualityEnhancer)),
+  'ai-web-content-summarizer': dynamic(() => import('@/components/tools/AiWebContentSummarizer').then(mod => mod.AiWebContentSummarizer)),
+  'flip-image': dynamic(() => import('@/components/tools/FlipImage').then(mod => mod.FlipImage)),
+  'ico-converter': dynamic(() => import('@/components/tools/IcoConverter').then(mod => mod.IcoConverter)),
+  'binary-converter': dynamic(() => import('@/components/tools/BinaryConverter').then(mod => mod.BinaryConverter)),
+  'ai-seo-keyword-generator': dynamic(() => import('@/components/tools/AiSeoKeywordGenerator').then(mod => mod.AiSeoKeywordGenerator)),
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
