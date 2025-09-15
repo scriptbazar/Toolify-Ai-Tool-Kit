@@ -52,7 +52,7 @@ export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersP
         }
     }, 300); // Debounce time
     return () => clearTimeout(handler);
-  }, [query, searchQuery, router, createQueryString]);
+  }, [query, router, createQueryString, searchQuery]);
   
   const handleCategoryChange = (category: string) => {
     router.push(`/tools?${createQueryString({ category: category === 'all' ? null : category, page: null })}`);
@@ -67,7 +67,7 @@ export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersP
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for a tool..."
-            className="w-full pl-12 pr-44 h-14 text-base rounded-full shadow-lg border-2 focus:border-primary"
+            className="w-full pl-12 pr-44 h-14 text-base rounded-full shadow-lg border focus:border-primary"
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2">
              <Select value={activeCategory} onValueChange={handleCategoryChange}>
