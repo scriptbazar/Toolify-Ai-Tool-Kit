@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Search, LayoutGrid } from 'lucide-react';
 import { toolCategories } from '@/lib/constants';
@@ -29,6 +29,12 @@ export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersP
 
   const createQueryString = useCallback((params: Record<string, string | null>) => {
     const currentParams = new URLSearchParams();
+    
+    // Preserve existing 'q' if not changing it
+    if (query && params.q === undefined) {
+      currentParams.set('q', query);
+    }
+     // Preserve existing 'category' if not changing it
     if (activeCategory !== 'all' && params.category === undefined) {
         currentParams.set('category', activeCategory);
     }
@@ -41,17 +47,23 @@ export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersP
       }
     }
     return currentParams.toString();
-  }, [activeCategory]);
+  }, [activeCategory, query]);
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newQuery = e.target.value;
       setQuery(newQuery);
-      router.push(`/tools?${createQueryString({ q: newQuery })}`);
+      const queryString = createQueryString({ q: newQuery });
+      router.push(`/tools?${queryString}`);
   };
 
   const handleCategoryChange = (category: string) => {
-    router.push(`/tools?${createQueryString({ category: category, q: query })}`);
+    const queryString = createQueryString({ category: category });
+    router.push(`/tools?${queryString}`);
   };
+
+  useEffect(() => {
+    setQuery(searchQuery);
+  }, [searchQuery]);
 
   return (
     <div className="mt-8 space-y-6">
