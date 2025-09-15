@@ -34,6 +34,7 @@ export default async function ToolsDashboardPage({
       </div>
 
       <ToolFilters 
+        tools={visibleTools}
         searchQuery={searchQuery}
         activeCategory={activeCategory}
       />
