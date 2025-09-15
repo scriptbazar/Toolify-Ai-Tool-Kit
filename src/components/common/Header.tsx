@@ -196,10 +196,12 @@ export default function Header() {
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => router.push(`/my-favorites`)}>
-                        <Star className="mr-2 h-4 w-4" />
-                        <span>My Favorites</span>
-                      </DropdownMenuItem>
+                      {!isAdmin && (
+                         <DropdownMenuItem onClick={() => router.push(`/my-favorites`)}>
+                          <Star className="mr-2 h-4 w-4" />
+                          <span>My Favorites</span>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleLogout}>
                          <LogoutIcon className="mr-2 h-4 w-4" />
