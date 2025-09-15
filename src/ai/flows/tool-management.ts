@@ -443,7 +443,11 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
       await userRef.update({ favorites: FieldValue.arrayRemove(toolSlug) });
       return { success: true, message: "Removed from favorites." };
     } else {
-      await userRef.update({ favorites: FieldValue.arrayUnion(toolSlug) });
+      if (userData?.hasOwnProperty('favorites')) {
+        await userRef.update({ favorites: FieldValue.arrayUnion(toolSlug) });
+      } else {
+        await userRef.set({ favorites: [toolSlug] }, { merge: true });
+      }
       return { success: true, message: "Added to favorites." };
     }
   } catch (error: any) {
@@ -455,3 +459,4 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+

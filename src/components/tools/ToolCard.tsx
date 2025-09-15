@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, forwardRef } from 'react';
+import { useState, useEffect, forwardRef, type MouseEvent } from 'react';
 import Link from 'next/link';
 import type { Tool } from '@/ai/flows/tool-management.types';
 import * as Icons from 'lucide-react';
@@ -9,10 +9,7 @@ import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { toggleFavoriteTool } from '@/ai/flows/tool-management';
 import { useAuth } from '@/hooks/use-auth';
-import { addUserActivity } from '@/ai/flows/user-activity';
-
 
 type ToolCardProps = {
   tool: Tool;
@@ -42,6 +39,8 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
   const { toast } = useToast();
 
   const isClickable = status === 'Active' || status === 'New Version';
+  
+  const isProUser = user?.role === 'admin' || user?.planId === 'pro' || user?.planId === 'team';
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -54,11 +53,9 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
   };
   
   const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-      if (plan === 'Pro' && user?.role !== 'admin' && user?.planId !== 'pro' && user?.planId !== 'team') {
+      if (plan === 'Pro' && !isProUser) {
           e.preventDefault();
           showUpgradeDialog();
-      } else if (user) {
-          addUserActivity(user.uid, 'tool_usage', { name: tool.name, path: `/tools/${tool.slug}` });
       }
   }
 
@@ -111,7 +108,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
   if (isClickable) {
       return (
         <Link href={`/tools/${slug}`} passHref legacyBehavior>
-          <CardContent onClick={(e: any) => handleCardClick(e)}/>
+          <a onClick={handleCardClick}><CardContent /></a>
         </Link>
       );
   }
