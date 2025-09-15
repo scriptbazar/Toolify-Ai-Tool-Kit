@@ -17,7 +17,15 @@ export default async function Home() {
     const testimonials = allReviews.filter(review => review.status === 'approved');
     const steps = homepageSettings.steps || [];
     const features = homepageSettings.features || [];
-    const toolOfTheWeek = tools.find(tool => tool.isToolOfTheWeek) || null;
+    
+    const toolsOfTheWeek = tools.filter(tool => tool.isToolOfTheWeek);
+    let toolOfTheWeek = null;
+    if (toolsOfTheWeek.length > 0) {
+        // If multiple tools are marked, pick one at random to display
+        const randomIndex = Math.floor(Math.random() * toolsOfTheWeek.length);
+        toolOfTheWeek = toolsOfTheWeek[randomIndex];
+    }
+
     const latestPosts = allPosts.filter(p => p.status === 'Published').slice(0, 3);
 
   return (
