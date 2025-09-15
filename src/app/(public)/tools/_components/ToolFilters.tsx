@@ -11,12 +11,15 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 
 interface ToolFiltersProps {
   tools: Tool[];
-  searchQuery: string;
-  activeCategory: string;
 }
 
-export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersProps) {
+export function ToolFilters({ tools }: ToolFiltersProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const searchQuery = searchParams.get('q') || '';
+  const activeCategory = searchParams.get('category') || 'all';
+
   const [query, setQuery] = useState(searchQuery);
 
   const categoryCounts = useMemo(() => {
@@ -28,17 +31,7 @@ export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersP
   }, [tools]);
 
   const createQueryString = useCallback((params: Record<string, string | null>) => {
-    const currentParams = new URLSearchParams();
-    
-    // Preserve existing 'q' if not changing it
-    if (query && params.q === undefined) {
-      currentParams.set('q', query);
-    }
-     // Preserve existing 'category' if not changing it
-    if (activeCategory !== 'all' && params.category === undefined) {
-        currentParams.set('category', activeCategory);
-    }
-
+    const currentParams = new URLSearchParams(window.location.search);
     for (const [key, value] of Object.entries(params)) {
       if (value === null || value === '' || value === 'all') {
         currentParams.delete(key);
@@ -47,17 +40,17 @@ export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersP
       }
     }
     return currentParams.toString();
-  }, [activeCategory, query]);
+  }, []);
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newQuery = e.target.value;
       setQuery(newQuery);
-      const queryString = createQueryString({ q: newQuery });
+      const queryString = createQueryString({ q: newQuery, page: '1' });
       router.push(`/tools?${queryString}`);
   };
 
   const handleCategoryChange = (category: string) => {
-    const queryString = createQueryString({ category: category });
+    const queryString = createQueryString({ category: category, page: '1' });
     router.push(`/tools?${queryString}`);
   };
 

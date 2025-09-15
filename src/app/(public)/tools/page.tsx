@@ -35,8 +35,6 @@ export default async function ToolsDashboardPage({
 
       <ToolFilters 
         tools={visibleTools}
-        searchQuery={searchQuery}
-        activeCategory={activeCategory}
       />
       
       <div className="mt-8">
