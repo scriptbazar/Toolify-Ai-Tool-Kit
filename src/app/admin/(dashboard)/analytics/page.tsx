@@ -29,7 +29,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { collection, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, Timestamp, getCountFromServer, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -132,36 +132,41 @@ export default function AdminAnalyticsPage() {
         const usersRef = collection(db, 'users');
         const leadsRef = collection(db, 'leads');
 
-        const [usersSnapshot, leadsSnapshot] = await Promise.all([
+        const thirtyDaysAgo = new Date(new Date().setDate(new Date().getDate() - 30));
+        const sixtyDaysAgo = new Date(new Date().setDate(new Date().getDate() - 60));
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+        const newUsersQuery = query(usersRef, where('createdAt', '>=', thirtyDaysAgo));
+        const prevNewUsersQuery = query(usersRef, where('createdAt', '>=', sixtyDaysAgo), where('createdAt', '<', thirtyDaysAgo));
+        const activeUsersQuery = query(usersRef, where('lastActive', '>=', fiveMinutesAgo));
+        const prevTotalLeadsQuery = query(leadsRef, where('createdAt', '<', thirtyDaysAgo));
+
+        const [
+            usersCountSnap, 
+            leadsCountSnap, 
+            newUsersSnap,
+            prevNewUsersSnap,
+            activeUsersSnap,
+            prevTotalLeadsSnap,
+            allUsersSnap, // Still needed for chart data
+        ] = await Promise.all([
+            getCountFromServer(usersRef),
+            getCountFromServer(leadsRef),
+            getCountFromServer(newUsersQuery),
+            getCountFromServer(prevNewUsersQuery),
+            getCountFromServer(activeUsersQuery),
+            getCountFromServer(prevTotalLeadsQuery),
             getDocs(usersRef),
-            getDocs(leadsRef)
         ]);
 
-        const allUsersList = usersSnapshot.docs.map(doc => doc.data());
-        const allLeadsList = leadsSnapshot.docs.map(doc => doc.data());
+        const totalUsers = usersCountSnap.data().count;
+        const totalLeads = leadsCountSnap.data().count;
+        const newUsersCount = newUsersSnap.data().count;
+        const prevNewUsersCount = prevNewUsersSnap.data().count;
+        const activeUsersCount = activeUsersSnap.data().count;
+        const prevTotalUsers = totalUsers - newUsersCount;
+        const prevTotalLeads = prevTotalLeadsSnap.data().count;
 
-        const now = new Date();
-        const thirtyDaysAgo = new Date(new Date().setDate(now.getDate() - 30));
-        const sixtyDaysAgo = new Date(new Date().setDate(now.getDate() - 60));
-
-        // Current period stats
-        const totalUsers = allUsersList.length;
-        const totalLeads = allLeadsList.length;
-        const newUsersCount = allUsersList.filter(user => 
-            user.createdAt && (user.createdAt as Timestamp).toDate() >= thirtyDaysAgo
-        ).length;
-         const activeUsersCount = allUsersList.filter(user =>
-          user.lastActive && (user.lastActive as Timestamp).toDate() >= new Date(Date.now() - 5 * 60 * 1000)
-        ).length;
-        
-        // Previous period stats for percentage change
-        const prevTotalUsers = allUsersList.filter(user => (user.createdAt as Timestamp).toDate() < thirtyDaysAgo).length;
-        const prevTotalLeads = allLeadsList.filter(lead => (lead.createdAt as Timestamp).toDate() < thirtyDaysAgo).length;
-        const prevNewUsersCount = allUsersList.filter(user => {
-            const createdAt = (user.createdAt as Timestamp).toDate();
-            return createdAt >= sixtyDaysAgo && createdAt < thirtyDaysAgo;
-        }).length;
-        
         setStats({ 
             totalUsers, 
             totalLeads,
@@ -173,14 +178,15 @@ export default function AdminAnalyticsPage() {
         });
 
         const monthlySignups: { [key: string]: number } = {};
-        allUsersList.forEach(user => {
-          if (user.createdAt && user.createdAt.seconds) {
-            const date = new Date(user.createdAt.seconds * 1000);
-            if (date.getFullYear() === new Date().getFullYear()) {
-                const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
-                monthlySignups[monthKey] = (monthlySignups[monthKey] || 0) + 1;
+        allUsersSnap.forEach(doc => {
+            const user = doc.data();
+            if (user.createdAt && user.createdAt.seconds) {
+                const date = new Date(user.createdAt.seconds * 1000);
+                if (date.getFullYear() === new Date().getFullYear()) {
+                    const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+                    monthlySignups[monthKey] = (monthlySignups[monthKey] || 0) + 1;
+                }
             }
-          }
         });
         
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -209,7 +215,7 @@ export default function AdminAnalyticsPage() {
       }
     }
     fetchAnalyticsData();
-    const interval = setInterval(fetchAnalyticsData, 30000);
+    const interval = setInterval(fetchAnalyticsData, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
   }, []);
 
