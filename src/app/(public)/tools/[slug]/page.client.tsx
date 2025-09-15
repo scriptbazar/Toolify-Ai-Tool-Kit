@@ -28,6 +28,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'lorem-ipsum-generator': dynamic(() => import('@/components/tools/LoremIpsumGenerator').then(mod => mod.LoremIpsumGenerator)),
   'password-generator': dynamic(() => import('@/components/tools/PasswordGenerator').then(mod => mod.PasswordGenerator)),
   'json-formatter': dynamic(() => import('@/components/tools/JsonFormatter').then(mod => mod.JsonFormatter)),
+  'json-prompt-generator': dynamic(() => import('@/components/tools/JsonPromptGenerator').then(mod => mod.JsonPromptGenerator)),
   'bmi-calculator': dynamic(() => import('@/components/tools/BmiCalculator').then(mod => mod.BmiCalculator)),
   'text-to-speech': dynamic(() => import('@/components/tools/TextToSpeech').then(mod => mod.TextToSpeech)),
   'speech-to-text': dynamic(() => import('@/components/tools/SpeechToText').then(mod => mod.SpeechToText)),

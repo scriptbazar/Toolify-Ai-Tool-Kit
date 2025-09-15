@@ -23,6 +23,8 @@ import '@/ai/flows/pdf-management.ts';
 import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/prompt-generator.ts';
 import '@/ai/flows/prompt-generator.types.ts';
+import '@/ai/flows/json-prompt-generator.ts';
+import '@/ai/flows/json-prompt-generator.types.ts';
 import '@/ai/flows/ai-content-summarizer.ts';
 import '@/ai/flows/ai-content-summarizer.types.ts';
 import '@/ai/flows/ai-code-assistant.ts';

@@ -67,6 +67,7 @@ export { InstagramVideoDownloader } from './InstagramVideoDownloader';
 export { JavascriptMinifier } from './JavascriptMinifier';
 export { JpgToPng } from './JpgToPng';
 export { JsonFormatter } from './JsonFormatter';
+export { JsonPromptGenerator } from './JsonPromptGenerator';
 export { KeywordDensityChecker } from './KeywordDensityChecker';
 export { LinkedinVideoDownloader } from './LinkedinVideoDownloader';
 export { LoanCalculator } from './LoanCalculator';
