@@ -131,9 +131,9 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'XML Sitemap Generator', description: 'Create an XML sitemap for your website to help search engines like Google better discover and index all your pages.', icon: 'FileCode', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter your website\'s URL.', 'The tool will crawl your site to find all the pages.', 'Click "Generate Sitemap" to create the sitemap.xml file.', 'Download the file and upload it to your website\'s root directory.'] },
     { name: 'Favicon Checker', description: 'Check if a website has a favicon installed and preview how it looks in a browser tab.', icon: 'Image', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the URL of the website you want to check.', 'Click "Check Favicon".', 'The tool will display the website\'s favicon if it exists.'] },
     { name: 'Keyword Density Checker', description: 'Analyze the keyword density of your text content to optimize for SEO and avoid keyword stuffing.', icon: 'Key', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste your article or text into the text area.', 'Click "Analyze Text".', 'The tool will show you a table of the most frequent keywords and their density percentage.'] },
-    { name: 'SERP Checker', description: 'Check the real-time search engine results page (SERP) for a given keyword in a specific location.', icon: 'Search', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the keyword you want to check.', 'Select the country for the search results.', 'Optionally, enter your domain to highlight its position.', 'Click "Check Rankings" to see the top search results.'] },
-    { name: 'Redirect Checker', description: 'Check the full redirect chain and status code (301, 302, etc.) of any URL to diagnose SEO issues.', icon: 'Link', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter a URL into the input field.', 'Click "Check Redirects".', 'The tool will show you the full path the URL takes, including all status codes.'] },
-    { name: 'Schema Generator', description: 'Generate structured data markup (JSON-LD) for your website to improve how search engines understand your content.', icon: 'Code', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Select the type of schema you want to create (e.g., FAQ, Article).', 'Fill in the required fields for that schema type.', 'The tool will generate the JSON-LD script.', 'Copy the script and paste it into your website\'s HTML.'] },
+    { name: 'SERP Checker', description: 'Check the real-time search engine results page (SERP) for a given keyword in a specific location.', icon: 'Search', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the keyword you want to check.', 'Select the country for the search results.', 'Optionally, enter your domain to highlight its position.', 'Click "Check Rankings" to see the top search results.'] },
+    { name: 'Redirect Checker', description: 'Check the full redirect chain and status code (301, 302, etc.) of any URL to diagnose SEO issues.', icon: 'Link', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a URL into the input field.', 'Click "Check Redirects".', 'The tool will show you the full path the URL takes, including all status codes.'] },
+    { name: 'Schema Generator', description: 'Generate structured data markup (JSON-LD) for your website to improve how search engines understand your content.', icon: 'Code', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select the type of schema you want to create (e.g., FAQ, Article).', 'Fill in the required fields for that schema type.', 'The tool will generate the JSON-LD script.', 'Copy the script and paste it into your website\'s HTML.'] },
     { name: 'Title Tag Checker', description: 'Check the length (in characters and pixels) of your title tags to ensure they don\'t get truncated in search results.', icon: 'Text', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your proposed title tag into the input field.', 'The tool will show you the character count and an estimated pixel width.', 'A preview shows how your title might look in Google search results.'] },
     { name: 'Website Word Counter', description: 'Count the total number of words on any webpage by simply entering its URL.', icon: 'FileSearch', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the URL of the webpage you want to analyze.', 'Click "Count Words".', 'The tool will fetch the page content and display the total word count.'] },
     { name: 'Fuel Cost Calculator', description: 'Calculate the total fuel cost for a trip based on distance, fuel efficiency, and price per liter.', icon: 'Fuel', category: 'calculator', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the total distance of your trip in kilometers.', 'Provide your car\'s fuel efficiency (km/l).', 'Enter the current price of fuel per liter.', 'Click "Calculate Fuel Cost" to see your total estimated cost.'] },
@@ -153,7 +153,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Pinterest Video Downloader', description: 'Download videos from Pinterest pins to save your favorite ideas and tutorials.', icon: 'BookImage', category: 'video', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Copy the URL of the Pinterest pin that has the video.', 'Paste the URL into the download tool.', 'Click "Download Video" to save it.'] },
     { name: 'AI SEO Keyword Generator', description: 'Get a comprehensive list of primary, secondary, and long-tail keywords for any topic to boost your search engine ranking.', icon: 'Key', category: 'seo', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter your main topic or keyword.', 'Optionally, specify your target audience.', 'Click "Generate Keywords".', 'The AI will provide lists of primary, secondary, and long-tail keywords.'] },
     { name: 'Case Converter', description: 'Easily convert text between different letter cases like uppercase, lowercase, title case, and more with a single click.', icon: 'CaseSensitive', category: 'text', plan: 'Free', isNew: false, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste your text into the input field.', 'Click on the desired case conversion button (e.g., UPPERCASE).', 'The text will be instantly converted in the same box.'] },
-    { name: 'PPT to PDF', description: 'Convert your PowerPoint presentations (.ppt, .pptx) into universally accessible PDF files in seconds.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Upload your PowerPoint file (.ppt or .pptx).', 'Click the "Convert to PDF" button.', 'Download the generated PDF file.'] }
 ];
 
 const generateSlug = (name: string) => {
@@ -229,14 +228,14 @@ export async function getTools(): Promise<Tool[]> {
             
             // Destructure to remove fields that shouldn't be directly compared
             const { id: codeId, createdAt: codeCreatedAt, ...codeToolData } = codeTool;
-            const { id: dbId, createdAt: dbCreatedAt, ...dbToolData } = dbTool || {};
-
+            
             if (!dbTool) {
                 console.log(`[SYNC] Adding new tool to DB: ${codeSlug}`);
                 const docRef = toolsRef.doc(codeSlug);
                 batch.set(docRef, { ...codeToolData, createdAt: FieldValue.serverTimestamp() });
                 hasChanges = true;
             } else {
+                const { id: dbId, createdAt: dbCreatedAt, ...dbToolData } = dbTool;
                 // Compare the rest of the data
                 const needsUpdate = JSON.stringify(codeToolData) !== JSON.stringify(dbToolData);
                 
@@ -490,6 +489,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
 
 
 
