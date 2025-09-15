@@ -1,5 +1,4 @@
 
-import { ToolCard } from '@/components/tools/ToolCard';
 import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
 import { ToolFilters } from './_components/ToolFilters';
@@ -11,17 +10,17 @@ export default async function ToolsDashboardPage({
 }: {
   searchParams: { [key: string]: string | undefined };
 }) {
-  const allTools = await getTools();
-  const visibleTools = allTools.filter(tool => tool.status !== 'Disabled');
-
   const searchQuery = searchParams.q || '';
   const activeCategory = (searchParams.category as ToolCategory) || 'all';
 
-  const filteredTools = visibleTools.filter(tool => {
-    const categoryMatch = activeCategory === 'all' || tool.category === activeCategory;
-    const searchMatch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) || tool.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return categoryMatch && searchMatch;
+  // Fetch only the tools that match the search criteria from the server
+  const filteredTools = await getTools({
+    query: searchQuery,
+    category: activeCategory,
   });
+
+  // This is for the filter component to show counts for all visible tools
+  const allVisibleTools = await getTools();
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -33,7 +32,7 @@ export default async function ToolsDashboardPage({
       </div>
 
       <ToolFilters 
-        tools={visibleTools}
+        tools={allVisibleTools.filter(tool => tool.status !== 'Disabled')}
       />
       
       <div className="mt-8">

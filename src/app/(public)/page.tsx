@@ -1,4 +1,5 @@
 
+
 import { getTools } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
 import { getPosts } from '@/ai/flows/blog-management';
@@ -6,15 +7,15 @@ import { getReviews } from '@/ai/flows/review-management';
 import { HomePageClient } from './_components/HomePageClient';
 
 export default async function Home() {
-    const [tools, settings, allPosts, allReviews] = await Promise.all([
-        getTools(),
+    // Fetch a limited number of approved reviews for testimonials
+    const [tools, settings, allPosts, testimonials] = await Promise.all([
+        getTools({ limit: 10 }), // Fetch only a small number of tools for "Tool of the Week" logic
         getSettings(),
         getPosts(),
-        getReviews()
+        getReviews(undefined, 12) // Fetch up to 12 approved reviews
     ]);
 
     const homepageSettings = settings.homepage || {};
-    const testimonials = allReviews.filter(review => review.status === 'approved');
     const steps = homepageSettings.steps || [];
     const features = homepageSettings.features || [];
     

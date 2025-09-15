@@ -14,9 +14,10 @@ import { type Review, ReviewSchema, AddReviewInputSchema, AddReviewInput, Review
  * Fetches all reviews from the 'reviews' collection in Firestore.
  * If a toolId is provided, it fetches reviews only for that specific tool.
  * @param {string} [toolId] - Optional ID of the tool to fetch reviews for.
+ * @param {number} [limit] - Optional limit for the number of reviews to fetch.
  * @returns {Promise<Review[]>} A list of reviews.
  */
-export async function getReviews(toolId?: string): Promise<Review[]> {
+export async function getReviews(toolId?: string, limit?: number): Promise<Review[]> {
     try {
         const adminDb = getAdminDb();
         if (!adminDb) {
@@ -24,10 +25,40 @@ export async function getReviews(toolId?: string): Promise<Review[]> {
             return [];
         }
         
-        const reviewsRef = adminDb.collection('reviews');
-        const snapshot = await reviewsRef.orderBy('submittedOn', 'desc').get();
+        let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = adminDb.collection('reviews');
+
+        if (toolId) {
+            // If fetching for a specific tool, only get approved reviews
+            query = query.where('toolId', '==', toolId).where('status', '==', 'approved');
+        } else {
+            // For general queries (like testimonials on homepage), only get approved reviews
+             query = query.where('status', '==', 'approved');
+        }
+
+        query = query.orderBy('submittedOn', 'desc');
+
+        if (limit) {
+            query = query.limit(limit);
+        }
+        
+        const snapshot = await query.get();
         
         if (snapshot.empty) {
+            // If we are looking for testimonials and find none, fetch all reviews for admin panel instead.
+            // This logic might be too complex, a better way is to have separate functions.
+            // For now, let's keep it but this might be revised.
+            if (!toolId && !limit) {
+                const allReviewsSnapshot = await adminDb.collection('reviews').orderBy('submittedOn', 'desc').get();
+                if(allReviewsSnapshot.empty) return [];
+                return allReviewsSnapshot.docs.map(doc => {
+                     const data = doc.data();
+                    return ReviewSchema.parse({
+                        id: doc.id,
+                        ...data,
+                        submittedOn: (data.submittedOn as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+                    });
+                })
+            }
             return [];
         }
 
@@ -40,12 +71,20 @@ export async function getReviews(toolId?: string): Promise<Review[]> {
             });
         });
 
-        // If a toolId is provided, filter for that tool and for approved reviews
-        if (toolId) {
-            return allReviews.filter(review => review.toolId === toolId && review.status === 'approved');
+        // If no toolId and no limit (for admin panel), fetch all reviews regardless of status
+        if (!toolId && !limit) {
+             const allReviewsSnapshot = await adminDb.collection('reviews').orderBy('submittedOn', 'desc').get();
+             if(allReviewsSnapshot.empty) return [];
+             return allReviewsSnapshot.docs.map(doc => {
+                const data = doc.data();
+                return ReviewSchema.parse({
+                    id: doc.id,
+                    ...data,
+                    submittedOn: (data.submittedOn as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+                });
+             });
         }
-
-        // If no toolId, return all reviews (for admin panel)
+        
         return allReviews;
 
     } catch (error) {
