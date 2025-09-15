@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -136,7 +135,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Schema Generator', description: 'Generate structured data markup (JSON-LD) for your website to improve how search engines understand your content.', icon: 'Code', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select the type of schema you want to create (e.g., FAQ, Article).', 'Fill in the required fields for that schema type.', 'The tool will generate the JSON-LD script.', 'Copy the script and paste it into your website\'s HTML.'] },
     { name: 'Title Tag Checker', description: 'Check the length (in characters and pixels) of your title tags to ensure they don\'t get truncated in search results.', icon: 'Text', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your proposed title tag into the input field.', 'The tool will show you the character count and an estimated pixel width.', 'A preview shows how your title might look in Google search results.'] },
     { name: 'Website Word Counter', description: 'Count the total number of words on any webpage by simply entering its URL.', icon: 'FileSearch', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the URL of the webpage you want to analyze.', 'Click "Count Words".', 'The tool will fetch the page content and display the total word count.'] },
-    { name: 'Fuel Cost Calculator', description: 'Calculate the total fuel cost for a trip based on distance, fuel efficiency, and price per liter.', icon: 'Fuel', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the total distance of your trip in kilometers.', 'Provide your car\'s fuel efficiency (km/l).', 'Enter the current price of fuel per liter.', 'Click "Calculate Fuel Cost" to see the total estimated cost.'] },
+    { name: 'Fuel Cost Calculator', description: 'Calculate the total fuel cost for a trip based on distance, fuel efficiency, and price per liter.', icon: 'Fuel', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the total distance of your trip in kilometers.', 'Provide your car\'s fuel efficiency (km/l).', 'Enter the current price of fuel per liter.', 'Click "Calculate Fuel Cost" to see your total estimated cost.'] },
     { name: 'GPA Calculator', description: 'Calculate your Grade Point Average (GPA) based on your course credits and grades.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Add a row for each of your courses.', 'Enter the credits and the grade you received for each course.', 'Click "Calculate GPA".', 'The tool will display your calculated GPA.'] },
     { name: 'Loan Calculator', description: 'Calculate your monthly loan payments, total payment, and total interest for mortgages, car loans, or personal loans.', icon: 'Landmark', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the total loan amount.', 'Input the annual interest rate.', 'Specify the loan term in years or months.', 'Click "Calculate" to see your monthly payment and total interest.'] },
     { name: 'Percentage Calculator', description: 'Easily calculate percentages, find what a percentage of a number is, or determine percentage change.', icon: 'Percent', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select the type of calculation you want to perform.', 'Enter the required values in the input fields.', 'Click "Calculate" to see the result.'] },
@@ -433,21 +432,21 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
   try {
     const userRef = adminDb.collection('users').doc(userId);
     const userDoc = await userRef.get();
+
     if (!userDoc.exists) {
       return { success: false, message: "User not found." };
     }
+
     const userData = userDoc.data();
     const currentFavorites: string[] = userData?.favorites || [];
 
     if (currentFavorites.includes(toolSlug)) {
+      // The field exists, so we can use update.
       await userRef.update({ favorites: FieldValue.arrayRemove(toolSlug) });
       return { success: true, message: "Removed from favorites." };
     } else {
-      if (userData?.hasOwnProperty('favorites')) {
-        await userRef.update({ favorites: FieldValue.arrayUnion(toolSlug) });
-      } else {
-        await userRef.set({ favorites: [toolSlug] }, { merge: true });
-      }
+      // If the field might not exist, using set with merge is safer.
+      await userRef.set({ favorites: FieldValue.arrayUnion(toolSlug) }, { merge: true });
       return { success: true, message: "Added to favorites." };
     }
   } catch (error: any) {
@@ -460,3 +459,8 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
     
 
+
+
+    
+
+    
