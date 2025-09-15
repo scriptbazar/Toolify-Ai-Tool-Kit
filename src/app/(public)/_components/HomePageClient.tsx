@@ -93,7 +93,7 @@ export function HomePageClient({ testimonials, steps, features, toolOfTheWeek, l
             Your All-in-One <span className="text-primary">Smart</span> <span className="text-accent">Toolkit</span>
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground">
-            Over 100+ smart utility and AI-powered tools to boost your productivity. From text manipulation to AI image generation, we've got you covered.
+            Boost your productivity with our suite of 100+ smart utilities and AI-powered tools.
           </p>
           <div className="mt-8 flex justify-center">
             <Button asChild size="lg">
@@ -248,5 +248,3 @@ export function HomePageClient({ testimonials, steps, features, toolOfTheWeek, l
     </>
     );
 }
-
-    
