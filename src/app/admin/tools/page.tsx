@@ -117,6 +117,7 @@ export default function AdminToolsPage() {
     pro: allTools.filter(t => t.plan === 'Pro').length,
     free: allTools.filter(t => t.plan === 'Free').length,
     new: allTools.filter(t => t.isNew).length,
+    toolOfTheWeek: allTools.filter(t => t.isToolOfTheWeek).length,
     active: allTools.filter(t => t.status === 'Active').length,
     disabled: allTools.filter(t => t.status === 'Disabled').length,
     maintenance: allTools.filter(t => t.status === 'Maintenance').length,
@@ -132,6 +133,7 @@ export default function AdminToolsPage() {
       if (activeFilter === 'pro') return tool.plan === 'Pro';
       if (activeFilter === 'free') return tool.plan === 'Free';
       if (activeFilter === 'new') return tool.isNew;
+      if (activeFilter === 'toolOfTheWeek') return tool.isToolOfTheWeek;
       if (activeFilter === 'active') return tool.status === 'Active';
       if (activeFilter === 'disabled') return tool.status === 'Disabled';
       if (activeFilter === 'maintenance') return tool.status === 'Maintenance';
@@ -219,6 +221,7 @@ export default function AdminToolsPage() {
     { id: 'pro', label: 'Pro', icon: Star, count: counts.pro },
     { id: 'free', label: 'Free', icon: Package, count: counts.free },
     { id: 'new', label: 'New', icon: Sparkles, count: counts.new },
+    { id: 'toolOfTheWeek', label: 'Tool of Week', icon: Star, count: counts.toolOfTheWeek },
     { id: 'active', label: 'Active', icon: CheckCircle, count: counts.active },
     { id: 'beta', label: 'Beta', icon: FlaskConical, count: counts.beta },
     { id: 'newVersion', label: 'New Version', icon: GitCommitVertical, count: counts.newVersion },
