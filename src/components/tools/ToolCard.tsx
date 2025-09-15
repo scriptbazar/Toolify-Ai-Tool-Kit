@@ -72,7 +72,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
         !isClickable && "opacity-10 blur-sm"
       )}></div>
       <div className={cn(
-        "relative flex h-full flex-col items-center justify-start rounded-lg border bg-card p-6 text-center shadow-lg transition-all duration-300 group-hover:-translate-y-1",
+        "relative flex h-full flex-col items-center justify-start rounded-lg border bg-card p-6 text-center transition-all duration-300 group-hover:-translate-y-1",
         !isClickable && "opacity-70"
       )}>
         {statusBadge ? statusBadge : (
