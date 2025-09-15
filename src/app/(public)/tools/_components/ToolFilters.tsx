@@ -48,35 +48,37 @@ export function ToolFilters({ searchQuery, activeCategory }: ToolFiltersProps) {
     <div className="mt-8 space-y-6">
       <div className="flex flex-col sm:flex-row items-center justify-center gap-2 max-w-2xl mx-auto">
         <form onSubmit={handleSearch} className="relative w-full flex-grow">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for a tool..."
-            className="w-full pl-12 h-12 text-base rounded-full shadow-md"
+            className="w-full pl-12 pr-44 h-14 text-base rounded-full shadow-lg border-2 focus:border-primary"
           />
-        </form>
-         <Select value={activeCategory} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-full sm:w-[220px] h-12 rounded-full shadow-md text-base">
-                <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="all">
-                    <div className="flex items-center gap-2">
-                        <LayoutGrid className="h-4 w-4" />
-                        All Categories
-                    </div>
-                </SelectItem>
-                {toolCategories.map(cat => (
-                    <SelectItem key={cat.id} value={cat.id}>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+             <Select value={activeCategory} onValueChange={handleCategoryChange}>
+                <SelectTrigger className="w-auto h-10 rounded-full shadow-inner bg-muted/50 border-0">
+                    <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">
                         <div className="flex items-center gap-2">
-                        <cat.Icon className="h-4 w-4" />
-                        {cat.name}
+                            <LayoutGrid className="h-4 w-4" />
+                            All Categories
                         </div>
                     </SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
+                    {toolCategories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                            <div className="flex items-center gap-2">
+                            <cat.Icon className="h-4 w-4" />
+                            {cat.name}
+                            </div>
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+          </div>
+        </form>
       </div>
     </div>
   );
