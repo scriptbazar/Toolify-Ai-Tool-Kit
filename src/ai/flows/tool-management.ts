@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -8,6 +9,7 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { type Tool, ToolSchema, UpsertToolInputSchema, type ToolRequest, ToolRequestSchema } from './tool-management.types';
 import { z } from 'zod';
+import { cache } from 'react';
 
 const TOOLS_COLLECTION = 'tools';
 const TOOL_REQUESTS_COLLECTION = 'toolRequests';
@@ -167,7 +169,7 @@ const generateSlug = (name: string) => {
  * - Tools in both will be UPDATED if their core properties (name, description, icon) differ.
  *   This leaves other properties like plan, status, etc., intact in the DB.
  */
-export async function getTools(): Promise<Tool[]> {
+export const getTools = cache(async (): Promise<Tool[]> => {
     const adminDb = getAdminDb();
     if (!adminDb) {
         console.error("Firebase Admin is not initialized. Cannot fetch tools.");
@@ -256,7 +258,7 @@ export async function getTools(): Promise<Tool[]> {
                  return ToolSchema.parse({ id: doc.id, slug: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
             });
         } else {
-            console.log("[SYNC] No database changes needed.");
+            // console.log("[SYNC] No database changes needed.");
             // Return sorted list from DB if no changes
              return Array.from(dbTools.values()).sort((a, b) => a.name.localeCompare(b.name));
         }
@@ -265,7 +267,7 @@ export async function getTools(): Promise<Tool[]> {
         console.error("Error synchronizing tools:", error);
         return []; // Return empty on error to prevent crashes
     }
-}
+});
 
 
 /**
