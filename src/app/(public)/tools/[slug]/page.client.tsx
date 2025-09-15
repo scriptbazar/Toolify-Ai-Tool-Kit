@@ -160,7 +160,6 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-web-content-summarizer': dynamic(() => import('@/components/tools/AiWebContentSummarizer').then(mod => mod.AiWebContentSummarizer)),
   'flip-image': dynamic(() => import('@/components/tools/FlipImage').then(mod => mod.FlipImage)),
   'ico-converter': dynamic(() => import('@/components/tools/IcoConverter').then(mod => mod.IcoConverter)),
-  'binary-converter': dynamic(() => import('@/components/tools/BinaryConverter').then(mod => mod.BinaryConverter)),
   'ai-seo-keyword-generator': dynamic(() => import('@/components/tools/AiSeoKeywordGenerator').then(mod => mod.AiSeoKeywordGenerator)),
 };
 

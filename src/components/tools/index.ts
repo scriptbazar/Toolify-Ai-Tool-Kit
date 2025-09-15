@@ -23,7 +23,6 @@ export { AiWebContentSummarizer } from './AiWebContentSummarizer';
 export { AmazonShippingLabelCropper } from './AmazonShippingLabelCropper';
 export { BarcodeGenerator } from './BarcodeGenerator';
 export { Base64Converter } from './Base64Converter';
-export { BinaryConverter } from './BinaryConverter';
 export { BmiCalculator } from './BmiCalculator';
 export { CaseConverter } from './CaseConverter';
 export { CategoryCard } from './CategoryCard';
