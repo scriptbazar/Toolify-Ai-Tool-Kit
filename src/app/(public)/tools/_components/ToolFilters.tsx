@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,7 @@ export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersP
     return counts;
   }, [tools]);
 
-  const createQueryString = (params: Record<string, string | null>) => {
+  const createQueryString = useCallback((params: Record<string, string | null>) => {
     const currentParams = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(params)) {
       if (value === null || value === '') {
@@ -43,7 +43,7 @@ export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersP
       }
     }
     return currentParams.toString();
-  };
+  }, [searchParams]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
