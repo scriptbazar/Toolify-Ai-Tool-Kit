@@ -1,9 +1,8 @@
 
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, startAfter, endBefore, Query, DocumentData, QueryDocumentSnapshot, where, QueryConstraint } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -16,7 +15,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search, MessageSquare, Edit, Copy, UserCog, Trash2, Check, Shield } from 'lucide-react';
+import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search, MessageSquare, Edit, Copy, UserCog, Trash2, Check, Shield, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -51,50 +50,74 @@ export default function AdminUsersPage() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'signup' | 'lead' | 'comment'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageDocs, setPageDocs] = useState<(QueryDocumentSnapshot<DocumentData> | null)[]>( [null] );
+  
   const { toast } = useToast();
 
-  const fetchUsersAndLeads = async () => {
+  const fetchUsersAndLeads = async (page = 1, direction: 'next' | 'prev' | 'first' = 'first') => {
     setLoading(true);
     try {
-      const usersCollection = collection(db, 'users');
-      const usersQuery = query(usersCollection, orderBy('createdAt', 'desc'));
-      const usersSnapshot = await getDocs(usersQuery);
-      const usersList: User[] = usersSnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
-          email: data.email,
-          userName: data.userName,
-          role: data.role,
-          type: 'Signup',
-          createdAt: data.createdAt,
-        };
-      });
+        const usersCollection = collection(db, 'users');
+        const leadsCollection = collection(db, 'leads');
+        const constraints: QueryConstraint[] = [orderBy('createdAt', 'desc')];
+        
+        const getQuery = (coll: Query<DocumentData>) => {
+            let q = query(coll, ...constraints);
+            if (direction === 'next' && page > 1 && pageDocs[page - 1]) {
+                q = query(coll, ...constraints, startAfter(pageDocs[page - 1]), limit(ITEMS_PER_PAGE));
+            } else if (direction === 'prev' && page > 0 && pageDocs[page - 1]) {
+                q = query(coll, ...constraints, endBefore(pageDocs[page - 1]), limit(ITEMS_PER_PAGE));
+            } else {
+                 q = query(coll, ...constraints, limit(ITEMS_PER_PAGE));
+            }
+            return q;
+        }
 
-      const leadsCollection = collection(db, 'leads');
-      const leadsQuery = query(leadsCollection, orderBy('createdAt', 'desc'));
-      const leadsSnapshot = await getDocs(leadsQuery);
-      const leadsList: User[] = leadsSnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          name: data.name,
-          email: data.email,
-          role: 'lead',
-          type: 'Lead',
-          createdAt: data.createdAt,
-        };
-      });
+        let usersSnapshot, leadsSnapshot;
+        if (activeFilter === 'all' || activeFilter === 'signup') {
+            usersSnapshot = await getDocs(getQuery(usersCollection));
+        }
+        if (activeFilter === 'all' || activeFilter === 'lead') {
+            leadsSnapshot = await getDocs(getQuery(leadsCollection));
+        }
+       
+        const usersList: User[] = usersSnapshot?.docs.map(doc => {
+            const data = doc.data();
+            return {
+            id: doc.id,
+            name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+            email: data.email,
+            userName: data.userName,
+            role: data.role,
+            type: 'Signup',
+            createdAt: data.createdAt,
+            };
+        }) || [];
 
-      const combinedList = [...usersList, ...leadsList].sort((a, b) => {
-        const dateA = a.createdAt?.seconds ?? 0;
-        const dateB = b.createdAt?.seconds ?? 0;
-        return dateB - dateA;
-      });
+        const leadsList: User[] = leadsSnapshot?.docs.map(doc => {
+            const data = doc.data();
+            return {
+            id: doc.id,
+            name: data.name,
+            email: data.email,
+            role: 'lead',
+            type: 'Lead',
+            createdAt: data.createdAt,
+            };
+        }) || [];
+        
+        const combinedList = [...usersList, ...leadsList].sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0));
+        
+        const lastDoc = usersSnapshot?.docs[usersSnapshot.docs.length - 1] || leadsSnapshot?.docs[leadsSnapshot.docs.length - 1];
+        
+        setPageDocs(prev => {
+            const newDocs = [...prev];
+            newDocs[page] = lastDoc || null;
+            return newDocs;
+        });
 
-      setAllUsers(combinedList);
-      setError(null);
+        setAllUsers(combinedList);
+        setError(null);
     } catch (err: any) {
       console.error("Error fetching data:", err);
       if (err.code === 'permission-denied' || err.code === 'failed-precondition') {
@@ -108,8 +131,21 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
-    fetchUsersAndLeads();
-  }, []);
+    fetchUsersAndLeads(1, 'first');
+  }, [activeFilter]);
+  
+  const handleNextPage = () => {
+    const newPage = currentPage + 1;
+    setCurrentPage(newPage);
+    fetchUsersAndLeads(newPage, 'next');
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage <= 1) return;
+    const newPage = currentPage - 1;
+    setCurrentPage(newPage);
+    fetchUsersAndLeads(newPage, 'prev');
+  };
   
   const copyToClipboard = (text: string, fieldName: string) => {
     navigator.clipboard.writeText(text);
@@ -120,7 +156,7 @@ export default function AdminUsersPage() {
     const result = await updateUserRole({ userId, newRole });
     if (result.success) {
       toast({ title: 'Success', description: 'User role updated successfully.' });
-      fetchUsersAndLeads(); // Refresh data
+      fetchUsersAndLeads(currentPage, 'first'); // Refresh data
     } else {
       toast({ title: 'Error', description: result.message, variant: 'destructive' });
     }
@@ -130,7 +166,7 @@ export default function AdminUsersPage() {
     const result = await deleteUser(userId);
     if (result.success) {
       toast({ title: 'Success', description: 'User has been deleted.' });
-      fetchUsersAndLeads(); // Refresh data
+      fetchUsersAndLeads(currentPage, 'first'); // Refresh data
     } else {
       toast({ title: 'Error', description: result.message, variant: 'destructive' });
     }
@@ -144,13 +180,7 @@ export default function AdminUsersPage() {
     });
   }, [allUsers, activeFilter, searchQuery]);
 
-  const paginatedUsers = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredUsers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredUsers, currentPage]);
 
-  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
-  
   const counts = useMemo(() => ({
     all: allUsers.length,
     signup: allUsers.filter(u => u.type === 'Signup').length,
@@ -161,6 +191,7 @@ export default function AdminUsersPage() {
   const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment') => {
       setActiveFilter(filter);
       setCurrentPage(1);
+      setPageDocs([null]);
   };
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -194,19 +225,19 @@ export default function AdminUsersPage() {
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
                 <Button variant={activeFilter === 'all' ? 'default' : 'outline'} onClick={() => handleFilterChange('all')}>
                     <Users className="mr-2 h-4 w-4"/>
-                    All Users ({counts.all})
+                    All Users
                 </Button>
                 <Button variant={activeFilter === 'signup' ? 'default' : 'outline'} onClick={() => handleFilterChange('signup')}>
                     <UserPlus className="mr-2 h-4 w-4"/>
-                    Signup Users ({counts.signup})
+                    Signup Users
                 </Button>
                 <Button variant={activeFilter === 'lead' ? 'default' : 'outline'} onClick={() => handleFilterChange('lead')}>
                     <User className="mr-2 h-4 w-4"/>
-                    Lead Users ({counts.lead})
+                    Lead Users
                 </Button>
                 <Button variant={activeFilter === 'comment' ? 'default' : 'outline'} onClick={() => handleFilterChange('comment')}>
                     <MessageSquare className="mr-2 h-4 w-4"/>
-                    Comment Users ({counts.comment})
+                    Comment Users
                 </Button>
             </div>
             <div className="relative w-full sm:w-auto">
@@ -247,8 +278,8 @@ export default function AdminUsersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedUsers.length > 0 ? (
-                    paginatedUsers.map(user => (
+                  {filteredUsers.length > 0 ? (
+                    filteredUsers.map(user => (
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">
                            <div className="flex items-center gap-2">
@@ -346,29 +377,27 @@ export default function AdminUsersPage() {
               </Table>
             </div>
           )}
-           {totalPages > 1 && (
-            <div className="flex items-center justify-end space-x-2 pt-4">
+           <div className="flex items-center justify-end space-x-2 pt-4">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={(e) => { e.stopPropagation(); setCurrentPage(prev => Math.max(prev - 1, 1)); }}
+                onClick={handlePrevPage}
                 disabled={currentPage === 1}
               >
-                Previous
+                <ArrowLeft className="mr-2 h-4 w-4" /> Previous
               </Button>
               <span className="text-sm text-muted-foreground">
-                  Page {currentPage} of {totalPages}
+                  Page {currentPage}
               </span>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={(e) => { e.stopPropagation(); setCurrentPage(prev => Math.min(prev + 1, totalPages)); }}
-                disabled={currentPage === totalPages}
+                onClick={handleNextPage}
+                disabled={filteredUsers.length < ITEMS_PER_PAGE}
               >
-                Next
+                Next <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
-          )}
         </CardContent>
       </Card>
     </div>
