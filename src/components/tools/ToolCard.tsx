@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, forwardRef, type MouseEvent } from 'react';
@@ -26,6 +27,8 @@ const getStatusBadge = (status: Tool['status']) => {
             return <Badge className="absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white shadow">Coming Soon</Badge>;
         case 'New Version':
             return <Badge className="absolute top-2 right-2 bg-green-500 hover:bg-green-600 text-white shadow">New Version</Badge>;
+        case 'Beta':
+            return <Badge className="absolute top-2 right-2 bg-orange-500 hover:bg-orange-600 text-white shadow">Beta</Badge>;
         default:
             return null;
     }
@@ -38,7 +41,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
   const statusBadge = getStatusBadge(status);
   const { toast } = useToast();
 
-  const isClickable = status === 'Active' || status === 'New Version';
+  const isClickable = status === 'Active' || status === 'New Version' || status === 'Beta';
   
   const isProUser = user?.role === 'admin' || user?.planId === 'pro' || user?.planId === 'team';
 
