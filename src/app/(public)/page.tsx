@@ -22,8 +22,7 @@ export default async function Home() {
     let toolOfTheWeek = null;
     if (toolsOfTheWeek.length > 0) {
         // If multiple tools are marked, pick one at random to display
-        // Use Date.now() to get a new seed for randomness on each server-side render
-        const randomIndex = Math.floor((Date.now() / 1000) % toolsOfTheWeek.length);
+        const randomIndex = Math.floor(Math.random() * toolsOfTheWeek.length);
         toolOfTheWeek = toolsOfTheWeek[randomIndex];
     }
 
