@@ -155,6 +155,7 @@ export default function UserPanelLayout({
   
   const allNavLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
+    { href: '/my-favorites', label: 'My Favorites', icon: Star },
     { href: '/my-media', label: 'My Media', icon: FileText },
     { href: '/usage-history', label: 'Usage History', icon: History },
     { href: '/community-chat', label: 'Community Chat', icon: MessageSquare },
