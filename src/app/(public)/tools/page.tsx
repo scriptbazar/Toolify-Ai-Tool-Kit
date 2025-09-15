@@ -1,5 +1,4 @@
 
-
 import { ToolCard } from '@/components/tools/ToolCard';
 import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
@@ -27,9 +26,9 @@ export default async function ToolsDashboardPage({
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Tools Dashboard</h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          Your one-stop-shop for productivity and creativity. Explore our suite of 100+ tools.
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Explore Our Tools</h1>
+        <p className="mt-4 text-muted-foreground">
+          Discover our comprehensive suite of 100+ powerful and easy-to-use tools.
         </p>
       </div>
 
