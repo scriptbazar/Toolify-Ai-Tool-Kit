@@ -12,9 +12,9 @@ export function ToolOfTheWeek({ tool }: { tool: Tool }) {
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
 
     return (
-        <Card className="bg-primary/10 border-primary border-2 shadow-lg">
+        <Card className="bg-card border-primary border-2 shadow-xl">
             <CardHeader className="text-center">
-                <div className="flex justify-center items-center gap-2 text-sm font-semibold text-primary uppercase tracking-widest mb-2">
+                <div className="inline-flex justify-center items-center gap-2 text-sm font-semibold text-primary uppercase tracking-widest mb-2">
                     <Star className="w-5 h-5"/>
                     <span>Tool of the Week</span>
                 </div>
