@@ -53,6 +53,8 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'flipkart-shipping-label-cropper': dynamic(() => import('@/components/tools/FlipkartShippingLabelCropper').then(mod => mod.FlipkartShippingLabelCropper)),
   'meesho-shipping-label-cropper': dynamic(() => import('@/components/tools/MeeshoShippingLabelCropper').then(mod => mod.MeeshoShippingLabelCropper)),
   'base64-converter': dynamic(() => import('@/components/tools/Base64Converter').then(mod => mod.Base64Converter)),
+  'binary-to-text': dynamic(() => import('@/components/tools/BinaryToText').then(mod => mod.BinaryToText)),
+  'text-to-binary': dynamic(() => import('@/components/tools/TextToBinary').then(mod => mod.TextToBinary)),
   'css-minifier': dynamic(() => import('@/components/tools/CssMinifier').then(mod => mod.CssMinifier)),
   'discount-calculator': dynamic(() => import('@/components/tools/DiscountCalculator').then(mod => mod.DiscountCalculator)),
   'date-calculator': dynamic(() => import('@/components/tools/DateCalculator').then(mod => mod.DateCalculator)),

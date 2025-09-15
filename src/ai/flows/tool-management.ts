@@ -47,6 +47,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Flipkart Shipping Label Cropper', description: 'Crop your Flipkart shipping labels from a full page to a 4x6 inch size in seconds, ideal for thermal printing.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Upload the standard PDF label from Flipkart.', 'Click the "Crop Flipkart Label" button.', 'A new PDF with a 4" x 6" label will be downloaded.'] },
     { name: 'Meesho Shipping Label Cropper', description: 'Optimize your Meesho shipping process by cropping default labels to a 4x6 inch format for your thermal printer.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Upload the standard PDF label from Meesho.', 'Click the "Crop Meesho Label" button.', 'A new PDF with a 4" x 6" label will be downloaded.'] },
     { name: 'Base64 Converter', description: 'Encode your text and data into Base64 format or decode Base64 strings back to their original form.', icon: 'Package', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter text in the input box.', 'Click "Encode" to convert it to Base64.', 'Alternatively, paste a Base64 string in the input box and click "Decode".', 'Use the "Swap" button to switch between input and output.'] },
+    { name: 'Binary to Text', description: 'Convert binary code into readable ASCII text.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the binary code (e.g., 01001000 01100101 01101100 01101100 01101111) in the input area.', 'Click the "Convert to Text" button.', 'The corresponding ASCII text will appear in the output area.'] },
+    { name: 'Text to Binary', description: 'Convert any text into binary code format.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the text you want to convert into the input area.', 'Click the "Convert to Binary" button.', 'The binary representation of your text will be displayed.'] },
     { name: 'CSS Minifier', description: 'Minify your CSS code to reduce file size, remove comments, and improve your website\'s loading times.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste your CSS code into the "Original CSS" box.', 'Click the "Minify CSS" button.', 'The minified code will appear in the "Minified CSS" box.', 'Click "Copy" to use the minified code.'] },
     { name: 'Discount Calculator', description: 'Easily calculate the final price after a discount and see exactly how much money you save.', icon: 'BadgePercent', category: 'calculator', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the original price of the item.', 'Enter the discount percentage.', 'Click the "Calculate" button.', 'View the final price and the amount you saved.'] },
     { name: 'Date Calculator', description: 'Calculate the duration between two dates or find a future/past date by adding or subtracting days, months, and years.', icon: 'CalendarDays', category: 'calculator', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Select the "Add/Subtract" or "Duration" tab.', 'For Add/Subtract: Pick a start date and enter the years, months, or days to add or subtract.', 'For Duration: Pick a start and end date.', 'Click the appropriate button to see the calculated result.'] },
@@ -132,7 +134,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'SERP Checker', description: 'Check the real-time search engine results page (SERP) for a given keyword in a specific location.', icon: 'Search', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the keyword you want to check.', 'Select the country for the search results.', 'Optionally, enter your domain to highlight its position.', 'Click "Check Rankings" to see the top search results.'] },
     { name: 'Redirect Checker', description: 'Check the full redirect chain and status code (301, 302, etc.) of any URL to diagnose SEO issues.', icon: 'Link', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter a URL into the input field.', 'Click "Check Redirects".', 'The tool will show you the full path the URL takes, including all status codes.'] },
     { name: 'Schema Generator', description: 'Generate structured data markup (JSON-LD) for your website to improve how search engines understand your content.', icon: 'Code', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Select the type of schema you want to create (e.g., FAQ, Article).', 'Fill in the required fields for that schema type.', 'The tool will generate the JSON-LD script.', 'Copy the script and paste it into your website\'s HTML.'] },
-    { name: 'Title Tag Checker', description: 'Check the length (in characters and pixels) of your title tags to ensure they don\'t get truncated in search results.', icon: 'Text', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter your proposed title tag into the input field.', 'The tool will show you the character count and an estimated pixel width.', 'A preview shows how your title might look in Google search results.'] },
+    { name: 'Title Tag Checker', description: 'Check the length (in characters and pixels) of your title tags to ensure they don\'t get truncated in search results.', icon: 'Text', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your proposed title tag into the input field.', 'The tool will show you the character count and an estimated pixel width.', 'A preview shows how your title might look in Google search results.'] },
     { name: 'Website Word Counter', description: 'Count the total number of words on any webpage by simply entering its URL.', icon: 'FileSearch', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the URL of the webpage you want to analyze.', 'Click "Count Words".', 'The tool will fetch the page content and display the total word count.'] },
     { name: 'Fuel Cost Calculator', description: 'Calculate the total fuel cost for a trip based on distance, fuel efficiency, and price per liter.', icon: 'Fuel', category: 'calculator', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the total distance of your trip in kilometers.', 'Provide your car\'s fuel efficiency (km/l).', 'Enter the current price of fuel per liter.', 'Click "Calculate Fuel Cost" to see your total estimated cost.'] },
     { name: 'GPA Calculator', description: 'Calculate your Grade Point Average (GPA) based on your course credits and grades.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Add a row for each of your courses.', 'Enter the credits and the grade you received for each course.', 'Click "Calculate GPA".', 'The tool will display your calculated GPA.'] },
@@ -169,7 +171,16 @@ export async function getTools(): Promise<Tool[]> {
     const adminDb = getAdminDb();
     if (!adminDb) {
         console.error("Firebase Admin is not initialized. Cannot fetch tools.");
-        return [];
+        // Return a stable, empty version of tools from code.
+        return initialTools.map(toolData => {
+            const slug = generateSlug(toolData.name);
+            return ToolSchema.parse({
+                id: slug,
+                slug: slug,
+                createdAt: new Date().toISOString(),
+                ...toolData,
+            });
+        }).sort((a, b) => a.name.localeCompare(b.name));
     }
 
     const toolsRef = adminDb.collection(TOOLS_COLLECTION);
@@ -181,7 +192,8 @@ export async function getTools(): Promise<Tool[]> {
             const data = doc.data();
             const tool = ToolSchema.safeParse({ id: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
             if (tool.success) {
-                dbTools.set(tool.data.slug, tool.data);
+                // Use the doc.id which is the slug as the key
+                dbTools.set(doc.id, tool.data);
             } else {
                 console.warn(`Invalid tool data in Firestore with ID ${doc.id}:`, tool.error);
             }
@@ -191,9 +203,9 @@ export async function getTools(): Promise<Tool[]> {
         initialTools.forEach(toolData => {
             const slug = generateSlug(toolData.name);
             const tool = ToolSchema.parse({
-                id: slug,
+                id: slug, // The ID and slug are the same
                 slug: slug,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date().toISOString(), // This is temporary, will be replaced by server timestamp
                 ...toolData,
             });
             codeTools.set(slug, tool);
@@ -214,32 +226,24 @@ export async function getTools(): Promise<Tool[]> {
         // Find tools to add or update
         for (const [codeSlug, codeTool] of codeTools.entries()) {
             const dbTool = dbTools.get(codeSlug);
+            
+            // Destructure to remove fields that shouldn't be directly compared
+            const { id: codeId, createdAt: codeCreatedAt, ...codeToolData } = codeTool;
+            const { id: dbId, createdAt: dbCreatedAt, ...dbToolData } = dbTool || {};
+
             if (!dbTool) {
                 console.log(`[SYNC] Adding new tool to DB: ${codeSlug}`);
                 const docRef = toolsRef.doc(codeSlug);
-                 // Omit 'id' because it's the document key, and 'createdAt' for server timestamp
-                const { id, createdAt, ...toolToWrite } = codeTool;
-                batch.set(docRef, { ...toolToWrite, createdAt: FieldValue.serverTimestamp() });
+                batch.set(docRef, { ...codeToolData, createdAt: FieldValue.serverTimestamp() });
                 hasChanges = true;
             } else {
-                // Check if an update is needed by comparing properties
-                const needsUpdate = Object.keys(codeTool).some(key => {
-                    const codeValue = (codeTool as any)[key];
-                    const dbValue = (dbTool as any)[key];
-                     if (key === 'createdAt' || key === 'id') return false; // Ignore dynamic fields
-                     
-                     if (Array.isArray(codeValue) && Array.isArray(dbValue)) {
-                       return JSON.stringify(codeValue) !== JSON.stringify(dbValue);
-                     }
-                     
-                    return codeValue !== dbValue;
-                });
+                // Compare the rest of the data
+                const needsUpdate = JSON.stringify(codeToolData) !== JSON.stringify(dbToolData);
                 
                 if (needsUpdate) {
                     console.log(`[SYNC] Updating tool in DB: ${codeSlug}`);
                     const docRef = toolsRef.doc(codeSlug);
-                    const { id, createdAt, ...toolToWrite } = codeTool;
-                    batch.update(docRef, toolToWrite);
+                    batch.update(docRef, codeToolData);
                     hasChanges = true;
                 }
             }
@@ -486,5 +490,6 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
 
 
