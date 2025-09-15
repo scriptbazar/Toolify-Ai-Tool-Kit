@@ -67,9 +67,9 @@ export function ToolFilters({ tools }: ToolFiltersProps) {
             value={query}
             onChange={handleSearchChange}
             placeholder="Search for a tool..."
-            className="w-full pl-12 pr-44 h-14 text-base rounded-full shadow-lg focus:border-primary"
+            className="w-full pl-12 pr-4 sm:pr-44 h-14 text-base rounded-full shadow-lg focus:border-primary"
           />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden sm:block">
              <Select value={activeCategory} onValueChange={handleCategoryChange}>
                 <SelectTrigger className="w-auto h-10 rounded-full shadow-inner bg-muted/50 border-0">
                     <SelectValue placeholder="All Categories" />
