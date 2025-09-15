@@ -1,9 +1,10 @@
 
 
-import { ChatWidget } from '@/components/common/ChatWidget';
 import Footer from '@/components/common/Footer';
 import Header from '@/components/common/Header';
 import { AdBlockerDetector } from '@/components/common/AdBlockerDetector';
+import { DynamicChatWidget } from '@/components/common/DynamicChatWidget';
+
 
 export default function PublicLayout({
   children,
@@ -14,7 +15,7 @@ export default function PublicLayout({
     <div className="relative flex min-h-screen flex-col">
       <Header />
       <main className="flex-1 bg-background">{children}</main>
-      <ChatWidget />
+      <DynamicChatWidget />
       <Footer />
       <AdBlockerDetector />
     </div>

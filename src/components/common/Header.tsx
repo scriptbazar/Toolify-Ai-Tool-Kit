@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -80,67 +81,66 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 md:px-8">
-        {/* Mobile Header */}
-        <div className="flex md:hidden container h-16 items-center px-0">
-          <div className="flex-1">
+        
+        {/* Mobile menu and logo */}
+        <div className="flex w-full items-center justify-between md:hidden">
             <Link href="/" className="flex items-center space-x-2">
               <Logo />
               <span className="font-bold text-xl">ToolifyAI</span>
             </Link>
-          </div>
-          <div className="flex flex-1 items-center justify-end space-x-2">
-             <ModeToggle />
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Toggle navigation menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="flex flex-col p-0 w-[280px]">
-                <SheetHeader className="p-4 border-b">
-                   <SheetTitle>
-                    <Link href="/" className="flex items-center space-x-2">
-                      <Logo />
-                      <span className="font-bold text-xl">ToolifyAI</span>
-                    </Link>
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="flex-1 overflow-y-auto p-4">
-                  <nav className="flex flex-col space-y-2">
-                     <NavLinks isMobile={true} isLoggedIn={!!user} isAdmin={isAdmin} />
-                  </nav>
-                </div>
-                 <div className="mt-auto p-4 border-t">
-                    <div className="flex flex-col gap-2">
-                      {loading ? null : !user ? (
-                        <div className="grid grid-cols-2 gap-2">
-                         <Button asChild variant="ghost" className="flex-1 justify-center">
-                           <Link href="/login"><LogIn className="mr-2 h-4 w-4" /> Log in</Link>
-                         </Button>
-                         <Button asChild className="flex-1 justify-center">
-                           <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" /> Sign Up</Link>
-                         </Button>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-2 gap-2">
-                           <Button asChild variant="secondary" className="justify-center">
-                            <Link href={dashboardHref}>
-                                {isAdmin ? <ShieldCheck className="mr-2 h-4 w-4"/> : <LayoutDashboard className="mr-2 h-4 w-4"/>}
-                                {isAdmin ? 'Admin' : 'Dashboard'}
-                            </Link>
-                          </Button>
-                          <Button variant="destructive" onClick={handleLogout} className="justify-center">
-                              <LogoutIcon className="mr-2 h-4 w-4"/>
-                              Logout
-                          </Button>
-                        </div>
-                      )}
+             <div className="flex items-center space-x-2">
+                <ModeToggle />
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Menu className="h-6 w-6" />
+                      <span className="sr-only">Toggle navigation menu</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="flex flex-col p-0 w-[280px]">
+                    <SheetHeader className="p-4 border-b">
+                       <SheetTitle>
+                        <Link href="/" className="flex items-center space-x-2">
+                          <Logo />
+                          <span className="font-bold text-xl">ToolifyAI</span>
+                        </Link>
+                      </SheetTitle>
+                    </SheetHeader>
+                    <div className="flex-1 overflow-y-auto p-4">
+                      <nav className="flex flex-col space-y-2">
+                         <NavLinks isMobile={true} isLoggedIn={!!user} isAdmin={isAdmin} />
+                      </nav>
                     </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+                     <div className="mt-auto p-4 border-t">
+                        <div className="flex flex-col gap-2">
+                          {loading ? null : !user ? (
+                            <div className="grid grid-cols-2 gap-2">
+                             <Button asChild variant="ghost" className="flex-1 justify-center">
+                               <Link href="/login"><LogIn className="mr-2 h-4 w-4" /> Log in</Link>
+                             </Button>
+                             <Button asChild className="flex-1 justify-center">
+                               <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" /> Sign Up</Link>
+                             </Button>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 gap-2">
+                               <Button asChild variant="secondary" className="justify-center">
+                                <Link href={dashboardHref}>
+                                    {isAdmin ? <ShieldCheck className="mr-2 h-4 w-4"/> : <LayoutDashboard className="mr-2 h-4 w-4"/>}
+                                    {isAdmin ? 'Admin' : 'Dashboard'}
+                                </Link>
+                              </Button>
+                              <Button variant="destructive" onClick={handleLogout} className="justify-center">
+                                  <LogoutIcon className="mr-2 h-4 w-4"/>
+                                  Logout
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+            </div>
         </div>
 
         {/* Desktop Header */}
