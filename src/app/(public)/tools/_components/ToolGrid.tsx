@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,7 +5,8 @@ import { ToolCard } from '@/components/tools/ToolCard';
 import { UpgradeProDialog } from '@/components/tools/UpgradeProDialog';
 import { useAuth } from '@/hooks/use-auth';
 import type { Tool } from '@/ai/flows/tool-management.types';
-import { toggleFavoriteTool, getFavoriteTools } from '@/ai/flows/user-management';
+import { toggleFavoriteTool } from '@/ai/flows/user-management';
+import { getFavoriteTools } from '@/ai/flows/tool-management';
 import { useToast } from '@/hooks/use-toast';
 import { Package } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
