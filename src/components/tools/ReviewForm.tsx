@@ -91,7 +91,7 @@ export function ReviewForm({ toolId, toolName }: { toolId: string, toolName: str
     return (
         <div className="text-center p-4 border rounded-lg bg-muted/50">
             <p className="text-muted-foreground">
-                <Link href="/login" className="text-primary underline">Log in</Link> to leave a review.
+                <Button variant="link" asChild className="p-0 text-base"><Link href="/login">Log in</Link></Button> to leave a review.
             </p>
         </div>
     );

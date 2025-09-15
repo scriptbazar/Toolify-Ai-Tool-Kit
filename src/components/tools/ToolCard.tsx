@@ -54,7 +54,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
     onToggleFavorite(slug);
   };
   
-  const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       if (plan === 'Pro' && !isProUser) {
           e.preventDefault();
           showUpgradeDialog();
@@ -105,8 +105,8 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
 
   if (isClickable) {
       return (
-        <Link href={`/tools/${slug}`} passHref legacyBehavior>
-          <a onClick={handleCardClick}><CardContent /></a>
+        <Link href={`/tools/${slug}`} passHref>
+          <CardContent onClick={handleCardClick} />
         </Link>
       );
   }
