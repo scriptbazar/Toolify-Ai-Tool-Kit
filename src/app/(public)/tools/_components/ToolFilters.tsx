@@ -1,10 +1,9 @@
 
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Search, LayoutGrid } from 'lucide-react';
 import { toolCategories } from '@/lib/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,12 +17,7 @@ interface ToolFiltersProps {
 
 export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchQuery);
-
-  useEffect(() => {
-    setQuery(searchQuery);
-  }, [searchQuery]);
 
   const categoryCounts = useMemo(() => {
     const counts: { [key: string]: number } = { all: tools.length };
@@ -34,28 +28,29 @@ export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersP
   }, [tools]);
 
   const createQueryString = useCallback((params: Record<string, string | null>) => {
-    const currentParams = new URLSearchParams(searchParams.toString());
+    const currentParams = new URLSearchParams();
+    if (activeCategory !== 'all' && params.category === undefined) {
+        currentParams.set('category', activeCategory);
+    }
+
     for (const [key, value] of Object.entries(params)) {
-      if (value === null || value === '') {
+      if (value === null || value === '' || value === 'all') {
         currentParams.delete(key);
       } else {
         currentParams.set(key, value);
       }
     }
     return currentParams.toString();
-  }, [searchParams]);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-        if (query !== searchQuery) {
-            router.push(`/tools?${createQueryString({ q: query, page: null })}`);
-        }
-    }, 300); // Debounce time
-    return () => clearTimeout(handler);
-  }, [query, router, createQueryString, searchQuery]);
+  }, [activeCategory]);
   
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newQuery = e.target.value;
+      setQuery(newQuery);
+      router.push(`/tools?${createQueryString({ q: newQuery })}`);
+  };
+
   const handleCategoryChange = (category: string) => {
-    router.push(`/tools?${createQueryString({ category: category === 'all' ? null : category, page: null })}`);
+    router.push(`/tools?${createQueryString({ category: category, q: query })}`);
   };
 
   return (
@@ -65,9 +60,9 @@ export function ToolFilters({ tools, searchQuery, activeCategory }: ToolFiltersP
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
           <Input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleSearchChange}
             placeholder="Search for a tool..."
-            className="w-full pl-12 pr-44 h-14 text-base rounded-full shadow-lg border focus:border-primary"
+            className="w-full pl-12 pr-44 h-14 text-base rounded-full shadow-lg focus:border-primary"
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2">
              <Select value={activeCategory} onValueChange={handleCategoryChange}>

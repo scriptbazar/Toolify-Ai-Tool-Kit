@@ -20,7 +20,7 @@ export default async function ToolsDashboardPage({
 
   const filteredTools = visibleTools.filter(tool => {
     const categoryMatch = activeCategory === 'all' || tool.category === activeCategory;
-    const searchMatch = tool.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const searchMatch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) || tool.description.toLowerCase().includes(searchQuery.toLowerCase());
     return categoryMatch && searchMatch;
   });
 
