@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import Link from 'next/link';
 import type { Tool } from '@/ai/flows/tool-management.types';
 import * as Icons from 'lucide-react';
@@ -62,8 +62,8 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
       }
   }
 
-  const CardContent = () => (
-    <div className={cn(
+  const CardContent = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>((props, ref) => (
+    <div ref={ref} {...props} className={cn(
         "relative group h-full w-full",
         !isClickable && "cursor-not-allowed"
       )}>
@@ -105,12 +105,13 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
         </div>
       </div>
     </div>
-  );
+  ));
+  CardContent.displayName = 'CardContent';
 
   if (isClickable) {
       return (
-        <Link href={`/tools/${slug}`} className="block h-full" onClick={handleCardClick}>
-          <CardContent />
+        <Link href={`/tools/${slug}`} passHref legacyBehavior>
+          <CardContent onClick={(e: any) => handleCardClick(e)}/>
         </Link>
       );
   }
