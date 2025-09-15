@@ -164,9 +164,10 @@ const generateSlug = (name: string) => {
 /**
  * Fetches all tools from Firestore and synchronizes them with the `initialTools` list.
  * This function ensures the database reflects the "source of truth" defined in the code.
- * - Tools in the database that are NOT in `initialTools` will be DELETED.
  * - Tools in `initialTools` that are NOT in the database will be CREATED.
- * - Tools in both will be UPDATED to ensure their data is current.
+ * - Tools in the database that are NOT in `initialTools` will be DELETED.
+ * - Tools in both will be UPDATED if their core properties (name, description, icon) differ.
+ *   This leaves other properties like plan, status, etc., intact in the DB.
  */
 export async function getTools(): Promise<Tool[]> {
     const adminDb = getAdminDb();
@@ -191,76 +192,76 @@ export async function getTools(): Promise<Tool[]> {
         const dbTools: Map<string, Tool> = new Map();
         snapshot.docs.forEach(doc => {
             const data = doc.data();
-            const tool = ToolSchema.safeParse({ id: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
+            const tool = ToolSchema.safeParse({ id: doc.id, slug: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
             if (tool.success) {
-                // Use the doc.id which is the slug as the key
                 dbTools.set(doc.id, tool.data);
             } else {
                 console.warn(`Invalid tool data in Firestore with ID ${doc.id}:`, tool.error);
             }
         });
 
-        const codeTools: Map<string, Tool> = new Map();
+        const codeToolsMap: Map<string, Omit<Tool, 'id' | 'slug' | 'createdAt'>> = new Map();
         initialTools.forEach(toolData => {
             const slug = generateSlug(toolData.name);
-            const tool = ToolSchema.parse({
-                id: slug, // The ID and slug are the same
-                slug: slug,
-                createdAt: new Date().toISOString(), // This is temporary, will be replaced by server timestamp
-                ...toolData,
-            });
-            codeTools.set(slug, tool);
+            codeToolsMap.set(slug, toolData);
         });
 
         const batch = adminDb.batch();
         let hasChanges = false;
 
-        // Find tools to delete from DB (in DB but not in code)
-        for (const dbSlug of dbTools.keys()) {
-            if (!codeTools.has(dbSlug)) {
-                console.log(`[SYNC] Deleting tool from DB: ${dbSlug}`);
-                batch.delete(toolsRef.doc(dbSlug));
+        // --- Step 1: Sync from Code to DB ---
+        for (const [slug, codeToolData] of codeToolsMap.entries()) {
+            const dbTool = dbTools.get(slug);
+
+            if (!dbTool) {
+                // Tool exists in code, but not in DB -> ADD IT
+                console.log(`[SYNC] Adding new tool to DB: ${slug}`);
+                const docRef = toolsRef.doc(slug);
+                batch.set(docRef, { ...codeToolData, slug: slug, createdAt: FieldValue.serverTimestamp() });
                 hasChanges = true;
+            } else {
+                // Tool exists in both -> Check for core property mismatch
+                if (
+                    dbTool.name !== codeToolData.name ||
+                    dbTool.description !== codeToolData.description ||
+                    dbTool.icon !== codeToolData.icon
+                ) {
+                    console.log(`[SYNC] Updating core properties for tool in DB: ${slug}`);
+                    const docRef = toolsRef.doc(slug);
+                    batch.update(docRef, {
+                        name: codeToolData.name,
+                        description: codeToolData.description,
+                        icon: codeToolData.icon,
+                    });
+                    hasChanges = true;
+                }
             }
         }
 
-        // Find tools to add or update
-        for (const [codeSlug, codeTool] of codeTools.entries()) {
-            const dbTool = dbTools.get(codeSlug);
-            
-            // Destructure to remove fields that shouldn't be directly compared or are auto-generated
-            const { id: codeId, slug: codeSlugIgnored, createdAt: codeCreatedAt, ...codeToolData } = codeTool;
-            
-            if (!dbTool) {
-                console.log(`[SYNC] Adding new tool to DB: ${codeSlug}`);
-                const docRef = toolsRef.doc(codeSlug);
-                batch.set(docRef, { ...codeToolData, slug: codeSlug, createdAt: FieldValue.serverTimestamp() });
+        // --- Step 2: Sync from DB to Code (Deletions) ---
+        for (const dbSlug of dbTools.keys()) {
+            if (!codeToolsMap.has(dbSlug)) {
+                // Tool exists in DB, but not in code -> DELETE IT
+                console.log(`[SYNC] Deleting tool from DB: ${dbSlug}`);
+                batch.delete(toolsRef.doc(dbSlug));
                 hasChanges = true;
-            } else {
-                const { id: dbId, slug: dbSlug, createdAt: dbCreatedAt, ...dbToolData } = dbTool;
-                
-                // Create comparable objects by removing the slug from the code tool data as well.
-                const comparableCodeToolData = { ...codeToolData };
-                
-                // Compare the rest of the data.
-                if (JSON.stringify(comparableCodeToolData) !== JSON.stringify(dbToolData)) {
-                    console.log(`[SYNC] Updating tool in DB: ${codeSlug}`);
-                    const docRef = toolsRef.doc(codeSlug);
-                    batch.update(docRef, comparableCodeToolData);
-                    hasChanges = true;
-                }
             }
         }
         
         if (hasChanges) {
             await batch.commit();
             console.log("[SYNC] Database synchronized successfully.");
+            // Re-fetch to return the fresh, synced state
+            const finalSnapshot = await toolsRef.orderBy('name').get();
+            return finalSnapshot.docs.map(doc => {
+                 const data = doc.data();
+                 return ToolSchema.parse({ id: doc.id, slug: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
+            });
         } else {
             console.log("[SYNC] No database changes needed.");
+            // Return sorted list from DB if no changes
+             return Array.from(dbTools.values()).sort((a, b) => a.name.localeCompare(b.name));
         }
-        
-        // Return the source of truth from the code, sorted alphabetically
-        return Array.from(codeTools.values()).sort((a, b) => a.name.localeCompare(b.name));
 
     } catch (error) {
         console.error("Error synchronizing tools:", error);
@@ -493,6 +494,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
 
 
 
