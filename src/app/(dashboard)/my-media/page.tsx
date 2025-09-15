@@ -6,28 +6,54 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, MessageSquare, Image as ImageIcon, AlertCircle, Ticket } from "lucide-react";
+import { Bot, MessageSquare, Image as ImageIcon, AlertCircle, Ticket, Clock, Calendar } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Image from 'next/image';
 import { getUserMedia } from '@/ai/flows/ai-image-generator';
 import { type UserMedia } from '@/ai/flows/ai-image-generator.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { CountdownTimer } from '@/components/common/CountdownTimer';
 
-const MediaCard = ({ src, alt, hint }: { src: string, alt: string, hint: string }) => (
-    <Card className="overflow-hidden">
-        <div className="aspect-w-16 aspect-h-9">
-             <Image
-                src={src}
-                alt={alt}
-                width={400}
-                height={300}
-                data-ai-hint={hint}
-                className="object-cover w-full h-full"
-            />
-        </div>
-    </Card>
-);
+const MediaCard = ({ media }: { media: UserMedia }) => {
+    const expiryDate = new Date(media.expiresAt);
+    const creationDate = new Date(media.createdAt);
+
+    return (
+        <Card className="overflow-hidden flex flex-col">
+            <div className="aspect-video relative">
+                 <Image
+                    src={media.mediaUrl}
+                    alt={media.prompt || 'User media'}
+                    fill
+                    data-ai-hint={media.prompt || 'user media'}
+                    className="object-cover"
+                />
+            </div>
+            <CardContent className="p-3 bg-muted/50 text-xs flex-grow flex flex-col justify-end">
+                <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                    <Calendar className="h-3 w-3" />
+                    <span>Created: {creationDate.toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                     <CountdownTimer
+                        expiryDate={expiryDate}
+                        expiredText="Expired & Deleted"
+                        expiredClassName="text-red-500 font-bold"
+                     >
+                        {(timeLeft) => (
+                            <span>
+                                Deletes in: {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+                            </span>
+                        )}
+                     </CountdownTimer>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
 
 export default function MyMediaPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -100,11 +126,11 @@ export default function MyMediaPage() {
                 </Alert>
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-48 w-full" />)}
                     </div>
                 ) : aiGeneratedMedia.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {aiGeneratedMedia.map(item => <MediaCard key={item.id} src={item.mediaUrl} alt={item.prompt || 'AI generated image'} hint={item.prompt || 'ai image'} />)}
+                        {aiGeneratedMedia.map(item => <MediaCard key={item.id} media={item} />)}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg">
@@ -132,11 +158,11 @@ export default function MyMediaPage() {
                 </Alert>
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-48 w-full" />)}
                     </div>
                 ) : communityMedia.length > 0 ? (
                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {communityMedia.map(item => <MediaCard key={item.id} src={item.mediaUrl} alt={item.prompt || 'Community shared media'} hint={item.prompt || 'community media'} />)}
+                        {communityMedia.map(item => <MediaCard key={item.id} media={item} />)}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg">
@@ -163,11 +189,11 @@ export default function MyMediaPage() {
                 </Alert>
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-48 w-full" />)}
                     </div>
                 ) : ticketMedia.length > 0 ? (
                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {ticketMedia.map(item => <MediaCard key={item.id} src={item.mediaUrl} alt={item.prompt || 'Ticket attachment'} hint={item.prompt || 'ticket attachment'} />)}
+                        {ticketMedia.map(item => <MediaCard key={item.id} media={item} />)}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-8 border-2 border-dashed rounded-lg">
