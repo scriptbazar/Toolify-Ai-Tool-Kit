@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -78,6 +79,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'image-converter': dynamic(() => import('@/components/tools/ImageConverter').then(mod => mod.ImageConverter)),
   'pdf-splitter': dynamic(() => import('@/components/tools/PdfSplitter').then(mod => mod.PdfSplitter)),
   'word-to-pdf': dynamic(() => import('@/components/tools/WordToPdf').then(mod => mod.WordToPdf)),
+  'ppt-to-pdf': dynamic(() => import('@/components/tools/PptToPdf').then(mod => mod.PptToPdf)),
   'rotate-pdf': dynamic(() => import('@/components/tools/RotatePdf').then(mod => mod.RotatePdf)),
   'pdf-to-word': dynamic(() => import('@/components/tools/PdfToWord').then(mod => mod.PdfToWord)),
   'pdf-to-jpg': dynamic(() => import('@/components/tools/PdfToJpg').then(mod => mod.PdfToJpg)),
@@ -427,3 +429,5 @@ export function ToolPageClient({
     </div>
   );
 }
+
+    

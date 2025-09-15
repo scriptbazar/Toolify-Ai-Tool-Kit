@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -123,6 +124,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Flip Image', description: 'Flip an image horizontally or vertically to create a mirrored version of your original picture.', icon: 'FlipHorizontal', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image you want to flip.', 'Click "Flip Horizontal" or "Flip Vertical".', 'Download the modified image.'] },
     { name: 'ICO Converter', description: 'Convert your images (PNG, JPG) to the ICO format, perfect for creating website favicons.', icon: 'FileHeart', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your source image (preferably square).', 'Click the "Convert & Download .ICO" button.', 'Your new .ico file will be automatically downloaded.'] },
     { name: 'Word to PDF', description: 'Convert your Microsoft Word documents (.doc, .docx) into professional PDF files while preserving formatting.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload your Word document.', 'Click the "Convert to PDF" button.', 'Download your newly created PDF file.'] },
+    { name: 'PPT to PDF', description: 'Convert your PowerPoint presentations (.ppt, .pptx) into universally accessible PDF files in seconds.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload your PowerPoint file (.ppt or .pptx).', 'Click the "Convert to PDF" button.', 'Download the generated PDF file.'] },
     { name: 'PDF to Word', description: 'Convert your PDF files back into editable Microsoft Word documents to easily make changes.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload your PDF file.', 'Click "Convert to Word".', 'Download the editable .docx file.'] },
     { name: 'PDF to JPG', description: 'Convert each page of a PDF document into high-quality JPG images.', icon: 'FileImage', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload your PDF file.', 'The tool will convert each page into a separate JPG image.', 'Download the images as a ZIP file.'] },
     { name: 'Meta Tag Generator', description: 'Create essential meta tags (title, description, keywords) to improve your website\'s search engine optimization (SEO).', icon: 'Tags', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your site title and meta description.', 'The tool will generate the necessary HTML meta tags.', 'Copy the generated code and paste it into the &lt;head&gt; section of your website.'] },
@@ -460,6 +462,8 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
 
+
+    
 
     
 

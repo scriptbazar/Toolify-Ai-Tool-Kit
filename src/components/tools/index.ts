@@ -98,6 +98,7 @@ export { PinterestVideoDownloader } from './PinterestVideoDownloader';
 export { PngToJpg } from './PngToJpg';
 export { PromptGenerator } from './PromptGenerator';
 export { PRNToPDF } from './PRNToPDF';
+export { PptToPdf } from './PptToPdf';
 export { RandomWordGenerator } from './RandomWordGenerator';
 export { RedirectChecker } from './RedirectChecker';
 export { RemoveExtraSpaces } from './RemoveExtraSpaces';
@@ -142,3 +143,5 @@ export { YoutubeVideoDownloader } from './YoutubeVideoDownloader';
 export { UpgradeProDialog } from './UpgradeProDialog';
 export { RecentlyUsedTools } from './RecentlyUsedTools';
 export { ToolOfTheWeek } from './ToolOfTheWeek';
+
+    
