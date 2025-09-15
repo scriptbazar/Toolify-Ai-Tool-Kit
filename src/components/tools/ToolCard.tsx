@@ -9,8 +9,10 @@ import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { toggleFavoriteTool } from '@/ai/flows/user-management';
+import { toggleFavoriteTool } from '@/ai/flows/tool-management';
 import { useAuth } from '@/hooks/use-auth';
+import { addUserActivity } from '@/ai/flows/user-activity';
+
 
 type ToolCardProps = {
   tool: Tool;
@@ -52,9 +54,11 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
   };
   
   const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-      if (plan === 'Pro' && !user?.planId?.includes('pro')) {
+      if (plan === 'Pro' && user?.role !== 'admin' && user?.planId !== 'pro' && user?.planId !== 'team') {
           e.preventDefault();
           showUpgradeDialog();
+      } else if (user) {
+          addUserActivity(user.uid, 'tool_usage', { name: tool.name, path: `/tools/${tool.slug}` });
       }
   }
 

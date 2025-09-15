@@ -25,7 +25,7 @@ export type RecentToolActivity = {
 
 
 /**
- * Adds a new activity log for a user.
+ * Adds a new activity log for a user with a 15-day expiration date.
  * @param userId - The ID of the user.
  * @param type - The type of activity performed.
  * @param details - An object containing details about the action.
@@ -38,10 +38,16 @@ export async function addUserActivity(userId: string, type: UserActivityType, de
   }
   try {
     const activityRef = adminDb.collection('users').doc(userId).collection('activity');
+    
+    // Set an expiration date 15 days from now
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 15);
+
     await activityRef.add({
       type,
       details,
       timestamp: FieldValue.serverTimestamp(),
+      expiresAt: Timestamp.fromDate(expiresAt),
     });
     return { success: true };
   } catch (error) {
@@ -51,7 +57,7 @@ export async function addUserActivity(userId: string, type: UserActivityType, de
 }
 
 /**
- * Fetches the most recent activities for a user.
+ * Fetches the most recent activities for a user after cleaning up expired entries.
  * @param userId - The ID of the user.
  * @param count - The number of activities to fetch.
  * @returns A promise that resolves to an array of user activities.
@@ -61,6 +67,21 @@ export async function getUserActivity(userId: string, count = 25): Promise<UserA
   if (!userId) return [];
   try {
     const activityRef = adminDb.collection('users').doc(userId).collection('activity');
+    const now = new Date();
+
+    // --- Cleanup Expired Activities ---
+    const expiredQuery = activityRef.where('expiresAt', '<=', now);
+    const expiredSnapshot = await expiredQuery.get();
+    if (!expiredSnapshot.empty) {
+        const batch = adminDb.batch();
+        expiredSnapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+        console.log(`Cleaned up ${expiredSnapshot.size} expired activities for user ${userId}.`);
+    }
+
+    // --- Fetch Remaining Activities ---
     const snapshot = await activityRef.orderBy('timestamp', 'desc').limit(count).get();
 
     if (snapshot.empty) {

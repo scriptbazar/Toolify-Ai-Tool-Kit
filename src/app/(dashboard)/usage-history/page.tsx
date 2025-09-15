@@ -11,8 +11,9 @@ import { getUserActivity } from '@/ai/flows/user-activity';
 import type { UserActivity, UserActivityType } from '@/ai/flows/user-activity.types';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart3, Clock, Type, FileText, Newspaper, HelpCircle, Activity, Loader2 } from 'lucide-react';
+import { BarChart3, Clock, Type, FileText, Newspaper, HelpCircle, Activity, Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import {
   Bar,
   BarChart,
@@ -23,6 +24,8 @@ import {
 } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+
+const ITEMS_PER_PAGE = 10;
 
 const getActivityIcon = (type: UserActivityType) => {
   switch (type) {
@@ -41,6 +44,7 @@ export default function UsageHistoryPage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -49,7 +53,7 @@ export default function UsageHistoryPage() {
       if (firebaseUser) {
         setUser(firebaseUser);
         try {
-          const userActivities = await getUserActivity(firebaseUser.uid, 50); // Fetch more activities
+          const userActivities = await getUserActivity(firebaseUser.uid, 100); // Fetch more activities for pagination
           setActivities(userActivities);
         } catch (error) {
           console.error("Failed to load usage history:", error);
@@ -81,6 +85,14 @@ export default function UsageHistoryPage() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 7); // Show top 7 tools
   }, [activities]);
+
+  const paginatedActivities = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return activities.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [activities, currentPage]);
+  
+  const totalPages = Math.ceil(activities.length / ITEMS_PER_PAGE);
+
 
   if (loading) {
     return (
@@ -177,7 +189,7 @@ export default function UsageHistoryPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {activities.length > 0 ? activities.slice(0, 15).map(activity => (
+                  {paginatedActivities.length > 0 ? paginatedActivities.map(activity => (
                     <TableRow key={activity.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -199,6 +211,19 @@ export default function UsageHistoryPage() {
                   )}
                 </TableBody>
               </Table>
+               {totalPages > 1 && (
+                <div className="flex items-center justify-end space-x-2 pt-4">
+                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+                        <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                        Page {currentPage} of {totalPages}
+                    </span>
+                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}>
+                        Next <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                </div>
+                )}
             </CardContent>
           </Card>
         </TabsContent>
