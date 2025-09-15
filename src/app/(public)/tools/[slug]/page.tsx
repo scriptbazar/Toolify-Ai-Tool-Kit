@@ -9,10 +9,9 @@ import { ToolPageClient } from './page.client';
 
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
-
+  
   const allTools = await getTools();
-  const tool = allTools.find(t => t.slug === slug);
+  const tool = allTools.find(t => t.slug === params.slug);
   
   if (!tool || tool.status === 'Disabled') {
       notFound();
@@ -20,7 +19,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
   
   const [settings, toolReviews, allPosts] = await Promise.all([
     getSettings(),
-    getReviews(slug),
+    getReviews(params.slug),
     getPosts()
   ]);
   
@@ -37,3 +36,4 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     />
   );
 }
+
