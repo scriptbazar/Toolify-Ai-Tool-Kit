@@ -7,7 +7,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Calendar as CalendarIcon, Gift, Sparkles } from 'lucide-react';
-import { format, differenceInYears, differenceInMonths, differenceInDays, addYears } from 'date-fns';
+import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, add } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 
 export function AgeCalculator() {
