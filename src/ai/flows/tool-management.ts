@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -154,7 +153,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Pinterest Video Downloader', description: 'Download videos from Pinterest pins to save your favorite ideas and tutorials.', icon: 'BookImage', category: 'video', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Copy the URL of the Pinterest pin that has the video.', 'Paste the URL into the download tool.', 'Click "Download Video" to save it.'] },
     { name: 'AI SEO Keyword Generator', description: 'Get a comprehensive list of primary, secondary, and long-tail keywords for any topic to boost your search engine ranking.', icon: 'Key', category: 'seo', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter your main topic or keyword.', 'Optionally, specify your target audience.', 'Click "Generate Keywords".', 'The AI will provide lists of primary, secondary, and long-tail keywords.'] },
     { name: 'Case Converter', description: 'Easily convert text between different letter cases like uppercase, lowercase, title case, and more with a single click.', icon: 'CaseSensitive', category: 'text', plan: 'Free', isNew: false, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste your text into the input field.', 'Click on the desired case conversion button (e.g., UPPERCASE).', 'The text will be instantly converted in the same box.'] },
-    { name: 'PPT to PDF', description: 'Convert your PowerPoint presentations (.ppt, .pptx) into universally accessible PDF files in seconds.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Upload your PowerPoint file (.ppt or .pptx).', 'Click the "Convert to PDF" button.', 'Download the generated PDF file.'] },
 ];
 
 const generateSlug = (name: string) => {
@@ -501,3 +499,6 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
 
+
+
+    
