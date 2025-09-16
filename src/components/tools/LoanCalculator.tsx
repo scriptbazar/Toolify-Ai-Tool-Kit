@@ -5,13 +5,16 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Landmark, Download, MessageCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '../ui/scroll-area';
 import type { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import { getSettings } from '@/ai/flows/settings-management';
+import { useToast } from '@/hooks/use-toast';
+
 
 interface ScheduleItem {
     month: number;
@@ -28,6 +31,7 @@ export function LoanCalculator() {
   const [termUnit, setTermUnit] = useState<'years' | 'months'>('years');
   const [frequency, setFrequency] = useState<'monthly' | 'daily' | 'weekly' | 'yearly'>('monthly');
   const [currency, setCurrency] = useState('INR');
+  const { toast } = useToast();
 
   const [payment, setPayment] = useState<number | null>(null);
   const [totalPayment, setTotalPayment] = useState<number | null>(null);
@@ -77,7 +81,10 @@ export function LoanCalculator() {
     }
 
     if (principal > 0 && annualRate >= 0 && numberOfPayments > 0) {
-      const calculatedPayment = principal * (ratePerPeriod * Math.pow(1 + ratePerPeriod, numberOfPayments)) / (Math.pow(1 + ratePerPeriod, numberOfPayments) - 1);
+      const calculatedPayment = annualRate > 0 ?
+        principal * (ratePerPeriod * Math.pow(1 + ratePerPeriod, numberOfPayments)) / (Math.pow(1 + ratePerPeriod, numberOfPayments) - 1)
+        : principal / numberOfPayments;
+        
       const totalPaid = calculatedPayment * numberOfPayments;
       const interestPaid = totalPaid - principal;
 
@@ -95,19 +102,20 @@ export function LoanCalculator() {
 
         newSchedule.push({
             month: i,
-            principal: formatCurrency(principalForPeriod, currency),
-            interest: formatCurrency(interestForPeriod, currency),
-            totalPayment: formatCurrency(calculatedPayment, currency),
-            remainingBalance: formatCurrency(Math.max(0, remainingBalance), currency),
+            principal: formatCurrency(principalForPeriod, currency, true),
+            interest: formatCurrency(interestForPeriod, currency, true),
+            totalPayment: formatCurrency(calculatedPayment, currency, true),
+            remainingBalance: formatCurrency(Math.max(0, remainingBalance), currency, true),
         });
       }
       setSchedule(newSchedule);
     }
   };
   
-  const formatCurrency = (value: number, currencyCode: string) => {
+  const formatCurrency = (value: number, currencyCode: string, includeSymbol: boolean = true) => {
       const symbol = currencySymbols[currencyCode] || '$';
-      return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+      const formattedValue = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+      return includeSymbol ? `${symbol}${formattedValue}` : formattedValue;
   }
   
   const handleDownloadPdf = async () => {
@@ -116,31 +124,87 @@ export function LoanCalculator() {
     const { default: jsPDF } = await import('jspdf');
     const { default: autoTable } = await import('jspdf-autotable');
     
-    const doc = new jsPDF();
+    try {
+        const settings = await getSettings();
+        const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
+        const logoUrl = settings.general?.logoUrl;
+        const socialLinks = settings.general?.socialLinks || {};
+        
+        const doc = new jsPDF();
+        let finalY = 10;
 
-    doc.text("Loan EMI Schedule", 14, 15);
-    doc.setFontSize(12);
-    doc.text(`Loan Amount: ${formatCurrency(parseFloat(loanAmount), currency)}`, 14, 25);
-    doc.text(`Interest Rate: ${interestRate}% per annum`, 14, 32);
-    doc.text(`Loan Term: ${loanTerm} ${termUnit}`, 14, 39);
+        // --- Header ---
+        if (logoUrl) {
+            try {
+                const response = await fetch(logoUrl);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                const dataUrl = await new Promise<string>(resolve => {
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.readAsDataURL(blob);
+                });
+                doc.addImage(dataUrl, 'PNG', 14, 15, 20, 20);
+                doc.setFontSize(22);
+                doc.text(siteTitle, 40, 28);
+            } catch (e) {
+                 console.error("Could not add logo to PDF:", e);
+                 doc.setFontSize(22);
+                 doc.text(siteTitle, 14, 22);
+            }
+        } else {
+             doc.setFontSize(22);
+             doc.text(siteTitle, 14, 22);
+        }
 
-    autoTable(doc, {
-        startY: 45,
-        head: [['Summary', 'Amount']],
-        body: [
-            [`${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Payment`, formatCurrency(payment, currency)],
-            ['Total Payment', formatCurrency(totalPayment, currency)],
-            ['Total Interest', formatCurrency(totalInterest, currency)],
-        ],
-    });
+        doc.setFontSize(12);
+        doc.text("Loan EMI Schedule", 14, 45);
+        finalY = 45;
+        
+        // --- Loan and Payment Tables ---
+        autoTable(doc, {
+            startY: finalY + 10,
+            head: [['Loan Summary', '']],
+            body: [
+                ['Loan Amount', formatCurrency(parseFloat(loanAmount), currency)],
+                ['Interest Rate', `${interestRate}% per annum`],
+                ['Loan Term', `${loanTerm} ${termUnit}`],
+                [`${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Payment`, formatCurrency(payment, currency)],
+                ['Total Payment', formatCurrency(totalPayment, currency)],
+                ['Total Interest', formatCurrency(totalInterest, currency)],
+            ],
+            theme: 'striped',
+            didParseCell: function (data: any) {
+                if (data.section === 'body' && data.column.index === 0) {
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            }
+        });
 
-    autoTable(doc, {
-      startY: (doc as any).autoTable.previous.finalY + 10,
-      head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
-      body: schedule.map(item => [item.month, item.principal, item.interest, item.totalPayment, item.remainingBalance]),
-    });
-    
-    doc.save(`emi-schedule-${loanAmount}.pdf`);
+        autoTable(doc, {
+          startY: (doc as any).autoTable.previous.finalY + 10,
+          head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
+          body: schedule.map(item => [item.month, item.principal, item.interest, item.totalPayment, item.remainingBalance]),
+        });
+        
+        // --- Footer with Social Links ---
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            const pageHeight = doc.internal.pageSize.getHeight();
+            doc.setFontSize(8);
+            doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.getWidth() - 20, pageHeight - 10);
+        }
+        
+        doc.save(`emi-schedule-${loanAmount}.pdf`);
+
+    } catch (error) {
+        console.error("PDF Generation Error:", error);
+        toast({
+            title: "Error Generating PDF",
+            description: "Could not generate the PDF invoice. Please try again.",
+            variant: "destructive"
+        });
+    }
   };
 
   const handleShareOnWhatsApp = () => {
