@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -174,6 +173,33 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'HTML Minifier', description: 'Minify your HTML code to reduce file size, remove whitespace, and improve website loading performance.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste your HTML code into the "Original HTML" box.', 'Click the "Minify HTML" button.', 'The minified code will appear in the "Minified HTML" box.', 'Click "Copy" to use the minified code.'] },
     { name: 'JavaScript Minifier', description: 'Minify your JavaScript code to decrease file size and speed up your website or application.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste your JavaScript code into the "Original JavaScript" box.', 'Click the "Minify JS" button.', 'The minified code will appear in the "Minified JavaScript" box.', 'Click "Copy" to use the minified code.'] },
     { name: 'SQL Formatter', description: 'Format and beautify your SQL queries to make them more readable and easier to debug.', icon: 'Database', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste your unformatted SQL query into the text area.', 'Choose your desired formatting options (e.g., indentation).', 'Click "Format SQL".', 'Copy the clean, formatted SQL query.'] },
+    { name: 'UUID Generator', description: 'Generate universally unique identifiers (UUIDs) in various versions for your application needs.', icon: 'Hash', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Select the number of UUIDs you want to generate.', 'Click the "Generate UUIDs" button.', 'The new UUIDs will be displayed in the text box for you to copy.'] },
+    { name: 'Image Metadata Viewer', description: 'View detailed EXIF and other metadata from your images, such as camera settings, location, and date.', icon: 'Camera', category: 'image', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Upload an image file (JPG, PNG, etc.).', 'The tool will extract and display all available metadata.', 'View details like camera model, aperture, ISO, and GPS data if available.'] },
+    { name: 'AI Image Quality Enhancer', description: 'Upscale and enhance the quality, resolution, and details of your images using powerful AI algorithms.', icon: 'Sparkles', category: 'ai', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Upload a low-resolution or blurry image.', 'Select the enhancement factor (e.g., 2x, 4x).', 'Click "Enhance Image".', 'The AI will upscale and sharpen your image, which you can then download.'] },
+    { name: 'AI Web Content Summarizer', description: 'Summarize and explain the content of any public website or article by simply providing a URL.', icon: 'Globe', category: 'ai', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste the URL of the webpage or article you want to process.', 'Click the "Process URL" button.', 'The AI will provide both a concise summary and a detailed explanation of the content.'] },
+    { name: 'Flip Image', description: 'Flip an image horizontally or vertically to create a mirrored version of your original picture.', icon: 'FlipHorizontal', category: 'image', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Upload the image you want to flip.', 'Click "Flip Horizontal" or "Flip Vertical".', 'Download the modified image.'] },
+    { name: 'ICO Converter', description: 'Convert your images (PNG, JPG) to the ICO format, perfect for creating website favicons.', icon: 'FileHeart', category: 'image', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Upload your source image (preferably square).', 'Click the "Convert & Download .ICO" button.', 'Your new .ico file will be automatically downloaded.'] },
+    { name: 'PDF to Word', description: 'Convert your PDF files back into editable Microsoft Word documents to easily make changes.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Upload your PDF file.', 'Click "Convert to Word".', 'Download the editable .docx file.'] },
+    { name: 'PDF to JPG', description: 'Convert each page of a PDF document into high-quality JPG images.', icon: 'FileImage', category: 'pdf', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Upload your PDF file.', 'The tool will convert each page into a separate JPG image.', 'Download the images as a ZIP file.'] },
+    { name: 'Meta Tag Generator', description: 'Create essential meta tags (title, description, keywords) to improve your website\'s search engine optimization (SEO).', icon: 'Tags', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter your site title and meta description.', 'The tool will generate the necessary HTML meta tags.', 'Copy the generated code and paste it into the &lt;head&gt; section of your website.'] },
+    { name: 'Robots.txt Generator', description: 'Generate a robots.txt file to guide search engine crawlers on which parts of your site to index or ignore.', icon: 'Bot', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Use the options to allow or disallow different user-agents (bots).', 'Add sitemap URLs if you have them.', 'The tool will generate the robots.txt content for you to copy.'] },
+    { name: 'XML Sitemap Generator', description: 'Create an XML sitemap for your website to help search engines like Google better discover and index all your pages.', icon: 'FileCode', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter your website\'s URL.', 'The tool will crawl your site to find all the pages.', 'Click "Generate Sitemap" to create the sitemap.xml file.', 'Download the file and upload it to your website\'s root directory.'] },
+    { name: 'Favicon Checker', description: 'Check if a website has a favicon installed and preview how it looks in a browser tab.', icon: 'Image', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the URL of the website you want to check.', 'Click "Check Favicon".', 'The tool will display the website\'s favicon if it exists.'] },
+    { name: 'Keyword Density Checker', description: 'Analyze the keyword density of your text content to optimize for SEO and avoid keyword stuffing.', icon: 'Key', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste your article or text into the text area.', 'Click "Analyze Text".', 'The tool will show you a table of the most frequent keywords and their density percentage.'] },
+    { name: 'SERP Checker', description: 'Check the real-time search engine results page (SERP) for a given keyword in a specific location.', icon: 'Search', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the keyword you want to check.', 'Select the country for the search results.', 'Optionally, enter your domain to highlight its position.', 'Click "Check Rankings" to see the top search results.'] },
+    { name: 'Redirect Checker', description: 'Check the full redirect chain and status code (301, 302, etc.) of any URL to diagnose SEO issues.', icon: 'Link', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a URL into the input field.', 'Click "Check Redirects".', 'The tool will show you the full path the URL takes, including all status codes.'] },
+    { name: 'Schema Generator', description: 'Generate structured data markup (JSON-LD) for your website to improve how search engines understand your content.', icon: 'Code', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select the type of schema you want to create (e.g., FAQ, Article).', 'Fill in the required fields for that schema type.', 'The tool will generate the JSON-LD script.', 'Copy the script and paste it into your website\'s HTML.'] },
+    { name: 'Title Tag Checker', description: 'Check the length (in characters and pixels) of your title tags to ensure they don\'t get truncated in search results.', icon: 'Text', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your proposed title tag into the input field.', 'The tool will show you the character count and an estimated pixel width.', 'A preview shows how your title might look in Google search results.'] },
+    { name: 'Website Word Counter', description: 'Count the total number of words on any webpage by simply entering its URL.', icon: 'FileSearch', category: 'seo', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the URL of the webpage you want to analyze.', 'Click "Count Words".', 'The tool will fetch the page content and display the total word count.'] },
+    { name: 'Fuel Cost Calculator', description: 'Calculate the total fuel cost for a trip based on distance, fuel efficiency, and price per liter.', icon: 'Fuel', category: 'calculator', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the total distance of your trip in kilometers.', 'Provide your car\'s fuel efficiency (km/l).', 'Enter the current price of fuel per liter.', 'Click "Calculate Fuel Cost" to see your total estimated cost.'] },
+    { name: 'GPA Calculator', description: 'Calculate your Grade Point Average (GPA) based on your course credits and grades.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Add a row for each of your courses.', 'Enter the credits and the grade you received for each course.', 'Click "Calculate GPA".', 'The tool will display your calculated GPA.'] },
+    { name: 'Loan Calculator', description: 'Calculate your monthly loan payments, total payment, and total interest for mortgages, car loans, or personal loans.', icon: 'Landmark', category: 'calculator', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter the total loan amount.', 'Input the annual interest rate.', 'Specify the loan term in years or months.', 'Click "Calculate" to see your monthly payment and total interest.'] },
+    { name: 'Percentage Calculator', description: 'Easily calculate percentages, find what a percentage of a number is, or determine percentage change.', icon: 'Percent', category: 'calculator', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Select the type of calculation you want to perform.', 'Enter the required values in the input fields.', 'Click "Calculate" to see the result.'] },
+    { name: 'Time Zone Converter', description: 'Convert times between different time zones around the world to coordinate meetings and events.', icon: 'Clock', category: 'calculator', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['The tool displays the current time in several default time zones.', 'You can add more time zones from the dropdown list.', 'The times will update in real-time.'] },
+    { name: 'Unix Timestamp Converter', description: 'Convert Unix timestamps to human-readable dates and vice-versa for development and data analysis.', icon: 'Timer', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Enter a Unix timestamp to see the human-readable date.', 'Alternatively, use the date picker to select a date and see its Unix timestamp.'] },
+    { name: 'HTML Minifier', description: 'Minify your HTML code to reduce file size, remove whitespace, and improve website loading performance.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste your HTML code into the "Original HTML" box.', 'Click the "Minify HTML" button.', 'The minified code will appear in the "Minified HTML" box.', 'Click "Copy" to use the minified code.'] },
+    { name: 'JavaScript Minifier', description: 'Minify your JavaScript code to decrease file size and speed up your website or application.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste your JavaScript code into the "Original JavaScript" box.', 'Click the "Minify JS" button.', 'The minified code will appear in the "Minified JavaScript" box.', 'Click "Copy" to use the minified code.'] },
+    { name: 'SQL Formatter', description: 'Format and beautify your SQL queries to make them more readable and easier to debug.', icon: 'Database', category: 'dev', plan: 'Free', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste your unformatted SQL query into the text area.', 'Choose your desired formatting options (e.g., indentation).', 'Click "Format SQL".', 'Copy the clean, formatted SQL query.'] },
     { name: 'YouTube Video Downloader', description: 'Download YouTube videos in various qualities and formats, including MP4 and MP3.', icon: 'Youtube', category: 'video', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Paste the URL of the YouTube video.', 'The tool will fetch available download links for different qualities.', 'Click on your desired quality to start the download.'] },
     { name: 'X (Twitter) Video Downloader', description: 'Download videos from posts on X (formerly Twitter) by simply pasting the post URL.', icon: 'Twitter', category: 'video', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Copy the URL of the tweet containing the video.', 'Paste the URL into the input field.', 'Click "Download Video" to save the video file.'] },
     { name: 'Instagram Video Downloader', description: 'Download videos and reels from public Instagram posts directly to your device.', icon: 'Instagram', category: 'video', plan: 'Pro', isNew: true, isToolOfTheWeek: false, status: 'Active', howToUse: ['Copy the URL of the Instagram post, Reel, or Story.', 'Paste the URL into the input field.', 'Click "Download Video" to get the video file.'] },
@@ -212,16 +238,8 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
         queryRef = queryRef.where('category', '==', options.category);
     }
     
-    // NOTE: Firestore doesn't support text search out of the box.
-    // A simple "startsWith" query can be used for basic search, but it's limited.
-    // For a real-world app, a dedicated search service like Algolia or Elasticsearch is recommended.
-    // We will keep the in-memory search for now as it's more flexible than basic Firestore queries.
-    if (options.query) {
-        // This part remains tricky without a proper search index.
-        // We'll fetch and then filter in memory for search.
-    }
-    
-    if (options.limit) {
+    // For queries with limits but no specific search text, we can apply the limit directly on the DB
+    if (options.limit && !options.query) {
         queryRef = queryRef.limit(options.limit);
     }
     
@@ -245,6 +263,11 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
             tool.name.toLowerCase().includes(lowercasedQuery) ||
             tool.description.toLowerCase().includes(lowercasedQuery)
         );
+    }
+    
+    // If a limit was specified with a query, apply it here after in-memory filtering.
+    if (options.limit && options.query) {
+        tools = tools.slice(0, options.limit);
     }
     
     return tools.filter(tool => tool.status !== 'Disabled');
@@ -487,3 +510,10 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
 
+
+
+    
+
+      
+
+    

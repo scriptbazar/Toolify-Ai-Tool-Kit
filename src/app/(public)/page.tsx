@@ -12,7 +12,7 @@ export default async function Home() {
         getTools({ limit: 10 }), // Fetch only a small number of tools for "Tool of the Week" logic
         getSettings(),
         getPosts(),
-        getReviews(undefined, 12) // Fetch up to 12 approved reviews
+        getReviews({ limit: 12 }) // Fetch up to 12 approved reviews
     ]);
 
     const homepageSettings = settings.homepage || {};
@@ -39,5 +39,7 @@ export default async function Home() {
     />
   );
 }
+
+    
 
     

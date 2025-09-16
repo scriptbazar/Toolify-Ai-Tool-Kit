@@ -9,15 +9,20 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp }from 'firebase-admin/firestore';
 import { type Review, ReviewSchema, AddReviewInputSchema, AddReviewInput, ReviewStatusSchema } from './review-management.types';
 
+interface GetReviewsOptions {
+    toolId?: string;
+    limit?: number;
+    status?: ReviewStatus;
+}
+
 
 /**
- * Fetches all reviews from the 'reviews' collection in Firestore.
- * If a toolId is provided, it fetches reviews only for that specific tool.
- * @param {string} [toolId] - Optional ID of the tool to fetch reviews for.
- * @param {number} [limit] - Optional limit for the number of reviews to fetch.
+ * Fetches reviews from the 'reviews' collection in Firestore.
+ * @param {GetReviewsOptions} [options] - Options for fetching reviews.
  * @returns {Promise<Review[]>} A list of reviews.
  */
-export async function getReviews(toolId?: string, limit?: number): Promise<Review[]> {
+export async function getReviews(options: GetReviewsOptions = {}): Promise<Review[]> {
+    const { toolId, limit, status } = options;
     try {
         const adminDb = getAdminDb();
         if (!adminDb) {
@@ -28,10 +33,14 @@ export async function getReviews(toolId?: string, limit?: number): Promise<Revie
         let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = adminDb.collection('reviews');
 
         if (toolId) {
-            // If fetching for a specific tool, only get approved reviews
-            query = query.where('toolId', '==', toolId).where('status', '==', 'approved');
-        } else {
-            // For general queries (like testimonials on homepage), only get approved reviews
+            query = query.where('toolId', '==', toolId);
+        }
+        
+        // If no specific status is requested, default to 'approved' for public-facing queries.
+        // For admin panel (no toolId, no limit), we might want all. The logic below handles this.
+        if (status) {
+            query = query.where('status', '==', status);
+        } else if (toolId || limit) {
              query = query.where('status', '==', 'approved');
         }
 
@@ -44,25 +53,10 @@ export async function getReviews(toolId?: string, limit?: number): Promise<Revie
         const snapshot = await query.get();
         
         if (snapshot.empty) {
-            // If we are looking for testimonials and find none, fetch all reviews for admin panel instead.
-            // This logic might be too complex, a better way is to have separate functions.
-            // For now, let's keep it but this might be revised.
-            if (!toolId && !limit) {
-                const allReviewsSnapshot = await adminDb.collection('reviews').orderBy('submittedOn', 'desc').get();
-                if(allReviewsSnapshot.empty) return [];
-                return allReviewsSnapshot.docs.map(doc => {
-                     const data = doc.data();
-                    return ReviewSchema.parse({
-                        id: doc.id,
-                        ...data,
-                        submittedOn: (data.submittedOn as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-                    });
-                })
-            }
             return [];
         }
 
-        const allReviews = snapshot.docs.map(doc => {
+        return snapshot.docs.map(doc => {
             const data = doc.data();
             return ReviewSchema.parse({
                 id: doc.id,
@@ -70,22 +64,6 @@ export async function getReviews(toolId?: string, limit?: number): Promise<Revie
                 submittedOn: (data.submittedOn as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
             });
         });
-
-        // If no toolId and no limit (for admin panel), fetch all reviews regardless of status
-        if (!toolId && !limit) {
-             const allReviewsSnapshot = await adminDb.collection('reviews').orderBy('submittedOn', 'desc').get();
-             if(allReviewsSnapshot.empty) return [];
-             return allReviewsSnapshot.docs.map(doc => {
-                const data = doc.data();
-                return ReviewSchema.parse({
-                    id: doc.id,
-                    ...data,
-                    submittedOn: (data.submittedOn as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-                });
-             });
-        }
-        
-        return allReviews;
 
     } catch (error) {
         console.error("Error fetching reviews:", error);

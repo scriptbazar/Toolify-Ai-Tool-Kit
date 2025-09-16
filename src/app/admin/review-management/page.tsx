@@ -74,7 +74,7 @@ export default function ReviewManagementPage() {
     const fetchReviews = async () => {
         setLoading(true);
         try {
-            const fetchedReviews = await getReviews();
+            const fetchedReviews = await getReviews({}); // Fetch all reviews for admin panel
             setReviews(fetchedReviews);
         } catch (error) {
             console.error(error);
