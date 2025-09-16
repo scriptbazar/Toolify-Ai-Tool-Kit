@@ -144,6 +144,7 @@ export function LoanCalculator() {
         const logoUrl = settings.general?.logoUrl;
         
         const doc = new jsPDF();
+        let finalY = 10;
 
         // --- Header ---
         if (logoUrl) {
@@ -318,15 +319,15 @@ export function LoanCalculator() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                 <div className="p-4 bg-muted rounded-lg">
                   <p className="text-sm text-muted-foreground capitalize">{frequency} Payment</p>
-                  <p className="text-2xl font-bold text-primary">{formatCurrency(payment, currency)}</p>
+                  <p className="text-xl font-bold text-primary">{formatCurrency(payment, currency)}</p>
                 </div>
                  <div className="p-4 bg-muted rounded-lg">
                    <p className="text-sm text-muted-foreground">Total Payment</p>
-                  <p className="text-2xl font-bold">{formatCurrency(totalPayment!, currency)}</p>
+                  <p className="text-xl font-bold">{formatCurrency(totalPayment!, currency)}</p>
                 </div>
                  <div className="p-4 bg-muted rounded-lg">
                   <p className="text-sm text-muted-foreground">Total Interest</p>
-                  <p className="text-2xl font-bold">{formatCurrency(totalInterest!, currency)}</p>
+                  <p className="text-xl font-bold">{formatCurrency(totalInterest!, currency)}</p>
                 </div>
             </div>
             <div className="h-48">
