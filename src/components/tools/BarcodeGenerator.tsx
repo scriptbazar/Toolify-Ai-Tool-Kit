@@ -153,10 +153,12 @@ export function BarcodeGenerator() {
                     background={background}
                 />
             </div>
-            <div className="flex flex-wrap gap-2">
-                <Button variant="outline" onClick={() => handleDownload('png')}><Download className="mr-2 h-4 w-4" />Download PNG</Button>
-                <Button variant="outline" onClick={() => handleDownload('jpeg')}><Download className="mr-2 h-4 w-4" />Download JPG</Button>
-                <Button variant="outline" onClick={() => handleDownload('svg')}><Download className="mr-2 h-4 w-4" />Download SVG</Button>
+            <div className="w-full space-y-2">
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => handleDownload('png')} className="flex-1"><Download className="mr-2 h-4 w-4" />Download PNG</Button>
+                    <Button variant="outline" onClick={() => handleDownload('jpeg')} className="flex-1"><Download className="mr-2 h-4 w-4" />Download JPG</Button>
+                </div>
+                <Button variant="outline" onClick={() => handleDownload('svg')} className="w-full"><Download className="mr-2 h-4 w-4" />Download SVG</Button>
             </div>
         </CardContent>
       </Card>
