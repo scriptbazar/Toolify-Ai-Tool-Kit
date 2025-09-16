@@ -9,7 +9,7 @@ import { ToolGrid } from './_components/ToolGrid';
 export default async function ToolsDashboardPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | undefined };
+  searchParams: { q?: string; category?: string; };
 }) {
   const searchQuery = searchParams.q || '';
   const activeCategory = (searchParams.category as ToolCategory) || 'all';
