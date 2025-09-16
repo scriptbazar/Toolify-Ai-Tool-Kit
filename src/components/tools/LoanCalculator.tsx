@@ -1,13 +1,12 @@
 
-
 'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
-import { Landmark, Download, MessageCircle, Calculator } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { Landmark, Download, MessageCircle, Calculator, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '../ui/scroll-area';
@@ -15,6 +14,7 @@ import type { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { getSettings } from '@/ai/flows/settings-management';
 import { useToast } from '@/hooks/use-toast';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 
 interface ScheduleItem {
@@ -123,6 +123,16 @@ export function LoanCalculator() {
       return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
   }
   
+    const handleClear = () => {
+        setLoanAmount('100000');
+        setInterestRate('5');
+        setLoanTerm('10');
+        setPayment(null);
+        setTotalPayment(null);
+        setTotalInterest(null);
+        setSchedule([]);
+    };
+  
   const handleDownloadPdf = async () => {
     if (!payment || !totalPayment || !totalInterest || schedule.length === 0) return;
     
@@ -159,7 +169,7 @@ export function LoanCalculator() {
         }
 
         doc.setFontSize(12).text("Loan EMI Schedule", 15, 45);
-        doc.line(15, 48, 195, 48); // separator line
+        doc.line(15, 48, 195, 48);
         
         // --- Loan Summary Table ---
         autoTable(doc, {
@@ -184,7 +194,7 @@ export function LoanCalculator() {
           head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
           body: schedule.map(item => [item.month.toString(), item.principal, item.interest, item.totalPayment, item.remainingBalance]),
           theme: 'grid',
-          headStyles: { fillColor: [76, 35, 137] }, // Primary color
+          headStyles: { fillColor: [76, 35, 137] },
         });
         
         // --- Footer ---
@@ -221,6 +231,14 @@ export function LoanCalculator() {
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(summary)}`;
       window.open(whatsappUrl, '_blank');
   };
+
+    const pieChartData = (payment !== null && totalInterest !== null) ? [
+        { name: 'Principal Amount', value: parseFloat(loanAmount) },
+        { name: 'Total Interest', value: totalInterest },
+    ] : [];
+
+    const COLORS = ['#8884d8', '#82ca9d'];
+
 
   return (
     <div className="space-y-6">
@@ -284,9 +302,14 @@ export function LoanCalculator() {
             </Select>
         </div>
       </div>
-      <Button onClick={calculateLoan} className="w-full">
-        <Calculator className="mr-2 h-4 w-4" /> Calculate
-      </Button>
+      <div className="flex gap-2">
+        <Button onClick={calculateLoan} className="w-full">
+          <Calculator className="mr-2 h-4 w-4" /> Calculate
+        </Button>
+        <Button onClick={handleClear} variant="outline" className="w-full">
+            <Trash2 className="mr-2 h-4 w-4" /> Clear
+        </Button>
+      </div>
 
       {payment !== null && (
         <Card className="mt-6">
@@ -294,18 +317,33 @@ export function LoanCalculator() {
                 <CardTitle>Loan Summary</CardTitle>
                 <CardDescription>Your estimated loan breakdown.</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground capitalize">{frequency} Payment</p>
-              <p className="text-2xl font-bold text-primary">{formatCurrency(payment, currency)}</p>
+          <CardContent className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <div className="p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground capitalize">{frequency} Payment</p>
+                  <p className="text-2xl font-bold text-primary">{formatCurrency(payment, currency)}</p>
+                </div>
+                 <div className="p-4 bg-muted rounded-lg">
+                   <p className="text-sm text-muted-foreground">Total Payment</p>
+                  <p className="text-2xl font-bold">{formatCurrency(totalPayment!, currency)}</p>
+                </div>
+                 <div className="p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground">Total Interest</p>
+                  <p className="text-2xl font-bold">{formatCurrency(totalInterest!, currency)}</p>
+                </div>
             </div>
-             <div className="p-4 bg-muted rounded-lg">
-               <p className="text-sm text-muted-foreground">Total Payment</p>
-              <p className="text-2xl font-bold">{formatCurrency(totalPayment!, currency)}</p>
-            </div>
-             <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">Total Interest</p>
-              <p className="text-2xl font-bold">{formatCurrency(totalInterest!, currency)}</p>
+            <div className="h-48">
+                 <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} fill="#8884d8" label>
+                            {pieChartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                        </Pie>
+                        <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
+                        <Legend />
+                    </PieChart>
+                </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
