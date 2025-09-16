@@ -142,7 +142,7 @@ export function BarcodeGenerator() {
           <CardTitle>Barcode Preview</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center space-y-4">
-            <div ref={barcodeRef} className="p-4" style={{ background }}>
+            <div ref={barcodeRef} className="p-4 overflow-x-auto" style={{ background }}>
                 <Barcode 
                     value={value} 
                     format={format} 
