@@ -3,18 +3,30 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Calendar as CalendarIcon, Gift, Sparkles, Clock } from 'lucide-react';
-import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, add, differenceInMilliseconds } from 'date-fns';
+import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, add, differenceInMilliseconds, isValid, parse } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { CountdownTimer } from '@/components/common/CountdownTimer';
 
 
 export function AgeCalculator() {
+  const [day, setDay] = useState('');
+  const [month, setMonth] = useState('');
+  const [year, setYear] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
   const [age, setAge] = useState<{ years: number; months: number; days: number; hours: number; minutes: number; seconds: number; milliseconds: number; } | null>(null);
+
+  useEffect(() => {
+    const parsedDate = parse(`${year}-${month}-${day}`, 'yyyy-MM-dd', new Date());
+    if (isValid(parsedDate) && year.length === 4 && parseInt(year, 10) > 1900 && parsedDate < new Date()) {
+      setDateOfBirth(parsedDate);
+    } else {
+      setDateOfBirth(undefined);
+    }
+  }, [day, month, year]);
 
   useEffect(() => {
     if (dateOfBirth) {
@@ -71,38 +83,25 @@ export function AgeCalculator() {
       <div className="space-y-2">
         <label className="text-lg font-semibold flex items-center gap-2">
             <CalendarIcon className="h-5 w-5 text-primary" />
-            Select your Date of Birth
+            Enter your Date of Birth
         </label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-full justify-start text-left font-normal h-12 text-base",
-                !dateOfBirth && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateOfBirth ? format(dateOfBirth, "PPP") : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={dateOfBirth}
-              onSelect={setDateOfBirth}
-              initialFocus
-              captionLayout="dropdown-buttons"
-              fromYear={1900}
-              toYear={new Date().getFullYear()}
-              defaultMonth={dateOfBirth}
-              disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-            />
-          </PopoverContent>
-        </Popover>
+         <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1">
+                <Label htmlFor="day-input">Day</Label>
+                <Input id="day-input" type="number" placeholder="DD" value={day} onChange={(e) => setDay(e.target.value)} min="1" max="31" />
+            </div>
+             <div className="space-y-1">
+                <Label htmlFor="month-input">Month</Label>
+                <Input id="month-input" type="number" placeholder="MM" value={month} onChange={(e) => setMonth(e.target.value)} min="1" max="12" />
+            </div>
+             <div className="space-y-1">
+                <Label htmlFor="year-input">Year</Label>
+                <Input id="year-input" type="number" placeholder="YYYY" value={year} onChange={(e) => setYear(e.target.value)} min="1900" max={new Date().getFullYear()} />
+            </div>
+        </div>
       </div>
 
-      {age && (
+      {age && dateOfBirth && (
         <Card className="mt-6 animate-in fade-in-50 duration-500">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
