@@ -1,5 +1,4 @@
 
-
 import type { Metadata } from 'next';
 import './globals.css';
 import { Inter } from 'next/font/google';
@@ -22,28 +21,24 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// This is a separate async function to fetch data for the script
+async function getScriptData() {
+  const settings = await getSettings();
+  const adSettings = settings.advertisement;
+  const showAutoAds = adSettings?.adType === 'auto';
+  const autoAdsScript = adSettings?.autoAdsScript;
+  return { showAutoAds, autoAdsScript };
+}
 
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await getSettings();
-  const adSettings = settings.advertisement;
-  const showAutoAds = adSettings?.adType === 'auto';
-  const autoAdsScript = adSettings?.autoAdsScript;
+  const { showAutoAds, autoAdsScript } = await getScriptData();
 
   return (
     <html lang="en" suppressHydrationWarning>
-       {showAutoAds && autoAdsScript && (
-          <head>
-            <Script
-              id="auto-ads-script"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{ __html: autoAdsScript }}
-            />
-          </head>
-        )}
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
@@ -59,6 +54,13 @@ export default async function RootLayout({
           {children}
           <Toaster />
         </ThemeProvider>
+        {showAutoAds && autoAdsScript && (
+          <Script
+            id="auto-ads-script"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{ __html: autoAdsScript }}
+          />
+        )}
       </body>
     </html>
   );
