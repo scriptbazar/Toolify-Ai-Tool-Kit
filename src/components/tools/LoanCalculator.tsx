@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
-import { Landmark, Download, MessageCircle, Calculator, Trash2, PieChart as PieChartIcon } from 'lucide-react';
+import { Download, MessageCircle, Calculator, Trash2, PieChart as PieChartIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '../ui/scroll-area';
@@ -334,27 +334,33 @@ export function LoanCalculator() {
                   <p className="text-xl font-bold">{formatCurrency(totalInterest!, currency)}</p>
                 </div>
             </div>
-            <div className="h-48">
-                 <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                        <Pie 
-                            data={pieChartData} 
-                            dataKey="value" 
-                            nameKey="name" 
-                            cx="50%" 
-                            cy="50%" 
-                            outerRadius={60} 
-                            label={(props) => formatCurrency(props.value, currency)}
-                        >
-                            {pieChartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                        </Pie>
-                        <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
-                        <Legend />
-                    </PieChart>
-                </ResponsiveContainer>
-            </div>
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><PieChartIcon className="h-5 w-5" />Loan Breakdown</CardTitle>
+                    <CardDescription>Principal vs. Interest</CardDescription>
+                </CardHeader>
+                <CardContent className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={pieChartData}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={60}
+                                label={(props) => formatCurrency(props.value, currency)}
+                            >
+                                {pieChartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
+                            <Legend wrapperStyle={{fontSize: "0.8rem", paddingTop: "1rem"}}/>
+                        </PieChart>
+                    </ResponsiveContainer>
+                </CardContent>
+             </Card>
           </CardContent>
         </Card>
       )}
