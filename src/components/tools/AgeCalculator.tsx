@@ -7,14 +7,14 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Calendar as CalendarIcon, Gift, Sparkles, Clock } from 'lucide-react';
-import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, add } from 'date-fns';
+import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, add, differenceInMilliseconds } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { CountdownTimer } from '@/components/common/CountdownTimer';
 
 
 export function AgeCalculator() {
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
-  const [age, setAge] = useState<{ years: number; months: number; days: number } | null>(null);
+  const [age, setAge] = useState<{ years: number; months: number; days: number; hours: number; minutes: number; seconds: number; milliseconds: number; } | null>(null);
 
   useEffect(() => {
     if (dateOfBirth) {
@@ -24,15 +24,31 @@ export function AgeCalculator() {
             return;
         }
 
-        const years = differenceInYears(now, dateOfBirth);
-        const dateAfterYears = addYears(dateOfBirth, years);
+        const calculateAge = () => {
+            const nowForCalc = new Date();
+            const years = differenceInYears(nowForCalc, dateOfBirth);
+            const dateAfterYears = addYears(dateOfBirth, years);
+            
+            const months = differenceInMonths(nowForCalc, dateAfterYears);
+            const dateAfterMonths = add(dateAfterYears, { months });
+
+            const days = differenceInDays(nowForCalc, dateAfterMonths);
+            const dateAfterDays = add(dateAfterMonths, { days });
+
+            const remainingMilliseconds = differenceInMilliseconds(nowForCalc, dateAfterDays);
+            
+            const hours = Math.floor(remainingMilliseconds / (1000 * 60 * 60));
+            const minutes = Math.floor((remainingMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remainingMilliseconds % (1000 * 60)) / 1000);
+            const milliseconds = remainingMilliseconds % 1000;
+
+            setAge({ years, months, days, hours, minutes, seconds, milliseconds });
+        };
         
-        const months = differenceInMonths(now, dateAfterYears);
-        const dateAfterMonths = addYears(add(dateOfBirth, { months }), years);
+        calculateAge(); // Initial calculation
+        const interval = setInterval(calculateAge, 100); // Update frequently for live milliseconds
 
-        const days = differenceInDays(now, dateAfterMonths);
-
-        setAge({ years, months, days });
+        return () => clearInterval(interval);
     } else {
         setAge(null);
     }
@@ -95,23 +111,18 @@ export function AgeCalculator() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-             <div className="text-center p-6 bg-muted rounded-lg">
-                <p className="text-muted-foreground">You are</p>
-                <div className="flex justify-center items-baseline gap-4 mt-2">
-                    <div>
-                        <span className="text-5xl font-bold text-primary">{age.years}</span>
-                        <span className="text-muted-foreground"> years</span>
-                    </div>
-                     <div>
-                        <span className="text-5xl font-bold text-primary">{age.months}</span>
-                        <span className="text-muted-foreground"> months</span>
-                    </div>
-                     <div>
-                        <span className="text-5xl font-bold text-primary">{age.days}</span>
-                        <span className="text-muted-foreground"> days</span>
-                    </div>
+             <div className="p-6 bg-muted rounded-lg">
+                <p className="text-muted-foreground text-center">You are</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-2">
+                    <div className="text-center"><span className="text-3xl font-bold text-primary">{age.years}</span><span className="text-muted-foreground"> years</span></div>
+                    <div className="text-center"><span className="text-3xl font-bold text-primary">{age.months}</span><span className="text-muted-foreground"> months</span></div>
+                    <div className="text-center"><span className="text-3xl font-bold text-primary">{age.days}</span><span className="text-muted-foreground"> days</span></div>
+                    <div className="text-center"><span className="text-3xl font-bold text-primary">{age.hours}</span><span className="text-muted-foreground"> hours</span></div>
+                    <div className="text-center"><span className="text-3xl font-bold text-primary">{age.minutes}</span><span className="text-muted-foreground"> minutes</span></div>
+                    <div className="text-center"><span className="text-3xl font-bold text-primary">{age.seconds}</span><span className="text-muted-foreground"> seconds</span></div>
+                    <div className="text-center col-span-2 md:col-span-1"><span className="text-3xl font-bold text-primary">{age.milliseconds}</span><span className="text-muted-foreground"> ms</span></div>
                 </div>
-                <p className="text-muted-foreground mt-2">old.</p>
+                <p className="text-muted-foreground mt-2 text-center">old!</p>
              </div>
              <div className="p-4 bg-primary/10 rounded-lg flex items-center justify-center gap-4">
                 <Gift className="h-8 w-8 text-primary" />
