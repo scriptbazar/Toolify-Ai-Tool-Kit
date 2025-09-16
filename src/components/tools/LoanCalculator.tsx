@@ -320,24 +320,24 @@ export function LoanCalculator() {
                 <CardDescription>Your estimated loan breakdown.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-            <div className="space-y-4 text-center">
-                <div className="p-4 bg-muted rounded-lg">
+            <div className="space-y-2">
+                <div className="p-2 bg-muted rounded-lg text-center">
                   <p className="text-sm text-muted-foreground capitalize">{frequency} Payment</p>
                   <p className="text-xl font-bold text-primary">{formatCurrency(payment, currency)}</p>
                 </div>
-                 <div className="p-4 bg-muted rounded-lg">
+                 <div className="p-2 bg-muted rounded-lg text-center">
                    <p className="text-sm text-muted-foreground">Total Payment</p>
                   <p className="text-xl font-bold">{formatCurrency(totalPayment!, currency)}</p>
                 </div>
-                 <div className="p-4 bg-muted rounded-lg">
+                 <div className="p-2 bg-muted rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">Total Interest</p>
                   <p className="text-xl font-bold">{formatCurrency(totalInterest!, currency)}</p>
                 </div>
             </div>
              <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><PieChartIcon className="h-5 w-5" />Loan Breakdown</CardTitle>
-                    <CardDescription>Principal vs. Interest</CardDescription>
+                    <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Loan Breakdown</CardTitle>
+                    <CardDescription className="text-xs">Principal vs. Interest</CardDescription>
                 </CardHeader>
                 <CardContent className="h-48">
                     <ResponsiveContainer width="100%" height="100%">
