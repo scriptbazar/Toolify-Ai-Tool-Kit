@@ -143,30 +143,26 @@ export function LoanCalculator() {
                  const blob = await response.blob();
                  const reader = new FileReader();
                  const dataUrl = await new Promise<string>((resolve, reject) => {
-                     reader.onload = () => resolve(reader.result as string);
+                     reader.onloadend = () => resolve(reader.result as string);
                      reader.onerror = reject;
                      reader.readAsDataURL(blob);
                  });
-                doc.addImage(dataUrl, 'PNG', 14, 15, 20, 20);
-                doc.setFontSize(22);
-                doc.text(siteTitle, 40, 28);
+                doc.addImage(dataUrl, 'PNG', 15, 15, 20, 20);
+                doc.setFontSize(22).text(siteTitle, 40, 28);
             } catch (e) {
                  console.error("Could not add logo to PDF:", e);
-                 doc.setFontSize(22);
-                 doc.text(siteTitle, 14, 22);
+                 doc.setFontSize(22).text(siteTitle, 15, 22);
             }
         } else {
-             doc.setFontSize(22);
-             doc.text(siteTitle, 14, 22);
+             doc.setFontSize(22).text(siteTitle, 15, 22);
         }
 
-        doc.setFontSize(12);
-        doc.text("Loan EMI Schedule", 14, 45);
+        doc.setFontSize(12).text("Loan EMI Schedule", 15, 45);
+        doc.line(15, 48, 195, 48); // separator line
         
         // --- Loan Summary Table ---
         autoTable(doc, {
             startY: 55,
-            head: [['Loan Summary', '']],
             body: [
                 ['Loan Type', loanType],
                 ['Loan Amount', formatCurrency(parseFloat(loanAmount), currency)],
@@ -176,12 +172,9 @@ export function LoanCalculator() {
                 ['Total Payment', formatCurrency(totalPayment, currency)],
                 ['Total Interest', formatCurrency(totalInterest, currency)],
             ],
-            theme: 'striped',
-            didParseCell: function (data: any) {
-                if (data.section === 'body' && data.column.index === 0) {
-                    data.cell.styles.fontStyle = 'bold';
-                }
-            }
+            theme: 'plain',
+            styles: { fontSize: 10 },
+            columnStyles: { 0: { fontStyle: 'bold' } },
         });
 
         // --- EMI Schedule Table ---
@@ -190,7 +183,16 @@ export function LoanCalculator() {
           head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
           body: schedule.map(item => [item.month.toString(), item.principal, item.interest, item.totalPayment, item.remainingBalance]),
           theme: 'grid',
+          headStyles: { fillColor: [76, 35, 137] }, // Primary color
         });
+        
+        // --- Footer ---
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8).text(`Page ${i} of ${pageCount}`, 195, 290, { align: 'right' });
+            doc.text(`${siteTitle} - EMI Report`, 15, 290);
+        }
         
         doc.save(`emi-schedule-${loanAmount}.pdf`);
 
@@ -352,4 +354,5 @@ export function LoanCalculator() {
       )}
     </div>
   );
-}
+
+    
