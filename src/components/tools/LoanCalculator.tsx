@@ -8,50 +8,122 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Landmark } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ScrollArea } from '../ui/scroll-area';
+
+interface ScheduleItem {
+    month: number;
+    principal: string;
+    interest: string;
+    totalPayment: string;
+    remainingBalance: string;
+}
 
 export function LoanCalculator() {
-  const [loanAmount, setLoanAmount] = useState('10000');
+  const [loanAmount, setLoanAmount] = useState('100000');
   const [interestRate, setInterestRate] = useState('5');
-  const [loanTerm, setLoanTerm] = useState('5');
+  const [loanTerm, setLoanTerm] = useState('10');
   const [termUnit, setTermUnit] = useState<'years' | 'months'>('years');
-  const [monthlyPayment, setMonthlyPayment] = useState<number | null>(null);
+  const [frequency, setFrequency] = useState<'monthly' | 'daily' | 'weekly' | 'yearly'>('monthly');
+  const [currency, setCurrency] = useState('INR');
+
+  const [payment, setPayment] = useState<number | null>(null);
   const [totalPayment, setTotalPayment] = useState<number | null>(null);
   const [totalInterest, setTotalInterest] = useState<number | null>(null);
+  const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+  
+  const currencySymbols: {[key: string]: string} = {
+      'INR': '₹',
+      'USD': '$',
+      'EUR': '€'
+  };
 
   const calculateLoan = () => {
     const principal = parseFloat(loanAmount);
     const annualRate = parseFloat(interestRate) / 100;
-    const monthlyRate = annualRate / 12;
+    
+    if (isNaN(principal) || principal <= 0 || isNaN(annualRate) || annualRate < 0 || isNaN(parseFloat(loanTerm)) || parseFloat(loanTerm) <= 0) {
+        setPayment(null);
+        setTotalPayment(null);
+        setTotalInterest(null);
+        setSchedule([]);
+        return;
+    }
+    
+    let ratePerPeriod = 0;
+    let numberOfPayments = 0;
+
     const termInMonths = termUnit === 'years' ? parseFloat(loanTerm) * 12 : parseFloat(loanTerm);
 
-    if (principal > 0 && annualRate > 0 && termInMonths > 0) {
-      if (monthlyRate === 0) { // Simple interest case
-        const payment = principal / termInMonths;
-        setMonthlyPayment(payment);
-        setTotalPayment(principal);
-        setTotalInterest(0);
-        return;
-      }
-      const payment = principal * (monthlyRate * Math.pow(1 + monthlyRate, termInMonths)) / (Math.pow(1 + monthlyRate, termInMonths) - 1);
-      const totalPaid = payment * termInMonths;
+    switch(frequency) {
+        case 'daily':
+            ratePerPeriod = annualRate / 365;
+            numberOfPayments = termInMonths * 30.44; // Avg days in month
+            break;
+        case 'weekly':
+            ratePerPeriod = annualRate / 52;
+            numberOfPayments = termInMonths * 4.345; // Avg weeks in month
+            break;
+        case 'yearly':
+            ratePerPeriod = annualRate;
+            numberOfPayments = termInMonths / 12;
+            break;
+        default: // monthly
+            ratePerPeriod = annualRate / 12;
+            numberOfPayments = termInMonths;
+            break;
+    }
+
+    if (principal > 0 && annualRate >= 0 && numberOfPayments > 0) {
+      const calculatedPayment = principal * (ratePerPeriod * Math.pow(1 + ratePerPeriod, numberOfPayments)) / (Math.pow(1 + ratePerPeriod, numberOfPayments) - 1);
+      const totalPaid = calculatedPayment * numberOfPayments;
       const interestPaid = totalPaid - principal;
 
-      setMonthlyPayment(payment);
+      setPayment(calculatedPayment);
       setTotalPayment(totalPaid);
       setTotalInterest(interestPaid);
-    } else {
-      setMonthlyPayment(null);
-      setTotalPayment(null);
-      setTotalInterest(null);
+      
+      // Generate EMI Schedule
+      let remainingBalance = principal;
+      const newSchedule: ScheduleItem[] = [];
+      for(let i = 1; i <= Math.ceil(numberOfPayments); i++) {
+        const interestForPeriod = remainingBalance * ratePerPeriod;
+        const principalForPeriod = calculatedPayment - interestForPeriod;
+        remainingBalance -= principalForPeriod;
+
+        newSchedule.push({
+            month: i,
+            principal: formatCurrency(principalForPeriod, currency),
+            interest: formatCurrency(interestForPeriod, currency),
+            totalPayment: formatCurrency(calculatedPayment, currency),
+            remainingBalance: formatCurrency(Math.max(0, remainingBalance), currency),
+        });
+      }
+      setSchedule(newSchedule);
     }
   };
+  
+  const formatCurrency = (value: number, currencyCode: string) => {
+      const symbol = currencySymbols[currencyCode] || '$';
+      return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+  }
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="loan-amount">Loan Amount ($)</Label>
-          <Input id="loan-amount" type="number" value={loanAmount} onChange={(e) => setLoanAmount(e.target.value)} placeholder="e.g., 10000" />
+          <Label htmlFor="loan-amount">Loan Amount</Label>
+           <div className="flex gap-2">
+            <Select value={currency} onValueChange={setCurrency}>
+              <SelectTrigger className="w-[80px]"><SelectValue/></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="INR">INR</SelectItem>
+                <SelectItem value="USD">USD</SelectItem>
+                <SelectItem value="EUR">EUR</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input id="loan-amount" type="number" value={loanAmount} onChange={(e) => setLoanAmount(e.target.value)} placeholder="e.g., 100000" />
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="interest-rate">Annual Interest Rate (%)</Label>
@@ -60,19 +132,31 @@ export function LoanCalculator() {
         <div className="space-y-2">
           <Label htmlFor="loan-term">Loan Term</Label>
           <div className="flex gap-2">
-            <Input id="loan-term" type="number" value={loanTerm} onChange={(e) => setLoanTerm(e.target.value)} placeholder="e.g., 5" />
+            <Input id="loan-term" type="number" value={loanTerm} onChange={(e) => setLoanTerm(e.target.value)} placeholder="e.g., 10" />
             <Select value={termUnit} onValueChange={(val) => setTermUnit(val as any)}>
                 <SelectTrigger className="w-[120px]"><SelectValue/></SelectTrigger>
                 <SelectContent><SelectItem value="years">Years</SelectItem><SelectItem value="months">Months</SelectItem></SelectContent>
             </Select>
           </div>
         </div>
+         <div className="space-y-2">
+          <Label htmlFor="frequency">Payment Frequency</Label>
+            <Select value={frequency} onValueChange={(val) => setFrequency(val as any)}>
+                <SelectTrigger className="w-full"><SelectValue/></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
       </div>
       <Button onClick={calculateLoan} className="w-full">
         <Landmark className="mr-2 h-4 w-4" /> Calculate
       </Button>
 
-      {monthlyPayment !== null && (
+      {payment !== null && (
         <Card className="mt-6">
            <CardHeader>
                 <CardTitle>Loan Summary</CardTitle>
@@ -80,19 +164,54 @@ export function LoanCalculator() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">Monthly Payment</p>
-              <p className="text-2xl font-bold text-primary">${monthlyPayment.toFixed(2)}</p>
+              <p className="text-sm text-muted-foreground capitalize">{frequency} Payment</p>
+              <p className="text-2xl font-bold text-primary">{formatCurrency(payment, currency)}</p>
             </div>
              <div className="p-4 bg-muted rounded-lg">
                <p className="text-sm text-muted-foreground">Total Payment</p>
-              <p className="text-2xl font-bold">${totalPayment?.toFixed(2)}</p>
+              <p className="text-2xl font-bold">{formatCurrency(totalPayment!, currency)}</p>
             </div>
              <div className="p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">Total Interest</p>
-              <p className="text-2xl font-bold">${totalInterest?.toFixed(2)}</p>
+              <p className="text-2xl font-bold">{formatCurrency(totalInterest!, currency)}</p>
             </div>
           </CardContent>
         </Card>
+      )}
+      
+      {schedule.length > 0 && (
+         <Card className="mt-6">
+            <CardHeader>
+                <CardTitle>EMI Schedule</CardTitle>
+                <CardDescription>Detailed breakdown of your payments over time.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ScrollArea className="h-96">
+                    <Table>
+                        <TableHeader className="sticky top-0 bg-card">
+                            <TableRow>
+                                <TableHead className="w-[80px]">#</TableHead>
+                                <TableHead>Principal</TableHead>
+                                <TableHead>Interest</TableHead>
+                                <TableHead>Total Payment</TableHead>
+                                <TableHead>Balance</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {schedule.map((item) => (
+                                <TableRow key={item.month}>
+                                    <TableCell>{item.month}</TableCell>
+                                    <TableCell>{item.principal}</TableCell>
+                                    <TableCell>{item.interest}</TableCell>
+                                    <TableCell>{item.totalPayment}</TableCell>
+                                    <TableCell>{item.remainingBalance}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
+            </CardContent>
+         </Card>
       )}
     </div>
   );
