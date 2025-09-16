@@ -119,7 +119,7 @@ export function LoanCalculator() {
   
   const formatCurrency = (value: number, currencyCode: string) => {
       const symbol = currencySymbols[currencyCode] || '$';
-      return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+      return `${symbol}${new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
   }
   
     const handleClear = () => {
@@ -144,7 +144,6 @@ export function LoanCalculator() {
         const logoUrl = settings.general?.logoUrl;
         
         const doc = new jsPDF();
-        let finalY = 10;
 
         // --- Header ---
         if (logoUrl) {
@@ -236,8 +235,7 @@ export function LoanCalculator() {
         { name: 'Total Interest', value: totalInterest },
     ] : [];
 
-    const COLORS = ['#8884d8', '#82ca9d'];
-
+    const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))'];
 
   return (
     <div className="space-y-6">
@@ -334,7 +332,15 @@ export function LoanCalculator() {
             <div className="h-48">
                  <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} fill="#8884d8" label>
+                        <Pie 
+                            data={pieChartData} 
+                            dataKey="value" 
+                            nameKey="name" 
+                            cx="50%" 
+                            cy="50%" 
+                            outerRadius={60} 
+                            label={(props) => formatCurrency(props.value, currency)}
+                        >
                             {pieChartData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
