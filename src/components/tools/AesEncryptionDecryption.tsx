@@ -33,49 +33,50 @@ export function AesEncryptionDecryption() {
     }
 
     setIsLoading(true);
-    try {
-      const fileReader = new FileReader();
-      fileReader.onload = (e) => {
-        const fileData = e.target?.result;
-        if (typeof fileData === 'string') {
-          let processedData;
-          let newFileName = '';
+    
+    const fileReader = new FileReader();
+    fileReader.onload = (e) => {
+        try {
+            const fileData = e.target?.result;
+            if (typeof fileData === 'string') {
+                let processedData;
+                let newFileName = '';
 
-          if (mode === 'encrypt') {
-            processedData = CryptoJS.AES.encrypt(fileData, password).toString();
-            newFileName = `${file.name}.enc`;
-          } else {
-            const bytes = CryptoJS.AES.decrypt(fileData, password);
-            processedData = bytes.toString(CryptoJS.enc.Utf8);
-            if (!processedData) {
-                throw new Error("Decryption failed. Check your password or file integrity.");
+                if (mode === 'encrypt') {
+                    processedData = CryptoJS.AES.encrypt(fileData, password).toString();
+                    newFileName = `${file.name}.enc`;
+                } else {
+                    const bytes = CryptoJS.AES.decrypt(fileData, password);
+                    processedData = bytes.toString(CryptoJS.enc.Utf8);
+                    if (!processedData) {
+                        throw new Error("Decryption failed. Check your password or file integrity.");
+                    }
+                    newFileName = file.name.replace(/\.enc$/, '') || `decrypted-${file.name}`;
+                }
+
+                const blob = new Blob([processedData], { type: 'text/plain' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = newFileName;
+                link.click();
+                URL.revokeObjectURL(link.href);
+                
+                toast({ title: `File successfully ${mode}ed!`, description: 'Your file has been downloaded.' });
             }
-            newFileName = file.name.replace(/\.enc$/, '') || `decrypted-${file.name}`;
-          }
-
-          const blob = new Blob([processedData], { type: 'text/plain' });
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(blob);
-          link.download = newFileName;
-          link.click();
-          URL.revokeObjectURL(link.href);
-          
-          toast({ title: `File successfully ${mode}ed!`, description: 'Your file has been downloaded.' });
+        } catch (error: any) {
+            console.error(error);
+            toast({ title: 'Error', description: error.message || 'An unexpected error occurred.', variant: 'destructive' });
+        } finally {
+            setIsLoading(false);
         }
-      };
-      
-      fileReader.onerror = () => {
-          throw new Error("Failed to read the file.");
-      }
-
-      fileReader.readAsText(file); // Reads as text, might need binary for other file types
-
-    } catch (error: any) {
-      console.error(error);
-      toast({ title: 'Error', description: error.message || 'An unexpected error occurred.', variant: 'destructive' });
-    } finally {
-      setIsLoading(false);
+    };
+    
+    fileReader.onerror = () => {
+        toast({ title: 'Error', description: 'Failed to read the file.', variant: 'destructive' });
+        setIsLoading(false);
     }
+
+    fileReader.readAsText(file);
   };
 
   return (
