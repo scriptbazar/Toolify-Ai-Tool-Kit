@@ -90,7 +90,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
             </div>
         )}
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4 transition-colors group-hover:bg-primary/20">
-          <Icon className="h-6 w-6 text-primary transition-transform group-hover:scale-110" />
+          <Icon className="h-6 w-6 text-primary transition-transform group-hover:animate-bounce" />
         </div>
         <div className="flex-grow">
             <h3 className="text-sm font-semibold mb-1">{name}</h3>
