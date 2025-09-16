@@ -32,20 +32,15 @@ export async function getReviews(options: GetReviewsOptions = {}): Promise<Revie
         
         let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = adminDb.collection('reviews');
 
+        // Apply filtering for a specific tool if requested
         if (toolId) {
             query = query.where('toolId', '==', toolId);
         }
-        
-        // If no specific status is requested, default to 'approved' for public-facing queries.
-        // For admin panel (no toolId, no limit), we might want all. The logic below handles this.
-        if (status) {
-            query = query.where('status', '==', status);
-        } else if (toolId || limit) {
-             query = query.where('status', '==', 'approved');
-        }
 
+        // Always order by submission date
         query = query.orderBy('submittedOn', 'desc');
 
+        // Apply a limit if provided, otherwise fetch a reasonable number for admin views.
         if (limit) {
             query = query.limit(limit);
         }
@@ -55,8 +50,8 @@ export async function getReviews(options: GetReviewsOptions = {}): Promise<Revie
         if (snapshot.empty) {
             return [];
         }
-
-        return snapshot.docs.map(doc => {
+        
+        let reviews = snapshot.docs.map(doc => {
             const data = doc.data();
             return ReviewSchema.parse({
                 id: doc.id,
@@ -64,6 +59,17 @@ export async function getReviews(options: GetReviewsOptions = {}): Promise<Revie
                 submittedOn: (data.submittedOn as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
             });
         });
+
+        // If a status is specified, filter in-memory after fetching.
+        // This avoids the composite index requirement for status + submittedOn.
+        if (status) {
+            reviews = reviews.filter(review => review.status === status);
+        } else if (toolId || limit) {
+            // For public-facing queries (e.g., on a tool page), default to showing only approved reviews.
+            reviews = reviews.filter(review => review.status === 'approved');
+        }
+
+        return reviews;
 
     } catch (error) {
         console.error("Error fetching reviews:", error);

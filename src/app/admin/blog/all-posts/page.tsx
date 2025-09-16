@@ -216,13 +216,13 @@ export default function AllPostsPage() {
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        This action cannot be undone. This will permanently delete this post and all of its data.
+                                                        This will move the post to the trash. It will not be permanently deleted immediately.
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                                     <AlertDialogAction onClick={() => handleDelete(post.id)}>
-                                                        Delete
+                                                        Move to Trash
                                                     </AlertDialogAction>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>

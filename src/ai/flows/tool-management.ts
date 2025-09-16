@@ -178,46 +178,53 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
         return [];
     }
 
-    let queryRef: Query = adminDb.collection(TOOLS_COLLECTION);
-    
-    // Apply server-side filters
-    if (options.category && options.category !== 'all') {
-        queryRef = queryRef.where('category', '==', options.category);
-    }
-    
-    // For queries with limits but no specific search text, we can apply the limit directly on the DB
-    if (options.limit && !options.query) {
-        queryRef = queryRef.limit(options.limit);
-    }
-    
-    const snapshot = await queryRef.orderBy('name').get();
-
-    let tools: Tool[] = [];
-    snapshot.docs.forEach(doc => {
-        const data = doc.data();
-        const tool = ToolSchema.safeParse({ id: doc.id, slug: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
-        if (tool.success) {
-            tools.push(tool.data);
-        } else {
-            console.warn(`Invalid tool data in Firestore with ID ${doc.id}:`, tool.error);
+    try {
+        let queryRef: Query = adminDb.collection(TOOLS_COLLECTION);
+        
+        // Apply server-side filters
+        if (options.category && options.category !== 'all') {
+            queryRef = queryRef.where('category', '==', options.category);
         }
-    });
+        
+        // Firestore doesn't support text search, so we fetch by category/all and filter by query in-memory.
+        // For limits, we apply them on the DB query if there's no text search, otherwise after in-memory search.
+        if (options.limit && !options.query) {
+            queryRef = queryRef.limit(options.limit);
+        }
+        
+        const snapshot = await queryRef.orderBy('name').get();
 
-    // In-memory search filtering (if a query is provided)
-    if (options.query) {
-        const lowercasedQuery = options.query.toLowerCase();
-        tools = tools.filter(tool => 
-            tool.name.toLowerCase().includes(lowercasedQuery) ||
-            tool.description.toLowerCase().includes(lowercasedQuery)
-        );
+        let tools: Tool[] = [];
+        snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            // Using safeParse to avoid crashing on schema mismatch
+            const tool = ToolSchema.safeParse({ id: doc.id, slug: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
+            if (tool.success) {
+                tools.push(tool.data);
+            } else {
+                console.warn(`Invalid tool data in Firestore with ID ${doc.id}:`, tool.error);
+            }
+        });
+
+        // In-memory search filtering (if a query is provided)
+        if (options.query) {
+            const lowercasedQuery = options.query.toLowerCase();
+            tools = tools.filter(tool => 
+                tool.name.toLowerCase().includes(lowercasedQuery) ||
+                tool.description.toLowerCase().includes(lowercasedQuery)
+            );
+        }
+        
+        // If a limit was specified with a query, apply it here after in-memory filtering.
+        if (options.limit && options.query) {
+            tools = tools.slice(0, options.limit);
+        }
+        
+        return tools.filter(tool => tool.status !== 'Disabled');
+    } catch(e) {
+        console.error(e);
+        return [];
     }
-    
-    // If a limit was specified with a query, apply it here after in-memory filtering.
-    if (options.limit && options.query) {
-        tools = tools.slice(0, options.limit);
-    }
-    
-    return tools.filter(tool => tool.status !== 'Disabled');
 });
 
 
@@ -466,5 +473,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
       
+
+    
 
     

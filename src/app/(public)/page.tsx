@@ -11,7 +11,7 @@ export default async function Home() {
     const [tools, settings, allPosts, testimonials] = await Promise.all([
         getTools({ limit: 10 }), // Fetch only a small number of tools for "Tool of the Week" logic
         getSettings(),
-        getPosts('all'),
+        getPosts(),
         getReviews({ limit: 12 }) // Fetch up to 12 approved reviews
     ]);
 
@@ -27,7 +27,7 @@ export default async function Home() {
         toolOfTheWeek = toolsOfTheWeek[randomIndex];
     }
 
-    const latestPosts = allPosts.filter(p => p.status === 'Published').slice(0, 3);
+    const latestPosts = allPosts.slice(0, 3);
 
   return (
     <HomePageClient
@@ -43,3 +43,4 @@ export default async function Home() {
     
 
     
+
