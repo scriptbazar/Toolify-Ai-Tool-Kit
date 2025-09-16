@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -6,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
-import { Landmark, Download, MessageCircle } from 'lucide-react';
+import { Landmark, Download, MessageCircle, Calculator } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '../ui/scroll-area';
@@ -284,7 +285,7 @@ export function LoanCalculator() {
         </div>
       </div>
       <Button onClick={calculateLoan} className="w-full">
-        <Landmark className="mr-2 h-4 w-4" /> Calculate
+        <Calculator className="mr-2 h-4 w-4" /> Calculate
       </Button>
 
       {payment !== null && (
@@ -354,5 +355,4 @@ export function LoanCalculator() {
       )}
     </div>
   );
-
-    
+}
