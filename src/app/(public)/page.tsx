@@ -11,7 +11,7 @@ export default async function Home() {
     const [tools, settings, allPosts, testimonials] = await Promise.all([
         getTools({ limit: 10 }), // Fetch only a small number of tools for "Tool of the Week" logic
         getSettings(),
-        getPosts(),
+        getPosts('all'),
         getReviews({ limit: 12 }) // Fetch up to 12 approved reviews
     ]);
 

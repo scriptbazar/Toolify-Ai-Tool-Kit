@@ -33,7 +33,7 @@ export default async function ToolsDashboardPage({
       </div>
 
       <ToolFilters 
-        tools={allVisibleTools.filter(tool => tool.status !== 'Disabled')}
+        tools={allVisibleTools}
       />
       
       <div className="mt-8">
@@ -45,5 +45,7 @@ export default async function ToolsDashboardPage({
 
 
       
+
+    
 
     

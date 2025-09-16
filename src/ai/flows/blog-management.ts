@@ -6,7 +6,7 @@
  * @fileOverview Manages blog-related data, such as posts and comments, in Firestore.
  */
 import { getAdminDb } from '@/lib/firebase-admin';
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp, type Query } from 'firebase-admin/firestore';
 import { PostSchema, type Post, CommentSchema, type Comment, CategorySchema, type Category, CommentStatusSchema } from './blog-management.types';
 
 const POSTS_COLLECTION = 'blogPosts';
@@ -15,17 +15,27 @@ const CATEGORIES_COLLECTION = 'blogCategories';
 
 
 /**
- * Fetches all posts from Firestore, ordered by creation date.
- * @returns {Promise<Post[]>} A list of all posts.
+ * Fetches posts from Firestore. By default, it fetches only 'Published' posts.
+ * To fetch all posts (e.g., for the admin panel), pass 'all' as the status.
+ * @param {('Published' | 'all')} [status='Published'] - The status of posts to fetch.
+ * @returns {Promise<Post[]>} A list of posts.
  */
-export async function getPosts(): Promise<Post[]> {
+export async function getPosts(status: 'Published' | 'all' = 'Published'): Promise<Post[]> {
   try {
     const adminDb = getAdminDb();
     if (!adminDb) {
       console.warn("Database not initialized, cannot fetch posts.");
       return [];
     }
-    const snapshot = await adminDb.collection(POSTS_COLLECTION).orderBy('createdAt', 'desc').get();
+    
+    let query: Query = adminDb.collection(POSTS_COLLECTION);
+    
+    if (status !== 'all') {
+        query = query.where('status', '==', status);
+    }
+    
+    const snapshot = await query.orderBy('createdAt', 'desc').get();
+    
     if (snapshot.empty) {
       return [];
     }

@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { Calendar as CalendarIcon, Gift, Sparkles } from 'lucide-react';
+import { Calendar as CalendarIcon, Gift, Sparkles, Clock } from 'lucide-react';
 import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, add } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { CountdownTimer } from '@/components/common/CountdownTimer';
+
 
 export function AgeCalculator() {
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
@@ -43,9 +45,10 @@ export function AgeCalculator() {
     if (now > nextBday) {
         nextBday.setFullYear(now.getFullYear() + 1);
     }
-    const daysLeft = differenceInDays(nextBday, now);
-    return { date: format(nextBday, 'PPP'), daysLeft };
+    return { date: format(nextBday, 'PPP'), daysLeft: differenceInDays(nextBday, now), nextBdayDate: nextBday };
   };
+
+  const nextBdayInfo = nextBirthday();
 
   return (
     <div className="space-y-6">
@@ -114,11 +117,25 @@ export function AgeCalculator() {
                 <Gift className="h-8 w-8 text-primary" />
                 <div>
                    <p className="font-semibold">Next Birthday</p>
-                   {nextBirthday() && (
-                       <p className="text-muted-foreground">{nextBirthday()?.date} ({nextBirthday()?.daysLeft} days left)</p>
+                   {nextBdayInfo && (
+                       <p className="text-muted-foreground">{nextBdayInfo.date} ({nextBdayInfo.daysLeft} days left)</p>
                    )}
                 </div>
             </div>
+            {nextBdayInfo && (
+              <div className="p-4 bg-muted/50 rounded-lg flex items-center justify-center">
+                 <CountdownTimer expiryDate={nextBdayInfo.nextBdayDate} className="flex space-x-4">
+                    {(timeLeft) => (
+                      <>
+                        <div className="text-center"><div className="text-2xl font-bold">{String(timeLeft.days).padStart(2, '0')}</div><div className="text-xs">Days</div></div>
+                        <div className="text-center"><div className="text-2xl font-bold">{String(timeLeft.hours).padStart(2, '0')}</div><div className="text-xs">Hours</div></div>
+                        <div className="text-center"><div className="text-2xl font-bold">{String(timeLeft.minutes).padStart(2, '0')}</div><div className="text-xs">Minutes</div></div>
+                        <div className="text-center"><div className="text-2xl font-bold">{String(timeLeft.seconds).padStart(2, '0')}</div><div className="text-xs">Seconds</div></div>
+                      </>
+                    )}
+                  </CountdownTimer>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
