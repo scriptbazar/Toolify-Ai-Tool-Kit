@@ -144,8 +144,7 @@ export function LoanCalculator() {
         const logoUrl = settings.general?.logoUrl;
         
         const doc = new jsPDF();
-        let finalY = 10;
-
+        
         // --- Header ---
         if (logoUrl) {
             try {
@@ -251,6 +250,11 @@ export function LoanCalculator() {
                     <SelectItem value="Car Loan">Car Loan</SelectItem>
                     <SelectItem value="Education Loan">Education Loan</SelectItem>
                     <SelectItem value="Business Loan">Business Loan</SelectItem>
+                    <SelectItem value="Two-wheeler Loan">Two-wheeler Loan</SelectItem>
+                    <SelectItem value="Gold Loan">Gold Loan</SelectItem>
+                    <SelectItem value="Payday Loan">Payday Loan</SelectItem>
+                    <SelectItem value="Medical Loan">Medical Loan</SelectItem>
+                    <SelectItem value="Debt Consolidation Loan">Debt Consolidation</SelectItem>
                     <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
             </Select>
