@@ -190,7 +190,7 @@ export function LoanCalculator() {
         autoTable(doc, {
           startY: (doc as any).autoTable.previous.finalY + 10,
           head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
-          body: schedule.map(item => [item.month.toString(), item.principal, item.interest, item.totalPayment, item.remainingBalance]),
+          body: schedule.map(item => [item.month, item.principal, item.interest, item.totalPayment, item.remainingBalance]),
           theme: 'grid',
           headStyles: { fillColor: [76, 35, 137] },
         });
@@ -319,8 +319,8 @@ export function LoanCalculator() {
                 <CardTitle>Loan Summary</CardTitle>
                 <CardDescription>Your estimated loan breakdown.</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 items-center">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+            <div className="space-y-4 text-center">
                 <div className="p-4 bg-muted rounded-lg">
                   <p className="text-sm text-muted-foreground capitalize">{frequency} Payment</p>
                   <p className="text-xl font-bold text-primary">{formatCurrency(payment, currency)}</p>
