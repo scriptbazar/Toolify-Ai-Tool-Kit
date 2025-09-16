@@ -31,6 +31,7 @@ export function LoanCalculator() {
   const [termUnit, setTermUnit] = useState<'years' | 'months'>('years');
   const [frequency, setFrequency] = useState<'monthly' | 'daily' | 'weekly' | 'yearly'>('monthly');
   const [currency, setCurrency] = useState('INR');
+  const [loanType, setLoanType] = useState('Personal Loan');
   const { toast } = useToast();
 
   const [payment, setPayment] = useState<number | null>(null);
@@ -41,7 +42,11 @@ export function LoanCalculator() {
   const currencySymbols: {[key: string]: string} = {
       'INR': '₹',
       'USD': '$',
-      'EUR': '€'
+      'EUR': '€',
+      'GBP': '£',
+      'JPY': '¥',
+      'AUD': 'A$',
+      'CAD': 'C$',
   };
 
   const calculateLoan = () => {
@@ -129,15 +134,17 @@ export function LoanCalculator() {
         const logoUrl = settings.general?.logoUrl;
         
         const doc = new jsPDF();
-        
+        let finalY = 10;
+
         // --- Header ---
         if (logoUrl) {
             try {
                  const response = await fetch(logoUrl);
                  const blob = await response.blob();
                  const reader = new FileReader();
-                 const dataUrl = await new Promise<string>(resolve => {
+                 const dataUrl = await new Promise<string>((resolve, reject) => {
                      reader.onload = () => resolve(reader.result as string);
+                     reader.onerror = reject;
                      reader.readAsDataURL(blob);
                  });
                 doc.addImage(dataUrl, 'PNG', 14, 15, 20, 20);
@@ -161,6 +168,7 @@ export function LoanCalculator() {
             startY: 55,
             head: [['Loan Summary', '']],
             body: [
+                ['Loan Type', loanType],
                 ['Loan Amount', formatCurrency(parseFloat(loanAmount), currency)],
                 ['Interest Rate', `${interestRate}% per annum`],
                 ['Loan Term', `${loanTerm} ${termUnit}`],
@@ -180,7 +188,7 @@ export function LoanCalculator() {
         autoTable(doc, {
           startY: (doc as any).autoTable.previous.finalY + 10,
           head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
-          body: schedule.map(item => [item.month, item.principal, item.interest, item.totalPayment, item.remainingBalance]),
+          body: schedule.map(item => [item.month.toString(), item.principal, item.interest, item.totalPayment, item.remainingBalance]),
           theme: 'grid',
         });
         
@@ -199,13 +207,13 @@ export function LoanCalculator() {
   const handleShareOnWhatsApp = () => {
       if (!payment || !totalPayment || !totalInterest) return;
 
-      const summary = `Loan Summary:
-- Loan Amount: ${formatCurrency(parseFloat(loanAmount), currency)}
-- Interest Rate: ${interestRate}%
-- Loan Term: ${loanTerm} ${termUnit}
-- EMI: ${formatCurrency(payment, currency)} / ${frequency}
-- Total Payment: ${formatCurrency(totalPayment, currency)}
-- Total Interest: ${formatCurrency(totalInterest, currency)}`;
+      const summary = `*Loan Summary for ${loanType}*
+- *Loan Amount:* ${formatCurrency(parseFloat(loanAmount), currency)}
+- *Interest Rate:* ${interestRate}%
+- *Loan Term:* ${loanTerm} ${termUnit}
+- *EMI:* ${formatCurrency(payment, currency)} / ${frequency}
+- *Total Payment:* ${formatCurrency(totalPayment, currency)}
+- *Total Interest:* ${formatCurrency(totalInterest, currency)}`;
       
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(summary)}`;
       window.open(whatsappUrl, '_blank');
@@ -213,16 +221,34 @@ export function LoanCalculator() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-2">
+            <Label htmlFor="loan-type">Loan Type</Label>
+            <Select value={loanType} onValueChange={setLoanType}>
+                <SelectTrigger id="loan-type"><SelectValue/></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="Personal Loan">Personal Loan</SelectItem>
+                    <SelectItem value="Home Loan">Home Loan</SelectItem>
+                    <SelectItem value="Car Loan">Car Loan</SelectItem>
+                    <SelectItem value="Education Loan">Education Loan</SelectItem>
+                    <SelectItem value="Business Loan">Business Loan</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
         <div className="space-y-2">
           <Label htmlFor="loan-amount">Loan Amount</Label>
            <div className="flex gap-2">
             <Select value={currency} onValueChange={setCurrency}>
-              <SelectTrigger className="w-[80px]"><SelectValue/></SelectTrigger>
+              <SelectTrigger className="w-[100px]"><SelectValue/></SelectTrigger>
               <SelectContent>
                 <SelectItem value="INR">INR</SelectItem>
                 <SelectItem value="USD">USD</SelectItem>
                 <SelectItem value="EUR">EUR</SelectItem>
+                <SelectItem value="GBP">GBP</SelectItem>
+                <SelectItem value="JPY">JPY</SelectItem>
+                <SelectItem value="AUD">AUD</SelectItem>
+                <SelectItem value="CAD">CAD</SelectItem>
               </SelectContent>
             </Select>
             <Input id="loan-amount" type="number" value={loanAmount} onChange={(e) => setLoanAmount(e.target.value)} placeholder="e.g., 100000" />
@@ -242,7 +268,7 @@ export function LoanCalculator() {
             </Select>
           </div>
         </div>
-         <div className="space-y-2">
+         <div className="space-y-2 col-span-1 md:col-span-2 lg:col-span-1">
           <Label htmlFor="frequency">Payment Frequency</Label>
             <Select value={frequency} onValueChange={(val) => setFrequency(val as any)}>
                 <SelectTrigger className="w-full"><SelectValue/></SelectTrigger>
