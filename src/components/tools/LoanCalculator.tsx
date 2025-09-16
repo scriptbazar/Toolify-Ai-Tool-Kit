@@ -127,26 +127,26 @@ export function LoanCalculator() {
         const settings = await getSettings();
         const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
         const logoUrl = settings.general?.logoUrl;
-        const socialLinks = settings.general?.socialLinks || {};
         
         const doc = new jsPDF();
-        let finalY = 10;
-
+        
         // --- Header ---
         if (logoUrl) {
             try {
-                const response = await fetch(logoUrl);
-                const blob = await response.blob();
-                const reader = new FileReader();
-                const dataUrl = await new Promise<string>(resolve => {
-                    reader.onload = () => resolve(reader.result as string);
-                    reader.readAsDataURL(blob);
+                // Using a proxy or a server-side fetch for the image is more robust.
+                // For client-side, this approach relies on the image being CORS-accessible.
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.src = logoUrl;
+                await new Promise((resolve, reject) => {
+                    img.onload = () => resolve(true);
+                    img.onerror = reject;
                 });
-                doc.addImage(dataUrl, 'PNG', 14, 15, 20, 20);
+                doc.addImage(img, 'PNG', 14, 15, 20, 20);
                 doc.setFontSize(22);
                 doc.text(siteTitle, 40, 28);
             } catch (e) {
-                 console.error("Could not add logo to PDF:", e);
+                 console.error("Could not add logo to PDF due to CORS or other error:", e);
                  doc.setFontSize(22);
                  doc.text(siteTitle, 14, 22);
             }
@@ -157,11 +157,10 @@ export function LoanCalculator() {
 
         doc.setFontSize(12);
         doc.text("Loan EMI Schedule", 14, 45);
-        finalY = 45;
         
         // --- Loan and Payment Tables ---
         autoTable(doc, {
-            startY: finalY + 10,
+            startY: 55,
             head: [['Loan Summary', '']],
             body: [
                 ['Loan Amount', formatCurrency(parseFloat(loanAmount), currency)],
@@ -184,15 +183,6 @@ export function LoanCalculator() {
           head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
           body: schedule.map(item => [item.month, item.principal, item.interest, item.totalPayment, item.remainingBalance]),
         });
-        
-        // --- Footer with Social Links ---
-        const pageCount = (doc as any).internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            const pageHeight = doc.internal.pageSize.getHeight();
-            doc.setFontSize(8);
-            doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.getWidth() - 20, pageHeight - 10);
-        }
         
         doc.save(`emi-schedule-${loanAmount}.pdf`);
 
