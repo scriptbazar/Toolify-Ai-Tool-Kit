@@ -28,13 +28,9 @@ export async function getPosts(status: 'Published' | 'all' = 'Published'): Promi
       return [];
     }
     
-    let query: Query = adminDb.collection(POSTS_COLLECTION);
+    let query: Query = adminDb.collection(POSTS_COLLECTION).orderBy('createdAt', 'desc');
     
-    if (status !== 'all') {
-        query = query.where('status', '==', status);
-    }
-    
-    const snapshot = await query.orderBy('createdAt', 'desc').get();
+    const snapshot = await query.get();
     
     if (snapshot.empty) {
       return [];
@@ -49,6 +45,10 @@ export async function getPosts(status: 'Published' | 'all' = 'Published'): Promi
         publishedAt: data.publishedAt ? (data.publishedAt as Timestamp)?.toDate().toISOString() : undefined,
       });
     });
+
+    if (status !== 'all') {
+        return posts.filter(post => post.status === status);
+    }
 
     return posts;
   } catch (error) {
