@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,14 +9,41 @@ import { UploadCloud, Download, KeyRound, Loader2, File, Eye, EyeOff } from 'luc
 import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
+// Define the type for the crypto-js module we expect to load
+type CryptoJsModule = {
+    AES: {
+        encrypt: (data: any, key: string) => any;
+        decrypt: (data: any, key: string) => any;
+    };
+    enc: {
+        Utf8: any;
+    };
+};
+
+
 export function AesEncryptionDecryption() {
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState<'encrypt' | 'decrypt'>('encrypt');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [cryptoJsModule, setCryptoJsModule] = useState<CryptoJsModule | null>(null);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Dynamically import crypto-js only on the client-side
+    import('crypto-js').then(module => {
+        setCryptoJsModule(module.default as any);
+    }).catch(err => {
+        console.error("Failed to load crypto-js", err);
+        toast({
+            title: "Library Error",
+            description: "Could not load the required encryption library. Please refresh the page.",
+            variant: "destructive"
+        });
+    });
+  }, [toast]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -26,15 +53,16 @@ export function AesEncryptionDecryption() {
   };
 
   const handleProcessFile = async () => {
+    if (!cryptoJsModule) {
+        toast({ title: "Library not loaded", description: "Encryption library is still loading. Please wait a moment and try again.", variant: "destructive"});
+        return;
+    }
     if (!file || !password) {
       toast({ title: "File and password are required.", variant: 'destructive'});
       return;
     }
 
     setIsLoading(true);
-    
-    // Dynamically import crypto-js only on the client-side within the handler
-    const CryptoJS = (await import('crypto-js')).default;
     
     const fileReader = new FileReader();
     fileReader.onload = (e) => {
@@ -45,11 +73,11 @@ export function AesEncryptionDecryption() {
                 let newFileName = '';
 
                 if (mode === 'encrypt') {
-                    processedData = CryptoJS.AES.encrypt(fileData, password).toString();
+                    processedData = cryptoJsModule.AES.encrypt(fileData, password).toString();
                     newFileName = `${file.name}.enc`;
                 } else {
-                    const bytes = CryptoJS.AES.decrypt(fileData, password);
-                    processedData = bytes.toString(CryptoJS.enc.Utf8);
+                    const bytes = cryptoJsModule.AES.decrypt(fileData, password);
+                    processedData = bytes.toString(cryptoJsModule.enc.Utf8);
                     if (!processedData) {
                         throw new Error("Decryption failed. Check your password or file integrity.");
                     }
@@ -127,7 +155,7 @@ export function AesEncryptionDecryption() {
           </div>
         </div>
 
-      <Button onClick={handleProcessFile} disabled={isLoading || !file || !password} className="w-full">
+      <Button onClick={handleProcessFile} disabled={isLoading || !file || !password || !cryptoJsModule} className="w-full">
         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
         {mode === 'encrypt' ? 'Encrypt & Download' : 'Decrypt & Download'}
       </Button>
