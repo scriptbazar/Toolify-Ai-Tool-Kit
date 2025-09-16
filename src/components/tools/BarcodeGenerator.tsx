@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,7 +38,7 @@ export function BarcodeGenerator() {
     });
   }, []);
 
-  const handleDownload = async (format: 'png' | 'jpeg' | 'svg') => {
+  const handleDownload = useCallback(async (format: 'png' | 'jpeg' | 'svg') => {
     if (!barcodeRef.current) {
       toast({ title: "Error", description: "Barcode reference not found.", variant: "destructive" });
       return;
@@ -74,7 +74,7 @@ export function BarcodeGenerator() {
       console.error(err);
       toast({ title: "Download Failed", description: "Could not generate the image file.", variant: "destructive"});
     }
-  };
+  }, [background, htmlToImage, toast]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
