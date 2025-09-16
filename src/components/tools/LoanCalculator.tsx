@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
 import { Landmark, Download, MessageCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -102,20 +102,19 @@ export function LoanCalculator() {
 
         newSchedule.push({
             month: i,
-            principal: formatCurrency(principalForPeriod, currency, true),
-            interest: formatCurrency(interestForPeriod, currency, true),
-            totalPayment: formatCurrency(calculatedPayment, currency, true),
-            remainingBalance: formatCurrency(Math.max(0, remainingBalance), currency, true),
+            principal: formatCurrency(principalForPeriod, currency),
+            interest: formatCurrency(interestForPeriod, currency),
+            totalPayment: formatCurrency(calculatedPayment, currency),
+            remainingBalance: formatCurrency(Math.max(0, remainingBalance), currency),
         });
       }
       setSchedule(newSchedule);
     }
   };
   
-  const formatCurrency = (value: number, currencyCode: string, includeSymbol: boolean = true) => {
+  const formatCurrency = (value: number, currencyCode: string) => {
       const symbol = currencySymbols[currencyCode] || '$';
-      const formattedValue = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
-      return includeSymbol ? `${symbol}${formattedValue}` : formattedValue;
+      return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
   }
   
   const handleDownloadPdf = async () => {
