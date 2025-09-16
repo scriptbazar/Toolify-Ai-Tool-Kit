@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { UploadCloud, Download, KeyRound, Loader2, File, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import CryptoJS from 'crypto-js';
 
 export function AesEncryptionDecryption() {
   const [file, setFile] = useState<File | null>(null);
@@ -33,6 +32,9 @@ export function AesEncryptionDecryption() {
     }
 
     setIsLoading(true);
+    
+    // Dynamically import crypto-js only on the client-side within the handler
+    const CryptoJS = (await import('crypto-js')).default;
     
     const fileReader = new FileReader();
     fileReader.onload = (e) => {
