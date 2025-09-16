@@ -5,11 +5,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { Landmark } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
+import { Landmark, Download, MessageCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '../ui/scroll-area';
+import type { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 interface ScheduleItem {
     month: number;
@@ -107,6 +109,54 @@ export function LoanCalculator() {
       const symbol = currencySymbols[currencyCode] || '$';
       return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
   }
+  
+  const handleDownloadPdf = async () => {
+    if (!payment || !totalPayment || !totalInterest || schedule.length === 0) return;
+    
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
+    
+    const doc = new jsPDF();
+
+    doc.text("Loan EMI Schedule", 14, 15);
+    doc.setFontSize(12);
+    doc.text(`Loan Amount: ${formatCurrency(parseFloat(loanAmount), currency)}`, 14, 25);
+    doc.text(`Interest Rate: ${interestRate}% per annum`, 14, 32);
+    doc.text(`Loan Term: ${loanTerm} ${termUnit}`, 14, 39);
+
+    autoTable(doc, {
+        startY: 45,
+        head: [['Summary', 'Amount']],
+        body: [
+            [`${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Payment`, formatCurrency(payment, currency)],
+            ['Total Payment', formatCurrency(totalPayment, currency)],
+            ['Total Interest', formatCurrency(totalInterest, currency)],
+        ],
+    });
+
+    autoTable(doc, {
+      startY: (doc as any).autoTable.previous.finalY + 10,
+      head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
+      body: schedule.map(item => [item.month, item.principal, item.interest, item.totalPayment, item.remainingBalance]),
+    });
+    
+    doc.save(`emi-schedule-${loanAmount}.pdf`);
+  };
+
+  const handleShareOnWhatsApp = () => {
+      if (!payment || !totalPayment || !totalInterest) return;
+
+      const summary = `Loan Summary:
+- Loan Amount: ${formatCurrency(parseFloat(loanAmount), currency)}
+- Interest Rate: ${interestRate}%
+- Loan Term: ${loanTerm} ${termUnit}
+- EMI: ${formatCurrency(payment, currency)} / ${frequency}
+- Total Payment: ${formatCurrency(totalPayment, currency)}
+- Total Interest: ${formatCurrency(totalInterest, currency)}`;
+      
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(summary)}`;
+      window.open(whatsappUrl, '_blank');
+  };
 
   return (
     <div className="space-y-6">
@@ -211,6 +261,14 @@ export function LoanCalculator() {
                     </Table>
                 </ScrollArea>
             </CardContent>
+            <CardFooter className="flex-col sm:flex-row justify-end gap-2">
+                <Button variant="outline" onClick={handleShareOnWhatsApp}>
+                    <MessageCircle className="mr-2 h-4 w-4"/> Share on WhatsApp
+                </Button>
+                <Button onClick={handleDownloadPdf}>
+                    <Download className="mr-2 h-4 w-4"/> Download as PDF
+                </Button>
+            </CardFooter>
          </Card>
       )}
     </div>
