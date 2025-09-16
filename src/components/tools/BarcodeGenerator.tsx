@@ -9,9 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Download, SlidersHorizontal } from 'lucide-react';
+import { Download, SlidersHorizontal, QrCode } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Barcode from 'react-barcode';
+import QRCode from 'react-qr-code';
 
 type HtmlToImageLibrary = {
     toPng: (node: HTMLElement, options?: any) => Promise<string>;
@@ -35,10 +36,10 @@ export function BarcodeGenerator() {
   useEffect(() => {
     import('html-to-image').then((module) => {
       setHtmlToImage(module);
-    });
+    }).catch(err => console.error("Failed to load html-to-image", err));
   }, []);
 
-  const handleDownload = useCallback(async (format: 'png' | 'jpeg' | 'svg') => {
+  const handleDownload = useCallback(async (downloadFormat: 'png' | 'jpeg' | 'svg') => {
     if (!barcodeRef.current) {
       toast({ title: "Error", description: "Barcode reference not found.", variant: "destructive" });
       return;
@@ -53,7 +54,7 @@ export function BarcodeGenerator() {
       let dataUrl;
       const downloadOptions = { backgroundColor: background };
       
-      switch (format) {
+      switch (downloadFormat) {
         case 'png':
           dataUrl = await htmlToImage.toPng(barcodeRef.current, downloadOptions);
           break;
@@ -66,7 +67,7 @@ export function BarcodeGenerator() {
       }
       
       const link = document.createElement('a');
-      link.download = `barcode.${format}`;
+      link.download = `barcode.${downloadFormat}`;
       link.href = dataUrl;
       link.click();
 
@@ -93,6 +94,7 @@ export function BarcodeGenerator() {
                     <Select value={format} onValueChange={setFormat}>
                         <SelectTrigger id="format-select"><SelectValue /></SelectTrigger>
                         <SelectContent>
+                            <SelectItem value="QRCode">QR Code</SelectItem>
                             <SelectItem value="CODE128">Code 128</SelectItem>
                             <SelectItem value="CODE39">Code 39</SelectItem>
                             <SelectItem value="EAN13">EAN-13</SelectItem>
@@ -143,15 +145,24 @@ export function BarcodeGenerator() {
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center space-y-4">
             <div ref={barcodeRef} className="p-4 overflow-x-auto max-w-full" style={{ background }}>
-                <Barcode 
-                    value={value} 
-                    format={format} 
-                    width={width}
-                    height={height}
-                    displayValue={displayValue}
-                    lineColor={lineColor}
-                    background={background}
-                />
+                {format === 'QRCode' ? (
+                    <QRCode
+                        value={value}
+                        bgColor={background}
+                        fgColor={lineColor}
+                        size={256}
+                    />
+                ) : (
+                    <Barcode 
+                        value={value} 
+                        format={format} 
+                        width={width}
+                        height={height}
+                        displayValue={displayValue}
+                        lineColor={lineColor}
+                        background={background}
+                    />
+                )}
             </div>
             <div className="w-full space-y-2">
                 <div className="flex gap-2">
