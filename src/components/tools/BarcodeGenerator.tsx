@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,12 @@ import { Slider } from '@/components/ui/slider';
 import { Download, SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Barcode from 'react-barcode';
-import { toPng, toJpeg, toSvg } from 'html-to-image';
+
+type HtmlToImageLibrary = {
+    toPng: (node: HTMLElement, options?: any) => Promise<string>;
+    toJpeg: (node: HTMLElement, options?: any) => Promise<string>;
+    toSvg: (node: HTMLElement, options?: any) => Promise<string>;
+};
 
 export function BarcodeGenerator() {
   const [value, setValue] = useState('https://toolifyai.com');
@@ -25,11 +30,23 @@ export function BarcodeGenerator() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const barcodeRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [htmlToImage, setHtmlToImage] = useState<HtmlToImageLibrary | null>(null);
+
+  useEffect(() => {
+    import('html-to-image').then((module) => {
+      setHtmlToImage(module);
+    });
+  }, []);
 
   const handleDownload = async (format: 'png' | 'jpeg' | 'svg') => {
     if (!barcodeRef.current) {
       toast({ title: "Error", description: "Barcode reference not found.", variant: "destructive" });
       return;
+    }
+    
+    if (!htmlToImage) {
+        toast({ title: "Library not loaded", description: "Image generation library is still loading, please try again in a moment.", variant: "destructive" });
+        return;
     }
 
     try {
@@ -38,13 +55,13 @@ export function BarcodeGenerator() {
       
       switch (format) {
         case 'png':
-          dataUrl = await toPng(barcodeRef.current, downloadOptions);
+          dataUrl = await htmlToImage.toPng(barcodeRef.current, downloadOptions);
           break;
         case 'jpeg':
-          dataUrl = await toJpeg(barcodeRef.current, { ...downloadOptions, quality: 0.95 });
+          dataUrl = await htmlToImage.toJpeg(barcodeRef.current, { ...downloadOptions, quality: 0.95 });
           break;
         case 'svg':
-          dataUrl = await toSvg(barcodeRef.current, downloadOptions);
+          dataUrl = await htmlToImage.toSvg(barcodeRef.current, downloadOptions);
           break;
       }
       
