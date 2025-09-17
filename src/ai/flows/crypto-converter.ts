@@ -75,7 +75,7 @@ export const getCryptoRates = ai.defineFlow(
                 'usd', 'eur', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'cny', 'hkd', 'sgd', 'inr', 'rub', 'krw', 'brl'
             ];
 
-            const ratesRes = await fetch(`${COINGECKO_API_BASE}/simple/price?ids=${popularCurrencyIds.join(',')}&vs_currencies=usd`);
+            const ratesRes = await fetch(`${COINGECKO_API_BASE}/simple/price?ids=${popularCurrencyIds.join(',')}&vs_currencies=usd,inr`);
             
             if (!ratesRes.ok) {
                 throw new Error('Failed to fetch price data from CoinGecko API.');
@@ -88,12 +88,11 @@ export const getCryptoRates = ai.defineFlow(
                     newRates[key] = priceData[key].usd;
                 }
             }
-             if (!newRates['inr']) {
-                const inrRateRes = await fetch(`${COINGECKO_API_BASE}/simple/price?ids=tether&vs_currencies=inr`);
-                const inrPriceData = await inrRateRes.json();
-                if(inrPriceData.tether.inr && newRates.tether) {
-                    newRates['inr'] = newRates.tether * inrPriceData.tether.inr;
-                }
+            
+            // Fetch INR rate against USD to use for other conversions
+            const usdToInrRate = priceData['bitcoin']?.inr / priceData['bitcoin']?.usd;
+             if (usdToInrRate) {
+                newRates['inr'] = usdToInrRate;
             }
 
 
