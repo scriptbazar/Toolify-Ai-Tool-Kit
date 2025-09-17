@@ -162,6 +162,7 @@ interface GetToolsOptions {
   query?: string;
   category?: string;
   limit?: number;
+  slug?: string;
 }
 
 /**
@@ -178,13 +179,13 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
     try {
         let queryRef: Query = adminDb.collection(TOOLS_COLLECTION);
         
-        // Apply server-side filters
+        if (options.slug) {
+            queryRef = queryRef.where('slug', '==', options.slug);
+        }
         if (options.category && options.category !== 'all') {
             queryRef = queryRef.where('category', '==', options.category);
         }
         
-        // Firestore doesn't support text search, so we fetch by category/all and filter by query in-memory.
-        // For limits, we apply them on the DB query if there's no text search, otherwise after in-memory search.
         if (options.limit && !options.query) {
             queryRef = queryRef.limit(options.limit);
         }
@@ -194,7 +195,6 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
         let tools: Tool[] = [];
         snapshot.docs.forEach(doc => {
             const data = doc.data();
-            // Using safeParse to avoid crashing on schema mismatch
             const tool = ToolSchema.safeParse({ id: doc.id, slug: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
             if (tool.success) {
                 tools.push(tool.data);
@@ -203,7 +203,6 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
             }
         });
 
-        // In-memory search filtering (if a query is provided)
         if (options.query) {
             const lowercasedQuery = options.query.toLowerCase();
             tools = tools.filter(tool => 
@@ -212,7 +211,6 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
             );
         }
         
-        // If a limit was specified with a query, apply it here after in-memory filtering.
         if (options.limit && options.query) {
             tools = tools.slice(0, options.limit);
         }
@@ -477,3 +475,4 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
     
+

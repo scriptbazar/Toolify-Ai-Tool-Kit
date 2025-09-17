@@ -10,20 +10,22 @@ import { ToolPageClient } from './page.client';
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
   
-  const allTools = await getTools();
-  const tool = allTools.find(t => t.slug === params.slug);
+  // Fetch only the required tool data, and other page data in parallel
+  const [toolResponse, settings, toolReviews, allPosts] = await Promise.all([
+    getTools({ slug: params.slug }), // Assuming getTools can be modified to fetch by slug
+    getSettings(),
+    getReviews(params.slug),
+    getPosts()
+  ]);
+
+  const tool = toolResponse[0]; // getTools with slug should return an array with one item or be empty
   
   if (!tool || tool.status === 'Disabled') {
       notFound();
   }
   
-  const [settings, toolReviews, allPosts] = await Promise.all([
-    getSettings(),
-    getReviews(params.slug),
-    getPosts()
-  ]);
-  
-  const popularTools = allTools.filter(t => t.status === 'Active' && t.slug !== tool.slug).slice(0, 20);
+  // Fetch popular tools separately to not block initial render
+  const popularTools = (await getTools({ limit: 20 })).filter(t => t.status === 'Active' && t.slug !== tool.slug);
   const recentPosts = allPosts.filter(p => p.status === 'Published').slice(0, 10);
 
   return (
@@ -36,4 +38,5 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     />
   );
 }
+
 
