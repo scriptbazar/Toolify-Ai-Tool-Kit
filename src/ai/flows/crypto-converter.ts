@@ -23,16 +23,17 @@ export const getCryptoCurrencies = ai.defineFlow(
     },
     async () => {
         try {
-            const [coinsRes, fiatRes] = await Promise.all([
-                fetch(`${COINGECKO_API_BASE}/coins/list`),
-                fetch(`${COINGECKO_API_BASE}/simple/supported_vs_currencies`)
-            ]);
+            // Fetch top 250 coins by market cap instead of the full list
+            const coinsRes = await fetch(`${COINGECKO_API_BASE}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false`);
+            const fiatRes = await fetch(`${COINGECKO_API_BASE}/simple/supported_vs_currencies`);
 
             if (!coinsRes.ok || !fiatRes.ok) {
                 throw new Error('Failed to fetch currency data from CoinGecko API.');
             }
             
-            const coins: z.infer<typeof CurrencySchema>[] = await coinsRes.json();
+            const coinsData: { id: string; symbol: string; name: string; }[] = await coinsRes.json();
+            const coins = coinsData.map(c => ({ id: c.id, symbol: c.symbol, name: c.name }));
+            
             const fiats: string[] = await fiatRes.json();
             
             const allCurrencies = [
@@ -87,6 +88,14 @@ export const getCryptoRates = ai.defineFlow(
                     newRates[key] = priceData[key].usd;
                 }
             }
+             if (!newRates['inr']) {
+                const inrRateRes = await fetch(`${COINGECKO_API_BASE}/simple/price?ids=tether&vs_currencies=inr`);
+                const inrPriceData = await inrRateRes.json();
+                if(inrPriceData.tether.inr && newRates.tether) {
+                    newRates['inr'] = newRates.tether * inrPriceData.tether.inr;
+                }
+            }
+
 
             return { success: true, rates: newRates };
         } catch (error: any) {

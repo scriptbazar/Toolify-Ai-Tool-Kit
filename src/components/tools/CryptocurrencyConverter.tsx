@@ -15,7 +15,7 @@ import type { Currency } from '@/ai/flows/crypto-converter.types';
 export function CryptocurrencyConverter() {
     const [amount, setAmount] = useState('1');
     const [fromCurrency, setFromCurrency] = useState('bitcoin');
-    const [toCurrency, setToCurrency] = useState('usd');
+    const [toCurrency, setToCurrency] = useState('inr');
     const [currencies, setCurrencies] = useState<Currency[]>([]);
     const [rates, setRates] = useState<{ [key: string]: number }>({});
     const [result, setResult] = useState<string | null>(null);
@@ -31,7 +31,7 @@ export function CryptocurrencyConverter() {
                 ]);
 
                 if (!currencyData.success || !ratesData.success) {
-                    throw new Error('Failed to fetch currency data from the server.');
+                    throw new Error(currencyData.message || ratesData.message || 'Failed to fetch currency data from the server.');
                 }
                 
                 setCurrencies(currencyData.currencies);
@@ -41,7 +41,7 @@ export function CryptocurrencyConverter() {
                 console.error("Error fetching currency data:", error);
                 toast({
                     title: "API Error",
-                    description: error.message || "Could not load currency data. Please try again later.",
+                    description: error.message,
                     variant: "destructive"
                 });
             } finally {
