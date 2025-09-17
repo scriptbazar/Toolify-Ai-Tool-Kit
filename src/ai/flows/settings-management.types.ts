@@ -57,12 +57,6 @@ export const WebmasterSettingsSchema = z.object({
 });
 export type WebmasterSettings = z.infer<typeof WebmasterSettingsSchema>;
 
-export const ApiKeysSchema = z.object({
-    gemini: z.string().optional(),
-    coinGecko: z.string().optional(),
-});
-export type ApiKeys = z.infer<typeof ApiKeysSchema>;
-
 export const TwoFactorAuthMethodsSchema = z.object({
     email: z.boolean().default(true),
     authenticatorApp: z.boolean().default(false),
@@ -97,7 +91,6 @@ export const GeneralSettingsSchema = z.object({
   contactEmail: z.string().email().optional(),
   socialLinks: SocialLinksSchema.optional(),
   webmaster: WebmasterSettingsSchema.optional(),
-  apiKeys: ApiKeysSchema.optional(),
   security: SecuritySettingsSchema.optional(),
 });
 export type GeneralSettings = z.infer<typeof GeneralSettingsSchema>;

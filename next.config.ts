@@ -44,6 +44,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    COINGECKO_API_KEY: process.env.COINGECKO_API_KEY,
     NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
   },
    webpack: (config, { isServer }) => {

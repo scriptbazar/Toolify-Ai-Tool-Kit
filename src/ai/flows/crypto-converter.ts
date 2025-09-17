@@ -8,11 +8,11 @@
 import { z } from 'zod';
 import { ai } from '@/ai/genkit';
 import { CurrencySchema, GetCurrenciesOutputSchema, GetRatesOutputSchema } from './crypto-converter.types';
-import { getSettings } from './settings-management';
 
 const COINGECKO_API_BASE = 'https://api.coingecko.com/api/v3';
+const apiKey = process.env.COINGECKO_API_KEY;
 
-const constructUrl = (path: string, apiKey?: string) => {
+const constructUrl = (path: string) => {
     let url = `${COINGECKO_API_BASE}${path}`;
     if (apiKey) {
         const separator = url.includes('?') ? '&' : '?';
@@ -33,11 +33,8 @@ export const getCryptoCurrencies = ai.defineFlow(
     },
     async () => {
         try {
-            const settings = await getSettings();
-            const apiKey = settings.general?.apiKeys?.coinGecko;
-
-            const coinsUrl = constructUrl('/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false', apiKey);
-            const fiatUrl = constructUrl('/simple/supported_vs_currencies', apiKey);
+            const coinsUrl = constructUrl('/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false');
+            const fiatUrl = constructUrl('/simple/supported_vs_currencies');
 
             const coinsRes = await fetch(coinsUrl);
             const fiatRes = await fetch(fiatUrl);
@@ -79,9 +76,6 @@ export const getCryptoRates = ai.defineFlow(
     },
     async () => {
         try {
-             const settings = await getSettings();
-             const apiKey = settings.general?.apiKeys?.coinGecko;
-
             const popularCurrencyIds = [
                 'bitcoin', 'ethereum', 'tether', 'binancecoin', 'solana', 'ripple', 'dogecoin',
                 'cardano', 'shiba-inu', 'avalanche-2', 'polkadot', 'chainlink', 'tron', 'litecoin',
@@ -90,7 +84,7 @@ export const getCryptoRates = ai.defineFlow(
             
             const vsCurrencies = 'usd,inr,eur,gbp,jpy,aud,cad';
 
-            const ratesUrl = constructUrl(`/simple/price?ids=${popularCurrencyIds.join(',')}&vs_currencies=${vsCurrencies}`, apiKey);
+            const ratesUrl = constructUrl(`/simple/price?ids=${popularCurrencyIds.join(',')}&vs_currencies=${vsCurrencies}`);
             const ratesRes = await fetch(ratesUrl);
             
             if (!ratesRes.ok) {
@@ -106,7 +100,7 @@ export const getCryptoRates = ai.defineFlow(
             }
             
             // Fetch fiat rates against USD separately
-            const fiatUrl = constructUrl('/simple/price?ids=indian-rupee,euro,british-pound-sterling,japanese-yen,australian-dollar,canadian-dollar&vs_currencies=usd', apiKey);
+            const fiatUrl = constructUrl('/simple/price?ids=indian-rupee,euro,british-pound-sterling,japanese-yen,australian-dollar,canadian-dollar&vs_currencies=usd');
             const fiatRes = await fetch(fiatUrl);
             if(fiatRes.ok) {
                 const fiatData = await fiatRes.json();

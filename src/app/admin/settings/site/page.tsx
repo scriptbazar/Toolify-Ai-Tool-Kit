@@ -118,10 +118,6 @@ export default function SiteSettingsPage() {
                  baidu: '',
                  yahooSearchConsole: '',
             },
-            apiKeys: {
-                 gemini: '',
-                 coinGecko: '',
-            },
             security: {
                 enableTwoFactorAuth: false,
                 twoFactorAuthMethods: {
@@ -140,14 +136,11 @@ export default function SiteSettingsPage() {
             }
         };
 
-        // Deep merge: This ensures that if a nested object like `apiKeys` is null or undefined in the database,
-        // it gets initialized with the default empty structure, preventing errors.
         const mergedSettings = {
             ...defaultSettingsData,
             ...generalData,
             socialLinks: { ...defaultSettingsData.socialLinks, ...generalData.socialLinks },
             webmaster: { ...defaultSettingsData.webmaster, ...generalData.webmaster },
-            apiKeys: { ...defaultSettingsData.apiKeys, ...generalData.apiKeys },
             security: { 
                 ...defaultSettingsData.security, 
                 ...generalData.security,
@@ -198,17 +191,6 @@ export default function SiteSettingsPage() {
     } : null));
   };
   
-  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setSettings(prev => (prev ? {
-      ...prev,
-      apiKeys: {
-        ...(prev.apiKeys || { gemini: '', coinGecko: '' }), // Ensure apiKeys object exists
-        [name]: value
-      }
-    } : null));
-  };
-
   const handleSecurityChange = (field: string, value: any) => {
     setSettings(prev => {
         if (!prev) return null;
@@ -240,7 +222,7 @@ export default function SiteSettingsPage() {
       await updateSettings({ general: settings });
       toast({
         title: 'Success!',
-        description: 'Site settings have been saved. API key changes may require a server restart to take effect.',
+        description: 'Site settings have been saved. Some changes may require a page refresh or server restart to take effect.',
       });
     } catch (error: any) {
       console.error('Failed to save settings:', error);
@@ -311,7 +293,6 @@ export default function SiteSettingsPage() {
   const sections = [
     { id: 'general', title: 'General Settings', description: "Update your site's title, description, etc.", icon: SlidersHorizontal },
     { id: 'branding', title: 'Branding & Contact', description: "Customize your site's appearance and contact info.", icon: Palette },
-    { id: 'apiKeys', title: 'API Key Management', description: 'Manage third-party API keys for your application.', icon: KeyRound },
     { id: 'social', title: 'Social Media Links', description: 'Provide links to your social media profiles.', icon: LinkIcon },
     { id: 'webmaster', title: 'Webmaster Tools', description: 'Add verification codes for webmaster tools.', icon: Globe },
     { id: 'security', title: 'Security & Utilities', description: 'Manage site security and maintenance.', icon: ShieldCheck },
@@ -400,27 +381,6 @@ export default function SiteSettingsPage() {
             </div>
         </CollapsibleSection>
         
-        <CollapsibleSection id="apiKeys" title="API Key Management" description="Manage third-party API keys." icon={KeyRound} isOpen={openSection === 'apiKeys'} onToggle={handleToggle} isFullWidth={openSection === 'apiKeys'}>
-            <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="gemini">Google Gemini API Key</Label>
-                  <div className="relative">
-                    <Cpu className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="gemini" name="gemini" value={settings.apiKeys?.gemini || ''} onChange={handleApiKeyChange} placeholder="Enter your Gemini API key" className="pl-10" />
-                  </div>
-                   <p className="text-sm text-muted-foreground">Used for all AI-powered features. Changes may require a server restart.</p>
-              </div>
-               <div className="space-y-2">
-                  <Label htmlFor="coinGecko">CoinGecko API Key</Label>
-                  <div className="relative">
-                    <Bitcoin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="coinGecko" name="coinGecko" value={settings.apiKeys?.coinGecko || ''} onChange={handleApiKeyChange} placeholder="Enter your CoinGecko API key (optional)" className="pl-10" />
-                  </div>
-                   <p className="text-sm text-muted-foreground">Used for the Cryptocurrency Converter tool for better reliability.</p>
-              </div>
-            </div>
-        </CollapsibleSection>
-
         <CollapsibleSection id="social" title="Social Media Links" description="Provide links to your social media profiles." icon={LinkIcon} isOpen={openSection === 'social'} onToggle={handleToggle} isFullWidth={openSection === 'social'}>
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
