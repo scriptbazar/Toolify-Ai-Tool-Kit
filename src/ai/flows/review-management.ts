@@ -39,11 +39,6 @@ export async function getReviews(options: GetReviewsOptions = {}): Promise<Revie
 
         // Always order by submission date
         query = query.orderBy('submittedOn', 'desc');
-
-        // Apply a limit if provided, otherwise fetch a reasonable number for admin views.
-        if (limit) {
-            query = query.limit(limit);
-        }
         
         const snapshot = await query.get();
         
@@ -67,6 +62,11 @@ export async function getReviews(options: GetReviewsOptions = {}): Promise<Revie
         } else if (toolId || limit) {
             // For public-facing queries (e.g., on a tool page), default to showing only approved reviews.
             reviews = reviews.filter(review => review.status === 'approved');
+        }
+
+        // Apply limit after all filtering
+        if (limit) {
+            reviews = reviews.slice(0, limit);
         }
 
         return reviews;
