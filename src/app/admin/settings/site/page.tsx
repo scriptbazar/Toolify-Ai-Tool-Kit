@@ -23,6 +23,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { AdBlockerDetector } from '@/components/common/AdBlockerDetector';
 import { clearCache } from '@/ai/flows/utility-actions';
+import { merge } from 'lodash';
 
 
 export const runtime = 'nodejs';
@@ -93,8 +94,8 @@ export default function SiteSettingsPage() {
         if (generalData.security?.maintenanceModeUntil && typeof generalData.security.maintenanceModeUntil === 'string') {
           generalData.security.maintenanceModeUntil = new Date(generalData.security.maintenanceModeUntil);
         }
-
-        setSettings({
+        
+        const defaultGeneralSettings: GeneralSettings = {
             siteTitle: '',
             slogan: '',
             siteDescription: '',
@@ -107,8 +108,11 @@ export default function SiteSettingsPage() {
             webmaster: { googleSearchConsole: '', googleAnalytics: '', googleAdsense: '', yandexWebmaster: '', bingWebmaster: '', pinterest: '', baidu: '', yahooSearchConsole: '' },
             apiKeys: { gemini: '', coinGecko: '' },
             security: { enableTwoFactorAuth: false, twoFactorAuthMethods: {email: true, authenticatorApp: false, mobileNumber: false}, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '', maintenanceMode: false, maintenanceModeMessage: '', maintenanceModeUntil: undefined, enableNewLoginAlerts: true },
-            ...generalData,
-        });
+        };
+
+        const mergedSettings = merge({}, defaultGeneralSettings, generalData);
+        setSettings(mergedSettings);
+
       } catch (error) {
         console.error('Failed to fetch settings:', error);
         toast({
