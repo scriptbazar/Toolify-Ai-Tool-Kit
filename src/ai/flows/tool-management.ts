@@ -181,16 +181,17 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
         
         if (options.slug) {
             queryRef = queryRef.where('slug', '==', options.slug);
-        }
-        if (options.category && options.category !== 'all') {
-            queryRef = queryRef.where('category', '==', options.category);
+        } else {
+             if (options.category && options.category !== 'all') {
+                queryRef = queryRef.where('category', '==', options.category);
+            }
+            if (options.limit && !options.query) {
+                queryRef = queryRef.limit(options.limit);
+            }
+            queryRef = queryRef.orderBy('name');
         }
         
-        if (options.limit && !options.query) {
-            queryRef = queryRef.limit(options.limit);
-        }
-        
-        const snapshot = await queryRef.orderBy('name').get();
+        const snapshot = await queryRef.get();
 
         let tools: Tool[] = [];
         snapshot.docs.forEach(doc => {
@@ -475,4 +476,5 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
     
+
 
