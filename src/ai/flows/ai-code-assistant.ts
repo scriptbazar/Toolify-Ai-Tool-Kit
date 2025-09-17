@@ -27,7 +27,7 @@ const prompt = ai.definePrompt({
   name: 'aiCodeAssistantPrompt',
   input: { schema: AiCodeAssistantInputSchema },
   output: { schema: AiCodeAssistantOutputSchema },
-  prompt: `You are an expert software developer and code reviewer. Your task is to provide a comprehensive analysis of the following code snippet.
+  prompt: `You are an expert software architect and a senior code reviewer with a specialization in security and performance. Your task is to provide an in-depth, multi-faceted analysis of the following code snippet.
 
 Code to Analyze:
 ---
@@ -36,12 +36,27 @@ Code to Analyze:
 
 **Instructions:**
 
-1.  **Detect Language:** Identify the programming language of the code. If it's ambiguous, make your best guess.
-2.  **Summarize:** Provide a concise, one-paragraph summary of what the code does. Explain its main purpose and functionality.
-3.  **Explain:** Give a clear, step-by-step explanation of how the code works. Break down the logic, describe key functions or classes, and explain the flow of execution. This should be easy for a beginner to understand.
-4.  **Suggest Improvements:** Analyze the code for potential bugs, style issues, performance bottlenecks, or areas where it could be made more readable, efficient, or robust. Provide a list of actionable improvement suggestions.
-
 Your response must be structured according to the output schema.
+
+1.  **Detect Language:** Identify the programming language of the code. If it's ambiguous, make your best guess.
+
+2.  **Summarize:** Provide a concise, one-paragraph executive summary of what the code does. Explain its main purpose and functionality.
+
+3.  **Explain:** Give a clear, step-by-step explanation of how the code works. Break down the logic, describe key functions or classes, and explain the flow of execution. Use markdown for code blocks and formatting to make this easy for a beginner to understand.
+
+4.  **Performance Analysis (Big O Notation):**
+    *   Analyze the time complexity (Big O) of the main operations or the entire snippet.
+    *   Analyze the space complexity (Big O).
+    *   Explain your reasoning for the Big O analysis. For example, "The time complexity is O(n^2) because of the nested loop that iterates through the list twice."
+
+5.  **Security Analysis:**
+    *   Identify potential security vulnerabilities (e.g., SQL injection, XSS, insecure handling of secrets, buffer overflows, etc.).
+    *   For each vulnerability, provide a brief explanation of the risk.
+    *   If no vulnerabilities are found, state "No obvious security vulnerabilities were detected."
+
+6.  **Suggest Improvements:**
+    *   Analyze the code for potential bugs, style issues, or areas where it could be made more readable, efficient, or robust following best practices.
+    *   Provide a numbered list of actionable improvement suggestions. Each suggestion should include a "before" and "after" code snippet to clearly illustrate the proposed change. Use markdown for code formatting.
 `,
 });
 
