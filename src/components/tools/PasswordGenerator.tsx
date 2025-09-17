@@ -106,9 +106,12 @@ export function PasswordGenerator() {
       <div>
          <div className="flex justify-between items-center text-sm mb-1">
             <Label>Password Strength</Label>
-            <span className="font-semibold" style={{ color: strengthColor().replace('bg-', 'hsl(var(--')) }}>{strength.label}</span>
+            <span className={cn("font-semibold", 
+                strength.label === 'Very Strong' || strength.label === 'Strong' ? 'text-green-500' :
+                strength.label === 'Medium' ? 'text-yellow-500' : 'text-red-500'
+            )}>{strength.label}</span>
         </div>
-        <Progress value={(strength.score / 6) * 100} className={cn("h-2", strengthColor())} />
+        <Progress value={(strength.score / 6) * 100} indicatorClassName={strengthColor()} />
       </div>
 
       <div className="space-y-4 pt-4 border-t">
