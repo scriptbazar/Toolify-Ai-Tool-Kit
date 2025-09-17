@@ -94,7 +94,7 @@ export const getCryptoRates = ai.defineFlow(
             
             const newRates: { [key: string]: number } = { 'usd': 1 };
             for (const key in priceData) {
-                if (priceData[key].usd) {
+                if (priceData[key] && priceData[key].usd) {
                     newRates[key] = priceData[key].usd;
                 }
             }
@@ -104,12 +104,12 @@ export const getCryptoRates = ai.defineFlow(
             const fiatRes = await fetch(fiatUrl);
             if(fiatRes.ok) {
                 const fiatData = await fiatRes.json();
-                newRates['inr'] = 1 / fiatData['indian-rupee'].usd;
-                newRates['eur'] = 1 / fiatData['euro'].usd;
-                newRates['gbp'] = 1 / fiatData['british-pound-sterling'].usd;
-                newRates['jpy'] = 1 / fiatData['japanese-yen'].usd;
-                newRates['aud'] = 1 / fiatData['australian-dollar'].usd;
-                newRates['cad'] = 1 / fiatData['canadian-dollar'].usd;
+                if (fiatData['indian-rupee']?.usd) newRates['inr'] = 1 / fiatData['indian-rupee'].usd;
+                if (fiatData['euro']?.usd) newRates['eur'] = 1 / fiatData['euro'].usd;
+                if (fiatData['british-pound-sterling']?.usd) newRates['gbp'] = 1 / fiatData['british-pound-sterling'].usd;
+                if (fiatData['japanese-yen']?.usd) newRates['jpy'] = 1 / fiatData['japanese-yen'].usd;
+                if (fiatData['australian-dollar']?.usd) newRates['aud'] = 1 / fiatData['australian-dollar'].usd;
+                if (fiatData['canadian-dollar']?.usd) newRates['cad'] = 1 / fiatData['canadian-dollar'].usd;
             } else {
                  console.warn("Could not fetch direct fiat rates against USD.");
             }
