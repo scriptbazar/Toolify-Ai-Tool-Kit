@@ -321,11 +321,32 @@ export const getSettings = cache(async (): Promise<AppSettings> => {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            const parsedData = AppSettingsSchema.safeParse(docSnap.data());
+            // Start with the default settings to ensure all keys exist
+            const settingsWithDefaults = defaultSettings;
+            const dbData = docSnap.data();
+
+            // Manually merge nested objects to avoid overwriting them with undefined
+            const merged = {
+              ...settingsWithDefaults,
+              ...dbData,
+              general: {
+                ...settingsWithDefaults.general,
+                ...dbData.general,
+                socialLinks: { ...settingsWithDefaults.general?.socialLinks, ...dbData.general?.socialLinks },
+                webmaster: { ...settingsWithDefaults.general?.webmaster, ...dbData.general?.webmaster },
+                apiKeys: { ...settingsWithDefaults.general?.apiKeys, ...dbData.general?.apiKeys },
+                security: { ...settingsWithDefaults.general?.security, ...dbData.general?.security },
+              },
+              payment: { ...settingsWithDefaults.payment, ...dbData.payment },
+              sidebar: { ...settingsWithDefaults.sidebar, ...dbData.sidebar },
+              // Add other nested objects here if they exist
+            };
+
+            const parsedData = AppSettingsSchema.safeParse(merged);
             if (parsedData.success) {
                 return parsedData.data;
             } else {
-                console.warn("Firestore settings data is invalid, returning defaults.", parsedData.error);
+                console.warn("Firestore settings data is invalid after merge, returning defaults.", parsedData.error);
                 return defaultSettings;
             }
         } else {
@@ -392,3 +413,5 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
     return { success: false, message: error.message || 'An unknown error occurred while updating settings.' };
   }
 }
+
+    
