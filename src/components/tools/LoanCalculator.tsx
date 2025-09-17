@@ -26,6 +26,7 @@ interface ScheduleItem {
 
 export function LoanCalculator() {
   const [loanAmount, setLoanAmount] = useState('100000');
+  const [gstRate, setGstRate] = useState('');
   const [interestRate, setInterestRate] = useState('5');
   const [loanTerm, setLoanTerm] = useState('10');
   const [termUnit, setTermUnit] = useState<'years' | 'months'>('years');
@@ -38,6 +39,7 @@ export function LoanCalculator() {
   const [totalPayment, setTotalPayment] = useState<number | null>(null);
   const [totalInterest, setTotalInterest] = useState<number | null>(null);
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+  const [gstAmount, setGstAmount] = useState<number | null>(null);
   
   const currencySymbols: {[key: string]: string} = {
       'INR': '₹',
@@ -51,6 +53,13 @@ export function LoanCalculator() {
 
   const calculateLoan = () => {
     const principal = parseFloat(loanAmount);
+    const gst = parseFloat(gstRate) || 0;
+    
+    const gstValue = (principal * gst) / 100;
+    const totalPrincipal = principal + gstValue;
+    
+    setGstAmount(gstValue);
+
     const annualRate = parseFloat(interestRate) / 100;
     
     if (isNaN(principal) || principal <= 0 || isNaN(annualRate) || annualRate < 0 || isNaN(parseFloat(loanTerm)) || parseFloat(loanTerm) <= 0) {
@@ -85,20 +94,20 @@ export function LoanCalculator() {
             break;
     }
 
-    if (principal > 0 && annualRate >= 0 && numberOfPayments > 0) {
+    if (totalPrincipal > 0 && annualRate >= 0 && numberOfPayments > 0) {
       const calculatedPayment = annualRate > 0 ?
-        principal * (ratePerPeriod * Math.pow(1 + ratePerPeriod, numberOfPayments)) / (Math.pow(1 + ratePerPeriod, numberOfPayments) - 1)
-        : principal / numberOfPayments;
+        totalPrincipal * (ratePerPeriod * Math.pow(1 + ratePerPeriod, numberOfPayments)) / (Math.pow(1 + ratePerPeriod, numberOfPayments) - 1)
+        : totalPrincipal / numberOfPayments;
         
       const totalPaid = calculatedPayment * numberOfPayments;
-      const interestPaid = totalPaid - principal;
+      const interestPaid = totalPaid - totalPrincipal;
 
       setPayment(calculatedPayment);
       setTotalPayment(totalPaid);
       setTotalInterest(interestPaid);
       
       // Generate EMI Schedule
-      let remainingBalance = principal;
+      let remainingBalance = totalPrincipal;
       const newSchedule: ScheduleItem[] = [];
       for(let i = 1; i <= Math.ceil(numberOfPayments); i++) {
         const interestForPeriod = remainingBalance * ratePerPeriod;
@@ -124,12 +133,14 @@ export function LoanCalculator() {
   
     const handleClear = () => {
         setLoanAmount('100000');
+        setGstRate('');
         setInterestRate('5');
         setLoanTerm('10');
         setPayment(null);
         setTotalPayment(null);
         setTotalInterest(null);
         setSchedule([]);
+        setGstAmount(null);
     };
   
   const handleDownloadPdf = async () => {
@@ -169,18 +180,28 @@ export function LoanCalculator() {
         doc.setFontSize(12).text("Loan EMI Schedule", 15, 45);
         doc.line(15, 48, 195, 48);
         
+        const bodyData = [
+            ['Loan Type', loanType],
+            ['Loan Amount', formatCurrency(parseFloat(loanAmount), currency)],
+        ];
+
+        if (gstAmount !== null && gstAmount > 0) {
+            bodyData.push(['GST Amount', formatCurrency(gstAmount, currency)]);
+            bodyData.push(['Total Loan Amount (with GST)', formatCurrency(parseFloat(loanAmount) + gstAmount, currency)]);
+        }
+
+        bodyData.push(
+            ['Interest Rate', `${interestRate}% per annum`],
+            ['Loan Term', `${loanTerm} ${termUnit}`],
+            [`${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Payment`, formatCurrency(payment, currency)],
+            ['Total Payment', formatCurrency(totalPayment, currency)],
+            ['Total Interest', formatCurrency(totalInterest, currency)],
+        );
+
         // --- Loan Summary Table ---
         autoTable(doc, {
             startY: 55,
-            body: [
-                ['Loan Type', loanType],
-                ['Loan Amount', formatCurrency(parseFloat(loanAmount), currency)],
-                ['Interest Rate', `${interestRate}% per annum`],
-                ['Loan Term', `${loanTerm} ${termUnit}`],
-                [`${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Payment`, formatCurrency(payment, currency)],
-                ['Total Payment', formatCurrency(totalPayment, currency)],
-                ['Total Interest', formatCurrency(totalInterest, currency)],
-            ],
+            body: bodyData,
             theme: 'plain',
             styles: { fontSize: 10 },
             columnStyles: { 0: { fontStyle: 'bold' } },
@@ -220,6 +241,8 @@ export function LoanCalculator() {
 
       const summary = `*Loan Summary for ${loanType}*
 - *Loan Amount:* ${formatCurrency(parseFloat(loanAmount), currency)}
+${gstAmount && gstAmount > 0 ? `- *GST Amount:* ${formatCurrency(gstAmount, currency)}` : ''}
+${gstAmount && gstAmount > 0 ? `- *Total Loan:* ${formatCurrency(parseFloat(loanAmount) + gstAmount, currency)}` : ''}
 - *Interest Rate:* ${interestRate}%
 - *Loan Term:* ${loanTerm} ${termUnit}
 - *EMI:* ${formatCurrency(payment, currency)} / ${frequency}
@@ -278,6 +301,10 @@ export function LoanCalculator() {
           </div>
         </div>
         <div className="space-y-2">
+            <Label htmlFor="gst-rate">GST Rate (%) (Optional)</Label>
+            <Input id="gst-rate" type="number" value={gstRate} onChange={(e) => setGstRate(e.target.value)} placeholder="e.g., 18" />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="interest-rate">Annual Interest Rate (%)</Label>
           <Input id="interest-rate" type="number" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} placeholder="e.g., 5" />
         </div>
@@ -291,7 +318,7 @@ export function LoanCalculator() {
             </Select>
           </div>
         </div>
-         <div className="space-y-2 col-span-1 md:col-span-2 lg:col-span-1">
+         <div className="space-y-2 col-span-1 md:col-span-1">
           <Label htmlFor="frequency">Payment Frequency</Label>
             <Select value={frequency} onValueChange={(val) => setFrequency(val as any)}>
                 <SelectTrigger className="w-full"><SelectValue/></SelectTrigger>
