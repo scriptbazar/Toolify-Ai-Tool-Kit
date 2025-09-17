@@ -76,19 +76,19 @@ export const getCryptoRates = ai.defineFlow(
     },
     async () => {
         try {
-            const popularCurrencyIds = [
+            const popularCryptoIds = [
                 'bitcoin', 'ethereum', 'tether', 'binancecoin', 'solana', 'ripple', 'dogecoin',
                 'cardano', 'shiba-inu', 'avalanche-2', 'polkadot', 'chainlink', 'tron', 'litecoin',
-                'bitcoin-cash', 'stellar', 'monero', 'cosmos', 'usd'
+                'bitcoin-cash', 'stellar', 'monero', 'cosmos'
             ];
             
             const vsCurrencies = 'usd,inr,eur,gbp,jpy,aud,cad';
 
-            const ratesUrl = constructUrl(`/simple/price?ids=${popularCurrencyIds.join(',')}&vs_currencies=${vsCurrencies}`);
+            const ratesUrl = constructUrl(`/simple/price?ids=${popularCryptoIds.join(',')}&vs_currencies=${vsCurrencies}`);
             const ratesRes = await fetch(ratesUrl);
             
             if (!ratesRes.ok) {
-                throw new Error('Failed to fetch price data from CoinGecko API.');
+                throw new Error('Failed to fetch crypto price data from CoinGecko API.');
             }
             const priceData = await ratesRes.json();
             
@@ -100,16 +100,17 @@ export const getCryptoRates = ai.defineFlow(
             }
             
             // Fetch fiat rates against USD separately
-            const fiatUrl = constructUrl('/simple/price?ids=indian-rupee,euro,british-pound-sterling,japanese-yen,australian-dollar,canadian-dollar&vs_currencies=usd');
+            const fiatIds = 'indian-rupee,euro,british-pound-sterling,japanese-yen,australian-dollar,canadian-dollar';
+            const fiatUrl = constructUrl(`/simple/price?ids=${fiatIds}&vs_currencies=usd`);
             const fiatRes = await fetch(fiatUrl);
             if(fiatRes.ok) {
                 const fiatData = await fiatRes.json();
-                if (fiatData['indian-rupee']?.usd) newRates['inr'] = 1 / fiatData['indian-rupee'].usd;
-                if (fiatData['euro']?.usd) newRates['eur'] = 1 / fiatData['euro'].usd;
-                if (fiatData['british-pound-sterling']?.usd) newRates['gbp'] = 1 / fiatData['british-pound-sterling'].usd;
-                if (fiatData['japanese-yen']?.usd) newRates['jpy'] = 1 / fiatData['japanese-yen'].usd;
-                if (fiatData['australian-dollar']?.usd) newRates['aud'] = 1 / fiatData['australian-dollar'].usd;
-                if (fiatData['canadian-dollar']?.usd) newRates['cad'] = 1 / fiatData['canadian-dollar'].usd;
+                if (fiatData['indian-rupee']?.usd) newRates['inr'] = fiatData['indian-rupee'].usd;
+                if (fiatData['euro']?.usd) newRates['eur'] = fiatData['euro'].usd;
+                if (fiatData['british-pound-sterling']?.usd) newRates['gbp'] = fiatData['british-pound-sterling'].usd;
+                if (fiatData['japanese-yen']?.usd) newRates['jpy'] = fiatData['japanese-yen'].usd;
+                if (fiatData['australian-dollar']?.usd) newRates['aud'] = fiatData['australian-dollar'].usd;
+                if (fiatData['canadian-dollar']?.usd) newRates['cad'] = fiatData['canadian-dollar'].usd;
             } else {
                  console.warn("Could not fetch direct fiat rates against USD.");
             }
