@@ -93,53 +93,66 @@ export default function SiteSettingsPage() {
           generalData.security.maintenanceModeUntil = new Date(generalData.security.maintenanceModeUntil);
         }
         
-        // This ensures that even if a nested object like `apiKeys` is null or undefined in the database,
-        // it gets initialized to an empty object before merging, preventing loss of data.
-        const mergedSettings: GeneralSettings = {
-            siteTitle: generalData.siteTitle || '',
-            slogan: generalData.slogan || '',
-            siteDescription: generalData.siteDescription || '',
-            metaKeywords: generalData.metaKeywords || '',
-            copyrightText: generalData.copyrightText || '© {year} ToolifyAI. All rights reserved.',
-            logoUrl: generalData.logoUrl || '',
-            faviconUrl: generalData.faviconUrl || '',
-            contactEmail: generalData.contactEmail || '',
+        const defaultSettingsData: GeneralSettings = {
+            siteTitle: '',
+            slogan: '',
+            siteDescription: '',
+            metaKeywords: '',
+            copyrightText: '© {year} ToolifyAI. All rights reserved.',
+            logoUrl: '',
+            faviconUrl: '',
+            contactEmail: '',
             socialLinks: { 
-                facebook: generalData.socialLinks?.facebook || '',
-                twitter: generalData.socialLinks?.twitter || '',
-                instagram: generalData.socialLinks?.instagram || '',
-                youtube: generalData.socialLinks?.youtube || '',
+                facebook: '',
+                twitter: '',
+                instagram: '',
+                youtube: '',
             },
             webmaster: {
-                 googleSearchConsole: generalData.webmaster?.googleSearchConsole || '',
-                 googleAnalytics: generalData.webmaster?.googleAnalytics || '',
-                 googleAdsense: generalData.webmaster?.googleAdsense || '',
-                 yandexWebmaster: generalData.webmaster?.yandexWebmaster || '',
-                 bingWebmaster: generalData.webmaster?.bingWebmaster || '',
-                 pinterest: generalData.webmaster?.pinterest || '',
-                 baidu: generalData.webmaster?.baidu || '',
-                 yahooSearchConsole: generalData.webmaster?.yahooSearchConsole || '',
+                 googleSearchConsole: '',
+                 googleAnalytics: '',
+                 googleAdsense: '',
+                 yandexWebmaster: '',
+                 bingWebmaster: '',
+                 pinterest: '',
+                 baidu: '',
+                 yahooSearchConsole: '',
             },
             apiKeys: {
-                 gemini: generalData.apiKeys?.gemini || '',
-                 coinGecko: generalData.apiKeys?.coinGecko || '',
+                 gemini: '',
+                 coinGecko: '',
             },
             security: {
-                enableTwoFactorAuth: generalData.security?.enableTwoFactorAuth ?? false,
+                enableTwoFactorAuth: false,
                 twoFactorAuthMethods: {
-                    email: generalData.security?.twoFactorAuthMethods?.email ?? true,
-                    authenticatorApp: generalData.security?.twoFactorAuthMethods?.authenticatorApp ?? false,
-                    mobileNumber: generalData.security?.twoFactorAuthMethods?.mobileNumber ?? false,
+                    email: true,
+                    authenticatorApp: false,
+                    mobileNumber: false,
                 },
-                enableRecaptcha: generalData.security?.enableRecaptcha ?? false,
-                recaptchaSiteKey: generalData.security?.recaptchaSiteKey || '',
-                recaptchaSecretKey: generalData.security?.recaptchaSecretKey || '',
-                maintenanceMode: generalData.security?.maintenanceMode ?? false,
-                maintenanceModeMessage: generalData.security?.maintenanceModeMessage || '',
-                maintenanceModeUntil: generalData.security?.maintenanceModeUntil,
-                enableNewLoginAlerts: generalData.security?.enableNewLoginAlerts ?? true,
-                enableAdBlockerDetection: generalData.security?.enableAdBlockerDetection ?? false,
+                enableRecaptcha: false,
+                recaptchaSiteKey: '',
+                recaptchaSecretKey: '',
+                maintenanceMode: false,
+                maintenanceModeMessage: '',
+                maintenanceModeUntil: undefined,
+                enableNewLoginAlerts: true,
+                enableAdBlockerDetection: false,
             }
+        };
+
+        // Deep merge: This ensures that if a nested object like `apiKeys` is null or undefined in the database,
+        // it gets initialized with the default empty structure, preventing errors.
+        const mergedSettings = {
+            ...defaultSettingsData,
+            ...generalData,
+            socialLinks: { ...defaultSettingsData.socialLinks, ...generalData.socialLinks },
+            webmaster: { ...defaultSettingsData.webmaster, ...generalData.webmaster },
+            apiKeys: { ...defaultSettingsData.apiKeys, ...generalData.apiKeys },
+            security: { 
+                ...defaultSettingsData.security, 
+                ...generalData.security,
+                twoFactorAuthMethods: { ...defaultSettingsData.security?.twoFactorAuthMethods, ...generalData.security?.twoFactorAuthMethods }
+            },
         };
 
         setSettings(mergedSettings);
