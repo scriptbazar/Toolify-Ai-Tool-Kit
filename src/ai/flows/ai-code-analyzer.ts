@@ -4,29 +4,29 @@
 /**
  * @fileOverview An AI agent that provides a comprehensive analysis of a given code snippet.
  *
- * - aiCodeAssistant - The main function for code analysis.
- * - AiCodeAssistantInput - The input type for the function.
- * - AiCodeAssistantOutput - The return type for the function.
+ * - aiCodeAnalyzer - The main function for code analysis.
+ * - AiCodeAnalyzerInput - The input type for the function.
+ * - AiCodeAnalyzerOutput - The return type for the function.
  */
 
 import { ai } from '@/ai/genkit';
 import {
-  AiCodeAssistantInputSchema,
-  AiCodeAssistantOutputSchema,
-  type AiCodeAssistantInput,
-  type AiCodeAssistantOutput,
-} from './ai-code-assistant.types';
+  AiCodeAnalyzerInputSchema,
+  AiCodeAnalyzerOutputSchema,
+  type AiCodeAnalyzerInput,
+  type AiCodeAnalyzerOutput,
+} from './ai-code-analyzer.types';
 
-export async function aiCodeAssistant(
-  input: AiCodeAssistantInput
-): Promise<AiCodeAssistantOutput> {
-  return aiCodeAssistantFlow(input);
+export async function aiCodeAnalyzer(
+  input: AiCodeAnalyzerInput
+): Promise<AiCodeAnalyzerOutput> {
+  return aiCodeAnalyzerFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'aiCodeAssistantPrompt',
-  input: { schema: AiCodeAssistantInputSchema },
-  output: { schema: AiCodeAssistantOutputSchema },
+  name: 'aiCodeAnalyzerPrompt',
+  input: { schema: AiCodeAnalyzerInputSchema },
+  output: { schema: AiCodeAnalyzerOutputSchema },
   prompt: `You are an expert software developer and code reviewer. Your task is to provide a comprehensive analysis of the following code snippet.
 
 Code to Analyze:
@@ -45,11 +45,11 @@ Your response must be structured according to the output schema.
 `,
 });
 
-const aiCodeAssistantFlow = ai.defineFlow(
+const aiCodeAnalyzerFlow = ai.defineFlow(
   {
-    name: 'aiCodeAssistantFlow',
-    inputSchema: AiCodeAssistantInputSchema,
-    outputSchema: AiCodeAssistantOutputSchema,
+    name: 'aiCodeAnalyzerFlow',
+    inputSchema: AiCodeAnalyzerInputSchema,
+    outputSchema: AiCodeAnalyzerOutputSchema,
   },
   async (input) => {
     const { output } = await prompt(input);

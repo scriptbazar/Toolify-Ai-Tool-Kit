@@ -8,12 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Code, Loader2, Copy, Trash2, Languages, FileText, Lightbulb, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { aiCodeAssistant, type AiCodeAssistantOutput } from '@/ai/flows/ai-code-assistant';
+import { aiCodeAnalyzer, type AiCodeAnalyzerOutput } from '@/ai/flows/ai-code-analyzer';
 import { Badge } from '../ui/badge';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-export function AiCodeAssistant() {
+export function AiCodeAnalyzer() {
   const [code, setCode] = useState('');
-  const [analysisResult, setAnalysisResult] = useState<AiCodeAssistantOutput | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AiCodeAnalyzerOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -29,7 +31,7 @@ export function AiCodeAssistant() {
     setIsLoading(true);
     setAnalysisResult(null);
     try {
-      const result = await aiCodeAssistant({ code });
+      const result = await aiCodeAnalyzer({ code });
       setAnalysisResult(result);
     } catch (error: any) {
       toast({

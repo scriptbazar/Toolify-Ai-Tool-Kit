@@ -29,6 +29,7 @@ const EditToolFormSchema = UpsertToolInputSchema.extend({
     isNew: z.boolean().default(false),
     isToolOfTheWeek: z.boolean().default(false),
     status: z.enum(['Active', 'Disabled', 'Maintenance', 'Coming Soon', 'New Version', 'Beta']).default('Active'),
+    howToUse: z.array(z.string()).optional(),
 });
 
 type EditToolFormValues = z.infer<typeof EditToolFormSchema>;
@@ -53,6 +54,7 @@ export function EditToolForm({ tool, onSave }: EditToolFormProps) {
             isNew: tool?.isNew || false,
             isToolOfTheWeek: tool?.isToolOfTheWeek || false,
             status: tool?.status || 'Active',
+            howToUse: tool?.howToUse || [],
         },
     });
 
@@ -221,4 +223,3 @@ export default function EditToolPage() {
         </div>
     );
 }
-

@@ -1,12 +1,12 @@
 
 import { z } from 'zod';
 
-export const AiCodeAssistantInputSchema = z.object({
+export const AiCodeAnalyzerInputSchema = z.object({
   code: z.string().describe('The code snippet to be analyzed.'),
 });
-export type AiCodeAssistantInput = z.infer<typeof AiCodeAssistantInputSchema>;
+export type AiCodeAnalyzerInput = z.infer<typeof AiCodeAnalyzerInputSchema>;
 
-export const AiCodeAssistantOutputSchema = z.object({
+export const AiCodeAnalyzerOutputSchema = z.object({
   language: z
     .string()
     .describe('The detected programming language of the code.'),
@@ -22,4 +22,4 @@ export const AiCodeAssistantOutputSchema = z.object({
       'A list of actionable suggestions for improving the code (e.g., bug fixes, style improvements, performance optimizations).'
     ),
 });
-export type AiCodeAssistantOutput = z.infer<typeof AiCodeAssistantOutputSchema>;
+export type AiCodeAnalyzerOutput = z.infer<typeof AiCodeAnalyzerOutputSchema>;

@@ -6,6 +6,7 @@ export { AddWatermarkToPdf } from './AddWatermarkToPdf';
 export { AesEncryptionDecryption } from './AesEncryptionDecryption';
 export { AgeCalculator } from './AgeCalculator';
 export { AiBlogPostWriter } from './AiBlogPostWriter';
+export { AiCodeAnalyzer } from './AiCodeAnalyzer';
 export { AiCodeAssistant } from './AiCodeAssistant';
 export { AiCodeGenerator } from './AiCodeGenerator';
 export { AiContentSummarizer } from './AiContentSummarizer';

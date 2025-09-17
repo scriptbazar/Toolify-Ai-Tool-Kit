@@ -27,6 +27,8 @@ import '@/ai/flows/json-prompt-generator.ts';
 import '@/ai/flows/json-prompt-generator.types.ts';
 import '@/ai/flows/ai-content-summarizer.ts';
 import '@/ai/flows/ai-content-summarizer.types.ts';
+import '@/ai/flows/ai-code-analyzer.ts';
+import '@/ai/flows/ai-code-analyzer.types.ts';
 import '@/ai/flows/ai-code-assistant.ts';
 import '@/ai/flows/ai-code-assistant.types.ts';
 import '@/ai/flows/ai-writer.ts';

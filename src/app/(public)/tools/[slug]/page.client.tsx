@@ -51,7 +51,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'prompt-generator': dynamic(() => import('@/components/tools/PromptGenerator').then(mod => mod.PromptGenerator), { loading: () => <LoadingComponent /> }),
   'ai-blog-post-writer': dynamic(() => import('@/components/tools/AiBlogPostWriter').then(mod => mod.AiBlogPostWriter), { loading: () => <LoadingComponent /> }),
   'ai-content-summarizer': dynamic(() => import('@/components/tools/AiContentSummarizer').then(mod => mod.AiContentSummarizer), { loading: () => <LoadingComponent /> }),
-  'ai-code-assistant': dynamic(() => import('@/components/tools/AiCodeAssistant').then(mod => mod.AiCodeAssistant), { loading: () => <LoadingComponent /> }),
+  'ai-code-analyzer': dynamic(() => import('@/components/tools/AiCodeAnalyzer').then(mod => mod.AiCodeAnalyzer), { loading: () => <LoadingComponent /> }),
   'ai-email-composer': dynamic(() => import('@/components/tools/AiEmailComposer').then(mod => mod.AiEmailComposer), { loading: () => <LoadingComponent /> }),
   'ai-image-generator': dynamic(() => import('@/components/tools/AiImageGenerator').then(mod => mod.AiImageGenerator), { loading: () => <LoadingComponent /> }),
   'ai-product-description-writer': dynamic(() => import('@/components/tools/AiProductDescriptionWriter').then(mod => mod.AiProductDescriptionWriter), { loading: () => <LoadingComponent /> }),
