@@ -33,7 +33,7 @@ export const getCryptoCurrencies = ai.defineFlow(
     },
     async () => {
         try {
-            const coinsUrl = constructUrl('/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false');
+            const coinsUrl = constructUrl('/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false');
             const fiatUrl = constructUrl('/simple/supported_vs_currencies');
 
             const coinsRes = await fetch(coinsUrl);
@@ -79,7 +79,7 @@ export const getCryptoRates = ai.defineFlow(
             const popularCurrencyIds = [
                 'bitcoin', 'ethereum', 'tether', 'binancecoin', 'solana', 'ripple', 'dogecoin',
                 'cardano', 'shiba-inu', 'avalanche-2', 'polkadot', 'chainlink', 'tron', 'litecoin',
-                'bitcoin-cash', 'stellar', 'monero', 'cosmos',
+                'bitcoin-cash', 'stellar', 'monero', 'cosmos', 'usd'
             ];
             
             const vsCurrencies = 'usd,inr,eur,gbp,jpy,aud,cad';
