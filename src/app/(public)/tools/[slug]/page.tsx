@@ -14,7 +14,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
   const [toolResponse, settings, toolReviews, allPosts] = await Promise.all([
     getTools({ slug: params.slug }), // Assuming getTools can be modified to fetch by slug
     getSettings(),
-    getReviews(params.slug),
+    getReviews({toolId: params.slug}),
     getPosts()
   ]);
 
@@ -38,5 +38,3 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     />
   );
 }
-
-

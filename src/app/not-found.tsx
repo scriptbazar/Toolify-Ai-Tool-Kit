@@ -56,8 +56,7 @@ export default function NotFoundPage() {
                 <Image
                     src={imageData.src}
                     alt="Abstract image representing a lost page"
-                    width={imageData.width}
-                    height={imageData.height}
+                    fill
                     className="object-cover h-full w-full"
                     data-ai-hint={imageData.hint}
                 />
