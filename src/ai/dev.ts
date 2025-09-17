@@ -51,6 +51,7 @@ import '@/ai/flows/ai-web-content-summarizer.ts';
 import '@/ai/flows/ai-web-content-summarizer.types.ts';
 import '@/ai/flows/ai-seo-keyword-generator.ts';
 import '@/ai/flows/ai-seo-keyword-generator.types.ts';
+import '@/ai/flows/crypto-converter.ts';
 
 
 

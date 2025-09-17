@@ -5,18 +5,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Bitcoin, ArrowRightLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Combobox } from '../ui/combobox';
-
-interface Currency {
-    id: string;
-    symbol: string;
-    name: string;
-}
-
-const COINGECKO_API_BASE = 'https://api.coingecko.com/api/v3';
+import { getCryptoCurrencies, getCryptoRates } from '@/ai/flows/crypto-converter';
+import type { Currency } from '@/ai/flows/crypto-converter.types';
 
 export function CryptocurrencyConverter() {
     const [amount, setAmount] = useState('1');
@@ -31,43 +25,17 @@ export function CryptocurrencyConverter() {
     useEffect(() => {
         async function fetchCurrenciesAndRates() {
             try {
-                const [coinsRes, fiatRes] = await Promise.all([
-                    fetch(`${COINGECKO_API_BASE}/coins/list`),
-                    fetch(`${COINGECKO_API_BASE}/simple/supported_vs_currencies`)
+                const [currencyData, ratesData] = await Promise.all([
+                    getCryptoCurrencies(),
+                    getCryptoRates()
                 ]);
 
-                if (!coinsRes.ok || !fiatRes.ok) {
-                    throw new Error('Failed to fetch currency data from API.');
+                if (!currencyData.success || !ratesData.success) {
+                    throw new Error('Failed to fetch currency data from the server.');
                 }
                 
-                const coins: Currency[] = await coinsRes.json();
-                const fiats: string[] = await fiatRes.json();
-                
-                const allCurrencies = [
-                    ...coins,
-                    ...fiats.map(f => ({ id: f, symbol: f, name: f.toUpperCase() }))
-                ];
-
-                // Remove duplicates and sort
-                const uniqueCurrencies = Array.from(new Map(allCurrencies.map(c => [c.id, c])).values())
-                                           .sort((a,b) => a.name.localeCompare(b.name));
-
-                setCurrencies(uniqueCurrencies);
-                
-                const allIds = uniqueCurrencies.map(c => c.id);
-                // Fetch rates for all currencies against USD
-                const ratesRes = await fetch(`${COINGECKO_API_BASE}/simple/price?ids=${allIds.join(',')}&vs_currencies=usd`);
-                if (!ratesRes.ok) {
-                    throw new Error('Failed to fetch price data.');
-                }
-                const priceData = await ratesRes.json();
-                
-                const newRates: { [key: string]: number } = { 'usd': 1 }; // Base rate
-                for (const key in priceData) {
-                    newRates[key] = priceData[key].usd;
-                }
-                
-                setRates(newRates);
+                setCurrencies(currencyData.currencies);
+                setRates(ratesData.rates);
 
             } catch (error: any) {
                 console.error("Error fetching currency data:", error);
