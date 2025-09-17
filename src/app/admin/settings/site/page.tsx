@@ -23,7 +23,33 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { AdBlockerDetector } from '@/components/common/AdBlockerDetector';
 import { clearCache } from '@/ai/flows/utility-actions';
-import { merge } from 'lodash';
+
+// Helper to check if a value is a plain object
+const isObject = (item: any) => {
+    return (item && typeof item === 'object' && !Array.isArray(item));
+}
+
+// Deep merge function to replace lodash.merge
+const deepMerge = (target: any, ...sources: any[]): any => {
+    if (!sources.length) {
+        return target;
+    }
+    const source = sources.shift();
+
+    if (isObject(target) && isObject(source)) {
+        for (const key in source) {
+            if (isObject(source[key])) {
+                if (!target[key]) {
+                    Object.assign(target, { [key]: {} });
+                }
+                deepMerge(target[key], source[key]);
+            } else {
+                Object.assign(target, { [key]: source[key] });
+            }
+        }
+    }
+    return deepMerge(target, ...sources);
+};
 
 
 export const runtime = 'nodejs';
@@ -110,7 +136,7 @@ export default function SiteSettingsPage() {
             security: { enableTwoFactorAuth: false, twoFactorAuthMethods: {email: true, authenticatorApp: false, mobileNumber: false}, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '', maintenanceMode: false, maintenanceModeMessage: '', maintenanceModeUntil: undefined, enableNewLoginAlerts: true },
         };
 
-        const mergedSettings = merge({}, defaultGeneralSettings, generalData);
+        const mergedSettings = deepMerge({}, defaultGeneralSettings, generalData);
         setSettings(mergedSettings);
 
       } catch (error) {
