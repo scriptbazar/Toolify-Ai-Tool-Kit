@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare, AlertTriangle, Calendar as CalendarIcon, Clock, Cpu, SlidersHorizontal, Palette, Link as LinkIcon, Globe } from 'lucide-react';
+import { Save, Loader2, UploadCloud, Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Youtube, Code, Search, ChevronDown, ChevronUp, ShieldCheck, KeyRound, Eraser, FileCode, FileText, Smartphone, MailCheck, Power, Construction, MessageSquare, AlertTriangle, Calendar as CalendarIcon, Clock, Cpu, SlidersHorizontal, Palette, Link as LinkIcon, Globe, Bitcoin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { GeneralSettings } from '@/ai/flows/settings-management.types';
@@ -104,7 +105,7 @@ export default function SiteSettingsPage() {
             contactEmail: '',
             socialLinks: { facebook: '', twitter: '', instagram: '', youtube: '' },
             webmaster: { googleSearchConsole: '', googleAnalytics: '', googleAdsense: '', yandexWebmaster: '', bingWebmaster: '', pinterest: '', baidu: '', yahooSearchConsole: '' },
-            apiKeys: { gemini: '' },
+            apiKeys: { gemini: '', coinGecko: '' },
             security: { enableTwoFactorAuth: false, twoFactorAuthMethods: {email: true, authenticatorApp: false, mobileNumber: false}, enableRecaptcha: false, recaptchaSiteKey: '', recaptchaSecretKey: '', maintenanceMode: false, maintenanceModeMessage: '', maintenanceModeUntil: undefined, enableNewLoginAlerts: true },
             ...generalData,
         });
@@ -359,7 +360,15 @@ export default function SiteSettingsPage() {
                     <Cpu className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input id="gemini" name="gemini" value={settings.apiKeys?.gemini || ''} onChange={handleApiKeyChange} placeholder="Enter your Gemini API key" className="pl-10" />
                   </div>
-                   <p className="text-sm text-muted-foreground">This key will be used for all AI-powered features. Changes may require a server restart to take effect.</p>
+                   <p className="text-sm text-muted-foreground">Used for all AI-powered features. Changes may require a server restart.</p>
+              </div>
+               <div className="space-y-2">
+                  <Label htmlFor="coinGecko">CoinGecko API Key</Label>
+                  <div className="relative">
+                    <Bitcoin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="coinGecko" name="coinGecko" value={settings.apiKeys?.coinGecko || ''} onChange={handleApiKeyChange} placeholder="Enter your CoinGecko API key (optional)" className="pl-10" />
+                  </div>
+                   <p className="text-sm text-muted-foreground">Used for the Cryptocurrency Converter tool for better reliability.</p>
               </div>
             </div>
         </CollapsibleSection>

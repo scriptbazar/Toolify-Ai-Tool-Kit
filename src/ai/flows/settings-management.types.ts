@@ -59,6 +59,7 @@ export type WebmasterSettings = z.infer<typeof WebmasterSettingsSchema>;
 
 export const ApiKeysSchema = z.object({
     gemini: z.string().optional(),
+    coinGecko: z.string().optional(),
 });
 export type ApiKeys = z.infer<typeof ApiKeysSchema>;
 
