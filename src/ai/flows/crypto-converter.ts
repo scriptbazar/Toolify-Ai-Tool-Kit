@@ -53,7 +53,7 @@ export const getCryptoCurrencies = ai.defineFlow(
 );
 
 /**
- * Fetches the current price of all known currencies against USD.
+ * Fetches the current price of a curated list of popular currencies against USD.
  * @returns {Promise<z.infer<typeof GetRatesOutputSchema>>}
  */
 export const getCryptoRates = ai.defineFlow(
@@ -64,14 +64,17 @@ export const getCryptoRates = ai.defineFlow(
     },
     async () => {
         try {
-            // First, get all available currencies to build the price query
-            const currencyData = await getCryptoCurrencies();
-            if (!currencyData.success || !currencyData.currencies) {
-                throw new Error("Could not retrieve currency list to fetch rates.");
-            }
+            // A curated list of popular crypto and fiat currencies to keep the request size manageable.
+            const popularCurrencyIds = [
+                // Top Crypto by Market Cap
+                'bitcoin', 'ethereum', 'tether', 'binancecoin', 'solana', 'ripple', 'dogecoin',
+                'cardano', 'shiba-inu', 'avalanche-2', 'polkadot', 'chainlink', 'tron', 'litecoin',
+                'bitcoin-cash', 'stellar', 'monero', 'cosmos',
+                // Major Fiat Currencies
+                'usd', 'eur', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'cny', 'hkd', 'sgd', 'inr', 'rub', 'krw', 'brl'
+            ];
 
-            const allIds = currencyData.currencies.map(c => c.id);
-            const ratesRes = await fetch(`${COINGECKO_API_BASE}/simple/price?ids=${allIds.join(',')}&vs_currencies=usd`);
+            const ratesRes = await fetch(`${COINGECKO_API_BASE}/simple/price?ids=${popularCurrencyIds.join(',')}&vs_currencies=usd`);
             
             if (!ratesRes.ok) {
                 throw new Error('Failed to fetch price data from CoinGecko API.');
