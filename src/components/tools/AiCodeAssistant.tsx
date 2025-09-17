@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { aiCodeAssistant, type AiCodeAssistantOutput } from '@/ai/flows/ai-code-assistant';
 import { Badge } from '../ui/badge';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export function AiCodeAssistant() {
   const [code, setCode] = useState('');
@@ -59,7 +61,7 @@ export function AiCodeAssistant() {
       .replace(/^- (.*$)/gim, '<li class="ml-4 list-disc">$1</li>')
       .replace(/\n/g, '<br />');
 
-    return <div className="prose prose-sm dark:prose-invert" dangerouslySetInnerHTML={{ __html: html }} />;
+    return <div className="prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: html }} />;
   };
 
   return (

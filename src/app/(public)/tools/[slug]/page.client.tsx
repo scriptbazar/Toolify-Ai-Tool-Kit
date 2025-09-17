@@ -52,6 +52,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-blog-post-writer': dynamic(() => import('@/components/tools/AiBlogPostWriter').then(mod => mod.AiBlogPostWriter), { loading: () => <LoadingComponent /> }),
   'ai-content-summarizer': dynamic(() => import('@/components/tools/AiContentSummarizer').then(mod => mod.AiContentSummarizer), { loading: () => <LoadingComponent /> }),
   'ai-code-analyzer': dynamic(() => import('@/components/tools/AiCodeAnalyzer').then(mod => mod.AiCodeAnalyzer), { loading: () => <LoadingComponent /> }),
+  'ai-code-assistant': dynamic(() => import('@/components/tools/AiCodeAssistant').then(mod => mod.AiCodeAssistant), { loading: () => <LoadingComponent /> }),
   'ai-email-composer': dynamic(() => import('@/components/tools/AiEmailComposer').then(mod => mod.AiEmailComposer), { loading: () => <LoadingComponent /> }),
   'ai-image-generator': dynamic(() => import('@/components/tools/AiImageGenerator').then(mod => mod.AiImageGenerator), { loading: () => <LoadingComponent /> }),
   'ai-product-description-writer': dynamic(() => import('@/components/tools/AiProductDescriptionWriter').then(mod => mod.AiProductDescriptionWriter), { loading: () => <LoadingComponent /> }),
@@ -339,12 +340,12 @@ export function ToolPageClient({
           <AdPlaceholder adSlotId="toolpage-banner-bottom" adSettings={settings?.advertisement ?? null} className="my-6" />
 
           <Card className="mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle2 /> Why Choose Our Tools?
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                      <CheckCircle2 /> Why Choose Our Tools?
+                  </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="p-4 bg-background">
                 <h3 className="font-semibold flex items-center gap-2"><ShieldCheck className="text-primary"/>Secure & Reliable</h3>
                 <p className="text-sm text-muted-foreground mt-1">Your data privacy is our priority. All tools run securely, and we never store your input data.</p>
