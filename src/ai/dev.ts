@@ -35,6 +35,7 @@ import '@/ai/flows/ai-story-visualizer.ts';
 import '@/ai/flows/ai-rewriter.ts';
 import '@/ai/flows/ai-web-content-summarizer.ts';
 import '@/ai/flows/ai-seo-keyword-generator.ts';
+import '@/ai/flows/media-management.ts';
 
 
 

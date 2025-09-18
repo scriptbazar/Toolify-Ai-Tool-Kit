@@ -19,6 +19,7 @@ import {
 } from './ticket-management.types';
 import { ai } from '@/ai/genkit';
 import { getStorage } from 'firebase-admin/storage';
+import { saveUserMedia } from './ai-image-generator';
 
 
 /**
@@ -65,20 +66,14 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
         
         // This part is for permanent storage of ticket media and is kept for reference
         if (attachments && attachments.length > 0) {
-            const mediaBatch = adminDb.batch();
-            const mediaCollection = adminDb.collection('userMedia');
-            attachments.forEach(url => {
-                const docRef = mediaCollection.doc(); 
-                mediaBatch.set(docRef, {
+            for (const url of attachments) {
+                await saveUserMedia({
                     userId,
                     type: 'ticket-media',
                     mediaUrl: url,
                     prompt: `Attachment for ticket ${ticketId}`,
-                    createdAt: FieldValue.serverTimestamp(),
-                    expiresAt: new Date(expiresAt),
                 });
-            });
-            await mediaBatch.commit();
+            }
         }
 
         return { success: true, message: 'Ticket created successfully.' };
