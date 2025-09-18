@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -172,7 +173,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'image-metadata-viewer': dynamic(() => import('@/components/tools/ImageMetadataViewer').then(mod => mod.ImageMetadataViewer), { loading: () => <LoadingComponent /> }),
   'ai-code-generator': dynamic(() => import('@/components/tools/AiCodeGenerator').then(mod => mod.AiCodeGenerator), { loading: () => <LoadingComponent /> }),
   'ai-rewriter': dynamic(() => import('@/components/tools/AiRewriter').then(mod => mod.AiRewriter), { loading: () => <LoadingComponent /> }),
-  'image-quality-enhancer': dynamic(() => import('@/components/tools/ImageQualityEnhancer').then(mod => mod.ImageQualityEnhancer), { loading: () => <LoadingComponent /> }),
+  'ai-image-quality-enhancer': dynamic(() => import('@/components/tools/AiImageQualityEnhancer').then(mod => mod.AiImageQualityEnhancer), { loading: () => <LoadingComponent /> }),
   'ai-web-content-summarizer': dynamic(() => import('@/components/tools/AiWebContentSummarizer').then(mod => mod.AiWebContentSummarizer), { loading: () => <LoadingComponent /> }),
   'flip-image': dynamic(() => import('@/components/tools/FlipImage').then(mod => mod.FlipImage), { loading: () => <LoadingComponent /> }),
   'ico-converter': dynamic(() => import('@/components/tools/IcoConverter').then(mod => mod.IcoConverter), { loading: () => <LoadingComponent /> }),

@@ -12,7 +12,7 @@ export { AiCodeGenerator } from './AiCodeGenerator';
 export { AiContentSummarizer } from './AiContentSummarizer';
 export { AiEmailComposer } from './AiEmailComposer';
 export { AiImageGenerator } from './AiImageGenerator';
-export { ImageQualityEnhancer } from './ImageQualityEnhancer';
+export { AiImageQualityEnhancer } from './AiImageQualityEnhancer';
 export { AiProductDescriptionWriter } from './AiProductDescriptionWriter';
 export { AiRewriter } from './AiRewriter';
 export { AiSeoKeywordGenerator } from './AiSeoKeywordGenerator';
