@@ -142,7 +142,6 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'image-shape-converter': dynamic(() => import('@/components/tools/ImageShapeConverter').then(mod => mod.ImageShapeConverter), { loading: () => <LoadingComponent /> }),
   'morse-to-text-translator': dynamic(() => import('@/components/tools/MorseToTextTranslator').then(mod => mod.MorseToTextTranslator), { loading: () => <LoadingComponent /> }),
   'text-to-morse-code': dynamic(() => import('@/components/tools/TextToMorseCode').then(mod => mod.TextToMorseCode), { loading: () => <LoadingComponent /> }),
-  'cryptocurrency-converter': dynamic(() => import('@/components/tools/CryptocurrencyConverter').then(mod => mod.CryptocurrencyConverter), { loading: () => <LoadingComponent /> }),
   'barcode-generator': dynamic(() => import('@/components/tools/BarcodeGenerator').then(mod => mod.BarcodeGenerator), { loading: () => <LoadingComponent /> }),
   'currency-converter': dynamic(() => import('@/components/tools/CurrencyConverter').then(mod => mod.CurrencyConverter), { loading: () => <LoadingComponent /> }),
   'credit-card-interest-calculator': dynamic(() => import('@/components/tools/CreditCardInterestCalculator').then(mod => mod.CreditCardInterestCalculator), { loading: () => <LoadingComponent /> }),

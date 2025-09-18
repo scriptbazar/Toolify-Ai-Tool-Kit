@@ -30,7 +30,6 @@ export { CgpaToMarksCalculator } from './CgpaToMarksCalculator';
 export { ColorPicker } from './ColorPicker';
 export { CompressPdf } from './CompressPdf';
 export { CreditCardInterestCalculator } from './CreditCardInterestCalculator';
-export { CryptocurrencyConverter } from './CryptocurrencyConverter';
 export { CssMinifier } from './CssMinifier';
 export { CurrencyConverter } from './CurrencyConverter';
 export { DateCalculator } from './DateCalculator';
