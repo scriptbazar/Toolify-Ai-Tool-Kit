@@ -25,6 +25,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { updateUserRole, deleteUser } from '@/ai/flows/user-management';
+import { UserTable } from '@/components/admin/UserTable';
 
 
 interface User {
@@ -146,32 +147,7 @@ export default function AdminUsersPage() {
     setCurrentPage(newPage);
     fetchUsersAndLeads(newPage, 'prev');
   };
-  
-  const copyToClipboard = (text: string, fieldName: string) => {
-    navigator.clipboard.writeText(text);
-    toast({ description: `Copied ${fieldName}: ${text}` });
-  };
 
-  const handleRoleChange = async (userId: string, newRole: 'user' | 'admin') => {
-    const result = await updateUserRole({ userId, newRole });
-    if (result.success) {
-      toast({ title: 'Success', description: 'User role updated successfully.' });
-      fetchUsersAndLeads(currentPage, 'first'); // Refresh data
-    } else {
-      toast({ title: 'Error', description: result.message, variant: 'destructive' });
-    }
-  };
-
-  const handleDeleteUser = async (userId: string) => {
-    const result = await deleteUser(userId);
-    if (result.success) {
-      toast({ title: 'Success', description: 'User has been deleted.' });
-      fetchUsersAndLeads(currentPage, 'first'); // Refresh data
-    } else {
-      toast({ title: 'Error', description: result.message, variant: 'destructive' });
-    }
-  };
-  
   const filteredUsers = useMemo(() => {
     return allUsers.filter(user => {
       const filterMatch = activeFilter === 'all' || user.type.toLowerCase() === activeFilter;
@@ -179,14 +155,6 @@ export default function AdminUsersPage() {
       return filterMatch && searchMatch;
     });
   }, [allUsers, activeFilter, searchQuery]);
-
-
-  const counts = useMemo(() => ({
-    all: allUsers.length,
-    signup: allUsers.filter(u => u.type === 'Signup').length,
-    lead: allUsers.filter(u => u.type === 'Lead').length,
-    comment: allUsers.filter(u => u.type === 'Comment').length,
-  }), [allUsers]);
 
   const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment') => {
       setActiveFilter(filter);
@@ -197,13 +165,6 @@ export default function AdminUsersPage() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchQuery(e.target.value);
       setCurrentPage(1);
-  };
-
-  const formatDate = (timestamp?: { seconds: number; nanoseconds: number; }) => {
-    if (!timestamp || typeof timestamp.seconds !== 'number') {
-      return 'N/A';
-    }
-    return new Date(timestamp.seconds * 1000).toLocaleString();
   };
 
   return (
@@ -263,119 +224,29 @@ export default function AdminUsersPage() {
             </Alert>
           )}
           {!loading && !error && (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Full Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Username</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Date Joined</TableHead>
-                    <TableHead className="text-right">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.length > 0 ? (
-                    filteredUsers.map(user => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">
-                           <div className="flex items-center gap-2">
-                             <Avatar className="h-8 w-8">
-                                <AvatarFallback>{user.name?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
-                             </Avatar>
-                             <span>{user.name}</span>
-                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {user.email}
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(user.email, 'Email')}>
-                              <Copy className="h-3 w-3" />
-                              <span className="sr-only">Copy email</span>
-                            </Button>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {user.userName ? (
-                            <div className="flex items-center gap-2">
-                              @{user.userName}
-                               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(user.userName!, 'Username')}>
-                                <Copy className="h-3 w-3" />
-                                <span className="sr-only">Copy username</span>
-                              </Button>
-                            </div>
-                          ) : '—'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={user.role === 'admin' ? 'default' : (user.role === 'user' ? 'secondary' : 'outline')}>
-                            {user.role}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{formatDate(user.createdAt)}</TableCell>
-                         <TableCell className="text-right">
-                          <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button size="icon" variant="ghost">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem asChild>
-                                  <Link href={`/admin/users/${user.id}`}><Edit className="mr-2 h-4 w-4" /> Edit User</Link>
-                                </DropdownMenuItem>
-                                {user.role !== 'lead' && (
-                                <DropdownMenuSub>
-                                  <DropdownMenuSubTrigger><UserCog className="mr-2 h-4 w-4"/> Set Role</DropdownMenuSubTrigger>
-                                  <DropdownMenuSubContent>
-                                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'admin')} disabled={user.role === 'admin'}>
-                                      <Shield className="mr-2 h-4 w-4" /> Admin {user.role === 'admin' && <Check className="ml-auto h-4 w-4"/>}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'user')} disabled={user.role === 'user'}>
-                                      <User className="mr-2 h-4 w-4" /> User {user.role === 'user' && <Check className="ml-auto h-4 w-4"/>}
-                                    </DropdownMenuItem>
-                                  </DropdownMenuSubContent>
-                                </DropdownMenuSub>
-                                )}
-                                <DropdownMenuSeparator />
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500">
-                                      <Trash2 className="mr-2 h-4 w-4" /> Delete
-                                    </DropdownMenuItem>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently delete the user and their associated data.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
-                                        Yes, delete user
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center h-24">
-                        No users found for the current selection.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+              <UserTable 
+                users={filteredUsers} 
+                onRoleChange={(userId, newRole) => {
+                  updateUserRole({ userId, newRole }).then(result => {
+                    if (result.success) {
+                      toast({ title: 'Success', description: 'User role updated successfully.' });
+                      fetchUsersAndLeads(currentPage, 'first');
+                    } else {
+                      toast({ title: 'Error', description: result.message, variant: 'destructive' });
+                    }
+                  });
+                }}
+                onDeleteUser={(userId) => {
+                  deleteUser(userId).then(result => {
+                    if (result.success) {
+                      toast({ title: 'Success', description: 'User has been deleted.' });
+                      fetchUsersAndLeads(currentPage, 'first');
+                    } else {
+                      toast({ title: 'Error', description: result.message, variant: 'destructive' });
+                    }
+                  });
+                }}
+              />
           )}
            <div className="flex items-center justify-end space-x-2 pt-4">
               <Button
