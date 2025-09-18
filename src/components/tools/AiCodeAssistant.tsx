@@ -14,6 +14,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Skeleton } from '../ui/skeleton';
+import { cn } from '@/lib/utils';
+
 
 const CodeBlock = ({ language, code }: { language: string, code: string | undefined }) => {
     if (!code) return null;
@@ -30,6 +32,7 @@ export function AiCodeAssistant() {
   const [code, setCode] = useState('');
   const [analysisResult, setAnalysisResult] = useState<AiCodeAssistantOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [openAccordionItem, setOpenAccordionItem] = useState<string | null>('summary');
   const { toast } = useToast();
 
   const handleAnalyze = async () => {
@@ -46,6 +49,7 @@ export function AiCodeAssistant() {
     try {
       const result = await aiCodeAssistant({ code });
       setAnalysisResult(result);
+      setOpenAccordionItem('summary');
     } catch (error: any) {
       toast({
         title: 'Analysis Failed',
@@ -78,11 +82,70 @@ export function AiCodeAssistant() {
   };
   
   const renderLoadingState = () => (
-      <div className="space-y-4">
+      <div className="space-y-4 p-4">
           <Skeleton className="h-10 w-3/4" />
           <Skeleton className="h-20 w-full" />
       </div>
   );
+  
+  const analysisSections = [
+      { id: 'summary', title: 'Summary & Language', icon: FileText, content: (
+          <div className="space-y-4">
+            <Badge>{analysisResult?.language}</Badge>
+            <p className="text-muted-foreground">{analysisResult?.summary}</p>
+          </div>
+      )},
+      { id: 'explanation', title: 'Code Explanation', icon: Code, content: (
+          <div className="p-4 bg-muted rounded-md text-sm">
+            {renderMarkdown(analysisResult?.explanation || '')}
+          </div>
+      )},
+      { id: 'performance', title: 'Performance Analysis', icon: BarChart2, content: (
+           <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+                <Card><CardHeader><CardTitle>Time Complexity</CardTitle></CardHeader><CardContent><Badge variant="outline">{analysisResult?.performance.timeComplexity}</Badge></CardContent></Card>
+                <Card><CardHeader><CardTitle>Space Complexity</CardTitle></CardHeader><CardContent><Badge variant="outline">{analysisResult?.performance.spaceComplexity}</Badge></CardContent></Card>
+            </div>
+            <p className="text-sm text-muted-foreground">{analysisResult?.performance.explanation}</p>
+           </div>
+      )},
+      { id: 'security', title: 'Security Analysis', icon: ShieldCheck, content: (
+           <div className="space-y-2">
+               {analysisResult?.security?.vulnerabilities && analysisResult.security.vulnerabilities.length > 0 ? (
+                   analysisResult.security.vulnerabilities.map((vuln, i) => (
+                       <div key={i} className="p-2 border-l-4 border-destructive bg-destructive/10 rounded">
+                           <p className="font-semibold">{vuln.type}</p>
+                           <p className="text-xs">{vuln.risk}</p>
+                       </div>
+                   ))
+               ) : (
+                   <p className="text-sm text-green-600">{analysisResult?.security.summary}</p>
+               )}
+           </div>
+      )},
+      { id: 'improvements', title: 'Improvement Suggestions', icon: Lightbulb, content: (
+            analysisResult?.improvements && analysisResult.improvements.length > 0 ? (
+                <div className="space-y-4">
+                    {analysisResult.improvements.map((item, index) => (
+                        <div key={index} className="p-4 border rounded-md">
+                            <h4 className="font-semibold">{item.title}</h4>
+                            <p className="text-sm text-muted-foreground mb-4">{item.description}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-xs font-semibold mb-1 text-red-500">Before:</p>
+                                    <CodeBlock language={analysisResult.language} code={item.before} />
+                                </div>
+                                <div>
+                                     <p className="text-xs font-semibold mb-1 text-green-500">After:</p>
+                                    <CodeBlock language={analysisResult.language} code={item.after} />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : <p className="text-muted-foreground">No specific improvement suggestions found.</p>
+      )},
+  ]
 
   return (
     <div className="space-y-6">
@@ -108,90 +171,30 @@ export function AiCodeAssistant() {
       </div>
 
       {(analysisResult || isLoading) && (
-        <div className="pt-6 border-t space-y-4">
-            <Accordion type="multiple" defaultValue={['summary', 'improvements']} className="w-full space-y-4">
-                <AccordionItem value="summary" className="border rounded-lg">
-                    <AccordionTrigger className="p-4"><div className="flex items-center gap-2"><FileText />Summary & Language</div></AccordionTrigger>
-                    <AccordionContent className="p-4 pt-0">
-                        {isLoading && !analysisResult ? renderLoadingState() : (
-                            <div className="space-y-4">
-                                <Badge>{analysisResult?.language}</Badge>
-                                <p className="text-muted-foreground">{analysisResult?.summary}</p>
-                            </div>
-                        )}
-                    </AccordionContent>
-                </AccordionItem>
-                 <AccordionItem value="explanation" className="border rounded-lg">
-                    <AccordionTrigger className="p-4"><div className="flex items-center gap-2"><Code />Code Explanation</div></AccordionTrigger>
-                    <AccordionContent className="p-4 pt-0">
-                         {isLoading && !analysisResult ? renderLoadingState() : (
-                            <div className="p-4 bg-muted rounded-md text-sm">
-                                {renderMarkdown(analysisResult?.explanation || '')}
-                            </div>
-                         )}
-                    </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="performance" className="border rounded-lg">
-                    <AccordionTrigger className="p-4"><div className="flex items-center gap-2"><BarChart2 />Performance Analysis</div></AccordionTrigger>
-                    <AccordionContent className="p-4 pt-0">
-                         {isLoading && !analysisResult ? renderLoadingState() : (
-                           <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <Card><CardHeader><CardTitle>Time Complexity</CardTitle></CardHeader><CardContent><Badge variant="outline">{analysisResult?.performance.timeComplexity}</Badge></CardContent></Card>
-                                <Card><CardHeader><CardTitle>Space Complexity</CardTitle></CardHeader><CardContent><Badge variant="outline">{analysisResult?.performance.spaceComplexity}</Badge></CardContent></Card>
-                            </div>
-                            <p className="text-sm text-muted-foreground">{analysisResult?.performance.explanation}</p>
-                           </div>
-                         )}
-                    </AccordionContent>
-                </AccordionItem>
-                 <AccordionItem value="security" className="border rounded-lg">
-                    <AccordionTrigger className="p-4"><div className="flex items-center gap-2"><ShieldCheck />Security Analysis</div></AccordionTrigger>
-                    <AccordionContent className="p-4 pt-0">
-                        {isLoading && !analysisResult ? renderLoadingState() : (
-                           <div className="space-y-2">
-                               {analysisResult?.security?.vulnerabilities && analysisResult.security.vulnerabilities.length > 0 ? (
-                                   analysisResult.security.vulnerabilities.map((vuln, i) => (
-                                       <div key={i} className="p-2 border-l-4 border-destructive bg-destructive/10 rounded">
-                                           <p className="font-semibold">{vuln.type}</p>
-                                           <p className="text-xs">{vuln.risk}</p>
-                                       </div>
-                                   ))
-                               ) : (
-                                   <p className="text-sm text-green-600">{analysisResult?.security.summary}</p>
-                               )}
-                           </div>
-                        )}
-                    </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="improvements" className="border rounded-lg">
-                    <AccordionTrigger className="p-4"><div className="flex items-center gap-2"><Lightbulb />Improvement Suggestions</div></AccordionTrigger>
-                    <AccordionContent className="p-4 pt-0">
-                         {isLoading && !analysisResult ? renderLoadingState() : (
-                             analysisResult?.improvements && analysisResult.improvements.length > 0 ? (
-                                <div className="space-y-4">
-                                    {analysisResult.improvements.map((item, index) => (
-                                        <div key={index} className="p-4 border rounded-md">
-                                            <h4 className="font-semibold">{item.title}</h4>
-                                            <p className="text-sm text-muted-foreground mb-4">{item.description}</p>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <p className="text-xs font-semibold mb-1 text-red-500">Before:</p>
-                                                    <CodeBlock language={analysisResult.language} code={item.before} />
-                                                </div>
-                                                <div>
-                                                     <p className="text-xs font-semibold mb-1 text-green-500">After:</p>
-                                                    <CodeBlock language={analysisResult.language} code={item.after} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : <p className="text-muted-foreground">No specific improvement suggestions found.</p>
-                         )}
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
+        <div className="pt-6 border-t">
+          <Accordion 
+              type="single" 
+              collapsible 
+              className="w-full grid grid-cols-1 md:grid-cols-2 gap-4"
+              value={openAccordionItem || ""}
+              onValueChange={setOpenAccordionItem}
+            >
+              {analysisSections.map(section => {
+                  const isOpen = openAccordionItem === section.id;
+                  return (
+                     <div key={section.id} className={cn(isOpen && "md:col-span-2")}>
+                        <AccordionItem value={section.id} className="border rounded-lg">
+                            <AccordionTrigger className="p-4">
+                                <div className="flex items-center gap-2"><section.icon />{section.title}</div>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-4 pt-0">
+                                {isLoading ? renderLoadingState() : section.content}
+                            </AccordionContent>
+                        </AccordionItem>
+                     </div>
+                  )
+              })}
+          </Accordion>
         </div>
       )}
     </div>
