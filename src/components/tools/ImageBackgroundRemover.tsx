@@ -1,15 +1,15 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { UploadCloud, Download, Sparkles, Image as ImageIcon, Trash2, Loader2, Scissors } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { removeImageBackground } from '@/ai/flows/ai-image-generator';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { useEffect } from 'react';
 
 export function ImageBackgroundRemover() {
   const [user, setUser] = useState<User | null>(null);
@@ -146,3 +146,5 @@ export function ImageBackgroundRemover() {
     </div>
   );
 }
+
+    
