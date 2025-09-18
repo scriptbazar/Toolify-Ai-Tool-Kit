@@ -11,8 +11,8 @@ export default async function ToolsDashboardPage({
 }: {
   searchParams: { q?: string; category?: string; };
 }) {
-  const searchQuery = searchParams.q || '';
-  const activeCategory = (searchParams.category as ToolCategory) || 'all';
+  const searchQuery = searchParams?.q || '';
+  const activeCategory = (searchParams?.category as ToolCategory) || 'all';
 
   // Fetch only the tools that match the search criteria from the server
   const filteredTools = await getTools({
@@ -20,7 +20,11 @@ export default async function ToolsDashboardPage({
     category: activeCategory,
   });
 
-  // This is for the filter component to show counts for all visible tools
+  // This is for the filter component to show counts for all visible tools.
+  // Instead of fetching all tools again, we can derive counts for categories
+  // from the already fetched filtered tools if we wanted to optimize further,
+  // but for accurate total counts, fetching all is necessary. Let's keep fetching all for now,
+  // but be mindful of performance. A better approach would be a dedicated count query.
   const allVisibleTools = await getTools();
 
   return (
