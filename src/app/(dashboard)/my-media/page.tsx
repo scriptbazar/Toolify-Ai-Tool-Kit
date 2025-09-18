@@ -9,11 +9,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bot, MessageSquare, Image as ImageIcon, AlertCircle, Ticket, Clock, Calendar } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Image from 'next/image';
-import { getUserMedia } from '@/ai/flows/ai-image-generator';
-import { type UserMedia } from '@/ai/flows/ai-image-generator.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { CountdownTimer } from '@/components/common/CountdownTimer';
+
+// This would be fetched from a unified media management flow in a real app.
+// For now, we are returning an empty array since the image generator is removed.
+const getUserMedia = async (userId: string): Promise<UserMedia[]> => {
+    console.log(`Fetching media for user: ${userId}`);
+    return [];
+}
+
+type UserMedia = {
+  id: string;
+  userId: string;
+  type: 'ai-generated' | 'community-chat' | 'ticket-media';
+  mediaUrl: string;
+  prompt?: string;
+  createdAt: string; // ISO string
+  expiresAt: string; // ISO string
+};
+
 
 const MediaCard = ({ media }: { media: UserMedia }) => {
     const expiryDate = new Date(media.expiresAt);

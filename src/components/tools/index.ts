@@ -36,7 +36,6 @@ export { DateCalculator } from './DateCalculator';
 export { DiscountCalculator } from './DiscountCalculator';
 export { DropboxDirectLinkGenerator } from './DropboxDirectLinkGenerator';
 export { ExcelToPdf } from './ExcelToPdf';
-export { FaviconChecker } from './FaviconChecker';
 export { FindAndReplace } from './FindAndReplace';
 export { FlipImage } from './FlipImage';
 export { FlipkartShippingLabelCropper } from './FlipkartShippingLabelCropper';
