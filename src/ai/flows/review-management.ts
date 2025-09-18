@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -31,14 +30,6 @@ export async function getReviews(options: GetReviewsOptions = {}): Promise<Revie
         }
         
         let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = adminDb.collection('reviews');
-
-        // Apply filtering for a specific tool if requested
-        if (toolId) {
-            query = query.where('toolId', '==', toolId);
-        }
-
-        // Always order by submission date
-        query = query.orderBy('submittedOn', 'desc');
         
         const snapshot = await query.get();
         
@@ -46,7 +37,7 @@ export async function getReviews(options: GetReviewsOptions = {}): Promise<Revie
             return [];
         }
         
-        let reviews = snapshot.docs.map(doc => {
+        let allReviews = snapshot.docs.map(doc => {
             const data = doc.data();
             return ReviewSchema.parse({
                 id: doc.id,
@@ -55,21 +46,28 @@ export async function getReviews(options: GetReviewsOptions = {}): Promise<Revie
             });
         });
 
-        // If a status is specified, filter in-memory after fetching.
-        // This avoids the composite index requirement for status + submittedOn.
+        // Manual filtering and sorting on the server
+        allReviews.sort((a, b) => new Date(b.submittedOn).getTime() - new Date(a.submittedOn).getTime());
+        
+        let filteredReviews = allReviews;
+
+        if (toolId) {
+          filteredReviews = filteredReviews.filter(review => review.toolId === toolId);
+        }
+
+        // Default to showing only 'approved' reviews if a status isn't explicitly requested for public-facing queries
         if (status) {
-            reviews = reviews.filter(review => review.status === status);
-        } else if (toolId || limit) {
-            // For public-facing queries (e.g., on a tool page), default to showing only approved reviews.
-            reviews = reviews.filter(review => review.status === 'approved');
+            filteredReviews = filteredReviews.filter(review => review.status === status);
+        } else if (toolId) {
+             filteredReviews = filteredReviews.filter(review => review.status === 'approved');
         }
 
         // Apply limit after all filtering
         if (limit) {
-            reviews = reviews.slice(0, limit);
+            filteredReviews = filteredReviews.slice(0, limit);
         }
 
-        return reviews;
+        return filteredReviews;
 
     } catch (error) {
         console.error("Error fetching reviews:", error);
