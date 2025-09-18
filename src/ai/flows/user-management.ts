@@ -13,7 +13,7 @@
  */
 
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, type Affiliate, type Comment } from './user-management.types';
+import { type AddLeadUserInput, type UpdateUserRoleInput, type ReferralRequest, type Affiliate, type Comment } from './user-management.schemas';
 import { AddLeadUserInputSchema, UpdateUserRoleInputSchema, ReferralRequestSchema, AffiliateSchema, CommentSchema } from './user-management.schemas';
 import { getAdminDb } from '@/lib/firebase-admin';
 

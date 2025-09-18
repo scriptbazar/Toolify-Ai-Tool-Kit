@@ -4,7 +4,7 @@
  * @fileOverview Types and Zod schemas for application settings management.
  */
 import { z } from 'zod';
-import { type ReferralRequestSchema, type ReferralStatusSchema } from './user-management.types';
+import { type ReferralRequestSchema } from './user-management.schemas';
 import * as Icons from 'lucide-react';
 
 const iconNames = Object.keys(Icons) as [string, ...string[]];
@@ -307,4 +307,3 @@ export const AppSettingsSchema = z.object({
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
 
 export type ReferralRequest = z.infer<typeof ReferralRequestSchema>;
-export type ReferralStatus = z.infer<typeof ReferralStatusSchema>;
