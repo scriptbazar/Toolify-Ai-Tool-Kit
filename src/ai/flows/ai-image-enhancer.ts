@@ -34,8 +34,11 @@ const enhanceImageQualityFlow = ai.defineFlow(
         ];
 
         const { media } = await ai.generate({
-          model: 'googleai/gemini-1.5-flash-latest',
+          model: 'googleai/gemini-2.5-flash-image-preview',
           prompt,
+          config: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          }
         });
 
         if (!media || !media.url) {
