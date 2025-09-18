@@ -180,16 +180,20 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
     try {
         let queryRef: Query = adminDb.collection(TOOLS_COLLECTION);
         
+        // Apply filters
         if (options.slug) {
             queryRef = queryRef.where('slug', '==', options.slug);
-        } else {
-             if (options.category && options.category !== 'all') {
-                queryRef = queryRef.where('category', '==', options.category);
-            }
-            if (options.limit && !options.query) {
-                queryRef = queryRef.limit(options.limit);
-            }
-            queryRef = queryRef.orderBy('name');
+        }
+        if (options.category && options.category !== 'all') {
+            queryRef = queryRef.where('category', '==', options.category);
+        }
+        
+        // Always apply a default sort order
+        queryRef = queryRef.orderBy('name');
+
+        // Apply limit if specified (and not a slug search)
+        if (options.limit && !options.slug) {
+            queryRef = queryRef.limit(options.limit);
         }
         
         const snapshot = await queryRef.get();
@@ -205,16 +209,13 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
             }
         });
 
+        // Client-side filtering for search query after initial fetch
         if (options.query) {
             const lowercasedQuery = options.query.toLowerCase();
             tools = tools.filter(tool => 
                 tool.name.toLowerCase().includes(lowercasedQuery) ||
                 tool.description.toLowerCase().includes(lowercasedQuery)
             );
-        }
-        
-        if (options.limit && options.query) {
-            tools = tools.slice(0, options.limit);
         }
         
         return tools.filter(tool => tool.status !== 'Disabled');
@@ -477,6 +478,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
     
+
 
 
 
