@@ -13,7 +13,6 @@ import * as Icons from 'lucide-react';
 import { CategoryCard } from '@/components/tools/CategoryCard';
 import { type Tool } from '@/ai/flows/tool-management.types';
 import { type Review } from '@/ai/flows/review-management.types';
-import { ToolOfTheWeek } from '@/components/tools/ToolOfTheWeek';
 import { type Post } from '@/ai/flows/blog-management.types';
 import { type HomepageSettings } from '@/ai/flows/settings-management.types';
 import dynamic from 'next/dynamic';
@@ -28,11 +27,10 @@ interface HomePageClientProps {
     testimonials: Review[];
     steps: HomepageSettings['steps'];
     features: HomepageSettings['features'];
-    toolOfTheWeek: Tool | null;
     latestPosts: Post[];
 }
 
-export function HomePageClient({ testimonials, steps, features, toolOfTheWeek, latestPosts }: HomePageClientProps) {
+export function HomePageClient({ testimonials, steps, features, latestPosts }: HomePageClientProps) {
 
     return (
         <>
@@ -59,14 +57,6 @@ export function HomePageClient({ testimonials, steps, features, toolOfTheWeek, l
         </div>
       </section>
       
-      {toolOfTheWeek && (
-        <section className="py-16 md:py-24 bg-background">
-            <div className="container mx-auto px-4">
-                <ToolOfTheWeek tool={toolOfTheWeek} />
-            </div>
-        </section>
-      )}
-
       <section className="py-16 md:py-24 bg-card">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">

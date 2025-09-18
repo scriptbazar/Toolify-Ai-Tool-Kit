@@ -27,7 +27,6 @@ import { Label } from '@/components/ui/label';
 
 const EditToolFormSchema = UpsertToolInputSchema.extend({
     isNew: z.boolean().default(false),
-    isToolOfTheWeek: z.boolean().default(false),
     status: z.enum(['Active', 'Disabled', 'Maintenance', 'Coming Soon', 'New Version', 'Beta']).default('Active'),
     howToUse: z.array(z.string()).optional(),
 });
@@ -52,7 +51,6 @@ export function EditToolForm({ tool, onSave }: EditToolFormProps) {
             category: tool?.category || 'text',
             plan: tool?.plan || 'Free',
             isNew: tool?.isNew || false,
-            isToolOfTheWeek: tool?.isToolOfTheWeek || false,
             status: tool?.status || 'Active',
             howToUse: tool?.howToUse || [],
         },
@@ -152,15 +150,6 @@ export function EditToolForm({ tool, onSave }: EditToolFormProps) {
                                 <div className="flex items-center gap-2 rounded-lg border p-2 h-fit">
                                     <Sparkles className="h-5 w-5 text-blue-500" />
                                     <div className="flex-1"><FormLabel>Mark as New</FormLabel><p className="text-xs text-muted-foreground">Display a "New" badge on the tool card.</p></div>
-                                    <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                                </div>
-                                <FormMessage /></FormItem>
-                            )} />
-                            <FormField control={form.control} name="isToolOfTheWeek" render={({ field }) => (
-                                <FormItem><FormLabel className="mb-2 block">Feature</FormLabel>
-                                <div className="flex items-center gap-2 rounded-lg border p-2 h-fit">
-                                    <Star className="h-5 w-5 text-yellow-500" />
-                                    <div className="flex-1"><FormLabel>Tool of the Week</FormLabel><p className="text-xs text-muted-foreground">Feature this tool on the homepage.</p></div>
                                     <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                                 </div>
                                 <FormMessage /></FormItem>

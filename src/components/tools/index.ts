@@ -140,8 +140,6 @@ export { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
 export { YoutubeVideoDownloader } from './YoutubeVideoDownloader';
 export { UpgradeProDialog } from './UpgradeProDialog';
 export { RecentlyUsedTools } from './RecentlyUsedTools';
-export { ToolOfTheWeek } from './ToolOfTheWeek';
-
     
 
     
