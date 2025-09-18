@@ -1,5 +1,4 @@
 
-
 import { getTools } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
 import { getReviews } from '@/ai/flows/review-management';
@@ -10,11 +9,13 @@ import { ToolPageClient } from './page.client';
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
   
+  const slug = params.slug;
+
   // Fetch only the required tool data, and other page data in parallel
   const [toolResponse, settings, toolReviews, allPosts, popularTools] = await Promise.all([
-    getTools({ slug: params.slug }), // Fetch the specific tool by slug
+    getTools({ slug: slug }), // Fetch the specific tool by slug
     getSettings(),
-    getReviews({toolId: params.slug}),
+    getReviews({toolId: slug}),
     getPosts(),
     getTools({ limit: 20 }) // Fetch a limited number of popular tools
   ]);
