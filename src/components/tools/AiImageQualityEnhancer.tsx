@@ -3,6 +3,7 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { UploadCloud, Download, Sparkles, Image as ImageIcon, Trash2, Loader2, Scissors } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
