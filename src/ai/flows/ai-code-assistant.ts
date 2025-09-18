@@ -38,7 +38,7 @@ Code to Analyze:
 
 Your response must be structured according to the output schema.
 
-1.  **Detect Language:** Identify the programming language of the code. If it's ambiguous, make your best guess.
+1.  **Detect Language:** Identify the programming language(s) of the code. If multiple languages are present (e.g., HTML with embedded JavaScript and CSS), list them all, separated by commas. If it's ambiguous, make your best guess.
 
 2.  **Summarize:** Provide a concise, one-paragraph executive summary of what the code does. Explain its main purpose and functionality.
 
