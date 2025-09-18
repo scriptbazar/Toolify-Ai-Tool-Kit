@@ -91,7 +91,10 @@ export function AiCodeAssistant() {
   const analysisSections = [
       { id: 'summary', title: 'Summary & Language', icon: FileText, content: (
           <div className="space-y-4">
-            <Badge>{analysisResult?.language}</Badge>
+             <div className="flex flex-wrap items-center gap-2">
+                <Badge>{analysisResult?.language.detected}</Badge>
+                <Badge variant="outline">Total: {analysisResult?.language.count}</Badge>
+             </div>
             <p className="text-muted-foreground">{analysisResult?.summary}</p>
           </div>
       )},
@@ -133,11 +136,11 @@ export function AiCodeAssistant() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <p className="text-xs font-semibold mb-1 text-red-500">Before:</p>
-                                    <CodeBlock language={analysisResult.language} code={item.before} />
+                                    <CodeBlock language={analysisResult.language.detected.split(',')[0]} code={item.before} />
                                 </div>
                                 <div>
                                      <p className="text-xs font-semibold mb-1 text-green-500">After:</p>
-                                    <CodeBlock language={analysisResult.language} code={item.after} />
+                                    <CodeBlock language={analysisResult.language.detected.split(',')[0]} code={item.after} />
                                 </div>
                             </div>
                         </div>

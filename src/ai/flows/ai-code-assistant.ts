@@ -38,11 +38,11 @@ Code to Analyze:
 
 Your response must be structured according to the output schema.
 
-1.  **Detect Language:** Identify the programming language(s) of the code. If multiple languages are present (e.g., HTML with embedded JavaScript and CSS), list them all, separated by commas. If it's ambiguous, make your best guess.
+1.  **Detect Language:** Identify all programming languages present in the code. If multiple languages are present (e.g., HTML with embedded JavaScript and CSS), list them all, separated by commas. Count the total number of unique languages and provide it in the 'count' field.
 
-2.  **Summarize:** Provide a concise, one-paragraph executive summary of what the code does. Explain its main purpose and functionality.
+2.  **Detailed Summary:** Provide a detailed, one-paragraph executive summary of what the code does. Explain its main purpose, functionality, and how the different parts interact.
 
-3.  **Explain:** Give a clear, step-by-step explanation of how the code works. Break down the logic, describe key functions or classes, and explain the flow of execution. Use markdown for code blocks and formatting to make this easy for a beginner to understand.
+3.  **Detailed Explanation:** Give a clear, step-by-step, and in-depth explanation of how the code works. Break down the logic, describe every function, class, and variable, and explain the flow of execution in great detail. Use markdown for code blocks and formatting to make this easy for a beginner to understand.
 
 4.  **Performance Analysis (Big O Notation):**
     *   Analyze the time complexity (Big O) of the main operations or the entire snippet.

@@ -14,9 +14,10 @@ const ImprovementSuggestionSchema = z.object({
 });
 
 export const AiCodeAssistantOutputSchema = z.object({
-  language: z
-    .string()
-    .describe('The detected programming language of the code.'),
+  language: z.object({
+      detected: z.string().describe('A comma-separated list of all detected programming languages.'),
+      count: z.number().describe('The total number of unique languages detected.'),
+  }).describe('The detected programming languages and their count.'),
   summary: z
     .string()
     .describe('A concise summary of what the code does.'),
