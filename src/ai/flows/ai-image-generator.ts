@@ -121,7 +121,7 @@ const removeImageBackgroundFlow = ai.defineFlow(
         ];
 
         const { media } = await ai.generate({
-          model: 'gemini-1.5-flash-latest',
+          model: 'gemini-pro-vision',
           prompt,
           config: {
             responseModalities: ['TEXT', 'IMAGE'],
@@ -232,5 +232,4 @@ export async function getUserMedia(userId: string): Promise<UserMedia[]> {
         throw new Error("Could not load your media gallery.");
     }
 }
-
     
