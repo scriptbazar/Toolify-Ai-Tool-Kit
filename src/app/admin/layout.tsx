@@ -51,26 +51,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
-import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
-import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { useEffect } from 'react';
 import { AdminSidebarNav } from '@/components/admin/AdminSidebarNav';
-
-interface AppUser {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
+import { useAuth } from '@/hooks/use-auth';
 
 export default function AdminLayout({
   children,
@@ -80,34 +71,20 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [userData, setUserData] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, userData, loading, isAdmin } = useAuth();
 
   const isLoginPage = pathname === '/admin/login';
 
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-          setUser(firebaseUser);
-          setUserData(userDocSnap.data() as AppUser);
-        } else {
-            router.push('/admin/login');
-            return;
+    if (!loading) {
+      if (!user || !isAdmin) {
+        if (!isLoginPage) {
+          router.replace('/admin/login');
         }
-      } else if (!isLoginPage) {
-        router.push('/admin/login');
-        return;
       }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [router, isLoginPage, toast]);
+    }
+  }, [user, isAdmin, loading, router, isLoginPage]);
 
 
   const handleLogout = async () => {
@@ -132,7 +109,7 @@ export default function AdminLayout({
     return <>{children}</>;
   }
   
-  if (loading) {
+  if (loading || !user) {
     return (
         <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
           <Logo className="h-16 w-16 animate-pulse" />

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -23,16 +24,14 @@ import {
   Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
-import { signOut, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
-import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -44,14 +43,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-
-interface AppUser {
-  firstName: string;
-  lastName: string;
-  email: string;
-  role?: 'user' | 'admin';
-}
+import { useAuth } from '@/hooks/use-auth';
+import { useEffect } from 'react';
 
 
 export default function UserPanelLayout({
@@ -62,51 +55,19 @@ export default function UserPanelLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [userData, setUserData] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, userData, loading, isAdmin } = useAuth();
+
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        
-        if (userDocSnap.exists()) {
-          const fetchedUserData = userDocSnap.data() as AppUser;
-          // If a user with 'admin' role tries to access the user dashboard,
-          // redirect them to the admin dashboard.
-          if (fetchedUserData.role === 'admin') {
-            router.replace('/admin/dashboard');
-            // We don't set loading to false here to avoid a flicker
-            return;
-          }
-          setUser(firebaseUser);
-          setUserData(fetchedUserData);
-        } else {
-            // This case handles if a user is authenticated but has no Firestore document.
-            // It's safer to log them out and ask to log in again.
-            toast({
-              title: "Authentication Error",
-              description: "Could not find your user details. Please log in again.",
-              variant: "destructive",
-            });
-            await signOut(auth); // Log out the user
-            router.push('/login');
-            // We don't set loading to false here to avoid a flicker
-            return;
-        }
-      } else {
-        // No user is signed in.
+    if (!loading && !user) {
         router.push('/login');
-        // We don't set loading to false here to avoid a flicker
-        return;
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [router, toast]);
+    }
+     // If a user with 'admin' role tries to access the user dashboard,
+     // redirect them to the admin dashboard.
+    if (!loading && isAdmin) {
+        router.replace('/admin/dashboard');
+    }
+  }, [user, loading, isAdmin, router]);
 
 
   const handleLogout = async () => {
@@ -127,27 +88,13 @@ export default function UserPanelLayout({
     }
   };
   
-  if (loading) {
+  if (loading || !user || !userData || isAdmin) {
       return (
         <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
           <Logo className="h-16 w-16 animate-pulse" />
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
             <p className="text-lg">Loading...</p>
-          </div>
-        </div>
-      );
-  }
-
-  if (!user || !userData) {
-    // This state can be reached if the user is being redirected.
-    // Showing a loading state prevents flashing the UI before redirection is complete.
-     return (
-        <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
-          <Logo className="h-16 w-16 animate-pulse" />
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <p className="text-lg">Redirecting...</p>
           </div>
         </div>
       );

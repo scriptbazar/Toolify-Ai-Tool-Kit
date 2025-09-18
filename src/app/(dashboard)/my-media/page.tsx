@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bot, MessageSquare, Image as ImageIcon, AlertCircle, Ticket, Clock, Calendar } from "lucide-react";
@@ -12,23 +13,38 @@ import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { CountdownTimer } from '@/components/common/CountdownTimer';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
-// This would be fetched from a unified media management flow in a real app.
-// For now, we are returning an empty array since the image generator is removed.
-const getUserMedia = async (userId: string): Promise<UserMedia[]> => {
-    console.log(`Fetching media for user: ${userId}`);
-    return [];
-}
 
+// Define the type based on expected Firestore structure
 type UserMedia = {
   id: string;
   userId: string;
   type: 'ai-generated' | 'community-chat' | 'ticket-media';
   mediaUrl: string;
   prompt?: string;
-  createdAt: string; // ISO string
-  expiresAt: string; // ISO string
+  createdAt: string; // Assuming to be an ISO string
+  expiresAt: string; // Assuming to be an ISO string
 };
+
+const getUserMedia = async (userId: string): Promise<UserMedia[]> => {
+    console.log(`Fetching media for user: ${userId}`);
+    const mediaCollection = collection(db, 'userMedia');
+    const q = query(mediaCollection, where("userId", "==", userId));
+    const querySnapshot = await getDocs(q);
+    const mediaList: UserMedia[] = [];
+    querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        mediaList.push({
+            id: doc.id,
+            ...data,
+            createdAt: data.createdAt?.toDate()?.toISOString() || new Date().toISOString(),
+            expiresAt: data.expiresAt?.toDate()?.toISOString() || new Date().toISOString(),
+        } as UserMedia);
+    });
+    return mediaList;
+};
+
 
 
 const MediaCard = ({ media }: { media: UserMedia }) => {

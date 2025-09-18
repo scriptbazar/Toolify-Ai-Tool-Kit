@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import dynamic from 'next/dynamic';
@@ -16,5 +17,3 @@ const ChatWidget = dynamic(
 export function DynamicChatWidget() {
   return <ChatWidget />;
 }
-
-    
