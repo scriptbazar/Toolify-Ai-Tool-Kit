@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useRef, type FormEvent, useEffect } from 'react';
@@ -24,6 +25,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { saveUserMedia } from '@/ai/flows/media-management';
+import { getChatUsers } from '@/ai/flows/user-management';
 
 
 type Poll = {
@@ -340,13 +342,13 @@ const PollDisplayAdmin = ({ message, currentUser }: { message: Message, currentU
 };
 
 interface CommunityChatProps {
-    allUsers: ChatUser[];
     isAdmin: boolean;
 }
 
-export function CommunityChat({ allUsers, isAdmin }: CommunityChatProps) {
+export function CommunityChat({ isAdmin }: CommunityChatProps) {
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
     const [userData, setUserData] = useState<AppUser | null>(null);
+    const [allUsers, setAllUsers] = useState<ChatUser[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [attachment, setAttachment] = useState<File | null>(null);
@@ -358,8 +360,8 @@ export function CommunityChat({ allUsers, isAdmin }: CommunityChatProps) {
     const [replyingTo, setReplyingTo] = useState<Message | null>(null);
     const [showUserList, setShowUserList] = useState(false);
     const [userSearch, setUserSearch] = useState('');
+    const [loading, setLoading] = useState(true);
     const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
-
 
      useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -382,11 +384,25 @@ export function CommunityChat({ allUsers, isAdmin }: CommunityChatProps) {
             setMessages(fetchedMessages);
         });
 
+        async function fetchUsers() {
+            try {
+                const usersList = await getChatUsers();
+                setAllUsers(usersList);
+            } catch (error) {
+                console.error("Error fetching users:", error);
+                toast({ title: "Error", description: "Could not load community members.", variant: "destructive" });
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        fetchUsers();
+
         return () => {
             unsubscribeAuth();
             unsubscribeMessages();
         };
-    }, []);
+    }, [toast]);
     
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -572,6 +588,17 @@ export function CommunityChat({ allUsers, isAdmin }: CommunityChatProps) {
         return allUsers.filter(u => u.username.toLowerCase().includes(userSearch.toLowerCase())).slice(0, 5);
     }, [userSearch, allUsers]);
 
+    if (loading) {
+        return (
+            <div className="flex h-full flex-col items-center justify-center gap-4 bg-transparent">
+              <Logo className="h-16 w-16 animate-pulse" />
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <p className="text-lg">Loading Chat...</p>
+              </div>
+            </div>
+        );
+    }
 
   return (
     <div className="space-y-6">
