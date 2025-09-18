@@ -12,14 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { PlusCircle, Trash2, Edit, Save, Loader2, X, MoreHorizontal, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
@@ -43,20 +35,12 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { collection, getDocs, query, where, QueryConstraint } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import dynamic from 'next/dynamic';
 
-interface Subscriber {
-    id: string;
-    name: string;
-    email: string;
-    planId: string;
-    subscribedAt: string;
-    subscriptionEndsAt: string;
-}
+const SubscriberTable = dynamic(() => import('@/components/admin/SubscriberTable').then(mod => mod.SubscriberTable), {
+  loading: () => <Skeleton className="h-48 w-full" />,
+});
 
-const SUBSCRIBERS_PER_PAGE = 5;
 
 const PlanFormSchema = z.object({
   name: z.string().min(1, 'Plan name is required'),
@@ -73,12 +57,10 @@ type PlanFormValues = z.infer<typeof PlanFormSchema>;
 
 export default function PlanManagementPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
-  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
   const form = useForm<PlanFormValues>({
@@ -106,47 +88,11 @@ export default function PlanManagementPage() {
         const settings = await getSettings();
         const fetchedPlans = settings.plan?.plans || [];
         setPlans(fetchedPlans);
-        
-        const usersRef = collection(db, 'users');
-        const planIds = fetchedPlans.map(p => p.id).filter(id => id);
-        
-        let fetchedSubscribers: Subscriber[] = [];
-        if (planIds.length > 0) {
-            const planChunks: string[][] = [];
-            for (let i = 0; i < planIds.length; i += 10) {
-                planChunks.push(planIds.slice(i, i + 10));
-            }
-            
-            const userPromises = planChunks.map(chunk => {
-                const q = query(usersRef, where('planId', 'in', chunk));
-                return getDocs(q);
-            });
-            const userSnapshots = await Promise.all(userPromises);
-            
-            userSnapshots.forEach(snapshot => {
-                snapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    const subscribedAtDate = data.subscriptionStartDate?.toDate ? data.subscriptionStartDate.toDate() : new Date();
-                    const endsAtDate = data.subscriptionEndDate?.toDate ? data.subscriptionEndDate.toDate() : new Date();
-
-                    fetchedSubscribers.push({
-                        id: doc.id,
-                        name: `${data.firstName} ${data.lastName}`,
-                        email: data.email,
-                        planId: data.planId || 'free',
-                        subscribedAt: subscribedAtDate.toLocaleDateString(),
-                        subscriptionEndsAt: endsAtDate.toLocaleDateString(),
-                    });
-                });
-            });
-        }
-        setSubscribers(fetchedSubscribers);
-
       } catch (error) {
         console.error('Failed to fetch data:', error);
         toast({
           title: 'Error',
-          description: 'Could not load plans or subscribers.',
+          description: 'Could not load plans.',
           variant: 'destructive',
         });
       } finally {
@@ -155,12 +101,6 @@ export default function PlanManagementPage() {
     }
     fetchData();
   }, [toast]);
-  
-  const totalPages = Math.ceil(subscribers.length / SUBSCRIBERS_PER_PAGE);
-  const paginatedSubscribers = useMemo(() => {
-    const startIndex = (currentPage - 1) * SUBSCRIBERS_PER_PAGE;
-    return subscribers.slice(startIndex, startIndex + SUBSCRIBERS_PER_PAGE);
-  }, [currentPage, subscribers]);
 
   const openModal = (plan?: Plan) => {
     if (plan) {
@@ -367,7 +307,7 @@ export default function PlanManagementPage() {
         </DialogContent>
       </Dialog>
       
-      <Card>
+       <Card>
         <CardHeader>
           <CardTitle>Plan Subscribers</CardTitle>
           <CardDescription>
@@ -375,72 +315,7 @@ export default function PlanManagementPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Subscribed Plan</TableHead>
-                  <TableHead>Subscription Date</TableHead>
-                  <TableHead>Subscription End Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedSubscribers.length > 0 ? (
-                  paginatedSubscribers.map(sub => (
-                    <TableRow key={sub.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                           <Avatar className="h-8 w-8">
-                            <AvatarFallback>{sub.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{sub.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{sub.email}</TableCell>
-                      <TableCell>
-                         <Badge variant="secondary">
-                           {plans.find(p => p.id === sub.planId)?.name || sub.planId}
-                         </Badge>
-                      </TableCell>
-                       <TableCell>{sub.subscribedAt}</TableCell>
-                       <TableCell>{sub.subscriptionEndsAt}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
-                      No subscribers found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-          {totalPages > 1 && (
-            <div className="flex items-center justify-end space-x-2 pt-4">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
-                    disabled={currentPage === 1}
-                >
-                    Previous
-                </Button>
-                <span className="text-sm text-muted-foreground">
-                    Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                >
-                    Next
-                </Button>
-            </div>
-          )}
+           <SubscriberTable />
         </CardContent>
       </Card>
     </div>
