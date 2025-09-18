@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -15,7 +14,7 @@ import { getSettings } from '@/ai/flows/settings-management';
 import type { Plan } from '@/ai/flows/settings-management.types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDesc, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getAnnouncementsForUser, markAnnouncementsAsRead } from '@/ai/flows/announcement-flow';
 import { type Announcement } from '@/ai/flows/announcement-flow.types';
@@ -273,3 +272,5 @@ export default function UserDashboard() {
     </div>
   );
 }
+
+    

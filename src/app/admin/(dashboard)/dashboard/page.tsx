@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -48,6 +49,7 @@ import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StatCard } from '@/components/common/StatCard';
 
 
 interface User {
@@ -186,60 +188,16 @@ export default function AdminDashboard() {
       </div>
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
         <Link href="/admin/users?filter=all">
-          <Card className="hover:bg-muted/50 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">All Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-20" /> : userCounts.all.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">
-                +5.2% from last month
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard title="All Users" value={loading ? '' : userCounts.all.toLocaleString()} icon={Users} />
         </Link>
         <Link href="/admin/users?filter=signup">
-          <Card className="hover:bg-muted/50 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Signup Users</CardTitle>
-              <UserPlus className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-20" /> : `+${userCounts.signup.toLocaleString()}`}</div>
-              <p className="text-xs text-muted-foreground">
-                +180.1% from last month
-              </p>
-            </CardContent>
-          </Card>
+           <StatCard title="Signup Users" value={loading ? '' : `+${userCounts.signup.toLocaleString()}`} icon={UserPlus} />
         </Link>
         <Link href="/admin/users?filter=lead">
-          <Card className="hover:bg-muted/50 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Lead Users</CardTitle>
-              <UserCheck className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-20" /> : `+${userCounts.lead.toLocaleString()}`}</div>
-              <p className="text-xs text-muted-foreground">
-                +19% from last month
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard title="Lead Users" value={loading ? '' : `+${userCounts.lead.toLocaleString()}`} icon={UserCheck} />
         </Link>
         <Link href="/admin/affiliate-management">
-          <Card className="hover:bg-muted/50 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Affiliate Users</CardTitle>
-              <UserRound className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-20" /> : `+${userCounts.affiliate.toLocaleString()}`}</div>
-              <p className="text-xs text-muted-foreground">
-                +201 since last hour
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard title="Affiliate Users" value={loading ? '' : `+${userCounts.affiliate.toLocaleString()}`} icon={UserRound} />
         </Link>
       </div>
       <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
@@ -368,3 +326,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+    
