@@ -121,11 +121,8 @@ const removeImageBackgroundFlow = ai.defineFlow(
         ];
 
         const { media } = await ai.generate({
-          model: 'gemini-pro-vision',
+          model: 'gemini-1.5-flash-latest',
           prompt,
-          config: {
-            responseModalities: ['TEXT', 'IMAGE'],
-          }
         });
 
         if (!media || !media.url) {
