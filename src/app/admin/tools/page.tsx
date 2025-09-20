@@ -34,13 +34,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDesc,
-  DialogFooter,
-  DialogTrigger,
-  DialogClose,
 } from '@/components/ui/dialog';
 import {
   ListChecks,
-  ListX,
   Sparkles,
   LayoutGrid,
   ArrowLeft,
@@ -59,7 +55,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EditToolForm } from './[id]/page';
+import { EditToolForm } from './[id]/page.client';
 
 
 const ITEMS_PER_PAGE = 10;
