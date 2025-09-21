@@ -1,9 +1,8 @@
 
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { getTools, upsertTool } from '@/ai/flows/tool-management';
+import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
 import { toolCategories } from '@/lib/constants';
 import { Search, Package } from 'lucide-react';
@@ -29,13 +28,6 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDesc,
-} from '@/components/ui/dialog';
-import {
   ListChecks,
   Sparkles,
   LayoutGrid,
@@ -55,16 +47,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EditToolForm } from './[id]/page.client';
-
 
 const ITEMS_PER_PAGE = 10;
 
 export default function AdminToolsPage() {
   const [allTools, setAllTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingTool, setEditingTool] = useState<Tool | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -186,29 +174,9 @@ export default function AdminToolsPage() {
   };
   
   const handleEditClick = (tool: Tool) => {
-    setEditingTool(tool);
-    setIsDialogOpen(true);
+    router.push(`/admin/tools/${tool.slug}`);
   };
   
-  const handleFormSave = async (data: any) => {
-    const toolData = {
-        id: editingTool?.id,
-        ...data,
-    };
-    const result = await upsertTool(toolData);
-    if (result.success) {
-        toast({
-            title: `Tool updated successfully!`,
-            description: `The tool "${data.name}" has been saved.`,
-        });
-        setIsDialogOpen(false);
-        setEditingTool(null);
-        fetchTools(); // Refresh the list
-    } else {
-         toast({ title: 'Error', description: result.message, variant: 'destructive' });
-    }
-    return result.success;
-  }
 
   const tabs: { id: string; label: string; icon: React.ElementType, count: number }[] = [
     { id: 'all', label: 'All', icon: Package, count: counts.all },
@@ -371,17 +339,6 @@ export default function AdminToolsPage() {
           )}
         </CardContent>
       </Card>
-       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-4xl">
-              <DialogHeader>
-                  <DialogTitle>Edit Tool: {editingTool?.name}</DialogTitle>
-                  <DialogDesc>Modify the details of an existing tool.</DialogDesc>
-              </DialogHeader>
-              <div className="max-h-[70vh] overflow-y-auto p-1 pr-4">
-                  <EditToolForm tool={editingTool} onSave={handleFormSave}/>
-              </div>
-          </DialogContent>
-       </Dialog>
     </div>
   );
 }

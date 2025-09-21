@@ -11,21 +11,26 @@ export default async function ToolPage({ params }: { params: { slug: string } })
   
   const slug = params.slug;
 
-  // Fetch all data in parallel for efficiency
-  const [allTools, settings, toolReviews, allPosts] = await Promise.all([
-    getTools(),
+  // Fetch only the specific tool needed for this page
+  const [tool] = await getTools({ slug });
+
+  if (!tool || tool.status === 'Disabled') {
+      notFound();
+  }
+
+  // Fetch other data in parallel for efficiency
+  const [settings, toolReviews, allPosts] = await Promise.all([
     getSettings(),
     getReviews({toolId: slug}),
     getPosts(),
   ]);
-
-  const tool = allTools.find(t => t.slug === slug);
   
-  if (!tool || tool.status === 'Disabled') {
-      notFound();
-  }
-  
-  const popularTools = allTools.filter(t => t.status === 'Active' && t.slug !== tool.slug).slice(0, 10);
+  // Fetch popular tools for the sidebar, excluding the current tool.
+  // This can be further optimized if getTools supports exclusion.
+  const popularTools = (await getTools({ limit: 10 }))
+    .filter(t => t.status === 'Active' && t.slug !== tool.slug)
+    .slice(0, 10);
+    
   const recentPosts = allPosts.filter(p => p.status === 'Published').slice(0, 10);
 
   return (
@@ -38,3 +43,4 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     />
   );
 }
+
