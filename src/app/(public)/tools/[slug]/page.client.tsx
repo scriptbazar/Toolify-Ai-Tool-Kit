@@ -151,6 +151,7 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'flip-image': dynamic(() => import('@/components/tools/FlipImage').then(mod => mod.FlipImage), { loading: () => <LoadingComponent /> }),
   'ico-converter': dynamic(() => import('@/components/tools/IcoConverter').then(mod => mod.IcoConverter), { loading: () => <LoadingComponent /> }),
   'ai-seo-keyword-generator': dynamic(() => import('@/components/tools/AiSeoKeywordGenerator').then(mod => mod.AiSeoKeywordGenerator), { loading: () => <LoadingComponent /> }),
+  'loan-calculator': dynamic(() => import('@/components/tools/LoanCalculator').then(mod => mod.LoanCalculator), { loading: () => <LoadingComponent /> }),
 };
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
