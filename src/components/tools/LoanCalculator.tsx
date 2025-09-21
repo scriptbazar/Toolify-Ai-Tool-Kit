@@ -128,7 +128,7 @@ export function LoanCalculator() {
   
   const formatCurrency = (value: number, currencyCode: string) => {
       const symbol = currencySymbols[currencyCode] || '$';
-      return `${symbol}${new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+      return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
   }
   
     const handleClear = () => {
@@ -156,30 +156,43 @@ export function LoanCalculator() {
         
         const doc = new jsPDF();
         
-        // --- Header ---
-        if (logoUrl) {
-            try {
-                 const response = await fetch(logoUrl);
-                 const blob = await response.blob();
-                 const reader = new FileReader();
-                 const dataUrl = await new Promise<string>((resolve, reject) => {
-                     reader.onloadend = () => resolve(reader.result as string);
-                     reader.onerror = reject;
-                     reader.readAsDataURL(blob);
-                 });
-                doc.addImage(dataUrl, 'PNG', 15, 15, 20, 20);
-                doc.setFontSize(22).text(siteTitle, 40, 28);
-            } catch (e) {
-                 console.error("Could not add logo to PDF:", e);
-                 doc.setFontSize(22).text(siteTitle, 15, 22);
-            }
-        } else {
-             doc.setFontSize(22).text(siteTitle, 15, 22);
-        }
+        // --- Watermark and Header/Footer ---
+        const pageCount = doc.internal.pages.length;
+        const addWatermarkAndHeaders = async () => {
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                
+                // Watermark
+                doc.setFontSize(50).setTextColor(230, 230, 230).text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
+                if (logoUrl) {
+                    try {
+                        const response = await fetch(logoUrl);
+                        const blob = await response.blob();
+                        const reader = new FileReader();
+                        const dataUrl = await new Promise<string>((resolve, reject) => {
+                            reader.onloadend = () => resolve(reader.result as string);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(blob);
+                        });
+                        doc.setGState(new (doc as any).GState({opacity: 0.1}));
+                        doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
+                        doc.setGState(new (doc as any).GState({opacity: 1}));
+                    } catch(e) { console.error("Could not add image watermark", e); }
+                }
 
-        doc.setFontSize(12).text("Loan EMI Schedule", 15, 45);
-        doc.line(15, 48, 195, 48);
-        
+                // Header
+                doc.setFontSize(10).setTextColor(100);
+                doc.text(siteTitle, 15, 10);
+                doc.text(`Loan Amortization Schedule`, doc.internal.pageSize.getWidth() - 15, 10, { align: 'right' });
+                doc.line(15, 12, doc.internal.pageSize.getWidth() - 15, 12);
+                
+                // Footer
+                doc.setFontSize(8).setTextColor(150);
+                doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.getWidth() - 15, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
+            }
+        };
+
+
         const bodyData = [
             ['Loan Type', loanType],
             ['Loan Amount', formatCurrency(parseFloat(loanAmount), currency)],
@@ -200,10 +213,12 @@ export function LoanCalculator() {
 
         // --- Loan Summary Table ---
         autoTable(doc, {
-            startY: 55,
+            startY: 20,
             body: bodyData,
-            theme: 'plain',
+            theme: 'striped',
             styles: { fontSize: 10 },
+            head: [['Loan Summary', '']],
+            headStyles: { fillColor: [76, 35, 137] },
             columnStyles: { 0: { fontStyle: 'bold' } },
         });
 
@@ -211,18 +226,13 @@ export function LoanCalculator() {
         autoTable(doc, {
           startY: (doc as any).autoTable.previous.finalY + 10,
           head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
-          body: schedule.map(item => [item.month, item.principal, item.interest, item.totalPayment, item.remainingBalance]),
+          body: schedule.map(item => [item.month, item.principal.replace(/[^\d.-]/g, ''), item.interest.replace(/[^\d.-]/g, ''), item.totalPayment.replace(/[^\d.-]/g, ''), item.remainingBalance.replace(/[^\d.-]/g, '')]),
           theme: 'grid',
           headStyles: { fillColor: [76, 35, 137] },
+          didDrawPage: addWatermarkAndHeaders
         });
         
-        // --- Footer ---
-        const pageCount = (doc as any).internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            doc.setFontSize(8).text(`Page ${i} of ${pageCount}`, 195, 290, { align: 'right' });
-            doc.text(`${siteTitle} - EMI Report`, 15, 290);
-        }
+        addWatermarkAndHeaders(); // Call for the first page
         
         doc.save(`emi-schedule-${loanAmount}.pdf`);
 
