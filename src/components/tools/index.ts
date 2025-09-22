@@ -58,6 +58,7 @@ export { ImageTextExtractor } from './ImageTextExtractor';
 export { ImageToBase64 } from './ImageToBase64';
 export { ImageToPdf } from './ImageToPdf';
 export { InstagramVideoDownloader } from './InstagramVideoDownloader';
+export { InterestCalculator } from './InterestCalculator';
 export { JavascriptMinifier } from './JavascriptMinifier';
 export { JpgToPng } from './JpgToPng';
 export { JsonFormatter } from './JsonFormatter';

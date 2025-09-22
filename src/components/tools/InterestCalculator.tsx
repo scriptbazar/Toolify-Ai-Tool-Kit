@@ -1,0 +1,153 @@
+
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { Calculator, Percent } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+
+export function InterestCalculator() {
+    const [activeTab, setActiveTab] = useState('simple');
+    const { toast } = useToast();
+
+    // Simple Interest State
+    const [siPrincipal, setSiPrincipal] = useState('100000');
+    const [siRate, setSiRate] = useState('5');
+    const [siTime, setSiTime] = useState('5');
+    const [siTimePeriod, setSiTimePeriod] = useState<'years' | 'months'>('years');
+    const [siResult, setSiResult] = useState<{ interest: number; total: number } | null>(null);
+
+    // Compound Interest State
+    const [ciPrincipal, setCiPrincipal] = useState('100000');
+    const [ciRate, setCiRate] = useState('5');
+    const [ciTime, setCiTime] = useState('5');
+    const [ciTimePeriod, setCiTimePeriod] = useState<'years' | 'months'>('years');
+    const [ciFrequency, setCiFrequency] = useState('12'); // Monthly
+    const [ciResult, setCiResult] = useState<{ interest: number; total: number } | null>(null);
+
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value);
+    };
+
+    const handleSimpleInterestCalc = () => {
+        const p = parseFloat(siPrincipal);
+        const r = parseFloat(siRate) / 100;
+        let t = parseFloat(siTime);
+
+        if (isNaN(p) || isNaN(r) || isNaN(t) || p <= 0 || r < 0 || t <= 0) {
+            toast({ title: "Invalid Input", description: "Please enter valid positive numbers.", variant: "destructive" });
+            return;
+        }
+
+        if (siTimePeriod === 'months') {
+            t = t / 12; // Convert months to years
+        }
+
+        const interest = p * r * t;
+        const total = p + interest;
+        setSiResult({ interest, total });
+    };
+
+    const handleCompoundInterestCalc = () => {
+        const p = parseFloat(ciPrincipal);
+        const r = parseFloat(ciRate) / 100;
+        let t = parseFloat(ciTime);
+        const n = parseInt(ciFrequency, 10);
+
+        if (isNaN(p) || isNaN(r) || isNaN(t) || p <= 0 || r < 0 || t <= 0) {
+            toast({ title: "Invalid Input", description: "Please enter valid positive numbers.", variant: "destructive" });
+            return;
+        }
+
+        if (ciTimePeriod === 'months') {
+            t = t / 12; // Convert months to years
+        }
+        
+        const amount = p * Math.pow((1 + r / n), n * t);
+        const interest = amount - p;
+        setCiResult({ interest, total: amount });
+    };
+
+    return (
+        <Tabs defaultValue="simple" onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="simple">Simple Interest</TabsTrigger>
+                <TabsTrigger value="compound">Compound Interest</TabsTrigger>
+            </TabsList>
+            <TabsContent value="simple">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Simple Interest Calculator</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="si-principal">Principal Amount (₹)</Label>
+                                <Input id="si-principal" type="number" value={siPrincipal} onChange={e => setSiPrincipal(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="si-rate">Rate of Interest (% p.a.)</Label>
+                                <Input id="si-rate" type="number" value={siRate} onChange={e => setSiRate(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="si-time">Time Period</Label>
+                                <div className="flex gap-2">
+                                    <Input id="si-time" type="number" value={siTime} onChange={e => setSiTime(e.target.value)} />
+                                    <Select value={siTimePeriod} onValueChange={(val) => setSiTimePeriod(val as 'years' | 'months')}>
+                                        <SelectTrigger className="w-[120px]"><SelectValue/></SelectTrigger>
+                                        <SelectContent><SelectItem value="years">Years</SelectItem><SelectItem value="months">Months</SelectItem></SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+                        <Button onClick={handleSimpleInterestCalc} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate</Button>
+                        {siResult && (
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Interest</p><p className="text-xl font-bold text-primary">{formatCurrency(siResult.interest)}</p></div>
+                                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Amount</p><p className="text-xl font-bold text-primary">{formatCurrency(siResult.total)}</p></div>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="compound">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Compound Interest Calculator</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="space-y-2"><Label htmlFor="ci-principal">Principal Amount (₹)</Label><Input id="ci-principal" type="number" value={ciPrincipal} onChange={e => setCiPrincipal(e.target.value)} /></div>
+                            <div className="space-y-2"><Label htmlFor="ci-rate">Rate of Interest (% p.a.)</Label><Input id="ci-rate" type="number" value={ciRate} onChange={e => setCiRate(e.target.value)} /></div>
+                            <div className="space-y-2">
+                                <Label htmlFor="ci-time">Time Period</Label>
+                                <div className="flex gap-2">
+                                    <Input id="ci-time" type="number" value={ciTime} onChange={e => setCiTime(e.target.value)} />
+                                    <Select value={ciTimePeriod} onValueChange={(val) => setCiTimePeriod(val as 'years' | 'months')}><SelectTrigger className="w-[120px]"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="years">Years</SelectItem><SelectItem value="months">Months</SelectItem></SelectContent></Select>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="ci-frequency">Compounding Frequency</Label>
+                                <Select value={ciFrequency} onValueChange={setCiFrequency}><SelectTrigger id="ci-frequency"><SelectValue/></SelectTrigger><SelectContent>
+                                    <SelectItem value="1">Yearly</SelectItem><SelectItem value="2">Half-yearly</SelectItem><SelectItem value="4">Quarterly</SelectItem><SelectItem value="12">Monthly</SelectItem>
+                                </SelectContent></Select>
+                            </div>
+                        </div>
+                        <Button onClick={handleCompoundInterestCalc} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate</Button>
+                        {ciResult && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Interest</p><p className="text-xl font-bold text-primary">{formatCurrency(ciResult.interest)}</p></div>
+                                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Amount</p><p className="text-xl font-bold text-primary">{formatCurrency(ciResult.total)}</p></div>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </TabsContent>
+        </Tabs>
+    );
+}

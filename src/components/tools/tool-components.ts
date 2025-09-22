@@ -56,6 +56,7 @@ import { ImageTextExtractor } from './ImageTextExtractor';
 import { ImageToBase64 } from './ImageToBase64';
 import { ImageToPdf } from './ImageToPdf';
 import { InstagramVideoDownloader } from './InstagramVideoDownloader';
+import { InterestCalculator } from './InterestCalculator';
 import { JavascriptMinifier } from './JavascriptMinifier';
 import { JpgToPng } from './JpgToPng';
 import { JsonFormatter } from './JsonFormatter';
@@ -192,6 +193,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'image-to-base64': ImageToBase64,
   'image-to-pdf': ImageToPdf,
   'instagram-video-downloader': InstagramVideoDownloader,
+  'interest-calculator': InterestCalculator,
   'javascript-minifier': JavascriptMinifier,
   'jpg-to-png': JpgToPng,
   'json-formatter': JsonFormatter,
