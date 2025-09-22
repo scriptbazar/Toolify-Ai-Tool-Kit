@@ -176,7 +176,7 @@ export function GSTCalculator() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
             <Label htmlFor="currency-select">Currency</Label>
             <Select value={currency} onValueChange={setCurrency}>
@@ -196,7 +196,10 @@ export function GSTCalculator() {
             <Label htmlFor="amount-input">Amount</Label>
             <Input id="amount-input" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g., 1000" />
         </div>
-         <div className="space-y-2">
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
             <Label htmlFor="gst-rate-select">GST Rate (%)</Label>
             <Select value={gstRate} onValueChange={setGstRate}>
                 <SelectTrigger id="gst-rate-select"><SelectValue placeholder="Select GST Rate" /></SelectTrigger>
@@ -208,20 +211,19 @@ export function GSTCalculator() {
                     <SelectItem value="28">28%</SelectItem>
                 </SelectContent>
             </Select>
-          </div>
-      </div>
-      
-      <div className="space-y-2">
-        <Label>Calculation Type</Label>
-        <Select value={calculationType} onValueChange={(v) => setCalculationType(v as 'add' | 'remove')}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="add">GST Exclusive (Add GST)</SelectItem>
-            <SelectItem value="remove">GST Inclusive (Remove GST)</SelectItem>
-          </SelectContent>
-        </Select>
+        </div>
+        <div className="space-y-2">
+            <Label>Calculation Type</Label>
+            <Select value={calculationType} onValueChange={(v) => setCalculationType(v as 'add' | 'remove')}>
+            <SelectTrigger>
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="add">GST Exclusive (Add GST)</SelectItem>
+                <SelectItem value="remove">GST Inclusive (Remove GST)</SelectItem>
+            </SelectContent>
+            </Select>
+        </div>
       </div>
 
 
@@ -298,3 +300,5 @@ export function GSTCalculator() {
     </div>
   );
 }
+
+    
