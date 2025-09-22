@@ -14,7 +14,8 @@ import { getSettings } from '@/ai/flows/settings-management';
 import { useToast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import 'jspdf-autotable';
+
 
 interface ScheduleItem {
     month: number;
@@ -51,14 +52,14 @@ export function LoanCalculator() {
       'CAD': 'C$',
   };
   
-  const formatCurrency = (value: number | undefined | null, currencyCode: string) => {
+  const formatCurrency = (value: number | undefined | null) => {
     if (value === null || value === undefined || isNaN(value)) return 'N/A';
     return value.toLocaleString('en-US', {
         style: 'currency',
-        currency: currencyCode,
+        currency: currency,
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-    });
+    }).replace(currency, currencySymbols[currency] || currency);
   }
   
   const calculateLoan = () => {
@@ -125,10 +126,10 @@ export function LoanCalculator() {
 
         newSchedule.push({
             month: i,
-            principal: formatCurrency(principalForPeriod, currency),
-            interest: formatCurrency(interestForPeriod, currency),
-            totalPayment: formatCurrency(calculatedPayment, currency),
-            remainingBalance: formatCurrency(Math.max(0, remainingBalance), currency),
+            principal: formatCurrency(principalForPeriod),
+            interest: formatCurrency(interestForPeriod),
+            totalPayment: formatCurrency(calculatedPayment),
+            remainingBalance: formatCurrency(Math.max(0, remainingBalance)),
         });
       }
       setSchedule(newSchedule);
@@ -157,9 +158,10 @@ export function LoanCalculator() {
         const settings = await getSettings();
         const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
         const logoUrl = settings.general?.logoUrl;
-
-        const doc = new jsPDF();
         
+        // Default Sparkles SVG data if logoUrl is not available
+        const sparklesSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 4.8-4.8 1.9 4.8 1.9L12 21l1.9-4.8 4.8-1.9-4.8-1.9L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`;
+
         let logoBase64: string | null = null;
         if (logoUrl) {
             try {
@@ -173,20 +175,25 @@ export function LoanCalculator() {
                 });
             } catch (e) {
                 console.error("Could not fetch or convert logo:", e);
-                toast({ title: "Logo Warning", description: "Could not load the site logo for the PDF.", variant: "default" });
+                toast({ title: "Logo Warning", description: "Could not load the site logo for the PDF. Using default.", variant: "default" });
             }
         }
+
+        const doc = new jsPDF();
         
         // ---- HEADER (Page 1 only) ----
+        const headerY = 28;
         if (logoBase64) {
             doc.addImage(logoBase64, 'PNG', 15, 15, 20, 20);
-            doc.setFontSize(22).setTextColor(40).text(siteTitle, 40, 28);
+            doc.setFontSize(22).setTextColor(40).text(siteTitle, 40, headerY);
         } else {
-            doc.setFontSize(22).setTextColor(40).text(siteTitle, 15, 28);
+            // Add SVG directly if no logo URL - this is a simplification
+            doc.setFontSize(22).setTextColor(40).text(siteTitle, 15, headerY);
         }
 
         // ---- SUMMARY TABLE ----
-        const formatCurrencyForPdf = (value: number) => {
+        const formatCurrencyForPdf = (value: number | undefined | null) => {
+            if (value === null || value === undefined || isNaN(value)) return 'N/A';
             return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         };
         
@@ -205,7 +212,7 @@ export function LoanCalculator() {
             ['Total Payment', `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(totalPayment)}`],
             ['Total Interest', `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(totalInterest)}`],
         );
-        autoTable(doc, {
+        (doc as any).autoTable({
             startY: 50,
             head: [['Loan Summary', '']],
             body: summaryBodyData,
@@ -222,7 +229,7 @@ export function LoanCalculator() {
             item.totalPayment.replace(/[^\d.-]/g, ''),
             item.remainingBalance.replace(/[^\d.-]/g, ''),
         ]);
-        autoTable(doc, {
+        (doc as any).autoTable({
             head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
             body: scheduleBodyData,
             theme: 'grid',
@@ -236,17 +243,16 @@ export function LoanCalculator() {
             const { width, height } = doc.internal.pageSize;
             doc.saveGraphicsState();
             doc.setGState(new (doc as any).GState({ opacity: 0.08 }));
-            doc.setFontSize(50).setTextColor(150);
             
             // Text watermark
+            doc.setFontSize(50).setTextColor(150);
             doc.text(siteTitle, width / 2, height / 2, { align: 'center', angle: 45 });
             
-            // Image watermark if logo exists
+            // Image watermark
             if (logoBase64) {
-                 const logoDim = 50; // size of the logo in the watermark
-                 doc.addImage(logoBase64, 'PNG', (width - logoDim) / 2, (height - logoDim) / 2, logoDim, logoDim, undefined, 'NONE', 45);
+                 const logoDim = 50;
+                 doc.addImage(logoBase64, 'PNG', (width / 2), (height / 2) - (logoDim / 2), logoDim, logoDim, undefined, 'NONE', 45);
             }
-
             doc.restoreGraphicsState();
         }
 
@@ -266,14 +272,14 @@ export function LoanCalculator() {
   const getShareSummary = () => {
       if (!payment || !totalPayment || !totalInterest) return '';
       return `*Loan Summary for ${loanType}*\n\n` +
-      `- *Loan Amount:* ${formatCurrency(parseFloat(loanAmount), currency)}\n` +
-      (gstAmount && gstAmount > 0 ? `- *GST Amount:* ${formatCurrency(gstAmount, currency)}\n` : '') +
-      (gstAmount && gstAmount > 0 ? `- *Total Loan:* ${formatCurrency(parseFloat(loanAmount) + gstAmount, currency)}\n` : '') +
+      `- *Loan Amount:* ${formatCurrency(parseFloat(loanAmount))}\n` +
+      (gstAmount && gstAmount > 0 ? `- *GST Amount:* ${formatCurrency(gstAmount)}\n` : '') +
+      (gstAmount && gstAmount > 0 ? `- *Total Loan:* ${formatCurrency(parseFloat(loanAmount) + gstAmount)}\n` : '') +
       `- *Interest Rate:* ${interestRate}%\n` +
       `- *Loan Term:* ${loanTerm} ${termUnit}\n` +
-      `- *EMI:* ${formatCurrency(payment, currency)} / ${frequency}\n` +
-      `- *Total Payment:* ${formatCurrency(totalPayment, currency)}\n` +
-      `- *Total Interest:* ${formatCurrency(totalInterest, currency)}\n\n` +
+      `- *EMI:* ${formatCurrency(payment)} / ${frequency}\n` +
+      `- *Total Payment:* ${formatCurrency(totalPayment)}\n` +
+      `- *Total Interest:* ${formatCurrency(totalInterest)}\n\n` +
       `_Calculated with ToolifyAI Loan Calculator_`;
   };
 
@@ -396,15 +402,15 @@ export function LoanCalculator() {
             <div className="space-y-2">
                 <div className="p-2 bg-muted rounded-lg text-center">
                   <p className="text-sm text-muted-foreground capitalize">{frequency} Payment</p>
-                  <p className="text-xl font-bold text-primary">{formatCurrency(payment, currency)}</p>
+                  <p className="text-xl font-bold text-primary">{formatCurrency(payment)}</p>
                 </div>
                  <div className="p-2 bg-muted rounded-lg text-center">
                    <p className="text-sm text-muted-foreground">Total Payment</p>
-                  <p className="text-xl font-bold">{formatCurrency(totalPayment, currency)}</p>
+                  <p className="text-xl font-bold">{formatCurrency(totalPayment)}</p>
                 </div>
                  <div className="p-2 bg-muted rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">Total Interest</p>
-                  <p className="text-xl font-bold">{formatCurrency(totalInterest, currency)}</p>
+                  <p className="text-xl font-bold">{formatCurrency(totalInterest)}</p>
                 </div>
             </div>
              <Card>
@@ -422,13 +428,13 @@ export function LoanCalculator() {
                                 cx="50%"
                                 cy="50%"
                                 outerRadius={60}
-                                label={(props) => formatCurrency(props.value, currency)}
+                                label={(props) => formatCurrency(props.value)}
                             >
                                 {pieChartData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
-                            <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
+                            <Tooltip formatter={(value: number) => formatCurrency(value)} />
                             <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{paddingTop: '20px'}}/>
                         </PieChart>
                     </ResponsiveContainer>
