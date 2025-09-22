@@ -108,9 +108,9 @@ export function CurrencyConverter() {
        
       <div className="grid grid-cols-[1fr,auto,1fr] items-center gap-4">
         <div className="space-y-2">
-          <Label htmlFor="from-currency">From</Label>
+          <Label>From</Label>
           <Select value={fromCurrency} onValueChange={setFromCurrency}>
-            <SelectTrigger id="from-currency"><SelectValue/></SelectTrigger>
+            <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
                 {currencies.map(c => <SelectItem key={c.code} value={c.code}>{c.code} - {c.name}</SelectItem>)}
             </SelectContent>
@@ -120,9 +120,9 @@ export function CurrencyConverter() {
           <ArrowRightLeft className="h-4 w-4" />
         </Button>
         <div className="space-y-2">
-          <Label htmlFor="to-currency">To</Label>
+          <Label>To</Label>
           <Select value={toCurrency} onValueChange={setToCurrency}>
-            <SelectTrigger id="to-currency"><SelectValue/></SelectTrigger>
+            <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
                  {currencies.map(c => <SelectItem key={c.code} value={c.code}>{c.code} - {c.name}</SelectItem>)}
             </SelectContent>

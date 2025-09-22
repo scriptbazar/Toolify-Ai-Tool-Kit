@@ -1,5 +1,4 @@
 
-
 export const countries = [
   { name: 'Afghanistan', dial_code: '+93', code: 'AF', flag: '🇦🇫' },
   { name: 'Aland Islands', dial_code: '+358', code: 'AX', flag: '🇦🇽' },
