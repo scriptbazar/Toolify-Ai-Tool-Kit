@@ -129,6 +129,29 @@ const generateSlug = (name: string) => {
     return name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 };
 
+/**
+ * Seeds the initial tools into the database if the collection is empty.
+ */
+export async function seedInitialTools() {
+    const adminDb = getAdminDb();
+    const toolsCollection = adminDb.collection(TOOLS_COLLECTION);
+    const snapshot = await toolsCollection.limit(1).get();
+
+    if (snapshot.empty) {
+        console.log("Seeding initial tools into the database...");
+        const batch = adminDb.batch();
+        initialTools.forEach(tool => {
+            const slug = generateSlug(tool.name);
+            const docRef = toolsCollection.doc(slug);
+            batch.set(docRef, { ...tool, slug, createdAt: FieldValue.serverTimestamp() });
+        });
+        await batch.commit();
+        console.log(`${initialTools.length} tools seeded successfully.`);
+        return true;
+    }
+    return false;
+}
+
 interface GetToolsOptions {
   query?: string;
   category?: string;
@@ -169,6 +192,16 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
         }
         
         const snapshot = await queryRef.get();
+        
+        // If snapshot is empty, try seeding the database.
+        if (snapshot.empty) {
+            const seeded = await seedInitialTools();
+            if (seeded) {
+                // If seeded, re-fetch the data.
+                return await getTools(options);
+            }
+        }
+
 
         let tools: Tool[] = [];
         snapshot.docs.forEach(doc => {
@@ -467,3 +500,4 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
