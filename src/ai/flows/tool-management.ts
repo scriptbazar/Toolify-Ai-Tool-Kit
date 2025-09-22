@@ -109,7 +109,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'SHA256 Hash Generator', description: 'Generate a secure SHA-256 hash for any text string, commonly used for data integrity checks.', icon: 'Hash', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter any text or string into the input box.', 'The tool will automatically generate the corresponding SHA-256 hash.', 'Copy the generated hash.'] },
     { name: 'Universal Hash Generator', description: 'Generate various types of cryptographic hashes for your text, including MD5, SHA1, SHA512, and more.', icon: 'Hash', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the text you want to hash.', 'Select the desired hashing algorithm (MD5, SHA1, etc.).', 'The generated hash will be displayed for you to copy.'] },
     { name: 'AES Encryption & Decryption', description: 'Encrypt and decrypt your files using the Advanced Encryption Standard (AES) for maximum security.', icon: 'Key', category: 'dev', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload the file you want to process.', 'Choose whether to encrypt or decrypt.', 'Enter your secret password.', 'Download the processed file.'] },
-    { name: 'Universal File Converter', description: 'Convert between various data formats like JSON, CSV, XML, and YAML. Upload a file or paste text to convert it to your desired format.', icon: 'FileCog', category: 'dev', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Select the input and output data formats.', 'Paste your data into the input text area.', 'Click the "Convert" button.', 'Your converted data will appear in the output area, ready to be copied.'] },
     { name: 'Image Shape Converter', description: 'Convert your images into various creative shapes like circles, stars, hearts, and more.', icon: 'Shapes', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your image.', 'Select the desired shape (e.g., Circle, Heart, Star).', 'The tool will crop your image into that shape with a transparent background.', 'Download the resulting PNG image.'] },
     { name: 'Morse to Text Translator', description: 'Translate Morse code signals (dots and dashes) into plain, readable text.', icon: 'MessageSquare', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your Morse code into the input box, using dots (.) and dashes (-).', 'The translated text will appear in the output box automatically.'] },
     { name: 'Text to Morse Code', description: 'Translate plain text into universally recognized Morse code signals.', icon: 'MessageSquare', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your text in the input box.', 'The corresponding Morse code will be generated in the output box automatically.'] },
@@ -453,8 +452,6 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
     
 
-
-
     
 
     
@@ -502,4 +499,3 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
-

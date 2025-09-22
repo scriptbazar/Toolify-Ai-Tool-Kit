@@ -118,7 +118,6 @@ export { ThreadsVideoDownloader } from './ThreadsVideoDownloader';
 export { TimeZoneConverter } from './TimeZoneConverter';
 export { TitleTagChecker } from './TitleTagChecker';
 export { UnixTimestampConverter } from './UnixTimestampConverter';
-export { UniversalFileConverter } from './UniversalFileConverter';
 export { UniversalHashGenerator } from './UniversalHashGenerator';
 export { UnlockPdf } from './UnlockPdf';
 export { UuidGenerator } from './UuidGenerator';

@@ -115,7 +115,6 @@ import { ThreadsVideoDownloader } from './ThreadsVideoDownloader';
 import { TimeZoneConverter } from './TimeZoneConverter';
 import { TitleTagChecker } from './TitleTagChecker';
 import { UnixTimestampConverter } from './UnixTimestampConverter';
-import { UniversalFileConverter } from './UniversalFileConverter';
 import { UniversalHashGenerator } from './UniversalHashGenerator';
 import { UnlockPdf } from './UnlockPdf';
 import { UuidGenerator } from './UuidGenerator';
@@ -252,7 +251,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'time-zone-converter': TimeZoneConverter,
   'title-tag-checker': TitleTagChecker,
   'unix-timestamp-converter': UnixTimestampConverter,
-  'universal-file-converter': UniversalFileConverter,
   'universal-hash-generator': UniversalHashGenerator,
   'unlock-pdf': UnlockPdf,
   'uuid-generator': UuidGenerator,
