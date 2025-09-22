@@ -11,13 +11,13 @@ export default async function ToolsDashboardPage({
 }: {
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  const searchQuery = typeof searchParams?.q === 'string' ? searchParams.q : '';
-  const activeCategory = typeof searchParams?.category === 'string' ? searchParams.category as ToolCategory : 'all';
+  const searchQuery = searchParams?.q ?? '';
+  const activeCategory = searchParams?.category ?? 'all';
 
   // Fetch only the tools that match the search criteria from the server
   const filteredTools = await getTools({
-    query: searchQuery,
-    category: activeCategory,
+    query: searchQuery as string,
+    category: activeCategory as ToolCategory,
   });
 
   // This is for the filter component to show counts for all visible tools.
@@ -53,4 +53,3 @@ export default async function ToolsDashboardPage({
     
 
     
-
