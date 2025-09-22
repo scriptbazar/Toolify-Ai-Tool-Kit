@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -100,21 +101,7 @@ export function UniversalFileConverter() {
     setOutputText('');
   }
 
-  const isConversionSupported = conversionType === 'json-csv' || conversionType === 'csv-json';
-
   const [fromFormat, toFormat] = conversionType.split('-');
-
-  const renderComingSoon = () => (
-    <Card className="flex flex-col items-center justify-center min-h-[300px] bg-muted/50">
-      <CardContent className="text-center">
-        <Construction className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold text-muted-foreground">Conversion Coming Soon!</h3>
-        <p className="text-sm text-muted-foreground mt-2">
-          This conversion type is under development.
-        </p>
-      </CardContent>
-    </Card>
-  );
 
   return (
     <div className="space-y-6">
@@ -130,38 +117,34 @@ export function UniversalFileConverter() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={handleConvert} disabled={!isConversionSupported} className="self-end w-full">Convert</Button>
+        <Button onClick={handleConvert} className="self-end w-full">Convert</Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <div className="space-y-2">
           <Label htmlFor="input-text">Input ({fromFormat.toUpperCase()})</Label>
-          {isConversionSupported ? (
-            <Textarea
-              id="input-text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder={`Paste your ${fromFormat.toUpperCase()} data here...`}
-              className="min-h-[300px] font-mono"
-            />
-          ) : renderComingSoon()}
+          <Textarea
+            id="input-text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder={`Paste your ${fromFormat.toUpperCase()} data here...`}
+            className="min-h-[300px] font-mono"
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="output-text">Output ({toFormat.toUpperCase()})</Label>
-          {isConversionSupported ? (
-            <Textarea
-              id="output-text"
-              value={outputText}
-              readOnly
-              placeholder={`Converted ${toFormat.toUpperCase()} will appear here...`}
-              className="min-h-[300px] font-mono bg-muted"
-            />
-          ) : renderComingSoon()}
+          <Textarea
+            id="output-text"
+            value={outputText}
+            readOnly
+            placeholder={`Converted ${toFormat.toUpperCase()} will appear here...`}
+            className="min-h-[300px] font-mono bg-muted"
+          />
         </div>
       </div>
       
        <div className="flex flex-col sm:flex-row gap-2">
-        <Button variant="outline" onClick={handleCopy} disabled={!outputText || !isConversionSupported} className="w-full">
+        <Button variant="outline" onClick={handleCopy} disabled={!outputText} className="w-full">
             <Copy className="mr-2 h-4 w-4" />
             Copy Result
         </Button>
