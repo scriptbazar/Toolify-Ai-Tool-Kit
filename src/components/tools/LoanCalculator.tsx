@@ -14,6 +14,7 @@ import { getSettings } from '@/ai/flows/settings-management';
 import { useToast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { jsPDF } from 'jspdf';
+import { applyPlugin } from 'jspdf-autotable';
 
 
 interface ScheduleItem {
@@ -50,6 +51,19 @@ export function LoanCalculator() {
       'AUD': 'A$',
       'CAD': 'C$',
   };
+  
+  const formatCurrency = (value: number | undefined | null, currencyCode: string) => {
+    if (value === null || value === undefined || isNaN(value)) return 'N/A';
+    const symbol = currencySymbols[currencyCode] || '$';
+    return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+  }
+  
+  const formatCurrencyForPdf = (value: number | undefined | null, currencyCode: string) => {
+    if (value === null || value === undefined || isNaN(value)) return 'N/A';
+    const symbol = currencySymbols[currencyCode] || '$';
+    // Always use en-US for PDF to avoid locale-specific issues like the '1' character.
+    return `${symbol}${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
 
   const calculateLoan = () => {
     const principal = parseFloat(loanAmount);
@@ -106,7 +120,6 @@ export function LoanCalculator() {
       setTotalPayment(totalPaid);
       setTotalInterest(interestPaid);
       
-      // Generate EMI Schedule
       let remainingBalance = totalPrincipal;
       const newSchedule: ScheduleItem[] = [];
       for(let i = 1; i <= Math.ceil(numberOfPayments); i++) {
@@ -126,14 +139,7 @@ export function LoanCalculator() {
     }
   };
   
-  const formatCurrency = (value: number, currencyCode: string) => {
-    if (isNaN(value)) return '';
-    const symbol = currencySymbols[currencyCode] || '$';
-    // Use en-US locale to avoid unwanted characters like the apostrophe from en-IN for lakhs.
-    return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
-  }
-  
-    const handleClear = () => {
+  const handleClear = () => {
         setLoanAmount('100000');
         setGstRate('');
         setInterestRate('5');
@@ -148,10 +154,10 @@ export function LoanCalculator() {
   const handleDownloadPdf = async () => {
     if (!payment || !totalPayment || !totalInterest || schedule.length === 0) return;
     
-    // Dynamically import libraries
     const { default: jsPDF } = await import('jspdf');
-    const { default: autoTable } = await import('jspdf-autotable');
-    
+    const autoTable = (await import('jspdf-autotable')).default;
+    applyPlugin(jsPDF); // Apply autotable plugin
+
     try {
         const settings = await getSettings();
         const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
@@ -159,50 +165,27 @@ export function LoanCalculator() {
         
         const doc = new jsPDF();
         
-        const pageCount = (doc as any).internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-             if (i === 1) {
-                if (logoUrl) {
-                    try {
-                        const response = await fetch(logoUrl);
-                        const blob = await response.blob();
-                        const reader = new FileReader();
-                        const dataUrl = await new Promise<string>((resolve, reject) => {
-                            reader.onloadend = () => resolve(reader.result as string);
-                            reader.onerror = reject;
-                            reader.readAsDataURL(blob);
-                        });
-                        doc.addImage(dataUrl, 'PNG', 15, 15, 20, 20);
-                    } catch(e) { console.error("Could not add logo to PDF header", e); }
-                }
-                doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, 40, 22);
-             }
-        }
-        
-        doc.setPage(1);
-
-        const bodyData = [
+        const summaryBodyData = [
             ['Loan Type', loanType],
-            ['Loan Amount', formatCurrency(parseFloat(loanAmount), currency)],
+            ['Loan Amount', formatCurrencyForPdf(parseFloat(loanAmount), currency)],
         ];
 
         if (gstAmount !== null && gstAmount > 0) {
-            bodyData.push(['GST Amount', formatCurrency(gstAmount, currency)]);
-            bodyData.push(['Total Loan Amount (with GST)', formatCurrency(parseFloat(loanAmount) + gstAmount, currency)]);
+            summaryBodyData.push(['GST Amount', formatCurrencyForPdf(gstAmount, currency)]);
+            summaryBodyData.push(['Total Loan Amount (with GST)', formatCurrencyForPdf(parseFloat(loanAmount) + gstAmount, currency)]);
         }
 
-        bodyData.push(
+        summaryBodyData.push(
             ['Interest Rate', `${interestRate}% per annum`],
             ['Loan Term', `${loanTerm} ${termUnit}`],
-            [`${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Payment`, formatCurrency(payment, currency)],
-            ['Total Payment', formatCurrency(totalPayment, currency)],
-            ['Total Interest', formatCurrency(totalInterest, currency)],
+            [`${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Payment`, formatCurrencyForPdf(payment, currency)],
+            ['Total Payment', formatCurrencyForPdf(totalPayment, currency)],
+            ['Total Interest', formatCurrencyForPdf(totalInterest, currency)],
         );
 
         autoTable(doc, {
             startY: 40,
-            body: bodyData,
+            body: summaryBodyData,
             theme: 'striped',
             styles: { fontSize: 10 },
             head: [['Loan Summary', '']],
@@ -210,35 +193,52 @@ export function LoanCalculator() {
             columnStyles: { 0: { fontStyle: 'bold' } },
         });
 
+        const scheduleBodyData = schedule.map(item => [item.month, item.principal, item.interest, item.totalPayment, item.remainingBalance]);
+
         autoTable(doc, {
           startY: (doc as any).autoTable.previous.finalY + 10,
           head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
-          body: schedule.map(item => [item.month, item.principal, item.interest, item.totalPayment, item.remainingBalance]),
+          body: scheduleBodyData,
           theme: 'grid',
           headStyles: { fillColor: [76, 35, 137] },
         });
-
-        // --- Add Watermark on all pages ---
+        
         const totalPages = (doc as any).internal.getNumberOfPages();
+        let logoImage: string | null = null;
+        if (logoUrl) {
+          try {
+            const response = await fetch(logoUrl);
+            const blob = await response.blob();
+            const reader = new FileReader();
+            logoImage = await new Promise<string>((resolve, reject) => {
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+          } catch(e) {
+            console.error("Could not fetch or process logo for PDF.", e);
+          }
+        }
+        
         for (let i = 1; i <= totalPages; i++) {
             doc.setPage(i);
-            doc.setFontSize(50).setTextColor(230, 230, 230);
-            doc.setGState(new (doc as any).GState({opacity: 0.1}));
-            doc.text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
-             if (logoUrl) {
-                try {
-                    const response = await fetch(logoUrl);
-                    const blob = await response.blob();
-                    const reader = new FileReader();
-                    const dataUrl = await new Promise<string>((resolve, reject) => {
-                        reader.onloadend = () => resolve(reader.result as string);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
-                    doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
-                } catch(e) { console.error("Could not add image watermark", e); }
+            
+            // Header on first page only
+            if (i === 1) {
+                doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, logoImage ? 40 : 15, 22);
+                if (logoImage) {
+                   doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
+                }
             }
-             doc.setGState(new (doc as any).GState({opacity: 1}));
+
+            // Watermark on all pages
+            doc.setFontSize(50).setTextColor(230, 230, 230);
+            doc.setGState(new (doc as any).GState({opacity: 0.08})); // Adjusted Opacity
+            doc.text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
+            if (logoImage) {
+              doc.addImage(logoImage, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
+            }
+            doc.setGState(new (doc as any).GState({opacity: 1})); // Reset GState
         }
         
         doc.save(`emi-schedule-${loanAmount}.pdf`);
@@ -390,11 +390,11 @@ export function LoanCalculator() {
                 </div>
                  <div className="p-2 bg-muted rounded-lg text-center">
                    <p className="text-sm text-muted-foreground">Total Payment</p>
-                  <p className="text-xl font-bold">{formatCurrency(totalPayment!, currency)}</p>
+                  <p className="text-xl font-bold">{formatCurrency(totalPayment, currency)}</p>
                 </div>
                  <div className="p-2 bg-muted rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">Total Interest</p>
-                  <p className="text-xl font-bold">{formatCurrency(totalInterest!, currency)}</p>
+                  <p className="text-xl font-bold">{formatCurrency(totalInterest, currency)}</p>
                 </div>
             </div>
              <Card>
@@ -412,7 +412,7 @@ export function LoanCalculator() {
                                 cx="50%"
                                 cy="50%"
                                 outerRadius={60}
-                                label={(props) => formatCurrency(props.payload.value, currency)}
+                                label={(props) => formatCurrency(props.value, currency)}
                             >
                                 {pieChartData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -461,7 +461,7 @@ export function LoanCalculator() {
                 </ScrollArea>
             </CardContent>
             <CardFooter className="flex-col sm:flex-row justify-end gap-2">
-                <Button variant="outline" onClick={handleShareOnWhatsApp}>
+                 <Button variant="outline" onClick={handleShareOnWhatsApp}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="mr-2 h-4 w-4">
                         <path d="M12.04 2C6.58 2 2.13 6.45 2.13 12c0 1.74.45 3.39 1.22 4.84l-1.18 4.34 4.45-1.16c1.4.74 3 .12 4.58.12h.01c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zM12.04 3.67c4.54 0 8.24 3.7 8.24 8.24 0 4.54-3.7 8.24-8.24 8.24h-.01c-1.48 0-2.92-.39-4.18-1.11l-.3-.17-3.11.81.83-3.04-.19-.32a8.24 8.24 0 0 1-1.26-4.39c0-4.54 3.7-8.24 8.24-8.24zm3.53 10.19c-.17-.08-1-.49-1.15-.55-.16-.06-.27-.08-.39.08s-.44.55-.54.66c-.1.11-.2.13-.37.04s-1.15-.42-2.19-1.34c-.81-.72-1.36-1.61-1.52-1.88-.16-.27-.02-.42.07-.54.08-.11.17-.27.26-.4.1-.13.13-.22.2-.36.06-.15.03-.27-.01-.36-.05-.08-1-2.4-1.37-3.29-.36-.85-.73-.73-.99-.74h-.27c-.22 0-.58.08-.89.36s-1.04 1.01-1.04 2.47c0 1.46 1.06 2.87 1.21 3.07.16.21 2.07 3.16 5.02 4.43.7.3 1.25.48 1.68.61.69.21 1.32.18 1.82.11.55-.07 1.66-.68 1.9-1.33.23-.65.23-1.21.16-1.33-.07-.12-.25-.2-.42-.28z"/>
                     </svg>
