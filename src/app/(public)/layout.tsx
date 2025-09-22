@@ -4,6 +4,7 @@ import Footer from '@/components/common/Footer';
 import Header from '@/components/common/Header';
 import { AdBlockerDetector } from '@/components/common/AdBlockerDetector';
 import { DynamicChatWidget } from '@/components/common/DynamicChatWidget';
+import { DevelopmentNoticeDialog } from '@/components/common/DevelopmentNoticeDialog';
 
 
 export default function PublicLayout({
@@ -18,6 +19,7 @@ export default function PublicLayout({
       <DynamicChatWidget />
       <Footer />
       <AdBlockerDetector />
+      <DevelopmentNoticeDialog />
     </div>
   );
 }
