@@ -11,8 +11,8 @@ export default async function ToolsDashboardPage({
 }: {
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  const searchQuery = searchParams?.q as string || '';
-  const activeCategory = (searchParams?.category as ToolCategory) || 'all';
+  const searchQuery = typeof searchParams?.q === 'string' ? searchParams.q : '';
+  const activeCategory = typeof searchParams?.category === 'string' ? searchParams.category as ToolCategory : 'all';
 
   // Fetch only the tools that match the search criteria from the server
   const filteredTools = await getTools({
