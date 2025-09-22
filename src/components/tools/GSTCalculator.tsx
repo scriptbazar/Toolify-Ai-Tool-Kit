@@ -169,10 +169,11 @@ export function GSTCalculator() {
   
     const pieChartData = result ? [
         { name: 'Base Amount', value: result.baseAmount },
-        { name: 'Total GST', value: result.gstAmount },
+        { name: 'CGST', value: result.cgstAmount },
+        { name: 'SGST', value: result.sgstAmount },
     ] : [];
 
-    const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))'];
+    const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))'];
 
   return (
     <div className="space-y-6">
@@ -269,14 +270,15 @@ export function GSTCalculator() {
                             cx="50%"
                             cy="50%"
                             outerRadius={80}
-                            label={(props) => formatCurrency(props.value)}
+                            label={(props) => `${((props.percent || 0) * 100).toFixed(0)}%`}
+                            labelLine={false}
                         >
                             {pieChartData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
                         <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                        <Legend />
+                        <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{paddingTop: '20px'}}/>
                     </PieChart>
                 </ResponsiveContainer>
             </div>
@@ -300,5 +302,3 @@ export function GSTCalculator() {
     </div>
   );
 }
-
-    
