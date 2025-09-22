@@ -80,10 +80,6 @@ export function UniversalFileConverter() {
         }
         result = JSON.stringify(data, null, 2);
       }
-      else {
-        toast({ title: 'Conversion Not Supported', description: `Conversion from ${fromFormat.toUpperCase()} to ${toFormat.toUpperCase()} is not yet available.`, variant: 'default' });
-        return;
-      }
       setOutputText(result);
     } catch (error: any) {
       toast({ title: 'Conversion Error', description: error.message || 'Please check your input data and format.', variant: 'destructive' });
