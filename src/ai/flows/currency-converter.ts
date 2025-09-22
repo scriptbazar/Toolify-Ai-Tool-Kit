@@ -20,10 +20,7 @@ const ExchangeRateResponseSchema = z.object({
 export const getExchangeRates = cache(async (): Promise<Record<string, number>> => {
   try {
     // Using a free, no-key-required API for this example.
-    const response = await fetch('https://v6.exchangerate-api.com/v6/e5f52f3a5281ded108e45f13/latest/USD', {
-      // Revalidate every hour to get fresh-enough rates without hitting rate limits.
-      next: { revalidate: 3600 },
-    });
+    const response = await fetch('https://v6.exchangerate-api.com/v6/e5f52f3a5281ded108e45f13/latest/USD');
 
     if (!response.ok) {
       throw new Error(`Failed to fetch exchange rates. Status: ${response.status}`);
