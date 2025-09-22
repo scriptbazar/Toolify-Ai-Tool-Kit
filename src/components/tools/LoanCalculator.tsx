@@ -160,8 +160,8 @@ export function LoanCalculator() {
         const logoUrl = settings.general?.logoUrl;
         
         const sparklesSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 4.8-4.8 1.9 4.8 1.9L12 21l1.9-4.8 4.8-1.9-4.8-1.9L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`;
-
         let logoBase64: string | null = null;
+
         if (logoUrl) {
             try {
                 const response = await fetch(logoUrl);
@@ -177,7 +177,7 @@ export function LoanCalculator() {
                 toast({ title: "Logo Warning", description: "Could not load the site logo for the PDF. Using default.", variant: "default" });
             }
         }
-
+        
         const doc = new jsPDF();
         
         // ---- HEADER (Page 1 only) ----
@@ -211,7 +211,7 @@ export function LoanCalculator() {
             ['Total Interest', `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(totalInterest)}`],
         );
         (doc as any).autoTable({
-            startY: 40,
+            startY: 35,
             head: [['Loan Summary', '']],
             body: summaryBodyData,
             theme: 'striped',
