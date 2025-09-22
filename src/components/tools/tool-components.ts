@@ -293,5 +293,3 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'youtube-video-title-extractor': dynamic(() => import('@/components/tools/YouTubeVideoTitleExtractor').then(mod => mod.YouTubeVideoTitleExtractor), { loading: () => <LoadingComponent /> }),
   'youtube-video-downloader': dynamic(() => import('@/components/tools/YoutubeVideoDownloader').then(mod => mod.YoutubeVideoDownloader), { loading: () => <LoadingComponent /> }),
 };
-
-    
