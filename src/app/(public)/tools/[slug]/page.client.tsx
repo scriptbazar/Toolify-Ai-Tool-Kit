@@ -135,7 +135,6 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'sha256-hash-generator': dynamic(() => import('@/components/tools/Sha256HashGenerator').then(mod => mod.Sha256HashGenerator), { loading: () => <LoadingComponent /> }),
   'universal-hash-generator': dynamic(() => import('@/components/tools/UniversalHashGenerator').then(mod => mod.UniversalHashGenerator), { loading: () => <LoadingComponent /> }),
   'aes-encryption-and-decryption': dynamic(() => import('@/components/tools/AesEncryptionDecryption').then(mod => mod.AesEncryptionDecryption), { loading: () => <LoadingComponent /> }),
-  'universal-file-converter': dynamic(() => import('@/components/tools/UniversalFileConverter').then(mod => mod.UniversalFileConverter), { loading: () => <LoadingComponent /> }),
   'image-shape-converter': dynamic(() => import('@/components/tools/ImageShapeConverter').then(mod => mod.ImageShapeConverter), { loading: () => <LoadingComponent /> }),
   'morse-to-text-translator': dynamic(() => import('@/components/tools/MorseToTextTranslator').then(mod => mod.MorseToTextTranslator), { loading: () => <LoadingComponent /> }),
   'text-to-morse-code': dynamic(() => import('@/components/tools/TextToMorseCode').then(mod => mod.TextToMorseCode), { loading: () => <LoadingComponent /> }),
