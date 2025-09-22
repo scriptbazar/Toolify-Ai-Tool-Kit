@@ -67,7 +67,11 @@ export function WebsiteScreenshot() {
         
     } catch (error: any) {
         console.error("Screenshot error:", error);
-        toast({ title: 'Error', description: error.message || 'An unknown error occurred.', variant: 'destructive'});
+        if (typeof error.message === 'string' && error.message.includes('Quota exceeded')) {
+             toast({ title: 'Daily Limit Reached', description: 'The screenshot service has reached its daily usage limit. Please try again tomorrow.', variant: 'destructive'});
+        } else {
+            toast({ title: 'Error', description: error.message || 'An unknown error occurred.', variant: 'destructive'});
+        }
     } finally {
         setIsLoading(false);
     }
