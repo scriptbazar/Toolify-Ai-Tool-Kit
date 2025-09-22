@@ -123,6 +123,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'AI SEO Keyword Generator', description: 'Get a comprehensive list of primary, secondary, and long-tail keywords for any topic to boost your search engine ranking.', icon: 'Key', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Enter your main topic or keyword.', 'Optionally, specify your target audience.', 'Click "Generate Keywords".', 'The AI will provide lists of primary, secondary, and long-tail keywords.'] },
     { name: 'Case Converter', description: 'Easily convert text between different letter cases like uppercase, lowercase, title case, and more with a single click.', icon: 'CaseSensitive', category: 'text', plan: 'Free', isNew: false, status: 'Active', howToUse: ['Paste your text into the input field.', 'Click on the desired case conversion button (e.g., UPPERCASE).', 'The text will be instantly converted in the same box.'] },
     { name: 'Loan Calculator', description: 'Calculate your loan payments, total interest, and amortization schedule for various loan types.', icon: 'Landmark', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Enter your loan amount, interest rate, and term.', 'Optionally, add GST and select payment frequency.', 'Click "Calculate" to see your EMI and a full breakdown.', 'Download your amortization schedule as a PDF.'] },
+    { name: 'XML Sitemap Generator', description: 'Create an XML sitemap for your website to help search engines crawl and index your pages efficiently.', icon: 'FileCode', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Enter your website\'s base URL.', 'Click "Generate Sitemap".', 'The tool will create a basic XML sitemap including your homepage.', 'You can copy the generated XML or download it as a sitemap.xml file.'] },
 ];
 
 const generateSlug = (name: string) => {
@@ -500,4 +501,3 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
-
