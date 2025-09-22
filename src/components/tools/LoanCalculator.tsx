@@ -145,8 +145,9 @@ export function LoanCalculator() {
   const handleDownloadPdf = async () => {
     if (!payment || !totalPayment || !totalInterest || schedule.length === 0) return;
     
+    // Dynamically import libraries
     const { default: jsPDF } = await import('jspdf');
-    const { default: autoTable } = (await import('jspdf-autotable')).default;
+    const { default: autoTable } = await import('jspdf-autotable');
     
     try {
         const settings = await getSettings();
@@ -155,11 +156,12 @@ export function LoanCalculator() {
         
         const doc = new jsPDF();
         
-        const addWatermarkAndHeaders = async (isFirstPage: boolean) => {
-            if (isFirstPage) {
-                // Header on first page only
-                doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, 15, 22);
-                if (logoUrl) {
+        const addWatermark = async () => {
+            const pageCount = doc.internal.pages.length - 1;
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(50).setTextColor(230, 230, 230).text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
+                 if (logoUrl) {
                     try {
                         const response = await fetch(logoUrl);
                         const blob = await response.blob();
@@ -169,13 +171,17 @@ export function LoanCalculator() {
                             reader.onerror = reject;
                             reader.readAsDataURL(blob);
                         });
-                        doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() - 35, 15, 20, 20);
-                    } catch(e) { console.error("Could not add logo to PDF header", e); }
+                        doc.setGState(new (doc as any).GState({opacity: 0.1}));
+                        doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
+                        doc.setGState(new (doc as any).GState({opacity: 1}));
+                    } catch(e) { console.error("Could not add image watermark", e); }
                 }
             }
+        };
 
-            // Watermark on all pages
-            doc.setFontSize(50).setTextColor(230, 230, 230).text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
+        const addHeader = async () => {
+             // Header on first page only
+            doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, 15, 22);
             if (logoUrl) {
                 try {
                     const response = await fetch(logoUrl);
@@ -186,12 +192,12 @@ export function LoanCalculator() {
                         reader.onerror = reject;
                         reader.readAsDataURL(blob);
                     });
-                    doc.setGState(new (doc as any).GState({opacity: 0.1}));
-                    doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
-                    doc.setGState(new (doc as any).GState({opacity: 1}));
-                } catch(e) { console.error("Could not add image watermark", e); }
+                    doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() - 35, 15, 20, 20);
+                } catch(e) { console.error("Could not add logo to PDF header", e); }
             }
-        };
+        }
+
+        await addHeader();
 
         const bodyData = [
             ['Loan Type', loanType],
@@ -219,18 +225,17 @@ export function LoanCalculator() {
             head: [['Loan Summary', '']],
             headStyles: { fillColor: [76, 35, 137] },
             columnStyles: { 0: { fontStyle: 'bold' } },
-            didDrawPage: (data) => addWatermarkAndHeaders(data.pageNumber === 1)
         });
 
         autoTable(doc, {
           startY: (doc as any).autoTable.previous.finalY + 10,
           head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
-          body: schedule.map(item => [item.month, item.principal.replace(/[^\d.-]/g, ''), item.interest.replace(/[^\d.-]/g, ''), item.totalPayment.replace(/[^\d.-]/g, ''), item.remainingBalance.replace(/[^\d.-]/g, '')]),
+          body: schedule.map(item => [item.month, item.principal, item.interest, item.totalPayment, item.remainingBalance]),
           theme: 'grid',
           headStyles: { fillColor: [76, 35, 137] },
-          didDrawPage: (data) => addWatermarkAndHeaders(false) // Not first page for subsequent pages
         });
         
+        await addWatermark();
         doc.save(`emi-schedule-${loanAmount}.pdf`);
 
     } catch (error) {
@@ -475,4 +480,3 @@ export function LoanCalculator() {
     </div>
   );
 }
-
