@@ -10,7 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 
 interface BrowserInfo {
-    ip: string;
+    ipv4: string;
+    ipv6: string;
     userAgent: string;
     browserName: string;
     browserVersion: string;
@@ -27,60 +28,54 @@ export function WhatIsMyBrowser() {
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
 
-    const getBrowserInfo = () => {
-        const ua = navigator.userAgent;
-        let browserName = "Unknown";
-        let browserVersion = "Unknown";
-        let os = "Unknown";
-
-        // OS Detection
-        if (ua.indexOf("Win") != -1) os = "Windows";
-        if (ua.indexOf("Mac") != -1) os = "macOS";
-        if (ua.indexOf("Linux") != -1) os = "Linux";
-        if (ua.indexOf("Android") != -1) os = "Android";
-        if (ua.indexOf("like Mac") != -1) os = "iOS";
-        
-        // Browser Detection
-        let match;
-        if ((match = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i)) || []) {
-             if (/trident/i.test(match[1])) {
-                const tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
-                browserName = "IE";
-                browserVersion = tem[1] || "";
-            } else if (match[1] === 'Chrome') {
-                const tem = ua.match(/\b(OPR|Edg)\/(\d+)/);
-                if (tem != null) {
-                    const parts = tem.slice(1);
-                    browserName = parts[0].replace('OPR', 'Opera').replace('Edg', 'Edge');
-                    browserVersion = parts[1];
-                } else {
-                     browserName = match[1];
-                     browserVersion = match[2];
-                }
-            } else {
-                match = match[2] ? [match[1], match[2]] : [navigator.appName, navigator.appVersion, '-?'];
-                if ((browserVersion = ua.match(/version\/(\d+)/i)) != null) {
-                    match.splice(1, 1, browserVersion[1]);
-                }
-                browserName = match[0];
-                browserVersion = match[1];
-            }
-        }
-        
-        return { browserName, browserVersion, os };
-    };
-
     const fetchBrowserInfo = async () => {
         setLoading(true);
         try {
-            const ipResponse = await fetch('https://api.ipify.org?format=json');
-            if (!ipResponse.ok) throw new Error('Could not fetch IP address.');
-            const ipData = await ipResponse.json();
-            
-            const { browserName, browserVersion, os } = getBrowserInfo();
+            // Fetch IPv4 and IPv6 in parallel
+            const [ipv4Res, ipv6Res] = await Promise.all([
+                fetch('https://api.ipify.org?format=json').catch(() => null),
+                fetch('https://api64.ipify.org?format=json').catch(() => null)
+            ]);
+
+            const ipv4 = ipv4Res && ipv4Res.ok ? (await ipv4Res.json()).ip : 'Not available';
+            const ipv6 = ipv6Res && ipv6Res.ok ? (await ipv6Res.json()).ip : 'Not available';
+
+            const ua = navigator.userAgent;
+            let browserName = "Unknown";
+            let browserVersion = "Unknown";
+            let os = "Unknown";
+
+            // OS Detection
+            if (ua.includes("Win")) os = "Windows";
+            else if (ua.includes("Mac")) os = "macOS";
+            else if (ua.includes("Linux")) os = "Linux";
+            else if (ua.includes("Android")) os = "Android";
+            else if (ua.includes("like Mac")) os = "iOS";
+
+            // Browser Detection
+            let match;
+            if ((match = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i))) {
+                if (/trident/i.test(match[1])) {
+                    browserName = "Internet Explorer";
+                    browserVersion = ua.match(/\brv[ :]+(\d+)/g)?.[0].substring(3) || "Unknown";
+                } else if (match[1] === 'Chrome') {
+                    const edgeMatch = ua.match(/\b(Edg|Edge)\/(\d+)/);
+                    if (edgeMatch) {
+                        browserName = "Edge";
+                        browserVersion = edgeMatch[2];
+                    } else {
+                        browserName = match[1];
+                        browserVersion = match[2];
+                    }
+                } else {
+                    browserName = match[1];
+                    browserVersion = match[2];
+                }
+            }
 
             setBrowserInfo({
-                ip: ipData.ip,
+                ipv4,
+                ipv6,
                 userAgent: navigator.userAgent,
                 browserName,
                 browserVersion,
@@ -113,7 +108,8 @@ export function WhatIsMyBrowser() {
     };
 
     const infoRows = [
-        { label: 'Your IP Address', value: browserInfo?.ip, icon: Network },
+        { label: 'IPv4 Address', value: browserInfo?.ipv4, icon: Network },
+        { label: 'IPv6 Address', value: browserInfo?.ipv6, icon: Network },
         { label: 'Browser Name', value: browserInfo?.browserName, icon: Globe },
         { label: 'Browser Version', value: browserInfo?.browserVersion, icon: Hash },
         { label: 'Operating System', value: browserInfo?.os, icon: Laptop },
@@ -133,7 +129,7 @@ export function WhatIsMyBrowser() {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        {[...Array(9)].map((_, i) => (
+                        {[...Array(10)].map((_, i) => (
                              <div key={i} className="flex justify-between">
                                 <Skeleton className="h-6 w-1/4" />
                                 <Skeleton className="h-6 w-1/2" />
