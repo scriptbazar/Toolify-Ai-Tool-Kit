@@ -1,102 +1,180 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, FileImage } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import Image from 'next/image';
+import { ArrowRightLeft, Copy, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent } from '../ui/card';
+import { Construction } from 'lucide-react';
 
-type ImageFormat = 'png' | 'jpeg' | 'webp' | 'gif';
+type DataFormat = 'json' | 'csv' | 'xml' | 'yaml';
 
 export function UniversalFileConverter() {
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [targetFormat, setTargetFormat] = useState<ImageFormat>('png');
+  const [fromFormat, setFromFormat] = useState<DataFormat>('json');
+  const [toFormat, setToFormat] = useState<DataFormat>('csv');
+  const [inputText, setInputText] = useState('');
+  const [outputText, setOutputText] = useState('');
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    } else if (file) {
-      toast({ title: "Invalid File", description: "Please upload a valid image file.", variant: "destructive" });
-    }
-  };
 
   const handleConvert = () => {
-    if (!imagePreview) {
-        toast({ title: "No image uploaded", variant: "destructive" });
-        return;
-    };
-    
-    const img = document.createElement('img');
-    img.src = imagePreview;
-    img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+    if (!inputText.trim()) {
+      toast({ title: 'Input is empty', description: 'Please enter data to convert.', variant: 'destructive' });
+      return;
+    }
 
-        // For formats that don't support transparency like JPEG, fill with white.
-        if (targetFormat === 'jpeg') {
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    try {
+      let result = '';
+      // JSON to CSV
+      if (fromFormat === 'json' && toFormat === 'csv') {
+        const data = JSON.parse(inputText);
+        if (!Array.isArray(data)) throw new Error('Input for JSON to CSV must be an array of objects.');
+        
+        const headers = Object.keys(data[0]);
+        const csvRows = [headers.join(',')];
+        
+        for (const row of data) {
+          const values = headers.map(header => {
+            const escaped = ('' + row[header]).replace(/"/g, '""');
+            return `"${escaped}"`;
+          });
+          csvRows.push(values.join(','));
         }
+        result = csvRows.join('\n');
+      } 
+      // CSV to JSON
+      else if (fromFormat === 'csv' && toFormat === 'json') {
+        const lines = inputText.trim().split('\n');
+        const headers = lines[0].split(',').map(h => h.trim());
+        const data = [];
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].split(',').map(v => v.trim());
+          const obj: { [key: string]: string } = {};
+          headers.forEach((header, index) => {
+            obj[header] = values[index];
+          });
+          data.push(obj);
+        }
+        result = JSON.stringify(data, null, 2);
+      }
+      // Other conversions are not supported yet
+      else {
+        toast({ title: 'Conversion Not Supported', description: `Conversion from ${fromFormat.toUpperCase()} to ${toFormat.toUpperCase()} is not yet available.`, variant: 'default' });
+        return;
+      }
 
-        ctx.drawImage(img, 0, 0);
+      setOutputText(result);
 
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL(`image/${targetFormat}`);
-        const originalName = imageFile?.name.split('.')[0] || 'converted';
-        link.download = `${originalName}.${targetFormat}`;
-        link.click();
-        toast({ title: `Converted to ${targetFormat.toUpperCase()} and downloaded!` });
+    } catch (error: any) {
+      toast({ title: 'Conversion Error', description: error.message || 'Please check your input data and format.', variant: 'destructive' });
     }
   };
+
+  const handleSwap = () => {
+    const tempFormat = fromFormat;
+    setFromFormat(toFormat);
+    setToFormat(tempFormat);
+    setInputText(outputText);
+    setOutputText(inputText);
+  };
+  
+  const handleCopy = () => {
+    if (!outputText) return;
+    navigator.clipboard.writeText(outputText);
+    toast({ title: 'Copied to clipboard!' });
+  };
+  
+  const handleClear = () => {
+    setInputText('');
+    setOutputText('');
+  }
+
+  const renderComingSoon = () => (
+    <Card className="flex flex-col items-center justify-center min-h-[300px] bg-muted/50">
+      <CardContent className="text-center">
+        <Construction className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold text-muted-foreground">Conversion Coming Soon!</h3>
+        <p className="text-sm text-muted-foreground mt-2">
+          This conversion type is under development.
+        </p>
+      </CardContent>
+    </Card>
+  );
+
+  const isConversionSupported = (fromFormat === 'json' && toFormat === 'csv') || (fromFormat === 'csv' && toFormat === 'json');
 
   return (
     <div className="space-y-6">
-      <div 
-        className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-        {imagePreview ? (
-            <Image src={imagePreview} alt="Preview" layout="fill" objectFit="contain" className="p-2" />
-        ) : (
-             <div className="flex flex-col items-center">
-              <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">Click or drag image to upload</p>
-            </div>
-        )}
+      <div className="grid grid-cols-[1fr,auto,1fr] items-center gap-4">
+        <div className="space-y-2">
+          <Label>From</Label>
+          <Select value={fromFormat} onValueChange={(val) => setFromFormat(val as DataFormat)}>
+            <SelectTrigger><SelectValue/></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="json">JSON</SelectItem>
+              <SelectItem value="csv">CSV</SelectItem>
+              <SelectItem value="xml">XML</SelectItem>
+              <SelectItem value="yaml">YAML</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button variant="outline" size="icon" onClick={handleSwap} className="mt-6"><ArrowRightLeft className="h-4 w-4" /></Button>
+        <div className="space-y-2">
+          <Label>To</Label>
+          <Select value={toFormat} onValueChange={(val) => setToFormat(val as DataFormat)}>
+            <SelectTrigger><SelectValue/></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="json">JSON</SelectItem>
+              <SelectItem value="csv">CSV</SelectItem>
+              <SelectItem value="xml">XML</SelectItem>
+              <SelectItem value="yaml">YAML</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-                <Label htmlFor="target-format">Convert To:</Label>
-                <Select value={targetFormat} onValueChange={(val) => setTargetFormat(val as ImageFormat)}>
-                    <SelectTrigger id="target-format">
-                        <SelectValue placeholder="Select format" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="png">PNG</SelectItem>
-                        <SelectItem value="jpeg">JPEG</SelectItem>
-                        <SelectItem value="webp">WEBP</SelectItem>
-                        <SelectItem value="gif">GIF</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-       </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="space-y-2">
+          <Label htmlFor="input-text">Input</Label>
+          {isConversionSupported ? (
+            <Textarea
+              id="input-text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder={`Paste your ${fromFormat.toUpperCase()} data here...`}
+              className="min-h-[300px] font-mono"
+            />
+          ) : renderComingSoon()}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="output-text">Output</Label>
+          {isConversionSupported ? (
+            <Textarea
+              id="output-text"
+              value={outputText}
+              readOnly
+              placeholder={`Converted ${toFormat.toUpperCase()} will appear here...`}
+              className="min-h-[300px] font-mono bg-muted"
+            />
+          ) : renderComingSoon()}
+        </div>
+      </div>
       
-      <Button onClick={handleConvert} disabled={!imageFile} className="w-full">
-        <Download className="mr-2 h-4 w-4" /> Convert & Download
-      </Button>
+       <div className="flex flex-col sm:flex-row gap-2">
+         <Button onClick={handleConvert} disabled={!isConversionSupported} className="w-full">Convert</Button>
+        <Button variant="outline" onClick={handleCopy} disabled={!outputText} className="w-full">
+            <Copy className="mr-2 h-4 w-4" />
+            Copy Result
+        </Button>
+        <Button variant="destructive" onClick={handleClear} disabled={!inputText && !outputText} className="w-full">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Clear
+        </Button>
+      </div>
+
     </div>
   );
 }
