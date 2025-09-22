@@ -14,7 +14,7 @@ import { getSettings } from '@/ai/flows/settings-management';
 import { useToast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 interface ScheduleItem {
     month: number;
@@ -22,13 +22,6 @@ interface ScheduleItem {
     interest: string;
     totalPayment: string;
     remainingBalance: string;
-}
-
-// Extend the jsPDF interface to include autoTable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
 }
 
 export function LoanCalculator() {
@@ -170,7 +163,6 @@ export function LoanCalculator() {
         // ---- HEADER (Page 1 only) ----
         if (logoUrl) {
             try {
-                // Fetch and convert image to data URL to embed in PDF
                 const response = await fetch(logoUrl);
                 const blob = await response.blob();
                 const logoImage = await new Promise<string>((resolve, reject) => {
@@ -205,7 +197,7 @@ export function LoanCalculator() {
             ['Total Payment', formatCurrency(totalPayment, currency)],
             ['Total Interest', formatCurrency(totalInterest, currency)],
         );
-        doc.autoTable({
+        autoTable(doc, {
             startY: 50,
             head: [['Loan Summary', '']],
             body: summaryBodyData,
@@ -222,7 +214,7 @@ export function LoanCalculator() {
             item.totalPayment.replace(/[^\d.-]/g, ''),
             item.remainingBalance.replace(/[^\d.-]/g, ''),
         ]);
-        doc.autoTable({
+        autoTable(doc, {
             head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
             body: scheduleBodyData,
             theme: 'grid',
@@ -230,12 +222,12 @@ export function LoanCalculator() {
         });
         
         // ---- WATERMARK (All pages) ----
-        const pageCount = doc.internal.getNumberOfPages();
+        const pageCount = (doc as any).internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
             const { width, height } = doc.internal.pageSize;
             doc.saveGraphicsState();
-            doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
+            doc.setGState(new (doc as any).GState({ opacity: 0.08 }));
             doc.setFontSize(50).setTextColor(150);
             doc.text(siteTitle, width / 2, height / 2, { align: 'center', angle: -45 });
             doc.restoreGraphicsState();
