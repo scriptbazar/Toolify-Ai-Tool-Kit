@@ -309,7 +309,7 @@ export async function getFavoriteTools(userId: string): Promise<Tool[]> {
     const userDocRef = adminDb.collection('users').doc(userId);
     const userDocSnap = await userDocRef.get();
 
-    if (!userDocSnap.exists()) {
+    if (!userDocSnap.exists) {
       return [];
     }
 
