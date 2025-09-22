@@ -14,6 +14,7 @@ const thumbnailQualities = [
     { name: 'Max Resolution', res: 'maxresdefault.jpg', size: '1280x720' },
     { name: 'Standard Definition', res: 'sddefault.jpg', size: '640x480' },
     { name: 'High Quality', res: 'hqdefault.jpg', size: '480x360' },
+    { name: 'Player Background', res: '0.jpg', size: '480x360' },
     { name: 'Medium Quality', res: 'mqdefault.jpg', size: '320x180' },
     { name: 'Default', res: 'default.jpg', size: '120x90' },
 ];
