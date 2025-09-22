@@ -8,30 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowRightLeft, Copy, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent } from '../ui/card';
-import { Construction } from 'lucide-react';
 
 type ConversionType = 
-  | 'json-csv' | 'csv-json'
-  | 'yaml-json' | 'yaml-csv'
-  | 'csv-yaml' | 'json-yaml'
-  | 'json-xml' | 'csv-xml'
-  | 'yaml-xml' | 'xml-json'
-  | 'xml-yaml' | 'xml-csv';
+  | 'json-csv' | 'csv-json';
 
 const conversionOptions: { value: ConversionType; label: string }[] = [
     { value: 'json-csv', label: 'JSON to CSV' },
     { value: 'csv-json', label: 'CSV to JSON' },
-    { value: 'yaml-json', label: 'YAML to JSON' },
-    { value: 'yaml-csv', label: 'YAML to CSV' },
-    { value: 'csv-yaml', label: 'CSV to YAML' },
-    { value: 'json-yaml', label: 'JSON to YAML' },
-    { value: 'json-xml', label: 'JSON to XML' },
-    { value: 'csv-xml', label: 'CSV to XML' },
-    { value: 'yaml-xml', label: 'YAML to XML' },
-    { value: 'xml-json', label: 'XML to JSON' },
-    { value: 'xml-yaml', label: 'XML to YAML' },
-    { value: 'xml-csv', label: 'XML to CSV' },
 ];
 
 export function UniversalFileConverter() {
@@ -52,7 +35,7 @@ export function UniversalFileConverter() {
       
       if (fromFormat === 'json' && toFormat === 'csv') {
         const data = JSON.parse(inputText);
-        if (!Array.isArray(data)) throw new Error('Input for JSON to CSV must be an array of objects.');
+        if (!Array.isArray(data) || data.length === 0) throw new Error('Input for JSON to CSV must be an array of objects.');
         
         const headers = Object.keys(data[0]);
         const csvRows = [headers.join(',')];
@@ -68,6 +51,8 @@ export function UniversalFileConverter() {
       } 
       else if (fromFormat === 'csv' && toFormat === 'json') {
         const lines = inputText.trim().split('\n');
+        if (lines.length === 0) throw new Error('CSV input cannot be empty.');
+
         const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
         const data = [];
         for (let i = 1; i < lines.length; i++) {
