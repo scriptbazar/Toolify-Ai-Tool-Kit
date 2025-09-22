@@ -40,7 +40,6 @@ import { FuelCostCalculator } from './FuelCostCalculator';
 import { GoogleDriveDirectLinkGenerator } from './GoogleDriveDirectLinkGenerator';
 import { GpaCalculator } from './GpaCalculator';
 import { GpaToCgpaCalculator } from './GpaToCgpaCalculator';
-import { GpaToPercentageConverter } from './GpaToPercentageConverter';
 import { GSTCalculator } from './GSTCalculator';
 import { HtmlMinifier } from './HtmlMinifier';
 import { IcoConverter } from './IcoConverter';
@@ -186,7 +185,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'google-drive-direct-link-generator': dynamic(() => import('@/components/tools/GoogleDriveDirectLinkGenerator').then(mod => mod.GoogleDriveDirectLinkGenerator), { loading: () => <LoadingComponent /> }),
   'gpa-calculator': dynamic(() => import('@/components/tools/GpaCalculator').then(mod => mod.GpaCalculator), { loading: () => <LoadingComponent /> }),
   'gpa-to-cgpa-calculator': dynamic(() => import('@/components/tools/GpaToCgpaCalculator').then(mod => mod.GpaToCgpaCalculator), { loading: () => <LoadingComponent /> }),
-  'gpa-to-percentage-converter': dynamic(() => import('@/components/tools/GpaToPercentageConverter').then(mod => mod.GpaToPercentageConverter), { loading: () => <LoadingComponent /> }),
   'gst-calculator': dynamic(() => import('@/components/tools/GSTCalculator').then(mod => mod.GSTCalculator), { loading: () => <LoadingComponent /> }),
   'html-minifier': dynamic(() => import('@/components/tools/HtmlMinifier').then(mod => mod.HtmlMinifier), { loading: () => <LoadingComponent /> }),
   'ico-converter': dynamic(() => import('@/components/tools/IcoConverter').then(mod => mod.IcoConverter), { loading: () => <LoadingComponent /> }),
