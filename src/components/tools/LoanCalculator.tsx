@@ -55,13 +55,13 @@ export function LoanCalculator() {
   const formatCurrency = (value: number | undefined | null, currencyCode: string) => {
     if (value === null || value === undefined || isNaN(value)) return 'N/A';
     const symbol = currencySymbols[currencyCode] || '$';
-    return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+    return `${symbol}${new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
   }
   
   const formatCurrencyForPdf = (value: number | undefined | null, currencyCode: string) => {
     if (value === null || value === undefined || isNaN(value)) return 'N/A';
     const symbol = currencySymbols[currencyCode] || '$';
-    // Always use en-US for PDF to avoid locale-specific issues like the '1' character.
+    // Explicitly use en-US to avoid locale issues like the apostrophe in Indian currency formatting in PDF.
     return `${symbol}${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
@@ -156,7 +156,7 @@ export function LoanCalculator() {
     
     const { default: jsPDF } = await import('jspdf');
     const autoTable = (await import('jspdf-autotable')).default;
-    applyPlugin(jsPDF); // Apply autotable plugin
+    applyPlugin(jsPDF);
 
     try {
         const settings = await getSettings();
@@ -183,26 +183,14 @@ export function LoanCalculator() {
             ['Total Interest', formatCurrencyForPdf(totalInterest, currency)],
         );
 
-        autoTable(doc, {
-            startY: 40,
-            body: summaryBodyData,
-            theme: 'striped',
-            styles: { fontSize: 10 },
-            head: [['Loan Summary', '']],
-            headStyles: { fillColor: [76, 35, 137] },
-            columnStyles: { 0: { fontStyle: 'bold' } },
-        });
+        const scheduleBodyData = schedule.map(item => [
+            item.month, 
+            item.principal, 
+            item.interest, 
+            item.totalPayment, 
+            item.remainingBalance
+        ].map(val => String(val).replace(/₹/g, 'Rs.'))); // Replace symbol for PDF compatibility if needed.
 
-        const scheduleBodyData = schedule.map(item => [item.month, item.principal, item.interest, item.totalPayment, item.remainingBalance]);
-
-        autoTable(doc, {
-          startY: (doc as any).autoTable.previous.finalY + 10,
-          head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
-          body: scheduleBodyData,
-          theme: 'grid',
-          headStyles: { fillColor: [76, 35, 137] },
-        });
-        
         const totalPages = (doc as any).internal.getNumberOfPages();
         let logoImage: string | null = null;
         if (logoUrl) {
@@ -220,25 +208,43 @@ export function LoanCalculator() {
           }
         }
         
+        // Header on first page only
+        if (logoImage) {
+            doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
+        }
+        doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, logoImage ? 40 : 15, 22);
+
+
+        autoTable(doc, {
+            startY: 40,
+            body: summaryBodyData,
+            theme: 'striped',
+            styles: { fontSize: 10 },
+            head: [['Loan Summary', '']],
+            headStyles: { fillColor: [76, 35, 137] },
+            columnStyles: { 0: { fontStyle: 'bold' } },
+        });
+
+        autoTable(doc, {
+          startY: (doc as any).autoTable.previous.finalY + 10,
+          head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
+          body: scheduleBodyData,
+          theme: 'grid',
+          headStyles: { fillColor: [76, 35, 137] },
+        });
+        
+        
         for (let i = 1; i <= totalPages; i++) {
             doc.setPage(i);
             
-            // Header on first page only
-            if (i === 1) {
-                doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, logoImage ? 40 : 15, 22);
-                if (logoImage) {
-                   doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
-                }
-            }
-
             // Watermark on all pages
             doc.setFontSize(50).setTextColor(230, 230, 230);
-            doc.setGState(new (doc as any).GState({opacity: 0.08})); // Adjusted Opacity
-            doc.text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
+            doc.setGState(new (doc as any).GState({opacity: 0.08}));
             if (logoImage) {
               doc.addImage(logoImage, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
             }
-            doc.setGState(new (doc as any).GState({opacity: 1})); // Reset GState
+            doc.text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
+            doc.setGState(new (doc as any).GState({opacity: 1}));
         }
         
         doc.save(`emi-schedule-${loanAmount}.pdf`);
@@ -485,3 +491,5 @@ export function LoanCalculator() {
     </div>
   );
 }
+
+    
