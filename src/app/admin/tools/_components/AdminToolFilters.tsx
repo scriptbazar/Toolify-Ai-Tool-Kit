@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
@@ -58,7 +59,7 @@ export function AdminToolFilters({ allTools }: AdminToolFiltersProps) {
   };
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-     router.push(`/admin/tools?${createQueryString({ q: e.target.value, page: null })}`);
+     router.replace(`/admin/tools?${createQueryString({ q: e.target.value, page: null })}`);
   };
   
   const counts = useMemo(() => ({
