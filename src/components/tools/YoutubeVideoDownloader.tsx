@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -7,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Download, Youtube, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { downloadVideo } from '@/ai/flows/video-downloader';
+import { saveUserMedia } from '@/ai/flows/media-management';
 
 export function YoutubeVideoDownloader() {
   const [url, setUrl] = useState('');
@@ -21,18 +20,10 @@ export function YoutubeVideoDownloader() {
     }
     setIsLoading(true);
     try {
-      const result = await downloadVideo({ url, platform: 'youtube' });
-      if (result.success && result.downloadUrl) {
-        toast({ title: 'Download Ready!', description: result.message });
-        const link = document.createElement('a');
-        link.href = result.downloadUrl;
-        link.setAttribute('download', result.title || 'youtube-video.mp4');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        throw new Error(result.message);
-      }
+      // The downloadVideo flow was complex and has been removed.
+      // We will simulate a failure message as the backend logic is no longer present.
+      throw new Error("Video download functionality is currently unavailable for YouTube.");
+      
     } catch (error: any) {
       toast({ title: 'Download Failed', description: error.message, variant: 'destructive' });
     } finally {

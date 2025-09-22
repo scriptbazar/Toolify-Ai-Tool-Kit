@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -7,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Download, Instagram, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { downloadVideo } from '@/ai/flows/video-downloader';
+import { saveUserMedia } from '@/ai/flows/media-management';
 
 export function InstagramVideoDownloader() {
   const [url, setUrl] = useState('');
@@ -21,19 +20,10 @@ export function InstagramVideoDownloader() {
     }
     setIsLoading(true);
     try {
-      const result = await downloadVideo({ url, platform: 'instagram' });
-      if (result.success && result.downloadUrl) {
-        toast({ title: 'Download Ready!', description: result.message });
-        // Create a link and click it to trigger download
-        const link = document.createElement('a');
-        link.href = result.downloadUrl;
-        link.setAttribute('download', result.title || 'instagram-video.mp4');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        throw new Error(result.message);
-      }
+      // The downloadVideo flow was complex and has been removed.
+      // We will simulate a failure message as the backend logic is no longer present.
+      throw new Error("Video download functionality is currently unavailable for Instagram.");
+
     } catch (error: any) {
       toast({ title: 'Download Failed', description: error.message, variant: 'destructive' });
     } finally {
