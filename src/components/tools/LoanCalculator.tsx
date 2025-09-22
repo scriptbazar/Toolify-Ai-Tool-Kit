@@ -13,8 +13,8 @@ import { ScrollArea } from '../ui/scroll-area';
 import { getSettings } from '@/ai/flows/settings-management';
 import { useToast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import type { jsPDF } from 'jspdf';
-import { applyPlugin } from 'jspdf-autotable';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 
 interface ScheduleItem {
@@ -54,12 +54,13 @@ export function LoanCalculator() {
   
   const formatCurrency = (value: number | undefined | null, currencyCode: string) => {
     if (value === null || value === undefined || isNaN(value)) return 'N/A';
-    return new Intl.NumberFormat('en-US', {
+    // Always use en-US for consistent formatting without strange prefixes.
+    return value.toLocaleString('en-US', {
         style: 'currency',
         currency: currencyCode,
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-    }).format(value);
+    });
   }
   
   const calculateLoan = () => {
@@ -151,10 +152,6 @@ export function LoanCalculator() {
  const handleDownloadPdf = async () => {
     if (!payment || !totalPayment || !totalInterest || schedule.length === 0) return;
     
-    const { default: jsPDF } = await import('jspdf');
-    const { applyPlugin } = await import('jspdf-autotable');
-    applyPlugin(jsPDF);
-
     try {
         const settings = await getSettings();
         const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
@@ -182,10 +179,10 @@ export function LoanCalculator() {
         
         const scheduleBodyData = schedule.map(item => [
             item.month,
-            item.principal.replace(/[₹$€£¥A-Z\s,]/g, ''),
-            item.interest.replace(/[₹$€£¥A-Z\s,]/g, ''),
-            item.totalPayment.replace(/[₹$€£¥A-Z\s,]/g, ''),
-            item.remainingBalance.replace(/[₹$€£¥A-Z\s,]/g, '')
+            item.principal.replace(/[^\d.-]/g, ''),
+            item.interest.replace(/[^\d.-]/g, ''),
+            item.totalPayment.replace(/[^\d.-]/g, ''),
+            item.remainingBalance.replace(/[^\d.-]/g, '')
         ]);
 
         let logoImage: string | null = null;
@@ -232,11 +229,13 @@ export function LoanCalculator() {
             doc.saveGraphicsState();
             doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
             
-            if (logoImage) doc.addImage(logoImage, 'PNG', width / 2 - 25, height / 2 - 25, 50, 50);
+            const rotationAngle = -45;
+            doc.translate(width / 2, height / 2);
+            doc.rotate(rotationAngle);
+            
+            if (logoImage) doc.addImage(logoImage, 'PNG', -25, -25, 50, 50);
             
             doc.setFontSize(50).setTextColor(150);
-            doc.translate(width / 2, height / 2);
-            doc.rotate(-45);
             doc.text(siteTitle, 0, 0, { align: 'center' });
             
             doc.restoreGraphicsState();
@@ -410,7 +409,7 @@ export function LoanCalculator() {
                                 cx="50%"
                                 cy="50%"
                                 outerRadius={60}
-                                label={(props) => formatCurrency(props.value, currency)}
+                                label={(props) => formatCurrency(props.payload.value, currency)}
                             >
                                 {pieChartData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
