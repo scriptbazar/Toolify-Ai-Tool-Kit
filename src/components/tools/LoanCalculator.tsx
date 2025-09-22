@@ -61,7 +61,6 @@ export function LoanCalculator() {
   const formatCurrencyForPdf = (value: number | undefined | null, currencyCode: string) => {
     if (value === null || value === undefined || isNaN(value)) return 'N/A';
     const symbol = currencySymbols[currencyCode] || '$';
-    // Explicitly use en-US to avoid locale issues like the apostrophe in Indian currency formatting in PDF.
     return `${symbol}${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
@@ -165,6 +164,7 @@ export function LoanCalculator() {
         
         const doc = new jsPDF();
         
+        // --- DATA PREPARATION ---
         const summaryBodyData = [
             ['Loan Type', loanType],
             ['Loan Amount', formatCurrencyForPdf(parseFloat(loanAmount), currency)],
@@ -182,41 +182,41 @@ export function LoanCalculator() {
             ['Total Payment', formatCurrencyForPdf(totalPayment, currency)],
             ['Total Interest', formatCurrencyForPdf(totalInterest, currency)],
         );
-
+        
         const scheduleBodyData = schedule.map(item => [
-            item.month, 
-            item.principal, 
-            item.interest, 
-            item.totalPayment, 
-            item.remainingBalance
-        ].map(val => String(val).replace(/₹/g, 'Rs.'))); // Replace symbol for PDF compatibility if needed.
+            item.month,
+            item.principal.replace(/₹/g, 'Rs.'),
+            item.interest.replace(/₹/g, 'Rs.'),
+            item.totalPayment.replace(/₹/g, 'Rs.'),
+            item.remainingBalance.replace(/₹/g, 'Rs.')
+        ]);
 
-        const totalPages = (doc as any).internal.getNumberOfPages();
         let logoImage: string | null = null;
         if (logoUrl) {
-          try {
-            const response = await fetch(logoUrl);
-            const blob = await response.blob();
-            const reader = new FileReader();
-            logoImage = await new Promise<string>((resolve, reject) => {
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(blob);
-            });
-          } catch(e) {
-            console.error("Could not fetch or process logo for PDF.", e);
-          }
+            try {
+                const response = await fetch(logoUrl);
+                const blob = await response.blob();
+                logoImage = await new Promise<string>((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result as string);
+                  reader.onerror = reject;
+                  reader.readAsDataURL(blob);
+                });
+            } catch (e) {
+                console.error("Could not fetch or process logo for PDF.", e);
+            }
         }
+        
+        // --- PDF GENERATION ---
         
         // Header on first page only
         if (logoImage) {
             doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
         }
-        doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, logoImage ? 40 : 15, 22);
-
+        doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, logoImage ? 40 : 15, 28);
 
         autoTable(doc, {
-            startY: 40,
+            startY: 45,
             body: summaryBodyData,
             theme: 'striped',
             styles: { fontSize: 10 },
@@ -232,21 +232,20 @@ export function LoanCalculator() {
           theme: 'grid',
           headStyles: { fillColor: [76, 35, 137] },
         });
-        
-        
+
+        // Watermark on ALL pages
+        const totalPages = (doc as any).internal.getNumberOfPages();
         for (let i = 1; i <= totalPages; i++) {
             doc.setPage(i);
-            
-            // Watermark on all pages
             doc.setFontSize(50).setTextColor(230, 230, 230);
-            doc.setGState(new (doc as any).GState({opacity: 0.08}));
+            doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
             if (logoImage) {
               doc.addImage(logoImage, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
             }
-            doc.text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
-            doc.setGState(new (doc as any).GState({opacity: 1}));
+            doc.text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2 + 35, { align: 'center' });
+            doc.setGState(new (doc as any).GState({ opacity: 1 }));
         }
-        
+
         doc.save(`emi-schedule-${loanAmount}.pdf`);
 
     } catch (error) {
@@ -258,6 +257,7 @@ export function LoanCalculator() {
         });
     }
   };
+
 
   const getShareSummary = () => {
       if (!payment || !totalPayment || !totalInterest) return '';
@@ -491,5 +491,3 @@ export function LoanCalculator() {
     </div>
   );
 }
-
-    
