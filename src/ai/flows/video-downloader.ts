@@ -9,15 +9,17 @@ import { z } from 'zod';
 
 const VideoDownloaderInputSchema = z.object({
   url: z.string().url('Please enter a valid URL.'),
-  platform: z.enum(['youtube', 'x', 'instagram', 'threads', 'linkedin', 'pinterest']),
 });
 export type VideoDownloaderInput = z.infer<typeof VideoDownloaderInputSchema>;
 
 const VideoDownloaderOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-  downloadUrl: z.string().url().optional(),
+  status: z.string(),
+  text: z.string(),
+  url: z.string().optional(),
   title: z.string().optional(),
+  picker: z.array(z.any()).optional(),
+  audio: z.string().optional(),
+  streamUrl: z.string().optional(),
 });
 export type VideoDownloaderOutput = z.infer<typeof VideoDownloaderOutputSchema>;
 
@@ -55,26 +57,31 @@ const videoDownloaderFlow = ai.defineFlow(
 
         const result = await response.json();
         
-        if (result.status === 'error' || !result.url) {
+        if (result.status === 'error') {
             return {
-                success: false,
-                message: result.text || 'Could not find a downloadable video at this URL.',
+                status: 'error',
+                text: result.text || 'Could not find a downloadable video at this URL.',
             };
         }
-
+        
+        // The Cobalt API response can vary, so we'll return the whole thing
         return {
-            success: true,
-            message: 'Your video is ready for download!',
-            downloadUrl: result.url,
-            title: result.picker?.find((p: any) => p.type === 'video')?.filename || 'video.mp4',
+            status: result.status,
+            text: result.text || 'Success',
+            url: result.url,
+            title: result.title,
+            picker: result.picker,
+            audio: result.audio,
+            streamUrl: result.stream,
         };
 
     } catch (error: any) {
         console.error("Video Downloader Error:", error);
         return {
-            success: false,
-            message: error.message || 'An unknown error occurred while processing the video.',
+            status: 'error',
+            text: error.message || 'An unknown error occurred while processing the video.',
         };
     }
   }
 );
+

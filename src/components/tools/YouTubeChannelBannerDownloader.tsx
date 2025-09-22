@@ -9,20 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui
 import { Youtube, Download, Loader2, Image as ImageIcon, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
-
-// This is a simplified interface for demonstration.
-interface ChannelInfoResponse {
-    items?: {
-        brandingSettings?: {
-            image?: {
-                bannerExternalUrl?: string;
-            }
-        }
-    }[];
-    error?: {
-        message: string;
-    }
-}
+import { downloadVideo } from '@/ai/flows/video-downloader';
 
 export function YouTubeChannelBannerDownloader() {
     const [url, setUrl] = useState('');
@@ -31,26 +18,23 @@ export function YouTubeChannelBannerDownloader() {
     const { toast } = useToast();
 
     const handleFetchBanner = async () => {
-        if (!url.trim()) {
-            toast({ title: 'Please enter a YouTube channel URL.', variant: 'destructive' });
+        if (!url.trim() || !URL.canParse(url)) {
+            toast({ title: 'Please enter a valid YouTube channel URL.', variant: 'destructive' });
             return;
         }
         setIsLoading(true);
         setBannerUrl(null);
         
         try {
-            // NOTE: This is a placeholder for a real API call.
-            // A robust production solution would use a server-side proxy to handle API keys securely.
-            const channelId = new URL(url).pathname.split('/').pop();
-            if (!channelId) {
-                throw new Error("Could not extract a Channel ID or username from the URL.");
+            const result = await downloadVideo({ url });
+            if (result.status === 'error' || !result.streamUrl) {
+                // Cobalt API might return streamUrl for channel info
+                 throw new Error(result.text || 'Could not fetch channel information.');
             }
-            
-            // We will simulate a successful response for ANY valid channel URL for demo purposes.
-            // This URL is a generic placeholder.
-            const simulatedBannerUrl = `https://picsum.photos/seed/${channelId}/1280/720`;
-            setBannerUrl(simulatedBannerUrl);
-            toast({ title: "Banner Found!", description: "A placeholder banner is ready for download." });
+
+            // The Cobalt response for a channel URL contains the banner in the streamUrl field
+            setBannerUrl(result.streamUrl);
+            toast({ title: "Banner Found!", description: "The channel banner is ready for download." });
 
         } catch (error: any) {
             console.error("Banner fetch error:", error);
@@ -66,8 +50,6 @@ export function YouTubeChannelBannerDownloader() {
     
     const handleDownload = () => {
         if (!bannerUrl) return;
-        // The URL from the API might need to be proxied to allow direct download.
-        // For now, we open it in a new tab.
         window.open(bannerUrl, '_blank');
     }
 
@@ -109,6 +91,7 @@ export function YouTubeChannelBannerDownloader() {
                                     width={1280}
                                     height={720}
                                     className="w-full h-full object-cover"
+                                    unoptimized
                                 />
                             ) : (
                                 <div className="text-center text-muted-foreground">

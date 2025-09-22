@@ -9,22 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui
 import { Youtube, Download, Loader2, Image as ImageIcon, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
-
-// This is a simplified interface for demonstration.
-interface ChannelInfoResponse {
-    items?: {
-        snippet?: {
-            thumbnails?: {
-                high?: {
-                    url?: string;
-                }
-            }
-        }
-    }[];
-    error?: {
-        message: string;
-    }
-}
+import { downloadVideo } from '@/ai/flows/video-downloader';
 
 export function YouTubeChannelLogoDownloader() {
     const [url, setUrl] = useState('');
@@ -33,26 +18,23 @@ export function YouTubeChannelLogoDownloader() {
     const { toast } = useToast();
 
     const handleFetchLogo = async () => {
-        if (!url.trim()) {
-            toast({ title: 'Please enter a YouTube channel URL.', variant: 'destructive' });
+        if (!url.trim() || !URL.canParse(url)) {
+            toast({ title: 'Please enter a valid YouTube channel URL.', variant: 'destructive' });
             return;
         }
         setIsLoading(true);
         setLogoUrl(null);
         
         try {
-            // NOTE: This is a placeholder for a real API call.
-            // A robust production solution would use a server-side proxy to handle API keys securely.
-            const channelId = new URL(url).pathname.split('/').pop();
-            if (!channelId) {
-                throw new Error("Could not extract a Channel ID or username from the URL.");
+            const result = await downloadVideo({ url });
+            if (result.status === 'error' || !result.audio) {
+                // Cobalt API might return audio for the channel logo URL
+                 throw new Error(result.text || 'Could not fetch channel information.');
             }
-            
-            // We will simulate a successful response for ANY valid channel URL for demo purposes.
-            // This URL is a generic placeholder that generates an image based on the channel ID.
-            const simulatedLogoUrl = `https://i.pravatar.cc/300?u=${channelId}`;
-            setLogoUrl(simulatedLogoUrl);
-            toast({ title: "Logo Found!", description: "A placeholder logo is ready for download." });
+
+            // The Cobalt response for a channel URL contains the logo in the 'audio' field
+            setLogoUrl(result.audio);
+            toast({ title: "Logo Found!", description: "The channel logo is ready for download." });
 
         } catch (error: any) {
             console.error("Logo fetch error:", error);
@@ -68,8 +50,6 @@ export function YouTubeChannelLogoDownloader() {
     
     const handleDownload = () => {
         if (!logoUrl) return;
-        // The URL from the API might need to be proxied to allow direct download.
-        // For now, we open it in a new tab.
         window.open(logoUrl, '_blank');
     }
 
@@ -111,6 +91,7 @@ export function YouTubeChannelLogoDownloader() {
                                     width={256}
                                     height={256}
                                     className="w-full h-full object-cover"
+                                    unoptimized
                                 />
                             ) : (
                                 <div className="text-center text-muted-foreground">
