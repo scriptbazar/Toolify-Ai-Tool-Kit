@@ -153,9 +153,10 @@ export function LoanCalculator() {
   const handleDownloadPdf = async () => {
     if (!payment || !totalPayment || !totalInterest || schedule.length === 0) return;
     
+    // Dynamically import jspdf and jspdf-autotable
     const { default: jsPDF } = await import('jspdf');
     const autoTable = (await import('jspdf-autotable')).default;
-    applyPlugin(jsPDF);
+    applyPlugin(jsPDF); // This is crucial for autoTable to work with the jsPDF instance.
 
     try {
         const settings = await getSettings();
@@ -185,10 +186,10 @@ export function LoanCalculator() {
         
         const scheduleBodyData = schedule.map(item => [
             item.month,
-            item.principal.replace(/₹/g, 'Rs.'),
-            item.interest.replace(/₹/g, 'Rs.'),
-            item.totalPayment.replace(/₹/g, 'Rs.'),
-            item.remainingBalance.replace(/₹/g, 'Rs.')
+            item.principal.replace(/[₹$€£¥A-Z\s]/g, ''),
+            item.interest.replace(/[₹$€£¥A-Z\s]/g, ''),
+            item.totalPayment.replace(/[₹$€£¥A-Z\s]/g, ''),
+            item.remainingBalance.replace(/[₹$€£¥A-Z\s]/g, '')
         ]);
 
         let logoImage: string | null = null;
@@ -231,20 +232,17 @@ export function LoanCalculator() {
           body: scheduleBodyData,
           theme: 'grid',
           headStyles: { fillColor: [76, 35, 137] },
-        });
-
-        // Watermark on ALL pages
-        const totalPages = (doc as any).internal.getNumberOfPages();
-        for (let i = 1; i <= totalPages; i++) {
-            doc.setPage(i);
-            doc.setFontSize(50).setTextColor(230, 230, 230);
+          didDrawPage: (data) => {
+            // Watermark on ALL pages
+            doc.setFontSize(50).setTextColor(150);
             doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
             if (logoImage) {
               doc.addImage(logoImage, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
             }
             doc.text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2 + 35, { align: 'center' });
             doc.setGState(new (doc as any).GState({ opacity: 1 }));
-        }
+          }
+        });
 
         doc.save(`emi-schedule-${loanAmount}.pdf`);
 
