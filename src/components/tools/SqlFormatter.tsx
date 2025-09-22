@@ -10,18 +10,34 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const formatSql = (sql: string, indent: string): string => {
-  const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'ON'];
-  let formatted = sql.replace(/\s+/g, ' ').trim();
+  let formatted = sql
+    .replace(/\s+/g, ' ')
+    .replace(/\s*([,()=<>!])\s*/g, ' $1 ');
 
-  keywords.forEach(keyword => {
-    formatted = formatted.replace(new RegExp(`\\b${keyword}\\b`, 'gi'), `\n${indent}${keyword}`);
-  });
+  const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'ON', 'AND', 'OR', 'UPDATE', 'SET', 'DELETE', 'INSERT INTO', 'VALUES'];
   
-  // A simple attempt to indent selected columns
-  formatted = formatted.replace(/\n\s*SELECT\s+/, `\nSELECT\n${indent}${indent}`);
-  formatted = formatted.replace(/,\s/g, `,\n${indent}${indent}`);
+  keywords.forEach(keyword => {
+    formatted = formatted.replace(new RegExp(`\\b${keyword}\\b`, 'gi'), `\n${keyword}`);
+  });
 
-  return formatted.trim();
+  let lines = formatted.split('\n');
+  let indentLevel = 0;
+  let newLines = [];
+
+  for (const line of lines) {
+    let trimmedLine = line.trim();
+    if (trimmedLine.startsWith(')')) {
+      indentLevel = Math.max(0, indentLevel - 1);
+    }
+    
+    newLines.push(indent.repeat(indentLevel) + trimmedLine);
+
+    if (trimmedLine.endsWith('(')) {
+      indentLevel++;
+    }
+  }
+
+  return newLines.join('\n').trim();
 }
 
 export function SqlFormatter() {
@@ -95,6 +111,7 @@ export function SqlFormatter() {
             id="formatted-sql"
             value={formattedSql}
             readOnly
+            placeholder="Formatted SQL will appear here..."
             className="min-h-[300px] font-mono bg-muted"
           />
         </div>
