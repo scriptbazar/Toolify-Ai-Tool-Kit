@@ -11,16 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Input } from '../ui/input';
 import type CryptoJS from 'crypto-js';
 
-type HashingAlgorithm = 'MD5' | 'SHA1' | 'SHA256' | 'SHA512' | 'RIPEMD160';
+type HashingAlgorithm = 'MD5' | 'SHA1' | 'SHA256' | 'SHA512' | 'SHA3' | 'RIPEMD160' | 'HmacMD5' | 'HmacSHA1' | 'HmacSHA256' | 'HmacSHA512';
 
 type CryptoJsLibrary = {
-    [key in HashingAlgorithm]: (message: string) => CryptoJS.lib.WordArray;
+    [key in HashingAlgorithm]?: (message: string, key?: string) => CryptoJS.lib.WordArray;
 };
 
 export function UniversalHashGenerator() {
   const [inputText, setInputText] = useState('Hello World!');
   const [generatedHash, setGeneratedHash] = useState('');
   const [algorithm, setAlgorithm] = useState<HashingAlgorithm>('SHA256');
+  const [hmacKey, setHmacKey] = useState('');
   const [cryptoJs, setCryptoJs] = useState<CryptoJsLibrary | null>(null);
   const { toast } = useToast();
 
@@ -32,7 +33,12 @@ export function UniversalHashGenerator() {
             'SHA1': cjs.SHA1,
             'SHA256': cjs.SHA256,
             'SHA512': cjs.SHA512,
+            'SHA3': cjs.SHA3,
             'RIPEMD160': cjs.RIPEMD160,
+            'HmacMD5': cjs.HmacMD5,
+            'HmacSHA1': cjs.HmacSHA1,
+            'HmacSHA256': cjs.HmacSHA256,
+            'HmacSHA512': cjs.HmacSHA512,
         });
     }).catch(err => {
         console.error("Failed to load crypto-js", err);
@@ -49,7 +55,7 @@ export function UniversalHashGenerator() {
       handleGenerate();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputText, algorithm, cryptoJs]);
+  }, [inputText, algorithm, hmacKey, cryptoJs]);
 
   const handleGenerate = () => {
     if (!inputText) {
@@ -63,12 +69,19 @@ export function UniversalHashGenerator() {
 
     try {
       const hashFunction = cryptoJs[algorithm];
-      if (hashFunction) {
-        const hash = hashFunction(inputText).toString();
-        setGeneratedHash(hash);
+      let hash;
+      if (algorithm.startsWith('Hmac')) {
+        if (!hmacKey) {
+            setGeneratedHash('');
+            return;
+        }
+        hash = hashFunction!(inputText, hmacKey).toString();
       } else {
-        throw new Error('Selected algorithm is not supported.');
+        hash = hashFunction!(inputText).toString();
       }
+
+      setGeneratedHash(hash);
+
     } catch (e) {
       toast({ title: "Hashing Error", description: "Could not generate hash.", variant: "destructive" });
     }
@@ -78,6 +91,8 @@ export function UniversalHashGenerator() {
     navigator.clipboard.writeText(text);
     toast({ title: 'Copied to clipboard!' });
   };
+
+  const isHmac = algorithm.startsWith('Hmac');
 
   return (
     <div className="space-y-6">
@@ -92,7 +107,20 @@ export function UniversalHashGenerator() {
             />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {isHmac && (
+            <div className="space-y-2">
+                <Label htmlFor="hmac-key">HMAC Secret Key</Label>
+                <Input
+                    id="hmac-key"
+                    value={hmacKey}
+                    onChange={(e) => setHmacKey(e.target.value)}
+                    placeholder="Enter your secret key for HMAC"
+                    className="font-mono"
+                />
+            </div>
+        )}
+      
+        <div className="grid grid-cols-1 md:grid-cols-[1fr,2fr] gap-4 items-end">
             <div className="space-y-2">
                 <Label htmlFor="algorithm-select">Hashing Algorithm</Label>
                 <Select value={algorithm} onValueChange={(val) => setAlgorithm(val as HashingAlgorithm)}>
@@ -103,26 +131,30 @@ export function UniversalHashGenerator() {
                         <SelectItem value="MD5">MD5</SelectItem>
                         <SelectItem value="SHA1">SHA-1</SelectItem>
                         <SelectItem value="SHA256">SHA-256</SelectItem>
+                        <SelectItem value="SHA3">SHA-3</SelectItem>
                         <SelectItem value="SHA512">SHA-512</SelectItem>
                         <SelectItem value="RIPEMD160">RIPEMD-160</SelectItem>
+                        <SelectItem value="HmacMD5">HMAC-MD5</SelectItem>
+                        <SelectItem value="HmacSHA1">HMAC-SHA1</SelectItem>
+                        <SelectItem value="HmacSHA256">HMAC-SHA256</SelectItem>
+                        <SelectItem value="HmacSHA512">HMAC-SHA512</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
-        </div>
-      
-        <div className="space-y-2">
-            <Label htmlFor="hash-output">Generated Hash</Label>
-            <div className="relative">
-                <Input
-                    id="hash-output"
-                    value={generatedHash}
-                    readOnly
-                    placeholder="Hash output will appear here"
-                    className="font-mono h-12 pr-12"
-                />
-                 <Button variant="ghost" size="icon" className="absolute top-1/2 right-2 -translate-y-1/2" onClick={() => handleCopy(generatedHash)} disabled={!generatedHash}>
-                    <Copy className="h-5 w-5" />
-                </Button>
+             <div className="space-y-2">
+                <Label htmlFor="hash-output">Generated Hash</Label>
+                <div className="relative">
+                    <Input
+                        id="hash-output"
+                        value={generatedHash}
+                        readOnly
+                        placeholder="Hash output will appear here"
+                        className="font-mono h-12 pr-12"
+                    />
+                    <Button variant="ghost" size="icon" className="absolute top-1/2 right-2 -translate-y-1/2" onClick={() => handleCopy(generatedHash)} disabled={!generatedHash}>
+                        <Copy className="h-5 w-5" />
+                    </Button>
+                </div>
             </div>
         </div>
     </div>
