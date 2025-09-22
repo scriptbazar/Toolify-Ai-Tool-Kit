@@ -16,13 +16,19 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recha
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
-
 interface ScheduleItem {
     month: number;
     principal: string;
     interest: string;
     totalPayment: string;
     remainingBalance: string;
+}
+
+// Extend the jsPDF interface to include autoTable
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+  }
 }
 
 export function LoanCalculator() {
@@ -54,7 +60,6 @@ export function LoanCalculator() {
   
   const formatCurrency = (value: number | undefined | null, currencyCode: string) => {
     if (value === null || value === undefined || isNaN(value)) return 'N/A';
-    // Always use en-US for consistent formatting without strange prefixes.
     return value.toLocaleString('en-US', {
         style: 'currency',
         currency: currencyCode,
@@ -149,8 +154,11 @@ export function LoanCalculator() {
         setGstAmount(null);
     };
   
- const handleDownloadPdf = async () => {
-    if (!payment || !totalPayment || !totalInterest || schedule.length === 0) return;
+  const handleDownloadPdf = async () => {
+    if (!payment || !totalPayment || !totalInterest || schedule.length === 0) {
+        toast({ title: "No data to download", description: "Please calculate the loan first.", variant: "destructive" });
+        return;
+    }
     
     try {
         const settings = await getSettings();
@@ -159,16 +167,37 @@ export function LoanCalculator() {
         
         const doc = new jsPDF();
         
+        // ---- HEADER (Page 1 only) ----
+        if (logoUrl) {
+            try {
+                // Fetch and convert image to data URL to embed in PDF
+                const response = await fetch(logoUrl);
+                const blob = await response.blob();
+                const logoImage = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+                doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
+                doc.setFontSize(22).setTextColor(40).text(siteTitle, 40, 28);
+            } catch (e) {
+                console.error("Could not add logo to PDF:", e);
+                doc.setFontSize(22).setTextColor(40).text(siteTitle, 15, 28);
+            }
+        } else {
+            doc.setFontSize(22).setTextColor(40).text(siteTitle, 15, 28);
+        }
+
+        // ---- SUMMARY TABLE ----
         const summaryBodyData = [
             ['Loan Type', loanType],
             ['Loan Amount', formatCurrency(parseFloat(loanAmount), currency)],
         ];
-
-        if (gstAmount !== null && gstAmount > 0) {
+        if (gstAmount && gstAmount > 0) {
             summaryBodyData.push(['GST Amount', formatCurrency(gstAmount, currency)]);
-            summaryBodyData.push(['Total Loan Amount (with GST)', formatCurrency(parseFloat(loanAmount) + gstAmount, currency)]);
+            summaryBodyData.push(['Total Loan Amount', formatCurrency(parseFloat(loanAmount) + gstAmount, currency)]);
         }
-
         summaryBodyData.push(
             ['Interest Rate', `${interestRate}% per annum`],
             ['Loan Term', `${loanTerm} ${termUnit}`],
@@ -176,68 +205,39 @@ export function LoanCalculator() {
             ['Total Payment', formatCurrency(totalPayment, currency)],
             ['Total Interest', formatCurrency(totalInterest, currency)],
         );
-        
+        doc.autoTable({
+            startY: 50,
+            head: [['Loan Summary', '']],
+            body: summaryBodyData,
+            theme: 'striped',
+            headStyles: { fillColor: [76, 35, 137] },
+            columnStyles: { 0: { fontStyle: 'bold' } },
+        });
+
+        // ---- SCHEDULE TABLE ----
         const scheduleBodyData = schedule.map(item => [
             item.month,
             item.principal.replace(/[^\d.-]/g, ''),
             item.interest.replace(/[^\d.-]/g, ''),
             item.totalPayment.replace(/[^\d.-]/g, ''),
-            item.remainingBalance.replace(/[^\d.-]/g, '')
+            item.remainingBalance.replace(/[^\d.-]/g, ''),
         ]);
-
-        let logoImage: string | null = null;
-        if (logoUrl) {
-            try {
-                const response = await fetch(logoUrl);
-                const blob = await response.blob();
-                logoImage = await new Promise<string>((resolve, reject) => {
-                  const reader = new FileReader();
-                  reader.onloadend = () => resolve(reader.result as string);
-                  reader.onerror = reject;
-                  reader.readAsDataURL(blob);
-                });
-            } catch (e) { console.error("Could not fetch or process logo for PDF.", e); }
-        }
-        
-        // Header on first page only
-        if (logoImage) doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
-        doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, logoImage ? 40 : 15, 28);
-
-        (doc as any).autoTable({
-            startY: 45,
-            body: summaryBodyData,
-            theme: 'striped',
-            styles: { fontSize: 10 },
-            head: [['Loan Summary', '']],
+        doc.autoTable({
+            head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
+            body: scheduleBodyData,
+            theme: 'grid',
             headStyles: { fillColor: [76, 35, 137] },
-            columnStyles: { 0: { fontStyle: 'bold' } },
-        });
-
-        (doc as any).autoTable({
-          startY: (doc as any).autoTable.previous.finalY + 10,
-          head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
-          body: scheduleBodyData,
-          theme: 'grid',
-          headStyles: { fillColor: [76, 35, 137] },
         });
         
-        const pageCount = (doc as any).internal.getNumberOfPages();
+        // ---- WATERMARK (All pages) ----
+        const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
-            const { width, height } = (doc as any).internal.getCurrentPageInfo().pageContext.mediaBox;
-            
+            const { width, height } = doc.internal.pageSize;
             doc.saveGraphicsState();
             doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
-            
-            const rotationAngle = -45;
-            doc.translate(width / 2, height / 2);
-            doc.rotate(rotationAngle);
-            
-            if (logoImage) doc.addImage(logoImage, 'PNG', -25, -25, 50, 50);
-            
             doc.setFontSize(50).setTextColor(150);
-            doc.text(siteTitle, 0, 0, { align: 'center' });
-            
+            doc.text(siteTitle, width / 2, height / 2, { align: 'center', angle: -45 });
             doc.restoreGraphicsState();
         }
 
@@ -245,7 +245,11 @@ export function LoanCalculator() {
 
     } catch (error) {
         console.error("PDF Generation Error:", error);
-        toast({ title: "Error Generating PDF", description: "Could not generate the PDF. Please try again.", variant: "destructive" });
+        toast({
+            title: "Error Generating PDF",
+            description: "Could not generate the PDF. Please try again.",
+            variant: "destructive"
+        });
     }
   };
 
@@ -409,7 +413,7 @@ export function LoanCalculator() {
                                 cx="50%"
                                 cy="50%"
                                 outerRadius={60}
-                                label={(props) => formatCurrency(props.payload.value, currency)}
+                                label={(props) => formatCurrency(props.value, currency)}
                             >
                                 {pieChartData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
