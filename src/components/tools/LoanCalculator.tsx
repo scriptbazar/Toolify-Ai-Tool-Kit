@@ -159,7 +159,6 @@ export function LoanCalculator() {
         const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
         const logoUrl = settings.general?.logoUrl;
         
-        // Default Sparkles SVG data if logoUrl is not available
         const sparklesSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 4.8-4.8 1.9 4.8 1.9L12 21l1.9-4.8 4.8-1.9-4.8-1.9L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`;
 
         let logoBase64: string | null = null;
@@ -187,13 +186,12 @@ export function LoanCalculator() {
             doc.addImage(logoBase64, 'PNG', 15, 15, 20, 20);
             doc.setFontSize(22).setTextColor(40).text(siteTitle, 40, headerY);
         } else {
-            // Add SVG directly if no logo URL - this is a simplification
             doc.setFontSize(22).setTextColor(40).text(siteTitle, 15, headerY);
         }
 
         // ---- SUMMARY TABLE ----
         const formatCurrencyForPdf = (value: number | undefined | null) => {
-            if (value === null || value === undefined || isNaN(value)) return 'N/A';
+             if (value === null || value === undefined || isNaN(value)) return 'N/A';
             return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         };
         
@@ -213,7 +211,7 @@ export function LoanCalculator() {
             ['Total Interest', `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(totalInterest)}`],
         );
         (doc as any).autoTable({
-            startY: 50,
+            startY: 40,
             head: [['Loan Summary', '']],
             body: summaryBodyData,
             theme: 'striped',
@@ -244,14 +242,12 @@ export function LoanCalculator() {
             doc.saveGraphicsState();
             doc.setGState(new (doc as any).GState({ opacity: 0.08 }));
             
-            // Text watermark
             doc.setFontSize(50).setTextColor(150);
             doc.text(siteTitle, width / 2, height / 2, { align: 'center', angle: 45 });
             
-            // Image watermark
             if (logoBase64) {
                  const logoDim = 50;
-                 doc.addImage(logoBase64, 'PNG', (width / 2), (height / 2) - (logoDim / 2), logoDim, logoDim, undefined, 'NONE', 45);
+                 doc.addImage(logoBase64, 'PNG', (width / 2) - (logoDim / 2), (height / 2) - (logoDim / 2), logoDim, logoDim, undefined, 'NONE', 45);
             }
             doc.restoreGraphicsState();
         }
