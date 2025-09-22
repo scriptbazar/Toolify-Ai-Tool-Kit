@@ -54,8 +54,12 @@ export function LoanCalculator() {
   
   const formatCurrency = (value: number | undefined | null, currencyCode: string) => {
     if (value === null || value === undefined || isNaN(value)) return 'N/A';
-    const symbol = currencySymbols[currencyCode] || '$';
-    return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currencyCode,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(value);
   }
   
   const formatCurrencyForPdf = (value: number | undefined | null, currencyCode: string) => {
@@ -153,8 +157,11 @@ export function LoanCalculator() {
  const handleDownloadPdf = async () => {
     if (!payment || !totalPayment || !totalInterest || schedule.length === 0) return;
     
+    // Dynamically import libraries
     const { default: jsPDF } = await import('jspdf');
-    const autoTable = (await import('jspdf-autotable')).default;
+    const { default: autoTable } = await import('jspdf-autotable');
+    
+    // Apply the plugin to the jsPDF instance
     applyPlugin(jsPDF);
 
     try {
@@ -184,15 +191,16 @@ export function LoanCalculator() {
         
         const scheduleBodyData = schedule.map(item => [
             item.month,
-            item.principal.replace(/[₹$€£¥A-Z\s]/g, ''),
-            item.interest.replace(/[₹$€£¥A-Z\s]/g, ''),
-            item.totalPayment.replace(/[₹$€£¥A-Z\s]/g, ''),
-            item.remainingBalance.replace(/[₹$€£¥A-Z\s]/g, '')
+            item.principal.replace(/[₹$€£¥A-Z\s,]/g, ''),
+            item.interest.replace(/[₹$€£¥A-Z\s,]/g, ''),
+            item.totalPayment.replace(/[₹$€£¥A-Z\s,]/g, ''),
+            item.remainingBalance.replace(/[₹$€£¥A-Z\s,]/g, '')
         ]);
 
         let logoImage: string | null = null;
         if (logoUrl) {
             try {
+                // Fetch the image and convert to base64
                 const response = await fetch(logoUrl);
                 const blob = await response.blob();
                 logoImage = await new Promise<string>((resolve, reject) => {
@@ -226,30 +234,22 @@ export function LoanCalculator() {
           body: scheduleBodyData,
           theme: 'grid',
           headStyles: { fillColor: [76, 35, 137] },
-          didDrawPage: (data) => {
-            if (data.pageNumber === 1) return; // Skip header on first page
-            if (logoImage) doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
-            doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, logoImage ? 40 : 15, 28);
-          }
         });
         
         const pageCount = (doc as any).internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
-            const pageInfo = (doc as any).internal.getCurrentPageInfo();
-            const { width, height } = pageInfo.pageContext.mediaBox;
+            const { width, height } = (doc as any).internal.getCurrentPageInfo().pageContext.mediaBox;
             
+            doc.saveGraphicsState();
             doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
             doc.setFontSize(50).setTextColor(150);
             
-            doc.saveGraphicsState();
             doc.translate(width / 2, height / 2);
             doc.rotate(-45);
+            doc.text(siteTitle, 0, 0, { align: 'center' });
             if (logoImage) doc.addImage(logoImage, 'PNG', -25, -50, 50, 50);
-            doc.text(siteTitle, 0, 20, { align: 'center' });
             doc.restoreGraphicsState();
-            
-            doc.setGState(new (doc as any).GState({ opacity: 1 }));
         }
 
         doc.save(`emi-schedule-${loanAmount}.pdf`);
