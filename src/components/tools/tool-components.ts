@@ -261,7 +261,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'title-tag-checker': dynamic(() => import('@/components/tools/TitleTagChecker').then(mod => mod.TitleTagChecker), { loading: () => <LoadingComponent /> }),
   'unix-timestamp-converter': dynamic(() => import('@/components/tools/UnixTimestampConverter').then(mod => mod.UnixTimestampConverter), { loading: () => <LoadingComponent /> }),
   'universal-hash-generator': dynamic(() => import('@/components/tools/UniversalHashGenerator').then(mod => mod.UniversalHashGenerator), { loading: () => <LoadingComponent /> }),
-  'aes-encryption-and-decryption': dynamic(() => import('@/components/tools/AesEncryptionDecryption').then(mod => mod.AesEncryptionDecryption), { loading: () => <LoadingComponent /> }),
   'image-shape-converter': dynamic(() => import('@/components/tools/ImageShapeConverter').then(mod => mod.ImageShapeConverter), { loading: () => <LoadingComponent /> }),
   'morse-to-text-translator': dynamic(() => import('@/components/tools/MorseToTextTranslator').then(mod => mod.MorseToTextTranslator), { loading: () => <LoadingComponent /> }),
   'text-to-morse-code': dynamic(() => import('@/components/tools/TextToMorseCode').then(mod => mod.TextToMorseCode), { loading: () => <LoadingComponent /> }),
