@@ -30,8 +30,8 @@ export function ToolFilters({ tools }: ToolFiltersProps) {
     return counts;
   }, [tools]);
 
-  const createQueryString = useCallback((params: Record<string, string | null>) => {
-    const currentParams = new URLSearchParams(window.location.search);
+  const createQueryString = (params: Record<string, string | null>) => {
+    const currentParams = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(params)) {
       if (value === null || value === '' || value === 'all') {
         currentParams.delete(key);
@@ -40,17 +40,17 @@ export function ToolFilters({ tools }: ToolFiltersProps) {
       }
     }
     return currentParams.toString();
-  }, []);
+  };
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newQuery = e.target.value;
       setQuery(newQuery);
-      const queryString = createQueryString({ q: newQuery, page: '1' });
+      const queryString = createQueryString({ q: newQuery, page: null });
       router.push(`/tools?${queryString}`);
   };
 
   const handleCategoryChange = (category: string) => {
-    const queryString = createQueryString({ category: category, page: '1' });
+    const queryString = createQueryString({ category: category, page: null });
     router.push(`/tools?${queryString}`);
   };
 
