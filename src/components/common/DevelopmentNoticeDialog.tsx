@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Bug, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -31,10 +31,7 @@ export function DevelopmentNoticeDialog() {
                     <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
                         <AlertTriangle className="h-10 w-10 text-primary" />
                     </div>
-                    <DialogTitle className="text-2xl">Welcome to ToolifyAI!</DialogTitle>
-                    <DialogDesc className="text-base">
-                        This site is currently under development.
-                    </DialogDesc>
+                    <DialogTitle className="text-2xl text-center">Welcome to ToolifyAI!</DialogTitle>
                 </DialogHeader>
                 <div className="py-4 text-muted-foreground text-sm space-y-4">
                     <p>
