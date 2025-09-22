@@ -81,6 +81,7 @@ export function GSTCalculator() {
                 <SelectValue placeholder="Select GST Rate" />
             </SelectTrigger>
             <SelectContent>
+                <SelectItem value="3">3%</SelectItem>
                 <SelectItem value="5">5%</SelectItem>
                 <SelectItem value="12">12%</SelectItem>
                 <SelectItem value="18">18%</SelectItem>
