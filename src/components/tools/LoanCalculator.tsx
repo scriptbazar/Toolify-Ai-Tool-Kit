@@ -411,7 +411,7 @@ export function LoanCalculator() {
                                 ))}
                             </Pie>
                             <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
-                            <Legend layout="vertical" verticalAlign="middle" align="right" />
+                            <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{paddingTop: '20px'}}/>
                         </PieChart>
                     </ResponsiveContainer>
                 </CardContent>
