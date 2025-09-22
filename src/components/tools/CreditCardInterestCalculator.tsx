@@ -6,15 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
-import { Calculator, Banknote, Percent, Calendar, Download, PieChart as PieChartIcon } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Download, MessageCircle, Calculator, Trash2, PieChart as PieChartIcon, Mail } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '../ui/scroll-area';
+import { getSettings } from '@/ai/flows/settings-management';
+import { useToast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { getSettings } from '@/ai/flows/settings-management';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Banknote, Percent, Calendar } from 'lucide-react';
+
 
 interface ScheduleItem {
   month: number;
@@ -141,6 +144,10 @@ export function CreditCardInterestCalculator() {
     return resultText.trim();
   };
   
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value);
+  }
+
   const pieChartData = result ? [
     { name: 'Principal Paid', value: parseFloat(balance) },
     { name: 'Total Interest', value: result.totalInterest },
@@ -162,12 +169,12 @@ export function CreditCardInterestCalculator() {
         startY: 35,
         head: [['Summary', 'Amount']],
         body: [
-            ['Initial Balance', `$${parseFloat(balance).toFixed(2)}`],
+            ['Initial Balance', `${formatCurrency(parseFloat(balance))}`],
             ['Interest Rate (APR)', `${apr}%`],
-            ['Monthly Payment', `$${parseFloat(monthlyPayment).toFixed(2)}`],
+            ['Monthly Payment', `${formatCurrency(parseFloat(monthlyPayment))}`],
             ['Time to Pay Off', formatMonths(result.monthsToPayOff)],
-            ['Total Interest Paid', `$${result.totalInterest.toFixed(2)}`],
-            ['Total Amount Paid', `$${result.totalPaid.toFixed(2)}`],
+            ['Total Interest Paid', `${formatCurrency(result.totalInterest)}`],
+            ['Total Amount Paid', `${formatCurrency(result.totalPaid)}`],
         ],
         theme: 'striped',
         headStyles: { fillColor: [76, 35, 137] },
@@ -197,7 +204,7 @@ export function CreditCardInterestCalculator() {
         <TabsContent value="calculator" className="space-y-6">
            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                 <div className="space-y-2">
-                <Label htmlFor="balance" className="flex items-center gap-2"><Banknote/>Credit Card Balance ($)</Label>
+                <Label htmlFor="balance" className="flex items-center gap-2"><Banknote/>Credit Card Balance (₹)</Label>
                 <Input id="balance" type="number" value={balance} onChange={(e) => setBalance(e.target.value)} placeholder="e.g., 10000" />
                 </div>
                 <div className="space-y-2">
@@ -205,7 +212,7 @@ export function CreditCardInterestCalculator() {
                 <Input id="apr" type="number" value={apr} onChange={(e) => setApr(e.target.value)} placeholder="e.g., 18" />
                 </div>
                 <div className="space-y-2">
-                <Label htmlFor="monthly-payment" className="flex items-center gap-2"><Banknote/>Monthly Payment ($)</Label>
+                <Label htmlFor="monthly-payment" className="flex items-center gap-2"><Banknote/>Monthly Payment (₹)</Label>
                 <Input id="monthly-payment" type="number" value={monthlyPayment} onChange={(e) => setMonthlyPayment(e.target.value)} placeholder="e.g., 500" />
                 </div>
             </div>
@@ -222,11 +229,11 @@ export function CreditCardInterestCalculator() {
                         </div>
                         <div className="p-4 bg-muted rounded-lg text-center">
                             <p className="text-sm text-muted-foreground">Total Interest</p>
-                            <p className="text-xl font-bold text-primary">${result.totalInterest.toFixed(2)}</p>
+                            <p className="text-xl font-bold text-primary">{formatCurrency(result.totalInterest)}</p>
                         </div>
                         <div className="p-4 bg-muted rounded-lg text-center">
                             <p className="text-sm text-muted-foreground">Total Paid</p>
-                            <p className="text-xl font-bold text-primary">${result.totalPaid.toFixed(2)}</p>
+                            <p className="text-xl font-bold text-primary">{formatCurrency(result.totalPaid)}</p>
                         </div>
                         <div className="p-4 bg-muted rounded-lg text-center">
                              <p className="text-sm text-muted-foreground">Interest/Principal Ratio</p>
@@ -243,7 +250,7 @@ export function CreditCardInterestCalculator() {
                                         <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                                             {pieChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
                                         </Pie>
-                                        <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                                        <Tooltip formatter={(value: number) => `${formatCurrency(value)}`} />
                                         <Legend />
                                     </PieChart>
                                 </ResponsiveContainer>
@@ -255,7 +262,7 @@ export function CreditCardInterestCalculator() {
                                 <ScrollArea className="h-72">
                                     <Table>
                                         <TableHeader className="sticky top-0 bg-card"><TableRow><TableHead>Month</TableHead><TableHead>Interest</TableHead><TableHead>Principal</TableHead><TableHead>Balance</TableHead></TableRow></TableHeader>
-                                        <TableBody>{result.schedule.map(item => (<TableRow key={item.month}><TableCell>{item.month}</TableCell><TableCell>${item.interest.toFixed(2)}</TableCell><TableCell>${item.principal.toFixed(2)}</TableCell><TableCell>${item.balance.toFixed(2)}</TableCell></TableRow>))}</TableBody>
+                                        <TableBody>{result.schedule.map(item => (<TableRow key={item.month}><TableCell>{item.month}</TableCell><TableCell>{formatCurrency(item.interest)}</TableCell><TableCell>{formatCurrency(item.principal)}</TableCell><TableCell>{formatCurrency(item.balance)}</TableCell></TableRow>))}</TableBody>
                                     </Table>
                                 </ScrollArea>
                             </CardContent>
@@ -268,7 +275,7 @@ export function CreditCardInterestCalculator() {
         <TabsContent value="extraPayment" className="space-y-6 pt-4">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="extra-payment">Extra Monthly Payment ($)</Label>
+                    <Label htmlFor="extra-payment">Extra Monthly Payment (₹)</Label>
                     <Input id="extra-payment" type="number" value={extraPayment} onChange={e => setExtraPayment(e.target.value)} />
                 </div>
                 <Button onClick={handleCalculateExtra} className="self-end w-full">Calculate with Extra Payment</Button>
@@ -284,11 +291,11 @@ export function CreditCardInterestCalculator() {
                         </div>
                          <div className="p-4 bg-muted rounded-lg">
                            <p className="font-semibold">Total Interest</p>
-                           <p className="text-muted-foreground line-through">${extraPaymentResult.original.totalInterest.toFixed(2)}</p>
-                           <p className="text-lg font-bold text-primary">${extraPaymentResult.withExtra.totalInterest.toFixed(2)}</p>
+                           <p className="text-muted-foreground line-through">{formatCurrency(extraPaymentResult.original.totalInterest)}</p>
+                           <p className="text-lg font-bold text-primary">{formatCurrency(extraPaymentResult.withExtra.totalInterest)}</p>
                         </div>
                         <div className="md:col-span-2 p-4 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded-lg text-center">
-                            <p className="font-bold">You save ${ (extraPaymentResult.original.totalInterest - extraPaymentResult.withExtra.totalInterest).toFixed(2) } and pay off your debt {formatMonths(extraPaymentResult.original.monthsToPayOff - extraPaymentResult.withExtra.monthsToPayOff)} faster!</p>
+                            <p className="font-bold">You save {formatCurrency(extraPaymentResult.original.totalInterest - extraPaymentResult.withExtra.totalInterest)} and pay off your debt {formatMonths(extraPaymentResult.original.monthsToPayOff - extraPaymentResult.withExtra.monthsToPayOff)} faster!</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -305,7 +312,7 @@ export function CreditCardInterestCalculator() {
             {payoffGoalResult && (
                  <Card className="text-center">
                     <CardHeader><CardTitle>Required Monthly Payment</CardTitle><CardDescription>To pay off your debt in {payoffGoal} months.</CardDescription></CardHeader>
-                    <CardContent><p className="text-3xl font-bold text-primary">${payoffGoalResult.requiredPayment.toFixed(2)}</p></CardContent>
+                    <CardContent><p className="text-3xl font-bold text-primary">{formatCurrency(payoffGoalResult.requiredPayment)}</p></CardContent>
                  </Card>
             )}
         </TabsContent>
