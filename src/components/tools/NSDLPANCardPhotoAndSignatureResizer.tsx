@@ -1,21 +1,159 @@
 
 'use client';
 
-import { Card, CardContent } from '../ui/card';
-import { Construction } from 'lucide-react';
+import { useState, useRef, type ChangeEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { UploadCloud, Download, Image as ImageIcon, PenLine, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
-export function NSDLPANCardPhotoAndSignatureResizer() {
+const PHOTO_WIDTH = 213;
+const PHOTO_HEIGHT = 213;
+const SIGNATURE_WIDTH = 400;
+const SIGNATURE_HEIGHT = 200;
+const MAX_FILE_SIZE_KB = 20;
+
+const ImageResizerBox = ({
+  title,
+  icon: Icon,
+  targetWidth,
+  targetHeight,
+}: {
+  title: string;
+  icon: React.ElementType;
+  targetWidth: number;
+  targetHeight: number;
+}) => {
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [originalPreview, setOriginalPreview] = useState<string | null>(null);
+  const [resizedPreview, setResizedPreview] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setOriginalFile(file);
+      setOriginalPreview(URL.createObjectURL(file));
+      setResizedPreview(null);
+    } else if (file) {
+      toast({ title: "Invalid File", description: "Please upload a valid image file.", variant: "destructive" });
+    }
+  };
+
+  const handleResize = () => {
+    if (!originalPreview) return;
+    setIsLoading(true);
+
+    const img = document.createElement('img');
+    img.src = originalPreview;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setIsLoading(false);
+        return;
+      }
+      
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, targetWidth, targetHeight);
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+      // Attempt to get the desired file size
+      let quality = 0.9;
+      let dataUrl = canvas.toDataURL('image/jpeg', quality);
+      
+      // Simple loop to reduce quality if size is too large
+      // A more sophisticated approach might use binary search
+      while (dataUrl.length > MAX_FILE_SIZE_KB * 1024 * 4/3 && quality > 0.1) {
+          quality -= 0.1;
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+      }
+
+      setResizedPreview(dataUrl);
+      setIsLoading(false);
+      toast({ title: `${title} Resized!`, description: 'Your image is ready for download.'});
+    };
+    img.onerror = () => {
+        setIsLoading(false);
+        toast({ title: 'Error', description: 'Could not load the image to resize.', variant: 'destructive'});
+    }
+  };
+  
+  const handleDownload = () => {
+      if (!resizedPreview || !originalFile) return;
+      const link = document.createElement('a');
+      link.href = resizedPreview;
+      const extension = originalFile.name.split('.').pop();
+      link.download = `nsdl-${title.toLowerCase()}-${Date.now()}.jpeg`;
+      link.click();
+  }
+
   return (
-    <Card className="flex flex-col items-center justify-center min-h-[300px]">
-      <CardContent className="text-center">
-        <Construction className="mx-auto h-12 w-12 text-primary mb-4" />
-        <h3 className="text-xl font-semibold">Coming Soon!</h3>
-        <p className="text-muted-foreground mt-2">
-          The "NSDL PAN Card Photo & Signature Resizer" tool is currently under development.
-        </p>
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2"><Icon className="h-5 w-5 text-primary"/>{title}</CardTitle>
+        <CardDescription>Upload, resize, and download your {title.toLowerCase()}.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div 
+            className="w-full aspect-square border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
+            onClick={() => fileInputRef.current?.click()}
+        >
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+            {originalPreview ? (
+                <Image src={originalPreview} alt="Preview" layout="fill" objectFit="contain" className="p-2"/>
+            ) : (
+                <div className="flex flex-col items-center">
+                    <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">Upload {title}</p>
+                    <p className="text-xs text-muted-foreground">Target: {targetWidth}x{targetHeight}px</p>
+                </div>
+            )}
+        </div>
+
+        <Button onClick={handleResize} disabled={!originalPreview || isLoading} className="w-full">
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImageIcon className="mr-2 h-4 w-4" />}
+            Resize {title}
+        </Button>
+        
+        {resizedPreview && (
+          <div className="space-y-2 pt-4 border-t">
+            <h4 className="font-semibold text-center">Resized Preview</h4>
+            <div className="border rounded-lg p-2 bg-muted flex justify-center">
+              <Image src={resizedPreview} alt="Resized Preview" width={targetWidth} height={targetHeight} />
+            </div>
+            <Button onClick={handleDownload} className="w-full">
+              <Download className="mr-2 h-4 w-4" />
+              Download {title}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
-}
+};
 
-    
+
+export function NSDLPANCardPhotoAndSignatureResizer() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <ImageResizerBox 
+        title="Photo"
+        icon={ImageIcon}
+        targetWidth={PHOTO_WIDTH}
+        targetHeight={PHOTO_HEIGHT}
+      />
+      <ImageResizerBox 
+        title="Signature"
+        icon={PenLine}
+        targetWidth={SIGNATURE_WIDTH}
+        targetHeight={SIGNATURE_HEIGHT}
+      />
+    </div>
+  );
+}
