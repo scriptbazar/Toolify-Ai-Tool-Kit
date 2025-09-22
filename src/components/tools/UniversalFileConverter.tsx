@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -11,11 +10,31 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '../ui/card';
 import { Construction } from 'lucide-react';
 
-type DataFormat = 'json' | 'csv' | 'xml' | 'yaml';
+type ConversionType = 
+  | 'json-csv' | 'csv-json'
+  | 'yaml-json' | 'yaml-csv'
+  | 'csv-yaml' | 'json-yaml'
+  | 'json-xml' | 'csv-xml'
+  | 'yaml-xml' | 'xml-json'
+  | 'xml-yaml' | 'xml-csv';
+
+const conversionOptions: { value: ConversionType; label: string }[] = [
+    { value: 'json-csv', label: 'JSON to CSV' },
+    { value: 'csv-json', label: 'CSV to JSON' },
+    { value: 'yaml-json', label: 'YAML to JSON' },
+    { value: 'yaml-csv', label: 'YAML to CSV' },
+    { value: 'csv-yaml', label: 'CSV to YAML' },
+    { value: 'json-yaml', label: 'JSON to YAML' },
+    { value: 'json-xml', label: 'JSON to XML' },
+    { value: 'csv-xml', label: 'CSV to XML' },
+    { value: 'yaml-xml', label: 'YAML to XML' },
+    { value: 'xml-json', label: 'XML to JSON' },
+    { value: 'xml-yaml', label: 'XML to YAML' },
+    { value: 'xml-csv', label: 'XML to CSV' },
+];
 
 export function UniversalFileConverter() {
-  const [fromFormat, setFromFormat] = useState<DataFormat>('json');
-  const [toFormat, setToFormat] = useState<DataFormat>('csv');
+  const [conversionType, setConversionType] = useState<ConversionType>('json-csv');
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const { toast } = useToast();
@@ -28,7 +47,8 @@ export function UniversalFileConverter() {
 
     try {
       let result = '';
-      // JSON to CSV
+      const [fromFormat, toFormat] = conversionType.split('-');
+      
       if (fromFormat === 'json' && toFormat === 'csv') {
         const data = JSON.parse(inputText);
         if (!Array.isArray(data)) throw new Error('Input for JSON to CSV must be an array of objects.');
@@ -45,13 +65,12 @@ export function UniversalFileConverter() {
         }
         result = csvRows.join('\n');
       } 
-      // CSV to JSON
       else if (fromFormat === 'csv' && toFormat === 'json') {
         const lines = inputText.trim().split('\n');
-        const headers = lines[0].split(',').map(h => h.trim());
+        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
         const data = [];
         for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(',').map(v => v.trim());
+          const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
           const obj: { [key: string]: string } = {};
           headers.forEach((header, index) => {
             obj[header] = values[index];
@@ -60,25 +79,14 @@ export function UniversalFileConverter() {
         }
         result = JSON.stringify(data, null, 2);
       }
-      // Other conversions are not supported yet
       else {
         toast({ title: 'Conversion Not Supported', description: `Conversion from ${fromFormat.toUpperCase()} to ${toFormat.toUpperCase()} is not yet available.`, variant: 'default' });
         return;
       }
-
       setOutputText(result);
-
     } catch (error: any) {
       toast({ title: 'Conversion Error', description: error.message || 'Please check your input data and format.', variant: 'destructive' });
     }
-  };
-
-  const handleSwap = () => {
-    const tempFormat = fromFormat;
-    setFromFormat(toFormat);
-    setToFormat(tempFormat);
-    setInputText(outputText);
-    setOutputText(inputText);
   };
   
   const handleCopy = () => {
@@ -92,6 +100,10 @@ export function UniversalFileConverter() {
     setOutputText('');
   }
 
+  const isConversionSupported = conversionType === 'json-csv' || conversionType === 'csv-json';
+
+  const [fromFormat, toFormat] = conversionType.split('-');
+
   const renderComingSoon = () => (
     <Card className="flex flex-col items-center justify-center min-h-[300px] bg-muted/50">
       <CardContent className="text-center">
@@ -104,41 +116,26 @@ export function UniversalFileConverter() {
     </Card>
   );
 
-  const isConversionSupported = (fromFormat === 'json' && toFormat === 'csv') || (fromFormat === 'csv' && toFormat === 'json');
-
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-[1fr,auto,1fr] items-center gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>From</Label>
-          <Select value={fromFormat} onValueChange={(val) => setFromFormat(val as DataFormat)}>
+          <Label>Select Conversion Type</Label>
+          <Select value={conversionType} onValueChange={(val) => setConversionType(val as ConversionType)}>
             <SelectTrigger><SelectValue/></SelectTrigger>
             <SelectContent>
-              <SelectItem value="json">JSON</SelectItem>
-              <SelectItem value="csv">CSV</SelectItem>
-              <SelectItem value="xml">XML</SelectItem>
-              <SelectItem value="yaml">YAML</SelectItem>
+              {conversionOptions.map(opt => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-        <Button variant="outline" size="icon" onClick={handleSwap} className="mt-6"><ArrowRightLeft className="h-4 w-4" /></Button>
-        <div className="space-y-2">
-          <Label>To</Label>
-          <Select value={toFormat} onValueChange={(val) => setToFormat(val as DataFormat)}>
-            <SelectTrigger><SelectValue/></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="json">JSON</SelectItem>
-              <SelectItem value="csv">CSV</SelectItem>
-              <SelectItem value="xml">XML</SelectItem>
-              <SelectItem value="yaml">YAML</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Button onClick={handleConvert} disabled={!isConversionSupported} className="self-end w-full">Convert</Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <div className="space-y-2">
-          <Label htmlFor="input-text">Input</Label>
+          <Label htmlFor="input-text">Input ({fromFormat.toUpperCase()})</Label>
           {isConversionSupported ? (
             <Textarea
               id="input-text"
@@ -150,7 +147,7 @@ export function UniversalFileConverter() {
           ) : renderComingSoon()}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="output-text">Output</Label>
+          <Label htmlFor="output-text">Output ({toFormat.toUpperCase()})</Label>
           {isConversionSupported ? (
             <Textarea
               id="output-text"
@@ -164,8 +161,7 @@ export function UniversalFileConverter() {
       </div>
       
        <div className="flex flex-col sm:flex-row gap-2">
-         <Button onClick={handleConvert} disabled={!isConversionSupported} className="w-full">Convert</Button>
-        <Button variant="outline" onClick={handleCopy} disabled={!outputText} className="w-full">
+        <Button variant="outline" onClick={handleCopy} disabled={!outputText || !isConversionSupported} className="w-full">
             <Copy className="mr-2 h-4 w-4" />
             Copy Result
         </Button>
