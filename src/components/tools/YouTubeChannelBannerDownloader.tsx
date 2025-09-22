@@ -10,7 +10,7 @@ import { Youtube, Download, Loader2, Image as ImageIcon, Search } from 'lucide-r
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 
-// This is a simplified interface. A full API response would be more complex.
+// This is a simplified interface for demonstration.
 interface ChannelInfoResponse {
     items?: {
         brandingSettings?: {
@@ -39,24 +39,18 @@ export function YouTubeChannelBannerDownloader() {
         setBannerUrl(null);
         
         try {
-            // NOTE: This uses a client-side call to a public API endpoint for demonstration.
+            // NOTE: This is a placeholder for a real API call.
             // A robust production solution would use a server-side proxy to handle API keys securely.
-            // This approach is vulnerable to API key exposure if a key were used.
             const channelId = new URL(url).pathname.split('/').pop();
             if (!channelId) {
                 throw new Error("Could not extract a Channel ID or username from the URL.");
             }
             
-            // This is a placeholder for a real API call which is hard to do without a key.
-            // We will simulate a successful response for a known channel for demo purposes.
-            if (url.includes("google")) {
-                 const simulatedBannerUrl = "https://yt3.googleusercontent.com/wzEGnTRWd2mGkQ2i3hVl7zP5eY2N5T9BqB1m-MKOjY8hXp31A_S4UNm_2qjF8A-e8rC_w";
-                 setBannerUrl(simulatedBannerUrl);
-                 toast({ title: "Banner Found!", description: "High-resolution banner is ready for download." });
-            } else {
-                 // Simulate not found
-                 throw new Error("Could not find a channel banner for this URL. Please make sure the channel has a banner and the URL is correct.");
-            }
+            // We will simulate a successful response for ANY valid channel URL for demo purposes.
+            // This URL is a generic placeholder.
+            const simulatedBannerUrl = `https://picsum.photos/seed/${channelId}/1280/720`;
+            setBannerUrl(simulatedBannerUrl);
+            toast({ title: "Banner Found!", description: "A placeholder banner is ready for download." });
 
         } catch (error: any) {
             console.error("Banner fetch error:", error);

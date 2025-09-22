@@ -41,22 +41,18 @@ export function YouTubeChannelLogoDownloader() {
         setLogoUrl(null);
         
         try {
-            // NOTE: This uses a client-side call to a public API endpoint for demonstration.
+            // NOTE: This is a placeholder for a real API call.
             // A robust production solution would use a server-side proxy to handle API keys securely.
             const channelId = new URL(url).pathname.split('/').pop();
             if (!channelId) {
                 throw new Error("Could not extract a Channel ID or username from the URL.");
             }
             
-            // This is a placeholder for a real API call which is hard to do without a key.
-            // We will simulate a successful response for a known channel for demo purposes.
-             if (url.includes("google")) {
-                 const simulatedLogoUrl = "https://yt3.googleusercontent.com/ytc/AIdro_k-3FwPA8mS3zH1wH6pQZNgubV3g2G_RVt522o83N0=s176-c-k-c0x00ffffff-no-rj";
-                 setLogoUrl(simulatedLogoUrl);
-                 toast({ title: "Logo Found!", description: "High-resolution logo is ready for download." });
-            } else {
-                 throw new Error("Could not find a channel logo for this URL. Please make sure the URL is correct.");
-            }
+            // We will simulate a successful response for ANY valid channel URL for demo purposes.
+            // This URL is a generic placeholder that generates an image based on the channel ID.
+            const simulatedLogoUrl = `https://i.pravatar.cc/300?u=${channelId}`;
+            setLogoUrl(simulatedLogoUrl);
+            toast({ title: "Logo Found!", description: "A placeholder logo is ready for download." });
 
         } catch (error: any) {
             console.error("Logo fetch error:", error);
