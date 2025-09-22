@@ -62,12 +62,6 @@ export function LoanCalculator() {
     }).format(value);
   }
   
-  const formatCurrencyForPdf = (value: number | undefined | null, currencyCode: string) => {
-    if (value === null || value === undefined || isNaN(value)) return 'N/A';
-    const symbol = currencySymbols[currencyCode] || '$';
-    return `${symbol}${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  }
-
   const calculateLoan = () => {
     const principal = parseFloat(loanAmount);
     const gst = parseFloat(gstRate) || 0;
@@ -157,11 +151,8 @@ export function LoanCalculator() {
  const handleDownloadPdf = async () => {
     if (!payment || !totalPayment || !totalInterest || schedule.length === 0) return;
     
-    // Dynamically import libraries
     const { default: jsPDF } = await import('jspdf');
-    const { default: autoTable } = await import('jspdf-autotable');
-    
-    // Apply the plugin to the jsPDF instance
+    const { applyPlugin } = await import('jspdf-autotable');
     applyPlugin(jsPDF);
 
     try {
@@ -173,20 +164,20 @@ export function LoanCalculator() {
         
         const summaryBodyData = [
             ['Loan Type', loanType],
-            ['Loan Amount', formatCurrencyForPdf(parseFloat(loanAmount), currency)],
+            ['Loan Amount', formatCurrency(parseFloat(loanAmount), currency)],
         ];
 
         if (gstAmount !== null && gstAmount > 0) {
-            summaryBodyData.push(['GST Amount', formatCurrencyForPdf(gstAmount, currency)]);
-            summaryBodyData.push(['Total Loan Amount (with GST)', formatCurrencyForPdf(parseFloat(loanAmount) + gstAmount, currency)]);
+            summaryBodyData.push(['GST Amount', formatCurrency(gstAmount, currency)]);
+            summaryBodyData.push(['Total Loan Amount (with GST)', formatCurrency(parseFloat(loanAmount) + gstAmount, currency)]);
         }
 
         summaryBodyData.push(
             ['Interest Rate', `${interestRate}% per annum`],
             ['Loan Term', `${loanTerm} ${termUnit}`],
-            [`${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Payment`, formatCurrencyForPdf(payment, currency)],
-            ['Total Payment', formatCurrencyForPdf(totalPayment, currency)],
-            ['Total Interest', formatCurrencyForPdf(totalInterest, currency)],
+            [`${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Payment`, formatCurrency(payment, currency)],
+            ['Total Payment', formatCurrency(totalPayment, currency)],
+            ['Total Interest', formatCurrency(totalInterest, currency)],
         );
         
         const scheduleBodyData = schedule.map(item => [
@@ -200,7 +191,6 @@ export function LoanCalculator() {
         let logoImage: string | null = null;
         if (logoUrl) {
             try {
-                // Fetch the image and convert to base64
                 const response = await fetch(logoUrl);
                 const blob = await response.blob();
                 logoImage = await new Promise<string>((resolve, reject) => {
@@ -212,13 +202,11 @@ export function LoanCalculator() {
             } catch (e) { console.error("Could not fetch or process logo for PDF.", e); }
         }
         
-        // --- PDF GENERATION ---
-        
         // Header on first page only
         if (logoImage) doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
         doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, logoImage ? 40 : 15, 28);
 
-        autoTable(doc, {
+        (doc as any).autoTable({
             startY: 45,
             body: summaryBodyData,
             theme: 'striped',
@@ -228,7 +216,7 @@ export function LoanCalculator() {
             columnStyles: { 0: { fontStyle: 'bold' } },
         });
 
-        autoTable(doc, {
+        (doc as any).autoTable({
           startY: (doc as any).autoTable.previous.finalY + 10,
           head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
           body: scheduleBodyData,
@@ -243,12 +231,14 @@ export function LoanCalculator() {
             
             doc.saveGraphicsState();
             doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
-            doc.setFontSize(50).setTextColor(150);
             
+            if (logoImage) doc.addImage(logoImage, 'PNG', width / 2 - 25, height / 2 - 25, 50, 50);
+            
+            doc.setFontSize(50).setTextColor(150);
             doc.translate(width / 2, height / 2);
             doc.rotate(-45);
             doc.text(siteTitle, 0, 0, { align: 'center' });
-            if (logoImage) doc.addImage(logoImage, 'PNG', -25, -50, 50, 50);
+            
             doc.restoreGraphicsState();
         }
 
