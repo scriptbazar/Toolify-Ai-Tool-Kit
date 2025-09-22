@@ -157,45 +157,53 @@ export function LoanCalculator() {
         const settings = await getSettings();
         const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
         const logoUrl = settings.general?.logoUrl;
-        
+
         const doc = new jsPDF();
         
-        // ---- HEADER (Page 1 only) ----
+        let logoBase64: string | null = null;
         if (logoUrl) {
             try {
                 const response = await fetch(logoUrl);
                 const blob = await response.blob();
-                const logoImage = await new Promise<string>((resolve, reject) => {
+                logoBase64 = await new Promise<string>((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onloadend = () => resolve(reader.result as string);
                     reader.onerror = reject;
                     reader.readAsDataURL(blob);
                 });
-                doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
-                doc.setFontSize(22).setTextColor(40).text(siteTitle, 40, 28);
             } catch (e) {
-                console.error("Could not add logo to PDF:", e);
-                doc.setFontSize(22).setTextColor(40).text(siteTitle, 15, 28);
+                console.error("Could not fetch or convert logo:", e);
+                toast({ title: "Logo Warning", description: "Could not load the site logo for the PDF.", variant: "default" });
             }
+        }
+        
+        // ---- HEADER (Page 1 only) ----
+        if (logoBase64) {
+            doc.addImage(logoBase64, 'PNG', 15, 15, 20, 20);
+            doc.setFontSize(22).setTextColor(40).text(siteTitle, 40, 28);
         } else {
             doc.setFontSize(22).setTextColor(40).text(siteTitle, 15, 28);
         }
 
         // ---- SUMMARY TABLE ----
+        const formatCurrencyForPdf = (value: number) => {
+            return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+        
         const summaryBodyData = [
             ['Loan Type', loanType],
-            ['Loan Amount', formatCurrency(parseFloat(loanAmount), currency)],
+            ['Loan Amount', `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(parseFloat(loanAmount))}`],
         ];
         if (gstAmount && gstAmount > 0) {
-            summaryBodyData.push(['GST Amount', formatCurrency(gstAmount, currency)]);
-            summaryBodyData.push(['Total Loan Amount', formatCurrency(parseFloat(loanAmount) + gstAmount, currency)]);
+            summaryBodyData.push(['GST Amount', `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(gstAmount)}`]);
+            summaryBodyData.push(['Total Loan Amount', `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(parseFloat(loanAmount) + gstAmount)}`]);
         }
         summaryBodyData.push(
             ['Interest Rate', `${interestRate}% per annum`],
             ['Loan Term', `${loanTerm} ${termUnit}`],
-            [`${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Payment`, formatCurrency(payment, currency)],
-            ['Total Payment', formatCurrency(totalPayment, currency)],
-            ['Total Interest', formatCurrency(totalInterest, currency)],
+            [`${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Payment`, `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(payment)}`],
+            ['Total Payment', `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(totalPayment)}`],
+            ['Total Interest', `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(totalInterest)}`],
         );
         autoTable(doc, {
             startY: 50,
@@ -229,7 +237,16 @@ export function LoanCalculator() {
             doc.saveGraphicsState();
             doc.setGState(new (doc as any).GState({ opacity: 0.08 }));
             doc.setFontSize(50).setTextColor(150);
-            doc.text(siteTitle, width / 2, height / 2, { align: 'center', angle: -45 });
+            
+            // Text watermark
+            doc.text(siteTitle, width / 2, height / 2, { align: 'center', angle: 45 });
+            
+            // Image watermark if logo exists
+            if (logoBase64) {
+                 const logoDim = 50; // size of the logo in the watermark
+                 doc.addImage(logoBase64, 'PNG', (width - logoDim) / 2, (height - logoDim) / 2, logoDim, logoDim, undefined, 'NONE', 45);
+            }
+
             doc.restoreGraphicsState();
         }
 
