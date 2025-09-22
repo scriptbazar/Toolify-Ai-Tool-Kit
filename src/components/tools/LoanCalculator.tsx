@@ -6,12 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
-import { Download, MessageCircle, Calculator, Trash2, PieChart as PieChartIcon } from 'lucide-react';
+import { Download, MessageCircle, Calculator, Trash2, PieChart as PieChartIcon, Mail } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '../ui/scroll-area';
-import type { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
 import { getSettings } from '@/ai/flows/settings-management';
 import { useToast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -127,8 +125,9 @@ export function LoanCalculator() {
   };
   
   const formatCurrency = (value: number, currencyCode: string) => {
-      const symbol = currencySymbols[currencyCode] || '$';
-      return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+    if (isNaN(value)) return '';
+    const symbol = currencySymbols[currencyCode] || '$';
+    return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
   }
   
     const handleClear = () => {
@@ -147,7 +146,7 @@ export function LoanCalculator() {
     if (!payment || !totalPayment || !totalInterest || schedule.length === 0) return;
     
     const { default: jsPDF } = await import('jspdf');
-    const { default: autoTable } = await import('jspdf-autotable');
+    const { default: autoTable } = (await import('jspdf-autotable')).default;
     
     try {
         const settings = await getSettings();
@@ -156,14 +155,10 @@ export function LoanCalculator() {
         
         const doc = new jsPDF();
         
-        // --- Watermark and Header/Footer ---
-        const pageCount = doc.internal.pages.length;
-        const addWatermarkAndHeaders = async () => {
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                
-                // Watermark
-                doc.setFontSize(50).setTextColor(230, 230, 230).text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
+        const addWatermarkAndHeaders = async (isFirstPage: boolean) => {
+            if (isFirstPage) {
+                // Header on first page only
+                doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, 15, 22);
                 if (logoUrl) {
                     try {
                         const response = await fetch(logoUrl);
@@ -174,24 +169,29 @@ export function LoanCalculator() {
                             reader.onerror = reject;
                             reader.readAsDataURL(blob);
                         });
-                        doc.setGState(new (doc as any).GState({opacity: 0.1}));
-                        doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
-                        doc.setGState(new (doc as any).GState({opacity: 1}));
-                    } catch(e) { console.error("Could not add image watermark", e); }
+                        doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() - 35, 15, 20, 20);
+                    } catch(e) { console.error("Could not add logo to PDF header", e); }
                 }
+            }
 
-                // Header
-                doc.setFontSize(10).setTextColor(100);
-                doc.text(siteTitle, 15, 10);
-                doc.text(`Loan Amortization Schedule`, doc.internal.pageSize.getWidth() - 15, 10, { align: 'right' });
-                doc.line(15, 12, doc.internal.pageSize.getWidth() - 15, 12);
-                
-                // Footer
-                doc.setFontSize(8).setTextColor(150);
-                doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.getWidth() - 15, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
+            // Watermark on all pages
+            doc.setFontSize(50).setTextColor(230, 230, 230).text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
+            if (logoUrl) {
+                try {
+                    const response = await fetch(logoUrl);
+                    const blob = await response.blob();
+                    const reader = new FileReader();
+                    const dataUrl = await new Promise<string>((resolve, reject) => {
+                        reader.onloadend = () => resolve(reader.result as string);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                    doc.setGState(new (doc as any).GState({opacity: 0.1}));
+                    doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
+                    doc.setGState(new (doc as any).GState({opacity: 1}));
+                } catch(e) { console.error("Could not add image watermark", e); }
             }
         };
-
 
         const bodyData = [
             ['Loan Type', loanType],
@@ -211,28 +211,25 @@ export function LoanCalculator() {
             ['Total Interest', formatCurrency(totalInterest, currency)],
         );
 
-        // --- Loan Summary Table ---
         autoTable(doc, {
-            startY: 20,
+            startY: 40,
             body: bodyData,
             theme: 'striped',
             styles: { fontSize: 10 },
             head: [['Loan Summary', '']],
             headStyles: { fillColor: [76, 35, 137] },
             columnStyles: { 0: { fontStyle: 'bold' } },
+            didDrawPage: (data) => addWatermarkAndHeaders(data.pageNumber === 1)
         });
 
-        // --- EMI Schedule Table ---
         autoTable(doc, {
           startY: (doc as any).autoTable.previous.finalY + 10,
           head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
           body: schedule.map(item => [item.month, item.principal.replace(/[^\d.-]/g, ''), item.interest.replace(/[^\d.-]/g, ''), item.totalPayment.replace(/[^\d.-]/g, ''), item.remainingBalance.replace(/[^\d.-]/g, '')]),
           theme: 'grid',
           headStyles: { fillColor: [76, 35, 137] },
-          didDrawPage: addWatermarkAndHeaders
+          didDrawPage: (data) => addWatermarkAndHeaders(false) // Not first page for subsequent pages
         });
-        
-        addWatermarkAndHeaders(); // Call for the first page
         
         doc.save(`emi-schedule-${loanAmount}.pdf`);
 
@@ -246,22 +243,41 @@ export function LoanCalculator() {
     }
   };
 
-  const handleShareOnWhatsApp = () => {
-      if (!payment || !totalPayment || !totalInterest) return;
+  const getShareSummary = () => {
+      if (!payment || !totalPayment || !totalInterest) return '';
+      return `*Loan Summary for ${loanType}*\n\n` +
+      `- *Loan Amount:* ${formatCurrency(parseFloat(loanAmount), currency)}\n` +
+      (gstAmount && gstAmount > 0 ? `- *GST Amount:* ${formatCurrency(gstAmount, currency)}\n` : '') +
+      (gstAmount && gstAmount > 0 ? `- *Total Loan:* ${formatCurrency(parseFloat(loanAmount) + gstAmount, currency)}\n` : '') +
+      `- *Interest Rate:* ${interestRate}%\n` +
+      `- *Loan Term:* ${loanTerm} ${termUnit}\n` +
+      `- *EMI:* ${formatCurrency(payment, currency)} / ${frequency}\n` +
+      `- *Total Payment:* ${formatCurrency(totalPayment, currency)}\n` +
+      `- *Total Interest:* ${formatCurrency(totalInterest, currency)}\n\n` +
+      `_Calculated with ToolifyAI Loan Calculator_`;
+  };
 
-      const summary = `*Loan Summary for ${loanType}*
-- *Loan Amount:* ${formatCurrency(parseFloat(loanAmount), currency)}
-${gstAmount && gstAmount > 0 ? `- *GST Amount:* ${formatCurrency(gstAmount, currency)}` : ''}
-${gstAmount && gstAmount > 0 ? `- *Total Loan:* ${formatCurrency(parseFloat(loanAmount) + gstAmount, currency)}` : ''}
-- *Interest Rate:* ${interestRate}%
-- *Loan Term:* ${loanTerm} ${termUnit}
-- *EMI:* ${formatCurrency(payment, currency)} / ${frequency}
-- *Total Payment:* ${formatCurrency(totalPayment, currency)}
-- *Total Interest:* ${formatCurrency(totalInterest, currency)}`;
-      
+  const handleShareOnWhatsApp = () => {
+      const summary = getShareSummary();
+      if (!summary) return;
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(summary)}`;
       window.open(whatsappUrl, '_blank');
   };
+  
+  const handleShareOnEmail = () => {
+      const summary = getShareSummary().replace(/\*/g, ''); // Remove markdown for plain text email
+      if (!summary) return;
+      const subject = `Loan Calculation for ${loanType}`;
+      const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(summary)}`;
+      window.location.href = mailtoUrl;
+  };
+  
+  const handleShareOnTelegram = () => {
+      const summary = getShareSummary();
+      if (!summary) return;
+      const telegramUrl = `https://t.me/share/url?url=https://toolifyai.com&text=${encodeURIComponent(summary)}`;
+      window.open(telegramUrl, '_blank');
+  }
 
     const pieChartData = (payment !== null && totalInterest !== null) ? [
         { name: 'Principal Amount', value: parseFloat(loanAmount) },
@@ -393,7 +409,7 @@ ${gstAmount && gstAmount > 0 ? `- *Total Loan:* ${formatCurrency(parseFloat(loan
                                 ))}
                             </Pie>
                             <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
-                            <Legend wrapperStyle={{fontSize: "0.8rem", paddingTop: "1rem"}}/>
+                            <Legend layout="vertical" verticalAlign="middle" align="right" />
                         </PieChart>
                     </ResponsiveContainer>
                 </CardContent>
@@ -436,7 +452,19 @@ ${gstAmount && gstAmount > 0 ? `- *Total Loan:* ${formatCurrency(parseFloat(loan
             </CardContent>
             <CardFooter className="flex-col sm:flex-row justify-end gap-2">
                 <Button variant="outline" onClick={handleShareOnWhatsApp}>
-                    <MessageCircle className="mr-2 h-4 w-4"/> Share on WhatsApp
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="mr-2 h-4 w-4">
+                        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 12c0 1.74.45 3.39 1.22 4.84l-1.18 4.34 4.45-1.16c1.4.74 3 .12 4.58.12h.01c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zM12.04 3.67c4.54 0 8.24 3.7 8.24 8.24 0 4.54-3.7 8.24-8.24 8.24h-.01c-1.48 0-2.92-.39-4.18-1.11l-.3-.17-3.11.81.83-3.04-.19-.32a8.24 8.24 0 0 1-1.26-4.39c0-4.54 3.7-8.24 8.24-8.24zm3.53 10.19c-.17-.08-1-.49-1.15-.55-.16-.06-.27-.08-.39.08s-.44.55-.54.66c-.1.11-.2.13-.37.04s-1.15-.42-2.19-1.34c-.81-.72-1.36-1.61-1.52-1.88-.16-.27-.02-.42.07-.54.08-.11.17-.27.26-.4.1-.13.13-.22.2-.36.06-.15.03-.27-.01-.36-.05-.08-1-2.4-1.37-3.29-.36-.85-.73-.73-.99-.74h-.27c-.22 0-.58.08-.89.36s-1.04 1.01-1.04 2.47c0 1.46 1.06 2.87 1.21 3.07.16.21 2.07 3.16 5.02 4.43.7.3 1.25.48 1.68.61.69.21 1.32.18 1.82.11.55-.07 1.66-.68 1.9-1.33.23-.65.23-1.21.16-1.33-.07-.12-.25-.2-.42-.28z"/>
+                    </svg>
+                    Share on WhatsApp
+                </Button>
+                <Button variant="outline" onClick={handleShareOnEmail}>
+                    <Mail className="mr-2 h-4 w-4"/> Share on Email
+                </Button>
+                <Button variant="outline" onClick={handleShareOnTelegram}>
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="mr-2 h-4 w-4">
+                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.13-.05.266-.19.395-1.22 1.06-2.06 2.02-2.822 2.914-.595.717-.963 1.122-1.122 1.23a.472.472 0 0 1-.33.123c-.16-.01-.3-.09-.41-.235-1.35-1.145-2.02-1.71-2.02-1.71s-.112-.097-.26-.03c-.15.066-.24.21-.24.21s-.13.14-.24.234c-.1.1-.2.13-.3.13a.43.43 0 0 1-.24-.07c-.12-.09-.15-.2-.15-.2s-.03-.11-.03-.21c0-.1.03-.2.03-.2s.18-.24.54-.54c.36-.3.66-.54.66-.54s.45-.45.81-.81c.36-.36.75-.75 1.05-1.11.3-.36.54-.78.54-.78s.09-.24.21-.36c.12-.12.27-.18.42-.18.15 0 .3.04.45.18l.06.06z"/>
+                    </svg>
+                    Share on Telegram
                 </Button>
                 <Button onClick={handleDownloadPdf}>
                     <Download className="mr-2 h-4 w-4"/> Download as PDF
@@ -447,3 +475,4 @@ ${gstAmount && gstAmount > 0 ? `- *Total Loan:* ${formatCurrency(parseFloat(loan
     </div>
   );
 }
+
