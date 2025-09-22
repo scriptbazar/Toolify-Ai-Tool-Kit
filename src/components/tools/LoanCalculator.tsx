@@ -14,7 +14,6 @@ import { getSettings } from '@/ai/flows/settings-management';
 import { useToast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
 
 
 interface ScheduleItem {
@@ -130,6 +129,7 @@ export function LoanCalculator() {
   const formatCurrency = (value: number, currencyCode: string) => {
     if (isNaN(value)) return '';
     const symbol = currencySymbols[currencyCode] || '$';
+    // Use en-US locale to avoid unwanted characters like the apostrophe from en-IN for lakhs.
     return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
   }
   
@@ -159,21 +159,28 @@ export function LoanCalculator() {
         
         const doc = new jsPDF();
         
-        // --- Add Header on first page ---
-        doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, 15, 22);
-        if (logoUrl) {
-            try {
-                const response = await fetch(logoUrl);
-                const blob = await response.blob();
-                const reader = new FileReader();
-                const dataUrl = await new Promise<string>((resolve, reject) => {
-                    reader.onloadend = () => resolve(reader.result as string);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
-                doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() - 35, 15, 20, 20);
-            } catch(e) { console.error("Could not add logo to PDF header", e); }
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+             if (i === 1) {
+                if (logoUrl) {
+                    try {
+                        const response = await fetch(logoUrl);
+                        const blob = await response.blob();
+                        const reader = new FileReader();
+                        const dataUrl = await new Promise<string>((resolve, reject) => {
+                            reader.onloadend = () => resolve(reader.result as string);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(blob);
+                        });
+                        doc.addImage(dataUrl, 'PNG', 15, 15, 20, 20);
+                    } catch(e) { console.error("Could not add logo to PDF header", e); }
+                }
+                doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, 40, 22);
+             }
         }
+        
+        doc.setPage(1);
 
         const bodyData = [
             ['Loan Type', loanType],
@@ -212,10 +219,12 @@ export function LoanCalculator() {
         });
 
         // --- Add Watermark on all pages ---
-        const pageCount = (doc as any).internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
+        const totalPages = (doc as any).internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
             doc.setPage(i);
-            doc.setFontSize(50).setTextColor(230, 230, 230).text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
+            doc.setFontSize(50).setTextColor(230, 230, 230);
+            doc.setGState(new (doc as any).GState({opacity: 0.1}));
+            doc.text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
              if (logoUrl) {
                 try {
                     const response = await fetch(logoUrl);
@@ -226,11 +235,10 @@ export function LoanCalculator() {
                         reader.onerror = reject;
                         reader.readAsDataURL(blob);
                     });
-                    doc.setGState(new (doc as any).GState({opacity: 0.1}));
                     doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
-                    doc.setGState(new (doc as any).GState({opacity: 1}));
                 } catch(e) { console.error("Could not add image watermark", e); }
             }
+             doc.setGState(new (doc as any).GState({opacity: 1}));
         }
         
         doc.save(`emi-schedule-${loanAmount}.pdf`);
@@ -394,7 +402,7 @@ export function LoanCalculator() {
                     <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Loan Breakdown</CardTitle>
                     <CardDescription className="text-xs">Principal vs. Interest</CardDescription>
                 </CardHeader>
-                <CardContent className="h-48">
+                <CardContent className="h-48 flex items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                             <Pie
@@ -404,7 +412,7 @@ export function LoanCalculator() {
                                 cx="50%"
                                 cy="50%"
                                 outerRadius={60}
-                                label={(props) => formatCurrency(props.value, currency)}
+                                label={(props) => formatCurrency(props.payload.value, currency)}
                             >
                                 {pieChartData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
