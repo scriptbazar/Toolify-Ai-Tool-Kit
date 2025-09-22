@@ -105,42 +105,97 @@ export function GSTCalculator() {
     try {
         const settings = await getSettings();
         const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
-
-        const doc = new jsPDF();
+        const logoUrl = settings.general?.logoUrl;
         
-        doc.setFontSize(22).setTextColor(40).text(siteTitle, 15, 20);
-        doc.setFontSize(12).setTextColor(100).text('GST Calculation Report', 15, 28);
-        doc.setLineWidth(0.5).line(15, 30, 195, 30);
+        const doc = new jsPDF();
+        let finalY = 10;
 
+        // --- Header ---
+        if (logoUrl) {
+            try {
+                // This is a simplified approach. A more robust solution would handle CORS and different image types.
+                // For this example, we assume a public, accessible image URL.
+                const response = await fetch(logoUrl);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                const dataUrl = await new Promise<string>(resolve => {
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.readAsDataURL(blob);
+                });
+                doc.addImage(dataUrl, 'PNG', 14, 15, 20, 20);
+                doc.setFontSize(22);
+                doc.text(siteTitle, 40, 28);
+            } catch (e) {
+                 console.error("Could not add logo to PDF:", e);
+                 doc.setFontSize(22);
+                 doc.text(siteTitle, 14, 22);
+            }
+        } else {
+             doc.setFontSize(22);
+             doc.text(siteTitle, 14, 22);
+        }
+
+        doc.setFontSize(12);
+        doc.text(`Transaction ID: ${result.transactionId}`, 14, 45);
+        doc.text(`Date: ${new Date(result.date).toLocaleDateString()}`, 14, 52);
+        finalY = 52;
+        
+        // --- User and Payment Tables ---
         (doc as any).autoTable({
-            startY: 40,
-            head: [['Description', 'Amount']],
+            startY: finalY + 10,
+            head: [['User Information']],
             body: [
-                ['Base Amount', formatCurrency(result.baseAmount)],
-                [`CGST (${parseFloat(gstRate)/2}%)`, formatCurrency(result.cgstAmount)],
-                [`SGST (${parseFloat(gstRate)/2}%)`, formatCurrency(result.sgstAmount)],
-                ['Total GST', formatCurrency(result.gstAmount)],
-                ['Total Amount', formatCurrency(result.totalAmount)],
+                [{ content: `Name: ${result.userName}\nEmail: ${result.userEmail}`, styles: { halign: 'left' }}],
             ],
             theme: 'striped',
-            headStyles: { fillColor: [76, 35, 137] }, // Primary color
-            foot: [['', '']],
-            footStyles: {
-                lineWidth: 0.5,
-                lineColor: [44, 62, 80]
-            },
-             didParseCell: function (data: any) {
-                if (data.row.index >= 3) {
-                     data.cell.styles.fontStyle = 'bold';
-                }
-             }
         });
+
+        (doc as any).autoTable({
+            startY: (doc as any).autoTable.previous.finalY + 10,
+            head: [['Payment Details']],
+            body: [
+                ['Plan', result.plan],
+                ['Amount', `$${result.amount.toFixed(2)}`],
+                ['Status', result.status],
+                ['Payment Method', result.paymentMethod],
+            ],
+            theme: 'striped',
+            didParseCell: function (data: any) {
+                if (data.section === 'body' && data.column.index === 0) {
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            }
+        });
+        finalY = (doc as any).autoTable.previous.finalY;
+
+
+        // --- Footer with Social Links ---
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const activeSocials = Object.entries(socialLinks).filter(([_, url]) => url);
         
-        doc.save(`gst-calculation-${Date.now()}.pdf`);
+        if (activeSocials.length > 0) {
+            let socialY = pageHeight - 15 - (activeSocials.length * 5);
+            doc.setFontSize(10);
+            doc.text("Follow Us:", 14, socialY);
+            socialY += 5;
+
+            activeSocials.forEach(([name, url]) => {
+                const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+                doc.setTextColor(40, 52, 152); // Link color
+                doc.textWithLink(`${capitalizedName}: ${url}`, 14, socialY, { url });
+                socialY += 5;
+            });
+        }
+        
+        doc.save(`invoice-${result.transactionId}.pdf`);
 
     } catch (error) {
         console.error("PDF Generation Error:", error);
-        toast({ title: "Error Generating PDF", variant: "destructive" });
+        toast({
+            title: "Error Generating PDF",
+            description: "Could not generate the PDF invoice. Please try again.",
+            variant: "destructive"
+        });
     }
   };
 
@@ -183,15 +238,16 @@ export function GSTCalculator() {
       </div>
       
       <div className="space-y-2">
-          <Label>Calculation Type</Label>
-          <RadioGroup value={calculationType} onValueChange={(val) => setCalculationType(val as any)} className="grid grid-cols-2 gap-4">
-            <Label htmlFor="add-gst" className="p-4 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary text-center">
-                <RadioGroupItem value="add" id="add-gst" className="sr-only"/>GST Exclusive
-            </Label>
-            <Label htmlFor="remove-gst" className="p-4 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary text-center">
-                <RadioGroupItem value="remove" id="remove-gst" className="sr-only"/>GST Inclusive
-            </Label>
-          </RadioGroup>
+        <Label>Calculation Type</Label>
+        <Select value={calculationType} onValueChange={(v) => setCalculationType(v as 'add' | 'remove')}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="add">GST Exclusive</SelectItem>
+            <SelectItem value="remove">GST Inclusive</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
 
