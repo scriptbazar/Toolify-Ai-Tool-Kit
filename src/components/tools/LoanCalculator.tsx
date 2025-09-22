@@ -13,6 +13,9 @@ import { ScrollArea } from '../ui/scroll-area';
 import { getSettings } from '@/ai/flows/settings-management';
 import { useToast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import type { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+
 
 interface ScheduleItem {
     month: number;
@@ -156,48 +159,21 @@ export function LoanCalculator() {
         
         const doc = new jsPDF();
         
-        const addWatermark = async () => {
-            const pageCount = doc.internal.pages.length - 1;
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(50).setTextColor(230, 230, 230).text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
-                 if (logoUrl) {
-                    try {
-                        const response = await fetch(logoUrl);
-                        const blob = await response.blob();
-                        const reader = new FileReader();
-                        const dataUrl = await new Promise<string>((resolve, reject) => {
-                            reader.onloadend = () => resolve(reader.result as string);
-                            reader.onerror = reject;
-                            reader.readAsDataURL(blob);
-                        });
-                        doc.setGState(new (doc as any).GState({opacity: 0.1}));
-                        doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
-                        doc.setGState(new (doc as any).GState({opacity: 1}));
-                    } catch(e) { console.error("Could not add image watermark", e); }
-                }
-            }
-        };
-
-        const addHeader = async () => {
-             // Header on first page only
-            doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, 15, 22);
-            if (logoUrl) {
-                try {
-                    const response = await fetch(logoUrl);
-                    const blob = await response.blob();
-                    const reader = new FileReader();
-                    const dataUrl = await new Promise<string>((resolve, reject) => {
-                        reader.onloadend = () => resolve(reader.result as string);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
-                    doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() - 35, 15, 20, 20);
-                } catch(e) { console.error("Could not add logo to PDF header", e); }
-            }
+        // --- Add Header on first page ---
+        doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, 15, 22);
+        if (logoUrl) {
+            try {
+                const response = await fetch(logoUrl);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                const dataUrl = await new Promise<string>((resolve, reject) => {
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+                doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() - 35, 15, 20, 20);
+            } catch(e) { console.error("Could not add logo to PDF header", e); }
         }
-
-        await addHeader();
 
         const bodyData = [
             ['Loan Type', loanType],
@@ -234,8 +210,29 @@ export function LoanCalculator() {
           theme: 'grid',
           headStyles: { fillColor: [76, 35, 137] },
         });
+
+        // --- Add Watermark on all pages ---
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(50).setTextColor(230, 230, 230).text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center', angle: 45 });
+             if (logoUrl) {
+                try {
+                    const response = await fetch(logoUrl);
+                    const blob = await response.blob();
+                    const reader = new FileReader();
+                    const dataUrl = await new Promise<string>((resolve, reject) => {
+                        reader.onloadend = () => resolve(reader.result as string);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                    doc.setGState(new (doc as any).GState({opacity: 0.1}));
+                    doc.addImage(dataUrl, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
+                    doc.setGState(new (doc as any).GState({opacity: 1}));
+                } catch(e) { console.error("Could not add image watermark", e); }
+            }
+        }
         
-        await addWatermark();
         doc.save(`emi-schedule-${loanAmount}.pdf`);
 
     } catch (error) {
