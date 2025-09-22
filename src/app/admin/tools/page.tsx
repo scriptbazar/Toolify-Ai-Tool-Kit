@@ -29,18 +29,18 @@ export default async function AdminToolsPage({
   const activeFilter = typeof searchParams?.filter === 'string' ? searchParams.filter : 'all';
   const currentPage = typeof searchParams?.page === 'string' ? Number(searchParams.page) : 1;
 
-  // Fetch ALL tools to calculate counts for filters, but only once.
-  // In a very large-scale app, this might be replaced with dedicated count queries.
+  // Fetch ALL tools once for filter counts.
   const allTools = await getTools();
-
-  // Apply filtering logic on the server
+  
+  // Apply all filters on the server-side
   const filteredTools = allTools
     .filter(tool => {
         if (activeFilter === 'all') return true;
         if (activeFilter === 'pro') return tool.plan === 'Pro';
         if (activeFilter === 'free') return tool.plan === 'Free';
         if (activeFilter === 'new') return tool.isNew;
-        return Object.values(tool.status).join('').toLowerCase().includes(activeFilter.toLowerCase());
+        // This handles status filters like 'Active', 'Beta', etc.
+        return tool.status.toLowerCase() === activeFilter.toLowerCase();
     })
     .filter(tool => {
       if (activeCategory === 'all') return true;
@@ -65,7 +65,7 @@ export default async function AdminToolsPage({
     }
 
     for (const [key, value] of Object.entries(params)) {
-      if (value === null || value === '' || (key === 'page' && value === 1)) {
+      if (value === null || (key === 'page' && value === 1)) {
         currentParams.delete(key);
       } else {
         currentParams.set(key, String(value));

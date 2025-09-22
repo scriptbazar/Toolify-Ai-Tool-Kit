@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ListChecks,
@@ -36,8 +36,8 @@ export function AdminToolFilters({ allTools }: AdminToolFiltersProps) {
   const searchQuery = searchParams.get('q') || '';
   const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
   const activeFilter = searchParams.get('filter') || 'all';
-
-  const createQueryString = (params: Record<string, string | null>) => {
+  
+  const createQueryString = useCallback((params: Record<string, string | null>) => {
     const currentParams = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(params)) {
       if (value === null || value === '' || value === 'all') {
@@ -47,7 +47,7 @@ export function AdminToolFilters({ allTools }: AdminToolFiltersProps) {
       }
     }
     return currentParams.toString();
-  };
+  }, [searchParams]);
 
   const handleFilterChange = (value: string) => {
     router.push(`/admin/tools?${createQueryString({ filter: value, page: null })}`);
@@ -58,7 +58,7 @@ export function AdminToolFilters({ allTools }: AdminToolFiltersProps) {
   };
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    router.push(`/admin/tools?${createQueryString({ q: e.target.value, page: null })}`);
+     router.push(`/admin/tools?${createQueryString({ q: e.target.value, page: null })}`);
   };
   
   const counts = useMemo(() => ({
