@@ -55,7 +55,7 @@ export function LoanCalculator() {
   const formatCurrency = (value: number | undefined | null, currencyCode: string) => {
     if (value === null || value === undefined || isNaN(value)) return 'N/A';
     const symbol = currencySymbols[currencyCode] || '$';
-    return `${symbol}${new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+    return `${symbol}${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
   }
   
   const formatCurrencyForPdf = (value: number | undefined | null, currencyCode: string) => {
@@ -150,13 +150,12 @@ export function LoanCalculator() {
         setGstAmount(null);
     };
   
-  const handleDownloadPdf = async () => {
+ const handleDownloadPdf = async () => {
     if (!payment || !totalPayment || !totalInterest || schedule.length === 0) return;
     
-    // Dynamically import jspdf and jspdf-autotable
     const { default: jsPDF } = await import('jspdf');
     const autoTable = (await import('jspdf-autotable')).default;
-    applyPlugin(jsPDF); // This is crucial for autoTable to work with the jsPDF instance.
+    applyPlugin(jsPDF);
 
     try {
         const settings = await getSettings();
@@ -165,7 +164,6 @@ export function LoanCalculator() {
         
         const doc = new jsPDF();
         
-        // --- DATA PREPARATION ---
         const summaryBodyData = [
             ['Loan Type', loanType],
             ['Loan Amount', formatCurrencyForPdf(parseFloat(loanAmount), currency)],
@@ -203,17 +201,13 @@ export function LoanCalculator() {
                   reader.onerror = reject;
                   reader.readAsDataURL(blob);
                 });
-            } catch (e) {
-                console.error("Could not fetch or process logo for PDF.", e);
-            }
+            } catch (e) { console.error("Could not fetch or process logo for PDF.", e); }
         }
         
         // --- PDF GENERATION ---
         
         // Header on first page only
-        if (logoImage) {
-            doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
-        }
+        if (logoImage) doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
         doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, logoImage ? 40 : 15, 28);
 
         autoTable(doc, {
@@ -233,26 +227,36 @@ export function LoanCalculator() {
           theme: 'grid',
           headStyles: { fillColor: [76, 35, 137] },
           didDrawPage: (data) => {
-            // Watermark on ALL pages
-            doc.setFontSize(50).setTextColor(150);
-            doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
-            if (logoImage) {
-              doc.addImage(logoImage, 'PNG', doc.internal.pageSize.getWidth() / 2 - 25, doc.internal.pageSize.getHeight() / 2 - 25, 50, 50);
-            }
-            doc.text(siteTitle, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2 + 35, { align: 'center' });
-            doc.setGState(new (doc as any).GState({ opacity: 1 }));
+            if (data.pageNumber === 1) return; // Skip header on first page
+            if (logoImage) doc.addImage(logoImage, 'PNG', 15, 15, 20, 20);
+            doc.setFontSize(22).setTextColor(40, 52, 137).text(siteTitle, logoImage ? 40 : 15, 28);
           }
         });
+        
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            const pageInfo = (doc as any).internal.getCurrentPageInfo();
+            const { width, height } = pageInfo.pageContext.mediaBox;
+            
+            doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
+            doc.setFontSize(50).setTextColor(150);
+            
+            doc.saveGraphicsState();
+            doc.translate(width / 2, height / 2);
+            doc.rotate(-45);
+            if (logoImage) doc.addImage(logoImage, 'PNG', -25, -50, 50, 50);
+            doc.text(siteTitle, 0, 20, { align: 'center' });
+            doc.restoreGraphicsState();
+            
+            doc.setGState(new (doc as any).GState({ opacity: 1 }));
+        }
 
         doc.save(`emi-schedule-${loanAmount}.pdf`);
 
     } catch (error) {
         console.error("PDF Generation Error:", error);
-        toast({
-            title: "Error Generating PDF",
-            description: "Could not generate the PDF invoice. Please try again.",
-            variant: "destructive"
-        });
+        toast({ title: "Error Generating PDF", description: "Could not generate the PDF. Please try again.", variant: "destructive" });
     }
   };
 
