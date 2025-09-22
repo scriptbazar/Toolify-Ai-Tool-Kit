@@ -52,7 +52,7 @@ export function TimeZoneConverter() {
     
     const timezoneOptions = useMemo(() => 
         timezones.map(tz => ({ value: tz, label: tz.replace(/_/g, ' ') })), 
-    [timezones]);
+    []);
 
 
     useEffect(() => {
