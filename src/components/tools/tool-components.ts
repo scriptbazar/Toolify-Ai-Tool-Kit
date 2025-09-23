@@ -38,7 +38,6 @@ import { FlipkartShippingLabelCropper } from './FlipkartShippingLabelCropper';
 import { FuelCostCalculator } from './FuelCostCalculator';
 import { GoogleDriveDirectLinkGenerator } from './GoogleDriveDirectLinkGenerator';
 import { GpaCalculator } from './GpaCalculator';
-import { GpaToCgpaCalculator } from './GpaToCgpaCalculator';
 import { GSTCalculator } from './GSTCalculator';
 import { IcoConverter } from './IcoConverter';
 import { IFSCodetoBankDetails } from './IFSCCodeToBankDetails';

@@ -39,7 +39,6 @@ export { FlipkartShippingLabelCropper } from './FlipkartShippingLabelCropper';
 export { FuelCostCalculator } from './FuelCostCalculator';
 export { GoogleDriveDirectLinkGenerator } from './GoogleDriveDirectLinkGenerator';
 export { GpaCalculator } from './GpaCalculator';
-export { GpaToCgpaCalculator } from './GpaToCgpaCalculator';
 export { GSTCalculator } from './GSTCalculator';
 export { IcoConverter } from './IcoConverter';
 export { IFSCodetoBankDetails } from './IFSCCodeToBankDetails';
