@@ -8,6 +8,7 @@ import { Search, LayoutGrid } from 'lucide-react';
 import { toolCategories } from '@/lib/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type Tool } from '@/ai/flows/tool-management.types';
+import { useDebounce } from 'use-debounce';
 
 interface ToolFiltersProps {
   tools: Tool[];
@@ -17,10 +18,11 @@ export function ToolFilters({ tools }: ToolFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const searchQuery = searchParams.get('q') || '';
+  const initialQuery = searchParams.get('q') || '';
   const activeCategory = searchParams.get('category') || 'all';
 
-  const [query, setQuery] = useState(searchQuery);
+  const [query, setQuery] = useState(initialQuery);
+  const [debouncedQuery] = useDebounce(query, 300);
 
   const categoryCounts = useMemo(() => {
     const counts: { [key: string]: number } = { all: tools.length };
@@ -30,7 +32,7 @@ export function ToolFilters({ tools }: ToolFiltersProps) {
     return counts;
   }, [tools]);
 
-  const createQueryString = (params: Record<string, string | null>) => {
+  const createQueryString = useCallback((params: Record<string, string | null>) => {
     const currentParams = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(params)) {
       if (value === null || value === '' || value === 'all') {
@@ -40,23 +42,17 @@ export function ToolFilters({ tools }: ToolFiltersProps) {
       }
     }
     return currentParams.toString();
-  };
+  }, [searchParams]);
   
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newQuery = e.target.value;
-      setQuery(newQuery);
-      const queryString = createQueryString({ q: newQuery, page: null });
-      router.push(`/tools?${queryString}`);
-  };
+  useEffect(() => {
+    const queryString = createQueryString({ q: debouncedQuery, page: null });
+    router.push(`/tools?${queryString}`);
+  }, [debouncedQuery, router, createQueryString]);
 
   const handleCategoryChange = (category: string) => {
     const queryString = createQueryString({ category: category, page: null });
     router.push(`/tools?${queryString}`);
   };
-
-  useEffect(() => {
-    setQuery(searchQuery);
-  }, [searchQuery]);
 
   return (
     <div className="mt-8 space-y-6">
@@ -65,7 +61,7 @@ export function ToolFilters({ tools }: ToolFiltersProps) {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
           <Input
             value={query}
-            onChange={handleSearchChange}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for a tool..."
             className="w-full pl-12 pr-4 sm:pr-44 h-14 text-base rounded-full shadow-lg focus:border-primary"
           />
