@@ -18,7 +18,7 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 import { toolCategories } from '@/lib/constants';
 import * as Icons from 'lucide-react';
 import { Edit, CheckCircle, XCircle, Star, Sparkles, Construction, GitCommitVertical, FlaskConical } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc } from '@/components/ui/dialog';
 import { EditToolForm } from '@/app/admin/tools/[id]/EditToolForm';
 import { upsertTool } from '@/ai/flows/tool-management';
 import { useToast } from '@/hooks/use-toast';
@@ -130,9 +130,9 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Edit Tool</DialogTitle>
-            <DialogDescription>
+            <DialogDesc>
               Modify the details for "{editingTool?.name}".
-            </DialogDescription>
+            </DialogDesc>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto p-1 pr-4">
              <EditToolForm tool={editingTool} onSave={handleSave} />
