@@ -121,6 +121,8 @@ export function ImageMetadataViewer() {
                         </div>
                     )}
                 </div>
+            </div>
+            <div className="space-y-4">
                 {isLoading && <Skeleton className="h-96 w-full"/>}
                 {!isLoading && metadata && (
                     <div className="space-y-4 animate-in fade-in-50">
