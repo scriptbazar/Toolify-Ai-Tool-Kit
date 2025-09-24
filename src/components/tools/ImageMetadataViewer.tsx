@@ -124,8 +124,10 @@ export function ImageMetadataViewer() {
                 {isLoading && <Skeleton className="h-96 w-full"/>}
                 {!isLoading && metadata && (
                     <div className="space-y-4 animate-in fade-in-50">
-                        {renderMetadataSection('File Info', FileText, ['FileName', 'FileSize', 'FileType', 'LastModified'])}
-                        {renderMetadataSection('Image Info', Camera, ['ImageWidth', 'ImageHeight', 'XResolution', 'YResolution', 'Orientation'])}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           {renderMetadataSection('File Info', FileText, ['FileName', 'FileSize', 'FileType', 'LastModified'])}
+                           {renderMetadataSection('Image Info', Camera, ['ImageWidth', 'ImageHeight', 'XResolution', 'YResolution', 'Orientation'])}
+                        </div>
                         {renderMetadataSection('Camera Info', Camera, ['Make', 'Model', 'FNumber', 'ISO', 'ExposureTime', 'FocalLength', 'LensModel'])}
                         {renderMetadataSection('GPS Info', Globe2, ['latitude', 'longitude'])}
                     </div>
