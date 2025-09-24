@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, Loader2, Circle, Heart, Star as StarIcon, Hexagon, Triangle, VenetianMask, Cross, Frame, Badge, MessageSquare, Octagon, Bot, Diamond } from 'lucide-react';
+import { UploadCloud, Download, Loader2, Circle, Heart, Star as StarIcon, Hexagon, Triangle, VenetianMask, Cross, Frame, Badge, MessageSquare, Octagon, Bot, Diamond, Pentagon, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -19,11 +19,13 @@ const shapes = [
     { id: 'octagon', name: 'Octagon', icon: Octagon },
     { id: 'triangle', name: 'Triangle', icon: Triangle },
     { id: 'rhombus', name: 'Rhombus', icon: Diamond },
+    { id: 'pentagon', name: 'Pentagon', icon: Pentagon },
     { id: 'cross', name: 'Cross', icon: Cross },
     { id: 'frame', name: 'Frame', icon: Frame },
     { id: 'badge', name: 'Badge', icon: Badge },
     { id: 'message', name: 'Message', icon: MessageSquare },
     { id: 'bot', name: 'Bot Head', icon: Bot },
+    { id: 'arrow-right', name: 'Arrow', icon: ArrowRight },
 ];
 
 export function ImageShapeConverter() {
@@ -34,13 +36,23 @@ export function ImageShapeConverter() {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const imageRef = useRef<HTMLImageElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file && file.type.startsWith('image/')) {
             setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new window.Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                  imageRef.current = img;
+                  setImagePreview(img.src);
+                };
+            };
+            reader.readAsDataURL(file);
             setConvertedImage(null);
         } else if (file) {
             toast({ title: "Invalid File", description: "Please upload a valid image file.", variant: "destructive" });
@@ -54,33 +66,37 @@ export function ImageShapeConverter() {
           ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, Math.PI * 2);
           break;
         case 'oval':
-          ctx.ellipse(w / 2, h / 2, w / 2, h / 2.5, 0, 0, Math.PI * 2);
+          ctx.ellipse(w / 2, h / 2, w / 2, h * 0.4, 0, 0, Math.PI * 2);
           break;
         case 'heart':
-            const dHeart = Math.min(w, h);
-            ctx.moveTo(dHeart / 2, dHeart / 4);
-            ctx.quadraticCurveTo(dHeart, 0, dHeart, dHeart / 4);
-            ctx.quadraticCurveTo(dHeart, dHeart / 2, dHeart / 2, dHeart * 0.75);
-            ctx.quadraticCurveTo(0, dHeart / 2, 0, dHeart / 4);
-            ctx.quadraticCurveTo(0, 0, dHeart / 2, dHeart / 4);
+            ctx.moveTo(w/2, h*0.35);
+            ctx.bezierCurveTo(w/2, h*0.3, w*0.4, h*0.15, w/2, h*0.15);
+            ctx.bezierCurveTo(w*0.1, h*0.15, 0, h*0.625, 0, h*0.625);
+            ctx.bezierCurveTo(0, h*0.8, w*0.15, h*0.9, w/2, h);
+            ctx.bezierCurveTo(w*0.85, h*0.9, w, h*0.8, w, h*0.625);
+            ctx.bezierCurveTo(w, h*0.625, w*0.9, h*0.15, w/2, h*0.15);
+            ctx.bezierCurveTo(w*0.6, h*0.15, w/2, h*0.3, w/2, h*0.35);
             break;
         case 'star':
-            const spikes = 5; let rot = Math.PI / 2 * 3; let x = w / 2; let y = h / 2;
+            const spikes = 5; let rot = Math.PI / 2 * 3;
             const step = Math.PI / spikes; const outerRadius = w / 2; const innerRadius = w / 4;
-            ctx.moveTo(x, y - outerRadius);
+            ctx.moveTo(w/2, h/2 - outerRadius);
             for (let i = 0; i < spikes; i++) {
-                x = w/2 + Math.cos(rot) * outerRadius; y = h/2 + Math.sin(rot) * outerRadius;
-                ctx.lineTo(x, y); rot += step;
-                x = w/2 + Math.cos(rot) * innerRadius; y = h/2 + Math.sin(rot) * innerRadius;
-                ctx.lineTo(x, y); rot += step;
+                ctx.lineTo(w/2 + Math.cos(rot) * outerRadius, h/2 + Math.sin(rot) * outerRadius);
+                rot += step;
+                ctx.lineTo(w/2 + Math.cos(rot) * innerRadius, h/2 + Math.sin(rot) * innerRadius);
+                rot += step;
             }
-            ctx.lineTo(w/2, h/2 - outerRadius);
+            ctx.closePath();
             break;
         case 'hexagon':
             for (let i = 0; i < 6; i++) { ctx.lineTo(w/2 + w/2 * Math.cos(Math.PI / 3 * i), h/2 + h/2 * Math.sin(Math.PI / 3 * i));}
             break;
         case 'octagon':
-            for (let i = 0; i < 8; i++) { ctx.lineTo(w/2 + w/2 * Math.cos(Math.PI / 4 * i), h/2 + h/2 * Math.sin(Math.PI / 4 * i));}
+            for (let i = 0; i < 8; i++) { ctx.lineTo(w/2 + w/2 * Math.cos(Math.PI / 4 * i + Math.PI/8), h/2 + h/2 * Math.sin(Math.PI / 4 * i + Math.PI/8));}
+            break;
+        case 'pentagon':
+            for (let i = 0; i < 5; i++) { ctx.lineTo(w / 2 + (w / 2) * Math.sin(2 * Math.PI * i / 5), h / 2 - (h / 2) * Math.cos(2 * Math.PI * i / 5)); }
             break;
         case 'triangle':
            ctx.moveTo(w / 2, 0); ctx.lineTo(w, h); ctx.lineTo(0, h);
@@ -89,66 +105,90 @@ export function ImageShapeConverter() {
             ctx.moveTo(w / 2, 0); ctx.lineTo(w, h / 2); ctx.lineTo(w / 2, h); ctx.lineTo(0, h / 2);
             break;
         case 'cross':
-            ctx.moveTo(w * 0.3, 0); ctx.lineTo(w * 0.7, 0); ctx.lineTo(w * 0.7, h * 0.3); ctx.lineTo(w, h * 0.3);
-            ctx.lineTo(w, h * 0.7); ctx.lineTo(w * 0.7, h * 0.7); ctx.lineTo(w * 0.7, h); ctx.lineTo(w * 0.3, h);
-            ctx.lineTo(w * 0.3, h * 0.7); ctx.lineTo(0, h * 0.7); ctx.lineTo(0, h * 0.3); ctx.lineTo(w * 0.3, h * 0.3);
+            ctx.moveTo(w * 0.3, 0); ctx.lineTo(w * 0.7, 0);
+            ctx.lineTo(w * 0.7, h * 0.3); ctx.lineTo(w, h * 0.3);
+            ctx.lineTo(w, h * 0.7); ctx.lineTo(w * 0.7, h * 0.7);
+            ctx.lineTo(w * 0.7, h); ctx.lineTo(w * 0.3, h);
+            ctx.lineTo(w * 0.3, h * 0.7); ctx.lineTo(0, h * 0.7);
+            ctx.lineTo(0, h * 0.3); ctx.lineTo(w * 0.3, h * 0.3);
             break;
         case 'frame':
             ctx.rect(0, 0, w, h);
             ctx.rect(w * 0.1, h * 0.1, w * 0.8, h * 0.8);
-            break;
+            ctx.closePath();
+            return; // Use fill with even-odd rule
         case 'badge':
             ctx.moveTo(0, h * 0.25); ctx.lineTo(w * 0.5, 0); ctx.lineTo(w, h * 0.25);
             ctx.lineTo(w, h * 0.75); ctx.quadraticCurveTo(w / 2, h, 0, h * 0.75);
             break;
         case 'message':
-            ctx.moveTo(0, 0); ctx.lineTo(w, 0); ctx.lineTo(w, h * 0.8);
-            ctx.lineTo(w * 0.6, h * 0.8); ctx.lineTo(w * 0.5, h); ctx.lineTo(w * 0.4, h * 0.8);
-            ctx.lineTo(0, h * 0.8);
+            ctx.moveTo(w * 0.1, 0); ctx.lineTo(w * 0.9, 0);
+            ctx.quadraticCurveTo(w, 0, w, h * 0.1);
+            ctx.lineTo(w, h * 0.9);
+            ctx.quadraticCurveTo(w, h, w * 0.9, h);
+            ctx.lineTo(w * 0.2, h);
+            ctx.lineTo(0, h * 0.7);
+            ctx.lineTo(w * 0.1, h);
+            ctx.quadraticCurveTo(0, h, 0, h * 0.9);
+            ctx.lineTo(0, h * 0.1);
+            ctx.quadraticCurveTo(0, 0, w * 0.1, 0);
             break;
         case 'bot':
-            ctx.arc(w/2, h/2, w/2, Math.PI, 0); // half circle
-            ctx.lineTo(w, h); ctx.lineTo(0, h); // bottom part
+            ctx.arc(w/2, h/2, w/2, Math.PI, 0);
+            ctx.lineTo(w, h); ctx.lineTo(0, h);
+            break;
+        case 'arrow-right':
+            ctx.moveTo(0, h * 0.25);
+            ctx.lineTo(w * 0.6, h * 0.25);
+            ctx.lineTo(w * 0.6, 0);
+            ctx.lineTo(w, h * 0.5);
+            ctx.lineTo(w * 0.6, h);
+            ctx.lineTo(w * 0.6, h * 0.75);
+            ctx.lineTo(0, h * 0.75);
             break;
       }
       ctx.closePath();
     }, []);
 
-    useEffect(() => {
-        if (!imagePreview) return;
-        setIsLoading(true);
+    const processImage = useCallback(() => {
+        const img = imageRef.current;
+        const canvas = canvasRef.current;
+        if (!img || !canvas) return;
 
-        const img = document.createElement('img');
-        img.src = imagePreview;
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-            const canvas = canvasRef.current;
-            if (!canvas) { setIsLoading(false); return; }
-            
-            const size = Math.min(img.width, img.height, 512);
-            canvas.width = size;
-            canvas.height = size;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) { setIsLoading(false); return; }
-            
-            ctx.clearRect(0, 0, size, size);
-            
-            drawShape(ctx, selectedShape, size, size);
-            ctx.clip();
-            
-            const ratio = Math.max(size / img.width, size / img.height);
-            const x = (size - img.width * ratio) / 2;
-            const y = (size - img.height * ratio) / 2;
-            ctx.drawImage(img, x, y, img.width * ratio, img.height * ratio);
-            
-            setConvertedImage(canvas.toDataURL('image/png'));
-            setIsLoading(false);
-        };
-         img.onerror = () => {
-            setIsLoading(false);
-            toast({ title: "Error", description: "Could not load the source image. It might be protected.", variant: 'destructive'});
-         }
-    }, [imagePreview, selectedShape, drawShape, toast]);
+        setIsLoading(true);
+        
+        const size = Math.min(img.naturalWidth, img.naturalHeight, 512);
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { setIsLoading(false); return; }
+        
+        ctx.clearRect(0, 0, size, size);
+        
+        ctx.save();
+        drawShape(ctx, selectedShape, size, size);
+
+        if (selectedShape === 'frame') {
+            ctx.fill('evenodd');
+        }
+        
+        ctx.clip();
+        
+        const ratio = Math.max(size / img.naturalWidth, size / img.naturalHeight);
+        const x = (size - img.naturalWidth * ratio) / 2;
+        const y = (size - img.naturalHeight * ratio) / 2;
+        ctx.drawImage(img, x, y, img.naturalWidth * ratio, img.naturalHeight * ratio);
+        ctx.restore();
+        
+        setConvertedImage(canvas.toDataURL('image/png'));
+        setIsLoading(false);
+    }, [selectedShape, drawShape]);
+
+    useEffect(() => {
+        if (imagePreview && imageRef.current) {
+            processImage();
+        }
+    }, [imagePreview, selectedShape, processImage]);
 
     const handleDownload = () => {
         if (!convertedImage || !imageFile) return;
@@ -179,7 +219,7 @@ export function ImageShapeConverter() {
                 
                  <div className="space-y-2">
                     <Label>Select a Shape</Label>
-                    <div className="grid grid-cols-4 md:grid-cols-5 gap-2">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                         {shapes.map(shape => {
                             const Icon = shape.icon;
                             return (
