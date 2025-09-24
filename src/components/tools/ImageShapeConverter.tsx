@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, Loader2, Circle, Heart, Star as StarIcon, Hexagon, Triangle, VenetianMask } from 'lucide-react';
+import { UploadCloud, Download, Loader2, Circle, Heart, Star as StarIcon, Hexagon, Triangle, VenetianMask, Cross, Frame, Badge, MessageSquare, Octagon, Bot, Diamond } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -12,12 +12,18 @@ import { Card, CardContent } from '../ui/card';
 
 const shapes = [
     { id: 'circle', name: 'Circle', icon: Circle },
+    { id: 'oval', name: 'Oval', icon: VenetianMask },
     { id: 'heart', name: 'Heart', icon: Heart },
     { id: 'star', name: 'Star', icon: StarIcon },
     { id: 'hexagon', name: 'Hexagon', icon: Hexagon },
+    { id: 'octagon', name: 'Octagon', icon: Octagon },
     { id: 'triangle', name: 'Triangle', icon: Triangle },
-    { id: 'oval', name: 'Oval', icon: VenetianMask }, // Using a placeholder icon
-    { id: 'rhombus', name: 'Rhombus', icon: Hexagon }, // Using a placeholder icon
+    { id: 'rhombus', name: 'Rhombus', icon: Diamond },
+    { id: 'cross', name: 'Cross', icon: Cross },
+    { id: 'frame', name: 'Frame', icon: Frame },
+    { id: 'badge', name: 'Badge', icon: Badge },
+    { id: 'message', name: 'Message', icon: MessageSquare },
+    { id: 'bot', name: 'Bot Head', icon: Bot },
 ];
 
 export function ImageShapeConverter() {
@@ -41,67 +47,68 @@ export function ImageShapeConverter() {
         }
     };
     
-    const drawShape = useCallback((ctx: CanvasRenderingContext2D, shape: string, width: number, height: number) => {
+    const drawShape = useCallback((ctx: CanvasRenderingContext2D, shape: string, w: number, h: number) => {
       ctx.beginPath();
       switch (shape) {
         case 'circle':
-          ctx.arc(width / 2, height / 2, Math.min(width, height) / 2, 0, Math.PI * 2);
+          ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, Math.PI * 2);
           break;
         case 'oval':
-          ctx.ellipse(width / 2, height / 2, width / 2, height / 3, 0, 0, Math.PI * 2);
+          ctx.ellipse(w / 2, h / 2, w / 2, h / 2.5, 0, 0, Math.PI * 2);
           break;
         case 'heart':
-          const d = Math.min(width, height);
-          const k = d/1.5;
-          ctx.moveTo(k, k / 4);
-          ctx.bezierCurveTo(k, k / 8, k / 2, 0, k / 4, k / 4);
-          ctx.bezierCurveTo(0, k / 2, 0, 0.875 * k, 0, 0.875 * k);
-          ctx.bezierCurveTo(0, 1.25 * k, k / 4, 1.4375 * k, k, 1.875 * k);
-          ctx.bezierCurveTo(1.75 * k, 1.4375 * k, 2 * k, 1.25 * k, 2 * k, 0.875 * k);
-          ctx.bezierCurveTo(2 * k, 0.875 * k, 2 * k, k / 2, 1.75 * k, k / 4);
-          ctx.bezierCurveTo(1.5 * k, 0, k, k / 8, k, k / 4);
-          break;
+            const dHeart = Math.min(w, h);
+            ctx.moveTo(dHeart / 2, dHeart / 4);
+            ctx.quadraticCurveTo(dHeart, 0, dHeart, dHeart / 4);
+            ctx.quadraticCurveTo(dHeart, dHeart / 2, dHeart / 2, dHeart * 0.75);
+            ctx.quadraticCurveTo(0, dHeart / 2, 0, dHeart / 4);
+            ctx.quadraticCurveTo(0, 0, dHeart / 2, dHeart / 4);
+            break;
         case 'star':
-          const spikes = 5;
-          let rot = Math.PI / 2 * 3;
-          let x = width/2;
-          let y = height/2;
-          const step = Math.PI / spikes;
-          const outerRadius = width / 2;
-          const innerRadius = width / 4;
-          
-          ctx.moveTo(x, y - outerRadius)
-          for (let i = 0; i < spikes; i++) {
-              x = width/2 + Math.cos(rot) * outerRadius;
-              y = height/2 + Math.sin(rot) * outerRadius;
-              ctx.lineTo(x, y)
-              rot += step
-
-              x = width/2 + Math.cos(rot) * innerRadius;
-              y = height/2 + Math.sin(rot) * innerRadius;
-              ctx.lineTo(x, y)
-              rot += step
-          }
-          ctx.lineTo(width/2, height/2 - outerRadius);
-          break;
+            const spikes = 5; let rot = Math.PI / 2 * 3; let x = w / 2; let y = h / 2;
+            const step = Math.PI / spikes; const outerRadius = w / 2; const innerRadius = w / 4;
+            ctx.moveTo(x, y - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                x = w/2 + Math.cos(rot) * outerRadius; y = h/2 + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y); rot += step;
+                x = w/2 + Math.cos(rot) * innerRadius; y = h/2 + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y); rot += step;
+            }
+            ctx.lineTo(w/2, h/2 - outerRadius);
+            break;
         case 'hexagon':
-          for (let i = 0; i <= 6; i++) {
-            const angle = (i * 60) * Math.PI / 180;
-            const x_ = width / 2 + (width / 2) * Math.cos(angle);
-            const y_ = height / 2 + (height / 2) * Math.sin(angle);
-            if (i === 0) ctx.moveTo(x_, y_); else ctx.lineTo(x_, y_);
-          }
-          break;
+            for (let i = 0; i < 6; i++) { ctx.lineTo(w/2 + w/2 * Math.cos(Math.PI / 3 * i), h/2 + h/2 * Math.sin(Math.PI / 3 * i));}
+            break;
+        case 'octagon':
+            for (let i = 0; i < 8; i++) { ctx.lineTo(w/2 + w/2 * Math.cos(Math.PI / 4 * i), h/2 + h/2 * Math.sin(Math.PI / 4 * i));}
+            break;
         case 'triangle':
-           ctx.moveTo(width / 2, 0);
-           ctx.lineTo(width, height);
-           ctx.lineTo(0, height);
+           ctx.moveTo(w / 2, 0); ctx.lineTo(w, h); ctx.lineTo(0, h);
            break;
         case 'rhombus':
-            ctx.moveTo(width / 2, 0);
-            ctx.lineTo(width, height / 2);
-            ctx.lineTo(width / 2, height);
-            ctx.lineTo(0, height / 2);
+            ctx.moveTo(w / 2, 0); ctx.lineTo(w, h / 2); ctx.lineTo(w / 2, h); ctx.lineTo(0, h / 2);
+            break;
+        case 'cross':
+            ctx.moveTo(w * 0.3, 0); ctx.lineTo(w * 0.7, 0); ctx.lineTo(w * 0.7, h * 0.3); ctx.lineTo(w, h * 0.3);
+            ctx.lineTo(w, h * 0.7); ctx.lineTo(w * 0.7, h * 0.7); ctx.lineTo(w * 0.7, h); ctx.lineTo(w * 0.3, h);
+            ctx.lineTo(w * 0.3, h * 0.7); ctx.lineTo(0, h * 0.7); ctx.lineTo(0, h * 0.3); ctx.lineTo(w * 0.3, h * 0.3);
+            break;
+        case 'frame':
+            ctx.rect(0, 0, w, h);
+            ctx.rect(w * 0.1, h * 0.1, w * 0.8, h * 0.8);
+            break;
+        case 'badge':
+            ctx.moveTo(0, h * 0.25); ctx.lineTo(w * 0.5, 0); ctx.lineTo(w, h * 0.25);
+            ctx.lineTo(w, h * 0.75); ctx.quadraticCurveTo(w / 2, h, 0, h * 0.75);
+            break;
+        case 'message':
+            ctx.moveTo(0, 0); ctx.lineTo(w, 0); ctx.lineTo(w, h * 0.8);
+            ctx.lineTo(w * 0.6, h * 0.8); ctx.lineTo(w * 0.5, h); ctx.lineTo(w * 0.4, h * 0.8);
+            ctx.lineTo(0, h * 0.8);
+            break;
+        case 'bot':
+            ctx.arc(w/2, h/2, w/2, Math.PI, 0); // half circle
+            ctx.lineTo(w, h); ctx.lineTo(0, h); // bottom part
             break;
       }
       ctx.closePath();
@@ -113,11 +120,12 @@ export function ImageShapeConverter() {
 
         const img = document.createElement('img');
         img.src = imagePreview;
+        img.crossOrigin = 'anonymous';
         img.onload = () => {
             const canvas = canvasRef.current;
             if (!canvas) { setIsLoading(false); return; }
             
-            const size = Math.min(img.width, img.height);
+            const size = Math.min(img.width, img.height, 512);
             canvas.width = size;
             canvas.height = size;
             const ctx = canvas.getContext('2d');
@@ -136,8 +144,11 @@ export function ImageShapeConverter() {
             setConvertedImage(canvas.toDataURL('image/png'));
             setIsLoading(false);
         };
-         img.onerror = () => setIsLoading(false);
-    }, [imagePreview, selectedShape, drawShape]);
+         img.onerror = () => {
+            setIsLoading(false);
+            toast({ title: "Error", description: "Could not load the source image. It might be protected.", variant: 'destructive'});
+         }
+    }, [imagePreview, selectedShape, drawShape, toast]);
 
     const handleDownload = () => {
         if (!convertedImage || !imageFile) return;
@@ -168,7 +179,7 @@ export function ImageShapeConverter() {
                 
                  <div className="space-y-2">
                     <Label>Select a Shape</Label>
-                    <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 md:grid-cols-5 gap-2">
                         {shapes.map(shape => {
                             const Icon = shape.icon;
                             return (
@@ -186,11 +197,10 @@ export function ImageShapeConverter() {
                  <div className="w-full aspect-square border rounded-lg flex items-center justify-center p-4">
                      <canvas ref={canvasRef} className="hidden" />
                      {isLoading && <Loader2 className="h-12 w-12 text-primary animate-spin" />}
-                     {!isLoading && convertedImage && (
+                     {!isLoading && convertedImage ? (
                         <Image src={convertedImage} alt="Converted shape" width={512} height={512} className="max-w-full max-h-full object-contain" />
-                     )}
-                     {!isLoading && !convertedImage && (
-                         <p className="text-muted-foreground text-center">Your converted image will appear here.</p>
+                     ) : (
+                         !isLoading && <p className="text-muted-foreground text-center">Your converted image will appear here.</p>
                      )}
                  </div>
                  <Button onClick={handleDownload} disabled={!convertedImage || isLoading} className="w-full">
