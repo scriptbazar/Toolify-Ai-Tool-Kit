@@ -11,8 +11,9 @@ import Image from 'next/image';
 import { Slider } from '../ui/slider';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
+import imageCompression from 'browser-image-compression';
 
-type ImageFormat = 'png' | 'jpeg' | 'webp' | 'gif';
+type ImageFormat = 'png' | 'jpeg' | 'webp';
 
 export function ImageConverter() {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -21,6 +22,7 @@ export function ImageConverter() {
   const [quality, setQuality] = useState(0.8);
   const [originalSize, setOriginalSize] = useState<string | null>(null);
   const [estimatedSize, setEstimatedSize] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -45,67 +47,62 @@ export function ImageConverter() {
     }
   };
 
-  const estimateSize = () => {
-    if (!imagePreview) return;
-    const img = document.createElement('img');
-    img.src = imagePreview;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+  const estimateSize = async () => {
+    if (!imageFile) return;
 
-      if (targetFormat === 'jpeg') {
-          ctx.fillStyle = 'white';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-      ctx.drawImage(img, 0, 0);
-
-      const dataUrl = canvas.toDataURL(`image/${targetFormat}`, quality);
-      const sizeInBytes = Math.round(dataUrl.length * 3 / 4);
-      setEstimatedSize(formatBytes(sizeInBytes));
-    };
+    try {
+      const options = {
+        maxSizeMB: 20, // High limit to not resize unintentionally
+        useWebWorker: true,
+        initialQuality: quality,
+        fileType: `image/${targetFormat}`,
+        exifOrientation: true,
+      };
+      const compressedFile = await imageCompression(imageFile, options);
+      setEstimatedSize(formatBytes(compressedFile.size));
+    } catch (error) {
+      console.error("Size estimation error:", error);
+      setEstimatedSize("N/A");
+    }
   };
 
   useEffect(() => {
-    if (targetFormat === 'jpeg' || targetFormat === 'webp') {
+    if ((targetFormat === 'jpeg' || targetFormat === 'webp') && imageFile) {
       estimateSize();
     } else {
       setEstimatedSize(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quality, targetFormat, imagePreview]);
+  }, [quality, targetFormat, imageFile]);
 
-
-  const handleConvert = () => {
-    if (!imagePreview) {
-        toast({ title: "No image uploaded", variant: "destructive" });
-        return;
-    };
-    
-    const img = document.createElement('img');
-    img.src = imagePreview;
-    img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        if (targetFormat === 'jpeg') {
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        ctx.drawImage(img, 0, 0);
-
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL(`image/${targetFormat}`, quality);
-        const originalName = imageFile?.name.split('.')[0] || 'converted';
-        link.download = `${originalName}.${targetFormat}`;
-        link.click();
-        toast({ title: `Converted to ${targetFormat.toUpperCase()} and downloaded!` });
+  const handleConvert = async () => {
+    if (!imageFile) {
+      toast({ title: "No image uploaded", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const options = {
+        maxSizeMB: 20,
+        useWebWorker: true,
+        initialQuality: quality,
+        fileType: `image/${targetFormat}`,
+        exifOrientation: true,
+      };
+      
+      const compressedFile = await imageCompression(imageFile, options);
+      
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(compressedFile);
+      const originalName = imageFile.name.split('.')[0] || 'converted';
+      link.download = `${originalName}.${targetFormat}`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      toast({ title: `Converted to ${targetFormat.toUpperCase()} and downloaded!` });
+    } catch (error: any) {
+        toast({ title: 'Conversion Failed', description: error.message, variant: 'destructive'});
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -156,7 +153,6 @@ export function ImageConverter() {
                             <SelectItem value="jpeg">JPEG</SelectItem>
                             <SelectItem value="png">PNG</SelectItem>
                             <SelectItem value="webp">WEBP</SelectItem>
-                            <SelectItem value="gif">GIF</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -169,8 +165,9 @@ export function ImageConverter() {
                         <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={0.1} max={1} step={0.05} />
                     </div>
                 )}
-                 <Button onClick={handleConvert} disabled={!imageFile} className="w-full">
-                    <Download className="mr-2 h-4 w-4" /> Convert & Download
+                 <Button onClick={handleConvert} disabled={!imageFile || isLoading} className="w-full">
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4" />}
+                    Convert & Download
                 </Button>
             </CardContent>
         </Card>
