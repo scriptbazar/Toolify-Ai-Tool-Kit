@@ -4,7 +4,7 @@
 import { useState, useRef, type ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { UploadCloud, Camera, FileText, Globe2, Copy, Loader2 } from 'lucide-react';
+import { UploadCloud, Camera, FileText, Globe2, Copy, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import exifr from 'exifr';
@@ -107,21 +107,19 @@ export function ImageMetadataViewer() {
     return (
         <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                    <div 
-                        className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
-                        onClick={() => fileInputRef.current?.click()}
-                    >
-                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-                        {imagePreview ? (
-                            <Image src={imagePreview} alt="Uploaded preview" layout="fill" objectFit="contain" className="p-2"/>
-                        ) : (
-                            <div className="flex flex-col items-center">
-                                <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                                <p className="text-sm text-muted-foreground">Click or drag image to upload</p>
-                            </div>
-                        )}
-                    </div>
+                 <div 
+                    className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+                    {imagePreview ? (
+                        <Image src={imagePreview} alt="Uploaded preview" layout="fill" objectFit="contain" className="p-2"/>
+                    ) : (
+                        <div className="flex flex-col items-center">
+                            <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                            <p className="text-sm text-muted-foreground">Click or drag image to upload</p>
+                        </div>
+                    )}
                 </div>
                  <div className="space-y-4">
                     {isLoading ? <Skeleton className="h-full w-full min-h-[250px]"/> : (
@@ -132,10 +130,10 @@ export function ImageMetadataViewer() {
             {!isLoading && metadata && (
                 <div className="space-y-4 animate-in fade-in-50">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                       {renderMetadataSection('Image Info', Camera, ['ImageWidth', 'ImageHeight', 'XResolution', 'YResolution', 'Orientation'])}
-                       {renderMetadataSection('Camera Info', Camera, ['Make', 'Model', 'FNumber', 'ISO', 'ExposureTime', 'FocalLength', 'LensModel'])}
+                        {renderMetadataSection('Image Info', ImageIcon, ['ImageWidth', 'ImageHeight', 'XResolution', 'YResolution', 'Orientation'])}
+                        {renderMetadataSection('Camera Info', Camera, ['Make', 'Model', 'FNumber', 'ISO', 'ExposureTime', 'FocalLength', 'LensModel'])}
                     </div>
-                    {renderMetadataSection('GPS Info', Globe2, ['latitude', 'longitude'])}
+                     {renderMetadataSection('GPS Info', Globe2, ['latitude', 'longitude'])}
                 </div>
             )}
         </div>
