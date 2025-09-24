@@ -4,15 +4,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, Percent } from 'lucide-react';
+import { UploadCloud, Download, Percent, FileArchive } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Slider } from '../ui/slider';
 import Image from 'next/image';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+
+type CompressionType = 'lossy' | 'lossless';
 
 export function ImageCompressor() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [quality, setQuality] = useState(0.8);
+  const [compressionType, setCompressionType] = useState<CompressionType>('lossy');
   const [originalSize, setOriginalSize] = useState(0);
   const [compressedSize, setCompressedSize] = useState(0);
   const { toast } = useToast();
@@ -23,6 +27,7 @@ export function ImageCompressor() {
     if (file && file.type.startsWith('image/')) {
       setImageFile(file);
       setOriginalSize(file.size);
+      setCompressedSize(0);
       setImagePreview(URL.createObjectURL(file));
     } else if (file) {
       toast({ title: "Invalid File", description: "Please upload a valid image file.", variant: "destructive" });
@@ -42,6 +47,18 @@ export function ImageCompressor() {
         if (!ctx) return;
         ctx.drawImage(img, 0, 0);
 
+        let compressionQuality: number | undefined;
+        let fileType = imageFile?.type || 'image/jpeg';
+
+        if (compressionType === 'lossy') {
+            compressionQuality = quality;
+        } else {
+            // For lossless, PNG is ideal. If original is not PNG, we try to keep max quality for others.
+            if (fileType !== 'image/png') {
+                compressionQuality = 1.0;
+            }
+        }
+
         canvas.toBlob(blob => {
             if (blob) {
                 const compressedUrl = URL.createObjectURL(blob);
@@ -53,7 +70,7 @@ export function ImageCompressor() {
                 link.click();
                 URL.revokeObjectURL(compressedUrl);
             }
-        }, imageFile?.type || 'image/jpeg', quality);
+        }, fileType, compressionQuality);
     }
   };
 
@@ -87,9 +104,27 @@ export function ImageCompressor() {
       </div>
       <div className="space-y-6">
         <div className="space-y-2">
-            <Label>Compression Quality: {Math.round(quality * 100)}%</Label>
-            <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={0.1} max={1} step={0.05} />
+          <Label>Compression Type</Label>
+            <RadioGroup value={compressionType} onValueChange={(val) => setCompressionType(val as CompressionType)} className="grid grid-cols-2 gap-4">
+              <Label htmlFor="lossless" className="p-4 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary text-center">
+                <RadioGroupItem value="lossless" id="lossless" className="sr-only"/>
+                <p className="font-semibold">Lossless</p>
+                <p className="text-xs text-muted-foreground">Best quality, larger size</p>
+              </Label>
+              <Label htmlFor="lossy" className="p-4 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary text-center">
+                <RadioGroupItem value="lossy" id="lossy" className="sr-only"/>
+                 <p className="font-semibold">Lossy</p>
+                <p className="text-xs text-muted-foreground">Smaller size, adjustable quality</p>
+              </Label>
+            </RadioGroup>
         </div>
+
+        {compressionType === 'lossy' && (
+             <div className="space-y-2">
+                <Label>Quality: {Math.round(quality * 100)}%</Label>
+                <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={0.1} max={1} step={0.05} />
+            </div>
+        )}
         
         {originalSize > 0 && (
             <div className="grid grid-cols-2 gap-4 text-center">
@@ -99,7 +134,7 @@ export function ImageCompressor() {
         )}
 
         <Button onClick={handleCompress} disabled={!imageFile} className="w-full">
-          <Download className="mr-2 h-4 w-4" /> Compress & Download
+          <FileArchive className="mr-2 h-4 w-4" /> Compress & Download
         </Button>
       </div>
     </div>
