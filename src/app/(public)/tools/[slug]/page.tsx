@@ -8,9 +8,10 @@ import { ToolPageClient } from './page.client';
 
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
-  
+  const slug = params.slug;
+
   // Fetch only the specific tool needed for this page
-  const [tool] = await getTools({ slug: params.slug });
+  const [tool] = await getTools({ slug: slug });
 
   if (!tool || tool.status === 'Disabled') {
       notFound();
@@ -19,14 +20,14 @@ export default async function ToolPage({ params }: { params: { slug: string } })
   // Fetch other data in parallel for efficiency
   const [settings, toolReviews, allPosts] = await Promise.all([
     getSettings(),
-    getReviews({toolId: params.slug}),
+    getReviews({toolId: slug}),
     getPosts(),
   ]);
   
   // Fetch popular tools for the sidebar, excluding the current tool.
   // This can be further optimized if getTools supports exclusion.
   const popularTools = (await getTools({ limit: 10 }))
-    .filter(t => t.status === 'Active' && t.slug !== tool.slug)
+    .filter(t => t.status === 'Active' && t.slug !== slug)
     .slice(0, 10);
     
   const recentPosts = allPosts.filter(p => p.status === 'Published').slice(0, 10);
