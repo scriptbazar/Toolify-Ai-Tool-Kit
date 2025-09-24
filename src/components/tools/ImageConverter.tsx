@@ -12,9 +12,9 @@ import { Slider } from '../ui/slider';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
 import imageCompression from 'browser-image-compression';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 
-type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf';
+type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'ico';
 
 export function ImageConverter() {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -52,7 +52,7 @@ export function ImageConverter() {
     if (!imageFile) return;
 
     try {
-        if (targetFormat === 'gif' || targetFormat === 'bmp' || targetFormat === 'pdf') {
+        if (['gif', 'bmp', 'pdf', 'ico', 'avif'].includes(targetFormat)) {
           setEstimatedSize("N/A for this format");
           return;
       }
@@ -114,23 +114,30 @@ export function ImageConverter() {
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
             handleDownload(blob, 'pdf');
 
-        } else if (targetFormat === 'gif' || targetFormat === 'bmp') {
+        } else if (['gif', 'bmp', 'ico', 'avif'].includes(targetFormat)) {
             const img = document.createElement('img');
             img.src = imagePreview;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
+                
+                if (targetFormat === 'ico') {
+                    canvas.width = 32;
+                    canvas.height = 32;
+                } else {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                }
+
                 const ctx = canvas.getContext('2d');
                 if(!ctx) {
                     throw new Error("Could not get canvas context");
                 }
-                ctx.drawImage(img, 0, 0);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 canvas.toBlob((blob) => {
                     if (blob) {
                         handleDownload(blob, targetFormat);
                     }
-                }, `image/${targetFormat}`);
+                }, `image/${targetFormat}`, quality);
             }
       } else {
         const options = {
@@ -201,11 +208,13 @@ export function ImageConverter() {
                             <SelectItem value="webp">WEBP</SelectItem>
                             <SelectItem value="gif">GIF</SelectItem>
                             <SelectItem value="bmp">BMP</SelectItem>
-                             <SelectItem value="pdf">PDF</SelectItem>
+                            <SelectItem value="avif">AVIF</SelectItem>
+                            <SelectItem value="ico">ICO (Favicon)</SelectItem>
+                            <SelectItem value="pdf">PDF</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
-                {(targetFormat === 'jpeg' || targetFormat === 'webp') && (
+                {(targetFormat === 'jpeg' || targetFormat === 'webp' || targetFormat === 'avif') && (
                     <div className="space-y-2">
                         <div className="flex justify-between items-center">
                             <Label>Quality: {Math.round(quality * 100)}%</Label>
