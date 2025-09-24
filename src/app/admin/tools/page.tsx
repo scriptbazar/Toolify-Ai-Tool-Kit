@@ -1,4 +1,6 @@
 
+'use server';
+
 import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
 import { AdminToolFilters } from './_components/AdminToolFilters';
@@ -14,6 +16,7 @@ import {
 import { PlusCircle, ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { revalidatePath } from 'next/cache';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -32,6 +35,11 @@ export default async function AdminToolsPage({
   // Fetch ALL tools once for filter counts.
   const allTools = await getTools();
   
+  const handleToolUpdate = async () => {
+    'use server';
+    revalidatePath('/admin/tools');
+  };
+
   // Apply all filters on the server-side
   const filteredTools = allTools
     .filter(tool => {
@@ -40,7 +48,7 @@ export default async function AdminToolsPage({
         if (activeFilter === 'free') return tool.plan === 'Free';
         if (activeFilter === 'new') return tool.isNew;
         // This handles status filters like 'Active', 'Beta', etc.
-        return tool.status.toLowerCase() === activeFilter.toLowerCase();
+        return tool.status.toLowerCase().replace(' ', '') === activeFilter.toLowerCase().replace(' ', '');
     })
     .filter(tool => {
       if (activeCategory === 'all') return true;
@@ -98,7 +106,7 @@ export default async function AdminToolsPage({
             <AdminToolFilters allTools={allTools} />
           </Suspense>
           
-          <AdminToolTable tools={paginatedTools} />
+          <AdminToolTable tools={paginatedTools} onToolUpdate={handleToolUpdate} />
           
            {totalPages > 1 && (
             <div className="flex items-center justify-end space-x-2 pt-4">
