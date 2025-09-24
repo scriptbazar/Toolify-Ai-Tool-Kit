@@ -175,8 +175,11 @@ export function ImageCropper() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="1">1:1 (Square)</SelectItem>
-                            <SelectItem value="1.333">4:3</SelectItem>
-                            <SelectItem value="1.777">16:9</SelectItem>
+                            <SelectItem value={String(4/3)}>4:3 (Landscape)</SelectItem>
+                            <SelectItem value={String(16/9)}>16:9 (Widescreen)</SelectItem>
+                            <SelectItem value={String(1.91/1)}>1.91:1 (Facebook/X Post)</SelectItem>
+                            <SelectItem value={String(4/5)}>4:5 (Instagram Portrait)</SelectItem>
+                            <SelectItem value={String(9/16)}>9:16 (Stories/Reels)</SelectItem>
                             <SelectItem value="free">Freeform</SelectItem>
                         </SelectContent>
                     </Select>
