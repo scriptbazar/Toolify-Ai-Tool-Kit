@@ -156,6 +156,11 @@
       min-height: 200px;
     }
 
+    /* React-Image-Crop Styles */
+    .ReactCrop__crop-selection {
+        border: 2px dashed hsl(var(--primary));
+    }
+
     /* Custom Scrollbar Styles for Webkit browsers */
     ::-webkit-scrollbar {
         width: 0px;
