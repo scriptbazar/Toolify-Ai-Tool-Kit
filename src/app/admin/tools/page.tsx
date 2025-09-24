@@ -17,14 +17,9 @@ import { PlusCircle, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense, useEffect, useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
+import { clearCache } from '@/ai/flows/utility-actions';
 
 const ITEMS_PER_PAGE = 10;
-
-async function revalidateTools() {
-    'use server';
-    revalidatePath('/admin/tools');
-}
 
 export default function AdminToolsPage() {
     const [allTools, setAllTools] = useState<Tool[]>([]);
@@ -43,9 +38,11 @@ export default function AdminToolsPage() {
         fetchTools();
     }, []);
     
-    const handleToolUpdate = () => {
+    const handleToolUpdate = async () => {
         // Re-fetch tools after an update
-        fetchTools();
+        await fetchTools();
+        // Clear cache to reflect changes immediately across the app
+        await clearCache();
     };
 
     const searchQuery = searchParams.get('q') || '';
