@@ -173,20 +173,6 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
     try {
         let queryRef: Query = adminDb.collection(TOOLS_COLLECTION);
         
-        // This is a simple client-side search simulation after fetching.
-        // For production, a more robust search (like Algolia or Firestore extensions) would be better.
-        // We will fetch all and filter for now as Firestore doesn't support partial text search natively.
-        
-        if (options.slug) {
-            queryRef = queryRef.where('slug', '==', options.slug);
-        }
-        if (options.category && options.category !== 'all') {
-            queryRef = queryRef.where('category', '==', options.category);
-        }
-        
-        // A full-text search is not natively supported in Firestore in this manner.
-        // The filtering logic for `query` will be handled client-side for simplicity here.
-        // However, we can pre-filter by category on the server.
         const snapshot = await queryRef.orderBy('name').get();
         
         if (snapshot.empty && !options.slug && !options.category) {
@@ -217,6 +203,14 @@ function processSnapshot(snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFires
             console.warn(`Invalid tool data in Firestore with ID ${doc.id}:`, tool.error);
         }
     });
+    
+    // Manual filtering after fetch
+    if (options.slug) {
+        tools = tools.filter(tool => tool.slug === options.slug);
+    }
+     if (options.category && options.category !== 'all') {
+        tools = tools.filter(tool => tool.category === options.category);
+    }
 
     // Manual client-side-like filtering for search query
     if (options.query) {
@@ -513,3 +507,6 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
 
+
+
+    
