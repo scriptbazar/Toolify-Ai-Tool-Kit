@@ -173,7 +173,10 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
     try {
         let queryRef: Query = adminDb.collection(TOOLS_COLLECTION);
         
-        // Apply filters
+        // This is a simple client-side search simulation after fetching.
+        // For production, a more robust search (like Algolia or Firestore extensions) would be better.
+        // We will fetch all and filter for now as Firestore doesn't support partial text search natively.
+        
         if (options.slug) {
             queryRef = queryRef.where('slug', '==', options.slug);
         }
@@ -181,54 +184,60 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
             queryRef = queryRef.where('category', '==', options.category);
         }
         
-        // Only apply a sort order if not doing a direct slug lookup
-        if (!options.slug) {
-          queryRef = queryRef.orderBy('name');
-        }
-
-        // Apply limit if specified (and not a slug search)
-        if (options.limit && !options.slug) {
-            queryRef = queryRef.limit(options.limit);
-        }
+        // A full-text search is not natively supported in Firestore in this manner.
+        // The filtering logic for `query` will be handled client-side for simplicity here.
+        // However, we can pre-filter by category on the server.
+        const snapshot = await queryRef.orderBy('name').get();
         
-        const snapshot = await queryRef.get();
-        
-        // If snapshot is empty, try seeding the database.
-        if (snapshot.empty) {
+        if (snapshot.empty && !options.slug && !options.category) {
             const seeded = await seedInitialTools();
             if (seeded) {
-                // If seeded, re-fetch the data.
-                return await getTools(options);
+                const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).orderBy('name').get();
+                return processSnapshot(retrySnapshot, options);
             }
-        }
-
-
-        let tools: Tool[] = [];
-        snapshot.docs.forEach(doc => {
-            const data = doc.data();
-            const tool = ToolSchema.safeParse({ id: doc.id, slug: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
-            if (tool.success) {
-                tools.push(tool.data);
-            } else {
-                console.warn(`Invalid tool data in Firestore with ID ${doc.id}:`, tool.error);
-            }
-        });
-
-        // Client-side filtering for search query after initial fetch
-        if (options.query) {
-            const lowercasedQuery = options.query.toLowerCase();
-            tools = tools.filter(tool => 
-                tool.name.toLowerCase().includes(lowercasedQuery) ||
-                tool.description.toLowerCase().includes(lowercasedQuery)
-            );
         }
         
-        return tools.filter(tool => tool.status !== 'Disabled');
+        return processSnapshot(snapshot, options);
+
     } catch(e) {
         console.error(e);
         return [];
     }
 });
+
+
+function processSnapshot(snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>, options: GetToolsOptions): Tool[] {
+    let tools: Tool[] = [];
+    snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const tool = ToolSchema.safeParse({ id: doc.id, slug: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
+        if (tool.success) {
+            tools.push(tool.data);
+        } else {
+            console.warn(`Invalid tool data in Firestore with ID ${doc.id}:`, tool.error);
+        }
+    });
+
+    // Manual client-side-like filtering for search query
+    if (options.query) {
+        const lowercasedQuery = options.query.toLowerCase();
+        tools = tools.filter(tool => 
+            tool.name.toLowerCase().includes(lowercasedQuery) ||
+            tool.description.toLowerCase().includes(lowercasedQuery)
+        );
+    }
+    
+    // Filter out disabled tools unless a specific slug is requested (to allow editing)
+    if (!options.slug) {
+        tools = tools.filter(tool => tool.status !== 'Disabled');
+    }
+    
+    if (options.limit) {
+      tools = tools.slice(0, options.limit);
+    }
+
+    return tools;
+}
 
 
 /**
@@ -500,6 +509,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
 
 
 
