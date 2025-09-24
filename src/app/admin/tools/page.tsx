@@ -27,10 +27,10 @@ export default async function AdminToolsPage({
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   // We get the search params directly on the server.
-  const searchQuery = typeof searchParams?.q === 'string' ? searchParams.q : '';
-  const activeCategory = typeof searchParams?.category === 'string' ? searchParams.category as ToolCategory : 'all';
-  const activeFilter = typeof searchParams?.filter === 'string' ? searchParams.filter : 'all';
-  const currentPage = typeof searchParams?.page === 'string' ? Number(searchParams.page) : 1;
+  const searchQuery = (searchParams?.['q'] as string) || '';
+  const activeCategory = (searchParams?.['category'] as ToolCategory) || 'all';
+  const activeFilter = (searchParams?.['filter'] as string) || 'all';
+  const currentPage = Number(searchParams?.['page'] || 1);
 
   // Fetch ALL tools once for filter counts.
   const allTools = await getTools();
@@ -67,7 +67,8 @@ export default async function AdminToolsPage({
   const createQueryString = (params: Record<string, string | number | null>) => {
     const currentParams = new URLSearchParams();
     if(searchParams){
-      for(const [key, value] of Object.entries(searchParams)){
+      for(const key in searchParams){
+        const value = searchParams[key];
         if(value && typeof value === 'string') currentParams.set(key, value);
       }
     }
