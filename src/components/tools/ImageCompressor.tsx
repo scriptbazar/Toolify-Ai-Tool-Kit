@@ -103,6 +103,7 @@ export function ImageCompressor() {
                <div className="flex flex-col items-center">
                 <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground">Click or drag image to upload</p>
+                <p className="text-xs text-muted-foreground">(JPG, PNG, WEBP, GIF)</p>
               </div>
           )}
         </div>
