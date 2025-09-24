@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import imageCompression from 'browser-image-compression';
 import { PDFDocument } from 'pdf-lib';
 
-type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'ico' | 'tiff' | 'heic' | 'raw' | 'svg';
+type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'ico';
 
 export function ImageConverter() {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -52,7 +52,7 @@ export function ImageConverter() {
     if (!imageFile) return;
 
     try {
-      if (['gif', 'bmp', 'pdf', 'ico', 'tiff', 'heic', 'raw', 'svg'].includes(targetFormat)) {
+      if (['gif', 'bmp', 'pdf', 'ico'].includes(targetFormat)) {
           setEstimatedSize("N/A for this format");
           return;
       }
@@ -94,15 +94,6 @@ export function ImageConverter() {
       return;
     }
     
-    if (['tiff', 'heic', 'raw', 'svg'].includes(targetFormat)) {
-        toast({
-            title: "Format Not Yet Supported",
-            description: `${targetFormat.toUpperCase()} conversion is coming soon!`,
-            variant: "default"
-        });
-        return;
-    }
-
     setIsLoading(true);
     try {
         if (targetFormat === 'pdf') {
@@ -221,10 +212,6 @@ export function ImageConverter() {
                             <SelectItem value="avif">AVIF</SelectItem>
                             <SelectItem value="ico">ICO (Favicon)</SelectItem>
                             <SelectItem value="pdf">PDF</SelectItem>
-                            <SelectItem value="tiff" disabled>TIFF (Coming Soon)</SelectItem>
-                            <SelectItem value="heic" disabled>HEIC (Coming Soon)</SelectItem>
-                            <SelectItem value="raw" disabled>RAW (Coming Soon)</SelectItem>
-                            <SelectItem value="svg" disabled>SVG (Coming Soon)</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
