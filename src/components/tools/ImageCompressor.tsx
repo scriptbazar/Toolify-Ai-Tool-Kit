@@ -4,21 +4,23 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, Percent, FileArchive } from 'lucide-react';
+import { UploadCloud, Download, FileArchive, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Slider } from '../ui/slider';
 import Image from 'next/image';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import imageCompression from 'browser-image-compression';
 
 type CompressionType = 'lossy' | 'lossless';
 
 export function ImageCompressor() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [quality, setQuality] = useState(0.8);
+  const [quality, setQuality] = useState(80); // Quality as a percentage
   const [compressionType, setCompressionType] = useState<CompressionType>('lossy');
   const [originalSize, setOriginalSize] = useState(0);
   const [compressedSize, setCompressedSize] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,43 +36,46 @@ export function ImageCompressor() {
     }
   };
 
-  const handleCompress = () => {
-    if (!imagePreview) return;
-    
-    const img = document.createElement('img');
-    img.src = imagePreview;
-    img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        ctx.drawImage(img, 0, 0);
+  const handleCompress = async () => {
+    if (!imageFile) return;
+    setIsLoading(true);
+    setCompressedSize(0);
 
-        let compressionQuality: number | undefined;
-        let fileType = imageFile?.type || 'image/jpeg';
-
+    try {
+        let compressedFile: File;
         if (compressionType === 'lossy') {
-            compressionQuality = quality;
+            const options = {
+                maxSizeMB: (imageFile.size / 1024 / 1024) * (quality / 100),
+                maxWidthOrHeight: 1920,
+                useWebWorker: true,
+                initialQuality: quality / 100,
+            };
+            compressedFile = await imageCompression(imageFile, options);
         } else {
-            // For lossless, PNG is ideal. If original is not PNG, we try to keep max quality for others.
-            if (fileType !== 'image/png') {
-                compressionQuality = 1.0;
-            }
+            // For "lossless", we still need to process it to some extent.
+            // Using a very high quality setting in the library is the closest we can get to a browser-based "lossless" feel
+            // without complex server-side tooling. This will optimize metadata and encoding without visible quality loss.
+            const options = {
+                maxSizeMB: 20, // High limit to prevent accidental resizing
+                initialQuality: 1.0,
+                alwaysKeepResolution: true,
+            };
+             compressedFile = await imageCompression(imageFile, options);
         }
-
-        canvas.toBlob(blob => {
-            if (blob) {
-                const compressedUrl = URL.createObjectURL(blob);
-                setCompressedSize(blob.size);
-                
-                const link = document.createElement('a');
-                link.href = compressedUrl;
-                link.download = `compressed-${imageFile?.name}`;
-                link.click();
-                URL.revokeObjectURL(compressedUrl);
-            }
-        }, fileType, compressionQuality);
+        
+        setCompressedSize(compressedFile.size);
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(compressedFile);
+        link.download = `compressed-${imageFile.name}`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        toast({ title: 'Success!', description: 'Your compressed image has been downloaded.' });
+    } catch (error) {
+        console.error("Compression error:", error);
+        toast({ title: "Compression Failed", description: "Could not compress the image.", variant: "destructive"});
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -121,20 +126,21 @@ export function ImageCompressor() {
 
         {compressionType === 'lossy' && (
              <div className="space-y-2">
-                <Label>Quality: {Math.round(quality * 100)}%</Label>
-                <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={0.1} max={1} step={0.05} />
+                <Label>Quality: {quality}%</Label>
+                <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={10} max={100} step={5} />
             </div>
         )}
         
         {originalSize > 0 && (
             <div className="grid grid-cols-2 gap-4 text-center">
                 <div className="p-2 border rounded-md"><p className="text-sm text-muted-foreground">Original Size</p><p className="font-bold">{formatBytes(originalSize)}</p></div>
-                <div className="p-2 border rounded-md"><p className="text-sm text-muted-foreground">Compressed Size</p><p className="font-bold">{compressedSize > 0 ? formatBytes(compressedSize) : '...'}</p></div>
+                <div className="p-2 border rounded-md"><p className="text-sm text-muted-foreground">Compressed Size</p><p className="font-bold">{isLoading ? <Loader2 className="h-4 w-4 animate-spin inline-block"/> : (compressedSize > 0 ? formatBytes(compressedSize) : '...')}</p></div>
             </div>
         )}
 
-        <Button onClick={handleCompress} disabled={!imageFile} className="w-full">
-          <FileArchive className="mr-2 h-4 w-4" /> Compress & Download
+        <Button onClick={handleCompress} disabled={!imageFile || isLoading} className="w-full">
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileArchive className="mr-2 h-4 w-4" />}
+           Compress & Download
         </Button>
       </div>
     </div>
