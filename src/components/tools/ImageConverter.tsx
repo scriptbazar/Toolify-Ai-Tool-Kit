@@ -12,8 +12,9 @@ import { Slider } from '../ui/slider';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
 import imageCompression from 'browser-image-compression';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
-type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp';
+type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf';
 
 export function ImageConverter() {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -51,6 +52,10 @@ export function ImageConverter() {
     if (!imageFile) return;
 
     try {
+        if (targetFormat === 'gif' || targetFormat === 'bmp' || targetFormat === 'pdf') {
+          setEstimatedSize("N/A for this format");
+          return;
+      }
       const options = {
         maxSizeMB: 20, // High limit to not resize unintentionally
         useWebWorker: true,
@@ -58,11 +63,7 @@ export function ImageConverter() {
         fileType: `image/${targetFormat}`,
         exifOrientation: true,
       };
-      // Don't run compression for formats it doesn't support for estimation
-      if (targetFormat === 'gif' || targetFormat === 'bmp') {
-          setEstimatedSize("N/A for this format");
-          return;
-      }
+
       const compressedFile = await imageCompression(imageFile, options);
       setEstimatedSize(formatBytes(compressedFile.size));
     } catch (error) {
@@ -78,9 +79,9 @@ export function ImageConverter() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quality, targetFormat, imageFile]);
 
-  const handleDownload = async (file: File, format: ImageFormat) => {
+  const handleDownload = async (blob: Blob, format: ImageFormat) => {
      const link = document.createElement('a');
-      link.href = URL.createObjectURL(file);
+      link.href = URL.createObjectURL(blob);
       const originalName = imageFile?.name.split('.')[0] || 'converted';
       link.download = `${originalName}.${format}`;
       link.click();
@@ -88,35 +89,52 @@ export function ImageConverter() {
   }
 
   const handleConvert = async () => {
-    if (!imageFile) {
+    if (!imageFile || !imagePreview) {
       toast({ title: "No image uploaded", variant: "destructive" });
       return;
     }
     setIsLoading(true);
     try {
-      // For GIF and BMP, use canvas method as library doesn't support them as output
-      if (targetFormat === 'gif' || targetFormat === 'bmp') {
-        const img = document.createElement('img');
-        img.src = imagePreview!;
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            if(!ctx) {
-                throw new Error("Could not get canvas context");
-            }
-            ctx.drawImage(img, 0, 0);
-            canvas.toBlob((blob) => {
-                if (blob) {
-                    handleDownload(new File([blob], imageFile.name), targetFormat);
+        if (targetFormat === 'pdf') {
+            const imageBytes = await imageFile.arrayBuffer();
+            const pdfDoc = await PDFDocument.create();
+            const image = imageFile.type === 'image/jpeg' 
+                ? await pdfDoc.embedJpg(imageBytes) 
+                : await pdfDoc.embedPng(imageBytes);
+
+            const page = pdfDoc.addPage([image.width, image.height]);
+            page.drawImage(image, {
+                x: 0,
+                y: 0,
+                width: image.width,
+                height: image.height,
+            });
+
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            handleDownload(blob, 'pdf');
+
+        } else if (targetFormat === 'gif' || targetFormat === 'bmp') {
+            const img = document.createElement('img');
+            img.src = imagePreview;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                if(!ctx) {
+                    throw new Error("Could not get canvas context");
                 }
-            }, `image/${targetFormat}`);
-        }
+                ctx.drawImage(img, 0, 0);
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        handleDownload(blob, targetFormat);
+                    }
+                }, `image/${targetFormat}`);
+            }
       } else {
-        // Use browser-image-compression for better quality and control
         const options = {
-            maxSizeMB: 20, // Set a high limit to prevent unintended resizing
+            maxSizeMB: 20,
             useWebWorker: true,
             initialQuality: quality,
             fileType: `image/${targetFormat}`,
@@ -183,6 +201,7 @@ export function ImageConverter() {
                             <SelectItem value="webp">WEBP</SelectItem>
                             <SelectItem value="gif">GIF</SelectItem>
                             <SelectItem value="bmp">BMP</SelectItem>
+                             <SelectItem value="pdf">PDF</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
