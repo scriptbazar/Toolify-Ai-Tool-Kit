@@ -8,6 +8,7 @@
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp, type Query } from 'firebase-admin/firestore';
 import { PostSchema, type Post, CommentSchema, type Comment, CategorySchema, type Category, CommentStatusSchema } from './blog-management.types';
+import { unstable_cache as cache } from 'next/cache';
 
 const POSTS_COLLECTION = 'blogPosts';
 const COMMENTS_COLLECTION = 'comments';
@@ -20,7 +21,7 @@ const CATEGORIES_COLLECTION = 'blogCategories';
  * @param {('Published' | 'all')} [status='Published'] - The status of posts to fetch.
  * @returns {Promise<Post[]>} A list of posts.
  */
-export async function getPosts(status: 'Published' | 'all' = 'Published'): Promise<Post[]> {
+export const getPosts = cache(async (status: 'Published' | 'all' = 'Published'): Promise<Post[]> => {
   try {
     const adminDb = getAdminDb();
     if (!adminDb) {
@@ -55,7 +56,10 @@ export async function getPosts(status: 'Published' | 'all' = 'Published'): Promi
     console.error("Error fetching posts:", error.message);
     return [];
   }
-}
+},
+['posts'],
+{ revalidate: 3600 }
+);
 
 /**
  * Fetches all comments from Firestore.
