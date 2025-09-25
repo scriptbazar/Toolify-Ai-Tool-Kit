@@ -9,7 +9,7 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp, Query } from 'firebase-admin/firestore';
 import { type Tool, ToolSchema, UpsertToolInputSchema, type ToolRequest, ToolRequestSchema } from './tool-management.types';
 import { z } from 'zod';
-import { cache } from 'react';
+import { unstable_cache as cache } from 'next/cache';
 
 const TOOLS_COLLECTION = 'tools';
 const TOOL_REQUESTS_COLLECTION = 'toolRequests';
@@ -68,7 +68,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'GST Calculator', description: 'Calculate the Goods and Services Tax (GST) for any amount with customizable tax slabs.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the base amount.', 'Select whether to add or remove GST.', 'Choose the correct GST slab (e.g., 5%, 12%, 18%, 28%).', 'The calculator will show the GST amount and the final price.'] },
     { name: 'Interest Calculator', description: 'Calculate simple and compound interest for investments or loans.', icon: 'Percent', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select simple or compound interest.', 'Enter principal, rate, and time.', 'Set compounding frequency for compound interest.', 'View the calculated interest and total amount.'] },
     { name: 'Credit Card Interest Calculator', description: 'Estimate interest payments and payoff time for credit card debt.', icon: 'CreditCard', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Enter your credit card balance, APR, and monthly payment.', 'Calculate your payoff schedule and total interest.', 'Use the "Extra Payment" and "Payoff Goal" tabs for more insights.'] },
-    { name: 'Image Color Extractor', description: 'Extract a complete color palette from an uploaded image to use in your design projects.', icon: 'Pipette', category: 'image', plan: 'Active', isNew: true, status: 'Active', howToUse: ['Upload an image from your device.', 'The tool will analyze the image and display a palette of its most dominant colors.', 'Click on any color swatch to copy its HEX, RGB, or HSL code.'] },
+    { name: 'Image Color Extractor', description: 'Extract a complete color palette from an uploaded image to use in your design projects.', icon: 'Pipette', category: 'image', isNew: true, status: 'Active', howToUse: ['Upload an image from your device.', 'The tool will analyze the image and display a palette of its most dominant colors.', 'Click on any color swatch to copy its HEX, RGB, or HSL code.'] },
     { name: 'Image Cropper', description: 'Crop your images to your desired dimensions with an easy-to-use visual cropping tool.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image you want to crop.', 'Drag the corners of the selection box to define your crop area.', 'Click the "Crop Image" button.', 'Download your newly cropped image.'] },
     { name: 'Image Compressor', description: 'Reduce the file size of your JPG and PNG images while maintaining the best possible quality.', icon: 'FileArchive', category: 'image', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload a JPG or PNG image.', 'Use the slider to adjust the desired compression quality (e.g., 80%).', 'Click "Compress & Download".', 'Your optimized image will be downloaded.'] },
     { name: 'Image Text Extractor', description: 'Extract all text from an image using Optical Character Recognition (OCR) technology.', icon: 'ScanText', category: 'ai', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload an image containing text (e.g., a photo of a document or a sign).', 'Click the "Extract Text" button.', 'The AI will analyze the image and display the recognized text.', 'You can then copy the extracted text.'] },
@@ -114,7 +114,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Text to Morse Code', description: 'Translate plain text into universally recognized Morse code signals.', icon: 'MessageSquare', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your text in the input box.', 'The corresponding Morse code will be generated in the output box automatically.'] },
     { name: 'Currency Converter', description: 'Convert between different world currencies with up-to-date exchange rates for your travel or business needs.', icon: 'Coins', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the amount you wish to convert.', 'Select the "From" and "To" currencies from the dropdown lists.', 'The converted amount will be displayed based on real-time exchange rates.'] },
     { name: 'UUID Generator', description: 'Generate universally unique identifiers (UUIDs) in various versions for your application needs.', icon: 'Hash', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select the number of UUIDs you want to generate.', 'Click the "Generate UUIDs" button.', 'The new UUIDs will be displayed in the text box for you to copy.'] },
-    { name: 'Image Metadata Viewer', description: 'View detailed EXIF and other metadata from your images, such as camera settings, location, and date.', icon: 'Camera', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload an image file (JPG, PNG, etc.).', 'The tool will extract and display all available metadata.', 'View details like camera model, aperture, ISO, and GPS data if available.'] },
+    { name: 'Image Metadata Viewer', description: 'View detailed EXIF and other metadata from your images, such as camera settings, location, and date.', icon: 'Camera', category: 'image', isNew: true, status: 'Active', howToUse: ['Upload an image file (JPG, PNG, etc.).', 'The tool will extract and display all available metadata.', 'View details like camera model, aperture, ISO, and GPS data if available.'] },
     { name: 'AI Web Content Summarizer', description: 'Summarize and explain the content of any public website or article by simply providing a URL.', icon: 'Globe', category: 'ai', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Paste the URL of the webpage or article you want to process.', 'Click the "Process URL" button.', 'The AI will provide both a concise summary and a detailed explanation of the content.'] },
     { name: 'Flip Image', description: 'Flip an image horizontally or vertically to create a mirrored version of your original picture.', icon: 'FlipHorizontal', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image you want to flip.', 'Click "Flip Horizontal" or "Flip Vertical".', 'Download the modified image.'] },
     { name: 'ICO Converter', description: 'Convert your images (PNG, JPG) to the ICO format, perfect for creating website favicons.', icon: 'FileHeart', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your source image (preferably square).', 'Click the "Convert & Download .ICO" button.', 'Your new .ico file will be automatically downloaded.'] },
@@ -189,7 +189,10 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
         console.error("Error in getTools:", e.message);
         return [];
     }
-});
+},
+['tools'],
+{ revalidate: 3600 } // Revalidate every hour
+);
 
 
 function processSnapshot(snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>, options: GetToolsOptions): Tool[] {
@@ -510,6 +513,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
     
+
 
 
 
