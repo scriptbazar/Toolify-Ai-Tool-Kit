@@ -164,13 +164,13 @@ interface GetToolsOptions {
  * This function is now optimized for server-side operations.
  */
 export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Tool[]> => {
-    const adminDb = getAdminDb();
-    if (!adminDb) {
-        console.error("Firebase Admin is not initialized. Cannot fetch tools.");
-        return [];
-    }
-
     try {
+        const adminDb = getAdminDb();
+        if (!adminDb) {
+            console.error("Firebase Admin is not initialized. Cannot fetch tools.");
+            return [];
+        }
+
         let queryRef: Query = adminDb.collection(TOOLS_COLLECTION);
         
         const snapshot = await queryRef.orderBy('name').get();
@@ -185,8 +185,8 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
         
         return processSnapshot(snapshot, options);
 
-    } catch(e) {
-        console.error(e);
+    } catch(e: any) {
+        console.error("Error in getTools:", e.message);
         return [];
     }
 });
@@ -510,4 +510,5 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
     
+
 
