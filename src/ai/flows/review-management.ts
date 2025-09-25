@@ -6,7 +6,8 @@
  */
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp }from 'firebase-admin/firestore';
-import { type Review, ReviewSchema, AddReviewInputSchema, AddReviewInput, ReviewStatusSchema } from './review-management.types';
+import { type Review, ReviewSchema, AddReviewInputSchema, AddReviewInput, ReviewStatusSchema, type ReviewStatus } from './review-management.types';
+import { unstable_cache as cache } from 'next/cache';
 
 interface GetReviewsOptions {
     toolId?: string;
@@ -20,7 +21,8 @@ interface GetReviewsOptions {
  * @param {GetReviewsOptions} [options] - Options for fetching reviews.
  * @returns {Promise<Review[]>} A list of reviews.
  */
-export async function getReviews(options: GetReviewsOptions = {}): Promise<Review[]> {
+export const getReviews = cache(
+  async (options: GetReviewsOptions = {}): Promise<Review[]> => {
     const { toolId, limit, status } = options;
     try {
         const adminDb = getAdminDb();
@@ -74,7 +76,10 @@ export async function getReviews(options: GetReviewsOptions = {}): Promise<Revie
         // Return an empty array on error to prevent crashing the calling component
         return [];
     }
-}
+  },
+  ['reviews'],
+  { revalidate: 3600 }
+);
 
 
 /**
