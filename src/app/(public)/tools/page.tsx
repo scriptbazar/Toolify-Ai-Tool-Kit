@@ -16,8 +16,13 @@ export default async function ToolsDashboardPage({
   // Fetch ALL tools once on the server.
   const allTools = await getTools();
   
-  // Pass the search query and category to getTools for server-side filtering
-  const filteredTools = await getTools({ query: searchQuery, category: activeCategory });
+  // Perform filtering on the server after fetching all tools.
+  const filteredTools = allTools.filter(tool => {
+    const categoryMatch = activeCategory === 'all' || tool.category === activeCategory;
+    const searchMatch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        tool.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return categoryMatch && searchMatch;
+  });
 
 
   return (
@@ -46,5 +51,6 @@ export default async function ToolsDashboardPage({
     
 
     
+
 
 
