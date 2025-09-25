@@ -51,8 +51,8 @@ export async function getPosts(status: 'Published' | 'all' = 'Published'): Promi
     }
 
     return posts;
-  } catch (error) {
-    console.error("Error fetching posts:", error);
+  } catch (error: any) {
+    console.error("Error fetching posts:", error.message);
     return [];
   }
 }
