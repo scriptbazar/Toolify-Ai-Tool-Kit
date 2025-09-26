@@ -3,8 +3,7 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, Image as ImageIcon, Wand2, Loader2 } from 'lucide-react';
+import { UploadCloud, Download, Wand2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
@@ -75,51 +74,64 @@ export function IcoConverter() {
   };
 
   return (
-    <div className="space-y-6">
-      <div 
-        className="w-full aspect-square max-w-xs mx-auto border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-        {imagePreview ? (
-            <Image src={imagePreview} alt="Preview" layout="fill" objectFit="contain" className="p-4" />
-        ) : (
-             <div className="flex flex-col items-center">
-              <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">Click to upload image</p>
-              <p className="text-xs text-muted-foreground">(Preferably square)</p>
-            </div>
-        )}
-      </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Step 1: Upload Your Image</CardTitle>
+                    <CardDescription>Click on the box to upload an image. Square images work best.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div 
+                        className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+                        {imagePreview ? (
+                            <Image src={imagePreview} alt="Preview" layout="fill" objectFit="contain" className="p-2" />
+                        ) : (
+                            <div className="flex flex-col items-center">
+                                <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                                <p className="text-sm text-muted-foreground">Click or drag image to upload</p>
+                            </div>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
 
-      <Button onClick={handleConvert} disabled={!imageFile || isLoading} className="w-full max-w-xs mx-auto">
-         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
-        Convert to ICO
-      </Button>
+            <Button onClick={handleConvert} disabled={!imageFile || isLoading} className="w-full">
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
+                Convert to ICO
+            </Button>
+        </div>
 
-      {icoPreviews.length > 0 && (
         <Card>
             <CardHeader>
-                <CardTitle>ICO Preview</CardTitle>
-                <CardDescription>This is how your icon will look at different sizes.</CardDescription>
+                <CardTitle>Step 2: Preview & Download</CardTitle>
+                <CardDescription>This is how your icon will look at different standard sizes.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="flex justify-center items-end gap-4 p-4 bg-muted rounded-lg">
-                    {icoPreviews.map(preview => (
-                        <div key={preview.size} className="flex flex-col items-center gap-2">
-                            <div className="border p-1 bg-white">
-                                <Image src={preview.dataUrl} alt={`${preview.size}x${preview.size} preview`} width={preview.size} height={preview.size} />
+            <CardContent className="space-y-6">
+                <div className="p-4 bg-muted rounded-lg flex justify-center items-end gap-6 h-[160px]">
+                    {isLoading ? (
+                        <Loader2 className="h-8 w-8 animate-spin text-primary"/>
+                    ) : icoPreviews.length > 0 ? (
+                        icoPreviews.map(preview => (
+                            <div key={preview.size} className="flex flex-col items-center gap-2">
+                                <div className="border p-1 bg-white shadow-md">
+                                    <Image src={preview.dataUrl} alt={`${preview.size}x${preview.size} preview`} width={preview.size} height={preview.size} />
+                                </div>
+                                <span className="text-xs text-muted-foreground">{preview.size}x{preview.size}</span>
                             </div>
-                            <span className="text-xs text-muted-foreground">{preview.size}x{preview.size}</span>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <p className="text-sm text-muted-foreground">Previews will appear here after conversion.</p>
+                    )}
                 </div>
-                <Button onClick={handleDownload} className="w-full">
+                <Button onClick={handleDownload} disabled={icoPreviews.length === 0} className="w-full">
                     <Download className="mr-2 h-4 w-4" /> Download ICO
                 </Button>
             </CardContent>
         </Card>
-      )}
     </div>
   );
 }
