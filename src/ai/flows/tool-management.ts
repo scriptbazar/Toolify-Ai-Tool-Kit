@@ -128,11 +128,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Unix Timestamp Converter', description: 'Convert Unix timestamps to human-readable dates and vice-versa.', icon: 'Clock', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
     { name: 'JavaScript Minifier', description: 'Minify your JavaScript code to reduce file size and improve loading speed.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
     { name: 'HTML Minifier', description: 'Minify your HTML code to reduce file size and optimize your website.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'YouTube Video Downloader', description: 'Download videos from YouTube in various formats and qualities.', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'Instagram Video Downloader', description: 'Download videos from Instagram.', icon: 'Instagram', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'X Video Downloader', description: 'Download videos from X (formerly Twitter).', icon: 'Twitter', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'Threads Video Downloader', description: 'Download videos from Threads.', icon: 'AtSign', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'Loan Calculator', description: 'Calculate loan payments, interest, and amortization schedules.', icon: 'Landmark', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'SQL Formatter', description: 'Format and beautify your SQL queries for better readability.', icon: 'Database', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
     { name: 'XML Sitemap Generator', description: 'Generate an XML sitemap for your website to improve SEO indexing.', icon: 'FileCode', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Word to PDF', description: 'Convert Microsoft Word documents to PDF format.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
@@ -146,6 +141,11 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'PPT to PDF', description: 'Convert PowerPoint presentations to PDF.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Text to Morse Code', description: 'Convert text to Morse code.', icon: 'MessageSquare', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Credit Card Interest Calculator', description: 'Calculate the interest on your credit card balance.', icon: 'CreditCard', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Youtube Video Downloader', description: 'Download videos from YouTube in various formats and qualities.', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Instagram Video Downloader', description: 'Download videos from Instagram.', icon: 'Instagram', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'X Video Downloader', description: 'Download videos from X (formerly Twitter).', icon: 'Twitter', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Threads Video Downloader', description: 'Download videos from Threads.', icon: 'AtSign', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Loan Calculator', description: 'Calculate loan payments, interest, and amortization schedules.', icon: 'Landmark', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
 ];
 
 const generateSlug = (name: string) => {
