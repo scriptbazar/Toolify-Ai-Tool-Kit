@@ -13,6 +13,14 @@ import { useToast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 
+interface ScheduleItem {
+  month: number;
+  principal: string;
+  interest: string;
+  totalPayment: string;
+  remainingBalance: string;
+}
+
 export function InterestCalculator() {
     const [activeTab, setActiveTab] = useState('simple');
     const { toast } = useToast();
@@ -117,14 +125,14 @@ export function InterestCalculator() {
         setCiResult(null);
     }
 
-    const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))'];
+    const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))'];
 
     const renderResult = (result: { interest: number; total: number } | null, principal: string) => {
         if (!result) return null;
-        const pieChartData = [
+        const pieChartData = result ? [
             { name: 'Principal Amount', value: parseFloat(principal) },
             { name: 'Total Interest', value: result.interest },
-        ];
+        ] : [];
 
         return (
             <Card className="mt-6">
@@ -194,7 +202,7 @@ export function InterestCalculator() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                             <div className="space-y-2">
+                            <div className="space-y-2">
                                 <Label htmlFor="si-principal">Principal Amount</Label>
                                 <div className="flex gap-2">
                                 <Select value={currency} onValueChange={setCurrency}>
@@ -210,7 +218,7 @@ export function InterestCalculator() {
                                 <Input id="si-principal" type="number" value={siPrincipal} onChange={e => setSiPrincipal(e.target.value)} />
                                 </div>
                             </div>
-                            <div className="space-y-2">
+                             <div className="space-y-2">
                                 <Label htmlFor="si-rate">Rate of Interest</Label>
                                 <div className="flex gap-2">
                                     <Input id="si-rate" type="number" value={siRate} onChange={e => setSiRate(e.target.value)} />
