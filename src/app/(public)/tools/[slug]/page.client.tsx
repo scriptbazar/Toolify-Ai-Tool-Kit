@@ -110,58 +110,60 @@ export function ToolPageClient({
             </CardContent>
           </Card>
           
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ListOrdered /> How to Use {tool.name}?
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(tool.howToUse && tool.howToUse.length > 0) ? (
-                    tool.howToUse.map((step, index) => (
-                        <div key={index} className="flex items-start gap-4 p-4 bg-background rounded-lg">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">{index + 1}</div>
-                            <div className="flex-1">
-                                <p className="text-muted-foreground">{step}</p>
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <>
-                        <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">1</div>
-                            <div className="flex-1">
-                                <h3 className="font-semibold">Provide Input</h3>
-                                <p className="text-muted-foreground">Paste your text, upload your file, or enter the required data in the designated fields.</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">2</div>
-                            <div className="flex-1">
-                                <h3 className="font-semibold">Configure Settings</h3>
-                                <p className="text-muted-foreground">Adjust any available options, such as language, format, or quality, to tailor the output to your needs.</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">3</div>
-                            <div className="flex-1">
-                                <h3 className="font-semibold">Process Your Request</h3>
-                                <p className="text-muted-foreground">Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">4</div>
-                            <div className="flex-1">
-                                <h3 className="font-semibold">Get Your Results</h3>
-                                <p className="text-muted-foreground">Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.</p>
-                            </div>
-                        </div>
-                    </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {tool.slug !== 'flip-image' && (
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ListOrdered /> How to Use {tool.name}?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {(tool.howToUse && tool.howToUse.length > 0) ? (
+                      tool.howToUse.map((step, index) => (
+                          <div key={index} className="flex items-start gap-4 p-4 bg-background rounded-lg">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">{index + 1}</div>
+                              <div className="flex-1">
+                                  <p className="text-muted-foreground">{step}</p>
+                              </div>
+                          </div>
+                      ))
+                  ) : (
+                      <>
+                          <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">1</div>
+                              <div className="flex-1">
+                                  <h3 className="font-semibold">Provide Input</h3>
+                                  <p className="text-muted-foreground">Paste your text, upload your file, or enter the required data in the designated fields.</p>
+                              </div>
+                          </div>
+                          <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">2</div>
+                              <div className="flex-1">
+                                  <h3 className="font-semibold">Configure Settings</h3>
+                                  <p className="text-muted-foreground">Adjust any available options, such as language, format, or quality, to tailor the output to your needs.</p>
+                              </div>
+                          </div>
+                          <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">3</div>
+                              <div className="flex-1">
+                                  <h3 className="font-semibold">Process Your Request</h3>
+                                  <p className="text-muted-foreground">Click the primary action button (e.g., "Generate", "Convert", "Calculate") to start the process.</p>
+                              </div>
+                          </div>
+                          <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">4</div>
+                              <div className="flex-1">
+                                  <h3 className="font-semibold">Get Your Results</h3>
+                                  <p className="text-muted-foreground">Your result will be displayed instantly. You can then copy it to your clipboard or download it as a file.</p>
+                              </div>
+                          </div>
+                      </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+           )}
           
           <Card className="mt-8">
             <CardHeader>

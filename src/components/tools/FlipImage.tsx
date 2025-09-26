@@ -4,7 +4,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, FlipHorizontal, FlipVertical, RotateCcw, Trash2, Loader2, Image as ImageIcon, CornerUpLeft, CornerUpRight, RotateCw, CornerDownLeft, CornerDownRight } from 'lucide-react';
+import { UploadCloud, Download, FlipHorizontal, FlipVertical, RotateCcw, Trash2, Loader2, Image as ImageIcon, CornerUpLeft, CornerUpRight, RotateCw, CornerDownLeft, CornerDownRight, ListOrdered } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -41,7 +41,6 @@ export function FlipImage() {
       const w = img.width;
       const h = img.height;
       
-      // Set canvas size based on rotation
       if (rotation === 90 || rotation === 270) {
         canvas.width = h;
         canvas.height = w;
@@ -73,7 +72,7 @@ export function FlipImage() {
     if(imagePreview) {
       applyTransformations();
     }
-  }, [applyTransformations, imagePreview]);
+  }, [applyTransformations, imagePreview, flipState, rotation]);
 
    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -129,7 +128,8 @@ export function FlipImage() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         <Card>
             <CardHeader>
                 <CardTitle>Original Image</CardTitle>
@@ -185,6 +185,46 @@ export function FlipImage() {
                         <Trash2 className="mr-2 h-4 w-4" /> Clear
                     </Button>
                 </div>
+            </CardContent>
+        </Card>
+      </div>
+       <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ListOrdered /> How to Use the Flip Image Tool?
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">1</div>
+                      <div className="flex-1">
+                          <h3 className="font-semibold">Upload Image</h3>
+                          <p className="text-muted-foreground">Click on the upload area to select an image from your device.</p>
+                      </div>
+                  </div>
+                  <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">2</div>
+                      <div className="flex-1">
+                          <h3 className="font-semibold">Apply Transformations</h3>
+                          <p className="text-muted-foreground">Use the buttons to flip or rotate the image. You will see a live preview of the result.</p>
+                      </div>
+                  </div>
+                  <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">3</div>
+                      <div className="flex-1">
+                          <h3 className="font-semibold">Download Your Image</h3>
+                          <p className="text-muted-foreground">Once you are happy with the result, click the "Download Image" button to save it.</p>
+                      </div>
+                  </div>
+                  <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">4</div>
+                      <div className="flex-1">
+                          <h3 className="font-semibold">Clear and Start Over</h3>
+                          <p className="text-muted-foreground">Click the "Clear" button to remove the current image and start again.</p>
+                      </div>
+                  </div>
+              </div>
             </CardContent>
         </Card>
     </div>
