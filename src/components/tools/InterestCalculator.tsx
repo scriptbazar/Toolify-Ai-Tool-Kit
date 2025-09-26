@@ -131,8 +131,16 @@ export function InterestCalculator() {
                 <CardHeader>
                     <CardTitle>Interest Summary</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                     <div className="space-y-3">
+                         <Card>
+                            <CardHeader className="p-4">
+                                <CardTitle className="text-base text-muted-foreground">Principal Amount</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-4 pt-0">
+                                <p className="text-2xl font-bold">{formatCurrency(parseFloat(principal))}</p>
+                            </CardContent>
+                        </Card>
                         <Card>
                             <CardHeader className="p-4">
                                 <CardTitle className="text-base text-muted-foreground">Total Interest</CardTitle>
