@@ -5,7 +5,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 const MergePdfsInputSchema = z.object({
