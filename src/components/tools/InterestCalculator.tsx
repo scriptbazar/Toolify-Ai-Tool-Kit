@@ -154,7 +154,7 @@ export function InterestCalculator() {
                                     <Input id="si-rate" type="number" value={siRate} onChange={e => setSiRate(e.target.value)} />
                                      <Select value={siRatePeriod} onValueChange={(val) => setSiRatePeriod(val as 'years' | 'months')}>
                                         <SelectTrigger className="w-[150px]"><SelectValue/></SelectTrigger>
-                                        <SelectContent><SelectItem value="years">p.a.</SelectItem><SelectItem value="months">p.m.</SelectItem></SelectContent>
+                                        <SelectContent><SelectItem value="years">per year</SelectItem><SelectItem value="months">per month</SelectItem></SelectContent>
                                     </Select>
                                 </div>
                             </div>
@@ -214,7 +214,7 @@ export function InterestCalculator() {
                                   <Input id="ci-rate" type="number" value={ciRate} onChange={e => setCiRate(e.target.value)} />
                                   <Select value={ciRatePeriod} onValueChange={(val) => setCiRatePeriod(val as 'years' | 'months')}>
                                       <SelectTrigger className="w-[150px]"><SelectValue/></SelectTrigger>
-                                      <SelectContent><SelectItem value="years">p.a.</SelectItem><SelectItem value="months">p.m.</SelectItem></SelectContent>
+                                      <SelectContent><SelectItem value="years">per year</SelectItem><SelectItem value="months">per month</SelectItem></SelectContent>
                                   </Select>
                                 </div>
                             </div>
