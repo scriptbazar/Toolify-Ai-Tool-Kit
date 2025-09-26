@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { UploadCloud, Crop, Download, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
 import ReactCrop, { type Crop as CropType, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -174,13 +174,31 @@ export function ImageCropper() {
                             <SelectValue placeholder="Select aspect ratio" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="1">1:1 (Square)</SelectItem>
-                            <SelectItem value={String(4/3)}>4:3 (Landscape)</SelectItem>
-                            <SelectItem value={String(16/9)}>16:9 (Widescreen)</SelectItem>
-                            <SelectItem value={String(1.91/1)}>1.91:1 (Facebook/X Post)</SelectItem>
-                            <SelectItem value={String(4/5)}>4:5 (Instagram Portrait)</SelectItem>
-                            <SelectItem value={String(9/16)}>9:16 (Stories/Reels)</SelectItem>
-                            <SelectItem value="free">Freeform</SelectItem>
+                            <SelectGroup>
+                                <SelectLabel>Common Ratios</SelectLabel>
+                                <SelectItem value="free">Freeform</SelectItem>
+                                <SelectItem value="1">1:1 (Square)</SelectItem>
+                                <SelectItem value={String(4/3)}>4:3 (Landscape)</SelectItem>
+                                <SelectItem value={String(3/2)}>3:2 (Photography)</SelectItem>
+                                <SelectItem value={String(16/9)}>16:9 (Widescreen)</SelectItem>
+                                <SelectItem value={String(3/4)}>3:4 (Portrait)</SelectItem>
+                                <SelectItem value={String(2/3)}>2:3 (Portrait)</SelectItem>
+                                <SelectItem value={String(5/4)}>5:4 (Large Format)</SelectItem>
+                            </SelectGroup>
+                            <SelectGroup>
+                                <SelectLabel>Social Media</SelectLabel>
+                                <SelectItem value={String(1.91/1)}>Facebook/X Post</SelectItem>
+                                <SelectItem value={String(4/5)}>Instagram Portrait</SelectItem>
+                                <SelectItem value={String(9/16)}>Stories/Reels</SelectItem>
+                                <SelectItem value={String(851/315)}>Facebook Cover</SelectItem>
+                                <SelectItem value={String(3/1)}>Twitter Header</SelectItem>
+                                <SelectItem value={String(4/1)}>LinkedIn Banner</SelectItem>
+                            </SelectGroup>
+                            <SelectGroup>
+                                <SelectLabel>Print</SelectLabel>
+                                <SelectItem value={String(210/297)}>A4 Portrait</SelectItem>
+                                <SelectItem value={String(297/210)}>A4 Landscape</SelectItem>
+                            </SelectGroup>
                         </SelectContent>
                     </Select>
                  </div>
