@@ -4,7 +4,7 @@
  * @fileOverview A flow for converting text to speech.
  */
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 import wav from 'wav';
 
 const VoiceConfigSchema = z.object({
