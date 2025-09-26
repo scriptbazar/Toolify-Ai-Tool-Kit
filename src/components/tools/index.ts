@@ -120,7 +120,6 @@ export { TitleTagChecker } from './TitleTagChecker';
 export { UnixTimestampConverter } from './UnixTimestampConverter';
 export { UniversalHashGenerator } from './UniversalHashGenerator';
 export { UnlockPdf } from './UnlockPdf';
-export { UpgradeProDialog } from './UpgradeProDialog';
 export { UuidGenerator } from './UuidGenerator';
 export { UTIPANCardPhotoAndSignatureResizer } from './UTIPANCardPhotoAndSignatureResizer';
 export { WebsiteScreenshot } from './WebsiteScreenshot';
@@ -137,3 +136,4 @@ export { YouTubeVideoDescriptionExtractor } from './YouTubeVideoDescriptionExtra
 export { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownloader';
 export { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
 export { YoutubeVideoDownloader } from './YoutubeVideoDownloader';
+export { UpgradeProDialog } from './UpgradeProDialog';

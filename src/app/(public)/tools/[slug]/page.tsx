@@ -5,7 +5,7 @@ import { getReviews } from '@/ai/flows/review-management';
 import { getPosts } from '@/ai/flows/blog-management';
 import { notFound } from 'next/navigation';
 import { ToolPageClient } from './page.client';
-import { toolComponents } from '@/components/tools/tool-components.tsx';
+import { toolComponents } from '@/components/tools/tool-components';
 
 
 export async function generateStaticParams() {
