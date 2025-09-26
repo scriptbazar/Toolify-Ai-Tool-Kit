@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -310,13 +309,21 @@ export async function deleteTool(toolId: string): Promise<{ success: boolean; me
         
         await toolRef.delete();
 
-        // Log the component file path for manual deletion
         const toolName = doc.data()?.name || toolId;
         const componentName = toolName.replace(/\s+/g, '');
         const componentPath = `src/components/tools/${componentName}.tsx`;
-        console.log(`ACTION REQUIRED: Tool '${toolName}' deleted from database. Please manually delete the component file: ${componentPath}`);
+        const logMessage = `
+*****************************************************************
+ACTION REQUIRED: Tool '${toolName}' deleted from database.
+To complete the deletion, please manually delete the following files:
+1. Component: ${componentPath}
+2. Entry in: src/components/tools/index.ts
+3. Entry in: src/components/tools/tool-components.tsx
+*****************************************************************
+        `;
+        console.log(logMessage);
 
-        return { success: true, message: 'Tool deleted successfully.' };
+        return { success: true, message: 'Tool deleted from database. Check console for required file cleanup.' };
     } catch (error: any) {
         console.error(`Error deleting tool ${toolId}:`, error);
         return { success: false, message: error.message || 'An unknown error occurred.' };
@@ -470,4 +477,6 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
   }
 }
     
+    
+
     
