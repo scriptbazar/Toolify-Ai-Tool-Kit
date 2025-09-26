@@ -17,7 +17,6 @@ import { PlusCircle, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense, useEffect, useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
 
 const ITEMS_PER_PAGE = 10;
 
