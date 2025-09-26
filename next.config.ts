@@ -30,10 +30,8 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  experimental: {
-    serverActions: {
-      allowedOrigins: ["*.google.com", "*.firebase.app", "*.cloud.run", "localhost:9002"]
-    }
+  serverActions: {
+    allowedOrigins: ["*.google.com", "*.firebase.app", "*.cloud.run", "localhost:9002"]
   },
 };
 
