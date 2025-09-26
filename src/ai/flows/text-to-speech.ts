@@ -59,7 +59,8 @@ export async function textToSpeech(
 ): Promise<TextToSpeechOutput> {
   
   let speechConfig: any;
-  if (input.isMultiSpeaker && input.multiSpeakerConfig && Object.keys(input.multiSpeakerConfig).length > 0) {
+
+  if (input.isMultiSpeaker && input.multiSpeakerConfig) {
       const speakerConfigs = Object.entries(input.multiSpeakerConfig).map(([speaker, voice]) => ({
           speaker: speaker,
           voiceConfig: {
@@ -69,9 +70,12 @@ export async function textToSpeech(
       speechConfig = { multiSpeakerVoiceConfig: { speakerVoiceConfigs: speakerConfigs } };
   } else {
       speechConfig = {
-        prebuiltVoiceConfig: { voiceName: input.singleVoice || 'Algenib' },
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: input.singleVoice || 'Algenib' },
+          }
       };
   }
+
 
   const { media } = await ai.generate({
     model: 'googleai/gemini-2.5-flash-preview-tts',
