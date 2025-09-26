@@ -21,6 +21,7 @@ export function InterestCalculator() {
     // Simple Interest State
     const [siPrincipal, setSiPrincipal] = useState('100000');
     const [siRate, setSiRate] = useState('5');
+    const [siRatePeriod, setSiRatePeriod] = useState<'years' | 'months'>('years');
     const [siTime, setSiTime] = useState('5');
     const [siTimePeriod, setSiTimePeriod] = useState<'years' | 'months'>('years');
     const [siResult, setSiResult] = useState<{ interest: number; total: number } | null>(null);
@@ -28,6 +29,7 @@ export function InterestCalculator() {
     // Compound Interest State
     const [ciPrincipal, setCiPrincipal] = useState('100000');
     const [ciRate, setCiRate] = useState('5');
+    const [ciRatePeriod, setCiRatePeriod] = useState<'years' | 'months'>('years');
     const [ciTime, setCiTime] = useState('5');
     const [ciTimePeriod, setCiTimePeriod] = useState<'years' | 'months'>('years');
     const [ciFrequency, setCiFrequency] = useState('12'); // Monthly
@@ -50,7 +52,7 @@ export function InterestCalculator() {
 
     const handleSimpleInterestCalc = () => {
         const p = parseFloat(siPrincipal);
-        const r = parseFloat(siRate) / 100;
+        let r = parseFloat(siRate) / 100;
         let t = parseFloat(siTime);
 
         if (isNaN(p) || isNaN(r) || isNaN(t) || p <= 0 || r < 0 || t <= 0) {
@@ -58,8 +60,14 @@ export function InterestCalculator() {
             return;
         }
 
+        // Adjust rate to be annual if it's given monthly
+        if (siRatePeriod === 'months') {
+            r = r * 12;
+        }
+        
+        // Adjust time to be in years if it's given in months
         if (siTimePeriod === 'months') {
-            t = t / 12; // Convert months to years
+            t = t / 12;
         }
 
         const interest = p * r * t;
@@ -69,7 +77,7 @@ export function InterestCalculator() {
 
     const handleCompoundInterestCalc = () => {
         const p = parseFloat(ciPrincipal);
-        const r = parseFloat(ciRate) / 100;
+        let r = parseFloat(ciRate) / 100;
         let t = parseFloat(ciTime);
         const n = parseInt(ciFrequency, 10);
 
@@ -78,8 +86,14 @@ export function InterestCalculator() {
             return;
         }
 
+        // Adjust rate to be annual if it's given monthly
+        if (ciRatePeriod === 'months') {
+            r = r * 12;
+        }
+
+        // Adjust time to be in years if it's given in months
         if (ciTimePeriod === 'months') {
-            t = t / 12; // Convert months to years
+            t = t / 12;
         }
         
         const amount = p * Math.pow((1 + r / n), n * t);
@@ -127,14 +141,20 @@ export function InterestCalculator() {
                               </SelectContent>
                             </Select>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                             <div className="space-y-2">
                                 <Label htmlFor="si-principal">Principal Amount</Label>
                                 <Input id="si-principal" type="number" value={siPrincipal} onChange={e => setSiPrincipal(e.target.value)} />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="si-rate">Rate of Interest (% p.a.)</Label>
-                                <Input id="si-rate" type="number" value={siRate} onChange={e => setSiRate(e.target.value)} />
+                                <Label htmlFor="si-rate">Rate of Interest</Label>
+                                <div className="flex gap-2">
+                                    <Input id="si-rate" type="number" value={siRate} onChange={e => setSiRate(e.target.value)} />
+                                     <Select value={siRatePeriod} onValueChange={(val) => setSiRatePeriod(val as 'years' | 'months')}>
+                                        <SelectTrigger className="w-[150px]"><SelectValue/></SelectTrigger>
+                                        <SelectContent><SelectItem value="years">p.a.</SelectItem><SelectItem value="months">p.m.</SelectItem></SelectContent>
+                                    </Select>
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="si-time">Time Period</Label>
@@ -179,9 +199,18 @@ export function InterestCalculator() {
                               </SelectContent>
                             </Select>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                             <div className="space-y-2"><Label htmlFor="ci-principal">Principal Amount</Label><Input id="ci-principal" type="number" value={ciPrincipal} onChange={e => setCiPrincipal(e.target.value)} /></div>
-                            <div className="space-y-2"><Label htmlFor="ci-rate">Rate of Interest (% p.a.)</Label><Input id="ci-rate" type="number" value={ciRate} onChange={e => setCiRate(e.target.value)} /></div>
+                            <div className="space-y-2">
+                                <Label htmlFor="ci-rate">Rate of Interest</Label>
+                                <div className="flex gap-2">
+                                  <Input id="ci-rate" type="number" value={ciRate} onChange={e => setCiRate(e.target.value)} />
+                                  <Select value={ciRatePeriod} onValueChange={(val) => setCiRatePeriod(val as 'years' | 'months')}>
+                                      <SelectTrigger className="w-[150px]"><SelectValue/></SelectTrigger>
+                                      <SelectContent><SelectItem value="years">p.a.</SelectItem><SelectItem value="months">p.m.</SelectItem></SelectContent>
+                                  </Select>
+                                </div>
+                            </div>
                             <div className="space-y-2">
                                 <Label htmlFor="ci-time">Time Period</Label>
                                 <div className="flex gap-2">
