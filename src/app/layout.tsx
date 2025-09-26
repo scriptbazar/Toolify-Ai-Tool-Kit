@@ -21,21 +21,15 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// This is a separate async function to fetch data for the script
-async function getScriptData() {
-  const settings = await getSettings();
-  const adSettings = settings.advertisement;
-  const showAutoAds = adSettings?.adType === 'auto';
-  const autoAdsScript = adSettings?.autoAdsScript;
-  return { showAutoAds, autoAdsScript };
-}
-
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { showAutoAds, autoAdsScript } = await getScriptData();
+  const settings = await getSettings();
+  const adSettings = settings.advertisement;
+  const showAutoAds = adSettings?.adType === 'auto';
+  const autoAdsScript = adSettings?.autoAdsScript;
 
   return (
     <html lang="en" suppressHydrationWarning>
