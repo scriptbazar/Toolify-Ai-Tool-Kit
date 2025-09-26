@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { Calculator, Percent, Trash2 } from 'lucide-react';
+import { Calculator, Percent, Trash2, PieChart as PieChartIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
 
 export function InterestCalculator() {
     const [activeTab, setActiveTab] = useState('simple');
@@ -115,6 +117,41 @@ export function InterestCalculator() {
         setCiResult(null);
     }
 
+    const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))'];
+
+    const renderResult = (result: { interest: number; total: number } | null, principal: string) => {
+        if (!result) return null;
+        const pieChartData = [
+            { name: 'Principal Amount', value: parseFloat(principal) },
+            { name: 'Total Interest', value: result.interest },
+        ];
+
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Interest</p><p className="text-xl font-bold text-primary">{formatCurrency(result.interest)}</p></div>
+                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Amount</p><p className="text-xl font-bold text-primary">{formatCurrency(result.total)}</p></div>
+                <div className="md:col-span-2">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Payment Breakdown</CardTitle>
+                        </CardHeader>
+                        <CardContent className="h-64 flex items-center justify-center">
+                             <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                                        {pieChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                                    </Pie>
+                                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
+
 
     return (
         <Tabs defaultValue="simple" onValueChange={setActiveTab} className="w-full">
@@ -173,12 +210,7 @@ export function InterestCalculator() {
                             <Button onClick={handleSimpleInterestCalc} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate</Button>
                             <Button onClick={handleClearSimple} variant="outline" className="w-full"><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
                         </div>
-                        {siResult && (
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
-                                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Interest</p><p className="text-xl font-bold text-primary">{formatCurrency(siResult.interest)}</p></div>
-                                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Amount</p><p className="text-xl font-bold text-primary">{formatCurrency(siResult.total)}</p></div>
-                            </div>
-                        )}
+                        {siResult && renderResult(siResult, siPrincipal)}
                     </CardContent>
                 </Card>
             </TabsContent>
@@ -189,7 +221,7 @@ export function InterestCalculator() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                            <div className="space-y-2">
+                             <div className="space-y-2">
                                 <Label htmlFor="currency-select-ci">Currency</Label>
                                 <Select value={currency} onValueChange={setCurrency}>
                                   <SelectTrigger id="currency-select-ci"><SelectValue/></SelectTrigger>
@@ -202,7 +234,7 @@ export function InterestCalculator() {
                                   </SelectContent>
                                 </Select>
                             </div>
-                            <div className="space-y-2 md:col-span-2">
+                             <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="ci-principal">Principal Amount</Label>
                                 <Input id="ci-principal" type="number" value={ciPrincipal} onChange={e => setCiPrincipal(e.target.value)} />
                             </div>
@@ -236,12 +268,7 @@ export function InterestCalculator() {
                             <Button onClick={handleCompoundInterestCalc} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate</Button>
                             <Button onClick={handleClearCompound} variant="outline" className="w-full"><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
                         </div>
-                        {ciResult && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
-                                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Interest</p><p className="text-xl font-bold text-primary">{formatCurrency(ciResult.interest)}</p></div>
-                                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Amount</p><p className="text-xl font-bold text-primary">{formatCurrency(ciResult.total)}</p></div>
-                            </div>
-                        )}
+                         {ciResult && renderResult(ciResult, ciPrincipal)}
                     </CardContent>
                 </Card>
             </TabsContent>
