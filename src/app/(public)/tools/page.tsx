@@ -1,29 +1,13 @@
-
 import { getTools } from '@/ai/flows/tool-management';
-import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
-import { ToolFilters } from './_components/ToolFilters';
-import { ToolGrid } from './_components/ToolGrid';
-
+import { ToolsPageClient } from './_components/ToolsPageClient';
 
 export default async function ToolsDashboardPage({
   searchParams,
 }: {
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  const searchQuery = (searchParams?.q as string) || '';
-  const activeCategory = (searchParams?.category as ToolCategory) || 'all';
-
   // Fetch ALL tools once on the server.
   const allTools = await getTools();
-  
-  // Perform filtering on the server after fetching all tools.
-  const filteredTools = allTools.filter(tool => {
-    const categoryMatch = activeCategory === 'all' || tool.category === activeCategory;
-    const searchMatch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        tool.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return categoryMatch && searchMatch;
-  });
-
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -34,23 +18,7 @@ export default async function ToolsDashboardPage({
         </p>
       </div>
 
-      <ToolFilters 
-        tools={allTools}
-      />
-      
-      <div className="mt-8">
-        <ToolGrid tools={filteredTools} />
-      </div>
+      <ToolsPageClient allTools={allTools} />
     </div>
   );
 }
-
-
-      
-
-    
-
-    
-
-
-
