@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, FlipHorizontal, FlipVertical, RotateCcw, Trash2, Loader2, Image as ImageIcon, RotateCw, CornerDownLeft, CornerDownRight, ListOrdered } from 'lucide-react';
+import { UploadCloud, Download, FlipHorizontal, FlipVertical, RotateCcw, Trash2, Loader2, Image as ImageIcon, RotateCw, CornerDownLeft, CornerDownRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -21,49 +21,50 @@ export function FlipImage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
 
-  const applyTransformations = useCallback(() => {
-    if (!imageRef.current) return;
-    setIsLoading(true);
+  useEffect(() => {
+    const applyTransformations = () => {
+      if (!imageRef.current) return;
+      setIsLoading(true);
 
-    const img = imageRef.current;
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
+      const img = imageRef.current;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
         setIsLoading(false);
         toast({ title: "Error", description: "Could not create canvas context.", variant: "destructive" });
         return;
-    }
-    
-    const rad = rotation * Math.PI / 180;
-    const w = img.naturalWidth;
-    const h = img.naturalHeight;
-    
-    if (rotation === 90 || rotation === 270) {
-        canvas.width = h;
-        canvas.height = w;
-    } else {
-        canvas.width = w;
-        canvas.height = h;
-    }
-    
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate(rad);
+      }
+      
+      const rad = rotation * Math.PI / 180;
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      
+      // Adjust canvas size for rotation
+      if (rotation === 90 || rotation === 270) {
+          canvas.width = h;
+          canvas.height = w;
+      } else {
+          canvas.width = w;
+          canvas.height = h;
+      }
+      
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(rad);
 
-    const scaleH = flipState.horizontal ? -1 : 1;
-    const scaleV = flipState.vertical ? -1 : 1;
-    ctx.scale(scaleH, scaleV);
-    
-    ctx.drawImage(img, -w / 2, -h / 2);
-    
-    setTransformedImage(canvas.toDataURL());
-    setIsLoading(false);
-  }, [rotation, flipState, toast]);
-  
-  useEffect(() => {
+      const scaleH = flipState.horizontal ? -1 : 1;
+      const scaleV = flipState.vertical ? -1 : 1;
+      ctx.scale(scaleH, scaleV);
+      
+      ctx.drawImage(img, -w / 2, -h / 2);
+      
+      setTransformedImage(canvas.toDataURL());
+      setIsLoading(false);
+    };
+
     if (imagePreview && imageRef.current) {
         applyTransformations();
     }
-  }, [imagePreview, flipState, rotation, applyTransformations]);
+  }, [imagePreview, flipState, rotation, toast]);
 
 
    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,6 +78,13 @@ export function FlipImage() {
         img.onload = () => {
           imageRef.current = img;
           setImagePreview(img.src);
+        };
+        img.onerror = () => {
+            toast({
+                title: 'Image Load Error',
+                description: 'There was a problem loading the image. Please try a different file.',
+                variant: 'destructive',
+            });
         };
       };
       reader.readAsDataURL(file);
@@ -210,4 +218,3 @@ export function FlipImage() {
     </div>
   );
 }
-
