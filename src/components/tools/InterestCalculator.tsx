@@ -128,9 +128,15 @@ export function InterestCalculator() {
 
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
-                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Interest</p><p className="text-xl font-bold text-primary">{formatCurrency(result.interest)}</p></div>
-                <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Amount</p><p className="text-xl font-bold text-primary">{formatCurrency(result.total)}</p></div>
-                <div className="md:col-span-2">
+                <div className="p-4 bg-muted rounded-lg text-center">
+                    <p className="text-sm text-muted-foreground">Total Interest</p>
+                    <p className="text-xl font-bold text-primary">{formatCurrency(result.interest)}</p>
+                </div>
+                <div className="p-4 bg-muted rounded-lg text-center">
+                    <p className="text-sm text-muted-foreground">Total Amount</p>
+                    <p className="text-xl font-bold text-primary">{formatCurrency(result.total)}</p>
+                </div>
+                 <div className="md:col-span-2">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Payment Breakdown</CardTitle>
