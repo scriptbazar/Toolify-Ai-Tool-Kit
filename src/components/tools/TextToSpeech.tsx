@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Volume2, Loader2, PlayCircle, User, UserCog, Bot, Mic, Speakers, ChevronDown } from 'lucide-react';
+import { Volume2, Loader2, PlayCircle, User, UserCog, Bot, Mic, Speaker, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
@@ -108,7 +108,7 @@ export function TextToSpeech() {
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
                   <Label htmlFor="multi-speaker-toggle" className="text-base font-medium flex items-center">
-                      <Speakers className="mr-2 h-5 w-5"/>
+                      <Speaker className="mr-2 h-5 w-5"/>
                       Enable Multi-Speaker Mode
                   </Label>
                   <p className="text-sm text-muted-foreground">
