@@ -10,7 +10,6 @@
  */
 
 import {ai} from '@/ai/genkit';
-import Handlebars from 'handlebars';
 import {
     AiWriterInputSchema,
     AiWriterOutputSchema,
@@ -34,31 +33,29 @@ export async function aiWriter(input: AiWriterInput): Promise<AiWriterOutput> {
   return aiWriterFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'aiWriterPrompt',
-  input: {schema: AiWriterInputSchema},
-  output: {schema: AiWriterOutputSchema},
-  prompt: `You are an expert content writer and SEO specialist. Your task is to generate a comprehensive, engaging, and well-structured blog post based on the provided topic, desired length, and tone. The output must be in HTML format.
+const aiWriterFlow = ai.defineFlow(
+  {
+    name: 'aiWriterFlow',
+    inputSchema: AiWriterInputSchema,
+    outputSchema: AiWriterOutputSchema,
+  },
+  async (input) => {
+    let lengthInstruction = `(Aim for ~700 words)`;
+    if (input.length === 'Short') {
+        lengthInstruction = `(Aim for ~300 words)`;
+    } else if (input.length === 'Long') {
+        lengthInstruction = `(Aim for ~1200 words)`;
+    } else if (input.length === 'Ultra Long') {
+        lengthInstruction = `(Aim for ~${input.wordCount} words)`;
+    }
+      
+    const prompt = `You are an expert content writer and SEO specialist. Your task is to generate a comprehensive, engaging, and well-structured blog post based on the provided topic, desired length, and tone. The output must be in HTML format.
 
-{{#if language}}
-The blog post must be written in the following language: **{{{language}}}**.
-{{/if}}
+${input.language ? `The blog post must be written in the following language: **${input.language}**.` : ''}
 
-Topic: "{{{topic}}}"
-Desired Length: {{{length}}} 
-{{#if isShort}}
-(Aim for ~300 words)
-{{/if}}
-{{#if isMedium}}
-(Aim for ~700 words)
-{{/if}}
-{{#if isLong}}
-(Aim for ~1200 words)
-{{/if}}
-{{#if isUltraLong}}
-(Aim for ~{{{wordCount}}} words)
-{{/if}}
-Tone of Voice: {{{tone}}}
+Topic: "${input.topic}"
+Desired Length: ${input.length} ${lengthInstruction}
+Tone of Voice: ${input.tone}
 
 Instructions:
 1.  **Title:** Create a compelling and SEO-friendly \`<h1>\` title for the blog post that reflects the topic and tone.
@@ -70,24 +67,15 @@ Instructions:
     *   Ensure the content length aligns with the user's "Desired Length" request.
 4.  **Conclusion:** End with a strong concluding paragraph that summarizes the main points and provides a final thought or call-to-action consistent with the post's tone. Use a single \`<p>\` tag for the conclusion.
 
-Ensure the entire output is a single HTML block, starting with \`<h1>\` and ending with the final \`</p>\`. Do not include \`<html>\` or \`<body>\` tags. Do not add extra line breaks between paragraphs.`,
-});
-
-const aiWriterFlow = ai.defineFlow(
-  {
-    name: 'aiWriterFlow',
-    inputSchema: AiWriterInputSchema,
-    outputSchema: AiWriterOutputSchema,
-  },
-  async input => {
-    const promptData = {
-        ...input,
-        isShort: input.length === 'Short',
-        isMedium: input.length === 'Medium',
-        isLong: input.length === 'Long',
-        isUltraLong: input.length === 'Ultra Long',
-    };
-    const {output} = await prompt(promptData);
+Ensure the entire output is a single HTML block, starting with \`<h1>\` and ending with the final \`</p>\`. Do not include \`<html>\` or \`<body>\` tags. Do not add extra line breaks between paragraphs.`;
+      
+    const { output } = await ai.generate({
+        prompt: prompt,
+        output: {
+            schema: AiWriterOutputSchema,
+        },
+    });
+      
     if (!output) {
       throw new Error("The AI failed to generate content. Please try again.");
     }
