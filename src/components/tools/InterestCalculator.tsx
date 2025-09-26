@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { Calculator, Percent, Trash2, PieChart as PieChartIcon, Mail } from 'lucide-react';
+import { Calculator, Percent, Trash2, PieChart as PieChartIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -127,40 +127,47 @@ export function InterestCalculator() {
         ];
 
         return (
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                <div className="space-y-3">
-                    <Card>
-                        <CardHeader className="p-4">
-                            <CardTitle className="text-base text-muted-foreground">Total Interest</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-0">
-                            <p className="text-2xl font-bold text-primary">{formatCurrency(result.interest)}</p>
-                        </CardContent>
-                    </Card>
-                     <Card>
-                        <CardHeader className="p-4">
-                            <CardTitle className="text-base text-muted-foreground">Total Amount</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-0">
-                            <p className="text-2xl font-bold text-primary">{formatCurrency(result.total)}</p>
-                        </CardContent>
-                    </Card>
-                </div>
+            <div className="mt-6 space-y-6">
                  <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Payment Breakdown</CardTitle>
-                        <CardDescription className="text-xs">Principal vs. Interest</CardDescription>
+                        <CardTitle>Interest Summary</CardTitle>
                     </CardHeader>
-                    <CardContent className="h-48 flex items-center justify-center">
-                         <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} labelLine={false}>
-                                    {pieChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
-                                </Pie>
-                                <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                                <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{paddingTop: '20px'}}/>
-                            </PieChart>
-                        </ResponsiveContainer>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div className="space-y-3">
+                            <Card>
+                                <CardHeader className="p-4">
+                                    <CardTitle className="text-base text-muted-foreground">Total Interest</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-4 pt-0">
+                                    <p className="text-2xl font-bold text-primary">{formatCurrency(result.interest)}</p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader className="p-4">
+                                    <CardTitle className="text-base text-muted-foreground">Total Amount (Principal + Interest)</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-4 pt-0">
+                                    <p className="text-2xl font-bold text-primary">{formatCurrency(result.total)}</p>
+                                </CardContent>
+                            </Card>
+                        </div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Payment Breakdown</CardTitle>
+                                <CardDescription className="text-xs">Principal vs. Interest</CardDescription>
+                            </CardHeader>
+                            <CardContent className="h-48 flex items-center justify-center">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} labelLine={false}>
+                                            {pieChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                                        </Pie>
+                                        <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                                        <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{paddingTop: '20px'}}/>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
                     </CardContent>
                  </Card>
             </div>
