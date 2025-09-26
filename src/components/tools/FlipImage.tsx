@@ -30,15 +30,13 @@ export function FlipImage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) {
         setIsLoading(false);
+        toast({ title: "Error", description: "Could not create canvas context.", variant: "destructive" });
         return;
     }
     
     const rad = rotation * Math.PI / 180;
     const w = img.naturalWidth;
     const h = img.naturalHeight;
-    
-    const absCos = Math.abs(Math.cos(rad));
-    const absSin = Math.abs(Math.sin(rad));
     
     if (rotation === 90 || rotation === 270) {
         canvas.width = h;
@@ -59,13 +57,13 @@ export function FlipImage() {
     
     setTransformedImage(canvas.toDataURL());
     setIsLoading(false);
-  }, [rotation, flipState]);
+  }, [rotation, flipState, toast]);
   
   useEffect(() => {
-    if (imageRef.current) {
+    if (imagePreview && imageRef.current) {
         applyTransformations();
     }
-  }, [applyTransformations, imageRef]);
+  }, [imagePreview, flipState, rotation, applyTransformations]);
 
 
    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,8 +77,6 @@ export function FlipImage() {
         img.onload = () => {
           imageRef.current = img;
           setImagePreview(img.src);
-          // Initially, the transformed image is the same as the original
-          setTransformedImage(img.src); 
         };
       };
       reader.readAsDataURL(file);
@@ -138,7 +134,7 @@ export function FlipImage() {
             <CardHeader>
                 <CardTitle>Original Image</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
                  <div 
                     className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
                     onClick={() => fileInputRef.current?.click()}
@@ -160,12 +156,12 @@ export function FlipImage() {
             <CardHeader>
                 <CardTitle>Transformed Image</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
                 <div className="w-full aspect-video border rounded-lg bg-muted flex items-center justify-center overflow-hidden">
                     {isLoading ? (
                         <Loader2 className="h-8 w-8 animate-spin text-primary"/>
-                    ) : transformedImage ? (
-                        <Image src={transformedImage} alt="Transformed Preview" layout="fill" objectFit="contain" className="p-2"/>
+                    ) : transformedImage && imageFile ? (
+                        <Image src={transformedImage} alt="Transformed Preview" width={500} height={500} className="w-full h-full object-contain p-2"/>
                     ) : (
                          <div className="flex flex-col items-center p-4 text-center">
                             <ImageIcon className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
@@ -211,45 +207,7 @@ export function FlipImage() {
             </div>
           </CardContent>
       </Card>
-       <Card className="mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ListOrdered /> How to Use the Flip Image Tool?
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">1</div>
-                      <div className="flex-1">
-                          <h3 className="font-semibold">Upload Image</h3>
-                          <p className="text-muted-foreground">Click on the upload area to select an image from your device.</p>
-                      </div>
-                  </div>
-                  <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">2</div>
-                      <div className="flex-1">
-                          <h3 className="font-semibold">Apply Transformations</h3>
-                          <p className="text-muted-foreground">Use the buttons to flip or rotate the image. You will see a live preview of the result.</p>
-                      </div>
-                  </div>
-                  <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">3</div>
-                      <div className="flex-1">
-                          <h3 className="font-semibold">Download Your Image</h3>
-                          <p className="text-muted-foreground">Once you are happy with the result, click the "Download Image" button to save it.</p>
-                      </div>
-                  </div>
-                  <div className="flex items-start gap-4 p-4 bg-background rounded-lg">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">4</div>
-                      <div className="flex-1">
-                          <h3 className="font-semibold">Clear and Start Over</h3>
-                          <p className="text-muted-foreground">Click the "Clear" button to remove the current image and start again.</p>
-                      </div>
-                  </div>
-              </div>
-            </CardContent>
-        </Card>
     </div>
   );
 }
+

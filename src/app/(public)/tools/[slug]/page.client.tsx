@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -110,7 +109,7 @@ export function ToolPageClient({
             </CardContent>
           </Card>
           
-          {tool.howToUse && tool.howToUse.length > 0 && (
+           {tool.howToUse && tool.howToUse.length > 0 && (
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -237,9 +236,3 @@ export function ToolPageClient({
     </div>
   );
 }
-
-    
-
-    
-
-
