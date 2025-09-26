@@ -16,8 +16,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 const allVoices = [
   { value: 'Algenib', label: 'Algenib', gender: 'Male' },
   { value: 'Canopus', label: 'Canopus', gender: 'Male' },
-  { value: 'Sirius-1', label: 'Sirius', gender: 'Male' },
-  { value: 'Procyon-1', label: 'Procyon', gender: 'Male' },
+  { value: 'Sirius', label: 'Sirius-1', gender: 'Male' },
+  { value: 'Procyon', label: 'Procyon-1', gender: 'Male' },
+  { value: 'Antares', label: 'Antares', gender: 'Male' },
+  { value: 'Arcturus', label: 'Arcturus', gender: 'Male' },
   { value: 'Achernar', label: 'Achernar', gender: 'Female' },
   { value: 'Cygni', label: 'Cygni', gender: 'Female' },
   { value: 'Electra', label: 'Electra', gender: 'Female' },
