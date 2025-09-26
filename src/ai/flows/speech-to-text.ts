@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -18,16 +19,6 @@ export type SpeechToTextOutput = z.infer<typeof SpeechToTextOutputSchema>;
 
 
 export async function speechToText(input: SpeechToTextInput): Promise<SpeechToTextOutput> {
-    return speechToTextFlow(input);
-}
-
-const speechToTextFlow = ai.defineFlow(
-  {
-    name: 'speechToTextFlow',
-    inputSchema: SpeechToTextInputSchema,
-    outputSchema: SpeechToTextOutputSchema,
-  },
-  async (input) => {
     const { text } = await ai.generate({
       model: 'gemini-1.5-flash',
       prompt: [
@@ -43,5 +34,4 @@ const speechToTextFlow = ai.defineFlow(
     return {
       transcribedText: text,
     };
-  }
-);
+}
