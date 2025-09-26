@@ -129,7 +129,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'JavaScript Minifier', description: 'Minify your JavaScript code to reduce file size and improve loading speed.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
     { name: 'HTML Minifier', description: 'Minify your HTML code to reduce file size and optimize your website.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
     { name: 'SQL Formatter', description: 'Format and beautify your SQL queries for better readability.', icon: 'Database', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'XML Sitemap Generator', description: 'Generate an XML sitemap for your website to improve SEO indexing.', icon: 'FileCode', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Word to PDF', description: 'Convert Microsoft Word documents to PDF format.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'PDF to JPG', description: 'Convert PDF pages to high-quality JPG images.', icon: 'FileImage', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'PDF to Word', description: 'Convert PDF documents to editable Microsoft Word files.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
