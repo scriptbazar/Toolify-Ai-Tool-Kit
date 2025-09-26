@@ -3,7 +3,8 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Download, FlipHorizontal, FlipVertical, RotateCcw, Trash2, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { UploadCloud, Download, FlipHorizontal, FlipVertical, RotateCcw, Trash2, Loader2, Image as ImageIcon, CornerUpLeft, CornerUpRight, RotateCw, CornerDownLeft, CornerDownRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -19,19 +20,6 @@ export function FlipImage() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-      setFlippedImage(null);
-      setFlipState({ horizontal: false, vertical: false });
-      setRotation(0);
-    } else if (file) {
-      toast({ title: "Invalid File", description: "Please upload a valid image file.", variant: "destructive" });
-    }
-  };
-
   const applyTransformations = useCallback(() => {
     if (!imagePreview) return;
     setIsLoading(true);
@@ -45,22 +33,31 @@ export function FlipImage() {
         setIsLoading(false);
         return;
       }
-
+      
       const rad = rotation * Math.PI / 180;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
 
-      canvas.width = Math.abs(img.width * cos) + Math.abs(img.height * sin);
-      canvas.height = Math.abs(img.width * sin) + Math.abs(img.height * cos);
+      const w = img.width;
+      const h = img.height;
+      
+      // Set canvas size based on rotation
+      if (rotation === 90 || rotation === 270) {
+        canvas.width = h;
+        canvas.height = w;
+      } else {
+        canvas.width = w;
+        canvas.height = h;
+      }
       
       ctx.translate(canvas.width / 2, canvas.height / 2);
       ctx.rotate(rad);
-      
+
       const scaleH = flipState.horizontal ? -1 : 1;
       const scaleV = flipState.vertical ? -1 : 1;
       ctx.scale(scaleH, scaleV);
       
-      ctx.drawImage(img, -img.width / 2, -img.height / 2);
+      ctx.drawImage(img, -w / 2, -h / 2, w, h);
       
       setFlippedImage(canvas.toDataURL());
       setIsLoading(false);
@@ -70,20 +67,49 @@ export function FlipImage() {
         toast({ title: 'Error loading image for transformation.', variant: 'destructive'});
     }
 
-  }, [imagePreview, flipState, rotation]);
+  }, [imagePreview, flipState, rotation, toast]);
   
   useEffect(() => {
-    applyTransformations();
-  }, [applyTransformations]);
+    if(imagePreview) {
+      applyTransformations();
+    }
+  }, [applyTransformations, imagePreview]);
 
+   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImagePreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+      setFlippedImage(null);
+      setFlipState({ horizontal: false, vertical: false });
+      setRotation(0);
+    } else if (file) {
+      toast({ title: "Invalid File", description: "Please upload a valid image file.", variant: "destructive" });
+    }
+  };
 
   const handleFlip = (direction: 'horizontal' | 'vertical') => {
     setFlipState(prev => ({ ...prev, [direction]: !prev[direction] }));
   };
   
-  const handleRotate = () => {
-    setRotation(prev => (prev + 90) % 360);
+  const handleRotate = (deg: number) => {
+    setRotation(prev => (prev + deg + 360) % 360);
+  };
+  
+  const handleDiagonalFlip = (type: 'main' | 'anti') => {
+      if (type === 'main') { // Top-left to bottom-right
+          setRotation(prev => (prev + 90) % 360);
+          setFlipState(prev => ({...prev, horizontal: !prev.horizontal}));
+      } else { // Top-right to bottom-left
+          setRotation(prev => (prev + 90) % 360);
+          setFlipState(prev => ({...prev, vertical: !prev.vertical}));
+      }
   }
+
 
   const handleDownload = () => {
       if (!flippedImage || !imageFile) return;
@@ -123,23 +149,20 @@ export function FlipImage() {
                         </div>
                     )}
                 </div>
-                 <div className="grid grid-cols-3 gap-2">
-                    <Button variant="outline" onClick={() => handleFlip('horizontal')} disabled={!imageFile}>
-                        <FlipHorizontal className="mr-2 h-4 w-4" /> Flip Horizontal
-                    </Button>
-                    <Button variant="outline" onClick={() => handleFlip('vertical')} disabled={!imageFile}>
-                        <FlipVertical className="mr-2 h-4 w-4" /> Flip Vertical
-                    </Button>
-                     <Button variant="outline" onClick={handleRotate} disabled={!imageFile}>
-                        <RotateCcw className="mr-2 h-4 w-4" /> Rotate 90°
-                    </Button>
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <Button variant="outline" onClick={() => handleFlip('horizontal')} disabled={!imageFile}><FlipHorizontal className="mr-2 h-4 w-4" /> Horizontal</Button>
+                    <Button variant="outline" onClick={() => handleFlip('vertical')} disabled={!imageFile}><FlipVertical className="mr-2 h-4 w-4" /> Vertical</Button>
+                    <Button variant="outline" onClick={() => handleRotate(-90)} disabled={!imageFile}><RotateCcw className="mr-2 h-4 w-4" /> Rotate Left</Button>
+                    <Button variant="outline" onClick={() => handleRotate(90)} disabled={!imageFile}><RotateCw className="mr-2 h-4 w-4" /> Rotate Right</Button>
+                    <Button variant="outline" onClick={() => handleDiagonalFlip('main')} disabled={!imageFile} className="md:col-span-2"><CornerDownRight className="mr-2 h-4 w-4" />Diagonal Flip (Main)</Button>
+                    <Button variant="outline" onClick={() => handleDiagonalFlip('anti')} disabled={!imageFile} className="md:col-span-2"><CornerDownLeft className="mr-2 h-4 w-4" />Diagonal Flip (Anti)</Button>
                 </div>
             </CardContent>
         </Card>
 
         <Card>
             <CardHeader>
-                <CardTitle>Flipped Image</CardTitle>
+                <CardTitle>Transformed Image</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="w-full aspect-video border rounded-lg bg-muted flex items-center justify-center overflow-hidden">
