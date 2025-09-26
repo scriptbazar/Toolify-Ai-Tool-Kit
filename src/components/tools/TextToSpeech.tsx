@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,14 +15,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 const allVoices = [
   { value: 'Algenib', label: 'Male Voice 1', gender: 'Male' },
   { value: 'Canopus', label: 'Male Voice 2', gender: 'Male' },
-  { value: 'Sirius', label: 'Male Voice 3', gender: 'Male' },
-  { value: 'Procyon', label: 'Male Voice 4', gender: 'Male' },
+  { value: 'Sirius-1', label: 'Male Voice 3', gender: 'Male' },
+  { value: 'Procyon-1', label: 'Male Voice 4', gender: 'Male' },
   { value: 'Achernar', label: 'Female Voice 1', gender: 'Female' },
-  { value: 'Cygni', label: 'Female Voice 2', gender: 'Female' },
-  { value: 'Electra', label: 'Female Voice 3', gender: 'Female' },
-  { value: 'Navi', label: 'Female Voice 4', gender: 'Female' },
-  { value: 'Salm', label: 'Female Voice 5', gender: 'Female' },
-  { value: 'Shaula', label: 'Female Voice 6', gender: 'Female' },
+  { value: 'Cygni-1', label: 'Female Voice 2', gender: 'Female' },
+  { value: 'Electra-1', label: 'Female Voice 3', gender: 'Female' },
+  { value: 'Navi-1', label: 'Female Voice 4', gender: 'Female' },
+  { value: 'Salm-1', label: 'Female Voice 5', gender: 'Female' },
+  { value: 'Shaula-1', label: 'Female Voice 6', gender: 'Female' },
 ];
 
 interface SpeakerConfig {
