@@ -5,13 +5,27 @@ import { getReviews } from '@/ai/flows/review-management';
 import { getPosts } from '@/ai/flows/blog-management';
 import { notFound } from 'next/navigation';
 import { ToolPageClient } from './page.client';
+import { toolComponents } from '@/components/tools/tool-components';
 
+
+export async function generateStaticParams() {
+  const tools = await getTools();
+  return tools.map((tool) => ({
+    slug: tool.slug,
+  }));
+}
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
   const slug = params.slug;
+  
+  if (!toolComponents[slug]) {
+      notFound();
+  }
 
   // Fetch only the specific tool needed for this page
-  const [tool] = await getTools({ slug: slug });
+  const allTools = await getTools();
+  const tool = allTools.find(t => t.slug === slug);
+
 
   if (!tool || tool.status === 'Disabled') {
       notFound();
@@ -26,7 +40,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
   
   // Fetch popular tools for the sidebar, excluding the current tool.
   // This can be further optimized if getTools supports exclusion.
-  const popularTools = (await getTools({ limit: 10 }))
+  const popularTools = allTools
     .filter(t => t.status === 'Active' && t.slug !== slug)
     .slice(0, 10);
     
