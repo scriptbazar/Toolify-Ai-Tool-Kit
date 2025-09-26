@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -22,6 +21,21 @@ export async function speechToText(input: SpeechToTextInput): Promise<SpeechToTe
     return speechToTextFlow(input);
 }
 
+const prompt = ai.definePrompt({
+  name: 'speechToTextPrompt',
+  prompt: `You are an expert transcriptionist. Your task is to accurately transcribe the audio provided.
+
+Instructions:
+1.  Transcribe the speech verbatim, including any filler words like "um" or "uh."
+2.  Ensure correct punctuation, including commas, periods, question marks, etc., to make the text readable.
+3.  Use paragraph breaks where appropriate to structure the text logically, especially during pauses or when the topic shifts.
+4.  Ignore background noise and focus only on the spoken words.
+5.  If a word is unintelligible, use [unintelligible].
+
+Here is the audio file to transcribe:
+{{media url=audioDataUri}}`,
+});
+
 const speechToTextFlow = ai.defineFlow(
   {
     name: 'speechToTextFlow',
@@ -29,11 +43,10 @@ const speechToTextFlow = ai.defineFlow(
     outputSchema: SpeechToTextOutputSchema,
   },
   async (input) => {
-    // Use the Gemini model for transcription
     const { text } = await ai.generate({
       model: 'gemini-1.5-flash-latest',
       prompt: [
-        { text: 'Transcribe the following audio:' },
+        { text: 'Transcribe the following audio with accurate punctuation and paragraphing:' },
         { media: { url: input.audioDataUri } }
       ],
     });
