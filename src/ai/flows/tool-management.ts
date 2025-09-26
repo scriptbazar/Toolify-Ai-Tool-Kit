@@ -67,7 +67,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'IFSC Code to Bank Details', description: 'Get complete bank branch details instantly from an Indian Financial System Code (IFSC).', icon: 'Banknote', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a valid 11-character IFSC code.', 'Click the "Find Bank Details" button.', 'The tool will display the bank name, branch, address, and other available details.'] },
     { name: 'GST Calculator', description: 'Calculate the Goods and Services Tax (GST) for any amount with customizable tax slabs.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the base amount.', 'Select whether to add or remove GST.', 'Choose the correct GST slab (e.g., 5%, 12%, 18%, 28%).', 'The calculator will show the GST amount and the final price.'] },
     { name: 'Interest Calculator', description: 'Calculate simple and compound interest for investments or loans.', icon: 'Percent', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select simple or compound interest.', 'Enter principal, rate, and time.', 'Set compounding frequency for compound interest.', 'View the calculated interest and total amount.'] },
-    { name: 'Credit Card Interest Calculator', description: 'Estimate interest payments and payoff time for credit card debt.', icon: 'CreditCard', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Enter your credit card balance, APR, and monthly payment.', 'Calculate your payoff schedule and total interest.', 'Use the "Extra Payment" and "Payoff Goal" tabs for more insights.'] },
     { name: 'Image Color Extractor', description: 'Extract a complete color palette from an uploaded image to use in your design projects.', icon: 'Pipette', category: 'image', isNew: true, status: 'Active', howToUse: ['Upload an image from your device.', 'The tool will analyze the image and display a palette of its most dominant colors.', 'Click on any color swatch to copy its HEX, RGB, or HSL code.'] },
     { name: 'Image Cropper', description: 'Crop your images to your desired dimensions with an easy-to-use visual cropping tool.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image you want to crop.', 'Drag the corners of the selection box to define your crop area.', 'Click the "Crop Image" button.', 'Download your newly cropped image.'] },
     { name: 'Image Compressor', description: 'Reduce the file size of your JPG and PNG images while maintaining the best possible quality.', icon: 'FileArchive', category: 'image', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload a JPG or PNG image.', 'Use the slider to adjust the desired compression quality (e.g., 80%).', 'Click "Compress & Download".', 'Your optimized image will be downloaded.'] },
@@ -513,6 +512,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
     
+
 
 
 
