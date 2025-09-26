@@ -58,7 +58,7 @@ export async function textToSpeech(
 ): Promise<TextToSpeechOutput> {
   
   let speechConfig: any;
-  if (input.multiSpeakerConfig && Object.keys(input.multiSpeakerConfig).length > 0) {
+  if (input.isMultiSpeaker && input.multiSpeakerConfig && Object.keys(input.multiSpeakerConfig).length > 0) {
       const speakerConfigs = Object.entries(input.multiSpeakerConfig).map(([speaker, voice]) => ({
           speaker: speaker,
           voiceConfig: {

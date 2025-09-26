@@ -53,6 +53,7 @@ export function TextToSpeech() {
     try {
       const input = {
           text,
+          isMultiSpeaker,
           ...(isMultiSpeaker ? { multiSpeakerConfig: speakerConfig } : { singleVoice: singleVoice }),
       };
       const result = await textToSpeech(input);
