@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, FlipHorizontal, FlipVertical, RotateCcw, Trash2, Loader2, Image as ImageIcon, CornerUpLeft, CornerUpRight, RotateCw, CornerDownLeft, CornerDownRight, ListOrdered } from 'lucide-react';
+import { UploadCloud, Download, FlipHorizontal, FlipVertical, RotateCcw, Trash2, Loader2, Image as ImageIcon, RotateCw, CornerDownLeft, CornerDownRight, ListOrdered } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -13,63 +13,60 @@ import { cn } from '@/lib/utils';
 export function FlipImage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [flippedImage, setFlippedImage] = useState<string | null>(null);
+  const [transformedImage, setTransformedImage] = useState<string | null>(null);
   const [flipState, setFlipState] = useState({ horizontal: false, vertical: false });
   const [rotation, setRotation] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+
+  const applyTransformations = useCallback(() => {
+    if (!imageRef.current) return;
+    setIsLoading(true);
+
+    const img = imageRef.current;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        setIsLoading(false);
+        return;
+    }
+    
+    const rad = rotation * Math.PI / 180;
+    const w = img.naturalWidth;
+    const h = img.naturalHeight;
+    
+    const absCos = Math.abs(Math.cos(rad));
+    const absSin = Math.abs(Math.sin(rad));
+    
+    if (rotation === 90 || rotation === 270) {
+        canvas.width = h;
+        canvas.height = w;
+    } else {
+        canvas.width = w;
+        canvas.height = h;
+    }
+    
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(rad);
+
+    const scaleH = flipState.horizontal ? -1 : 1;
+    const scaleV = flipState.vertical ? -1 : 1;
+    ctx.scale(scaleH, scaleV);
+    
+    ctx.drawImage(img, -w / 2, -h / 2);
+    
+    setTransformedImage(canvas.toDataURL());
+    setIsLoading(false);
+  }, [rotation, flipState]);
   
   useEffect(() => {
-    const applyTransformations = () => {
-        if (!imagePreview) return;
-        setIsLoading(true);
-
-        const img = document.createElement('img');
-        img.src = imagePreview;
-        img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            setIsLoading(false);
-            return;
-        }
-        
-        const rad = rotation * Math.PI / 180;
-        
-        const w = img.width;
-        const h = img.height;
-        
-        if (rotation === 90 || rotation === 270) {
-            canvas.width = h;
-            canvas.height = w;
-        } else {
-            canvas.width = w;
-            canvas.height = h;
-        }
-        
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(rad);
-
-        const scaleH = flipState.horizontal ? -1 : 1;
-        const scaleV = flipState.vertical ? -1 : 1;
-        ctx.scale(scaleH, scaleV);
-        
-        ctx.drawImage(img, -w / 2, -h / 2, w, h);
-        
-        setFlippedImage(canvas.toDataURL());
-        setIsLoading(false);
-        };
-        img.onerror = () => {
-            setIsLoading(false);
-            toast({ title: 'Error loading image for transformation.', variant: 'destructive'});
-        }
-    }
-
-    if(imagePreview) {
+    if (imageRef.current) {
         applyTransformations();
     }
-  }, [imagePreview, flipState, rotation, toast]);
+  }, [applyTransformations, imageRef]);
+
 
    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,10 +74,16 @@ export function FlipImage() {
       setImageFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
-        setImagePreview(event.target?.result as string);
+        const img = new window.Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          imageRef.current = img;
+          setImagePreview(img.src);
+          // Initially, the transformed image is the same as the original
+          setTransformedImage(img.src); 
+        };
       };
       reader.readAsDataURL(file);
-      setFlippedImage(null);
       setFlipState({ horizontal: false, vertical: false });
       setRotation(0);
     } else if (file) {
@@ -89,14 +92,17 @@ export function FlipImage() {
   };
 
   const handleFlip = (direction: 'horizontal' | 'vertical') => {
+    if (!imageFile) return;
     setFlipState(prev => ({ ...prev, [direction]: !prev[direction] }));
   };
   
   const handleRotate = (deg: number) => {
+    if (!imageFile) return;
     setRotation(prev => (prev + deg + 360) % 360);
   };
   
   const handleDiagonalFlip = (type: 'main' | 'anti') => {
+      if (!imageFile) return;
       if (type === 'main') { // Top-left to bottom-right
           setRotation(prev => (prev + 90) % 360);
           setFlipState(prev => ({...prev, horizontal: !prev.horizontal}));
@@ -108,9 +114,9 @@ export function FlipImage() {
 
 
   const handleDownload = () => {
-      if (!flippedImage || !imageFile) return;
+      if (!transformedImage || !imageFile) return;
       const link = document.createElement('a');
-      link.href = flippedImage;
+      link.href = transformedImage;
       link.download = `transformed-${imageFile.name}`;
       link.click();
   }
@@ -118,7 +124,8 @@ export function FlipImage() {
   const handleClear = () => {
       setImageFile(null);
       setImagePreview(null);
-      setFlippedImage(null);
+      setTransformedImage(null);
+      imageRef.current = null;
       setFlipState({ horizontal: false, vertical: false });
       setRotation(0);
       if(fileInputRef.current) fileInputRef.current.value = '';
@@ -157,8 +164,8 @@ export function FlipImage() {
                 <div className="w-full aspect-video border rounded-lg bg-muted flex items-center justify-center overflow-hidden">
                     {isLoading ? (
                         <Loader2 className="h-8 w-8 animate-spin text-primary"/>
-                    ) : flippedImage ? (
-                        <Image src={flippedImage} alt="Flipped Preview" layout="fill" objectFit="contain" className="p-2"/>
+                    ) : transformedImage ? (
+                        <Image src={transformedImage} alt="Transformed Preview" layout="fill" objectFit="contain" className="p-2"/>
                     ) : (
                          <div className="flex flex-col items-center p-4 text-center">
                             <ImageIcon className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
@@ -175,15 +182,27 @@ export function FlipImage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <Button variant="outline" onClick={() => handleFlip('horizontal')} disabled={!imageFile}><FlipHorizontal className="mr-2 h-4 w-4" /> Horizontal</Button>
-                <Button variant="outline" onClick={() => handleFlip('vertical')} disabled={!imageFile}><FlipVertical className="mr-2 h-4 w-4" /> Vertical</Button>
-                <Button variant="outline" onClick={() => handleRotate(-90)} disabled={!imageFile}><RotateCcw className="mr-2 h-4 w-4" /> Rotate Left</Button>
-                <Button variant="outline" onClick={() => handleRotate(90)} disabled={!imageFile}><RotateCw className="mr-2 h-4 w-4" /> Rotate Right</Button>
-                <Button variant="outline" onClick={() => handleDiagonalFlip('main')} disabled={!imageFile} className="md:col-span-2"><CornerDownRight className="mr-2 h-4 w-4" />Diagonal Flip (Main)</Button>
-                <Button variant="outline" onClick={() => handleDiagonalFlip('anti')} disabled={!imageFile} className="md:col-span-2"><CornerDownLeft className="mr-2 h-4 w-4" />Diagonal Flip (Anti)</Button>
+                <Button variant="outline" onClick={() => handleFlip('horizontal')} disabled={!imageFile}>
+                  <FlipHorizontal className="mr-2 h-4 w-4" /> Horizontal Flip
+                </Button>
+                <Button variant="outline" onClick={() => handleFlip('vertical')} disabled={!imageFile}>
+                  <FlipVertical className="mr-2 h-4 w-4" /> Vertical Flip
+                </Button>
+                <Button variant="outline" onClick={() => handleRotate(-90)} disabled={!imageFile}>
+                  <RotateCcw className="mr-2 h-4 w-4" /> Rotate Left
+                </Button>
+                <Button variant="outline" onClick={() => handleRotate(90)} disabled={!imageFile}>
+                  <RotateCw className="mr-2 h-4 w-4" /> Rotate Right
+                </Button>
+                <Button variant="outline" onClick={() => handleDiagonalFlip('main')} disabled={!imageFile} className="md:col-span-2">
+                  <CornerDownRight className="mr-2 h-4 w-4" />Diagonal Flip (Main)
+                </Button>
+                <Button variant="outline" onClick={() => handleDiagonalFlip('anti')} disabled={!imageFile} className="md:col-span-2">
+                  <CornerDownLeft className="mr-2 h-4 w-4" />Diagonal Flip (Anti)
+                </Button>
             </div>
             <div className="flex gap-2 mt-4">
-              <Button onClick={handleDownload} disabled={!flippedImage || isLoading} className="w-full">
+              <Button onClick={handleDownload} disabled={!transformedImage || isLoading} className="w-full">
                   <Download className="mr-2 h-4 w-4" /> Download Image
               </Button>
                 <Button onClick={handleClear} variant="destructive" className="w-full" disabled={!imageFile}>
