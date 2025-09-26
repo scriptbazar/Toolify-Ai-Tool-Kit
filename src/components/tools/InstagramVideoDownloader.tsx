@@ -20,20 +20,36 @@ export function InstagramVideoDownloader() {
     }
     setIsLoading(true);
     try {
-      // The downloadVideo flow was complex and has been removed.
-      // We will simulate a failure message as the backend logic is no longer present.
-       toast({ title: 'Downloading...', description: 'Your video will begin downloading shortly.' });
-      // Simulate download of a placeholder video
-      const placeholderVideoUrl = "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4";
-      const link = document.createElement('a');
-      link.href = placeholderVideoUrl;
-      link.setAttribute('download', `instagram-video.mp4`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // WARNING: This is a client-side approach using a public proxy/API.
+      // It is not guaranteed to work and may break if the third-party service changes or if Instagram blocks it.
+      // A robust solution requires a dedicated server-side component.
       
+      // Using an Invidious instance as a proxy to fetch the video. This is primarily for YouTube, but can sometimes work for other services.
+      // This is a best-effort attempt and is likely to fail.
+      const proxyUrl = `https://invidious.io.lol/`;
+      const videoId = new URL(url).pathname.split('/').filter(Boolean).pop();
+      const response = await fetch(`${proxyUrl}api/v1/videos/${videoId}`);
+      
+      if (!response.ok) {
+           throw new Error('Could not fetch video information. The video might be private or the service is unavailable.');
+      }
+      
+      const data = await response.json();
+      const videoUrl = data.formatStreams?.find((f: any) => f.qualityLabel === '720p')?.url || data.formatStreams?.[0]?.url;
+
+      if (!videoUrl) {
+          throw new Error('No downloadable video stream found.');
+      }
+
+      toast({ title: 'Downloading...', description: 'Your video will begin downloading shortly.' });
+      
+      // Since we can't directly download from the proxied URL due to CORS, we open it in a new tab.
+      // The user can then right-click to save. This is a limitation of client-side approaches.
+      window.open(videoUrl, '_blank');
+
     } catch (error: any) {
-      toast({ title: 'Download Failed', description: error.message, variant: 'destructive' });
+      console.error("Download Error:", error);
+      toast({ title: 'Download Failed', description: error.message || 'This video could not be downloaded. It might be private or protected.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -60,5 +76,3 @@ export function InstagramVideoDownloader() {
     </div>
   );
 }
-
-    
