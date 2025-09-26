@@ -27,6 +27,9 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'ai-story-generator': dynamic(() => import('@/components/tools/AiStoryGenerator').then(mod => mod.AiStoryGenerator), { loading: () => <LoadingComponent /> }),
   'ai-tweet-generator': dynamic(() => import('@/components/tools/AiTweetGenerator').then(mod => mod.AiTweetGenerator), { loading: () => <LoadingComponent /> }),
   'ai-story-visualizer': dynamic(() => import('@/components/tools/AiStoryVisualizer').then(mod => mod.AiStoryVisualizer), { loading: () => <LoadingComponent /> }),
+  'ai-rewriter': dynamic(() => import('@/components/tools/AiRewriter').then(mod => mod.AiRewriter), { loading: () => <LoadingComponent /> }),
+  'ai-web-content-summarizer': dynamic(() => import('@/components/tools/AiWebContentSummarizer').then(mod => mod.AiWebContentSummarizer), { loading: () => <LoadingComponent /> }),
+  'ai-seo-keyword-generator': dynamic(() => import('@/components/tools/AiSeoKeywordGenerator').then(mod => mod.AiSeoKeywordGenerator), { loading: () => <LoadingComponent /> }),
   'amazon-shipping-label-cropper': dynamic(() => import('@/components/tools/AmazonShippingLabelCropper').then(mod => mod.AmazonShippingLabelCropper), { loading: () => <LoadingComponent /> }),
   'barcode-generator': dynamic(() => import('@/components/tools/BarcodeGenerator').then(mod => mod.BarcodeGenerator), { loading: () => <LoadingComponent /> }),
   'base64-converter': dynamic(() => import('@/components/tools/Base64Converter').then(mod => mod.Base64Converter), { loading: () => <LoadingComponent /> }),
@@ -145,6 +148,4 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'youtube-video-thumbnail-downloader': dynamic(() => import('@/components/tools/YouTubeVideoThumbnailDownloader').then(mod => mod.YouTubeVideoThumbnailDownloader), { loading: () => <LoadingComponent /> }),
   'youtube-video-title-extractor': dynamic(() => import('@/components/tools/YouTubeVideoTitleExtractor').then(mod => mod.YouTubeVideoTitleExtractor), { loading: () => <LoadingComponent /> }),
   'youtube-video-downloader': dynamic(() => import('@/components/tools/YoutubeVideoDownloader').then(mod => mod.YoutubeVideoDownloader), { loading: () => <LoadingComponent /> }),
-  'ai-rewriter': dynamic(() => import('@/components/tools/AiRewriter').then(mod => mod.AiRewriter), { loading: () => <LoadingComponent /> }),
-  'ai-web-content-summarizer': dynamic(() => import('@/components/tools/AiWebContentSummarizer').then(mod => mod.AiWebContentSummarizer), { loading: () => <LoadingComponent /> }),
 };

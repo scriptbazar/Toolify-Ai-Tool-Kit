@@ -144,6 +144,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'X Video Downloader', description: 'Download videos from X (formerly Twitter) by pasting the post URL.', icon: 'Twitter', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Threads Video Downloader', description: 'Download videos from Threads by pasting the URL.', icon: 'AtSign', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Pinterest Video Downloader', description: 'Download videos from Pinterest by pasting the pin URL.', icon: 'BookImage', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Linkedin Video Downloader', description: 'Download videos from Linkedin by pasting the post URL.', icon: 'Linkedin', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
 ];
 
 const generateSlug = (name: string) => {
@@ -534,6 +535,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
     
+
 
 
 
