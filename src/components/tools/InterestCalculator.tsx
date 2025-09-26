@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { Calculator, Percent } from 'lucide-react';
+import { Calculator, Percent, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,9 @@ import { useToast } from '@/hooks/use-toast';
 export function InterestCalculator() {
     const [activeTab, setActiveTab] = useState('simple');
     const { toast } = useToast();
+
+    // Shared State
+    const [currency, setCurrency] = useState('INR');
 
     // Simple Interest State
     const [siPrincipal, setSiPrincipal] = useState('100000');
@@ -29,9 +32,20 @@ export function InterestCalculator() {
     const [ciTimePeriod, setCiTimePeriod] = useState<'years' | 'months'>('years');
     const [ciFrequency, setCiFrequency] = useState('12'); // Monthly
     const [ciResult, setCiResult] = useState<{ interest: number; total: number } | null>(null);
+    
+    const currencySymbols: {[key: string]: string} = {
+      'INR': '₹',
+      'USD': '$',
+      'EUR': '€',
+      'GBP': '£',
+      'JPY': '¥',
+    };
 
     const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value);
+        return (currencySymbols[currency] || currency) + value.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
     };
 
     const handleSimpleInterestCalc = () => {
@@ -73,6 +87,21 @@ export function InterestCalculator() {
         setCiResult({ interest, total: amount });
     };
 
+    const handleClearSimple = () => {
+        setSiPrincipal('100000');
+        setSiRate('5');
+        setSiTime('5');
+        setSiResult(null);
+    }
+    
+     const handleClearCompound = () => {
+        setCiPrincipal('100000');
+        setCiRate('5');
+        setCiTime('5');
+        setCiResult(null);
+    }
+
+
     return (
         <Tabs defaultValue="simple" onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -85,9 +114,22 @@ export function InterestCalculator() {
                         <CardTitle>Simple Interest Calculator</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                         <div className="space-y-2">
+                            <Label htmlFor="currency-select-si">Currency</Label>
+                            <Select value={currency} onValueChange={setCurrency}>
+                              <SelectTrigger id="currency-select-si" className="w-full md:w-1/3"><SelectValue/></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="INR">INR (₹)</SelectItem>
+                                <SelectItem value="USD">USD ($)</SelectItem>
+                                <SelectItem value="EUR">EUR (€)</SelectItem>
+                                <SelectItem value="GBP">GBP (£)</SelectItem>
+                                <SelectItem value="JPY">JPY (¥)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="si-principal">Principal Amount (₹)</Label>
+                                <Label htmlFor="si-principal">Principal Amount</Label>
                                 <Input id="si-principal" type="number" value={siPrincipal} onChange={e => setSiPrincipal(e.target.value)} />
                             </div>
                             <div className="space-y-2">
@@ -105,7 +147,10 @@ export function InterestCalculator() {
                                 </div>
                             </div>
                         </div>
-                        <Button onClick={handleSimpleInterestCalc} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate</Button>
+                        <div className="flex gap-2">
+                            <Button onClick={handleSimpleInterestCalc} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate</Button>
+                            <Button onClick={handleClearSimple} variant="outline" className="w-full"><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
+                        </div>
                         {siResult && (
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
                                 <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Interest</p><p className="text-xl font-bold text-primary">{formatCurrency(siResult.interest)}</p></div>
@@ -121,8 +166,21 @@ export function InterestCalculator() {
                         <CardTitle>Compound Interest Calculator</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                         <div className="space-y-2">
+                            <Label htmlFor="currency-select-ci">Currency</Label>
+                            <Select value={currency} onValueChange={setCurrency}>
+                              <SelectTrigger id="currency-select-ci" className="w-full md:w-1/3"><SelectValue/></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="INR">INR (₹)</SelectItem>
+                                <SelectItem value="USD">USD ($)</SelectItem>
+                                <SelectItem value="EUR">EUR (€)</SelectItem>
+                                <SelectItem value="GBP">GBP (£)</SelectItem>
+                                <SelectItem value="JPY">JPY (¥)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="space-y-2"><Label htmlFor="ci-principal">Principal Amount (₹)</Label><Input id="ci-principal" type="number" value={ciPrincipal} onChange={e => setCiPrincipal(e.target.value)} /></div>
+                            <div className="space-y-2"><Label htmlFor="ci-principal">Principal Amount</Label><Input id="ci-principal" type="number" value={ciPrincipal} onChange={e => setCiPrincipal(e.target.value)} /></div>
                             <div className="space-y-2"><Label htmlFor="ci-rate">Rate of Interest (% p.a.)</Label><Input id="ci-rate" type="number" value={ciRate} onChange={e => setCiRate(e.target.value)} /></div>
                             <div className="space-y-2">
                                 <Label htmlFor="ci-time">Time Period</Label>
@@ -138,7 +196,10 @@ export function InterestCalculator() {
                                 </SelectContent></Select>
                             </div>
                         </div>
-                        <Button onClick={handleCompoundInterestCalc} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate</Button>
+                        <div className="flex gap-2">
+                            <Button onClick={handleCompoundInterestCalc} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate</Button>
+                            <Button onClick={handleClearCompound} variant="outline" className="w-full"><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
+                        </div>
                         {ciResult && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
                                 <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Total Interest</p><p className="text-xl font-bold text-primary">{formatCurrency(ciResult.interest)}</p></div>
