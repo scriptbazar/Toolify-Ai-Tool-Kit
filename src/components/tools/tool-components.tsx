@@ -57,7 +57,6 @@ import { ImageToPdf } from './ImageToPdf';
 import { InstagramVideoDownloader } from './InstagramVideoDownloader';
 import { InterestCalculator } from './InterestCalculator';
 import { JavascriptMinifier } from './JavascriptMinifier';
-import { JpgToPng } from './JpgToPng';
 import { JsonFormatter } from './JsonFormatter';
 import { JsonPromptGenerator } from './JsonPromptGenerator';
 import { KeywordDensityChecker } from './KeywordDensityChecker';
@@ -88,7 +87,6 @@ import { PdfToWord } from './PdfToWord';
 import { PercentageCalculator } from './PercentageCalculator';
 import { PercentageToCgpaConverter } from './PercentageToCgpaConverter';
 import { PinterestVideoDownloader } from './PinterestVideoDownloader';
-import { PngToJpg } from './PngToJpg';
 import { PromptGenerator } from './PromptGenerator';
 import { PRNToPDF } from './PRNToPDF';
 import { PptToPdf } from './PptToPdf';
@@ -196,7 +194,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'instagram-video-downloader': InstagramVideoDownloader,
   'interest-calculator': InterestCalculator,
   'javascript-minifier': JavascriptMinifier,
-  'jpg-to-png': JpgToPng,
   'json-formatter': JsonFormatter,
   'json-prompt-generator': JsonPromptGenerator,
   'keyword-density-checker': KeywordDensityChecker,
@@ -227,7 +224,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'percentage-calculator': PercentageCalculator,
   'percentage-to-cgpa-converter': PercentageToCgpaConverter,
   'pinterest-video-downloader': PinterestVideoDownloader,
-  'png-to-jpg': PngToJpg,
   'prompt-generator': PromptGenerator,
   'prn-to-pdf': PRNToPDF,
   'ppt-to-pdf': PptToPdf,
