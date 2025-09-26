@@ -1,4 +1,5 @@
 
+      
 'use client';
 
 import { useState } from 'react';
@@ -127,34 +128,41 @@ export function InterestCalculator() {
         ];
 
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
-                <div className="p-4 bg-muted rounded-lg text-center">
-                    <p className="text-sm text-muted-foreground">Total Interest</p>
-                    <p className="text-xl font-bold text-primary">{formatCurrency(result.interest)}</p>
-                </div>
-                <div className="p-4 bg-muted rounded-lg text-center">
-                    <p className="text-sm text-muted-foreground">Total Amount</p>
-                    <p className="text-xl font-bold text-primary">{formatCurrency(result.total)}</p>
-                </div>
-                 <div className="md:col-span-2">
-                    <Card>
+            <Card className="mt-6">
+                <CardHeader>
+                    <CardTitle>Loan Summary</CardTitle>
+                    <CardDescription>Your estimated loan breakdown.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <div className="space-y-3">
+                         <div className="p-4 bg-muted rounded-lg text-center">
+                            <p className="text-sm text-muted-foreground">Total Interest</p>
+                            <p className="text-xl font-bold text-primary">{formatCurrency(result.interest)}</p>
+                        </div>
+                        <div className="p-4 bg-muted rounded-lg text-center">
+                            <p className="text-sm text-muted-foreground">Total Amount</p>
+                            <p className="text-xl font-bold text-primary">{formatCurrency(result.total)}</p>
+                        </div>
+                    </div>
+                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Payment Breakdown</CardTitle>
+                            <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Loan Breakdown</CardTitle>
+                            <CardDescription className="text-xs">Principal vs. Interest</CardDescription>
                         </CardHeader>
-                        <CardContent className="h-64 flex items-center justify-center">
+                        <CardContent className="h-48 flex items-center justify-center">
                              <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                                    <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} label={(props) => formatCurrency(props.value)}>
                                         {pieChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
                                     </Pie>
                                     <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                                    <Legend />
+                                    <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{paddingTop: '20px'}}/>
                                 </PieChart>
                             </ResponsiveContainer>
                         </CardContent>
-                    </Card>
-                </div>
-            </div>
+                     </Card>
+                </CardContent>
+            </Card>
         );
     }
 
@@ -172,22 +180,21 @@ export function InterestCalculator() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                            <div className="space-y-2">
-                                <Label htmlFor="currency-select-si">Currency</Label>
+                             <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="si-principal">Principal Amount</Label>
+                                <div className="flex gap-2">
                                 <Select value={currency} onValueChange={setCurrency}>
-                                  <SelectTrigger id="currency-select-si"><SelectValue/></SelectTrigger>
+                                  <SelectTrigger id="currency-select-si" className="w-[100px]"><SelectValue/></SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="INR">INR (₹)</SelectItem>
-                                    <SelectItem value="USD">USD ($)</SelectItem>
-                                    <SelectItem value="EUR">EUR (€)</SelectItem>
-                                    <SelectItem value="GBP">GBP (£)</SelectItem>
-                                    <SelectItem value="JPY">JPY (¥)</SelectItem>
+                                    <SelectItem value="INR">INR</SelectItem>
+                                    <SelectItem value="USD">USD</SelectItem>
+                                    <SelectItem value="EUR">EUR</SelectItem>
+                                    <SelectItem value="GBP">GBP</SelectItem>
+                                    <SelectItem value="JPY">JPY</SelectItem>
                                   </SelectContent>
                                 </Select>
-                            </div>
-                            <div className="space-y-2 md:col-span-2">
-                                <Label htmlFor="si-principal">Principal Amount</Label>
                                 <Input id="si-principal" type="number" value={siPrincipal} onChange={e => setSiPrincipal(e.target.value)} />
+                                </div>
                             </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
@@ -227,22 +234,21 @@ export function InterestCalculator() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                             <div className="space-y-2">
-                                <Label htmlFor="currency-select-ci">Currency</Label>
-                                <Select value={currency} onValueChange={setCurrency}>
-                                  <SelectTrigger id="currency-select-ci"><SelectValue/></SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="INR">INR (₹)</SelectItem>
-                                    <SelectItem value="USD">USD ($)</SelectItem>
-                                    <SelectItem value="EUR">EUR (€)</SelectItem>
-                                    <SelectItem value="GBP">GBP (£)</SelectItem>
-                                    <SelectItem value="JPY">JPY (¥)</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                            </div>
-                             <div className="space-y-2 md:col-span-2">
+                              <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="ci-principal">Principal Amount</Label>
-                                <Input id="ci-principal" type="number" value={ciPrincipal} onChange={e => setCiPrincipal(e.target.value)} />
+                                <div className="flex gap-2">
+                                    <Select value={currency} onValueChange={setCurrency}>
+                                      <SelectTrigger id="currency-select-ci" className="w-[100px]"><SelectValue/></SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="INR">INR</SelectItem>
+                                        <SelectItem value="USD">USD</SelectItem>
+                                        <SelectItem value="EUR">EUR</SelectItem>
+                                        <SelectItem value="GBP">GBP</SelectItem>
+                                        <SelectItem value="JPY">JPY</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <Input id="ci-principal" type="number" value={ciPrincipal} onChange={e => setCiPrincipal(e.target.value)} />
+                                </div>
                             </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
@@ -281,3 +287,5 @@ export function InterestCalculator() {
         </Tabs>
     );
 }
+
+    

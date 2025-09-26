@@ -1,4 +1,5 @@
 
+      
 'use client';
 
 import { useState } from 'react';
@@ -13,16 +14,14 @@ import { ScrollArea } from '../ui/scroll-area';
 import { getSettings } from '@/ai/flows/settings-management';
 import { useToast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 
 
 interface ScheduleItem {
-    month: number;
-    principal: string;
-    interest: string;
-    totalPayment: string;
-    remainingBalance: string;
+  month: number;
+  principal: string;
+  interest: string;
+  totalPayment: string;
+  remainingBalance: string;
 }
 
 export function LoanCalculator() {
@@ -159,9 +158,10 @@ export function LoanCalculator() {
         const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
         const logoUrl = settings.general?.logoUrl;
         
-        const sparklesSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 4.8-4.8 1.9 4.8 1.9L12 21l1.9-4.8 4.8-1.9-4.8-1.9L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`;
-        let logoBase64: string | null = null;
-
+        const doc = new jsPDF();
+        
+        // ---- HEADER (Page 1 only) ----
+        const headerY = 28;
         if (logoUrl) {
             try {
                 const response = await fetch(logoUrl);
@@ -178,17 +178,6 @@ export function LoanCalculator() {
             }
         }
         
-        const doc = new jsPDF();
-        
-        // ---- HEADER (Page 1 only) ----
-        const headerY = 28;
-        if (logoBase64) {
-            doc.addImage(logoBase64, 'PNG', 15, 15, 20, 20);
-            doc.setFontSize(22).setTextColor(40).text(siteTitle, 40, headerY);
-        } else {
-            doc.setFontSize(22).setTextColor(40).text(siteTitle, 15, headerY);
-        }
-
         // ---- SUMMARY TABLE ----
         const formatCurrencyForPdf = (value: number | undefined | null) => {
              if (value === null || value === undefined || isNaN(value)) return 'N/A';
@@ -395,16 +384,16 @@ export function LoanCalculator() {
                 <CardDescription>Your estimated loan breakdown.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-            <div className="space-y-2">
-                <div className="p-2 bg-muted rounded-lg text-center">
+            <div className="space-y-3">
+                <div className="p-4 bg-muted rounded-lg text-center">
                   <p className="text-sm text-muted-foreground capitalize">{frequency} Payment</p>
-                  <p className="text-xl font-bold text-primary">{formatCurrency(payment)}</p>
+                  <p className="text-2xl font-bold text-primary">{formatCurrency(payment)}</p>
                 </div>
-                 <div className="p-2 bg-muted rounded-lg text-center">
+                 <div className="p-4 bg-muted rounded-lg text-center">
                    <p className="text-sm text-muted-foreground">Total Payment</p>
-                  <p className="text-xl font-bold">{formatCurrency(totalPayment)}</p>
+                  <p className="text-2xl font-bold">{formatCurrency(totalPayment)}</p>
                 </div>
-                 <div className="p-2 bg-muted rounded-lg text-center">
+                 <div className="p-4 bg-muted rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">Total Interest</p>
                   <p className="text-xl font-bold">{formatCurrency(totalInterest)}</p>
                 </div>
@@ -417,15 +406,7 @@ export function LoanCalculator() {
                 <CardContent className="h-48 flex items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
-                            <Pie
-                                data={pieChartData}
-                                dataKey="value"
-                                nameKey="name"
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={60}
-                                label={(props) => formatCurrency(props.value)}
-                            >
+                            <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} label={(props) => formatCurrency(props.value)}>
                                 {pieChartData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
@@ -497,3 +478,5 @@ export function LoanCalculator() {
     </div>
   );
 }
+
+    
