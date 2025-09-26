@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -127,41 +126,35 @@ export function InterestCalculator() {
         ];
 
         return (
-            <Card className="mt-6">
-                <CardHeader>
-                    <CardTitle>Interest Summary</CardTitle>
-                    <CardDescription>Your estimated interest breakdown.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                    <div className="space-y-3">
-                         <div className="p-4 bg-muted rounded-lg text-center">
-                            <p className="text-sm text-muted-foreground">Total Interest</p>
-                            <p className="text-xl font-bold text-primary">{formatCurrency(result.interest)}</p>
-                        </div>
-                        <div className="p-4 bg-muted rounded-lg text-center">
-                            <p className="text-sm text-muted-foreground">Total Amount</p>
-                            <p className="text-xl font-bold text-primary">{formatCurrency(result.total)}</p>
-                        </div>
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div className="space-y-3">
+                    <div className="p-4 bg-muted rounded-lg text-center">
+                        <p className="text-sm text-muted-foreground">Total Interest</p>
+                        <p className="text-xl font-bold text-primary">{formatCurrency(result.interest)}</p>
                     </div>
-                     <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Payment Breakdown</CardTitle>
-                            <CardDescription className="text-xs">Principal vs. Interest</CardDescription>
-                        </CardHeader>
-                        <CardContent className="h-48 flex items-center justify-center">
-                             <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} label={(props) => formatCurrency(props.value)}>
-                                        {pieChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
-                                    </Pie>
-                                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                                    <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{paddingTop: '20px'}}/>
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                     </Card>
-                </CardContent>
-            </Card>
+                    <div className="p-4 bg-muted rounded-lg text-center">
+                        <p className="text-sm text-muted-foreground">Total Amount</p>
+                        <p className="text-xl font-bold text-primary">{formatCurrency(result.total)}</p>
+                    </div>
+                </div>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Payment Breakdown</CardTitle>
+                        <CardDescription className="text-xs">Principal vs. Interest</CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-48 flex items-center justify-center">
+                         <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} labelLine={false}>
+                                    {pieChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                                </Pie>
+                                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                                <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{paddingTop: '20px'}}/>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                 </Card>
+            </div>
         );
     }
 
