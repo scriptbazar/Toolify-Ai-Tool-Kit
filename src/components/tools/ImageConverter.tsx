@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import imageCompression from 'browser-image-compression';
 import { PDFDocument } from 'pdf-lib';
 
-type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'ico' | 'jpg';
+type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'jpg';
 
 export function ImageConverter() {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -115,20 +115,14 @@ export function ImageConverter() {
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
             handleDownload(blob, 'pdf');
 
-        } else if (['gif', 'bmp', 'ico', 'avif'].includes(targetFormat)) {
+        } else if (['gif', 'bmp', 'avif'].includes(targetFormat)) {
             const img = document.createElement('img');
             img.src = imagePreview;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
                 
-                if (targetFormat === 'ico') {
-                    canvas.width = 32;
-                    canvas.height = 32;
-                } else {
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                }
-
                 const ctx = canvas.getContext('2d');
                 if(!ctx) {
                     throw new Error("Could not get canvas context");
@@ -211,7 +205,6 @@ export function ImageConverter() {
                             <SelectItem value="gif">GIF</SelectItem>
                             <SelectItem value="bmp">BMP</SelectItem>
                             <SelectItem value="avif">AVIF</SelectItem>
-                            <SelectItem value="ico">ICO (Favicon)</SelectItem>
                             <SelectItem value="pdf">PDF</SelectItem>
                         </SelectContent>
                     </Select>
