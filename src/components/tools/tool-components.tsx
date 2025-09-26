@@ -56,7 +56,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'gst-calculator': dynamic(() => import('@/components/tools/GSTCalculator').then(mod => mod.GSTCalculator), { loading: () => <LoadingComponent /> }),
   'html-minifier': dynamic(() => import('@/components/tools/HtmlMinifier').then(mod => mod.HtmlMinifier), { loading: () => <LoadingComponent /> }),
   'ico-converter': dynamic(() => import('@/components/tools/IcoConverter').then(mod => mod.IcoConverter), { loading: () => <LoadingComponent /> }),
-  'ifsc-code-to-bank-details': dynamic(() => import('@/components/tools/IFSCCodeToBankDetails').then(mod => mod.IFSCCodetoBankDetails), { loading: () => <LoadingComponent /> }),
+  'ifsc-code-to-bank-details': dynamic(() => import('@/components/tools/IFSCCodeToBankDetails').then(mod => mod.IFSCodetoBankDetails), { loading: () => <LoadingComponent /> }),
   'image-color-extractor': dynamic(() => import('@/components/tools/ImageColorExtractor').then(mod => mod.ImageColorExtractor), { loading: () => <LoadingComponent /> }),
   'image-compressor': dynamic(() => import('@/components/tools/ImageCompressor').then(mod => mod.ImageCompressor), { loading: () => <LoadingComponent /> }),
   'image-converter': dynamic(() => import('@/components/tools/ImageConverter').then(mod => mod.ImageConverter), { loading: () => <LoadingComponent /> }),
