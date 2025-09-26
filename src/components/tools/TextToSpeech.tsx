@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,16 +14,16 @@ import { Switch } from '../ui/switch';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 const allVoices = [
-  { value: 'Algenib', label: 'Male Voice 1', gender: 'Male' },
-  { value: 'Canopus', label: 'Male Voice 2', gender: 'Male' },
-  { value: 'Sirius-1', label: 'Male Voice 3', gender: 'Male' },
-  { value: 'Procyon-1', label: 'Male Voice 4', gender: 'Male' },
-  { value: 'Achernar', label: 'Female Voice 1', gender: 'Female' },
-  { value: 'Cygni-1', label: 'Female Voice 2', gender: 'Female' },
-  { value: 'Electra-1', label: 'Female Voice 3', gender: 'Female' },
-  { value: 'Navi-1', label: 'Female Voice 4', gender: 'Female' },
-  { value: 'Salm-1', label: 'Female Voice 5', gender: 'Female' },
-  { value: 'Shaula-1', label: 'Female Voice 6', gender: 'Female' },
+  { value: 'Algenib', label: 'Algenib', gender: 'Male' },
+  { value: 'Canopus', label: 'Canopus', gender: 'Male' },
+  { value: 'Sirius-1', label: 'Sirius-1', gender: 'Male' },
+  { value: 'Procyon-1', label: 'Procyon-1', gender: 'Male' },
+  { value: 'Achernar', label: 'Achernar', gender: 'Female' },
+  { value: 'Cygni-1', label: 'Cygni-1', gender: 'Female' },
+  { value: 'Electra-1', label: 'Electra-1', gender: 'Female' },
+  { value: 'Navi-1', label: 'Navi-1', gender: 'Female' },
+  { value: 'Salm-1', label: 'Salm-1', gender: 'Female' },
+  { value: 'Shaula-1', label: 'Shaula-1', gender: 'Female' },
 ];
 
 interface SpeakerConfig {
@@ -94,7 +95,7 @@ export function TextToSpeech() {
             id="tts-input"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={isMultiSpeaker ? "Speaker1: Hello, how are you?\nSpeaker2: I'm fine, thank you!" : "Enter text to convert to speech..."}
+            placeholder={isMultiSpeaker ? "Speaker1: Hello, how are you?\\nSpeaker2: I'm fine, thank you!" : "Enter text to convert to speech..."}
             className="min-h-[150px] resize-y"
           />
         </CardContent>
