@@ -17,11 +17,13 @@ import { Button } from '@/components/ui/button';
 import { type Tool } from '@/ai/flows/tool-management.types';
 import { toolCategories } from '@/lib/constants';
 import * as Icons from 'lucide-react';
-import { Edit, CheckCircle, XCircle, Star, Sparkles, Construction, GitCommitVertical, FlaskConical } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc } from '@/components/ui/dialog';
+import { Edit, CheckCircle, XCircle, Star, Sparkles, Construction, GitCommitVertical, FlaskConical, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { EditToolForm } from '@/app/admin/tools/[id]/EditToolForm';
-import { upsertTool } from '@/ai/flows/tool-management';
+import { upsertTool, deleteTool } from '@/ai/flows/tool-management';
 import { useToast } from '@/hooks/use-toast';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+
 
 interface AdminToolTableProps {
   tools: Tool[];
@@ -73,6 +75,17 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
       toast({ title: 'Error', description: result.message, variant: 'destructive' });
     }
     return result.success;
+  };
+  
+  const handleDelete = async (toolId: string) => {
+    const result = await deleteTool(toolId);
+    if (result.success) {
+        toast({ title: 'Tool Deleted', description: result.message });
+        setIsModalOpen(false);
+        onToolUpdate();
+    } else {
+        toast({ title: 'Error', description: result.message, variant: 'destructive' });
+    }
   };
 
 
@@ -130,13 +143,38 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Edit Tool</DialogTitle>
-            <DialogDesc>
+            <DialogDescription>
               Modify the details for "{editingTool?.name}".
-            </DialogDesc>
+            </DialogDescription>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto p-1 pr-4">
              <EditToolForm tool={editingTool} onSave={handleSave} />
           </div>
+           {editingTool && (
+              <DialogFooter className="pt-4 border-t">
+                  <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                          <Button variant="destructive">
+                              <Trash2 className="mr-2 h-4 w-4" /> Delete Tool
+                          </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                          <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the tool and its associated data.
+                              </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(editingTool.id)}>
+                                  Yes, delete this tool
+                              </AlertDialogAction>
+                          </AlertDialogFooter>
+                      </AlertDialogContent>
+                  </AlertDialog>
+              </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
     </>
