@@ -31,7 +31,9 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    allowedDevOrigins: ["https://*.cluster-52r6vzs3ujeoctkkxpjif3x34a.cloudworkstations.dev"],
+    serverActions: {
+      allowedOrigins: ["*.google.com", "*.firebase.app", "*.cloud.run", "localhost:9002"]
+    }
   },
 };
 
