@@ -284,7 +284,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
              <ChartContainer config={chartConfig} className="h-[300px] w-full">
-              <RechartsLineChart
+              <LineChart
                 accessibilityLayer
                 data={chartData}
                 margin={{
@@ -319,7 +319,7 @@ export default function AdminDashboard() {
                   strokeWidth={2}
                   dot={true}
                 />
-              </RechartsLineChart>
+              </LineChart>
             </ChartContainer>
           </CardContent>
         </Card>
