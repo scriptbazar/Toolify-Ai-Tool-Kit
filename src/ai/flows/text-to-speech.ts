@@ -68,14 +68,18 @@ export async function textToSpeech(
       }));
       speechConfig = { multiSpeakerVoiceConfig: { speakerVoiceConfigs: speakerConfigs } };
   } else {
-      speechConfig = { voiceConfig: { prebuiltVoiceConfig: { voiceName: input.singleVoice || 'Algenib' } } };
+      speechConfig = {
+        prebuiltVoiceConfig: { voiceName: input.singleVoice || 'Algenib' },
+      };
   }
 
   const { media } = await ai.generate({
     model: 'googleai/gemini-2.5-flash-preview-tts',
     config: {
       responseModalities: ['AUDIO'],
-      speechConfig,
+      speechConfig: {
+          voiceConfig: speechConfig,
+      }
     },
     prompt: input.text,
   });
