@@ -16,6 +16,7 @@ const SpeakerVoiceMappingSchema = z.record(VoiceConfigSchema);
 
 const TextToSpeechInputSchema = z.object({
   text: z.string().describe('The text to convert to speech.'),
+  isMultiSpeaker: z.boolean().optional(),
   singleVoice: z.string().optional().describe('The single voice to use for the speech synthesis.'),
   multiSpeakerConfig: SpeakerVoiceMappingSchema.optional().describe('A mapping of speaker names to voices for multi-speaker synthesis.'),
 });
