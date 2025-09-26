@@ -1,6 +1,3 @@
-
-'use client';
-
 import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
 import { AdminToolFilters } from './_components/AdminToolFilters';
@@ -15,42 +12,24 @@ import {
 } from '@/components/ui/card';
 import { PlusCircle, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { Suspense, useEffect, useState, useMemo } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense } from 'react';
 import { clearCache } from '@/ai/flows/utility-actions';
 
 const ITEMS_PER_PAGE = 10;
 
-export default function AdminToolsPage() {
-    const [allTools, setAllTools] = useState<Tool[]>([]);
-    const [loading, setLoading] = useState(true);
-    const searchParams = useSearchParams();
-    const router = useRouter();
+export default async function AdminToolsPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+    const allTools = await getTools();
 
-    const fetchTools = async () => {
-        setLoading(true);
-        const tools = await getTools();
-        setAllTools(tools);
-        setLoading(false);
-    };
+    const searchQuery = (searchParams?.q as string) || '';
+    const activeCategory = (searchParams?.category as ToolCategory) || 'all';
+    const activeFilter = (searchParams?.filter as string) || 'all';
+    const currentPage = Number(searchParams?.page || 1);
 
-    useEffect(() => {
-        fetchTools();
-    }, []);
-    
-    const handleToolUpdate = async () => {
-        // Re-fetch tools after an update
-        await fetchTools();
-        // Clear cache to reflect changes immediately across the app
-        await clearCache();
-    };
-
-    const searchQuery = searchParams.get('q') || '';
-    const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
-    const activeFilter = searchParams.get('filter') || 'all';
-    const currentPage = Number(searchParams.get('page') || 1);
-
-    const filteredTools = useMemo(() => allTools
+    const filteredTools = allTools
         .filter(tool => {
             if (activeFilter === 'all') return true;
             if (activeFilter === 'pro') return tool.plan === 'Pro';
@@ -64,7 +43,7 @@ export default function AdminToolsPage() {
         })
         .filter(tool =>
             tool.name.toLowerCase().includes(searchQuery.toLowerCase())
-        ), [allTools, activeFilter, activeCategory, searchQuery]);
+        );
 
     const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
     const paginatedTools = filteredTools.slice(
@@ -73,7 +52,7 @@ export default function AdminToolsPage() {
     );
     
     const createQueryString = (params: Record<string, string | number | null>) => {
-        const currentParams = new URLSearchParams(searchParams.toString());
+        const currentParams = new URLSearchParams(searchParams as any);
         for (const [key, value] of Object.entries(params)) {
             if (value === null || (key === 'page' && value === 1)) {
                 currentParams.delete(key);
@@ -103,15 +82,16 @@ export default function AdminToolsPage() {
                     <CardDescription>A comprehensive list of all tools available in the application.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <AdminToolFilters allTools={allTools} />
+                    <Suspense fallback={<div>Loading filters...</div>}>
+                        <AdminToolFilters allTools={allTools} />
+                    </Suspense>
                     
-                    {loading ? (
-                         <div className="flex justify-center items-center h-48">
-                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                        </div>
-                    ) : (
-                        <AdminToolTable tools={paginatedTools} onToolUpdate={handleToolUpdate} />
-                    )}
+                    <Suspense fallback={<div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+                      <AdminToolTable tools={paginatedTools} onToolUpdate={async () => {
+                          'use server';
+                          await clearCache();
+                      }} />
+                    </Suspense>
                     
                     {totalPages > 1 && (
                         <div className="flex items-center justify-end space-x-2 pt-4">
