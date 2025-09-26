@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import imageCompression from 'browser-image-compression';
 import { PDFDocument } from 'pdf-lib';
 
-type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'ico';
+type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'ico' | 'jpg';
 
 export function ImageConverter() {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -60,7 +60,7 @@ export function ImageConverter() {
         maxSizeMB: 20, // High limit to not resize unintentionally
         useWebWorker: true,
         initialQuality: quality,
-        fileType: `image/${targetFormat}`,
+        fileType: `image/${targetFormat === 'jpg' ? 'jpeg' : targetFormat}`,
         exifOrientation: true,
       };
 
@@ -145,7 +145,7 @@ export function ImageConverter() {
             maxSizeMB: 20,
             useWebWorker: true,
             initialQuality: quality,
-            fileType: `image/${targetFormat}`,
+            fileType: `image/${targetFormat === 'jpg' ? 'jpeg' : targetFormat}`,
             exifOrientation: true,
         };
         const compressedFile = await imageCompression(imageFile, options);
@@ -176,8 +176,8 @@ export function ImageConverter() {
                         <Image src={imagePreview} alt="Preview" layout="fill" objectFit="contain" className="p-2" />
                     ) : (
                         <div className="flex flex-col items-center">
-                        <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                        <p className="text-sm text-muted-foreground">Click or drag image to upload</p>
+                            <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                            <p className="text-sm text-muted-foreground">Click or drag image to upload</p>
                         </div>
                     )}
                 </div>
@@ -204,6 +204,7 @@ export function ImageConverter() {
                             <SelectValue placeholder="Select format" />
                         </SelectTrigger>
                         <SelectContent>
+                            <SelectItem value="jpg">JPG</SelectItem>
                             <SelectItem value="jpeg">JPEG</SelectItem>
                             <SelectItem value="png">PNG</SelectItem>
                             <SelectItem value="webp">WEBP</SelectItem>
@@ -215,7 +216,7 @@ export function ImageConverter() {
                         </SelectContent>
                     </Select>
                 </div>
-                {(targetFormat === 'jpeg' || targetFormat === 'webp' || targetFormat === 'avif') && (
+                {(targetFormat === 'jpeg' || targetFormat === 'webp' || targetFormat === 'avif' || targetFormat === 'jpg') && (
                     <div className="space-y-2">
                         <div className="flex justify-between items-center">
                             <Label>Quality: {Math.round(quality * 100)}%</Label>
