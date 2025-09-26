@@ -14,7 +14,7 @@ export const GeneratePromptInputSchema = z.object({
   socialMediaAdStyle: z.enum(['Urgent', 'Friendly', 'Humorous', 'Inspirational', 'Benefit-focused']).optional().describe('The tone/style for social media ad prompts.'),
   videoScriptStyle: z.enum(['Tutorial', 'Commercial', 'Vlog', 'Explainer', 'Documentary', 'Product Demo', 'Testimonial', 'Short Film', 'Music Video', 'Unboxing']).optional().describe('The type of video script to generate.'),
   marketingCopyStyle: z.enum(['Persuasive', 'Informative', 'Inspirational', 'Storytelling', 'Technical']).optional().describe('The tone for marketing copy prompts.'),
-  creativeWritingStyle: z.enum(['Fantasy', 'Sci-Fi', 'Horror', 'Mystery', 'Romance']).optional().describe('The genre for creative writing prompts.'),
+  creativeWritingStyle: z.enum(['Fantasy', 'Sci-Fi', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Historical Fiction', 'Dystopian']).optional().describe('The genre for creative writing prompts.'),
 });
 export type GeneratePromptInput = z.infer<typeof GeneratePromptInputSchema>;
 

@@ -198,6 +198,9 @@ export function JsonPromptGenerator() {
                                 <SelectItem value="Horror">Horror</SelectItem>
                                 <SelectItem value="Mystery">Mystery</SelectItem>
                                 <SelectItem value="Romance">Romance</SelectItem>
+                                <SelectItem value="Thriller">Thriller</SelectItem>
+                                <SelectItem value="Historical Fiction">Historical Fiction</SelectItem>
+                                <SelectItem value="Dystopian">Dystopian</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
