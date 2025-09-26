@@ -60,16 +60,13 @@ export function IcoConverter() {
     }
   };
   
-  const handleDownload = () => {
-    // For this client-side example, we'll download the 32x32 version as a PNG, 
-    // as creating a multi-layer .ico file is complex without a dedicated library.
-    // The user can then use an online service to convert this PNG to a true ICO if needed.
-    const ico32 = icoPreviews.find(p => p.size === 32);
-    if (!ico32 || !imageFile) return;
+  const handleDownload = (size: number) => {
+    const ico = icoPreviews.find(p => p.size === size);
+    if (!ico || !imageFile) return;
     
     const link = document.createElement('a');
-    link.href = ico32.dataUrl;
-    link.download = `${imageFile.name.split('.')[0]}_32x32.png`; // Downloading as PNG for compatibility
+    link.href = ico.dataUrl;
+    link.download = `${imageFile.name.split('.')[0]}_${size}x${size}.png`; // Downloading as PNG for compatibility
     link.click();
   };
 
@@ -127,9 +124,13 @@ export function IcoConverter() {
                         <p className="text-sm text-muted-foreground">Previews will appear here after conversion.</p>
                     )}
                 </div>
-                <Button onClick={handleDownload} disabled={icoPreviews.length === 0} className="w-full">
-                    <Download className="mr-2 h-4 w-4" /> Download ICO
-                </Button>
+                {icoPreviews.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <Button onClick={() => handleDownload(48)} variant="outline"><Download className="mr-2 h-4 w-4"/>48x48</Button>
+                        <Button onClick={() => handleDownload(32)}><Download className="mr-2 h-4 w-4"/>32x32</Button>
+                        <Button onClick={() => handleDownload(16)} variant="outline"><Download className="mr-2 h-4 w-4"/>16x16</Button>
+                    </div>
+                )}
             </CardContent>
         </Card>
     </div>
