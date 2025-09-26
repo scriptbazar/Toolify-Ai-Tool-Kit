@@ -95,7 +95,7 @@ export function ToolPageClient({
       </Button>
       <AdPlaceholder adSlotId="toolpage-banner-top" adSettings={settings?.advertisement ?? null} className="mb-6" />
       <div className="flex flex-col lg:flex-row lg:gap-8">
-        <div className="flex-1">
+        <div className="flex-1 space-y-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-center gap-4">
               <Icon className="h-10 w-10 text-primary" />
@@ -110,27 +110,29 @@ export function ToolPageClient({
             </CardContent>
           </Card>
           
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles /> Features of {tool.name}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="p-4 bg-background">
-                  <h3 className="font-semibold flex items-center gap-2">⚡ Instant Results</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Get what you need in seconds, without any unnecessary waiting or complex steps.</p>
-              </Card>
-              <Card className="p-4 bg-background">
-                  <h3 className="font-semibold flex items-center gap-2">👍 Easy to Use</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Our intuitive interface makes it easy for anyone to use, regardless of technical skill.</p>
-              </Card>
-            </CardContent>
-          </Card>
+          {tool.howToUse && tool.howToUse.length > 0 && (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <ListOrdered /> How to use {tool.name}?
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {tool.howToUse.map((step, index) => (
+                            <div key={index} className="flex items-start gap-4 p-4 bg-background rounded-lg">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0 mt-1">{index + 1}</div>
+                                <p className="text-muted-foreground">{step}</p>
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+          )}
           
-          <AdPlaceholder adSlotId="toolpage-banner-bottom" adSettings={settings?.advertisement ?? null} className="my-6" />
+          <AdPlaceholder adSlotId="toolpage-banner-bottom" adSettings={settings?.advertisement ?? null} />
 
-          <Card className="mt-8">
+          <Card>
               <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                       <CheckCircle2 /> Why Choose Our Tools?
@@ -164,7 +166,7 @@ export function ToolPageClient({
             </CardContent>
           </Card>
           
-          <Card className="mt-8">
+          <Card>
               <CardHeader>
                   <CardTitle>Reviews for {tool.name}</CardTitle>
                   <CardDescription>See what other users are saying about this tool.</CardDescription>
@@ -239,4 +241,5 @@ export function ToolPageClient({
     
 
     
+
 
