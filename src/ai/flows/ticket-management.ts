@@ -19,7 +19,7 @@ import {
 } from './ticket-management.types';
 import { ai } from '@/ai/genkit';
 import { getStorage } from 'firebase-admin/storage';
-import { saveUserMedia } from './ai-image-generator';
+import { saveUserMedia } from './media-management';
 
 
 /**

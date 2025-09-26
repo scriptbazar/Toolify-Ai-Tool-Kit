@@ -88,7 +88,10 @@ const aiWriterFlow = ai.defineFlow(
         isUltraLong: input.length === 'Ultra Long',
     };
     const {output} = await prompt(promptData);
-    return output!;
+    if (!output) {
+      throw new Error("The AI failed to generate content. Please try again.");
+    }
+    return output;
   }
 );
 

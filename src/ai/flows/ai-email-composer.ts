@@ -52,7 +52,10 @@ const composeEmailFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("The AI failed to compose an email. Please try again.");
+    }
+    return output;
   }
 );
 
@@ -87,7 +90,10 @@ const regenerateEmailTemplateFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await regeneratePrompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("The AI failed to regenerate the email template. Please try again.");
+    }
+    return output;
   }
 );
 
@@ -123,6 +129,9 @@ const generateFeatureAnnouncementFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await featureAnnouncementPrompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("The AI failed to generate the announcement email. Please try again.");
+    }
+    return output;
   }
 );

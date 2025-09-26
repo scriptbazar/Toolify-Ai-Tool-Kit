@@ -53,6 +53,9 @@ const aiRewriterFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("The AI failed to rewrite the text. Please try again.");
+    }
+    return output;
   }
 );

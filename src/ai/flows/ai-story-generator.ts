@@ -50,6 +50,9 @@ const aiStoryGeneratorFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("The AI failed to generate a story. Please try again.");
+    }
+    return output;
   }
 );
