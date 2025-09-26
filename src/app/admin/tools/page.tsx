@@ -1,3 +1,4 @@
+
 import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
 import { AdminToolFilters } from './_components/AdminToolFilters';
@@ -52,7 +53,7 @@ export default async function AdminToolsPage({
     );
     
     const createQueryString = (params: Record<string, string | number | null>) => {
-        const currentParams = new URLSearchParams(searchParams as any);
+        const currentParams = new URLSearchParams(searchParams.toString());
         for (const [key, value] of Object.entries(params)) {
             if (value === null || (key === 'page' && value === 1)) {
                 currentParams.delete(key);
