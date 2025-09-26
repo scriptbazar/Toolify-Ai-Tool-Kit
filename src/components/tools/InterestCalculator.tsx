@@ -62,51 +62,49 @@ export function InterestCalculator() {
 
     const handleSimpleInterestCalc = () => {
         const p = parseFloat(siPrincipal);
-        let r = parseFloat(siRate) / 100;
-        let t = parseFloat(siTime);
+        let annualRate = parseFloat(siRate) / 100;
+        let timeInYears = parseFloat(siTime);
 
-        if (isNaN(p) || isNaN(r) || isNaN(t) || p <= 0 || r < 0 || t <= 0) {
+        if (isNaN(p) || isNaN(annualRate) || isNaN(timeInYears) || p <= 0 || annualRate < 0 || timeInYears <= 0) {
             toast({ title: "Invalid Input", description: "Please enter valid positive numbers.", variant: "destructive" });
             return;
         }
 
-        // Adjust rate to be annual if it's given monthly
+        // Standardize to annual rate and time in years for calculation
         if (siRatePeriod === 'months') {
-            r = r * 12;
+            annualRate = annualRate * 12;
         }
         
-        // Adjust time to be in years if it's given in months
         if (siTimePeriod === 'months') {
-            t = t / 12;
+            timeInYears = timeInYears / 12;
         }
 
-        const interest = p * r * t;
+        const interest = p * annualRate * timeInYears;
         const total = p + interest;
         setSiResult({ interest, total });
     };
 
     const handleCompoundInterestCalc = () => {
         const p = parseFloat(ciPrincipal);
-        let r = parseFloat(ciRate) / 100;
-        let t = parseFloat(ciTime);
+        let annualRate = parseFloat(ciRate) / 100;
+        let timeInYears = parseFloat(ciTime);
         const n = parseInt(ciFrequency, 10);
 
-        if (isNaN(p) || isNaN(r) || isNaN(t) || p <= 0 || r < 0 || t <= 0) {
+        if (isNaN(p) || isNaN(annualRate) || isNaN(timeInYears) || p <= 0 || annualRate < 0 || timeInYears <= 0) {
             toast({ title: "Invalid Input", description: "Please enter valid positive numbers.", variant: "destructive" });
             return;
         }
 
-        // Adjust rate to be annual if it's given monthly
+        // Standardize to annual rate and time in years for calculation
         if (ciRatePeriod === 'months') {
-            r = r * 12;
+            annualRate = annualRate * 12;
         }
 
-        // Adjust time to be in years if it's given in months
         if (ciTimePeriod === 'months') {
-            t = t / 12;
+            timeInYears = timeInYears / 12;
         }
         
-        const amount = p * Math.pow((1 + r / n), n * t);
+        const amount = p * Math.pow((1 + annualRate / n), n * timeInYears);
         const interest = amount - p;
         setCiResult({ interest, total: amount });
     };
@@ -159,7 +157,7 @@ export function InterestCalculator() {
                         </Card>
                         <Card>
                             <CardHeader className="p-4">
-                                <CardTitle className="text-base text-muted-foreground">Total Amount (Principal + Interest)</CardTitle>
+                                <CardTitle className="text-base text-muted-foreground">Total Amount</CardTitle>
                             </CardHeader>
                             <CardContent className="p-4 pt-0">
                                 <p className="text-2xl font-bold text-primary">{formatCurrency(result.total)}</p>
@@ -169,7 +167,6 @@ export function InterestCalculator() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Payment Breakdown</CardTitle>
-                            <CardDescription className="text-xs">Principal vs. Interest</CardDescription>
                         </CardHeader>
                         <CardContent className="h-64 flex items-center justify-center">
                             <ResponsiveContainer width="100%" height="100%">
