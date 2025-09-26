@@ -7,9 +7,17 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import wav from 'wav';
 
+const VoiceConfigSchema = z.object({
+    name: z.string(),
+    gender: z.string(),
+});
+
+const SpeakerVoiceMappingSchema = z.record(VoiceConfigSchema);
+
 const TextToSpeechInputSchema = z.object({
   text: z.string().describe('The text to convert to speech.'),
-  voice: z.string().optional().describe('The voice to use for the speech synthesis.'),
+  singleVoice: z.string().optional().describe('The single voice to use for the speech synthesis.'),
+  multiSpeakerConfig: SpeakerVoiceMappingSchema.optional().describe('A mapping of speaker names to voices for multi-speaker synthesis.'),
 });
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
@@ -48,25 +56,38 @@ async function toWav(
 export async function textToSpeech(
   input: TextToSpeechInput
 ): Promise<TextToSpeechOutput> {
+  
+  let speechConfig: any;
+  if (input.multiSpeakerConfig && Object.keys(input.multiSpeakerConfig).length > 0) {
+      const speakerConfigs = Object.entries(input.multiSpeakerConfig).map(([speaker, voice]) => ({
+          speaker: speaker,
+          voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: voice.name },
+          }
+      }));
+      speechConfig = { multiSpeakerVoiceConfig: { speakerVoiceConfigs: speakerConfigs } };
+  } else {
+      speechConfig = { voiceConfig: { prebuiltVoiceConfig: { voiceName: input.singleVoice || 'Algenib' } } };
+  }
+
   const { media } = await ai.generate({
     model: 'googleai/gemini-2.5-flash-preview-tts',
     config: {
       responseModalities: ['AUDIO'],
-      speechConfig: {
-        voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: input.voice || 'Algenib' },
-        },
-      },
+      speechConfig,
     },
     prompt: input.text,
   });
+
   if (!media) {
     throw new Error('no media returned');
   }
+
   const audioBuffer = Buffer.from(
     media.url.substring(media.url.indexOf(',') + 1),
     'base64'
   );
+
   return {
     audioDataUri: 'data:audio/wav;base64,' + (await toWav(audioBuffer)),
   };
