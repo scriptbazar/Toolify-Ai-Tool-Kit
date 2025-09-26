@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { Calculator, Percent, Trash2, PieChart as PieChartIcon } from 'lucide-react';
+import { Calculator, Percent, Trash2, PieChart as PieChartIcon, Mail } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -128,14 +129,22 @@ export function InterestCalculator() {
         return (
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                 <div className="space-y-3">
-                    <div className="p-4 bg-muted rounded-lg text-center">
-                        <p className="text-sm text-muted-foreground">Total Interest</p>
-                        <p className="text-xl font-bold text-primary">{formatCurrency(result.interest)}</p>
-                    </div>
-                    <div className="p-4 bg-muted rounded-lg text-center">
-                        <p className="text-sm text-muted-foreground">Total Amount</p>
-                        <p className="text-xl font-bold text-primary">{formatCurrency(result.total)}</p>
-                    </div>
+                    <Card>
+                        <CardHeader className="p-4">
+                            <CardTitle className="text-base text-muted-foreground">Total Interest</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-0">
+                            <p className="text-2xl font-bold text-primary">{formatCurrency(result.interest)}</p>
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader className="p-4">
+                            <CardTitle className="text-base text-muted-foreground">Total Amount</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-0">
+                            <p className="text-2xl font-bold text-primary">{formatCurrency(result.total)}</p>
+                        </CardContent>
+                    </Card>
                 </div>
                  <Card>
                     <CardHeader>
@@ -188,8 +197,6 @@ export function InterestCalculator() {
                                 <Input id="si-principal" type="number" value={siPrincipal} onChange={e => setSiPrincipal(e.target.value)} />
                                 </div>
                             </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                             <div className="space-y-2">
                                 <Label htmlFor="si-rate">Rate of Interest</Label>
                                 <div className="flex gap-2">
@@ -200,6 +207,8 @@ export function InterestCalculator() {
                                     </Select>
                                 </div>
                             </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                             <div className="space-y-2">
                                 <Label htmlFor="si-time">Time Period</Label>
                                 <div className="flex gap-2">
@@ -242,8 +251,6 @@ export function InterestCalculator() {
                                     <Input id="ci-principal" type="number" value={ciPrincipal} onChange={e => setCiPrincipal(e.target.value)} />
                                 </div>
                             </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
                             <div className="space-y-2">
                                 <Label htmlFor="ci-rate">Rate of Interest</Label>
                                 <div className="flex gap-2">
@@ -254,6 +261,8 @@ export function InterestCalculator() {
                                   </Select>
                                 </div>
                             </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                             <div className="space-y-2">
                                 <Label htmlFor="ci-time">Time Period</Label>
                                 <div className="flex gap-2">
