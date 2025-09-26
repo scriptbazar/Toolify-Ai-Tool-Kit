@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -12,7 +13,17 @@ import { useToast } from '@/hooks/use-toast';
 import { getSettings } from '@/ai/flows/settings-management';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import dynamic from 'next/dynamic';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Banknote, Percent, Calendar } from 'lucide-react';
+
+
+const PieChart = dynamic(() => import('recharts').then(mod => mod.PieChart), { ssr: false });
+const Pie = dynamic(() => import('recharts').then(mod => mod.Pie), { ssr: false });
+const Cell = dynamic(() => import('recharts').then(mod => mod.Cell), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
+const Legend = dynamic(() => import('recharts').then(mod => mod.Legend), { ssr: false });
+const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
 
 
 interface Result {
@@ -289,7 +300,7 @@ export function GSTCalculator() {
                     </svg>
                     Share on WhatsApp
                 </Button>
-                 <Button variant="outline" className="w-full" onClick={handleShareOnEmail}>
+                <Button variant="outline" className="w-full" onClick={handleShareOnEmail}>
                     <Mail className="mr-2 h-4 w-4"/> Share on Email
                 </Button>
                 <Button variant="outline" className="w-full" onClick={handleDownloadPdf}>
