@@ -121,6 +121,29 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Loan Calculator', description: 'Calculate your loan payments, total interest, and amortization schedule for various loan types.', icon: 'Landmark', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Enter your loan amount, interest rate, and term.', 'Optionally, add GST and select payment frequency.', 'Click "Calculate" to see your EMI and a full breakdown.', 'Download your amortization schedule as a PDF.'] },
     { name: 'XML Sitemap Generator', description: 'Create an XML sitemap for your website to help search engines crawl and index your pages efficiently.', icon: 'FileCode', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Enter your website\'s base URL.', 'Click "Generate Sitemap".', 'The tool will create a basic XML sitemap including your homepage.', 'You can copy the generated XML or download it as a sitemap.xml file.'] },
     { name: 'SQL Formatter', description: 'Format and beautify your SQL queries to make them readable and easy to debug.', icon: 'Database', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste your SQL query into the editor.', 'Select your SQL dialect (e.g., MySQL, PostgreSQL).', 'Choose your preferred indentation.', 'Click "Format SQL" to see the cleaned-up query.'] },
+    { name: 'Website Word Counter', description: 'Count the number of words on any webpage by entering its URL.', icon: 'Calculator', category: 'text', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Favicon Checker', description: 'Check if a website has a favicon and preview what it looks like.', icon: 'Heart', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Meta Tag Generator', description: 'Generate meta tags for your website to improve SEO and social media sharing.', icon: 'Code', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Keyword Density Checker', description: 'Analyze the keyword density of your text to optimize for SEO.', icon: 'PieChart', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Redirect Checker', description: 'Check the redirect chain and status code of any URL.', icon: 'Link', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'SERP Checker', description: 'Check the search engine results page (SERP) for a specific keyword in any country.', icon: 'Search', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Schema Generator', description: 'Generate structured data markup in JSON-LD format, including FAQ, Article, and Product schemas.', icon: 'FileJson', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Robots.txt Generator', description: 'Create a robots.txt file to guide search engine crawlers on your website.', icon: 'FileCode', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Credit Card Interest Calculator', description: 'Calculate the interest on your credit card debt and create a payoff plan.', icon: 'CreditCard', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Fuel Cost Calculator', description: 'Estimate the fuel cost for a trip based on distance, fuel efficiency, and price.', icon: 'Fuel', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Time Zone Converter', description: 'Convert times between different time zones around the world.', icon: 'Clock', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Title Tag Checker', description: 'Check the length of your title tag in pixels and characters for SEO.', icon: 'Text', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Unix Timestamp Converter', description: 'Convert Unix timestamps to human-readable dates and vice-versa.', icon: 'Clock', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Word to PDF', description: 'Convert your Microsoft Word documents (.doc, .docx) into PDF files.', icon: 'FileWord', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'PDF to Word', description: 'Convert your PDF documents into editable Microsoft Word files.', icon: 'FileWord', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'PDF to JPG', description: 'Convert each page of a PDF document into a JPG image.', icon: 'FileImage', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'JavaScript Minifier', description: 'Minify your JavaScript code to reduce file size and improve loading speed.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'HTML Minifier', description: 'Minify your HTML code to reduce file size and optimize your website.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'YouTube Video Downloader', description: 'Download videos from YouTube in various formats and qualities.', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Instagram Video Downloader', description: 'Download videos and reels from Instagram by pasting the URL.', icon: 'Instagram', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'X Video Downloader', description: 'Download videos from X (formerly Twitter) by pasting the post URL.', icon: 'Twitter', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Threads Video Downloader', description: 'Download videos from Threads by pasting the URL.', icon: 'AtSign', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
+    { name: 'Pinterest Video Downloader', description: 'Download videos from Pinterest by pasting the pin URL.', icon: 'BookImage', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
 ];
 
 const generateSlug = (name: string) => {
@@ -511,6 +534,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
     
+
 
 
 
