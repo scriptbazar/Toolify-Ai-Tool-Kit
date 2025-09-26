@@ -1,11 +1,10 @@
-
 'use server';
 
 /**
  * @fileOverview A flow for converting speech to text using Google's Gemini model.
  */
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 const SpeechToTextInputSchema = z.object({
   audioDataUri: z.string().describe('The audio file as a data URI.'),
