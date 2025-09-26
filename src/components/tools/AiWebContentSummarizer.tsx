@@ -5,15 +5,67 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Wand2, Loader2, Link, FileText, Lightbulb } from 'lucide-react';
+import { Wand2, Loader2, Link, FileText, Lightbulb, Users, BarChart2, CheckCircle, BrainCircuit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { summarizeAndExplainWebContent } from '@/ai/flows/ai-web-content-summarizer';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { summarizeAndExplainWebContent, type AiWebContentSummarizerOutput } from '@/ai/flows/ai-web-content-summarizer';
+import { Badge } from '../ui/badge';
+import { Skeleton } from '../ui/skeleton';
+
+const InfoCard = ({ title, content, icon: Icon }: { title: string; content: string; icon: React.ElementType }) => (
+    <Card>
+        <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+                <Icon className="h-5 w-5"/>
+                {title}
+            </CardTitle>
+        </CardHeader>
+        <CardContent>
+            <p className="text-sm text-muted-foreground">{content}</p>
+        </CardContent>
+    </Card>
+);
+
+const ListCard = ({ title, items, icon: Icon }: { title: string; items: string[]; icon: React.ElementType }) => (
+    <Card>
+        <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+                <Icon className="h-5 w-5" />
+                {title}
+            </CardTitle>
+        </CardHeader>
+        <CardContent>
+            <ul className="space-y-2">
+                {items.map((item, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                        <CheckCircle className="h-4 w-4 mt-0.5 text-primary shrink-0"/>
+                        <span>{item}</span>
+                    </li>
+                ))}
+            </ul>
+        </CardContent>
+    </Card>
+);
+
+const KeywordCard = ({ title, keywords, icon: Icon }: { title: string; keywords: string[]; icon: React.ElementType }) => (
+     <Card>
+        <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+                <Icon className="h-5 w-5"/>
+                {title}
+            </CardTitle>
+        </CardHeader>
+        <CardContent>
+            <div className="flex flex-wrap gap-2">
+                {keywords.map((kw, i) => <Badge key={i} variant="secondary">{kw}</Badge>)}
+            </div>
+        </CardContent>
+    </Card>
+)
 
 export function AiWebContentSummarizer() {
   const [url, setUrl] = useState('');
-  const [result, setResult] = useState<{ summary: string; explanation: string } | null>(null);
+  const [result, setResult] = useState<AiWebContentSummarizerOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -27,7 +79,6 @@ export function AiWebContentSummarizer() {
       return;
     }
     
-    // Basic URL validation
     try {
         new URL(url);
     } catch (_) {
@@ -51,15 +102,15 @@ export function AiWebContentSummarizer() {
     }
   };
   
-  const renderMarkdown = (text: string) => {
-    // A simple markdown renderer for demonstration
-    const html = text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`(.*?)`/g, '<code>$1</code>')
-      .replace(/\n/g, '<br />');
-    return <div dangerouslySetInnerHTML={{ __html: html }} />;
-  };
+  const renderLoadingState = () => (
+      <div className="space-y-6">
+        <Skeleton className="h-32 w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-48 w-full" />
+        </div>
+      </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -73,35 +124,38 @@ export function AiWebContentSummarizer() {
         />
         <Button onClick={handleProcessUrl} disabled={isLoading} className="h-12">
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-            Process URL
+            Analyze URL
         </Button>
       </div>
       
-      {(result || isLoading) && (
-        <Tabs defaultValue="summary" className="w-full pt-4 border-t">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="summary"><FileText className="mr-2 h-4 w-4" />Summary</TabsTrigger>
-              <TabsTrigger value="explanation"><Lightbulb className="mr-2 h-4 w-4" />Explanation</TabsTrigger>
-            </TabsList>
-            <TabsContent value="summary" className="mt-4">
-                <Card>
-                    <CardHeader><CardTitle>Professional Summary</CardTitle></CardHeader>
-                    <CardContent className="prose dark:prose-invert max-w-none text-sm">
-                        {isLoading ? <p>Summarizing...</p> : renderMarkdown(result?.summary || '')}
-                    </CardContent>
+      {(isLoading || result) && (
+        <div className="pt-6 border-t">
+          {isLoading ? renderLoadingState() : result && (
+            <div className="space-y-6">
+                <Card className="bg-primary/5 border-primary">
+                    <CardHeader><CardTitle>Overall Summary</CardTitle></CardHeader>
+                    <CardContent><p>{result.summary}</p></CardContent>
                 </Card>
-            </TabsContent>
-            <TabsContent value="explanation" className="mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                   <InfoCard title="Target Audience" content={result.targetAudience} icon={Users} />
+                   <InfoCard title="Tone of Voice" content={result.toneOfVoice} icon={BarChart2} />
+                   <InfoCard title="Final Verdict" content={result.finalVerdict} icon={CheckCircle} />
+                </div>
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <ListCard title="Core Concepts" items={result.coreConcepts} icon={BrainCircuit} />
+                    <ListCard title="Key Takeaways" items={result.keyTakeaways} icon={Lightbulb} />
+                </div>
                  <Card>
-                    <CardHeader><CardTitle>Detailed Explanation</CardTitle></CardHeader>
-                    <CardContent className="prose dark:prose-invert max-w-none text-sm">
-                        {isLoading ? <p>Generating explanation...</p> : renderMarkdown(result?.explanation || '')}
+                    <CardHeader><CardTitle>SEO Analysis</CardTitle></CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <KeywordCard title="Primary Keywords" keywords={result.seoAnalysis.primaryKeywords} icon={FileText} />
+                        <KeywordCard title="LSI Keywords" keywords={result.seoAnalysis.lsiKeywords} icon={FileText} />
                     </CardContent>
-                </Card>
-            </TabsContent>
-        </Tabs>
+                 </Card>
+            </div>
+          )}
+        </div>
       )}
-
     </div>
   );
 }
