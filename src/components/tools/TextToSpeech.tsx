@@ -16,15 +16,19 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 const allVoices = [
   { value: 'Algenib', label: 'Algenib', gender: 'Male' },
   { value: 'Canopus', label: 'Canopus', gender: 'Male' },
-  { value: 'Sirius-1', label: 'Sirius-1', gender: 'Male' },
-  { value: 'Procyon-1', label: 'Procyon-1', gender: 'Male' },
+  { value: 'Sirius-1', label: 'Sirius', gender: 'Male' },
+  { value: 'Procyon-1', label: 'Procyon', gender: 'Male' },
   { value: 'Achernar', label: 'Achernar', gender: 'Female' },
-  { value: 'Cygni-1', label: 'Cygni-1', gender: 'Female' },
-  { value: 'Electra-1', label: 'Electra-1', gender: 'Female' },
-  { value: 'Navi-1', label: 'Navi-1', gender: 'Female' },
-  { value: 'Salm-1', label: 'Salm-1', gender: 'Female' },
-  { value: 'Shaula-1', label: 'Shaula-1', gender: 'Female' },
+  { value: 'Cygni-1', label: 'Cygni', gender: 'Female' },
+  { value: 'Electra-1', label: 'Electra', gender: 'Female' },
+  { value: 'Navi-1', label: 'Navi', gender: 'Female' },
+  { value: 'Salm-1', label: 'Salm', gender: 'Female' },
+  { value: 'Shaula-1', label: 'Shaula', gender: 'Female' },
 ];
+
+const maleVoices = allVoices.filter(v => v.gender === 'Male');
+const femaleVoices = allVoices.filter(v => v.gender === 'Female');
+
 
 interface SpeakerConfig {
   [key: string]: { name: string; gender: string; };
@@ -120,26 +124,52 @@ export function TextToSpeech() {
               </div>
               
               {!isMultiSpeaker ? (
-                  <div className="space-y-2">
-                    <Label>Select Voice Model</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {allVoices.map(v => (
-                            <Card 
-                                key={v.value} 
-                                onClick={() => setSingleVoice(v.value)}
-                                className={cn("cursor-pointer transition-all", singleVoice === v.value ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50')}
-                            >
-                                <CardContent className="p-4 flex justify-between items-center">
-                                    <div className="flex items-center gap-3">
-                                        {v.gender === 'Male' ? <UserCog className="h-6 w-6 text-primary"/> : <User className="h-6 w-6 text-primary"/>}
-                                        <span className="font-semibold">{v.label}</span>
-                                    </div>
-                                    <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); playSample(v.value); }} disabled={!!sampleLoading}>
-                                        {sampleLoading === v.value ? <Loader2 className="h-5 w-5 animate-spin" /> : <PlayCircle className="h-5 w-5"/>}
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        ))}
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium">Select Voice Model</Label>
+                    
+                    <div>
+                        <h4 className="font-semibold text-muted-foreground mb-2">Male Voices</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {maleVoices.map(v => (
+                                <Card 
+                                    key={v.value} 
+                                    onClick={() => setSingleVoice(v.value)}
+                                    className={cn("cursor-pointer transition-all", singleVoice === v.value ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50')}
+                                >
+                                    <CardContent className="p-4 flex justify-between items-center">
+                                        <div className="flex items-center gap-3">
+                                            <UserCog className="h-6 w-6 text-primary"/>
+                                            <span className="font-semibold">{v.label}</span>
+                                        </div>
+                                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); playSample(v.value); }} disabled={!!sampleLoading}>
+                                            {sampleLoading === v.value ? <Loader2 className="h-5 w-5 animate-spin" /> : <PlayCircle className="h-5 w-5"/>}
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                     <div>
+                        <h4 className="font-semibold text-muted-foreground mb-2">Female Voices</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {femaleVoices.map(v => (
+                                <Card 
+                                    key={v.value} 
+                                    onClick={() => setSingleVoice(v.value)}
+                                    className={cn("cursor-pointer transition-all", singleVoice === v.value ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50')}
+                                >
+                                    <CardContent className="p-4 flex justify-between items-center">
+                                        <div className="flex items-center gap-3">
+                                            <User className="h-6 w-6 text-primary"/>
+                                            <span className="font-semibold">{v.label}</span>
+                                        </div>
+                                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); playSample(v.value); }} disabled={!!sampleLoading}>
+                                            {sampleLoading === v.value ? <Loader2 className="h-5 w-5 animate-spin" /> : <PlayCircle className="h-5 w-5"/>}
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
                     </div>
                   </div>
               ) : (
