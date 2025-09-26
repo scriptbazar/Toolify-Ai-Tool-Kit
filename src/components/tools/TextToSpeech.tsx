@@ -75,7 +75,11 @@ export function TextToSpeech() {
     if (sampleLoading) return;
     setSampleLoading(voice);
     try {
-        const result = await textToSpeech({ text: "Hello, you can select this voice to generate your audio.", singleVoice: voice });
+        const result = await textToSpeech({ 
+            text: "Hello, you can select this voice to generate your audio.", 
+            singleVoice: voice,
+            isMultiSpeaker: false,
+        });
         const audio = new Audio(result.audioDataUri);
         audio.play();
         audio.onended = () => setSampleLoading(null);
