@@ -1,12 +1,14 @@
 
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, type ChangeEvent, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { UploadCloud, Palette, Copy, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import { Skeleton } from '../ui/skeleton';
 
 interface ColorInfo {
   hex: string;
@@ -22,17 +24,44 @@ export function ImageColorExtractor() {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [palette, setPalette] = useState<ColorInfo[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+    const handleFile = (file: File) => {
         if (file && file.type.startsWith('image/')) {
             setImageFile(file);
             setImagePreview(URL.createObjectURL(file));
             setPalette([]); // Clear previous palette
         } else if (file) {
             toast({ title: "Invalid File", description: "Please upload a valid image file.", variant: "destructive" });
+        }
+    };
+    
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) handleFile(file);
+    };
+
+    const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+    
+    const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) {
+            handleFile(file);
         }
     };
     
@@ -45,24 +74,34 @@ export function ImageColorExtractor() {
         img.src = imagePreview;
         img.onload = () => {
             const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
+            
+            // --- Performance Improvement ---
+            // Resize image to a smaller thumbnail on canvas before processing
+            const MAX_WIDTH = 100;
+            const scaleRatio = MAX_WIDTH / img.width;
+            canvas.width = MAX_WIDTH;
+            canvas.height = img.height * scaleRatio;
+            // --------------------------------
+
             const ctx = canvas.getContext('2d');
             if (!ctx) {
                 setIsLoading(false);
                 return;
             }
-            ctx.drawImage(img, 0, 0);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             try {
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
                 const colorCount: { [key: string]: number } = {};
                 
-                // Sample pixels to improve performance
-                const sampleRate = Math.max(1, Math.floor(imageData.length / 4 / 20000));
-
-                for (let i = 0; i < imageData.length; i += 4 * sampleRate) {
-                    const rgb = `${imageData[i]},${imageData[i + 1]},${imageData[i + 2]}`;
+                for (let i = 0; i < imageData.length; i += 4) {
+                    const r = imageData[i];
+                    const g = imageData[i+1];
+                    const b = imageData[i+2];
+                    // Skip transparent pixels
+                    if (imageData[i+3] < 128) continue;
+                    
+                    const rgb = `${r},${g},${b}`;
                     colorCount[rgb] = (colorCount[rgb] || 0) + 1;
                 }
 
@@ -103,14 +142,20 @@ export function ImageColorExtractor() {
                     </CardHeader>
                     <CardContent>
                         <div 
-                            className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
+                            className={cn("w-full aspect-video border-2 border-dashed rounded-lg text-center cursor-pointer flex items-center justify-center relative transition-colors", 
+                                isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/30 hover:bg-muted/50'
+                            )}
                             onClick={() => fileInputRef.current?.click()}
+                            onDragEnter={handleDragEnter}
+                            onDragOver={handleDragEnter}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
                         >
                             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
                             {imagePreview ? (
                                 <Image src={imagePreview} alt="Preview" layout="fill" objectFit="contain" className="p-2"/>
                             ) : (
-                                <div className="flex flex-col items-center">
+                                <div className="flex flex-col items-center p-4">
                                     <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
                                     <p className="text-sm text-muted-foreground">Click or drag image to upload</p>
                                 </div>
@@ -129,22 +174,32 @@ export function ImageColorExtractor() {
                     <CardDescription>The most prominent colors found in your image.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {palette.length > 0 ? (
+                     {isLoading ? (
+                        <div className="grid grid-cols-2 gap-4">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="p-3 border rounded-lg space-y-2">
+                                    <Skeleton className="w-full h-16 rounded-md" />
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-4 w-full" />
+                                </div>
+                            ))}
+                        </div>
+                    ) : palette.length > 0 ? (
                         <div className="grid grid-cols-2 gap-4">
                             {palette.map((color, index) => (
-                                <div key={index} className="p-3 border rounded-lg">
+                                <div key={index} className="p-3 border rounded-lg bg-muted/50">
                                     <div style={{ backgroundColor: color.hex }} className="w-full h-16 rounded-md mb-2 border"/>
                                     <div className="space-y-1 text-xs">
                                         <div className="flex items-center justify-between">
                                             <span className="font-semibold">HEX:</span>
                                             <div className="flex items-center gap-1 font-mono">
-                                                {color.hex} <Copy className="h-3 w-3 cursor-pointer" onClick={() => handleCopy(color.hex, 'HEX')} />
+                                                {color.hex} <Copy className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground" onClick={() => handleCopy(color.hex, 'HEX')} />
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between">
                                             <span className="font-semibold">RGB:</span>
                                             <div className="flex items-center gap-1 font-mono">
-                                                {color.rgb} <Copy className="h-3 w-3 cursor-pointer" onClick={() => handleCopy(color.rgb, 'RGB')} />
+                                                {color.rgb} <Copy className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground" onClick={() => handleCopy(color.rgb, 'RGB')} />
                                             </div>
                                         </div>
                                     </div>
