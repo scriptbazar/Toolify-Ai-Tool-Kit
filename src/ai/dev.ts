@@ -35,6 +35,7 @@ import '@/ai/flows/ai-seo-keyword-generator.ts';
 import '@/ai/flows/media-management.ts';
 import '@/ai/flows/currency-converter.ts';
 import '@/ai/flows/image-text-extractor.ts';
+import '@/ai/flows/lorem-ipsum-generator.ts';
 
 
 

@@ -5,39 +5,43 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Copy, Trash2, Wand2 } from 'lucide-react';
+import { Copy, Trash2, Wand2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-
-const loremIpsumParagraph = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-const loremIpsumWords = loremIpsumParagraph.split(' ');
+import { generateLoremIpsum } from '@/ai/flows/lorem-ipsum-generator';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 export function LoremIpsumGenerator() {
   const [text, setText] = useState('');
   const [count, setCount] = useState(5);
-  const [type, setType] = useState('paragraphs');
+  const [type, setType] = useState<'paragraphs' | 'sentences' | 'words'>('paragraphs');
+  const [topic, setTopic] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleGenerate = () => {
-    let result = '';
-    switch (type) {
-        case 'paragraphs':
-            result = Array(count).fill(loremIpsumParagraph).join('\n\n');
-            break;
-        case 'sentences':
-            // Simple sentence generation for demo
-            result = loremIpsumParagraph.repeat(count).split('. ').slice(0, count).join('. ');
-            break;
-        case 'words':
-            result = loremIpsumWords.slice(0, count).join(' ');
-            break;
-    }
-    setText(result);
-    toast({
+  const handleGenerate = async () => {
+    setIsLoading(true);
+    try {
+      const result = await generateLoremIpsum({
+        count,
+        type,
+        topic: topic || undefined,
+      });
+      setText(result.text);
+      toast({
         title: 'Generated!',
-        description: `Generated ${count} ${type} of Lorem Ipsum text.`
-    });
+        description: `Generated ${count} ${type} of text.`,
+      });
+    } catch (error: any) {
+        toast({
+            title: 'Generation Failed',
+            description: error.message || 'Could not generate text.',
+            variant: 'destructive',
+        });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   const handleCopy = () => {
@@ -59,48 +63,66 @@ export function LoremIpsumGenerator() {
     setText('');
     setCount(5);
     setType('paragraphs');
+    setTopic('');
   };
 
   return (
     <div className="space-y-6">
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           <div className="space-y-2">
-               <Label htmlFor="type-select">Generate Type</Label>
-                <Select value={type} onValueChange={setType}>
-                    <SelectTrigger id="type-select">
-                        <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="paragraphs">Paragraphs</SelectItem>
-                        <SelectItem value="sentences">Sentences</SelectItem>
-                        <SelectItem value="words">Words</SelectItem>
-                    </SelectContent>
-                </Select>
-           </div>
-           <div className="space-y-2">
-               <Label htmlFor="count-input">Amount</Label>
-               <Input 
-                 id="count-input"
-                 type="number"
-                 value={count}
-                 onChange={(e) => setCount(Math.max(1, parseInt(e.target.value) || 1))}
-                 min="1"
-               />
-           </div>
-       </div>
-       <Button onClick={handleGenerate} className="w-full">
-            <Wand2 className="mr-2 h-4 w-4" />
-            Generate
+        <Card>
+            <CardHeader>
+                <CardTitle>Configuration</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="topic-input">Topic (Optional)</Label>
+                    <Input 
+                        id="topic-input"
+                        value={topic}
+                        onChange={(e) => setTopic(e.target.value)}
+                        placeholder="e.g., space exploration, ancient Rome"
+                    />
+                     <p className="text-xs text-muted-foreground">Leave blank for traditional "Lorem Ipsum".</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="type-select">Generate Type</Label>
+                            <Select value={type} onValueChange={(val) => setType(val as any)}>
+                                <SelectTrigger id="type-select">
+                                    <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="paragraphs">Paragraphs</SelectItem>
+                                    <SelectItem value="sentences">Sentences</SelectItem>
+                                    <SelectItem value="words">Words</SelectItem>
+                                </SelectContent>
+                            </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="count-input">Amount</Label>
+                        <Input 
+                            id="count-input"
+                            type="number"
+                            value={count}
+                            onChange={(e) => setCount(Math.max(1, parseInt(e.target.value) || 1))}
+                            min="1"
+                        />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+       <Button onClick={handleGenerate} disabled={isLoading} className="w-full">
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
+            Generate Text
         </Button>
       <div className="space-y-2">
         <div className="flex justify-between items-center">
             <Label htmlFor="text-output">Generated Text</Label>
             <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={handleCopy} title="Copy to clipboard">
+                <Button variant="outline" size="icon" onClick={handleCopy} title="Copy to clipboard" disabled={!text}>
                     <Copy className="h-4 w-4" />
                     <span className="sr-only">Copy</span>
                 </Button>
-                <Button variant="destructive" size="icon" onClick={handleClear} title="Clear text">
+                <Button variant="destructive" size="icon" onClick={handleClear} title="Clear text" disabled={!text}>
                     <Trash2 className="h-4 w-4" />
                     <span className="sr-only">Clear</span>
                 </Button>
