@@ -77,9 +77,7 @@ export async function textToSpeech(
     model: 'googleai/gemini-2.5-flash-preview-tts',
     config: {
       responseModalities: ['AUDIO'],
-      speechConfig: {
-          voiceConfig: speechConfig,
-      }
+      speechConfig: speechConfig,
     },
     prompt: input.text,
   });
