@@ -1,5 +1,4 @@
 
-      
 'use client';
 
 import { useState } from 'react';
@@ -130,8 +129,8 @@ export function InterestCalculator() {
         return (
             <Card className="mt-6">
                 <CardHeader>
-                    <CardTitle>Loan Summary</CardTitle>
-                    <CardDescription>Your estimated loan breakdown.</CardDescription>
+                    <CardTitle>Interest Summary</CardTitle>
+                    <CardDescription>Your estimated interest breakdown.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                     <div className="space-y-3">
@@ -146,7 +145,7 @@ export function InterestCalculator() {
                     </div>
                      <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Loan Breakdown</CardTitle>
+                            <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Payment Breakdown</CardTitle>
                             <CardDescription className="text-xs">Principal vs. Interest</CardDescription>
                         </CardHeader>
                         <CardContent className="h-48 flex items-center justify-center">
@@ -179,8 +178,8 @@ export function InterestCalculator() {
                         <CardTitle>Simple Interest Calculator</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                             <div className="space-y-2 md:col-span-2">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                             <div className="space-y-2">
                                 <Label htmlFor="si-principal">Principal Amount</Label>
                                 <div className="flex gap-2">
                                 <Select value={currency} onValueChange={setCurrency}>
@@ -233,8 +232,8 @@ export function InterestCalculator() {
                         <CardTitle>Compound Interest Calculator</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                              <div className="space-y-2 md:col-span-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                              <div className="space-y-2">
                                 <Label htmlFor="ci-principal">Principal Amount</Label>
                                 <div className="flex gap-2">
                                     <Select value={currency} onValueChange={setCurrency}>
@@ -287,5 +286,3 @@ export function InterestCalculator() {
         </Tabs>
     );
 }
-
-    
