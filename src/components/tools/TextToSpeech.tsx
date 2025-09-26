@@ -19,11 +19,11 @@ const allVoices = [
   { value: 'Sirius-1', label: 'Sirius', gender: 'Male' },
   { value: 'Procyon-1', label: 'Procyon', gender: 'Male' },
   { value: 'Achernar', label: 'Achernar', gender: 'Female' },
-  { value: 'Cygni-1', label: 'Cygni', gender: 'Female' },
-  { value: 'Electra-1', label: 'Electra', gender: 'Female' },
-  { value: 'Navi-1', label: 'Navi', gender: 'Female' },
-  { value: 'Salm-1', label: 'Salm', gender: 'Female' },
-  { value: 'Shaula-1', label: 'Shaula', gender: 'Female' },
+  { value: 'Cygni', label: 'Cygni', gender: 'Female' },
+  { value: 'Electra', label: 'Electra', gender: 'Female' },
+  { value: 'Navi', label: 'Navi', gender: 'Female' },
+  { value: 'Salm', label: 'Salm', gender: 'Female' },
+  { value: 'Shaula', label: 'Shaula', gender: 'Female' },
 ];
 
 const maleVoices = allVoices.filter(v => v.gender === 'Male');
