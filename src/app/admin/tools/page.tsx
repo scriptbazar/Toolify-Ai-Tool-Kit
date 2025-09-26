@@ -1,4 +1,6 @@
 
+'use client';
+
 import { getTools } from '@/ai/flows/tool-management';
 import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
 import { AdminToolFilters } from './_components/AdminToolFilters';
@@ -13,24 +15,35 @@ import {
 } from '@/components/ui/card';
 import { PlusCircle, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { Suspense } from 'react';
-import { clearCache } from '@/ai/flows/utility-actions';
+import { Suspense, useEffect, useState, useMemo } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 
 const ITEMS_PER_PAGE = 10;
 
-export default async function AdminToolsPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-    const allTools = await getTools();
+export default function AdminToolsPage() {
+    const [allTools, setAllTools] = useState<Tool[]>([]);
+    const [loading, setLoading] = useState(true);
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
-    const searchQuery = (searchParams?.q as string) || '';
-    const activeCategory = (searchParams?.category as ToolCategory) || 'all';
-    const activeFilter = (searchParams?.filter as string) || 'all';
-    const currentPage = Number(searchParams?.page || 1);
+    const fetchTools = async () => {
+        setLoading(true);
+        const tools = await getTools();
+        setAllTools(tools);
+        setLoading(false);
+    };
 
-    const filteredTools = allTools
+    useEffect(() => {
+        fetchTools();
+    }, []);
+    
+    const searchQuery = (searchParams.get('q') as string) || '';
+    const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
+    const activeFilter = (searchParams.get('filter') as string) || 'all';
+    const currentPage = Number(searchParams.get('page') || 1);
+
+    const filteredTools = useMemo(() => allTools
         .filter(tool => {
             if (activeFilter === 'all') return true;
             if (activeFilter === 'pro') return tool.plan === 'Pro';
@@ -44,7 +57,7 @@ export default async function AdminToolsPage({
         })
         .filter(tool =>
             tool.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        ), [allTools, activeFilter, activeCategory, searchQuery]);
 
     const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
     const paginatedTools = filteredTools.slice(
@@ -83,16 +96,13 @@ export default async function AdminToolsPage({
                     <CardDescription>A comprehensive list of all tools available in the application.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Suspense fallback={<div>Loading filters...</div>}>
-                        <AdminToolFilters allTools={allTools} />
-                    </Suspense>
+                    <AdminToolFilters allTools={allTools} />
                     
-                    <Suspense fallback={<div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
-                      <AdminToolTable tools={paginatedTools} onToolUpdate={async () => {
-                          'use server';
-                          await clearCache();
-                      }} />
-                    </Suspense>
+                    {loading ? (
+                         <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+                    ) : (
+                      <AdminToolTable tools={paginatedTools} onToolUpdate={fetchTools} />
+                    )}
                     
                     {totalPages > 1 && (
                         <div className="flex items-center justify-end space-x-2 pt-4">

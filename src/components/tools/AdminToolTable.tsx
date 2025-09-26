@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { EditToolForm } from '@/app/admin/tools/[id]/EditToolForm';
 import { upsertTool } from '@/ai/flows/tool-management';
 import { useToast } from '@/hooks/use-toast';
+import { revalidatePath } from 'next/cache';
 
 interface AdminToolTableProps {
   tools: Tool[];
