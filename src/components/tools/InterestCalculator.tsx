@@ -128,24 +128,26 @@ export function InterestCalculator() {
                         <CardTitle>Simple Interest Calculator</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                         <div className="space-y-2">
-                            <Label htmlFor="currency-select-si">Currency</Label>
-                            <Select value={currency} onValueChange={setCurrency}>
-                              <SelectTrigger id="currency-select-si" className="w-full md:w-1/3"><SelectValue/></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="INR">INR (₹)</SelectItem>
-                                <SelectItem value="USD">USD ($)</SelectItem>
-                                <SelectItem value="EUR">EUR (€)</SelectItem>
-                                <SelectItem value="GBP">GBP (£)</SelectItem>
-                                <SelectItem value="JPY">JPY (¥)</SelectItem>
-                              </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                             <div className="space-y-2">
+                                <Label htmlFor="currency-select-si">Currency</Label>
+                                <Select value={currency} onValueChange={setCurrency}>
+                                  <SelectTrigger id="currency-select-si"><SelectValue/></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="INR">INR (₹)</SelectItem>
+                                    <SelectItem value="USD">USD ($)</SelectItem>
+                                    <SelectItem value="EUR">EUR (€)</SelectItem>
+                                    <SelectItem value="GBP">GBP (£)</SelectItem>
+                                    <SelectItem value="JPY">JPY (¥)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="si-principal">Principal Amount</Label>
                                 <Input id="si-principal" type="number" value={siPrincipal} onChange={e => setSiPrincipal(e.target.value)} />
                             </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                             <div className="space-y-2">
                                 <Label htmlFor="si-rate">Rate of Interest</Label>
                                 <div className="flex gap-2">
@@ -186,21 +188,26 @@ export function InterestCalculator() {
                         <CardTitle>Compound Interest Calculator</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                         <div className="space-y-2">
-                            <Label htmlFor="currency-select-ci">Currency</Label>
-                            <Select value={currency} onValueChange={setCurrency}>
-                              <SelectTrigger id="currency-select-ci" className="w-full md:w-1/3"><SelectValue/></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="INR">INR (₹)</SelectItem>
-                                <SelectItem value="USD">USD ($)</SelectItem>
-                                <SelectItem value="EUR">EUR (€)</SelectItem>
-                                <SelectItem value="GBP">GBP (£)</SelectItem>
-                                <SelectItem value="JPY">JPY (¥)</SelectItem>
-                              </SelectContent>
-                            </Select>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div className="space-y-2">
+                                <Label htmlFor="currency-select-ci">Currency</Label>
+                                <Select value={currency} onValueChange={setCurrency}>
+                                  <SelectTrigger id="currency-select-ci"><SelectValue/></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="INR">INR (₹)</SelectItem>
+                                    <SelectItem value="USD">USD ($)</SelectItem>
+                                    <SelectItem value="EUR">EUR (€)</SelectItem>
+                                    <SelectItem value="GBP">GBP (£)</SelectItem>
+                                    <SelectItem value="JPY">JPY (¥)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="ci-principal">Principal Amount</Label>
+                                <Input id="ci-principal" type="number" value={ciPrincipal} onChange={e => setCiPrincipal(e.target.value)} />
+                            </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-                            <div className="space-y-2"><Label htmlFor="ci-principal">Principal Amount</Label><Input id="ci-principal" type="number" value={ciPrincipal} onChange={e => setCiPrincipal(e.target.value)} /></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
                             <div className="space-y-2">
                                 <Label htmlFor="ci-rate">Rate of Interest</Label>
                                 <div className="flex gap-2">
