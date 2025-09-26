@@ -23,23 +23,21 @@ export default async function ToolPage({ params }: { params: { slug: string } })
   }
 
   // Fetch only the specific tool needed for this page
-  const allTools = await getTools();
-  const tool = allTools.find(t => t.slug === slug);
-
+  const [tool] = await getTools({ slug });
 
   if (!tool || tool.status === 'Disabled') {
       notFound();
   }
 
   // Fetch other data in parallel for efficiency
-  const [settings, toolReviews, allPosts] = await Promise.all([
+  const [settings, toolReviews, allPosts, allTools] = await Promise.all([
     getSettings(),
     getReviews({toolId: slug}),
     getPosts(),
+    getTools(), // Still needed for popular tools, but the main page load is faster.
   ]);
   
   // Fetch popular tools for the sidebar, excluding the current tool.
-  // This can be further optimized if getTools supports exclusion.
   const popularTools = allTools
     .filter(t => t.status === 'Active' && t.slug !== slug)
     .slice(0, 10);
@@ -56,3 +54,4 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     />
   );
 }
+
