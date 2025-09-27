@@ -1,3 +1,4 @@
+
 import { AdMobRevenueCalculator } from './AdMobRevenueCalculator';
 import { AdSenseRevenueCalculator } from './AdSenseRevenueCalculator';
 import { AddWatermarkToPdf } from './AddWatermarkToPdf';
@@ -253,3 +254,5 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'youtube-video-thumbnail-downloader': YouTubeVideoThumbnailDownloader,
   'youtube-video-title-extractor': YouTubeVideoTitleExtractor,
 };
+
+    
