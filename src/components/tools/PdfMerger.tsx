@@ -114,7 +114,7 @@ export function PdfMerger() {
     setFiles(prev => prev.map((item, i) => i === index ? { ...item, pages } : item));
   };
   
-  const handleMerge = async () => {
+ const handleMerge = async () => {
     if (files.length === 0) {
       toast({ title: 'Please select at least one PDF file.', variant: 'destructive' });
       return;
@@ -122,41 +122,43 @@ export function PdfMerger() {
     setIsLoading(true);
 
     try {
-        const firstFileItem = files[0];
-        const firstFileBytes = await firstFileItem.file.arrayBuffer();
-        const mergedPdf = await PDFDocument.load(firstFileBytes, { ignoreEncryption: true });
+      // Use the first PDF as the base for the merged document.
+      const firstFileItem = files[0];
+      const firstFileBytes = await firstFileItem.file.arrayBuffer();
+      const mergedPdf = await PDFDocument.load(firstFileBytes, { ignoreEncryption: true });
 
-        // If the first file has specific pages selected, we need to handle it separately
-        // by creating a new document and copying only the selected pages from the first file.
-        const firstPagesToCopy = parsePages(firstFileItem.pages, mergedPdf.getPageCount()).map(p => p - 1);
+      // If a page range is specified for the first file, we need to rebuild it
+      // as we can't remove pages from the document we're merging into.
+      const firstPagesToKeep = parsePages(firstFileItem.pages, mergedPdf.getPageCount());
+      if (firstFileItem.pages.trim() && firstPagesToKeep.length < mergedPdf.getPageCount()) {
+        const pagesToRemove = Array.from({ length: mergedPdf.getPageCount() }, (_, i) => i)
+                                     .filter(i => !firstPagesToKeep.includes(i + 1));
         
-        let finalPdf: PDFDocument;
-        if (firstFileItem.pages.trim()) {
-            finalPdf = await PDFDocument.create();
-            const copiedPages = await finalPdf.copyPages(mergedPdf, firstPagesToCopy);
-            copiedPages.forEach(page => finalPdf.addPage(page));
-        } else {
-            finalPdf = mergedPdf;
-        }
+        // Remove pages in reverse order to avoid index shifting issues
+        pagesToRemove.reverse().forEach(pageIndex => mergedPdf.removePage(pageIndex));
+      }
+      
+      // Iterate over the rest of the files and append their selected pages
+      for (let i = 1; i < files.length; i++) {
+        const fileItem = files[i];
+        if (!fileItem.totalPages) continue; // Skip if we couldn't read the PDF
 
-        // Process remaining files
-        for (let i = 1; i < files.length; i++) {
-            const fileItem = files[i];
-            const fileBytes = await fileItem.file.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
-
-            const pagesToCopy = parsePages(fileItem.pages, pdfDoc.getPageCount()).map(p => p - 1);
-            if (pagesToCopy.length > 0) {
-                const copiedPages = await finalPdf.copyPages(pdfDoc, pagesToCopy);
-                copiedPages.forEach(page => finalPdf.addPage(page));
-            }
-        }
+        const fileBytes = await fileItem.file.arrayBuffer();
+        const pdfToMerge = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
         
-        if (finalPdf.getPageCount() === 0) {
+        const pagesToCopyIndices = parsePages(fileItem.pages, pdfToMerge.getPageCount()).map(p => p - 1);
+        
+        if (pagesToCopyIndices.length > 0) {
+            const copiedPages = await mergedPdf.copyPages(pdfToMerge, pagesToCopyIndices);
+            copiedPages.forEach(page => mergedPdf.addPage(page));
+        }
+      }
+        
+        if (mergedPdf.getPageCount() === 0) {
             throw new Error("No pages were selected to merge.");
         }
         
-        const mergedPdfBytes = await finalPdf.save();
+        const mergedPdfBytes = await mergedPdf.save();
 
         const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
         const link = document.createElement('a');
