@@ -1,6 +1,7 @@
 
 import type {NextConfig} from 'next';
 import path from 'path';
+import CopyPlugin from 'copy-webpack-plugin';
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -33,18 +34,15 @@ const nextConfig: NextConfig = {
   },
    webpack: (config, { isServer }) => {
     // This is to make `pdfjs-dist` work with Next.js
-    const pdfjsDistPath = path.dirname(require.resolve('pdfjs-dist/package.json'));
-    const pdfWorkerPath = path.join(pdfjsDistPath, 'build', 'pdf.worker.min.mjs');
-    
-    // Add an alias for 'pdfjs-dist'
-    config.resolve.alias['pdfjs-dist'] = pdfjsDistPath;
-    
-    // Copy the worker file to the static directory
     if (!isServer) {
-        config.entry().then((entry: any) => {
-            entry['main.js'].push(pdfWorkerPath);
-            return entry;
-        });
+        const pdfjsDistPath = path.dirname(require.resolve('pdfjs-dist/package.json'));
+        const pdfWorkerPath = path.join(pdfjsDistPath, 'build', 'pdf.worker.min.mjs');
+
+        config.plugins.push(new CopyPlugin({
+            patterns: [
+                { from: pdfWorkerPath, to: path.join(config.output.path, 'static', 'chunks') }
+            ]
+        }));
     }
 
     return config;
