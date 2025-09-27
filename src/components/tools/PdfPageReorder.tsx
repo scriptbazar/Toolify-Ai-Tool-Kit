@@ -12,11 +12,6 @@ import { ScrollArea } from '../ui/scroll-area';
 import Image from 'next/image';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Set worker source
-if (typeof window !== 'undefined') {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-}
-
 interface PagePreview {
     id: string;
     dataUrl: string;
