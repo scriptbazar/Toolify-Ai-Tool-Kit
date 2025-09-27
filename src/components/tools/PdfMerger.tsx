@@ -122,24 +122,27 @@ export function PdfMerger() {
     setIsLoading(true);
 
     try {
-        const finalPdf = await PDFDocument.create();
+        const mergedPdf = await PDFDocument.create();
 
         for (const fileItem of files) {
-             const fileBytes = await fileItem.file.arrayBuffer();
-             const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
+            const fileBytes = await fileItem.file.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
+            
+            const pageIndicesToCopy = parsePages(fileItem.pages, pdfDoc.getPageCount()).map(p => p - 1);
 
-             const pageIndices = parsePages(fileItem.pages, pdfDoc.getPageCount()).map(p => p - 1);
-             if (pageIndices.length > 0) {
-                 const copiedPages = await finalPdf.copyPages(pdfDoc, pageIndices);
-                 copiedPages.forEach(page => finalPdf.addPage(page));
-             }
+            for (const pageIndex of pageIndicesToCopy) {
+                // Embed the page and draw it onto a new page in the final document
+                const [embeddedPage] = await mergedPdf.embedPdf(pdfDoc, [pageIndex]);
+                const newPage = mergedPdf.addPage();
+                newPage.drawPage(embeddedPage);
+            }
         }
         
-        if (finalPdf.getPageCount() === 0) {
+        if (mergedPdf.getPageCount() === 0) {
             throw new Error("No pages were selected to merge.");
         }
         
-        const mergedPdfBytes = await finalPdf.save();
+        const mergedPdfBytes = await mergedPdf.save();
 
         const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
         const link = document.createElement('a');
