@@ -18,8 +18,6 @@ import Link from 'next/link';
 import { Suspense, useEffect, useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-const ITEMS_PER_PAGE = 10;
-
 export default function AdminToolsPage() {
     const [allTools, setAllTools] = useState<Tool[]>([]);
     const [loading, setLoading] = useState(true);
@@ -40,7 +38,6 @@ export default function AdminToolsPage() {
     const searchQuery = (searchParams.get('q') as string) || '';
     const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
     const activeFilter = (searchParams.get('filter') as string) || 'all';
-    const currentPage = Number(searchParams.get('page') || 1);
 
     const filteredTools = useMemo(() => allTools
         .filter(tool => {
@@ -57,24 +54,6 @@ export default function AdminToolsPage() {
         .filter(tool =>
             tool.name.toLowerCase().includes(searchQuery.toLowerCase())
         ), [allTools, activeFilter, activeCategory, searchQuery]);
-
-    const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
-    const paginatedTools = filteredTools.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    );
-    
-    const createQueryString = (params: Record<string, string | number | null>) => {
-        const currentParams = new URLSearchParams(searchParams.toString());
-        for (const [key, value] of Object.entries(params)) {
-            if (value === null || (key === 'page' && value === 1)) {
-                currentParams.delete(key);
-            } else {
-                currentParams.set(key, String(value));
-            }
-        }
-        return currentParams.toString();
-    };
 
     return (
         <div className="space-y-6">
@@ -100,25 +79,7 @@ export default function AdminToolsPage() {
                     {loading ? (
                          <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
                     ) : (
-                      <AdminToolTable tools={paginatedTools} onToolUpdate={fetchTools} />
-                    )}
-                    
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-end space-x-2 pt-4">
-                            <Button asChild variant="outline" size="sm" disabled={currentPage <= 1}>
-                                <Link href={`/admin/tools?${createQueryString({ page: currentPage - 1 })}`} scroll={false}>
-                                    <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-                                </Link>
-                            </Button>
-                            <span className="text-sm text-muted-foreground">
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <Button asChild variant="outline" size="sm" disabled={currentPage >= totalPages}>
-                                <Link href={`/admin/tools?${createQueryString({ page: currentPage + 1 })}`} scroll={false}>
-                                    Next <ArrowRight className="ml-2 h-4 w-4" />
-                                </Link>
-                            </Button>
-                        </div>
+                      <AdminToolTable tools={filteredTools} onToolUpdate={fetchTools} />
                     )}
                 </CardContent>
             </Card>
