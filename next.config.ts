@@ -30,7 +30,11 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+   webpack: (config, { isServer }) => {
+    // This is to make `pdfjs-dist` work with Next.js
+    config.resolve.alias['pdfjs-dist'] = 'pdfjs-dist/build/pdf';
+    return config;
+  },
 };
 
 export default nextConfig;
-

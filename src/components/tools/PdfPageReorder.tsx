@@ -4,12 +4,18 @@
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, Download, Loader2, Shuffle, Trash2, FileText, GripVertical } from 'lucide-react';
+import { UploadCloud, Download, Loader2, Shuffle, Trash2, GripVertical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 import Image from 'next/image';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Set worker source
+if (typeof window !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+}
 
 interface PagePreview {
     id: string;
@@ -39,31 +45,40 @@ export function PdfPageReorder() {
 
     try {
         const fileBytes = await file.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
-        const numPages = pdfDoc.getPageCount();
-        const previews: PagePreview[] = [];
+        const loadingTask = pdfjsLib.getDocument({ data: fileBytes });
+        const pdf = await loadingTask.promise;
+        const numPages = pdf.numPages;
 
+        const previews: PagePreview[] = Array.from({ length: numPages }, (_, i) => ({
+            id: `page-${i}`,
+            dataUrl: '', // Initially empty
+            originalIndex: i,
+        }));
+        setPagePreviews(previews);
+
+        // Render pages one by one to avoid blocking the main thread
         for (let i = 0; i < numPages; i++) {
-            const newPdf = await PDFDocument.create();
-            const [copiedPage] = await newPdf.copyPages(pdfDoc, [i]);
-            newPdf.addPage(copiedPage);
-            const pageBytes = await newPdf.saveAsBase64({ dataUri: true });
-            previews.push({ id: `page-${i}`, dataUrl: pageBytes, originalIndex: i });
+            const page = await pdf.getPage(i + 1);
+            const viewport = page.getViewport({ scale: 0.5 }); // Use a smaller scale for performance
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const context = canvas.getContext('2d');
+            
+            if (context) {
+                 const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport,
+                };
+                await page.render(renderContext).promise;
+                const dataUrl = canvas.toDataURL('image/png');
+                setPagePreviews(prev => {
+                    const newPreviews = [...prev];
+                    newPreviews[i] = { ...newPreviews[i], dataUrl };
+                    return newPreviews;
+                });
+            }
         }
-        
-        // This is a workaround as rendering PDFs to canvas is slow and complex client-side.
-        // We will generate a data URL for each page by creating single-page PDFs.
-        // For a real high-performance tool, a server-side solution or a library like PDF.js would be better.
-        
-        // Let's create dummy placeholders for now as the above logic is too slow
-        const placeholderPreviews: PagePreview[] = [];
-        for (let i = 0; i < numPages; i++) {
-             placeholderPreviews.push({ id: `page-${i}`, dataUrl: '', originalIndex: i });
-        }
-
-
-        setPagePreviews(placeholderPreviews);
-
     } catch (error) {
         console.error('Error processing PDF:', error);
         toast({ title: 'Error', description: 'Could not process the PDF file.', variant: 'destructive'});
@@ -74,12 +89,12 @@ export function PdfPageReorder() {
   
   const handleDragSort = () => {
     if (dragItem.current === null || dragOverItem.current === null) return;
-    const newPreviews = [...pagePreviews];
-    const draggedItemContent = newPreviews.splice(dragItem.current, 1)[0];
-    newPreviews.splice(dragOverItem.current, 0, draggedItemContent);
+    const newFiles = [...pagePreviews];
+    const draggedItemContent = newFiles.splice(dragItem.current, 1)[0];
+    newFiles.splice(dragOverItem.current, 0, draggedItemContent);
     dragItem.current = null;
     dragOverItem.current = null;
-    setPagePreviews(newPreviews);
+    setPagePreviews(newFiles);
   };
   
   const handleSave = async () => {
@@ -116,6 +131,12 @@ export function PdfPageReorder() {
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
   const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); e.dataTransfer.files && handleFile(e.dataTransfer.files[0]); };
 
+  const handleClear = () => {
+    setPdfFile(null);
+    setPagePreviews([]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
 
   return (
     <div className="space-y-6">
@@ -135,8 +156,6 @@ export function PdfPageReorder() {
                 </div>
             </CardContent>
        </Card>
-
-      {isLoading && <div className="flex justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}
       
       {pagePreviews.length > 0 && (
           <Card>
@@ -149,7 +168,7 @@ export function PdfPageReorder() {
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
                         {pagePreviews.map((page, index) => (
                             <div 
-                                key={page.id}
+                                key={page.id} 
                                 className="p-2 border rounded-lg bg-muted flex flex-col items-center gap-2 cursor-grab active:cursor-grabbing"
                                 draggable
                                 onDragStart={() => dragItem.current = index}
@@ -158,8 +177,12 @@ export function PdfPageReorder() {
                                 onDragOver={(e) => e.preventDefault()}
                             >
                                 <GripVertical className="h-5 w-5 text-muted-foreground self-center"/>
-                                 <div className="w-full aspect-[2/3] bg-white flex items-center justify-center text-5xl font-bold text-muted-foreground shadow-md">
-                                    {page.originalIndex + 1}
+                                 <div className="w-full aspect-[2/3] bg-white flex items-center justify-center text-5xl font-bold text-muted-foreground shadow-md relative">
+                                    {page.dataUrl ? (
+                                        <Image src={page.dataUrl} alt={`Page ${page.originalIndex + 1}`} layout="fill" objectFit="contain" />
+                                    ) : (
+                                        <Loader2 className="h-8 w-8 animate-spin" />
+                                    )}
                                  </div>
                                 <p className="text-xs font-semibold">New Page {index + 1}</p>
                                 <p className="text-xs text-muted-foreground">(Original: {page.originalIndex + 1})</p>
@@ -168,12 +191,12 @@ export function PdfPageReorder() {
                     </div>
                 </ScrollArea>
                 <div className="flex justify-end gap-2 mt-4">
-                     <Button variant="destructive" onClick={() => {setFiles([]); setPagePreviews([])}}>
+                     <Button variant="destructive" onClick={handleClear}>
                         <Trash2 className="mr-2 h-4 w-4"/>
                         Clear
                     </Button>
                     <Button onClick={handleSave} disabled={isLoading}>
-                      <Shuffle className="mr-2 h-4 w-4"/>
+                      {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Shuffle className="mr-2 h-4 w-4"/>}
                       Save & Download
                     </Button>
                 </div>
@@ -183,5 +206,3 @@ export function PdfPageReorder() {
     </div>
   );
 }
-
-    
