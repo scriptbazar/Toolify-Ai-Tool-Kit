@@ -7,7 +7,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
 
 const WatermarkInputSchema = z.object({
     pdfDataUri: z.string().describe('The PDF file as a data URI.'),
@@ -46,31 +46,37 @@ const addWatermarkToPdfFlow = ai.defineFlow(
             watermarkImageBytes = Buffer.from(imageDataUri.split(',')[1], 'base64');
         }
 
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const watermarkImage = watermarkImageBytes ? await pdfDoc.embedPng(watermarkImageBytes) : undefined;
+
         for (const page of pages) {
             const { width, height } = page.getSize();
-            const rotationAngle = (rotation * Math.PI) / 180;
             
             if (watermarkType === 'text' && text) {
-                const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+                // Dynamically adjust font size based on page width
+                const fontSize = (width / text.length) * (size / 100) * 1.5;
+                const textWidth = font.widthOfTextAtSize(text, fontSize);
+                const textHeight = font.heightAtSize(fontSize);
+                
                 page.drawText(text, {
-                    x: width / 2, // These positions should be adjusted based on the `position` input
-                    y: height / 2,
-                    size: size,
+                    x: width / 2 - textWidth / 2,
+                    y: height / 2 - textHeight / 2,
+                    size: fontSize,
                     font: font,
                     color: rgb(0, 0, 0),
                     opacity: opacity,
-                    rotate: { angle: rotationAngle, type: 'degrees' },
+                    rotate: degrees(rotation),
                 });
-            } else if (watermarkType === 'image' && watermarkImageBytes) {
-                const watermarkImage = await pdfDoc.embedPng(watermarkImageBytes);
+            } else if (watermarkType === 'image' && watermarkImage) {
                 const imageDims = watermarkImage.scale(size / 100);
+                
                 page.drawImage(watermarkImage, {
-                    x: width / 2 - imageDims.width / 2, // Adjust for position
+                    x: width / 2 - imageDims.width / 2,
                     y: height / 2 - imageDims.height / 2,
                     width: imageDims.width,
                     height: imageDims.height,
                     opacity: opacity,
-                    rotate: { angle: rotationAngle, type: 'degrees' },
+                    rotate: degrees(rotation),
                 });
             }
         }
