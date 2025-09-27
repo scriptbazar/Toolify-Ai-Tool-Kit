@@ -7,9 +7,8 @@ import { Label } from '@/components/ui/label';
 import { FilePlus2, Trash2, Download, Loader2, UploadCloud, GripVertical, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { mergePdfs } from '@/ai/flows/pdf-management';
-import { Input } from '../ui/input';
 import { PDFDocument } from 'pdf-lib';
+import { Input } from '../ui/input';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 
@@ -19,6 +18,35 @@ interface FileWithPages {
     totalPages?: number;
     id: string;
 }
+
+// Helper to parse page ranges e.g., "1-5, 8, 10-12" into a set of numbers
+const parsePages = (pagesStr: string, totalPages: number): number[] => {
+    const pages = new Set<number>();
+    if (!pagesStr) {
+        for (let i = 1; i <= totalPages; i++) pages.add(i);
+        return Array.from(pages);
+    }
+
+    const parts = pagesStr.split(',');
+    for (const part of parts) {
+        const trimmedPart = part.trim();
+        if (trimmedPart.includes('-')) {
+            const [start, end] = trimmedPart.split('-').map(Number);
+            if (!isNaN(start) && !isNaN(end)) {
+                for (let i = start; i <= end; i++) {
+                    if (i > 0 && i <= totalPages) pages.add(i);
+                }
+            }
+        } else {
+            const page = Number(trimmedPart);
+            if (!isNaN(page) && page > 0 && page <= totalPages) {
+                pages.add(page);
+            }
+        }
+    }
+    return Array.from(pages).sort((a, b) => a - b);
+}
+
 
 export function PdfMerger() {
   const [files, setFiles] = useState<FileWithPages[]>([]);
@@ -93,24 +121,23 @@ export function PdfMerger() {
     setIsLoading(true);
 
     try {
-        const filesToMerge = files.map(async (item) => {
-            const pdfDataUri = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    if (event.target?.result) resolve(event.target.result as string);
-                    else reject(new Error(`Failed to read file: ${item.file.name}.`));
-                };
-                reader.onerror = (error) => reject(error);
-                reader.readAsDataURL(item.file);
-            });
-            return { pdfDataUri, pages: item.pages };
-        });
+        const mergedPdf = await PDFDocument.create();
 
-        const filesPayload = await Promise.all(filesToMerge);
-        const result = await mergePdfs({ files: filesPayload });
+        for (const item of files) {
+            const pdfBytes = await item.file.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+            
+            const pageIndices = parsePages(item.pages, pdfDoc.getPageCount()).map(p => p - 1);
+            
+            const copiedPages = await mergedPdf.copyPages(pdfDoc, pageIndices);
+            copiedPages.forEach(page => mergedPdf.addPage(page));
+        }
 
+        const mergedPdfBytes = await mergedPdf.save();
+
+        const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
         const link = document.createElement('a');
-        link.href = result.mergedPdfDataUri;
+        link.href = URL.createObjectURL(blob);
         link.download = `merged-${Date.now()}.pdf`;
         document.body.appendChild(link);
         link.click();
@@ -120,7 +147,7 @@ export function PdfMerger() {
 
     } catch (error: any) {
         console.error("PDF Merging Error:", error);
-        toast({ title: 'Merge Failed', description: error.message || 'Could not merge PDFs.', variant: 'destructive'});
+        toast({ title: 'Merge Failed', description: error.message || 'Could not merge PDFs. One of the files might be corrupted or using an unsupported format.', variant: 'destructive'});
     } finally {
         setIsLoading(false);
     }
