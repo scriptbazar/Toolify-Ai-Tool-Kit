@@ -122,33 +122,17 @@ export function PdfMerger() {
     setIsLoading(true);
 
     try {
-        const firstFileBytes = await files[0].file.arrayBuffer();
-        const mergedPdf = await PDFDocument.load(firstFileBytes, { ignoreEncryption: true });
+        const finalPdf = await PDFDocument.create();
 
-        // If the first file has a page range, we need to handle it separately
-        // by creating a new document and copying just the selected pages from the first file.
-        const firstPageIndices = parsePages(files[0].pages, mergedPdf.getPageCount());
-        let finalPdf: PDFDocument;
+        for (const fileItem of files) {
+             const fileBytes = await fileItem.file.arrayBuffer();
+             const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
 
-        if (firstPageIndices.length !== mergedPdf.getPageCount()) {
-            finalPdf = await PDFDocument.create();
-            const copiedPages = await finalPdf.copyPages(mergedPdf, firstPageIndices.map(p => p - 1));
-            copiedPages.forEach(page => finalPdf.addPage(page));
-        } else {
-            finalPdf = mergedPdf;
-        }
-
-        // Process remaining files
-        for (let i = 1; i < files.length; i++) {
-            const fileItem = files[i];
-            const fileBytes = await fileItem.file.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
-            
-            const pageIndices = parsePages(fileItem.pages, pdfDoc.getPageCount()).map(p => p - 1);
-            if (pageIndices.length > 0) {
+             const pageIndices = parsePages(fileItem.pages, pdfDoc.getPageCount()).map(p => p - 1);
+             if (pageIndices.length > 0) {
                  const copiedPages = await finalPdf.copyPages(pdfDoc, pageIndices);
                  copiedPages.forEach(page => finalPdf.addPage(page));
-            }
+             }
         }
         
         if (finalPdf.getPageCount() === 0) {

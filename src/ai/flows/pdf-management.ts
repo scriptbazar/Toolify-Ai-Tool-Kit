@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview Manages PDF-related operations like merging and watermarking.
+ * @fileOverview Manages PDF-related operations like watermarking.
  */
 
 import { ai } from '@/ai/genkit';
