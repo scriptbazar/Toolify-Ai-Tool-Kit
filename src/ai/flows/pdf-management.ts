@@ -72,17 +72,8 @@ const mergePdfsFlow = ai.defineFlow(
         const pagesToCopyIndices = parsePages(file.pages || '', totalPages).map(p => p - 1); // convert to 0-based index
       
         if (pagesToCopyIndices.length > 0) {
-            for (const pageIndex of pagesToCopyIndices) {
-                const [embeddedPage] = await mergedPdf.embedPdf(pdfDoc, [pageIndex]);
-                const page = mergedPdf.addPage();
-                page.setSize(embeddedPage.width, embeddedPage.height);
-                page.drawPage(embeddedPage, {
-                    x: 0,
-                    y: 0,
-                    width: embeddedPage.width,
-                    height: embeddedPage.height,
-                });
-            }
+           const copiedPages = await mergedPdf.copyPages(pdfDoc, pagesToCopyIndices);
+           copiedPages.forEach(page => mergedPdf.addPage(page));
         }
     }
 
