@@ -126,15 +126,17 @@ export function PdfMerger() {
 
         for (const fileItem of files) {
             const fileBytes = await fileItem.file.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
+            // Important: updateFlateFilters: false helps prevent "Unknown compression method" errors
+            const pdfDoc = await PDFDocument.load(fileBytes, { 
+                ignoreEncryption: true,
+                updateFlateFilters: false 
+            });
             
             const pageIndicesToCopy = parsePages(fileItem.pages, pdfDoc.getPageCount()).map(p => p - 1);
 
-            for (const pageIndex of pageIndicesToCopy) {
-                // Embed the page and draw it onto a new page in the final document
-                const [embeddedPage] = await mergedPdf.embedPdf(pdfDoc, [pageIndex]);
-                const newPage = mergedPdf.addPage();
-                newPage.drawPage(embeddedPage);
+            if (pageIndicesToCopy.length > 0) {
+                const copiedPages = await mergedPdf.copyPages(pdfDoc, pageIndicesToCopy);
+                copiedPages.forEach(page => mergedPdf.addPage(page));
             }
         }
         
