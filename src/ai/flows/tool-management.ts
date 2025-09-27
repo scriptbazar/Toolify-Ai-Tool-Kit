@@ -264,7 +264,7 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
     }
     
     // Validate data before saving
-    const validatedData = UpsertToolInputSchema.parse(data);
+    const validatedData = ToolSchema.partial().parse(data);
 
     if (id) {
       const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(id);
