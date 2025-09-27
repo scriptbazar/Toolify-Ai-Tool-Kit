@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef } from 'react';
@@ -8,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { UploadCloud, Image as ImageIcon, Type, Fingerprint, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '../ui/card';
-import { addWatermarkToPdf } from '@/ai/flows/pdf-management';
+import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '../ui/slider';
 
@@ -54,39 +53,56 @@ export function AddWatermarkToPdf() {
     setIsLoading(true);
 
     try {
-      const fileToDataUri = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            if (event.target?.result) resolve(event.target.result as string);
-            else reject(new Error('Failed to read file.'));
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      };
-
-      const pdfDataUri = await fileToDataUri(pdfFile);
-      let imageDataUri: string | undefined = undefined;
+      const pdfBytes = await pdfFile.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      const pages = pdfDoc.getPages();
+      
+      let watermarkImageBytes: ArrayBuffer | undefined;
       if (watermarkType === 'image' && watermarkImage) {
-        imageDataUri = await fileToDataUri(watermarkImage);
+        watermarkImageBytes = await watermarkImage.arrayBuffer();
       }
 
-      const result = await addWatermarkToPdf({
-        pdfDataUri,
-        watermarkType,
-        text: watermarkText,
-        imageDataUri,
-        opacity,
-        size,
-        position: 'center', // This can be extended
-        rotation,
-      });
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const watermarkImageEmbed = watermarkImageBytes ? await pdfDoc.embedPng(watermarkImageBytes) : undefined;
 
+      for (const page of pages) {
+          const { width, height } = page.getSize();
+          
+          if (watermarkType === 'text' && watermarkText) {
+              const fontSize = (width / watermarkText.length) * (size / 100) * 1.5;
+              const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
+              const textHeight = font.heightAtSize(fontSize);
+              
+              page.drawText(watermarkText, {
+                  x: width / 2 - textWidth / 2,
+                  y: height / 2 - textHeight / 2,
+                  size: fontSize,
+                  font: font,
+                  color: rgb(0, 0, 0),
+                  opacity: opacity,
+                  rotate: degrees(rotation),
+              });
+          } else if (watermarkType === 'image' && watermarkImageEmbed) {
+              const imageDims = watermarkImageEmbed.scale(size / 100);
+              
+              page.drawImage(watermarkImageEmbed, {
+                  x: width / 2 - imageDims.width / 2,
+                  y: height / 2 - imageDims.height / 2,
+                  width: imageDims.width,
+                  height: imageDims.height,
+                  opacity: opacity,
+                  rotate: degrees(rotation),
+              });
+          }
+      }
+
+      const watermarkedPdfBytes = await pdfDoc.save();
+      const blob = new Blob([watermarkedPdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
-      link.href = result.watermarkedPdfDataUri;
+      link.href = URL.createObjectURL(blob);
       link.download = `watermarked-${pdfFile.name}`;
       link.click();
+      URL.revokeObjectURL(link.href);
 
       toast({ title: 'Watermark applied successfully!', description: 'Your watermarked PDF has been downloaded.' });
     } catch (error: any) {
