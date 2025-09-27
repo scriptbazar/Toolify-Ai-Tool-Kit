@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -6,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Download, Instagram, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { saveUserMedia } from '@/ai/flows/media-management';
 
 export function InstagramVideoDownloader() {
   const [url, setUrl] = useState('');
@@ -19,37 +19,23 @@ export function InstagramVideoDownloader() {
       return;
     }
     setIsLoading(true);
+    
+    // Client-side fetching is blocked by CORS. The reliable solution is to
+    // redirect the user to a third-party service that can handle the download.
     try {
-      // WARNING: This is a client-side approach using a public proxy/API.
-      // It is not guaranteed to work and may break if the third-party service changes or if Instagram blocks it.
-      // A robust solution requires a dedicated server-side component.
-      
-      // Using an Invidious instance as a proxy to fetch the video. This is primarily for YouTube, but can sometimes work for other services.
-      // This is a best-effort attempt and is likely to fail.
-      const proxyUrl = `https://invidious.io.lol/`;
-      const videoId = new URL(url).pathname.split('/').filter(Boolean).pop();
-      const response = await fetch(`${proxyUrl}api/v1/videos/${videoId}`);
-      
-      if (!response.ok) {
-           throw new Error('Could not fetch video information. The video might be private or the service is unavailable.');
-      }
-      
-      const data = await response.json();
-      const videoUrl = data.formatStreams?.find((f: any) => f.qualityLabel === '720p')?.url || data.formatStreams?.[0]?.url;
+        const downloaderServiceUrl = `https://savefrom.net/`;
+        
+        toast({
+            title: "Redirecting to Downloader",
+            description: "We'll open a new tab for you to complete the download.",
+        });
 
-      if (!videoUrl) {
-          throw new Error('No downloadable video stream found.');
-      }
-
-      toast({ title: 'Downloading...', description: 'Your video will begin downloading shortly.' });
-      
-      // Since we can't directly download from the proxied URL due to CORS, we open it in a new tab.
-      // The user can then right-click to save. This is a limitation of client-side approaches.
-      window.open(videoUrl, '_blank');
+        // Open the service in a new tab. The user will then paste the URL there.
+        window.open(downloaderServiceUrl, '_blank');
 
     } catch (error: any) {
       console.error("Download Error:", error);
-      toast({ title: 'Download Failed', description: error.message || 'This video could not be downloaded. It might be private or protected.', variant: 'destructive' });
+      toast({ title: 'Redirection Failed', description: "Could not open the download service. Please try again.", variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
