@@ -1,5 +1,4 @@
 
-
 export { AdMobRevenueCalculator } from './AdMobRevenueCalculator';
 export { AdSenseRevenueCalculator } from './AdSenseRevenueCalculator';
 export { AddWatermarkToPdf } from './AddWatermarkToPdf';
@@ -59,7 +58,6 @@ export { ImageToBase64 } from './ImageToBase64';
 export { ImageToPdf } from './ImageToPdf';
 export { InterestCalculator } from './InterestCalculator';
 export { JavascriptMinifier } from './JavascriptMinifier';
-export { JpgToPng } from './JpgToPng';
 export { JsonFormatter } from './JsonFormatter';
 export { JsonPromptGenerator } from './JsonPromptGenerator';
 export { KeywordDensityChecker } from './KeywordDensityChecker';
@@ -88,7 +86,6 @@ export { PdfToJpg } from './PdfToJpg';
 export { PdfToWord } from './PdfToWord';
 export { PercentageCalculator } from './PercentageCalculator';
 export { PercentageToCgpaConverter } from './PercentageToCgpaConverter';
-export { PngToJpg } from './PngToJpg';
 export { PromptGenerator } from './PromptGenerator';
 export { PRNToPDF } from './PRNToPDF';
 export { PptToPdf } from './PptToPdf';
@@ -132,5 +129,3 @@ export { YouTubeVideoDescriptionExtractor } from './YouTubeVideoDescriptionExtra
 export { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownloader';
 export { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
 export { UpgradeProDialog } from './UpgradeProDialog';
-
-    
