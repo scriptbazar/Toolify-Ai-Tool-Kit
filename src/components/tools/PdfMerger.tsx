@@ -22,7 +22,7 @@ interface FileWithPages {
 // Helper to parse page ranges e.g., "1-5, 8, 10-12" into a set of numbers
 const parsePages = (pagesStr: string, totalPages: number): number[] => {
     const pages = new Set<number>();
-    if (!pagesStr) {
+    if (!pagesStr.trim()) {
         for (let i = 1; i <= totalPages; i++) pages.add(i);
         return Array.from(pages);
     }
@@ -32,9 +32,9 @@ const parsePages = (pagesStr: string, totalPages: number): number[] => {
         const trimmedPart = part.trim();
         if (trimmedPart.includes('-')) {
             const [start, end] = trimmedPart.split('-').map(Number);
-            if (!isNaN(start) && !isNaN(end)) {
+            if (!isNaN(start) && !isNaN(end) && start > 0 && end <= totalPages && start <= end) {
                 for (let i = start; i <= end; i++) {
-                    if (i > 0 && i <= totalPages) pages.add(i);
+                    pages.add(i);
                 }
             }
         } else {
@@ -59,41 +59,42 @@ export function PdfMerger() {
 
   const handleFile = async (selectedFiles: FileList | null) => {
     if (!selectedFiles) return;
+    setIsLoading(true);
     const newFiles = Array.from(selectedFiles);
     const pdfFiles = newFiles.filter(file => file.type === 'application/pdf');
     if (pdfFiles.length !== newFiles.length) {
         toast({ title: 'Invalid File Type', description: 'Only PDF files are allowed.', variant: 'destructive'});
     }
     
-    const filesWithPageCounts = await Promise.all(pdfFiles.map(async (file) => {
-      try {
-        const fileBytes = await file.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
-        return { file, pages: '', totalPages: pdfDoc.getPageCount(), id: `${file.name}-${Math.random()}` };
-      } catch (error) {
-        console.error(`Failed to read PDF ${file.name}:`, error);
-        toast({ title: `Error reading ${file.name}`, description: 'Could not determine the number of pages. The file might be encrypted.', variant: 'destructive'});
-        return { file, pages: '', totalPages: undefined, id: `${file.name}-${Math.random()}` };
-      }
-    }));
-
-    setFiles(prev => [...prev, ...filesWithPageCounts]);
+    try {
+        const filesWithPageCounts = await Promise.all(pdfFiles.map(async (file) => {
+          try {
+            const fileBytes = await file.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
+            return { file, pages: '', totalPages: pdfDoc.getPageCount(), id: `${file.name}-${Math.random()}` };
+          } catch (error) {
+            console.error(`Failed to read PDF ${file.name}:`, error);
+            toast({ title: `Error reading ${file.name}`, description: 'Could not determine page count. The file might be encrypted or corrupted.', variant: 'destructive'});
+            return { file, pages: '', totalPages: undefined, id: `${file.name}-${Math.random()}` };
+          }
+        }));
+        setFiles(prev => [...prev, ...filesWithPageCounts]);
+    } catch(e) {
+        toast({ title: 'Error', description: 'Could not process all selected files.', variant: 'destructive'});
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     handleFile(e.target.files);
+    // Reset input value to allow re-uploading the same file
+    if(e.target) e.target.value = '';
   };
   
-  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
-      e.preventDefault(); e.stopPropagation(); setIsDragging(true);
-  };
-  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
-      e.preventDefault(); e.stopPropagation(); setIsDragging(false);
-  };
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-      e.preventDefault(); e.stopPropagation(); setIsDragging(false);
-      handleFile(e.dataTransfer.files);
-  };
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); handleFile(e.dataTransfer.files); };
   
   const handleDragSort = () => {
     if (dragItem.current === null || dragOverItem.current === null) return;
@@ -122,20 +123,28 @@ export function PdfMerger() {
 
     try {
         const mergedPdf = await PDFDocument.create();
+        
+        // First, load all PDF documents into memory
+        const loadedDocs = await Promise.all(
+            files.map(item => item.file.arrayBuffer().then(bytes => 
+                PDFDocument.load(bytes, { ignoreEncryption: true })
+            ))
+        );
 
-        for (const item of files) {
-            const pdfBytes = await item.file.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
-            
+        // Now, iterate and copy pages
+        for (let i = 0; i < files.length; i++) {
+            const item = files[i];
+            const pdfDoc = loadedDocs[i];
             const pageIndices = parsePages(item.pages, pdfDoc.getPageCount()).map(p => p - 1);
-            if (pageIndices.length === 0) continue;
-
-            const copiedPages = await mergedPdf.copyPages(pdfDoc, pageIndices);
-            copiedPages.forEach(page => mergedPdf.addPage(page));
+            
+            if (pageIndices.length > 0) {
+                const copiedPages = await mergedPdf.copyPages(pdfDoc, pageIndices);
+                copiedPages.forEach(page => mergedPdf.addPage(page));
+            }
         }
 
         if (mergedPdf.getPageCount() === 0) {
-            throw new Error("No pages were selected or could be merged.");
+            throw new Error("No pages were selected or could be merged. Please check your page ranges.");
         }
 
         const mergedPdfBytes = await mergedPdf.save();
