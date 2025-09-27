@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { getFavoriteTools } from '@/ai/flows/tool-management';
+import { getTools } from '@/ai/flows/tool-management';
 import { ToolGrid } from '@/app/(public)/tools/_components/ToolGrid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -11,16 +12,19 @@ import type { Tool } from '@/ai/flows/tool-management.types';
 import { Star } from 'lucide-react';
 
 export default function MyFavoritesPage() {
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   const [favoriteTools, setFavoriteTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
+    if (user && userData) {
       setLoading(true);
-      getFavoriteTools(user.uid)
-        .then(setFavoriteTools)
+      getTools()
+        .then(allTools => {
+          const userFavorites = allTools.filter(tool => userData.favorites?.includes(tool.slug));
+          setFavoriteTools(userFavorites);
+        })
         .catch(err => {
           console.error("Failed to load favorite tools:", err);
           toast({
@@ -30,8 +34,10 @@ export default function MyFavoritesPage() {
           });
         })
         .finally(() => setLoading(false));
+    } else {
+        setLoading(false);
     }
-  }, [user, toast]);
+  }, [user, userData, toast]);
 
   if (loading) {
     return (

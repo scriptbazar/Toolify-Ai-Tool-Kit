@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
 interface AppUser {
@@ -13,6 +13,7 @@ interface AppUser {
   email: string;
   planId?: string;
   role?: 'user' | 'admin';
+  favorites?: string[];
 }
 
 // Ensure planId and role are part of the CombinedUser type
@@ -31,33 +32,40 @@ export function useAuth() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
         
-        if (userDocSnap.exists()) {
-          const data = userDocSnap.data() as AppUser;
-          setUserData(data);
-          const userIsAdmin = data.role === 'admin';
-          setIsAdmin(userIsAdmin);
-          
-          // Correctly combine Firebase user with Firestore data
-          const combinedUser: CombinedUser = {
-              ...firebaseUser,
-              planId: data.planId,
-              role: data.role,
-          };
-          setUser(combinedUser);
+        // Use onSnapshot for real-time updates to user data (like favorites)
+        const unsubscribeFirestore = onSnapshot(userDocRef, (userDocSnap) => {
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data() as AppUser;
+            setUserData(data);
+            const userIsAdmin = data.role === 'admin';
+            setIsAdmin(userIsAdmin);
+            
+            const combinedUser: CombinedUser = {
+                ...firebaseUser,
+                planId: data.planId,
+                role: data.role,
+            };
+            setUser(combinedUser);
+          } else {
+              // Case where auth user exists but no firestore doc
+              setUser(firebaseUser as CombinedUser);
+          }
+           setLoading(false); // Set loading to false once data is fetched
+        }, (error) => {
+          console.error("Firestore snapshot error:", error);
+          setLoading(false);
+        });
 
-        } else {
-            // Case where auth user exists but no firestore doc
-            setUser(firebaseUser as CombinedUser);
-        }
+        // Return the firestore unsubscribe function to be called on cleanup
+        return () => unsubscribeFirestore();
 
       } else {
         setUser(null);
         setUserData(null);
         setIsAdmin(false);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
