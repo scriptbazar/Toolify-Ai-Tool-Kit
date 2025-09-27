@@ -132,7 +132,7 @@ export function PdfSigner() {
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
             const pdfDoc = await PDFDocument.load(pdfBytes);
-            const signatureBytes = await fetch(signatureDataUrl).then(res => res.arrayBuffer());
+            const signatureBytes = Uint8Array.from(atob(signatureDataUrl.split(',')[1]), c => c.charCodeAt(0));
             const signatureImage = await pdfDoc.embedPng(signatureBytes);
 
             const page = pdfDoc.getPage(signaturePosition.pageIndex);
