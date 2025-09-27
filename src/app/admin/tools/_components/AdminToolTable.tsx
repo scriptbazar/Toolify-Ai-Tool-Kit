@@ -18,7 +18,7 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 import { toolCategories } from '@/lib/constants';
 import * as Icons from 'lucide-react';
 import { Edit, CheckCircle, XCircle, Star, Sparkles, Construction, GitCommitVertical, FlaskConical, Trash2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { EditToolForm } from '@/app/admin/tools/[id]/EditToolForm';
 import { upsertTool, deleteTool } from '@/ai/flows/tool-management';
 import { useToast } from '@/hooks/use-toast';
