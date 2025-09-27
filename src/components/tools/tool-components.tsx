@@ -54,13 +54,11 @@ import { ImageShapeConverter } from './ImageShapeConverter';
 import { ImageTextExtractor } from './ImageTextExtractor';
 import { ImageToBase64 } from './ImageToBase64';
 import { ImageToPdf } from './ImageToPdf';
-import { InstagramVideoDownloader } from './InstagramVideoDownloader';
 import { InterestCalculator } from './InterestCalculator';
 import { JavascriptMinifier } from './JavascriptMinifier';
 import { JsonFormatter } from './JsonFormatter';
 import { JsonPromptGenerator } from './JsonPromptGenerator';
 import { KeywordDensityChecker } from './KeywordDensityChecker';
-import { LinkedinVideoDownloader } from './LinkedinVideoDownloader';
 import { LoanCalculator } from './LoanCalculator';
 import { LockPdf } from './LockPdf';
 import { LoremIpsumGenerator } from './LoremIpsumGenerator';
@@ -86,15 +84,12 @@ import { PdfToJpg } from './PdfToJpg';
 import { PdfToWord } from './PdfToWord';
 import { PercentageCalculator } from './PercentageCalculator';
 import { PercentageToCgpaConverter } from './PercentageToCgpaConverter';
-import { PinterestVideoDownloader } from './PinterestVideoDownloader';
 import { PromptGenerator } from './PromptGenerator';
 import { PRNToPDF } from './PRNToPDF';
 import { PptToPdf } from './PptToPdf';
 import { RandomWordGenerator } from './RandomWordGenerator';
-import { RecentlyUsedTools } from './RecentlyUsedTools';
 import { RedirectChecker } from './RedirectChecker';
 import { RemoveExtraSpaces } from './RemoveExtraSpaces';
-import { ReviewForm } from './ReviewForm';
 import { ReverseText } from './ReverseText';
 import { RobotsTxtGenerator } from './RobotsTxtGenerator';
 import { RotateImage } from './RotateImage';
@@ -110,13 +105,11 @@ import { TextRepeater } from './TextRepeater';
 import { TextToBinary } from './TextToBinary';
 import { TextToMorseCode } from './TextToMorseCode';
 import { TextToSpeech } from './TextToSpeech';
-import { ThreadsVideoDownloader } from './ThreadsVideoDownloader';
 import { TimeZoneConverter } from './TimeZoneConverter';
 import { TitleTagChecker } from './TitleTagChecker';
 import { UnixTimestampConverter } from './UnixTimestampConverter';
 import { UniversalHashGenerator } from './UniversalHashGenerator';
 import { UnlockPdf } from './UnlockPdf';
-import { UpgradeProDialog } from './UpgradeProDialog';
 import { UuidGenerator } from './UuidGenerator';
 import { UTIPANCardPhotoAndSignatureResizer } from './UTIPANCardPhotoAndSignatureResizer';
 import { WebsiteScreenshot } from './WebsiteScreenshot';
@@ -124,7 +117,6 @@ import { WebsiteWordCounter } from './WebsiteWordCounter';
 import { WhatIsMyBrowser } from './WhatIsMyBrowser';
 import { WordCounter } from './WordCounter';
 import { WordToPdf } from './WordToPdf';
-import { XVideoDownloader } from './XVideoDownloader';
 import { XmlSitemapGenerator } from './XmlSitemapGenerator';
 import { YouTubeChannelBannerDownloader } from './YouTubeChannelBannerDownloader';
 import { YouTubeChannelLogoDownloader } from './YouTubeChannelLogoDownloader';
@@ -132,7 +124,6 @@ import { YouTubeRegionRestrictionChecker } from './YouTubeRegionRestrictionCheck
 import { YouTubeVideoDescriptionExtractor } from './YouTubeVideoDescriptionExtractor';
 import { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownloader';
 import { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
-import { YoutubeVideoDownloader } from './YoutubeVideoDownloader';
 
 export const toolComponents: { [key: string]: React.ComponentType } = {
   'admob-revenue-calculator': AdMobRevenueCalculator,
@@ -191,13 +182,11 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'image-text-extractor': ImageTextExtractor,
   'image-to-base64': ImageToBase64,
   'image-to-pdf': ImageToPdf,
-  'instagram-video-downloader': InstagramVideoDownloader,
   'interest-calculator': InterestCalculator,
   'javascript-minifier': JavascriptMinifier,
   'json-formatter': JsonFormatter,
   'json-prompt-generator': JsonPromptGenerator,
   'keyword-density-checker': KeywordDensityChecker,
-  'linkedin-video-downloader': LinkedinVideoDownloader,
   'loan-calculator': LoanCalculator,
   'lock-pdf': LockPdf,
   'lorem-ipsum-generator': LoremIpsumGenerator,
@@ -223,7 +212,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'pdf-to-word': PdfToWord,
   'percentage-calculator': PercentageCalculator,
   'percentage-to-cgpa-converter': PercentageToCgpaConverter,
-  'pinterest-video-downloader': PinterestVideoDownloader,
   'prompt-generator': PromptGenerator,
   'prn-to-pdf': PRNToPDF,
   'ppt-to-pdf': PptToPdf,
@@ -245,7 +233,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'text-to-binary': TextToBinary,
   'text-to-morse-code': TextToMorseCode,
   'text-to-speech': TextToSpeech,
-  'threads-video-downloader': ThreadsVideoDownloader,
   'time-zone-converter': TimeZoneConverter,
   'title-tag-checker': TitleTagChecker,
   'unix-timestamp-converter': UnixTimestampConverter,
@@ -258,7 +245,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'what-is-my-browser': WhatIsMyBrowser,
   'word-counter': WordCounter,
   'word-to-pdf': WordToPdf,
-  'x-video-downloader': XVideoDownloader,
   'xml-sitemap-generator': XmlSitemapGenerator,
   'youtube-channel-banner-downloader': YouTubeChannelBannerDownloader,
   'youtube-channel-logo-downloader': YouTubeChannelLogoDownloader,
@@ -266,5 +252,4 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'youtube-video-description-extractor': YouTubeVideoDescriptionExtractor,
   'youtube-video-thumbnail-downloader': YouTubeVideoThumbnailDownloader,
   'youtube-video-title-extractor': YouTubeVideoTitleExtractor,
-  'youtube-video-downloader': YoutubeVideoDownloader,
 };

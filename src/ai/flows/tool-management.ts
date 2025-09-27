@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -77,7 +78,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'CGPA to Marks Calculator', description: 'Convert your CGPA score into an equivalent total marks or percentage based on your university\'s formula.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your CGPA.', 'Select your university or enter the conversion formula (e.g., Percentage = CGPA * 9.5).', 'Click "Convert".', 'The tool will show your equivalent percentage or marks.'] },
     { name: 'GPA to CGPA Calculator', description: 'Calculate your Cumulative Grade Point Average (CGPA) from your semester-wise or yearly GPA scores.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your GPA and total credits for each semester.', 'Click "Calculate CGPA".', 'The tool will show your overall CGPA based on the provided data.'] },
     { name: 'Percentage to CGPA Converter', description: 'Convert your overall percentage into a CGPA score on various scales (e.g., 4.0, 10.0).', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your total percentage.', 'Select the target CGPA scale (e.g., 10-point scale).', 'Click "Convert to CGPA".', 'Your equivalent CGPA will be displayed.'] },
-    { name: 'CGPA to GPA Converter', description: 'Convert your Cumulative Grade Point Average (CGPA) back to a standard GPA score.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your CGPA score.', 'Enter the scale of your CGPA (e.g., 10.0).', 'Select the target GPA scale (e.g., 4.0).', 'The tool will convert the score for you.'] },
     { name: 'PDF Splitter', description: 'Split a large PDF file into multiple smaller files or extract a specific range of pages into a new document.', icon: 'Split', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload your large PDF file.', 'Choose your split option: split into single pages or extract a specific page range.', 'Enter the page numbers if needed (e.g., "5-10").', 'Click "Split PDF" to download your new file(s).'] },
     { name: 'PDF Page Reorder', description: 'Visually rearrange the pages of your PDF document into a new order with a simple drag-and-drop interface.', icon: 'Shuffle', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload your PDF file.', 'Thumbnails of all pages will be displayed.', 'Drag and drop the page thumbnails into your desired new order.', 'Click "Save & Download" to get the reordered PDF.'] },
     { name: 'PDF Page Counter', description: 'Quickly and accurately count the total number of pages in any PDF file without opening it.', icon: 'ListOrdered', category: 'pdf', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your PDF document.', 'The tool will instantly analyze the file and display the total number of pages.'] },
@@ -132,16 +132,9 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Morse to Text Translator', description: 'Translate Morse code back into readable text.', icon: 'MessageSquare', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Text Encryption & Decryption', description: 'Encrypt and decrypt your text using various algorithms for security.', icon: 'Key', category: 'dev', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'GPA to Percentage Converter', description: 'Convert your GPA score back into a percentage.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'Pinterest Video Downloader', description: 'Download videos from Pinterest.', icon: 'BookImage', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'Linkedin Video Downloader', description: 'Download videos from LinkedIn.', icon: 'Linkedin', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'PPT to PDF', description: 'Convert PowerPoint presentations to PDF.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Text to Morse Code', description: 'Convert text to Morse code.', icon: 'MessageSquare', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Credit Card Interest Calculator', description: 'Calculate the interest on your credit card balance.', icon: 'CreditCard', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'Youtube Video Downloader', description: 'Download videos from YouTube in various formats and qualities.', icon: 'Download', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'Instagram Video Downloader', description: 'Download videos from Instagram.', icon: 'Instagram', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'X Video Downloader', description: 'Download videos from X (formerly Twitter).', icon: 'Twitter', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'Threads Video Downloader', description: 'Download videos from Threads.', icon: 'AtSign', category: 'video', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'Loan Calculator', description: 'Calculate loan payments, interest, and amortization schedules.', icon: 'Landmark', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
 ];
 
 const generateSlug = (name: string) => {
