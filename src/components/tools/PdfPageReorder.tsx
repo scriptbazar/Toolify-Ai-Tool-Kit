@@ -142,7 +142,10 @@ export function PdfPageReorder() {
                 "transition-colors",
                 isDragging && 'border-primary bg-primary/10'
             )}
-            onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
         >
             <CardContent 
                 className="p-6 text-center cursor-pointer"
