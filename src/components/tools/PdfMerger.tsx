@@ -128,9 +128,25 @@ export function PdfMerger() {
             const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
             
             const pageIndices = parsePages(item.pages, pdfDoc.getPageCount()).map(p => p - 1);
-            
-            const copiedPages = await mergedPdf.copyPages(pdfDoc, pageIndices);
-            copiedPages.forEach(page => mergedPdf.addPage(page));
+            if (pageIndices.length === 0) continue;
+
+            try {
+                // First, try the more efficient copyPages method
+                const copiedPages = await mergedPdf.copyPages(pdfDoc, pageIndices);
+                copiedPages.forEach(page => mergedPdf.addPage(page));
+            } catch (copyError) {
+                console.warn("copyPages failed, falling back to embedding:", copyError);
+                // Fallback: If copyPages fails, embed and draw each page individually
+                for (const pageIndex of pageIndices) {
+                    const [embeddedPage] = await mergedPdf.embedPdf(pdfDoc, [pageIndex]);
+                    const newPage = mergedPdf.addPage();
+                    newPage.drawPage(embeddedPage);
+                }
+            }
+        }
+
+        if (mergedPdf.getPageCount() === 0) {
+            throw new Error("No pages were selected or could be merged.");
         }
 
         const mergedPdfBytes = await mergedPdf.save();
