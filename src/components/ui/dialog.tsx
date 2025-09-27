@@ -119,7 +119,6 @@ export {
   DialogHeader,
   DialogFooter,
   DialogTitle,
+  DialogDescription,
   DialogDescription as DialogDesc,
 }
-
-    

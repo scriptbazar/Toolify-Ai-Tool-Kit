@@ -18,11 +18,11 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 import { toolCategories } from '@/lib/constants';
 import * as Icons from 'lucide-react';
 import { Edit, CheckCircle, XCircle, Star, Sparkles, Construction, GitCommitVertical, FlaskConical, Trash2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDesc, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { EditToolForm } from '@/app/admin/tools/[id]/EditToolForm';
 import { upsertTool, deleteTool } from '@/ai/flows/tool-management';
 import { useToast } from '@/hooks/use-toast';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 
 interface AdminToolTableProps {
@@ -143,9 +143,9 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Edit Tool</DialogTitle>
-            <DialogDesc>
+            <DialogDescription>
               Modify the details for "{editingTool?.name}".
-            </DialogDesc>
+            </DialogDescription>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto p-1 pr-4">
              <EditToolForm tool={editingTool} onSave={handleSave} />
@@ -161,9 +161,9 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
                       <AlertDialogContent>
                           <AlertDialogHeader>
                               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
+                              <AlertDialogDesc>
                                   This action cannot be undone. This will permanently delete the tool and its associated data.
-                              </AlertDialogDescription>
+                              </AlertDialogDesc>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
