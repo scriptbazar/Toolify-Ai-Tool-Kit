@@ -43,7 +43,7 @@ const addWatermarkToPdfFlow = ai.defineFlow(
         
         let watermarkImageBytes: Uint8Array | undefined;
         if (watermarkType === 'image' && imageDataUri) {
-            watermarkImageBytes = Buffer.from(imageDataUri.split(',')[1, 'base64');
+            watermarkImageBytes = Buffer.from(imageDataUri.split(',')[1], 'base64');
         }
 
         for (const page of pages) {
