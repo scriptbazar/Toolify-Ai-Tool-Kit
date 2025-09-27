@@ -4,7 +4,7 @@
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, Download, Loader2, Shuffle, Trash2, GripVertical } from 'lucide-react';
+import { UploadCloud, Download, Loader2, Shuffle, Trash2, GripVertical, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import Image from 'next/image';
 import * as pdfjsLib from 'pdfjs-dist';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+// pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
 interface PagePreview {
     id: string;
@@ -41,6 +41,7 @@ export function PdfPageReorder() {
     setPagePreviews([]);
 
     try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/chunks/pdf.worker.min.mjs';
         const fileBytes = await file.arrayBuffer();
         const loadingTask = pdfjsLib.getDocument({ data: fileBytes });
         const pdf = await loadingTask.promise;
