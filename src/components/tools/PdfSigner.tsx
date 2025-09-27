@@ -16,7 +16,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
-// pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
 
 interface PagePreview {
@@ -60,7 +60,6 @@ export function PdfSigner() {
         setSignaturePosition(null);
 
         try {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/chunks/pdf.worker.min.mjs';
             const fileBytes = await file.arrayBuffer();
             const loadingTask = pdfjsLib.getDocument({ data: fileBytes });
             const pdf = await loadingTask.promise;
@@ -102,7 +101,8 @@ export function PdfSigner() {
             ctx.font = `60px ${typedFont.replace('font-', '')}, cursive`;
             ctx.fillStyle = "black";
             ctx.fillText(typedSignature, 10, 60);
-            setSignatureDataUrl(canvas.toDataURL('image/png'));
+            const dataUrl = canvas.toDataURL('image/png');
+            setSignatureDataUrl(dataUrl);
         }
     };
 
