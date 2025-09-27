@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef } from 'react';
@@ -14,11 +15,11 @@ import { Slider } from '../ui/slider';
 export function AddWatermarkToPdf() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [watermarkType, setWatermarkType] = useState<'text' | 'image'>('text');
-  const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
+  const [watermarkText, setWatermarkText] = useState('ToolifyAI');
   const [watermarkImage, setWatermarkImage] = useState<File | null>(null);
   const [opacity, setOpacity] = useState(0.5);
   const [size, setSize] = useState(50);
-  const [rotation, setRotation] = useState(-45);
+  const [rotation, setRotation] = useState(45);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const pdfInputRef = useRef<HTMLInputElement>(null);
