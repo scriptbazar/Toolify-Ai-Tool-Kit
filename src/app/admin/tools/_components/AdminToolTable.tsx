@@ -60,7 +60,6 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
   const handleSave = async (data: any) => {
     const toolData = {
       id: editingTool?.id,
-      slug: editingTool?.slug,
       ...data,
     };
     const result = await upsertTool(toolData);
