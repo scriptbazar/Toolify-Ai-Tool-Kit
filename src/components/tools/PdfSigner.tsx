@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
+
 interface PagePreview {
     dataUrl: string;
     width: number;
@@ -137,7 +138,7 @@ export function PdfSigner() {
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
             const pdfDoc = await PDFDocument.load(pdfBytes);
-            const signatureBytes = Uint8Array.from(atob(signatureDataUrl.split(',')[1]), c => c.charCodeAt(0));
+            const signatureBytes = await fetch(signatureDataUrl).then(res => res.arrayBuffer());
             const signatureImage = await pdfDoc.embedPng(signatureBytes);
 
             const page = pdfDoc.getPage(signaturePosition.pageIndex);
