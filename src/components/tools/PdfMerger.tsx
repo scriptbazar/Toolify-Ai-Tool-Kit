@@ -122,30 +122,40 @@ export function PdfMerger() {
     setIsLoading(true);
 
     try {
-        const mergedPdf = await PDFDocument.create();
-        
-        const pdfDocs = await Promise.all(
-            files.map(item => item.file.arrayBuffer().then(bytes => 
-                PDFDocument.load(bytes, { ignoreEncryption: true })
-            ))
-        );
+        const firstFileBytes = await files[0].file.arrayBuffer();
+        const mergedPdf = await PDFDocument.load(firstFileBytes, { ignoreEncryption: true });
 
-        for (let i = 0; i < pdfDocs.length; i++) {
-            const pdfDoc = pdfDocs[i];
-            const item = files[i];
-            const pageIndices = parsePages(item.pages, pdfDoc.getPageCount()).map(p => p - 1);
+        // If the first file has a page range, we need to handle it separately
+        // by creating a new document and copying just the selected pages from the first file.
+        const firstPageIndices = parsePages(files[0].pages, mergedPdf.getPageCount());
+        let finalPdf: PDFDocument;
 
+        if (firstPageIndices.length !== mergedPdf.getPageCount()) {
+            finalPdf = await PDFDocument.create();
+            const copiedPages = await finalPdf.copyPages(mergedPdf, firstPageIndices.map(p => p - 1));
+            copiedPages.forEach(page => finalPdf.addPage(page));
+        } else {
+            finalPdf = mergedPdf;
+        }
+
+        // Process remaining files
+        for (let i = 1; i < files.length; i++) {
+            const fileItem = files[i];
+            const fileBytes = await fileItem.file.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
+            
+            const pageIndices = parsePages(fileItem.pages, pdfDoc.getPageCount()).map(p => p - 1);
             if (pageIndices.length > 0) {
-                 const copiedPages = await mergedPdf.copyPages(pdfDoc, pageIndices);
-                 copiedPages.forEach(page => mergedPdf.addPage(page));
+                 const copiedPages = await finalPdf.copyPages(pdfDoc, pageIndices);
+                 copiedPages.forEach(page => finalPdf.addPage(page));
             }
         }
-
-        if (mergedPdf.getPageCount() === 0) {
-            throw new Error("No pages were selected or could be merged. Please check your page ranges.");
+        
+        if (finalPdf.getPageCount() === 0) {
+            throw new Error("No pages were selected to merge.");
         }
-
-        const mergedPdfBytes = await mergedPdf.save();
+        
+        const mergedPdfBytes = await finalPdf.save();
 
         const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
         const link = document.createElement('a');
