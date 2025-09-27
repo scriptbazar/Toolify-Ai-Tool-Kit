@@ -12,6 +12,8 @@ import { ScrollArea } from '../ui/scroll-area';
 import Image from 'next/image';
 import * as pdfjsLib from 'pdfjs-dist';
 
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+
 interface PagePreview {
     id: string;
     dataUrl: string;
@@ -136,7 +138,10 @@ export function PdfPageReorder() {
   return (
     <div className="space-y-6">
        <Card 
-            className={cn("transition-colors", isDragging && 'border-primary bg-primary/10')}
+            className={cn(
+                "transition-colors",
+                isDragging && 'border-primary bg-primary/10'
+            )}
             onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
         >
             <CardContent 

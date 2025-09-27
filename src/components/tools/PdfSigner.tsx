@@ -13,7 +13,10 @@ import SignatureCanvas from 'react-signature-canvas';
 import Image from 'next/image';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
 interface PagePreview {
     dataUrl: string;
