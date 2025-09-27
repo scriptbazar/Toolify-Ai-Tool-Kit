@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -65,7 +66,7 @@ const mergePdfsFlow = ai.defineFlow(
 
     for (const file of files) {
       const pdfBytes = Buffer.from(file.pdfDataUri.split(',')[1], 'base64');
-      const pdfDoc = await PDFDocument.load(pdfBytes);
+      const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
       
       const totalPages = pdfDoc.getPageCount();
       const pagesToCopyIndices = parsePages(file.pages || '', totalPages).map(p => p - 1); // convert to 0-based index
@@ -115,7 +116,7 @@ const addWatermarkToPdfFlow = ai.defineFlow(
     },
     async ({ pdfDataUri, watermarkType, text, imageDataUri, opacity, size, position, rotation }) => {
         const pdfBytes = Buffer.from(pdfDataUri.split(',')[1], 'base64');
-        const pdfDoc = await PDFDocument.load(pdfBytes);
+        const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
         const pages = pdfDoc.getPages();
         
         let watermarkImageBytes: Uint8Array | undefined;
