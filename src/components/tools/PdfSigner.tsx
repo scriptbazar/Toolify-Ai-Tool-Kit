@@ -37,6 +37,7 @@ export function PdfSigner() {
     const [pagePreviews, setPagePreviews] = useState<PagePreview[]>([]);
     const [signatureType, setSignatureType] = useState<'draw' | 'type' | 'upload'>('draw');
     const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
+    const [signatureUploadPreview, setSignatureUploadPreview] = useState<string | null>(null);
     const [typedSignature, setTypedSignature] = useState('Your Name');
     const [typedFont, setTypedFont] = useState('font-cursive');
     const [signaturePosition, setSignaturePosition] = useState<SignaturePosition | null>(null);
@@ -107,7 +108,11 @@ export function PdfSigner() {
         const file = e.target.files?.[0];
         if(file && file.type.startsWith('image/')) {
             const reader = new FileReader();
-            reader.onload = (event) => setSignatureDataUrl(event.target?.result as string);
+            reader.onload = (event) => {
+                const dataUrl = event.target?.result as string;
+                setSignatureUploadPreview(dataUrl);
+                setSignatureDataUrl(dataUrl);
+            }
             reader.readAsDataURL(file);
         }
     };
@@ -190,7 +195,15 @@ export function PdfSigner() {
                                 <Button variant="outline" size="sm" onClick={() => sigCanvasRef.current?.clear()} className="w-full mt-2">Clear</Button>
                             </TabsContent>
                             <TabsContent value="type" className="mt-4 space-y-2">
-                                <Input value={typedSignature} onChange={(e) => setTypedSignature(e.target.value)} onBlur={handleTypeSignature} className={cn('text-3xl h-20 p-4 border rounded-md bg-muted', typedFont)} />
+                                <Input 
+                                    value={typedSignature} 
+                                    onChange={(e) => {
+                                        setTypedSignature(e.target.value);
+                                        handleTypeSignature();
+                                    }} 
+                                    onBlur={handleTypeSignature}
+                                    className={cn('text-3xl h-20 p-4 border rounded-md bg-muted', typedFont)} 
+                                />
                                 <Select value={typedFont} onValueChange={setTypedFont}>
                                     <SelectTrigger><SelectValue/></SelectTrigger>
                                     <SelectContent>
@@ -201,10 +214,10 @@ export function PdfSigner() {
                                 </Select>
                             </TabsContent>
                             <TabsContent value="upload" className="mt-4">
-                                <Input type="file" onChange={handleSignatureUpload} accept="image/png, image/jpeg"/>
+                                 <Input type="file" onChange={handleSignatureUpload} accept="image/png, image/jpeg"/>
+                                 {signatureUploadPreview && <div className="mt-4 p-2 border rounded-md flex justify-center bg-muted"><Image src={signatureUploadPreview} alt="Signature preview" width={200} height={100} style={{objectFit: 'contain'}}/></div>}
                             </TabsContent>
                         </Tabs>
-                        {signatureDataUrl && <div className="mt-4 p-2 border rounded-md flex justify-center bg-muted"><Image src={signatureDataUrl} alt="Signature preview" width={200} height={100} style={{objectFit: 'contain'}}/></div>}
                     </CardContent>
                  </Card>
                  <Button onClick={applySignatureAndDownload} disabled={!signaturePosition || isLoading} className="w-full">
