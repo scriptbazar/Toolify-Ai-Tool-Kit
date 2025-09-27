@@ -124,22 +124,20 @@ export function PdfMerger() {
     try {
         const mergedPdf = await PDFDocument.create();
         
-        // First, load all PDF documents into memory
-        const loadedDocs = await Promise.all(
+        const pdfDocs = await Promise.all(
             files.map(item => item.file.arrayBuffer().then(bytes => 
                 PDFDocument.load(bytes, { ignoreEncryption: true })
             ))
         );
 
-        // Now, iterate and copy pages
-        for (let i = 0; i < files.length; i++) {
+        for (let i = 0; i < pdfDocs.length; i++) {
+            const pdfDoc = pdfDocs[i];
             const item = files[i];
-            const pdfDoc = loadedDocs[i];
             const pageIndices = parsePages(item.pages, pdfDoc.getPageCount()).map(p => p - 1);
-            
+
             if (pageIndices.length > 0) {
-                const copiedPages = await mergedPdf.copyPages(pdfDoc, pageIndices);
-                copiedPages.forEach(page => mergedPdf.addPage(page));
+                 const copiedPages = await mergedPdf.copyPages(pdfDoc, pageIndices);
+                 copiedPages.forEach(page => mergedPdf.addPage(page));
             }
         }
 
