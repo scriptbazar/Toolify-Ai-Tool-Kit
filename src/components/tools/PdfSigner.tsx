@@ -138,6 +138,7 @@ export function PdfSigner() {
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
             const pdfDoc = await PDFDocument.load(pdfBytes);
+            
             const signatureBytes = await fetch(signatureDataUrl).then(res => res.arrayBuffer());
             const signatureImage = await pdfDoc.embedPng(signatureBytes);
 
@@ -161,9 +162,9 @@ export function PdfSigner() {
             link.download = `signed-${pdfFile.name}`;
             link.click();
             URL.revokeObjectURL(link.href);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast({ title: 'Failed to Sign PDF', variant: 'destructive'});
+            toast({ title: 'Failed to Sign PDF', description: error.message, variant: 'destructive'});
         } finally {
             setIsLoading(false);
         }
