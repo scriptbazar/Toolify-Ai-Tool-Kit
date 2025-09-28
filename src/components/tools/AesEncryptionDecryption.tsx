@@ -1,13 +1,14 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type DragEvent, type ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UploadCloud, Download, KeyRound, Loader2, File, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { cn } from '@/lib/utils';
 
 // Define the type for the crypto-js module we expect to load
 type CryptoJsModule = {
@@ -27,6 +28,7 @@ export function AesEncryptionDecryption() {
   const [mode, setMode] = useState<'encrypt' | 'decrypt'>('encrypt');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [cryptoJsModule, setCryptoJsModule] = useState<CryptoJsModule | null>(null);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,12 +47,17 @@ export function AesEncryptionDecryption() {
     });
   }, [toast]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
+   const handleFileChange = (files: FileList | null) => {
+    const selectedFile = files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
     }
   };
+  
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); handleFileChange(e.dataTransfer.files); };
+
 
   const handleProcessFile = async () => {
     if (!cryptoJsModule) {
@@ -106,7 +113,7 @@ export function AesEncryptionDecryption() {
         setIsLoading(false);
     }
 
-    fileReader.readAsText(file);
+    fileReader.readAsBinaryString(file);
   };
 
   return (
@@ -121,10 +128,17 @@ export function AesEncryptionDecryption() {
       </RadioGroup>
       
       <div 
-        className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative"
+        className={cn(
+            "w-full aspect-video border-2 border-dashed rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative transition-colors",
+            isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/30'
+        )}
         onClick={() => fileInputRef.current?.click()}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+        <input type="file" ref={fileInputRef} onChange={(e) => handleFileChange(e.target.files)} className="hidden" />
         {file ? (
             <div className="p-4 text-center">
                 <File className="mx-auto h-12 w-12 text-primary mb-2" />
