@@ -36,10 +36,12 @@ import '@/ai/flows/media-management.ts';
 import '@/ai/flows/currency-converter.ts';
 import '@/ai/flows/image-text-extractor.ts';
 import '@/ai/flows/encryption-actions.ts';
+import '@/ai/flows/serp-checker.ts';
 
 
 
     
+
 
 
 
