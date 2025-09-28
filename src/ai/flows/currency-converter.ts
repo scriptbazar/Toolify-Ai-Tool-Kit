@@ -22,7 +22,7 @@ const ExchangeRateResponseSchema = z.object({
 
 export const getExchangeRates = cache(async (): Promise<Record<string, number>> => {
   try {
-    const apiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
+    const apiKey = process.env.COINGECKO_API_KEY;
     if (!apiKey) {
       throw new Error('CoinGecko API key is not configured.');
     }
