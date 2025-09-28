@@ -138,7 +138,7 @@ export function PdfSigner() {
         setIsLoading(true);
         try {
             const pdfBytes = await pdfFile.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
             
             const signatureBytes = await fetch(signatureDataUrl).then(res => res.arrayBuffer());
             const signatureImage = await pdfDoc.embedPng(signatureBytes);

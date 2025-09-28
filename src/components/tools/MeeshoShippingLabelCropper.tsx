@@ -30,7 +30,7 @@ export function MeeshoShippingLabelCropper() {
     setIsLoading(true);
     try {
       const existingPdfBytes = await pdfFile.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+      const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
       const newPdfDoc = await PDFDocument.create();
 
       const labelWidth = 4 * 72;  // 4 inches

@@ -32,7 +32,7 @@ export function AmazonShippingLabelCropper() {
     setIsLoading(true);
     try {
       const existingPdfBytes = await pdfFile.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+      const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
       
       if (pdfDoc.getPageCount() > 1) {
         toast({ title: 'Multi-page PDF detected', description: 'This tool is optimized for single-page FBA labels. Only the first page will be processed.', variant: 'default' });

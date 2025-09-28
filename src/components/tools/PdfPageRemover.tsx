@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
@@ -75,7 +76,7 @@ export function PdfPageRemover() {
   
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); handleFile(e.dataTransfer.files?.[0]); };
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); e.dataTransfer.files && handleFile(e.dataTransfer.files[0]); };
 
   const handleRemovePages = async () => {
     if (!pdfFile || !totalPages) {
@@ -133,7 +134,10 @@ export function PdfPageRemover() {
   return (
     <div className="space-y-6">
         <Card 
-            className={cn("transition-colors", isDragging && 'border-primary bg-primary/10')}
+            className={cn(
+                "transition-colors",
+                isDragging && 'border-primary bg-primary/10'
+            )}
             onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
         >
              <CardContent 
@@ -143,49 +147,49 @@ export function PdfPageRemover() {
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
                 <div className="flex flex-col items-center justify-center h-full">
                     <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold">Click or drag PDF to upload</h3>
+                    <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
                     <p className="text-sm text-muted-foreground">Select the PDF file you want to modify.</p>
                 </div>
             </CardContent>
         </Card>
       
-      {pdfFile && (
-        <Card className="animate-in fade-in-50">
-            <CardHeader>
-                <CardTitle>File Details & Options</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="p-3 bg-muted rounded-md flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 overflow-hidden">
-                        <FileText className="h-5 w-5 text-primary shrink-0"/>
-                        <span className="font-medium text-sm truncate">{pdfFile.name}</span>
+        {pdfFile && (
+            <Card className="animate-in fade-in-50">
+                <CardHeader>
+                    <CardTitle>File Details & Options</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="p-3 bg-muted rounded-md flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                            <FileText className="h-5 w-5 text-primary shrink-0"/>
+                            <span className="font-medium text-sm truncate">{pdfFile.name}</span>
+                        </div>
+                        {totalPages && <span className="text-xs text-muted-foreground shrink-0">({totalPages} pages)</span>}
                     </div>
-                    {totalPages && <span className="text-xs text-muted-foreground shrink-0">({totalPages} pages)</span>}
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="pages-to-remove">Pages to Remove</Label>
-                    <Input
-                        id="pages-to-remove"
-                        value={pagesToRemove}
-                        onChange={(e) => setPagesToRemove(e.target.value)}
-                        placeholder="e.g., 2, 5-7, 10"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                        Enter page numbers or ranges, separated by commas.
-                    </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                    <Button onClick={handleRemovePages} disabled={isLoading} className="w-full">
-                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileMinus className="mr-2 h-4 w-4" />}
-                        Remove Pages & Download
-                    </Button>
-                     <Button onClick={handleClear} variant="destructive" className="w-full">
-                        <Trash2 className="mr-2 h-4 w-4" /> Clear
-                    </Button>
-                </div>
-            </CardContent>
-        </Card>
-      )}
+                     <div className="space-y-2">
+                        <Label htmlFor="pages-to-remove">Pages to Remove</Label>
+                        <Input
+                            id="pages-to-remove"
+                            value={pagesToRemove}
+                            onChange={(e) => setPagesToRemove(e.target.value)}
+                            placeholder="e.g., 2, 5-7, 10"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                            Enter page numbers or ranges, separated by commas.
+                        </p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <Button onClick={handleRemovePages} disabled={isLoading} className="w-full">
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileMinus className="mr-2 h-4 w-4" />}
+                            Remove Pages & Download
+                        </Button>
+                         <Button onClick={handleClear} variant="destructive" className="w-full">
+                            <Trash2 className="mr-2 h-4 w-4" /> Clear
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        )}
     </div>
   );
 }
