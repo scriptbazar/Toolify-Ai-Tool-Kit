@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Copy, Trash2, ArrowRightLeft, Volume2, Lightbulb, Pause, Play } from 'lucide-react';
+import { Copy, Trash2, ArrowRightLeft, Volume2, Lightbulb, Pause, Play, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { morseCodeMap } from '@/lib/morse-code';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
@@ -164,6 +164,7 @@ export function TextToMorseCode() {
                 <Button variant="destructive" onClick={handleClear} disabled={!textInput}><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
             </div>
         </div>
+
         <div className="space-y-4">
             <div className="space-y-2">
                 <Label htmlFor="morse-output">Morse Code Output</Label>
@@ -184,6 +185,8 @@ export function TextToMorseCode() {
                     {isPlaying ? 'Stop' : 'Play Sound'}
                 </Button>
             </div>
+        </div>
+        <div className="lg:col-span-2">
             <Card>
                 <CardHeader className="p-4">
                     <CardTitle className="text-base flex items-center gap-2"><Lightbulb className="h-5 w-5"/>Visual Signal</CardTitle>
