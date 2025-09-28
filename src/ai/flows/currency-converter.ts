@@ -1,5 +1,6 @@
 
-'use client';
+
+'use server';
 
 /**
  * @fileOverview A flow for fetching live currency exchange rates.
@@ -19,9 +20,9 @@ const ExchangeRateResponseSchema = z.object({
 });
 
 
-export const getExchangeRates = async (): Promise<Record<string, number>> => {
+export const getExchangeRates = cache(async (): Promise<Record<string, number>> => {
   try {
-    const apiKey = process.env.COINGECKO_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
     if (!apiKey) {
       throw new Error('CoinGecko API key is not configured.');
     }
@@ -69,5 +70,4 @@ export const getExchangeRates = async (): Promise<Record<string, number>> => {
     console.error("Error in getExchangeRates:", error);
     throw new Error('Could not fetch latest currency exchange rates.');
   }
-};
-
+}, ['exchange-rates'], { revalidate: 3600 }); // Revalidate every hour
