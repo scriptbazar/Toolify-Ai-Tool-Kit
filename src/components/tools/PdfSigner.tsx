@@ -105,8 +105,8 @@ export function PdfSigner() {
             setSignatureDataUrl(dataUrl);
         }
     };
-
-    const handleSignatureUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    
+     const handleSignatureUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if(file && file.type.startsWith('image/')) {
             const reader = new FileReader();
@@ -130,7 +130,7 @@ export function PdfSigner() {
         setSignaturePosition({ pageIndex, x: x - 50, y: y - 25, width: 100, height: 50 });
     };
 
-    const applySignatureAndDownload = async () => {
+     const applySignatureAndDownload = async () => {
         if (!pdfFile || !signatureDataUrl || !signaturePosition) {
             toast({ title: 'Error', description: 'Missing PDF, signature, or placement.', variant: 'destructive'});
             return;
@@ -154,7 +154,7 @@ export function PdfSigner() {
                 y: pdfY,
                 width: signaturePosition.width,
                 height: signaturePosition.height,
-                blendMode: BlendMode.Normal,
+                blendMode: BlendMode.Multiply, // Use a blend mode that handles transparency well
             });
 
             const newPdfBytes = await pdfDoc.save();
@@ -208,7 +208,7 @@ export function PdfSigner() {
                                     onBlur={handleTypeSignature}
                                     className={cn('text-3xl h-20 p-4 border rounded-md bg-muted', typedFont)} 
                                 />
-                                <Select value={typedFont} onValueChange={setTypedFont}>
+                                <Select value={typedFont} onValueChange={(value) => { setTypedFont(value); handleTypeSignature(); }}>
                                     <SelectTrigger><SelectValue/></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="font-cursive" className="font-cursive">Cursive</SelectItem>
@@ -233,6 +233,7 @@ export function PdfSigner() {
                 <Card className="h-full">
                     <CardHeader><CardTitle>3. Place Signature</CardTitle><CardDescription>Click on a page to place your signature.</CardDescription></CardHeader>
                     <CardContent className="h-[70vh] overflow-y-auto space-y-4">
+                       {isLoading && pagePreviews.length === 0 && <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin text-primary"/></div>}
                        {pagePreviews.length > 0 ? pagePreviews.map((page, index) => (
                         <div key={index} className="relative border shadow-md" onClick={(e) => handlePageClick(index, e)} style={{width: page.width, height: page.height, margin: 'auto'}}>
                             <Image src={page.dataUrl} alt={`Page ${index + 1}`} width={page.width} height={page.height} />
@@ -243,7 +244,7 @@ export function PdfSigner() {
                             )}
                         </div>
                        )) : (
-                           <div className="flex items-center justify-center h-full text-muted-foreground">PDF preview will appear here.</div>
+                           !isLoading && <div className="flex items-center justify-center h-full text-muted-foreground">PDF preview will appear here.</div>
                        )}
                     </CardContent>
                 </Card>
