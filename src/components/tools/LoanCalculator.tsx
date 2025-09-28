@@ -1,6 +1,4 @@
 
-
-      
 'use client';
 
 import { useState } from 'react';
@@ -17,8 +15,13 @@ import { useToast } from '@/hooks/use-toast';
 import dynamic from 'next/dynamic';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import type { UserOptions } from 'jspdf-autotable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Banknote, Percent, Calendar } from 'lucide-react';
+
+interface jsPDFWithAutoTable extends jsPDF {
+    autoTable: (options: UserOptions) => void;
+}
 
 const PieChart = dynamic(() => import('recharts').then(mod => mod.PieChart), { ssr: false });
 const Pie = dynamic(() => import('recharts').then(mod => mod.Pie), { ssr: false });
@@ -170,7 +173,7 @@ export function LoanCalculator() {
         const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
         const logoUrl = settings.general?.logoUrl;
         
-        const doc = new jsPDF();
+        const doc = new jsPDF() as jsPDFWithAutoTable;
         let logoBase64: string | null = null;
         
         // ---- HEADER (Page 1 only) ----
@@ -186,8 +189,8 @@ export function LoanCalculator() {
                     reader.readAsDataURL(blob);
                 });
             } catch (e) {
-                console.error("Could not fetch or convert logo:", e);
-                toast({ title: "Logo Warning", description: "Could not load the site logo for the PDF. Using default.", variant: "default" });
+                 console.error("Could not fetch or convert logo:", e);
+                 toast({ title: "Logo Warning", description: "Could not load the site logo for the PDF. Using default.", variant: "default" });
             }
         }
         
@@ -212,7 +215,7 @@ export function LoanCalculator() {
             ['Total Payment', `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(totalPayment)}`],
             ['Total Interest', `${currencySymbols[currency] || '$'}${formatCurrencyForPdf(totalInterest)}`],
         );
-        (doc as any).autoTable({
+        doc.autoTable({
             startY: 35,
             head: [['Loan Summary', '']],
             body: summaryBodyData,
@@ -229,7 +232,7 @@ export function LoanCalculator() {
             item.totalPayment.replace(/[^\d.-]/g, ''),
             item.remainingBalance.replace(/[^\d.-]/g, ''),
         ]);
-        (doc as any).autoTable({
+        doc.autoTable({
             head: [['#', 'Principal', 'Interest', 'Total Payment', 'Balance']],
             body: scheduleBodyData,
             theme: 'grid',
@@ -237,7 +240,7 @@ export function LoanCalculator() {
         });
         
         // ---- WATERMARK (All pages) ----
-        const pageCount = (doc as any).internal.getNumberOfPages();
+        const pageCount = doc.internal.pages.length -1;
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
             const { width, height } = doc.internal.pageSize;
@@ -308,7 +311,7 @@ export function LoanCalculator() {
         { name: 'Total Interest', value: totalInterest },
     ] : [];
 
-    const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))'];
+    const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))'];
 
   return (
     <div className="space-y-6">
@@ -419,13 +422,13 @@ export function LoanCalculator() {
                 <CardContent className="h-48 flex items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
-                            <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} label={(props) => formatCurrency(props.value)}>
+                            <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} label={(props) => `${((props.percent || 0) * 100).toFixed(0)}%`}>
                                 {pieChartData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
                             <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                            <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{paddingTop: '20px'}}/>
+                            <Legend layout="horizontal" verticalAlign="bottom" align="center" />
                         </PieChart>
                     </ResponsiveContainer>
                 </CardContent>
