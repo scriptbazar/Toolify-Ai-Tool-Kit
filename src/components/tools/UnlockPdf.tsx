@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { UploadCloud, Download, Loader2, KeyRound, FileText, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { PDFDocument, PDFInvalidPasswordError } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 
 export function UnlockPdf() {
@@ -59,10 +59,10 @@ export function UnlockPdf() {
 
     } catch (error: any) {
         console.error("PDF Unlock Error:", error);
-        if (error instanceof PDFInvalidPasswordError) {
-            toast({ title: 'Incorrect Password', description: 'The password you entered is incorrect. Please try again.', variant: 'destructive'});
+        if (error.name === 'PDFInvalidPasswordError') {
+          toast({ title: 'Incorrect Password', description: 'The password you entered is incorrect. Please try again.', variant: 'destructive'});
         } else {
-            toast({ title: 'Unlock Failed', description: 'Could not unlock the PDF. The file may be corrupted or not encrypted.', variant: 'destructive'});
+          toast({ title: 'Unlock Failed', description: 'Could not unlock the PDF. The file may be corrupted or not encrypted.', variant: 'destructive'});
         }
     } finally {
         setIsLoading(false);
@@ -93,14 +93,8 @@ export function UnlockPdf() {
       
         {pdfFile && (
             <Card className="animate-in fade-in-50">
-                <CardContent className="p-6 space-y-4">
-                    <div className="p-3 bg-muted rounded-md flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 overflow-hidden">
-                            <FileText className="h-5 w-5 text-primary shrink-0"/>
-                            <span className="font-medium text-sm truncate">{pdfFile.name}</span>
-                        </div>
-                    </div>
-                     <div className="grid grid-cols-1 md:grid-cols-[2fr,1fr] gap-4 items-end">
+                <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-[2fr,1fr] gap-4 items-end">
                         <div className="space-y-2">
                             <Label htmlFor="pdf-password">PDF Password</Label>
                             <div className="relative">
