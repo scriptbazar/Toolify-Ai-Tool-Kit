@@ -28,7 +28,7 @@ export function RobotsTxtGenerator() {
         link.href = url;
         link.download = 'robots.txt';
         link.click();
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(link.href);
     };
 
     return (
