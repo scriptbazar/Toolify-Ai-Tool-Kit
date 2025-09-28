@@ -1,19 +1,218 @@
 
 'use client';
 
-import { Card, CardContent } from '../ui/card';
-import { Construction } from 'lucide-react';
+import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { UploadCloud, Download, Loader2, Hash, FileText } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+
+type Position = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
 export function PdfPageNumberer() {
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [totalPages, setTotalPages] = useState<number | null>(null);
+  const [position, setPosition] = useState<Position>('bottom-center');
+  const [format, setFormat] = useState('{page}');
+  const [startNumber, setStartNumber] = useState('1');
+  const [pagesToNumber, setPagesToNumber] = useState('');
+  const [fontSize, setFontSize] = useState('12');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (file: File) => {
+    if (file && file.type === 'application/pdf') {
+      setIsLoading(true);
+      setPdfFile(file);
+      try {
+        const fileBytes = await file.arrayBuffer();
+        const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
+        setTotalPages(pdfDoc.getPageCount());
+      } catch (error) {
+        toast({ title: "Error reading PDF", description: "Could not read the page count.", variant: "destructive" });
+        setPdfFile(null);
+        setTotalPages(null);
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (file) {
+      toast({ title: 'Invalid File Type', variant: 'destructive' });
+    }
+  };
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    e.target.files && handleFile(e.target.files[0]);
+    if (e.target) e.target.value = '';
+  };
+  
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); e.dataTransfer.files && handleFile(e.dataTransfer.files[0]); };
+
+  const handleApplyNumbers = async () => {
+    if (!pdfFile || !totalPages) {
+      toast({ title: 'Please upload a PDF file first.', variant: 'destructive' });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const existingPdfBytes = await pdfFile.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      
+      const pages = pdfDoc.getPages();
+      const numStart = parseInt(startNumber, 10);
+      const size = parseInt(fontSize, 10);
+      
+      const pageSet = new Set<number>();
+      if (pagesToNumber.trim()) {
+        pagesToNumber.split(',').forEach(part => {
+          const trimmed = part.trim();
+          if (trimmed.includes('-')) {
+            const [start, end] = trimmed.split('-').map(Number);
+            if (!isNaN(start) && !isNaN(end) && start <= end) {
+              for (let i = start; i <= end; i++) pageSet.add(i - 1);
+            }
+          } else {
+            const num = Number(trimmed);
+            if (!isNaN(num)) pageSet.add(num - 1);
+          }
+        });
+      } else {
+        for (let i = 0; i < totalPages; i++) pageSet.add(i);
+      }
+
+      let pageCounter = numStart;
+      for (let i = 0; i < pages.length; i++) {
+        if (!pageSet.has(i)) continue;
+
+        const page = pages[i];
+        const { width, height } = page.getSize();
+        
+        const text = format.replace('{page}', String(pageCounter)).replace('{pages}', String(totalPages));
+        const textWidth = font.widthOfTextAtSize(text, size);
+        
+        let x, y;
+        const margin = 36; // 0.5 inch
+
+        // Y coordinate
+        if (position.startsWith('top')) {
+          y = height - size - margin;
+        } else { // bottom
+          y = margin;
+        }
+
+        // X coordinate
+        if (position.endsWith('left')) {
+          x = margin;
+        } else if (position.endsWith('center')) {
+          x = width / 2 - textWidth / 2;
+        } else { // right
+          x = width - textWidth - margin;
+        }
+
+        page.drawText(text, { x, y, font, size, color: rgb(0, 0, 0) });
+        pageCounter++;
+      }
+
+      const newPdfBytes = await pdfDoc.save();
+      const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `numbered-${pdfFile.name}`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      
+    } catch (error) {
+      toast({ title: 'Error', description: 'Could not apply page numbers.', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <Card className="flex flex-col items-center justify-center min-h-[300px]">
-      <CardContent className="text-center">
-        <Construction className="mx-auto h-12 w-12 text-primary mb-4" />
-        <h3 className="text-xl font-semibold">Coming Soon!</h3>
-        <p className="text-muted-foreground mt-2">
-          The "PDF Page Numberer" tool is currently under development.
-        </p>
-      </CardContent>
-    </Card>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div className="space-y-6">
+            <Card 
+                className={cn("transition-colors", isDragging && 'border-primary bg-primary/10')}
+                onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+            >
+                 <CardContent 
+                    className="p-6 text-center cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
+                    <div className="flex flex-col items-center justify-center h-full">
+                        <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
+                    </div>
+                </CardContent>
+            </Card>
+            {totalPages && (
+                <div className="p-3 bg-muted rounded-md flex items-center justify-center gap-2">
+                    <FileText className="h-5 w-5 text-primary shrink-0"/>
+                    <span className="font-medium text-sm">Total Pages: {totalPages}</span>
+                </div>
+            )}
+        </div>
+        <Card>
+            <CardHeader>
+                <CardTitle>Numbering Options</CardTitle>
+                <CardDescription>Customize how the page numbers will appear.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="position">Position</Label>
+                    <Select value={position} onValueChange={(v) => setPosition(v as Position)}>
+                        <SelectTrigger><SelectValue/></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="top-left">Top Left</SelectItem>
+                            <SelectItem value="top-center">Top Center</SelectItem>
+                            <SelectItem value="top-right">Top Right</SelectItem>
+                            <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                            <SelectItem value="bottom-center">Bottom Center</SelectItem>
+                            <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="format">Format</Label>
+                    <Select value={format} onValueChange={setFormat}>
+                        <SelectTrigger><SelectValue/></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="{page}">Page {page} (e.g., Page 1)</SelectItem>
+                            <SelectItem value="{page} / {pages}">Page {page} of {pages} (e.g., 1 / 10)</SelectItem>
+                            <SelectItem value="{page}">{page} (e.g., 1)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                 <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="start-number">Start Numbering From</Label>
+                        <Input id="start-number" type="number" value={startNumber} onChange={e => setStartNumber(e.target.value)} min="1"/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="font-size">Font Size</Label>
+                        <Input id="font-size" type="number" value={fontSize} onChange={e => setFontSize(e.target.value)} min="6"/>
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="pages-to-number">Apply to Pages (Optional)</Label>
+                    <Input id="pages-to-number" value={pagesToNumber} onChange={e => setPagesToNumber(e.target.value)} placeholder="e.g. 2-5, 8 (all pages if empty)"/>
+                </div>
+                <Button onClick={handleApplyNumbers} disabled={!pdfFile || isLoading} className="w-full">
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Hash className="mr-2 h-4 w-4"/>}
+                    Add Numbers & Download
+                </Button>
+            </CardContent>
+        </Card>
+    </div>
   );
 }
