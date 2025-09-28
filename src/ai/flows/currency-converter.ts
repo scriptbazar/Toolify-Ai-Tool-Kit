@@ -7,7 +7,7 @@
 
 import { z } from 'zod';
 import { ai } from '@/ai/genkit';
-import { cache } from 'react';
+
 
 const ExchangeRateResponseSchema = z.object({
   rates: z.record(z.object({
@@ -19,7 +19,7 @@ const ExchangeRateResponseSchema = z.object({
 });
 
 
-export const getExchangeRates = cache(async (): Promise<Record<string, number>> => {
+export const getExchangeRates = async (): Promise<Record<string, number>> => {
   try {
     const apiKey = process.env.COINGECKO_API_KEY;
     if (!apiKey) {
@@ -69,5 +69,5 @@ export const getExchangeRates = cache(async (): Promise<Record<string, number>> 
     console.error("Error in getExchangeRates:", error);
     throw new Error('Could not fetch latest currency exchange rates.');
   }
-});
+};
 
