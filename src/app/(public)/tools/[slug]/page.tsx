@@ -18,7 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { ReviewForm } from '@/components/tools/ReviewForm';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, MousePointerClick, ShieldCheck, Sparkles, Star, Zap, BrainCircuit, Construction } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, MousePointerClick, ShieldCheck, Sparkles, Star, Zap, BrainCircuit, Construction, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getTools } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
