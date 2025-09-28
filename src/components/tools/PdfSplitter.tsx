@@ -14,6 +14,35 @@ import { splitPdf } from '@/ai/flows/pdf-management';
 
 type SplitMode = 'ranges' | 'fixed' | 'extract';
 
+// Helper to parse page ranges e.g., "1-5, 8, 10-12" into a set of numbers
+const parsePages = (pagesStr: string, totalPages: number): number[] => {
+    const pages = new Set<number>();
+    if (!pagesStr.trim()) {
+        for (let i = 1; i <= totalPages; i++) pages.add(i);
+        return Array.from(pages);
+    }
+
+    const parts = pagesStr.split(',');
+    for (const part of parts) {
+        const trimmedPart = part.trim();
+        if (trimmedPart.includes('-')) {
+            const [start, end] = trimmedPart.split('-').map(Number);
+            if (!isNaN(start) && !isNaN(end) && start > 0 && end <= totalPages && start <= end) {
+                for (let i = start; i <= end; i++) {
+                    pages.add(i);
+                }
+            }
+        } else {
+            const page = Number(trimmedPart);
+            if (!isNaN(page) && page > 0 && page <= totalPages) {
+                pages.add(page);
+            }
+        }
+    }
+    return Array.from(pages).sort((a, b) => a - b);
+}
+
+
 export function PdfSplitter() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [splitMode, setSplitMode] = useState<SplitMode>('ranges');
@@ -51,13 +80,13 @@ export function PdfSplitter() {
     if (file) handleFile(file);
     if(e.target) e.target.value = '';
   };
-
+  
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
   const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); e.dataTransfer.files && handleFile(e.dataTransfer.files[0]); };
 
   const handleSplit = async () => {
-    if (!pdfFile) {
+    if (!pdfFile || !totalPages) {
         toast({ title: 'No PDF selected', variant: 'destructive' });
         return;
     }
@@ -66,6 +95,9 @@ export function PdfSplitter() {
     switch (splitMode) {
         case 'ranges':
             if (!ranges.trim()) { toast({ title: 'Ranges are required', variant: 'destructive'}); return; }
+            if (parsePages(ranges, totalPages).length === 0) {
+                 toast({ title: 'Invalid Ranges', description: `Please enter page numbers between 1 and ${totalPages}.`, variant: 'destructive'}); return;
+            }
             options = { ranges };
             break;
         case 'fixed':
@@ -73,6 +105,9 @@ export function PdfSplitter() {
             break;
         case 'extract':
              if (!pagesToExtract.trim()) { toast({ title: 'Pages are required', variant: 'destructive'}); return; }
+             if (parsePages(pagesToExtract, totalPages).length === 0) {
+                 toast({ title: 'Invalid Pages', description: `Please enter page numbers between 1 and ${totalPages}.`, variant: 'destructive'}); return;
+            }
             options = { extractPages: pagesToExtract };
             break;
     }
@@ -144,7 +179,10 @@ export function PdfSplitter() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div className="space-y-6">
             <Card 
-                className={cn("transition-colors", isDragging && 'border-primary bg-primary/10')}
+                className={cn(
+                    "transition-colors",
+                    isDragging && 'border-primary bg-primary/10'
+                )}
                 onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
             >
                  <CardContent 
