@@ -2,11 +2,6 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // This allows the Next.js development server to accept cross-origin
-    // requests from the Firebase Studio environment.
-    
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
