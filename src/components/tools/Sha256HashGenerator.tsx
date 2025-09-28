@@ -9,18 +9,23 @@ import { Input } from '@/components/ui/input';
 import { Copy, Hash } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type CryptoJS from 'crypto-js';
+import { getSettings } from '@/ai/flows/settings-management';
 
 type CryptoJsLibrary = {
     SHA256: (message: string) => CryptoJS.lib.WordArray;
 };
 
 export function Sha256HashGenerator() {
-  const [inputText, setInputText] = useState('Hello World!');
+  const [inputText, setInputText] = useState('');
   const [generatedHash, setGeneratedHash] = useState('');
   const [cryptoJs, setCryptoJs] = useState<CryptoJsLibrary | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
+    getSettings().then(settings => {
+      setInputText(settings.general?.siteTitle || 'ToolifyAI');
+    });
+    
     import('crypto-js').then(module => {
         const cjs = module.default;
         setCryptoJs({

@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Input } from '../ui/input';
 import type CryptoJS from 'crypto-js';
+import { getSettings } from '@/ai/flows/settings-management';
 
 type HashingAlgorithm = 'MD5' | 'SHA1' | 'SHA256' | 'SHA512' | 'SHA3' | 'RIPEMD160' | 'HmacMD5' | 'HmacSHA1' | 'HmacSHA256' | 'HmacSHA512';
 
@@ -18,7 +19,7 @@ type CryptoJsLibrary = {
 };
 
 export function UniversalHashGenerator() {
-  const [inputText, setInputText] = useState('Hello World!');
+  const [inputText, setInputText] = useState('');
   const [generatedHash, setGeneratedHash] = useState('');
   const [algorithm, setAlgorithm] = useState<HashingAlgorithm>('SHA256');
   const [hmacKey, setHmacKey] = useState('');
@@ -26,6 +27,10 @@ export function UniversalHashGenerator() {
   const { toast } = useToast();
 
   useEffect(() => {
+    getSettings().then(settings => {
+      setInputText(settings.general?.siteTitle || 'ToolifyAI');
+    });
+
     import('crypto-js').then(module => {
         const cjs = module.default;
         setCryptoJs({
