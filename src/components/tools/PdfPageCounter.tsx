@@ -27,8 +27,8 @@ export function PdfPageCounter() {
             setTotalPages(pdfDoc.getPageCount());
         } catch (error) {
             toast({ title: "Error reading PDF", description: "Could not read the page count. The file might be corrupted or encrypted.", variant: "destructive" });
-            setTotalPages(null);
             setPdfFile(null);
+            setTotalPages(null);
         } finally {
             setIsLoading(false);
         }
@@ -48,10 +48,10 @@ export function PdfPageCounter() {
   const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); e.dataTransfer.files && handleFile(e.dataTransfer.files[0]); };
   
   return (
-    <div className="space-y-6 max-w-lg mx-auto">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
         <Card 
             className={cn(
-                "transition-colors",
+                "transition-colors h-full",
                 isDragging && 'border-primary bg-primary/10'
             )}
             onDragEnter={handleDragEnter}
@@ -60,20 +60,19 @@ export function PdfPageCounter() {
             onDrop={handleDrop}
         >
              <CardContent 
-                className="p-6 text-center cursor-pointer"
+                className="p-6 text-center cursor-pointer h-full flex items-center justify-center"
                 onClick={() => fileInputRef.current?.click()}
             >
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
                 <div className="flex flex-col items-center justify-center h-full">
                     <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold">Click or drag PDF to upload</h3>
+                    <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
                     <p className="text-sm text-muted-foreground">The page count will be displayed instantly.</p>
                 </div>
             </CardContent>
         </Card>
       
-      {(isLoading || pdfFile) && (
-        <Card className="animate-in fade-in-50">
+        <Card className="min-h-[220px]">
             <CardHeader>
                 <CardTitle>Result</CardTitle>
             </CardHeader>
@@ -87,7 +86,7 @@ export function PdfPageCounter() {
                         <span className="text-xs text-muted-foreground shrink-0">{((pdfFile.size || 0) / 1024).toFixed(1)} KB</span>
                     </div>
                  )}
-                 <div className="text-center p-6">
+                 <div className="text-center p-6 border-2 border-dashed rounded-lg">
                     {isLoading ? (
                         <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary" />
                     ) : totalPages !== null ? (
@@ -95,11 +94,12 @@ export function PdfPageCounter() {
                             <p className="text-6xl font-bold text-primary">{totalPages}</p>
                             <p className="text-lg text-muted-foreground">pages</p>
                         </>
-                    ) : null}
+                    ) : (
+                         <p className="text-muted-foreground">Upload a PDF to see the page count.</p>
+                    )}
                  </div>
             </CardContent>
         </Card>
-      )}
     </div>
   );
 }
