@@ -12,7 +12,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import Image from 'next/image';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 interface PagePreview {
     id: string;
@@ -41,7 +41,6 @@ export function PdfPageReorder() {
     setPagePreviews([]);
 
     try {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/chunks/pdf.worker.min.mjs';
         const fileBytes = await file.arrayBuffer();
         const loadingTask = pdfjsLib.getDocument({ data: fileBytes });
         const pdf = await loadingTask.promise;
