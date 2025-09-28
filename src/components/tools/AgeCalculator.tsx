@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,6 +18,9 @@ export function AgeCalculator() {
   const [year, setYear] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
   const [age, setAge] = useState<{ years: number; months: number; days: number; hours: number; minutes: number; seconds: number; milliseconds: number; } | null>(null);
+
+  const monthInputRef = useRef<HTMLInputElement>(null);
+  const yearInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const parsedDate = parse(`${year}-${month}-${day}`, 'yyyy-MM-dd', new Date());
@@ -77,6 +80,22 @@ export function AgeCalculator() {
   };
 
   const nextBdayInfo = nextBirthday();
+  
+  const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setDay(value);
+    if (value.length === 2) {
+      monthInputRef.current?.focus();
+    }
+  };
+
+  const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMonth(value);
+    if (value.length === 2) {
+      yearInputRef.current?.focus();
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -88,15 +107,15 @@ export function AgeCalculator() {
          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1">
                 <Label htmlFor="day-input">Day</Label>
-                <Input id="day-input" type="number" placeholder="DD" value={day} onChange={(e) => setDay(e.target.value)} min="1" max="31" />
+                <Input id="day-input" type="number" placeholder="DD" value={day} onChange={handleDayChange} min="1" max="31" />
             </div>
              <div className="space-y-1">
                 <Label htmlFor="month-input">Month</Label>
-                <Input id="month-input" type="number" placeholder="MM" value={month} onChange={(e) => setMonth(e.target.value)} min="1" max="12" />
+                <Input ref={monthInputRef} id="month-input" type="number" placeholder="MM" value={month} onChange={handleMonthChange} min="1" max="12" />
             </div>
              <div className="space-y-1">
                 <Label htmlFor="year-input">Year</Label>
-                <Input id="year-input" type="number" placeholder="YYYY" value={year} onChange={(e) => setYear(e.target.value)} min="1900" max={new Date().getFullYear()} />
+                <Input ref={yearInputRef} id="year-input" type="number" placeholder="YYYY" value={year} onChange={(e) => setYear(e.target.value)} min="1900" max={new Date().getFullYear()} />
             </div>
         </div>
       </div>
