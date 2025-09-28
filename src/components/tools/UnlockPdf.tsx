@@ -38,12 +38,13 @@ export function UnlockPdf() {
       toast({ title: 'Please upload a PDF file.', variant: 'destructive' });
       return;
     }
-     if (!password) {
+    if (!password) {
       toast({ title: 'Password is required to unlock.', variant: 'destructive' });
       return;
     }
 
     setIsLoading(true);
+
     try {
         const fileBytes = await pdfFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(fileBytes, { password });
