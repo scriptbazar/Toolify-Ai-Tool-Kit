@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 type Position = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
 // Helper to parse page ranges e.g., "1-5, 8, 10-12" into a set of zero-based indices
-const parsePageRanges = (pagesStr: string, totalPages: number): number[] => {
+const parsePages = (pagesStr: string, totalPages: number): number[] => {
     const pages = new Set<number>();
     if (!pagesStr.trim()) {
         for (let i = 0; i < totalPages; i++) pages.add(i);
@@ -87,7 +87,7 @@ export function PdfPageNumberer() {
       return;
     }
 
-    const pagesToProcess = parsePageRanges(pagesToNumber, totalPages);
+    const pagesToProcess = parsePages(pagesToNumber, totalPages);
     if (pagesToNumber.trim() !== '' && pagesToProcess.length === 0) {
       toast({ title: 'Invalid Page Selection', description: 'Please check your page numbers and ranges.', variant: 'destructive' });
       return;
@@ -140,35 +140,34 @@ export function PdfPageNumberer() {
       setIsLoading(false);
     }
   };
-
+  
   return (
-    <div className="grid grid-cols-1 gap-6 items-start">
-        <div className="space-y-6">
-            <Card 
-                className={cn(
-                    "transition-colors",
-                    isDragging && 'border-primary bg-primary/10'
-                )}
-                onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
-            >
-                 <CardContent 
-                    className="p-6 text-center cursor-pointer"
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
-                    <div className="flex flex-col items-center justify-center h-full">
-                        <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
-                    </div>
-                </CardContent>
-            </Card>
-            {totalPages && (
-                <div className="p-3 bg-muted rounded-md flex items-center justify-center gap-2">
-                    <FileText className="h-5 w-5 text-primary shrink-0"/>
-                    <span className="font-medium text-sm">Total Pages: {totalPages}</span>
-                </div>
+    <div className="space-y-6">
+        <Card 
+            className={cn(
+                "transition-colors",
+                isDragging && 'border-primary bg-primary/10'
             )}
-        </div>
+            onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+        >
+             <CardContent 
+                className="p-6 text-center cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+            >
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
+                <div className="flex flex-col items-center justify-center h-full">
+                    <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
+                </div>
+            </CardContent>
+        </Card>
+        {totalPages && (
+            <div className="p-3 bg-muted rounded-md flex items-center justify-center gap-2">
+                <FileText className="h-5 w-5 text-primary shrink-0"/>
+                <span className="font-medium text-sm">Total Pages: {totalPages}</span>
+            </div>
+        )}
+      
         {pdfFile && totalPages && (
             <Card className="animate-in fade-in-50">
                 <CardHeader>
@@ -176,30 +175,32 @@ export function PdfPageNumberer() {
                     <CardDescription>Customize how the page numbers will appear.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="position">Position</Label>
-                        <Select value={position} onValueChange={(v) => setPosition(v as Position)}>
-                            <SelectTrigger><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="top-left">Top Left</SelectItem>
-                                <SelectItem value="top-center">Top Center</SelectItem>
-                                <SelectItem value="top-right">Top Right</SelectItem>
-                                <SelectItem value="bottom-left">Bottom Left</SelectItem>
-                                <SelectItem value="bottom-center">Bottom Center</SelectItem>
-                                <SelectItem value="bottom-right">Bottom Right</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="format">Format</Label>
-                        <Select value={format} onValueChange={setFormat}>
-                            <SelectTrigger><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Page {page}">Page 1</SelectItem>
-                                <SelectItem value="Page {page} of {pages}">Page 1 of {totalPages || 'N'}</SelectItem>
-                                <SelectItem value="{page}">1</SelectItem>
-                            </SelectContent>
-                        </Select>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div className="space-y-2">
+                            <Label htmlFor="position">Position</Label>
+                            <Select value={position} onValueChange={(v) => setPosition(v as Position)}>
+                                <SelectTrigger><SelectValue/></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="top-left">Top Left</SelectItem>
+                                    <SelectItem value="top-center">Top Center</SelectItem>
+                                    <SelectItem value="top-right">Top Right</SelectItem>
+                                    <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                                    <SelectItem value="bottom-center">Bottom Center</SelectItem>
+                                    <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="format">Format</Label>
+                            <Select value={format} onValueChange={setFormat}>
+                                <SelectTrigger><SelectValue/></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Page {page}">Page 1</SelectItem>
+                                    <SelectItem value="Page {page} of {pages}">Page 1 of {totalPages || 'N'}</SelectItem>
+                                    <SelectItem value="{page}">1</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
