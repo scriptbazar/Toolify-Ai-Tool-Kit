@@ -62,10 +62,10 @@ export function UnlockPdf() {
 
     } catch (error: any) {
         console.error("PDF Unlock Error:", error);
-        if (error.message.includes('password')) {
-            toast({ title: 'Incorrect Password', description: 'The password you entered is incorrect.', variant: 'destructive'});
+        if (error.message.includes('encrypted') || error.message.toLowerCase().includes('password')) {
+            toast({ title: 'Incorrect Password', description: 'The password you entered is incorrect. Please try again.', variant: 'destructive'});
         } else {
-            toast({ title: 'Unlock Failed', description: error.message || 'Could not unlock the PDF.', variant: 'destructive'});
+            toast({ title: 'Unlock Failed', description: error.message || 'Could not unlock the PDF. The file may be corrupted.', variant: 'destructive'});
         }
     } finally {
         setIsLoading(false);
