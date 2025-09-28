@@ -173,14 +173,14 @@ export function PdfSplitter() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div className="space-y-6">
-            <Card 
+             <Card 
                 className={cn(
                     "transition-colors",
                     isDragging && 'border-primary bg-primary/10'
                 )}
                 onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
             >
-                 <CardContent 
+                <CardContent 
                     className="p-6 text-center cursor-pointer"
                     onClick={() => fileInputRef.current?.click()}
                 >
@@ -197,44 +197,47 @@ export function PdfSplitter() {
                     <span className="font-medium text-sm">Total Pages: {totalPages}</span>
                 </div>
             )}
-        </div>
-        <Card>
-            <CardHeader>
-                <CardTitle>Splitting Options</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                 <RadioGroup value={splitMode} onValueChange={(val) => setSplitMode(val as SplitMode)} className="grid grid-cols-1 gap-2">
-                    <Label htmlFor="mode-ranges" className="p-3 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary flex items-center gap-3">
-                        <RadioGroupItem value="ranges" id="mode-ranges" />
-                        <div>
-                            <p className="font-semibold">Split by ranges</p>
-                            <p className="text-xs text-muted-foreground">Create multiple PDFs from custom ranges.</p>
-                        </div>
-                    </Label>
-                    <Label htmlFor="mode-fixed" className="p-3 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary flex items-center gap-3">
-                        <RadioGroupItem value="fixed" id="mode-fixed" />
-                        <div>
-                            <p className="font-semibold">Split into fixed-size chunks</p>
-                            <p className="text-xs text-muted-foreground">e.g., split into files of 2 pages each.</p>
-                        </div>
-                    </Label>
-                    <Label htmlFor="mode-extract" className="p-3 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary flex items-center gap-3">
-                        <RadioGroupItem value="extract" id="mode-extract" />
-                        <div>
-                            <p className="font-semibold">Extract pages</p>
-                            <p className="text-xs text-muted-foreground">Create a single PDF from selected pages.</p>
-                        </div>
-                    </Label>
-                </RadioGroup>
-
-                {renderOptions()}
-                
-                <Button onClick={handleSplit} disabled={!pdfFile || isLoading} className="w-full">
+             {pdfFile && totalPages && (
+                 <Button onClick={handleSplit} disabled={isLoading} className="w-full">
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Split className="mr-2 h-4 w-4" />}
                     Split PDF & Download
                 </Button>
-            </CardContent>
-        </Card>
+            )}
+        </div>
+        {pdfFile && totalPages && (
+            <Card className="animate-in fade-in-50">
+                <CardHeader>
+                    <CardTitle>Splitting Options</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <RadioGroup value={splitMode} onValueChange={(val) => setSplitMode(val as SplitMode)} className="grid grid-cols-1 gap-2">
+                        <Label htmlFor="mode-ranges" className="p-3 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary flex items-center gap-3">
+                            <RadioGroupItem value="ranges" id="mode-ranges" />
+                            <div>
+                                <p className="font-semibold">Split by ranges</p>
+                                <p className="text-xs text-muted-foreground">Create multiple PDFs from custom ranges.</p>
+                            </div>
+                        </Label>
+                        <Label htmlFor="mode-fixed" className="p-3 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary flex items-center gap-3">
+                            <RadioGroupItem value="fixed" id="mode-fixed" />
+                            <div>
+                                <p className="font-semibold">Split into fixed-size chunks</p>
+                                <p className="text-xs text-muted-foreground">e.g., split into files of 2 pages each.</p>
+                            </div>
+                        </Label>
+                        <Label htmlFor="mode-extract" className="p-3 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary flex items-center gap-3">
+                            <RadioGroupItem value="extract" id="mode-extract" />
+                            <div>
+                                <p className="font-semibold">Extract pages</p>
+                                <p className="text-xs text-muted-foreground">Create a single PDF from selected pages.</p>
+                            </div>
+                        </Label>
+                    </RadioGroup>
+
+                    {renderOptions()}
+                </CardContent>
+            </Card>
+        )}
     </div>
   );
 }

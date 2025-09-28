@@ -169,57 +169,59 @@ export function PdfPageNumberer() {
                 </div>
             )}
         </div>
-        <Card>
-            <CardHeader>
-                <CardTitle>Numbering Options</CardTitle>
-                <CardDescription>Customize how the page numbers will appear.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="position">Position</Label>
-                    <Select value={position} onValueChange={(v) => setPosition(v as Position)}>
-                        <SelectTrigger><SelectValue/></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="top-left">Top Left</SelectItem>
-                            <SelectItem value="top-center">Top Center</SelectItem>
-                            <SelectItem value="top-right">Top Right</SelectItem>
-                            <SelectItem value="bottom-left">Bottom Left</SelectItem>
-                            <SelectItem value="bottom-center">Bottom Center</SelectItem>
-                            <SelectItem value="bottom-right">Bottom Right</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="format">Format</Label>
-                    <Select value={format} onValueChange={setFormat}>
-                        <SelectTrigger><SelectValue/></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Page {page}">Page 1</SelectItem>
-                            <SelectItem value="Page {page} of {pages}">Page 1 of {totalPages || 'N'}</SelectItem>
-                            <SelectItem value="{page}">1</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-                 <div className="grid grid-cols-2 gap-4">
+        {pdfFile && totalPages && (
+            <Card className="animate-in fade-in-50">
+                <CardHeader>
+                    <CardTitle>Numbering Options</CardTitle>
+                    <CardDescription>Customize how the page numbers will appear.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="start-number">Start Numbering From</Label>
-                        <Input id="start-number" type="number" value={startNumber} onChange={e => setStartNumber(e.target.value)} min="1"/>
+                        <Label htmlFor="position">Position</Label>
+                        <Select value={position} onValueChange={(v) => setPosition(v as Position)}>
+                            <SelectTrigger><SelectValue/></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="top-left">Top Left</SelectItem>
+                                <SelectItem value="top-center">Top Center</SelectItem>
+                                <SelectItem value="top-right">Top Right</SelectItem>
+                                <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                                <SelectItem value="bottom-center">Bottom Center</SelectItem>
+                                <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="font-size">Font Size</Label>
-                        <Input id="font-size" type="number" value={fontSize} onChange={e => setFontSize(e.target.value)} min="6"/>
+                        <Label htmlFor="format">Format</Label>
+                        <Select value={format} onValueChange={setFormat}>
+                            <SelectTrigger><SelectValue/></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Page {page}">Page 1</SelectItem>
+                                <SelectItem value="Page {page} of {pages}">Page 1 of {totalPages || 'N'}</SelectItem>
+                                <SelectItem value="{page}">1</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="pages-to-number">Apply to Pages (Optional)</Label>
-                    <Input id="pages-to-number" value={pagesToNumber} onChange={e => setPagesToNumber(e.target.value)} placeholder="e.g. 2-5, 8 (all pages if empty)"/>
-                </div>
-                <Button onClick={handleApplyNumbers} disabled={!pdfFile || isLoading} className="w-full">
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Hash className="mr-2 h-4 w-4"/>}
-                    Add Numbers & Download
-                </Button>
-            </CardContent>
-        </Card>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="start-number">Start Numbering From</Label>
+                            <Input id="start-number" type="number" value={startNumber} onChange={e => setStartNumber(e.target.value)} min="1"/>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="font-size">Font Size</Label>
+                            <Input id="font-size" type="number" value={fontSize} onChange={e => setFontSize(e.target.value)} min="6"/>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="pages-to-number">Apply to Pages (Optional)</Label>
+                        <Input id="pages-to-number" value={pagesToNumber} onChange={e => setPagesToNumber(e.target.value)} placeholder="e.g. 2-5, 8 (all pages if empty)"/>
+                    </div>
+                    <Button onClick={handleApplyNumbers} disabled={!pdfFile || isLoading} className="w-full">
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Hash className="mr-2 h-4 w-4"/>}
+                        Add Numbers & Download
+                    </Button>
+                </CardContent>
+            </Card>
+        )}
     </div>
   );
 }
