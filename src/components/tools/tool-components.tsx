@@ -228,7 +228,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'speech-to-text': SpeechToText,
   'sql-formatter': SqlFormatter,
   'srm-to-cgpa-calculator': SrmToCgpaCalculator,
-  'text-encryption-and-decryption': TextEncryptionDecryption,
+  'text-encryption-decryption': TextEncryptionDecryption,
   'text-repeater': TextRepeater,
   'text-to-binary': TextToBinary,
   'text-to-morse-code': TextToMorseCode,
