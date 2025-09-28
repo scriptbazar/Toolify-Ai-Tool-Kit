@@ -5,10 +5,9 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Copy, Trash2, ArrowRightLeft, Volume2, XCircle, ClipboardPaste, MessageSquare } from 'lucide-react';
+import { Copy, Trash2, Volume2, XCircle, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { morseCodeMap, reverseMorseCodeMap } from '@/lib/morse-code';
-import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
+import { reverseMorseCodeMap } from '@/lib/morse-code';
 
 export function MorseToTextTranslator() {
   const [morseInput, setMorseInput] = useState('');
@@ -55,20 +54,6 @@ export function MorseToTextTranslator() {
       setTextOutput(decodedText.trim());
     }
   };
-  
-  const handleSwap = () => {
-    setMorseInput(textOutput);
-    setTextOutput(morseInput);
-  };
-  
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      setMorseInput(text);
-    } catch (err) {
-      toast({ title: 'Paste Error', description: 'Could not read from clipboard.', variant: 'destructive'});
-    }
-  }
 
   const handleCopy = () => {
     if (!textOutput) return;
@@ -103,8 +88,6 @@ export function MorseToTextTranslator() {
                 )}
             </div>
              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" onClick={handlePaste}><ClipboardPaste className="mr-2 h-4 w-4"/>Paste</Button>
-                <Button variant="outline" onClick={handleSwap}><ArrowRightLeft className="mr-2 h-4 w-4"/>Swap</Button>
                 <Button variant="destructive" onClick={handleClear} disabled={!morseInput}><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
             </div>
         </div>
