@@ -38,17 +38,30 @@ export function UnlockPdf() {
       toast({ title: 'Please upload a PDF file.', variant: 'destructive' });
       return;
     }
-    if (!password) {
-      toast({ title: 'Password is required to unlock.', variant: 'destructive' });
-      return;
-    }
-
+    
     setIsLoading(true);
 
     try {
-        const fileBytes = await pdfFile.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(fileBytes, { password });
-        const unlockedPdfBytes = await pdfDoc.save();
+        const existingPdfBytes = await pdfFile.arrayBuffer();
+        const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
+
+        let unlockedPdfBytes;
+
+        if (pdfDoc.isEncrypted) {
+            if (!password) {
+              toast({ title: 'Password is required to unlock this PDF.', variant: 'destructive' });
+              setIsLoading(false);
+              return;
+            }
+            // Attempt to decrypt with the provided password
+            const decryptedDoc = await PDFDocument.load(existingPdfBytes, { password });
+            unlockedPdfBytes = await decryptedDoc.save();
+            toast({ title: 'Success!', description: 'Your PDF has been unlocked and downloaded.'});
+        } else {
+            // If not encrypted, just use the original bytes
+            unlockedPdfBytes = existingPdfBytes;
+            toast({ title: 'Already Unlocked', description: 'This PDF is not encrypted. Downloading a copy.'});
+        }
 
         const blob = new Blob([unlockedPdfBytes], { type: 'application/pdf' });
         const link = document.createElement('a');
@@ -56,14 +69,13 @@ export function UnlockPdf() {
         link.download = `unlocked-${pdfFile.name}`;
         link.click();
         URL.revokeObjectURL(link.href);
-        toast({ title: 'Success!', description: 'Your PDF has been unlocked and downloaded.'});
 
     } catch (error: any) {
         console.error("PDF Unlock Error:", error);
         if (error.name === 'PDFInvalidPasswordError') {
           toast({ title: 'Incorrect Password', description: 'The password you entered is incorrect. Please try again.', variant: 'destructive'});
         } else {
-          toast({ title: 'Unlock Failed', description: 'Could not unlock the PDF. The file may be corrupted or not encrypted.', variant: 'destructive'});
+          toast({ title: 'Unlock Failed', description: error.message || 'Could not unlock the PDF.', variant: 'destructive'});
         }
     } finally {
         setIsLoading(false);
@@ -97,7 +109,7 @@ export function UnlockPdf() {
                 <CardContent className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-[2fr,1fr] gap-4 items-end">
                         <div className="space-y-2">
-                            <Label htmlFor="pdf-password">PDF Password</Label>
+                            <Label htmlFor="pdf-password">PDF Password (if any)</Label>
                             <div className="relative">
                                 <Input
                                     id="pdf-password"
