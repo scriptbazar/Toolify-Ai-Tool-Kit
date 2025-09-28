@@ -171,33 +171,32 @@ export function PdfSplitter() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 items-start">
-        <div className="space-y-6">
-             <Card 
-                className={cn(
-                    "transition-colors",
-                    isDragging && 'border-primary bg-primary/10'
-                )}
-                onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
-            >
-                <CardContent 
-                    className="p-6 text-center cursor-pointer"
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
-                    <div className="flex flex-col items-center justify-center h-full">
-                        <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
-                    </div>
-                </CardContent>
-            </Card>
-            {totalPages && (
-                <div className="p-3 bg-muted rounded-md flex items-center justify-center gap-2">
-                    <FileText className="h-5 w-5 text-primary shrink-0"/>
-                    <span className="font-medium text-sm">Total Pages: {totalPages}</span>
-                </div>
+    <div className="space-y-6">
+        <Card 
+            className={cn(
+                "transition-colors",
+                isDragging && 'border-primary bg-primary/10'
             )}
-        </div>
+            onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+        >
+            <CardContent 
+                className="p-6 text-center cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+            >
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
+                <div className="flex flex-col items-center justify-center h-full">
+                    <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
+                </div>
+            </CardContent>
+        </Card>
+        {totalPages && (
+            <div className="p-3 bg-muted rounded-md flex items-center justify-center gap-2">
+                <FileText className="h-5 w-5 text-primary shrink-0"/>
+                <span className="font-medium text-sm">Total Pages: {totalPages}</span>
+            </div>
+        )}
+      
         {pdfFile && totalPages && (
             <Card className="animate-in fade-in-50">
                 <CardHeader>

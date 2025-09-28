@@ -91,7 +91,7 @@ export function RotatePdf() {
     setIsLoading(true);
     try {
       const existingPdfBytes = await pdfFile.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+      const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
       
       pagesToProcess.forEach(pageIndex => {
           if (pageIndex < pdfDoc.getPageCount()) {
@@ -141,6 +141,7 @@ export function RotatePdf() {
                 <div className="flex flex-col items-center justify-center h-full">
                     <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
+                    <p className="text-sm text-muted-foreground">The page count will be displayed instantly.</p>
                 </div>
             </CardContent>
         </Card>

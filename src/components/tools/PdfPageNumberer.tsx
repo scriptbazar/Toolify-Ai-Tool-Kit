@@ -96,7 +96,7 @@ export function PdfPageNumberer() {
     setIsLoading(true);
     try {
       const existingPdfBytes = await pdfFile.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+      const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       
       const numStart = parseInt(startNumber, 10);
@@ -220,7 +220,7 @@ export function PdfPageNumberer() {
                     </div>
                     
                     <Button onClick={handleApplyNumbers} disabled={!pdfFile || isLoading} className="w-full">
-                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Hash className="mr-2 h-4 w-4"/>}
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Hash className="mr-2 h-4 w-4" />}
                         Add Numbers & Download
                     </Button>
                 </CardContent>
