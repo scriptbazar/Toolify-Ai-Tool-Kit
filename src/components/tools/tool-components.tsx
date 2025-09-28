@@ -124,6 +124,7 @@ import { YouTubeRegionRestrictionChecker } from './YouTubeRegionRestrictionCheck
 import { YouTubeVideoDescriptionExtractor } from './YouTubeVideoDescriptionExtractor';
 import { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownloader';
 import { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
+import { UnitConverter } from './UnitConverter';
 
 export const toolComponents: { [key: string]: React.ComponentType } = {
   'admob-revenue-calculator': AdMobRevenueCalculator,
@@ -251,4 +252,5 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'youtube-video-description-extractor': YouTubeVideoDescriptionExtractor,
   'youtube-video-thumbnail-downloader': YouTubeVideoThumbnailDownloader,
   'youtube-video-title-extractor': YouTubeVideoTitleExtractor,
+  'unit-converter': UnitConverter,
 };
