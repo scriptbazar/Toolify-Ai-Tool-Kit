@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { UploadCloud, Download, Loader2, KeyRound, FileText, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFInvalidPasswordError } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 
 export function UnlockPdf() {
@@ -46,7 +46,7 @@ export function UnlockPdf() {
     setIsLoading(true);
     try {
         const fileBytes = await pdfFile.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(fileBytes, { password: password });
+        const pdfDoc = await PDFDocument.load(fileBytes, { password });
         const unlockedPdfBytes = await pdfDoc.save();
 
         const blob = new Blob([unlockedPdfBytes], { type: 'application/pdf' });
@@ -59,7 +59,7 @@ export function UnlockPdf() {
 
     } catch (error: any) {
         console.error("PDF Unlock Error:", error);
-        if (error.message.includes('password')) {
+        if (error instanceof PDFInvalidPasswordError) {
             toast({ title: 'Incorrect Password', description: 'The password you entered is incorrect. Please try again.', variant: 'destructive'});
         } else {
             toast({ title: 'Unlock Failed', description: 'Could not unlock the PDF. The file may be corrupted or not encrypted.', variant: 'destructive'});
