@@ -47,7 +47,7 @@ export function UnlockPdf() {
     try {
         const fileBytes = await pdfFile.arrayBuffer();
         // Try to load with the provided password
-        const pdfDoc = await PDFDocument.load(fileBytes, { password });
+        const pdfDoc = await PDFDocument.load(fileBytes, { password: password });
 
         // If successful, save it without encryption
         const unlockedPdfBytes = await pdfDoc.save();
