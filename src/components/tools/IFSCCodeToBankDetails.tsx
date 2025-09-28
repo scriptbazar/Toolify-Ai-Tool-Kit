@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { Bank, Search, Loader2, AlertTriangle, Copy } from 'lucide-react';
+import { Landmark, Search, Loader2, AlertTriangle, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
@@ -64,7 +64,7 @@ export function IFSCodetoBankDetails() {
         <div className="space-y-6">
             <div className="space-y-2">
                 <Label htmlFor="ifsc-code" className="flex items-center gap-2">
-                    <Bank className="h-5 w-5"/>
+                    <Landmark className="h-5 w-5"/>
                     Enter IFSC Code
                 </Label>
                 <div className="flex gap-2">
