@@ -1,19 +1,75 @@
 
 'use client';
 
-import { Card, CardContent } from '../ui/card';
-import { Construction } from 'lucide-react';
+import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { UploadCloud, FileText, Loader2, FileDown } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 export function PdfToWord() {
+  const [file, setFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (selectedFile: File) => {
+    if (selectedFile && selectedFile.type === 'application/pdf') {
+      setFile(selectedFile);
+    } else {
+      toast({ title: 'Invalid File', description: 'Please upload a valid PDF file.', variant: 'destructive' });
+    }
+  };
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) handleFile(selectedFile);
+  };
+  
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); e.dataTransfer.files && handleFile(e.dataTransfer.files[0]); };
+
+  const handleConvert = () => {
+    if (!file) {
+      toast({ title: 'No file selected', variant: 'destructive' });
+      return;
+    }
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      toast({ title: 'Coming Soon!', description: 'This feature is under development.' });
+    }, 1500);
+  };
+
   return (
-    <Card className="flex flex-col items-center justify-center min-h-[300px]">
-      <CardContent className="text-center">
-        <Construction className="mx-auto h-12 w-12 text-primary mb-4" />
-        <h3 className="text-xl font-semibold">Coming Soon!</h3>
-        <p className="text-muted-foreground mt-2">
-          The "PDF to Word" tool is currently under development.
-        </p>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+       <Card 
+            className={cn(
+                "transition-colors",
+                isDragging && 'border-primary bg-primary/10'
+            )}
+            onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+        >
+             <CardContent 
+                className="p-6 text-center cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+            >
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
+                <div className="flex flex-col items-center justify-center h-full">
+                    <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold">{file ? file.name : "Click or drag PDF file to upload"}</h3>
+                    <p className="text-sm text-muted-foreground">Your PDF will be converted into an editable Word document.</p>
+                </div>
+            </CardContent>
+       </Card>
+
+      <Button onClick={handleConvert} disabled={isLoading || !file} className="w-full">
+        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
+        Convert to Word
+      </Button>
+    </div>
   );
 }
