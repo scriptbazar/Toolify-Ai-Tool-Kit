@@ -30,14 +30,7 @@ import {
 } from './ai-writer.types';
 
 export async function aiWriter(input: AiWriterInput): Promise<AiWriterOutput> {
-  const { output } = await aiWriterPrompt(input);
-  if (!output) {
-      throw new Error("The AI failed to generate content. Please try again.");
-  }
-  return output;
-}
-
-const aiWriterPrompt = ai.definePrompt(
+  const aiWriterPrompt = ai.definePrompt(
   {
     name: 'aiWriterPrompt',
     input: { schema: AiWriterInputSchema },
@@ -74,6 +67,12 @@ Instructions:
 Ensure the entire output is a single HTML block, starting with \`<h1>\` and ending with the final \`</p>\`. Do not include \`<html>\` or \`<body>\` tags. Do not add extra line breaks between paragraphs.`,
   }
 );
+  const { output } = await aiWriterPrompt(input);
+  if (!output) {
+      throw new Error("The AI failed to generate content. Please try again.");
+  }
+  return output;
+}
 
 
 export async function generateMetaDescription(input: GenerateMetaDescInput): Promise<GenerateMetaDescOutput> {
