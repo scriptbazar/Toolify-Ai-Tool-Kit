@@ -46,10 +46,7 @@ export function UnlockPdf() {
     setIsLoading(true);
     try {
         const fileBytes = await pdfFile.arrayBuffer();
-        // Try to load with the provided password
         const pdfDoc = await PDFDocument.load(fileBytes, { password: password });
-
-        // If successful, save it without encryption
         const unlockedPdfBytes = await pdfDoc.save();
 
         const blob = new Blob([unlockedPdfBytes], { type: 'application/pdf' });
@@ -62,10 +59,10 @@ export function UnlockPdf() {
 
     } catch (error: any) {
         console.error("PDF Unlock Error:", error);
-        if (error.message.includes('encrypted') || error.message.toLowerCase().includes('password')) {
+        if (error.message.includes('password')) {
             toast({ title: 'Incorrect Password', description: 'The password you entered is incorrect. Please try again.', variant: 'destructive'});
         } else {
-            toast({ title: 'Unlock Failed', description: error.message || 'Could not unlock the PDF. The file may be corrupted.', variant: 'destructive'});
+            toast({ title: 'Unlock Failed', description: 'Could not unlock the PDF. The file may be corrupted or not encrypted.', variant: 'destructive'});
         }
     } finally {
         setIsLoading(false);
@@ -96,35 +93,34 @@ export function UnlockPdf() {
       
         {pdfFile && (
             <Card className="animate-in fade-in-50">
-                <CardHeader>
-                    <CardTitle>Unlock Options</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="p-6 space-y-4">
                     <div className="p-3 bg-muted rounded-md flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 overflow-hidden">
                             <FileText className="h-5 w-5 text-primary shrink-0"/>
                             <span className="font-medium text-sm truncate">{pdfFile.name}</span>
                         </div>
                     </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="pdf-password">PDF Password</Label>
-                         <div className="relative">
-                            <Input
-                                id="pdf-password"
-                                type={showPassword ? 'text' : 'password'}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Enter the PDF password"
-                            />
-                             <Button type="button" variant="ghost" size="icon" className="absolute inset-y-0 right-0 h-full px-3" onClick={() => setShowPassword(!showPassword)}>
-                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                             </Button>
+                     <div className="grid grid-cols-1 md:grid-cols-[2fr,1fr] gap-4 items-end">
+                        <div className="space-y-2">
+                            <Label htmlFor="pdf-password">PDF Password</Label>
+                            <div className="relative">
+                                <Input
+                                    id="pdf-password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter the PDF password"
+                                />
+                                <Button type="button" variant="ghost" size="icon" className="absolute inset-y-0 right-0 h-full px-3" onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </Button>
+                            </div>
                         </div>
+                        <Button onClick={handleUnlock} disabled={isLoading} className="w-full">
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
+                            Unlock & Download
+                        </Button>
                     </div>
-                    <Button onClick={handleUnlock} disabled={isLoading} className="w-full">
-                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
-                        Unlock & Download
-                    </Button>
                 </CardContent>
             </Card>
         )}
