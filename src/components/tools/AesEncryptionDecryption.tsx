@@ -142,29 +142,26 @@ export function AesEncryptionDecryption() {
     setIsLoading(true);
     
     const fileReader = new FileReader();
-    fileReader.readAsDataURL(file);
+
     fileReader.onload = async (e) => {
         try {
-            const fileDataUrl = e.target?.result as string;
-            
             let resultData;
             let blobType = 'application/octet-stream';
             let newFileName = '';
 
             if (mode === 'encrypt') {
-                const base64Content = fileDataUrl.split(',')[1];
-                resultData = cryptoJs.AES.encrypt(base64Content, password).toString();
+                const fileDataUrl = e.target?.result as string;
+                resultData = cryptoJs.AES.encrypt(fileDataUrl, password).toString();
                 newFileName = `${file.name}.enc`;
-            } else {
-                const base64Content = await file.text();
-                const decryptedBytes = cryptoJs.AES.decrypt(base64Content, password);
+            } else { // decrypt
+                const fileContent = e.target?.result as string;
+                const decryptedBytes = cryptoJs.AES.decrypt(fileContent, password);
                 const decryptedDataUrl = decryptedBytes.toString(cryptoJs.enc.Utf8);
 
                 if (!decryptedDataUrl) {
                     throw new Error("Decryption failed. Check password or file.");
                 }
                 
-                // Convert data URL back to Blob
                 const res = await fetch(decryptedDataUrl);
                 const blob = await res.blob();
                 resultData = blob;
@@ -191,6 +188,12 @@ export function AesEncryptionDecryption() {
     fileReader.onerror = () => {
         toast({ title: 'Error', description: 'Failed to read the file.', variant: 'destructive' });
         setIsLoading(false);
+    }
+    
+    if (mode === 'encrypt') {
+        fileReader.readAsDataURL(file);
+    } else {
+        fileReader.readAsText(file);
     }
   };
 
