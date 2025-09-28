@@ -141,6 +141,7 @@ export function PdfPageNumberer() {
     }
   };
   
+
   return (
     <div className="space-y-6">
         <Card 
@@ -158,6 +159,7 @@ export function PdfPageNumberer() {
                 <div className="flex flex-col items-center justify-center h-full">
                     <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
+                    <p className="text-sm text-muted-foreground">The page count will be displayed instantly.</p>
                 </div>
             </CardContent>
         </Card>
@@ -202,7 +204,7 @@ export function PdfPageNumberer() {
                             </Select>
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="start-number">Start Numbering From</Label>
                             <Input id="start-number" type="number" value={startNumber} onChange={e => setStartNumber(e.target.value)} min="1"/>
@@ -211,11 +213,12 @@ export function PdfPageNumberer() {
                             <Label htmlFor="font-size">Font Size</Label>
                             <Input id="font-size" type="number" value={fontSize} onChange={e => setFontSize(e.target.value)} min="6"/>
                         </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="pages-to-number">Apply to Pages (Optional)</Label>
+                            <Input id="pages-to-number" value={pagesToNumber} onChange={e => setPagesToNumber(e.target.value)} placeholder="e.g. 2-5, 8"/>
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="pages-to-number">Apply to Pages (Optional)</Label>
-                        <Input id="pages-to-number" value={pagesToNumber} onChange={e => setPagesToNumber(e.target.value)} placeholder="e.g. 2-5, 8 (all if empty)"/>
-                    </div>
+                    
                     <Button onClick={handleApplyNumbers} disabled={!pdfFile || isLoading} className="w-full">
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Hash className="mr-2 h-4 w-4"/>}
                         Add Numbers & Download
