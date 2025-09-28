@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { UploadCloud, Download, PenLine, Type, Image as ImageIcon, Loader2, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { PDFDocument, rgb, StandardFonts, PDFImage } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, PDFImage, BlendMode } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import SignatureCanvas from 'react-signature-canvas';
@@ -154,6 +154,7 @@ export function PdfSigner() {
                 y: pdfY,
                 width: signaturePosition.width,
                 height: signaturePosition.height,
+                blendMode: BlendMode.Normal,
             });
 
             const newPdfBytes = await pdfDoc.save();
