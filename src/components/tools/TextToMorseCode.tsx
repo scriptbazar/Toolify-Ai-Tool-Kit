@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Copy, Trash2, ArrowRightLeft, Volume2, Lightbulb, Pause, Play, ClipboardPaste } from 'lucide-react';
+import { Copy, Trash2, ArrowRightLeft, Volume2, Lightbulb, Pause, Play } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { morseCodeMap } from '@/lib/morse-code';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
@@ -146,15 +146,6 @@ export function TextToMorseCode() {
     setTextInput('');
     setMorseOutput('');
   };
-  
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      setTextInput(text);
-    } catch (err) {
-      toast({ title: 'Paste Error', description: 'Could not read from clipboard.', variant: 'destructive'});
-    }
-  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -170,7 +161,6 @@ export function TextToMorseCode() {
                 />
             </div>
              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" onClick={handlePaste}><ClipboardPaste className="mr-2 h-4 w-4"/>Paste</Button>
                 <Button variant="destructive" onClick={handleClear} disabled={!textInput}><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
             </div>
         </div>
