@@ -130,6 +130,7 @@ export function AesEncryptionDecryption() {
   }, [toast]);
 
   const processFile = async (mode: 'encrypt' | 'decrypt', file: File | null) => {
+    'use server';
     if (!cryptoJs) {
         toast({ title: "Library not loaded.", variant: "destructive"});
         return;
