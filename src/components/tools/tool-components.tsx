@@ -130,7 +130,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'admob-revenue-calculator': AdMobRevenueCalculator,
   'adsense-revenue-calculator': AdSenseRevenueCalculator,
   'add-watermark-to-pdf': AddWatermarkToPdf,
-  'aes-encryption-decryption': AesEncryptionDecryption,
+  'aes-encryption-and-decryption': AesEncryptionDecryption,
   'age-calculator': AgeCalculator,
   'ai-blog-post-writer': AiBlogPostWriter,
   'ai-code-assistant': AiCodeAssistant,
