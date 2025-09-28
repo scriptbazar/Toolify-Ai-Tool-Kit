@@ -112,7 +112,6 @@ export { TextToMorseCode } from './TextToMorseCode';
 export { TextToSpeech } from './TextToSpeech';
 export { TimeZoneConverter } from './TimeZoneConverter';
 export { TitleTagChecker } from './TitleTagChecker';
-export { UnixTimestampConverter } from './UnixTimestampConverter';
 export { UniversalHashGenerator } from './UniversalHashGenerator';
 export { UnlockPdf } from './UnlockPdf';
 export { UuidGenerator } from './UuidGenerator';
