@@ -18,6 +18,7 @@ import '@/ai/flows/review-management.ts';
 import '@/ai/flows/backup-restore.ts';
 import '@/ai/flows/utility-actions.ts';
 import '@/ai/flows/verify-recaptcha.ts';
+import '@/ai/flows/pdf-management.ts';
 import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/prompt-generator.ts';
 import '@/ai/flows/json-prompt-generator.ts';
@@ -34,11 +35,12 @@ import '@/ai/flows/ai-seo-keyword-generator.ts';
 import '@/ai/flows/media-management.ts';
 import '@/ai/flows/currency-converter.ts';
 import '@/ai/flows/image-text-extractor.ts';
-import '@/ai/flows/lorem-ipsum-generator.ts';
+import '@/ai/flows/encryption-actions.ts';
 
 
 
     
+
 
 
 

@@ -9,20 +9,7 @@ import { UploadCloud, Download, KeyRound, Loader2, File as FileIcon, Eye, EyeOff
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import type CryptoJS from 'crypto-js';
-
-type CryptoJsLibrary = {
-    AES: {
-        encrypt: (data: any, key: string) => any;
-        decrypt: (data: any, key: string) => any;
-    };
-    enc: {
-        Utf8: any;
-        Base64: {
-            parse: (encoded: string) => any;
-        };
-    };
-};
+import { encryptOrDecryptFile } from '@/ai/flows/encryption-actions';
 
 const ActionCard = ({ 
     title, 
@@ -117,24 +104,9 @@ export function AesEncryptionDecryption() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [cryptoJs, setCryptoJs] = useState<CryptoJsLibrary | null>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    import('crypto-js').then(module => {
-        setCryptoJs(module.default as any);
-    }).catch(err => {
-        console.error("Failed to load crypto-js", err);
-        toast({ title: "Library Error", description: "Could not load the encryption library.", variant: "destructive" });
-    });
-  }, [toast]);
-
-  const processFile = async (mode: 'encrypt' | 'decrypt', file: File | null) => {
-    'use server';
-    if (!cryptoJs) {
-        toast({ title: "Library not loaded.", variant: "destructive"});
-        return;
-    }
+  
+  const processAndDownloadFile = async (mode: 'encrypt' | 'decrypt', file: File | null) => {
     if (!file || !password) {
       toast({ title: "File and password are required.", variant: 'destructive'});
       return;
@@ -143,37 +115,29 @@ export function AesEncryptionDecryption() {
     setIsLoading(true);
     
     const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
 
     fileReader.onload = async (e) => {
         try {
-            let resultData;
-            let blobType = 'application/octet-stream';
-            let newFileName = '';
+            const fileDataUrl = e.target?.result as string;
+            if (!fileDataUrl) throw new Error("Could not read file.");
 
-            if (mode === 'encrypt') {
-                const fileDataUrl = e.target?.result as string;
-                resultData = cryptoJs.AES.encrypt(fileDataUrl, password).toString();
-                newFileName = `${file.name}.enc`;
-            } else { // decrypt
-                const fileContent = e.target?.result as string;
-                const decryptedBytes = cryptoJs.AES.decrypt(fileContent, password);
-                const decryptedDataUrl = decryptedBytes.toString(cryptoJs.enc.Utf8);
+            const result = await encryptOrDecryptFile({
+                mode,
+                fileDataUrl,
+                password
+            });
 
-                if (!decryptedDataUrl) {
-                    throw new Error("Decryption failed. Check password or file.");
-                }
-                
-                const res = await fetch(decryptedDataUrl);
-                const blob = await res.blob();
-                resultData = blob;
-                blobType = blob.type;
-                newFileName = file.name.replace(/\.enc$/, '') || `decrypted-${file.name}`;
+            if (!result.success || !result.dataUrl) {
+                throw new Error(result.message || "An unknown error occurred.");
             }
 
-            const blob = new Blob([resultData], { type: blobType });
+            const res = await fetch(result.dataUrl);
+            const blob = await res.blob();
+            
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = newFileName;
+            link.download = mode === 'encrypt' ? `${file.name}.enc` : file.name.replace(/\.enc$/, '') || `decrypted-${file.name}`;
             link.click();
             URL.revokeObjectURL(link.href);
             
@@ -190,13 +154,8 @@ export function AesEncryptionDecryption() {
         toast({ title: 'Error', description: 'Failed to read the file.', variant: 'destructive' });
         setIsLoading(false);
     }
-    
-    if (mode === 'encrypt') {
-        fileReader.readAsDataURL(file);
-    } else {
-        fileReader.readAsText(file);
-    }
   };
+
 
   return (
     <div className="space-y-6">
@@ -227,7 +186,7 @@ export function AesEncryptionDecryption() {
                 description="Select a file to encrypt with your key."
                 file={encryptFile}
                 onFileChange={(e) => setEncryptFile(e.target.files?.[0] || null)}
-                onAction={() => processFile('encrypt', encryptFile)}
+                onAction={() => processAndDownloadFile('encrypt', encryptFile)}
                 isLoading={isLoading}
                 buttonText="Encrypt & Download"
                 icon={Lock}
@@ -241,7 +200,7 @@ export function AesEncryptionDecryption() {
                 description="Select an encrypted file to decrypt."
                 file={decryptFile}
                 onFileChange={(e) => setDecryptFile(e.target.files?.[0] || null)}
-                onAction={() => processFile('decrypt', decryptFile)}
+                onAction={() => processAndDownloadFile('decrypt', decryptFile)}
                 isLoading={isLoading}
                 buttonText="Decrypt & Download"
                 icon={Unlock}
