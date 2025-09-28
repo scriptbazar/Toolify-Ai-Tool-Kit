@@ -2,9 +2,8 @@
 'use client';
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, Loader2, FileText, ListOrdered } from 'lucide-react';
+import { UploadCloud, Loader2, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
@@ -43,10 +42,10 @@ export function PdfPageCounter() {
     if (file) handleFile(file);
     if(e.target) e.target.value = '';
   };
-
+  
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); handleFile(e.dataTransfer.files?.[0]); };
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); e.dataTransfer.files && handleFile(e.dataTransfer.files[0]); };
   
   return (
     <div className="space-y-6 max-w-lg mx-auto">
@@ -67,26 +66,37 @@ export function PdfPageCounter() {
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
                 <div className="flex flex-col items-center justify-center h-full">
                     <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
+                    <h3 className="text-lg font-semibold">Click or drag PDF to upload</h3>
                     <p className="text-sm text-muted-foreground">The page count will be displayed instantly.</p>
                 </div>
             </CardContent>
         </Card>
       
-      {(isLoading || totalPages !== null) && (
-        <Card className="animate-in fade-in-50 text-center">
+      {(isLoading || pdfFile) && (
+        <Card className="animate-in fade-in-50">
             <CardHeader>
-                <CardTitle>Page Count Result</CardTitle>
+                <CardTitle>Result</CardTitle>
             </CardHeader>
-            <CardContent>
-                {isLoading ? (
-                    <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary" />
-                ) : (
-                    <>
-                        <p className="text-6xl font-bold text-primary">{totalPages}</p>
-                        <p className="text-lg text-muted-foreground">pages</p>
-                    </>
-                )}
+            <CardContent className="space-y-4">
+                 {pdfFile && (
+                    <div className="p-3 bg-muted rounded-md flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                            <FileText className="h-5 w-5 text-primary shrink-0"/>
+                            <span className="font-medium text-sm truncate">{pdfFile.name}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground shrink-0">{((pdfFile.size || 0) / 1024).toFixed(1)} KB</span>
+                    </div>
+                 )}
+                 <div className="text-center p-6">
+                    {isLoading ? (
+                        <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary" />
+                    ) : totalPages !== null ? (
+                        <>
+                            <p className="text-6xl font-bold text-primary">{totalPages}</p>
+                            <p className="text-lg text-muted-foreground">pages</p>
+                        </>
+                    ) : null}
+                 </div>
             </CardContent>
         </Card>
       )}

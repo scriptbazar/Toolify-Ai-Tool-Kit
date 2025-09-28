@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, Download, Loader2, Split, Trash2, FileText, File, FileCog } from 'lucide-react';
+import { UploadCloud, Download, Loader2, Split, Trash2, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
@@ -14,7 +14,7 @@ import { splitPdf } from '@/ai/flows/pdf-management';
 
 type SplitMode = 'ranges' | 'fixed' | 'extract';
 
-// Helper to parse page ranges e.g., "1-5, 8, 10-12" into a set of numbers
+// This helper is now defined on the client-side for validation
 const parsePages = (pagesStr: string, totalPages: number): number[] => {
     const pages = new Set<number>();
     if (!pagesStr.trim()) {
@@ -59,7 +59,7 @@ export function PdfSplitter() {
     if (file && file.type === 'application/pdf') {
         setIsLoading(true);
         setPdfFile(file);
-        setTotalPages(null); // Reset page count
+        setTotalPages(null);
         try {
             const { PDFDocument } = await import('pdf-lib');
             const fileBytes = await file.arrayBuffer();
@@ -75,12 +75,7 @@ export function PdfSplitter() {
     }
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
-    if(e.target) e.target.value = '';
-  };
-  
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) handleFile(file); if(e.target) e.target.value = ''; };
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
   const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); e.dataTransfer.files && handleFile(e.dataTransfer.files[0]); };

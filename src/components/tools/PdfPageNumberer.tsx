@@ -14,6 +14,35 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 type Position = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
+// Helper to parse page ranges e.g., "1-5, 8, 10-12" into a set of zero-based indices
+const parsePageRanges = (pagesStr: string, totalPages: number): number[] => {
+    const pages = new Set<number>();
+    if (!pagesStr.trim()) {
+        for (let i = 0; i < totalPages; i++) pages.add(i);
+        return Array.from(pages);
+    }
+
+    const parts = pagesStr.split(',');
+    for (const part of parts) {
+        const trimmedPart = part.trim();
+        if (trimmedPart.includes('-')) {
+            const [start, end] = trimmedPart.split('-').map(Number);
+            if (!isNaN(start) && !isNaN(end) && start > 0 && end <= totalPages && start <= end) {
+                for (let i = start; i <= end; i++) {
+                    pages.add(i - 1);
+                }
+            }
+        } else {
+            const page = Number(trimmedPart);
+            if (!isNaN(page) && page > 0 && page <= totalPages) {
+                pages.add(page - 1);
+            }
+        }
+    }
+    return Array.from(pages).sort((a, b) => a - b);
+}
+
+
 export function PdfPageNumberer() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [totalPages, setTotalPages] = useState<number | null>(null);
@@ -47,11 +76,7 @@ export function PdfPageNumberer() {
     }
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    e.target.files && handleFile(e.target.files[0]);
-    if (e.target) e.target.value = '';
-  };
-  
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => { e.target.files && handleFile(e.target.files[0]); if (e.target) e.target.value = ''; };
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
   const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); e.dataTransfer.files && handleFile(e.dataTransfer.files[0]); };
@@ -61,65 +86,44 @@ export function PdfPageNumberer() {
       toast({ title: 'Please upload a PDF file first.', variant: 'destructive' });
       return;
     }
+
+    const pagesToProcess = parsePageRanges(pagesToNumber, totalPages);
+    if (pagesToNumber.trim() !== '' && pagesToProcess.length === 0) {
+      toast({ title: 'Invalid Page Selection', description: 'Please check your page numbers and ranges.', variant: 'destructive' });
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const existingPdfBytes = await pdfFile.arrayBuffer();
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       
-      const pages = pdfDoc.getPages();
       const numStart = parseInt(startNumber, 10);
       const size = parseInt(fontSize, 10);
-      
-      const pageSet = new Set<number>();
-      if (pagesToNumber.trim()) {
-        pagesToNumber.split(',').forEach(part => {
-          const trimmed = part.trim();
-          if (trimmed.includes('-')) {
-            const [start, end] = trimmed.split('-').map(Number);
-            if (!isNaN(start) && !isNaN(end) && start <= end) {
-              for (let i = start; i <= end; i++) pageSet.add(i - 1);
-            }
-          } else {
-            const num = Number(trimmed);
-            if (!isNaN(num)) pageSet.add(num - 1);
-          }
-        });
-      } else {
-        for (let i = 0; i < totalPages; i++) pageSet.add(i);
-      }
 
-      let pageCounter = numStart;
-      for (let i = 0; i < pages.length; i++) {
-        if (!pageSet.has(i)) continue;
+      for (let i = 0; i < pagesToProcess.length; i++) {
+        const pageIndex = pagesToProcess[i];
+        if (pageIndex >= pdfDoc.getPageCount()) continue;
 
-        const page = pages[i];
+        const page = pdfDoc.getPage(pageIndex);
         const { width, height } = page.getSize();
         
+        const pageCounter = numStart + i;
         const text = format.replace('{page}', String(pageCounter)).replace('{pages}', String(totalPages));
         const textWidth = font.widthOfTextAtSize(text, size);
         
         let x, y;
-        const margin = 36; // 0.5 inch
+        const margin = 36;
 
-        // Y coordinate
-        if (position.startsWith('top')) {
-          y = height - size - margin;
-        } else { // bottom
-          y = margin;
-        }
+        if (position.startsWith('top')) y = height - size - margin;
+        else y = margin;
 
-        // X coordinate
-        if (position.endsWith('left')) {
-          x = margin;
-        } else if (position.endsWith('center')) {
-          x = width / 2 - textWidth / 2;
-        } else { // right
-          x = width - textWidth - margin;
-        }
+        if (position.endsWith('left')) x = margin;
+        else if (position.endsWith('center')) x = width / 2 - textWidth / 2;
+        else x = width - textWidth - margin;
 
         page.drawText(text, { x, y, font, size, color: rgb(0, 0, 0) });
-        pageCounter++;
       }
 
       const newPdfBytes = await pdfDoc.save();
