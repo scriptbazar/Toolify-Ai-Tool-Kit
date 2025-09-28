@@ -47,7 +47,7 @@ export function PdfPageNumberer() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [totalPages, setTotalPages] = useState<number | null>(null);
   const [position, setPosition] = useState<Position>('bottom-center');
-  const [format, setFormat] = useState('{page}');
+  const [format, setFormat] = useState('Page {page} of {pages}');
   const [startNumber, setStartNumber] = useState('1');
   const [pagesToNumber, setPagesToNumber] = useState('');
   const [fontSize, setFontSize] = useState('12');
@@ -58,21 +58,21 @@ export function PdfPageNumberer() {
 
   const handleFile = async (file: File) => {
     if (file && file.type === 'application/pdf') {
-      setIsLoading(true);
-      setPdfFile(file);
-      try {
-        const fileBytes = await file.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
-        setTotalPages(pdfDoc.getPageCount());
-      } catch (error) {
-        toast({ title: "Error reading PDF", description: "Could not read the page count.", variant: "destructive" });
-        setPdfFile(null);
-        setTotalPages(null);
-      } finally {
-        setIsLoading(false);
-      }
+        setIsLoading(true);
+        setPdfFile(file);
+        try {
+            const fileBytes = await file.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
+            setTotalPages(pdfDoc.getPageCount());
+        } catch (error) {
+            toast({ title: "Error reading PDF", description: "Could not read the page count. The file might be corrupted or encrypted.", variant: "destructive" });
+            setPdfFile(null);
+            setTotalPages(null);
+        } finally {
+            setIsLoading(false);
+        }
     } else if (file) {
-      toast({ title: 'Invalid File Type', variant: 'destructive' });
+        toast({ title: 'Invalid File Type', variant: 'destructive'});
     }
   };
 
@@ -145,7 +145,10 @@ export function PdfPageNumberer() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div className="space-y-6">
             <Card 
-                className={cn("transition-colors", isDragging && 'border-primary bg-primary/10')}
+                className={cn(
+                    "transition-colors",
+                    isDragging && 'border-primary bg-primary/10'
+                )}
                 onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
             >
                  <CardContent 
@@ -191,9 +194,9 @@ export function PdfPageNumberer() {
                     <Select value={format} onValueChange={setFormat}>
                         <SelectTrigger><SelectValue/></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="{page}">Page {page} (e.g., Page 1)</SelectItem>
-                            <SelectItem value="{page} / {pages}">Page {page} of {pages} (e.g., 1 / 10)</SelectItem>
-                            <SelectItem value="{page}">{page} (e.g., 1)</SelectItem>
+                            <SelectItem value="Page {page}">Page 1</SelectItem>
+                            <SelectItem value="Page {page} of {pages}">Page 1 of {totalPages || 'N'}</SelectItem>
+                            <SelectItem value="{page}">1</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
