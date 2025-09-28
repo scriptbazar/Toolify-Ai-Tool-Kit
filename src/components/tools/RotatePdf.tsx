@@ -44,7 +44,7 @@ const parsePageRanges = (pagesStr: string, totalPages: number): number[] => {
 export function RotatePdf() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [totalPages, setTotalPages] = useState<number | null>(null);
-  const [rotation, setRotation] = useState<90 | 180 | 270>(90);
+  const [rotation, setRotation] = useState<number>(90);
   const [pagesToRotate, setPagesToRotate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -161,12 +161,16 @@ export function RotatePdf() {
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                         <div className="space-y-2">
                             <Label htmlFor="rotation-angle">Rotation Angle</Label>
-                            <Select value={String(rotation)} onValueChange={(v) => setRotation(Number(v) as 90 | 180 | 270)}>
+                            <Select value={String(rotation)} onValueChange={(v) => setRotation(Number(v))}>
                                 <SelectTrigger><SelectValue/></SelectTrigger>
                                 <SelectContent>
+                                    <SelectItem value="45">45° (Clockwise)</SelectItem>
                                     <SelectItem value="90">90° (Clockwise)</SelectItem>
+                                    <SelectItem value="135">135° (Clockwise)</SelectItem>
                                     <SelectItem value="180">180° (Upside Down)</SelectItem>
+                                    <SelectItem value="225">225° (Clockwise)</SelectItem>
                                     <SelectItem value="270">270° (Counter-clockwise)</SelectItem>
+                                    <SelectItem value="315">315° (Clockwise)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
