@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -214,9 +215,19 @@ export async function createStripeCheckoutSession(input: CreateStripeSessionInpu
   const siteUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
 
   try {
+      const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
+      let customer = customers.data[0];
+
+      if (!customer) {
+        customer = await stripe.customers.create({
+            email: userEmail,
+            name: 'New Customer', // You can pass the user's name here if available
+        });
+      }
+      
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      customer_email: userEmail,
+      customer: customer.id,
       line_items: [
         {
           price_data: {
