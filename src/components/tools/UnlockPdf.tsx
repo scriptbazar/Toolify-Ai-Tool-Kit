@@ -43,25 +43,32 @@ export function UnlockPdf() {
 
     try {
         const existingPdfBytes = await pdfFile.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
+        let pdfDoc;
 
-        let unlockedPdfBytes;
-
-        if (pdfDoc.isEncrypted) {
-            if (!password) {
-              toast({ title: 'Password is required to unlock this PDF.', variant: 'destructive' });
-              setIsLoading(false);
-              return;
+        try {
+            // Try to load with the password. This will fail for unencrypted PDFs or wrong passwords.
+            pdfDoc = await PDFDocument.load(existingPdfBytes, { password });
+        } catch (error: any) {
+            if (error.name === 'PDFInvalidPasswordError') {
+                 throw new Error('The password you entered is incorrect. Please try again.');
             }
-            // Attempt to decrypt with the provided password
-            const decryptedDoc = await PDFDocument.load(existingPdfBytes, { password });
-            unlockedPdfBytes = await decryptedDoc.save();
-            toast({ title: 'Success!', description: 'Your PDF has been unlocked and downloaded.'});
-        } else {
-            // If not encrypted, just use the original bytes
-            unlockedPdfBytes = existingPdfBytes;
-            toast({ title: 'Already Unlocked', description: 'This PDF is not encrypted. Downloading a copy.'});
+            // If it's not a password error, assume it might be unencrypted and try loading without a password.
+             try {
+                pdfDoc = await PDFDocument.load(existingPdfBytes);
+                if (!pdfDoc.isEncrypted) {
+                    toast({ title: 'Already Unlocked', description: 'This PDF is not encrypted. Downloading a copy.'});
+                }
+            } catch (finalError) {
+                // If it fails again, it's a genuine load error.
+                 throw new Error('Could not process this PDF. It might be corrupted or in an unsupported format.');
+            }
         }
+        
+        if (!pdfDoc) {
+             throw new Error('Could not load the PDF document.');
+        }
+
+        const unlockedPdfBytes = await pdfDoc.save();
 
         const blob = new Blob([unlockedPdfBytes], { type: 'application/pdf' });
         const link = document.createElement('a');
@@ -69,14 +76,11 @@ export function UnlockPdf() {
         link.download = `unlocked-${pdfFile.name}`;
         link.click();
         URL.revokeObjectURL(link.href);
+        toast({ title: 'Success!', description: 'Your PDF has been unlocked and downloaded.'});
 
     } catch (error: any) {
         console.error("PDF Unlock Error:", error);
-        if (error.name === 'PDFInvalidPasswordError') {
-          toast({ title: 'Incorrect Password', description: 'The password you entered is incorrect. Please try again.', variant: 'destructive'});
-        } else {
-          toast({ title: 'Unlock Failed', description: error.message || 'Could not unlock the PDF.', variant: 'destructive'});
-        }
+        toast({ title: 'Unlock Failed', description: error.message || 'An unknown error occurred.', variant: 'destructive'});
     } finally {
         setIsLoading(false);
     }
