@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   experimental: {
     // This allows the Next.js development server to accept cross-origin
     // requests from the Firebase Studio environment.
-    allowedDevOrigins: ['https://*.cloudworkstations.dev'],
+    
   },
   typescript: {
     ignoreBuildErrors: true,
