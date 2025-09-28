@@ -49,6 +49,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Binary to Text', description: 'Convert binary code into readable ASCII text.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the binary code (e.g., 01001000 01100101 01101100 01101100 01101111) in the input area.', 'Click the "Convert to Text" button.', 'The corresponding ASCII text will appear in the output area.'] },
     { name: 'Text to Binary', description: 'Convert any text into binary code format.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the text you want to convert into the input area.', 'Click the "Convert to Binary" button.', 'The binary representation of your text will be displayed.'] },
     { name: 'CSS Minifier', description: 'Minify your CSS code to reduce file size, remove comments, and improve your website\'s loading times.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste your CSS code into the "Original CSS" box.', 'Click the "Minify CSS" button.', 'The minified code will appear in the "Minified CSS" box.', 'Click "Copy" to use the minified code.'] },
+    { name: 'HTML Minifier', description: 'Optimize your web pages by reducing the size of your HTML code, improving load times.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste your HTML code into the "Original HTML" box.', 'Click the "Minify HTML" button.', 'The minified code will appear in the "Minified HTML" box.', 'Click "Copy" to use the minified code.'] },
     { name: 'Discount Calculator', description: 'Easily calculate the final price after a discount and see exactly how much money you save.', icon: 'BadgePercent', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the original price of the item.', 'Enter the discount percentage.', 'Click the "Calculate" button.', 'View the final price and the amount you saved.'] },
     { name: 'Date Calculator', description: 'Calculate the duration between two dates or find a future/past date by adding or subtracting days, months, and years.', icon: 'CalendarDays', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select the "Add/Subtract" or "Duration" tab.', 'For Add/Subtract: Pick a start date and enter the years, months, or days to add or subtract.', 'For Duration: Pick a start and end date.', 'Click the appropriate button to see the calculated result.'] },
     { name: 'Compress PDF', description: 'Reduce the file size of your PDF documents without sacrificing quality, making them easier to share.', icon: 'FileArchive', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload the PDF file you want to compress.', 'Select the desired compression level (e.g., Low, Medium, High).', 'Click the "Compress PDF" button.', 'Download the optimized, smaller PDF file.'] },
@@ -474,6 +475,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
 
 
 

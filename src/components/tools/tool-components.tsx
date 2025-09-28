@@ -125,6 +125,7 @@ import { YouTubeVideoDescriptionExtractor } from './YouTubeVideoDescriptionExtra
 import { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownloader';
 import { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
 import { UnitConverter } from './UnitConverter';
+import { HtmlMinifier } from './HtmlMinifier';
 
 export const toolComponents: { [key: string]: React.ComponentType } = {
   'admob-revenue-calculator': AdMobRevenueCalculator,
@@ -155,6 +156,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'compress-pdf': CompressPdf,
   'credit-card-interest-calculator': CreditCardInterestCalculator,
   'css-minifier': CssMinifier,
+  'html-minifier': HtmlMinifier,
   'currency-converter': CurrencyConverter,
   'date-calculator': DateCalculator,
   'discount-calculator': DiscountCalculator,
