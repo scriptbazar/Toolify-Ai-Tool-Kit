@@ -60,6 +60,7 @@ export function PdfPageNumberer() {
     if (file && file.type === 'application/pdf') {
         setIsLoading(true);
         setPdfFile(file);
+        setTotalPages(null);
         try {
             const fileBytes = await file.arrayBuffer();
             const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
@@ -67,7 +68,6 @@ export function PdfPageNumberer() {
         } catch (error) {
             toast({ title: "Error reading PDF", description: "Could not read the page count. The file might be corrupted or encrypted.", variant: "destructive" });
             setPdfFile(null);
-            setTotalPages(null);
         } finally {
             setIsLoading(false);
         }
@@ -142,7 +142,7 @@ export function PdfPageNumberer() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+    <div className="grid grid-cols-1 gap-6 items-start">
         <div className="space-y-6">
             <Card 
                 className={cn(
@@ -213,7 +213,7 @@ export function PdfPageNumberer() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="pages-to-number">Apply to Pages (Optional)</Label>
-                        <Input id="pages-to-number" value={pagesToNumber} onChange={e => setPagesToNumber(e.target.value)} placeholder="e.g. 2-5, 8 (all pages if empty)"/>
+                        <Input id="pages-to-number" value={pagesToNumber} onChange={e => setPagesToNumber(e.target.value)} placeholder="e.g. 2-5, 8 (all if empty)"/>
                     </div>
                     <Button onClick={handleApplyNumbers} disabled={!pdfFile || isLoading} className="w-full">
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Hash className="mr-2 h-4 w-4"/>}

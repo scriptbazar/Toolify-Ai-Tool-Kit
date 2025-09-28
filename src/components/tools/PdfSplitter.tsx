@@ -14,7 +14,7 @@ import { splitPdf } from '@/ai/flows/pdf-management';
 
 type SplitMode = 'ranges' | 'fixed' | 'extract';
 
-// This helper is now defined on the client-side for validation
+// Helper to parse page ranges e.g., "1-5, 8, 10-12" into a set of numbers
 const parsePages = (pagesStr: string, totalPages: number): number[] => {
     const pages = new Set<number>();
     if (!pagesStr.trim()) {
@@ -171,7 +171,7 @@ export function PdfSplitter() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+    <div className="grid grid-cols-1 gap-6 items-start">
         <div className="space-y-6">
              <Card 
                 className={cn(
@@ -197,12 +197,6 @@ export function PdfSplitter() {
                     <span className="font-medium text-sm">Total Pages: {totalPages}</span>
                 </div>
             )}
-             {pdfFile && totalPages && (
-                 <Button onClick={handleSplit} disabled={isLoading} className="w-full">
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Split className="mr-2 h-4 w-4" />}
-                    Split PDF & Download
-                </Button>
-            )}
         </div>
         {pdfFile && totalPages && (
             <Card className="animate-in fade-in-50">
@@ -210,31 +204,32 @@ export function PdfSplitter() {
                     <CardTitle>Splitting Options</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <RadioGroup value={splitMode} onValueChange={(val) => setSplitMode(val as SplitMode)} className="grid grid-cols-1 gap-2">
+                    <RadioGroup value={splitMode} onValueChange={(val) => setSplitMode(val as SplitMode)} className="grid grid-cols-1 md:grid-cols-3 gap-2">
                         <Label htmlFor="mode-ranges" className="p-3 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary flex items-center gap-3">
                             <RadioGroupItem value="ranges" id="mode-ranges" />
                             <div>
                                 <p className="font-semibold">Split by ranges</p>
-                                <p className="text-xs text-muted-foreground">Create multiple PDFs from custom ranges.</p>
                             </div>
                         </Label>
                         <Label htmlFor="mode-fixed" className="p-3 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary flex items-center gap-3">
                             <RadioGroupItem value="fixed" id="mode-fixed" />
                             <div>
-                                <p className="font-semibold">Split into fixed-size chunks</p>
-                                <p className="text-xs text-muted-foreground">e.g., split into files of 2 pages each.</p>
+                                <p className="font-semibold">Fixed-size chunks</p>
                             </div>
                         </Label>
                         <Label htmlFor="mode-extract" className="p-3 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary flex items-center gap-3">
                             <RadioGroupItem value="extract" id="mode-extract" />
                             <div>
                                 <p className="font-semibold">Extract pages</p>
-                                <p className="text-xs text-muted-foreground">Create a single PDF from selected pages.</p>
                             </div>
                         </Label>
                     </RadioGroup>
+                    <div className="p-4 border rounded-lg">{renderOptions()}</div>
 
-                    {renderOptions()}
+                     <Button onClick={handleSplit} disabled={isLoading} className="w-full">
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Split className="mr-2 h-4 w-4" />}
+                        Split PDF & Download
+                    </Button>
                 </CardContent>
             </Card>
         )}
