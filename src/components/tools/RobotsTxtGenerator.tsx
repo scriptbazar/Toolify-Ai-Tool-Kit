@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -6,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Copy, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 
 export function RobotsTxtGenerator() {
     const [robotsTxt, setRobotsTxt] = useState(`User-agent: *\nAllow: /\n\nSitemap: https://example.com/sitemap.xml`);
