@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
@@ -126,33 +125,32 @@ export function RotatePdf() {
 
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <div className="space-y-6">
-            <Card 
-                className={cn(
-                    "transition-colors",
-                    isDragging && 'border-primary bg-primary/10'
-                )}
-                onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
-            >
-                 <CardContent 
-                    className="p-6 text-center cursor-pointer"
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
-                    <div className="flex flex-col items-center justify-center h-full">
-                        <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
-                    </div>
-                </CardContent>
-            </Card>
-            {totalPages && (
-                <div className="p-3 bg-muted rounded-md flex items-center justify-center gap-2">
-                    <FileText className="h-5 w-5 text-primary shrink-0"/>
-                    <span className="font-medium text-sm">Total Pages: {totalPages}</span>
-                </div>
+    <div className="space-y-6">
+        <Card 
+            className={cn(
+                "transition-colors",
+                isDragging && 'border-primary bg-primary/10'
             )}
-        </div>
+            onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+        >
+             <CardContent 
+                className="p-6 text-center cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+            >
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
+                <div className="flex flex-col items-center justify-center h-full">
+                    <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold">{pdfFile ? pdfFile.name : "Click or drag PDF to upload"}</h3>
+                </div>
+            </CardContent>
+        </Card>
+        {totalPages && (
+            <div className="p-3 bg-muted rounded-md flex items-center justify-center gap-2">
+                <FileText className="h-5 w-5 text-primary shrink-0"/>
+                <span className="font-medium text-sm">Total Pages: {totalPages}</span>
+            </div>
+        )}
+      
         {pdfFile && totalPages && (
             <Card className="animate-in fade-in-50">
                 <CardHeader>
@@ -160,20 +158,22 @@ export function RotatePdf() {
                     <CardDescription>Choose how you want to rotate your PDF.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="rotation-angle">Rotation Angle</Label>
-                        <Select value={String(rotation)} onValueChange={(v) => setRotation(Number(v) as 90 | 180 | 270)}>
-                            <SelectTrigger><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="90">90° (Clockwise)</SelectItem>
-                                <SelectItem value="180">180° (Upside Down)</SelectItem>
-                                <SelectItem value="270">270° (Counter-clockwise)</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="pages-to-rotate">Apply to Pages (Optional)</Label>
-                        <Input id="pages-to-rotate" value={pagesToRotate} onChange={e => setPagesToRotate(e.target.value)} placeholder="e.g., 2, 5-7 (all if empty)"/>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                        <div className="space-y-2">
+                            <Label htmlFor="rotation-angle">Rotation Angle</Label>
+                            <Select value={String(rotation)} onValueChange={(v) => setRotation(Number(v) as 90 | 180 | 270)}>
+                                <SelectTrigger><SelectValue/></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="90">90° (Clockwise)</SelectItem>
+                                    <SelectItem value="180">180° (Upside Down)</SelectItem>
+                                    <SelectItem value="270">270° (Counter-clockwise)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="pages-to-rotate">Apply to Pages (Optional)</Label>
+                            <Input id="pages-to-rotate" value={pagesToRotate} onChange={e => setPagesToRotate(e.target.value)} placeholder="e.g., 2, 5-7 (all if empty)"/>
+                        </div>
                     </div>
                      <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
                         <Button onClick={handleRotate} disabled={isLoading} className="w-full">
