@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { UploadCloud, FileText, Loader2, FileUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 
 export function PptToPdf() {
   const [file, setFile] = useState<File | null>(null);
