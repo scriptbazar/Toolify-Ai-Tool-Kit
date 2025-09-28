@@ -42,7 +42,6 @@ import { GpaCalculator } from './GpaCalculator';
 import { GpaToCgpaCalculator } from './GpaToCgpaCalculator';
 import { GpaToPercentageConverter } from './GpaToPercentageConverter';
 import { GSTCalculator } from './GSTCalculator';
-import { HtmlMinifier } from './HtmlMinifier';
 import { IcoConverter } from './IcoConverter';
 import { IFSCodetoBankDetails } from './IFSCCodeToBankDetails';
 import { ImageColorExtractor } from './ImageColorExtractor';
@@ -170,7 +169,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'gpa-to-cgpa-calculator': GpaToCgpaCalculator,
   'gpa-to-percentage-converter': GpaToPercentageConverter,
   'gst-calculator': GSTCalculator,
-  'html-minifier': HtmlMinifier,
   'ico-converter': IcoConverter,
   'ifsc-code-to-bank-details': IFSCodetoBankDetails,
   'image-color-extractor': ImageColorExtractor,

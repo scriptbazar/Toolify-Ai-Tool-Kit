@@ -44,7 +44,6 @@ export { GpaCalculator } from './GpaCalculator';
 export { GpaToCgpaCalculator } from './GpaToCgpaCalculator';
 export { GpaToPercentageConverter } from './GpaToPercentageConverter';
 export { GSTCalculator } from './GSTCalculator';
-export { HtmlMinifier } from './HtmlMinifier';
 export { IcoConverter } from './IcoConverter';
 export { IFSCodetoBankDetails } from './IFSCCodeToBankDetails';
 export { ImageColorExtractor } from './ImageColorExtractor';
