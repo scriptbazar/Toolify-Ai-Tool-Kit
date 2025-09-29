@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
+import nookies from 'nookies';
 
 interface AppUser {
   firstName: string;
@@ -30,6 +31,8 @@ export function useAuth() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        const token = await firebaseUser.getIdToken();
+        nookies.set(undefined, 'session', token, { path: '/' });
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         try {
             const userDocSnap = await getDoc(userDocRef);
@@ -55,6 +58,7 @@ export function useAuth() {
             setLoading(false);
         }
       } else {
+        nookies.destroy(undefined, 'session');
         setUser(null);
         setUserData(null);
         setIsAdmin(false);

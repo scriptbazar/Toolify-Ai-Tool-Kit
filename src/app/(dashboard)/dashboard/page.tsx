@@ -15,6 +15,7 @@ import { unstable_cache as cache, revalidatePath } from 'next/cache';
 import { getAuth } from 'firebase-admin/auth';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
+import { adminAuth } from "@/lib/firebase-admin-auth";
 
 
 const getDashboardData = cache(async (uid: string) => {
@@ -47,18 +48,21 @@ const getDashboardData = cache(async (uid: string) => {
 
 export default async function UserDashboard() {
   const cookieStore = cookies();
-  const session = cookieStore.get('session');
+  const sessionCookie = cookieStore.get('session')?.value;
 
-  // In a real app with proper auth, you'd get the UID from the verified session.
-  // For this demo, we'll use a hardcoded UID for caching purposes.
-  // This part needs to be replaced with your actual authentication logic.
-  const uid = session?.value || 'default-user-id'; 
-
-  if (!session) {
-      // Handle unauthenticated user - redirect or show login
-      // For now, we'll just show a message.
-       return <div>Please log in to view your dashboard.</div>;
+  if (!sessionCookie) {
+       return <div className="flex items-center justify-center h-full"><p>Please log in to view your dashboard.</p></div>;
   }
+  
+  let decodedToken;
+  try {
+    decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+  } catch (error) {
+    console.error('Error verifying session cookie:', error);
+    return <div className="flex items-center justify-center h-full"><p>Your session is invalid. Please log in again.</p></div>;
+  }
+  
+  const uid = decodedToken.uid;
   
   const { profile, plan, announcements, stats } = await getDashboardData(uid);
   const welcomeMessage = profile?.firstName ? `Welcome Back, ${profile.firstName} ${profile.lastName}!` : "User Dashboard";
