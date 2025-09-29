@@ -17,6 +17,7 @@ import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { createStripeCheckoutSession, createPayPalOrder, createRazorpayOrder, createPayUPayment, createCashfreePayment, createPhonePePayment } from '@/ai/flows/payment-management';
 import { loadStripe } from '@stripe/stripe-js';
+import { useRouter } from 'next/navigation';
 
 
 interface UserProfile {
@@ -35,6 +36,7 @@ export default function ManageSubscriptionPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
@@ -266,7 +268,6 @@ export default function ManageSubscriptionPage() {
                 id="billing-cycle"
                 checked={isYearly}
                 onCheckedChange={setIsYearly}
-                disabled
             />
             <Label htmlFor="billing-cycle" className="text-muted-foreground">
                 Yearly <span className="text-primary font-semibold">(Save 2 months)</span>
@@ -339,5 +340,3 @@ export default function ManageSubscriptionPage() {
     </div>
   );
 }
-
-    
