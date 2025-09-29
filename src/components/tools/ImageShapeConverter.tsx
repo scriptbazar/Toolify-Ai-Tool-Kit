@@ -263,5 +263,3 @@ export function ImageShapeConverter() {
         </div>
     );
 }
-
-    
