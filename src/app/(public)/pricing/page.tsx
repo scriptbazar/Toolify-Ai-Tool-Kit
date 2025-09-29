@@ -14,7 +14,8 @@ import type { Plan, FaqItem } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import * as Icons from 'lucide-react';
-
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 export default function PricingPage() {
     const [isYearly, setIsYearly] = useState(false);
@@ -22,6 +23,8 @@ export default function PricingPage() {
     const [faqs, setFaqs] = useState<FaqItem[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
+    const { user } = useAuth();
+    const router = useRouter();
 
     useEffect(() => {
         async function fetchPlans() {
@@ -44,6 +47,19 @@ export default function PricingPage() {
         }
         fetchPlans();
     }, [toast]);
+
+    const handleUpgradeClick = (plan: Plan) => {
+        if (user) {
+            router.push('/manage-subscription');
+        } else {
+            if (plan.price === 0) {
+                 router.push('/signup');
+            } else {
+                 router.push('/login');
+            }
+        }
+    };
+
 
     return (
         <div className="bg-background">
@@ -117,10 +133,13 @@ export default function PricingPage() {
                                         </ul>
                                     </CardContent>
                                     <CardFooter>
-                                        <Button asChild className="w-full" variant={plan.isPopular ? 'default' : 'outline'} size="lg">
-                                            <a href="/login">
-                                                {plan.price === 0 ? 'Get Started' : 'Upgrade Now'} <ArrowRight className="ml-2 h-4 w-4" />
-                                            </a>
+                                        <Button 
+                                            onClick={() => handleUpgradeClick(plan)}
+                                            className="w-full" 
+                                            variant={plan.isPopular ? 'default' : 'outline'} 
+                                            size="lg"
+                                        >
+                                            {plan.price === 0 ? 'Get Started' : 'Upgrade Now'} <ArrowRight className="ml-2 h-4 w-4" />
                                         </Button>
                                     </CardFooter>
                                 </Card>
