@@ -119,7 +119,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Redirect Checker', description: 'Check the redirect chain and status code of any URL.', icon: 'Link', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'SERP Checker', description: 'Check the search engine results page (SERP) for a specific keyword in any country.', icon: 'Search', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Schema Generator', description: 'Generate structured data markup in JSON-LD format, including FAQ, Article, and Product schemas.', icon: 'FileJson', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
-    { name: 'Robots Txt Generator', description: 'Create a robots.txt file to guide search engine crawlers on your website.', icon: 'FileCode', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: ["The editor comes with a default robots.txt template.", "Modify the content as needed for your specific site structure.", "Click 'Copy Code' to get the content for your robots.txt file."] },
+    { name: 'Robots.txt Generator', description: 'Create a robots.txt file to guide search engine crawlers on your website.', icon: 'FileCode', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: ["The editor comes with a default robots.txt template.", "Modify the content as needed for your specific site structure.", "Click 'Copy Code' to get the content for your robots.txt file."] },
     { name: 'Fuel Cost Calculator', description: 'Estimate the fuel cost for a trip based on distance, fuel efficiency, and price.', icon: 'Fuel', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Time Zone Converter', description: 'Convert times between different time zones around the world.', icon: 'Clock', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
     { name: 'Title Tag Checker', description: 'Check the length of your title tag in pixels and characters for SEO.', icon: 'Text', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: [] },
@@ -475,24 +475,3 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
