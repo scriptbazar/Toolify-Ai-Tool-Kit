@@ -36,7 +36,19 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  webpack: (config, { isServer }) => {
+    //
+    // The "handlebars" library is a sub-dependency of genkit, and it uses
+    // an old "require.extensions" feature that is not supported by webpack.
+    //
+    // This can be worked around by telling webpack to not try and bundle the
+    // "handlebars" library.
+    //
+    config.externals.push('handlebars');
+    return config;
+  },
 };
 
 export default nextConfig;
+
 
