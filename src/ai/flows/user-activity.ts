@@ -23,6 +23,15 @@ export type RecentToolActivity = {
     timestamp: string;
 };
 
+export type AdminActivityLogItem = {
+    id: string;
+    userId: string;
+    userName: string;
+    type: UserActivityType;
+    details: UserActivityDetails;
+    timestamp: string;
+}
+
 
 /**
  * Adds a new activity log for a user with a 15-day expiration date.
@@ -141,6 +150,8 @@ export async function logUserLogin(userId: string): Promise<{ success: boolean }
       location: location,
       status: 'Success',
     });
+    
+    await addUserActivity(userId, 'login', { name: 'User logged in' });
 
     return { success: true };
   } catch (error) {
@@ -245,6 +256,64 @@ export async function getRecentToolActivity(count = 20): Promise<RecentToolActiv
 
     } catch (error) {
         console.error("Error fetching recent tool activity:", error);
+        return [];
+    }
+}
+
+
+/**
+ * Fetches a log of all important admin-relevant activities across all users.
+ * Also handles cleanup of expired activities.
+ */
+export async function getAdminActivityLog(): Promise<AdminActivityLogItem[]> {
+    const adminDb = getAdminDb();
+    if (!adminDb) return [];
+    
+    try {
+        const now = new Date();
+        const activityQuery = adminDb.collectionGroup('activity')
+            .where('type', 'in', ['tool_usage', 'login', 'logout', 'account_update']);
+
+        // First, handle deletion of expired documents
+        const expiredQuery = activityQuery.where('expiresAt', '<=', now);
+        const expiredSnapshot = await expiredQuery.get();
+        
+        if (!expiredSnapshot.empty) {
+            const batch = adminDb.batch();
+            expiredSnapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+            console.log(`Cleaned up ${expiredSnapshot.size} expired activities.`);
+        }
+        
+        // Then, fetch the latest activities
+        const finalQuery = activityQuery.orderBy('timestamp', 'desc');
+        const activitySnapshot = await finalQuery.get();
+        
+        if (activitySnapshot.empty) return [];
+        
+        const userIds = [...new Set(activitySnapshot.docs.map(doc => doc.ref.parent.parent!.id))];
+        const userDocs = await Promise.all(userIds.map(id => adminDb.collection('users').doc(id).get()));
+        const userMap = new Map(userDocs.map(doc => doc.exists ? [doc.id, doc.data()] : [doc.id, null]));
+
+        return activitySnapshot.docs.map(doc => {
+            const data = doc.data();
+            const userId = doc.ref.parent.parent!.id;
+            const user = userMap.get(userId);
+            
+            return {
+                id: doc.id,
+                userId: userId,
+                userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+                type: data.type,
+                details: data.details,
+                timestamp: (data.timestamp as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+            };
+        });
+
+    } catch (error) {
+        console.error("Error fetching admin activity log:", error);
         return [];
     }
 }

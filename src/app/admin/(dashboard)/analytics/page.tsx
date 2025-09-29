@@ -11,6 +11,10 @@ import {
   BookOpen,
   ArrowLeft,
   ArrowRight,
+  Activity,
+  Footprints,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
 import {
   Card,
@@ -38,6 +42,8 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { getAdminActivityLog, type AdminActivityLogItem } from '@/ai/flows/user-activity';
+import Link from 'next/link';
 
 
 const RechartsLineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false });
@@ -62,15 +68,6 @@ interface PieChartData {
   name: string;
   value: number;
 }
-
-interface ActivityLog {
-  id: string;
-  action: string;
-  date: string;
-  ipAddress: string;
-}
-
-const dummyActivityLog: ActivityLog[] = [];
 
 
 const lineChartConfig = {
@@ -117,13 +114,9 @@ export default function AdminAnalyticsPage() {
   });
   const [lineChartData, setLineChartData] = useState<ChartData[]>([]);
   const [pieChartData, setPieChartData] = useState<PieChartData[]>([]);
+  const [activityLog, setActivityLog] = useState<AdminActivityLogItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = Math.ceil(dummyActivityLog.length / ITEMS_PER_PAGE);
-  const currentActivityLog = dummyActivityLog.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const [isActivityLoading, setIsActivityLoading] = useState(true);
 
   useEffect(() => {
     async function fetchAnalyticsData() {
@@ -214,15 +207,46 @@ export default function AdminAnalyticsPage() {
         setLoading(false);
       }
     }
+    
+    async function fetchActivity() {
+      setIsActivityLoading(true);
+      try {
+        const log = await getAdminActivityLog();
+        setActivityLog(log);
+      } catch (error) {
+        console.error("Error fetching activity log:", error);
+      } finally {
+        setIsActivityLoading(false);
+      }
+    }
+    
     fetchAnalyticsData();
+    fetchActivity();
     const interval = setInterval(fetchAnalyticsData, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
   }, []);
+
+  const totalPages = Math.ceil(activityLog.length / ITEMS_PER_PAGE);
+  const currentActivityLog = activityLog.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'activity', label: 'Activity Log' },
   ];
+  
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'tool_usage': return <Activity className="h-4 w-4 text-blue-500" />;
+      case 'login': return <LogIn className="h-4 w-4 text-green-500" />;
+      case 'logout': return <LogOut className="h-4 w-4 text-red-500" />;
+      default: return <Footprints className="h-4 w-4 text-gray-500" />;
+    }
+  }
+
 
   const renderOverview = () => {
      if (loading) {
@@ -367,27 +391,42 @@ export default function AdminAnalyticsPage() {
     <Card>
       <CardHeader>
         <CardTitle>Admin Activity Log</CardTitle>
-        <CardDescription>A log of all actions performed by administrators.</CardDescription>
+        <CardDescription>A log of all important actions performed by users.</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>User</TableHead>
               <TableHead>Action</TableHead>
+              <TableHead>Details</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead>IP Address</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentActivityLog.length > 0 ? currentActivityLog.map(log => (
+            {isActivityLoading ? (
+                [...Array(ITEMS_PER_PAGE)].map((_, i) => (
+                    <TableRow key={i}><TableCell colSpan={4}><Skeleton className="h-8 w-full"/></TableCell></TableRow>
+                ))
+            ) : currentActivityLog.length > 0 ? currentActivityLog.map(log => (
               <TableRow key={log.id}>
-                <TableCell className="font-medium">{log.action}</TableCell>
-                <TableCell>{log.date}</TableCell>
-                <TableCell>{log.ipAddress}</TableCell>
+                <TableCell>
+                    <Link href={`/admin/users/${log.userId}`} className="hover:underline">
+                        {log.userName}
+                    </Link>
+                </TableCell>
+                <TableCell>
+                    <div className="flex items-center gap-2">
+                        {getActivityIcon(log.type)}
+                        <span className="capitalize">{log.type.replace(/_/g, ' ')}</span>
+                    </div>
+                </TableCell>
+                <TableCell>{log.details.name}</TableCell>
+                <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
               </TableRow>
             )) : (
               <TableRow>
-                <TableCell colSpan={3} className="h-24 text-center">
+                <TableCell colSpan={4} className="h-24 text-center">
                   No activity log found.
                 </TableCell>
               </TableRow>
