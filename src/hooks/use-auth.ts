@@ -30,44 +30,38 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    return onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const token = await firebaseUser.getIdToken();
-        nookies.set(undefined, 'session', token, { path: '/' });
-        const userDocRef = doc(db, 'users', firebaseUser.uid);
-        try {
-            const userDocSnap = await getDoc(userDocRef);
-            if (userDocSnap.exists()) {
-                const data = userDocSnap.data() as AppUser;
-                setUserData(data);
-                const userIsAdmin = data.role === 'admin';
-                setIsAdmin(userIsAdmin);
-                
-                const combinedUser: CombinedUser = {
-                    ...firebaseUser,
-                    planId: data.planId,
-                    role: data.role,
-                };
-                setUser(combinedUser);
-            } else {
-                 setUser(firebaseUser as CombinedUser);
-            }
-        } catch(error) {
-            console.error("Auth hook error fetching user data:", error);
-            setUser(firebaseUser as CombinedUser); // Still set auth user on firestore error
-        } finally {
+        nookies.set(undefined, "session", token, { path: "/" });
+        
+        // Set user immediately to stop loading state
+        setUser(firebaseUser as CombinedUser);
+
+        // Fetch user data in the background
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        getDoc(userDocRef).then(userDocSnap => {
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data() as AppUser;
+            setUserData(data);
+            setIsAdmin(data.role === 'admin');
+            // Update user state with full data
+            setUser(prevUser => prevUser ? { ...prevUser, ...data } : null);
+          }
+        }).catch(error => {
+          console.error("Auth hook error fetching user data:", error);
+        }).finally(() => {
             setLoading(false);
-        }
+        });
+
       } else {
-        nookies.destroy(undefined, 'session', { path: '/' });
+        nookies.destroy(undefined, "session", { path: "/" });
         setUser(null);
         setUserData(null);
         setIsAdmin(false);
         setLoading(false);
       }
     });
-
-    return () => unsubscribe();
   }, []);
 
   return { user, userData, isAdmin, loading };
