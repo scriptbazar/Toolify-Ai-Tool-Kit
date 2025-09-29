@@ -153,7 +153,7 @@ export default function AdminAnalyticsPage() {
             getCountFromServer(usersRef),
             getCountFromServer(leadsRef),
             getCountFromServer(newUsersQuery),
-            getCountFromServer(prevNewUsersSnap),
+            getCountFromServer(prevNewUsersQuery),
             getCountFromServer(activeUsersQuery),
             getCountFromServer(prevTotalLeadsQuery),
             getDocs(usersRef),
