@@ -63,7 +63,6 @@ export const getPosts = cache(async (status: 'Published' | 'all' = 'Published'):
 
 /**
  * Fetches all comments from Firestore.
- * @returns {Promise<Comment[]>} A list of all comments.
  */
 export async function getComments(): Promise<Comment[]> {
     const adminDb = getAdminDb();

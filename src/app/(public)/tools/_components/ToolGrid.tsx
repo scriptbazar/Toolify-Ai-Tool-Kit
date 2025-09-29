@@ -7,30 +7,23 @@ import { UpgradeProDialog } from '@/components/tools/UpgradeProDialog';
 import { useAuth } from '@/hooks/use-auth';
 import type { Tool } from '@/ai/flows/tool-management.types';
 import { toggleFavoriteTool } from '@/ai/flows/tool-management';
-import { getFavoriteTools } from '@/ai/flows/tool-management';
 import { useToast } from '@/hooks/use-toast';
 import { Package } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function ToolGrid({ tools }: { tools: Tool[] }) {
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   const [favoriteSlugs, setFavoriteSlugs] = useState<Set<string>>(new Set());
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      setLoadingFavorites(true);
-      getFavoriteTools(user.uid)
-        .then(favTools => {
-          setFavoriteSlugs(new Set(favTools.map(t => t.slug)));
-        })
-        .finally(() => setLoadingFavorites(false));
-    } else {
-        setLoadingFavorites(false);
+    if (user && userData) {
+      setFavoriteSlugs(new Set(userData.favorites || []));
     }
-  }, [user]);
+    setLoadingFavorites(false);
+  }, [user, userData]);
 
   const handleToggleFavorite = async (slug: string) => {
     if (!user) return;
