@@ -13,6 +13,24 @@ import { CountdownTimer } from '@/components/common/CountdownTimer';
 import ReactConfetti from 'react-confetti';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 
+const useWindowSize = () => {
+    const [size, setSize] = useState({ width: 0, height: 0 });
+    useEffect(() => {
+        const handleResize = () => {
+            setSize({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+        };
+        
+        window.addEventListener('resize', handleResize);
+        handleResize();
+        
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    return size;
+};
+
 
 export function AgeCalculator() {
   const [day, setDay] = useState('');
@@ -22,6 +40,9 @@ export function AgeCalculator() {
   const [age, setAge] = useState<{ years: number; months: number; days: number; hours: number; minutes: number; seconds: number; milliseconds: number; } | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isBirthday, setIsBirthday] = useState(false);
+  const [isBirthdayExplosion, setIsBirthdayExplosion] = useState(false);
+  const { width, height } = useWindowSize();
+
 
   const monthInputRef = useRef<HTMLInputElement>(null);
   const yearInputRef = useRef<HTMLInputElement>(null);
@@ -95,6 +116,14 @@ export function AgeCalculator() {
     return { date: format(nextBday, 'PPP'), daysLeft: differenceInDays(nextBday, now), nextBdayDate: nextBday };
   };
 
+  const handleBirthdayExplosion = () => {
+    setIsBirthdayExplosion(true);
+    setTimeout(() => {
+        setIsBirthdayExplosion(false);
+        setIsBirthday(false); // Close the dialog after the explosion
+    }, 8000); // Let the explosion last for 8 seconds
+  };
+
   const nextBdayInfo = nextBirthday();
   
   const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,21 +141,54 @@ export function AgeCalculator() {
       yearInputRef.current?.focus();
     }
   };
+  
+  const CakeWithCandles = ({ age }: { age: number }) => {
+    const candles = Array.from({ length: age > 0 ? age : 1 }, (_, i) => i);
+    const candleWidth = 4;
+    const candleSpacing = age > 20 ? 3 : (age > 10 ? 4 : 6);
+    const totalCandleWidth = (candles.length * (candleWidth + candleSpacing)) - candleSpacing;
+    const startX = (200 - totalCandleWidth) / 2;
+
+    return (
+        <svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg" className="w-64 h-auto">
+            {/* Candles */}
+            {candles.map((_, i) => (
+                <g key={i}>
+                    <rect x={startX + i * (candleWidth + candleSpacing)} y="40" width={candleWidth} height="20" rx="1" className="fill-primary" />
+                    <path d={`M ${startX + i * (candleWidth + candleSpacing) + candleWidth / 2},40 Q ${startX + i * (candleWidth + candleSpacing) + candleWidth / 2},35 ${startX + i * (candleWidth + candleSpacing) + candleWidth / 2 - 1},30 C ${startX + i * (candleWidth + candleSpacing) + candleWidth / 2 - 3},25 ${startX + i * (candleWidth + candleSpacing) + candleWidth / 2 + 1},25 ${startX + i * (candleWidth + candleSpacing) + candleWidth / 2},30 Q ${startX + i * (candleWidth + candleSpacing) + candleWidth / 2},35 ${startX + i * (candleWidth + candleSpacing) + candleWidth / 2},40`} className="fill-yellow-300" />
+                </g>
+            ))}
+            {/* Cake */}
+            <rect x="10" y="60" width="180" height="80" rx="8" className="fill-pink-300 dark:fill-pink-800" />
+            <rect x="20" y="80" width="160" height="50" fill="rgba(255,255,255,0.5)" />
+            <rect x="0" y="140" width="200" height="10" rx="5" className="fill-gray-200 dark:fill-gray-700" />
+        </svg>
+    )
+  }
 
   return (
     <>
-      {showConfetti && <ReactConfetti recycle={false} numberOfPieces={200} />}
+      {showConfetti && <ReactConfetti recycle={false} numberOfPieces={200} gravity={0.2} initialVelocityY={-10} />}
+      {isBirthdayExplosion && <ReactConfetti width={width} height={height} numberOfPieces={500} recycle={false} />}
+
        <Dialog open={isBirthday} onOpenChange={setIsBirthday}>
         <DialogContent className="sm:max-w-md text-center">
             <DialogHeader>
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-                    <PartyPopper className="h-10 w-10 text-primary" />
-                </div>
                 <DialogTitle className="text-2xl">Happy Birthday!</DialogTitle>
                 <DialogDescription>
                     Wishing you a fantastic day filled with joy and happiness.
                 </DialogDescription>
             </DialogHeader>
+            <div className="flex flex-col items-center justify-center my-4">
+               <CakeWithCandles age={age?.years || 0} />
+               <div 
+                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+                 onClick={handleBirthdayExplosion}
+               >
+                   <span className="text-7xl font-bold text-white drop-shadow-lg group-hover:scale-110 transition-transform">{age?.years}</span>
+                   <p className="text-xs text-white/80 animate-pulse">Click my age!</p>
+               </div>
+            </div>
         </DialogContent>
       </Dialog>
 
