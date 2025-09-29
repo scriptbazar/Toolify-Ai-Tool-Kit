@@ -137,33 +137,26 @@ const CreatePhonePePaymentOutputSchema = z.object({
 type CreatePhonePePaymentOutput = z.infer<typeof CreatePhonePePaymentOutputSchema>;
 
 
-async function getPayPalClient() {
-    const settings = await getSettings();
-    const paypalSettings = settings.payment?.paypal;
-    if (!paypalSettings?.isEnabled || !paypalSettings.clientId || !paypalSettings.clientSecret) {
-      throw new Error('PayPal is not configured or enabled.');
-    }
-
-    let environment;
-    if (paypalSettings.mode === 'live') {
-      environment = new paypal.core.LiveEnvironment(paypalSettings.clientId, paypalSettings.clientSecret);
-    } else {
-      environment = new paypal.core.SandboxEnvironment(paypalSettings.clientId, paypalSettings.clientSecret);
-    }
-      
-    const client = new paypal.core.PayPalHttpClient(environment);
-    return client;
-}
-
 /**
  * Creates a PayPal order for a user to purchase a plan.
  */
 export async function createPayPalOrder(input: CreatePayPalOrderInput): Promise<z.infer<typeof CreatePayPalOrderOutputSchema>> {
   const { planId, planName, planPrice, userId } = CreatePayPalOrderInputSchema.parse(input);
   
-  const client = await getPayPalClient();
-  const request = new paypal.orders.OrdersCreateRequest();
+  // Directly get settings and create client inside the function
+  const settings = await getSettings();
+  const paypalSettings = settings.payment?.paypal;
+  if (!paypalSettings?.isEnabled || !paypalSettings.clientId || !paypalSettings.clientSecret) {
+    throw new Error('PayPal is not configured or enabled.');
+  }
+
+  const environment = paypalSettings.mode === 'live'
+    ? new paypal.core.LiveEnvironment(paypalSettings.clientId, paypalSettings.clientSecret)
+    : new paypal.core.SandboxEnvironment(paypalSettings.clientId, paypalSettings.clientSecret);
+    
+  const client = new paypal.core.PayPalHttpClient(environment);
   
+  const request = new paypal.orders.OrdersCreateRequest();
   const siteUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
 
   request.prefer("return=representation");
@@ -192,8 +185,8 @@ export async function createPayPalOrder(input: CreatePayPalOrderInput): Promise<
       links: order.result.links,
     });
   } catch (error: any) {
-    console.error("PayPal Error:", error);
-    const errorDetails = error.details ? JSON.stringify(error.details) : error.message;
+    console.error("PayPal Error:", JSON.stringify(error.result, null, 2));
+    const errorDetails = error.result ? `{"error":"${error.result.name}","error_description":"${error.result.message}"}` : error.message;
     throw new Error(`Failed to create PayPal order: ${errorDetails}`);
   }
 }
@@ -558,7 +551,18 @@ export async function capturePayPalOrder(orderId: string): Promise<{ success: bo
       throw new Error('Database not initialized for verification.');
     }
     try {
-        const client = await getPayPalClient();
+        const settings = await getSettings();
+        const paypalSettings = settings.payment?.paypal;
+        if (!paypalSettings?.isEnabled || !paypalSettings.clientId || !paypalSettings.clientSecret) {
+            throw new Error('PayPal is not configured or enabled.');
+        }
+
+        const environment = paypalSettings.mode === 'live'
+            ? new paypal.core.LiveEnvironment(paypalSettings.clientId, paypalSettings.clientSecret)
+            : new paypal.core.SandboxEnvironment(paypalSettings.clientId, paypalSettings.clientSecret);
+            
+        const client = new paypal.core.PayPalHttpClient(environment);
+
         const request = new paypal.orders.OrdersCaptureRequest(orderId);
         request.requestBody({});
 
