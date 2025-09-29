@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, type MouseEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { UploadCloud, Download, Loader2, Circle, Heart, Star as StarIcon, Hexagon, Triangle, VenetianMask, Cross, Frame, Badge, MessageSquare, Octagon, Bot, Diamond, Pentagon, ArrowRight, ZoomIn } from 'lucide-react';
@@ -36,6 +36,10 @@ export function ImageShapeConverter() {
     const [convertedImage, setConvertedImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [zoom, setZoom] = useState(100);
+    const [offset, setOffset] = useState({ x: 0, y: 0 });
+    const [isPannable, setIsPannable] = useState(false);
+    const lastMousePos = useRef({ x: 0, y: 0 });
+
     const { toast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const imageRef = useRef<HTMLImageElement | null>(null);
@@ -56,6 +60,7 @@ export function ImageShapeConverter() {
             };
             reader.readAsDataURL(file);
             setConvertedImage(null);
+            setOffset({ x: 0, y: 0 }); // Reset pan on new image
         } else if (file) {
             toast({ title: "Invalid File", description: "Please upload a valid image file.", variant: "destructive" });
         }
@@ -177,27 +182,26 @@ export function ImageShapeConverter() {
         ctx.clip();
         
         const zoomFactor = zoom / 100;
-        // Start with 'contain' logic and then apply zoom
         const ratio = Math.min(size / img.naturalWidth, size / img.naturalHeight) * zoomFactor;
         const imgWidth = img.naturalWidth * ratio;
         const imgHeight = img.naturalHeight * ratio;
 
-        const x = (size - imgWidth) / 2;
-        const y = (size - imgHeight) / 2;
+        const x = (size - imgWidth) / 2 + offset.x;
+        const y = (size - imgHeight) / 2 + offset.y;
         
         ctx.drawImage(img, x, y, imgWidth, imgHeight);
         ctx.restore();
         
         setConvertedImage(canvas.toDataURL('image/png'));
         setIsLoading(false);
-    }, [selectedShape, drawShape, zoom]);
+    }, [selectedShape, drawShape, zoom, offset]);
 
 
     useEffect(() => {
         if (imagePreview && imageRef.current) {
             processImage();
         }
-    }, [imagePreview, selectedShape, processImage, zoom]);
+    }, [imagePreview, selectedShape, processImage, zoom, offset]);
 
     const handleDownload = () => {
         if (!convertedImage || !imageFile) return;
@@ -207,6 +211,24 @@ export function ImageShapeConverter() {
         link.download = `${shapeName}-${imageFile.name.split('.')[0]}.png`;
         link.click();
     };
+    
+    // --- Panning logic ---
+    const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsPannable(true);
+        lastMousePos.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+        if (!isPannable) return;
+        const dx = e.clientX - lastMousePos.current.x;
+        const dy = e.clientY - lastMousePos.current.y;
+        lastMousePos.current = { x: e.clientX, y: e.clientY };
+        setOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+    };
+
+    const handleMouseUp = () => setIsPannable(false);
+    const handleMouseLeave = () => setIsPannable(false);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
@@ -247,7 +269,13 @@ export function ImageShapeConverter() {
             </div>
 
             <div className="space-y-6">
-                 <div className="w-full aspect-square border rounded-lg flex items-center justify-center p-4">
+                 <div 
+                    className={cn("w-full aspect-square border rounded-lg flex items-center justify-center p-4", isPannable && "cursor-grabbing")}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseLeave}
+                 >
                      <canvas ref={canvasRef} className="hidden" />
                      {isLoading && <Loader2 className="h-12 w-12 text-primary animate-spin" />}
                      {!isLoading && convertedImage ? (
