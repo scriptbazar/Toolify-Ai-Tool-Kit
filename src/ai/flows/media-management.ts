@@ -10,17 +10,17 @@
 
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
-import { z } from 'zod';
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/googleai';
+import {
+    SaveMediaInputSchema,
+    GenerateImageInputSchema,
+    GenerateImageOutputSchema,
+    type SaveMediaInput,
+    type GenerateImageInput,
+    type GenerateImageOutput
+} from './media-management.types';
 
-export const SaveMediaInputSchema = z.object({
-    userId: z.string(),
-    type: z.enum(['ai-generated', 'community-chat', 'ticket-media']),
-    mediaUrl: z.string().url(),
-    prompt: z.string().optional(),
-});
-export type SaveMediaInput = z.infer<typeof SaveMediaInputSchema>;
 
 export async function saveUserMedia(input: SaveMediaInput): Promise<{ success: boolean }> {
   const adminDb = getAdminDb();
@@ -58,24 +58,12 @@ export async function saveUserMedia(input: SaveMediaInput): Promise<{ success: b
 }
 
 
-const GenerateImageInputSchema = z.object({
-  promptText: z.string().describe('The text prompt to generate an image from.'),
-  userId: z.string(), // To track usage, although not directly used in the model call
-});
-type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
-
-const GenerateImageOutputSchema = z.object({
-  imageDataUri: z.string().describe('The generated image as a base64 data URI.'),
-});
-type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
-
-
 export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
   const { promptText, userId } = GenerateImageInputSchema.parse(input);
   
   try {
     const { media } = await ai.generate({
-      model: googleAI.model('imagen-2'),
+      model: googleAI.model('imagen-4.0-fast-generate-001'),
       prompt: promptText,
     });
     
