@@ -20,7 +20,7 @@ export type SpeechToTextOutput = z.infer<typeof SpeechToTextOutputSchema>;
 
 export async function speechToText(input: SpeechToTextInput): Promise<SpeechToTextOutput> {
     const { text } = await ai.generate({
-      model: 'gemini-1.5-flash-latest',
+      model: 'googleai/gemini-1.5-flash-latest',
       prompt: [
         { text: 'Transcribe the following audio with accurate punctuation and paragraphing:' },
         { media: { url: input.audioDataUri } }
