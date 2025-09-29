@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, type DragEvent } from 'react';
@@ -167,7 +168,7 @@ export function SpeechToText() {
                     <Skeleton className="h-4 w-3/4" />
                 </div>
             )}
-            <div className="flex justify-end gap-2 mt-4">
+             <div className="flex justify-end gap-2 mt-4">
                 <Button variant="outline" size="sm" onClick={handleCopy} disabled={!transcribedText || isLoading}>
                     <Copy className="mr-2 h-4 w-4" /> Copy
                 </Button>

@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -24,6 +25,9 @@ export async function speechToText(input: SpeechToTextInput): Promise<SpeechToTe
         { text: 'Transcribe the following audio with accurate punctuation and paragraphing:' },
         { media: { url: input.audioDataUri } }
       ],
+      config: {
+        responseMimeType: 'text/plain',
+      },
     });
 
     if (!text) {
