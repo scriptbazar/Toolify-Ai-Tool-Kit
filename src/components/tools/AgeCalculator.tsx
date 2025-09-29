@@ -185,7 +185,7 @@ export function AgeCalculator() {
                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
                  onClick={handleBirthdayExplosion}
                >
-                   <span className="text-7xl font-bold text-white [text-shadow:0_0_10px_rgba(0,0,0,0.5),0_0_20px_theme(colors.primary)] group-hover:scale-110 transition-transform">{age?.years}</span>
+                   <span className="text-7xl font-bold text-white [text-shadow:0_0_10px_rgba(0,0,0,0.5),0_0_20px_hsl(var(--primary))] group-hover:scale-110 transition-transform">{age?.years}</span>
                    <p className="text-xs text-white/90 animate-pulse font-semibold [text-shadow:0_0_5px_black]">Click my age!</p>
                </div>
             </div>
