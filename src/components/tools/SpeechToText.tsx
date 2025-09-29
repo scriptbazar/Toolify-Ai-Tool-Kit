@@ -9,6 +9,7 @@ import { UploadCloud, Copy, Mic, Loader2, FileText, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast';
 import { speechToText } from '@/ai/flows/speech-to-text';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Skeleton } from '../ui/skeleton';
 
@@ -79,7 +80,7 @@ export function SpeechToText() {
         const result = await speechToText({
           audioDataUri: base64Audio,
         });
-        setTranscribedText(result.transcribedText);
+        setTranscribedText(result.extractedText);
         setIsLoading(false);
       };
       reader.onerror = (error) => {
@@ -148,36 +149,38 @@ export function SpeechToText() {
         </Button>
       </div>
 
-       <Card>
-        <CardHeader>
-            <CardTitle>Transcribed Text</CardTitle>
-            <CardDescription>The text recognized from your audio will appear here.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <Textarea
-                id="transcribed-text"
-                value={transcribedText}
-                readOnly
-                placeholder={isLoading ? "Analyzing your audio, please wait..." : "Transcription will appear here..."}
-                className="min-h-[300px] bg-muted"
-            />
-            {isLoading && (
-                <div className="space-y-2 mt-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                </div>
-            )}
-             <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline" size="sm" onClick={handleCopy} disabled={!transcribedText || isLoading}>
-                    <Copy className="mr-2 h-4 w-4" /> Copy
-                </Button>
-                <Button variant="destructive" size="sm" onClick={handleClear} disabled={!audioFile && !transcribedText}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Clear
-                </Button>
-            </div>
-        </CardContent>
-       </Card>
+       {(isLoading || transcribedText) && (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Transcribed Text</CardTitle>
+                    <CardDescription>The text recognized from your audio will appear here.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Textarea
+                        id="transcribed-text"
+                        value={transcribedText}
+                        readOnly
+                        placeholder={isLoading ? "Analyzing your audio, please wait..." : "Transcription will appear here..."}
+                        className="min-h-[300px] bg-muted"
+                    />
+                    {isLoading && (
+                        <div className="space-y-2 mt-2">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-3/4" />
+                        </div>
+                    )}
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button variant="outline" size="sm" onClick={handleCopy} disabled={!transcribedText || isLoading}>
+                            <Copy className="mr-2 h-4 w-4" /> Copy
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={handleClear} disabled={!audioFile && !transcribedText}>
+                            <Trash2 className="mr-2 h-4 w-4" /> Clear
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+       )}
     </div>
   );
 }
