@@ -12,10 +12,8 @@ import { getAnnouncementsForUser } from '@/ai/flows/announcement-flow';
 import { type Announcement } from '@/ai/flows/announcement-flow.types';
 import { DashboardClient } from './_components/DashboardClient';
 import { unstable_cache as cache, revalidatePath } from 'next/cache';
-import { getAuth } from 'firebase-admin/auth';
-import { getAdminDb } from '@/lib/firebase-admin';
+import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
-import { adminAuth } from "@/lib/firebase-admin-auth";
 
 
 const getDashboardData = cache(async (uid: string) => {
@@ -56,6 +54,7 @@ export default async function UserDashboard() {
   
   let decodedToken;
   try {
+    const adminAuth = getAdminAuth();
     decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
   } catch (error) {
     console.error('Error verifying session cookie:', error);

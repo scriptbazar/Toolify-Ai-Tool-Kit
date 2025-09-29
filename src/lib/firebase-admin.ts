@@ -8,30 +8,40 @@ import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import serviceAccount from '../../firebase-service-account-key.json';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import { z } from 'zod';
+import { getAuth } from 'firebase-admin/auth';
 
 
 let adminDb: Firestore;
+let adminApp: App;
 
-function initializeAdminDb() {
+function initializeAdmin() {
     if (!getApps().length) {
-      const adminApp = initializeApp({
+      adminApp = initializeApp({
         credential: cert(serviceAccount as ServiceAccount),
       });
       adminDb = getFirestore(adminApp);
     } else {
-      adminDb = getFirestore(getApps()[0]);
+      adminApp = getApps()[0];
+      adminDb = getFirestore(adminApp);
     }
 }
 
 // Initialize on module load
-initializeAdminDb();
+initializeAdmin();
 
 
 export function getAdminDb() {
     if (!adminDb) {
-        initializeAdminDb();
+        initializeAdmin();
     }
     return adminDb;
+}
+
+export function getAdminAuth() {
+    if (!adminApp) {
+        initializeAdmin();
+    }
+    return getAuth(adminApp);
 }
 
 
