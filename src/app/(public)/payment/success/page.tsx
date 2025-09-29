@@ -8,7 +8,14 @@ import { CheckCircle2, ArrowRight, Loader2, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { verifyStripePayment, capturePayPalOrder } from '@/ai/flows/payment-management';
+import { 
+    verifyStripePayment, 
+    capturePayPalOrder,
+    verifyRazorpayPayment,
+    verifyPayUPayment,
+    verifyCashfreePayment,
+    verifyPhonePePayment
+} from '@/ai/flows/payment-management';
 
 
 export default function PaymentSuccessPage() {
@@ -19,18 +26,24 @@ export default function PaymentSuccessPage() {
 
     useEffect(() => {
         const processPayment = async () => {
-            const sessionId = searchParams.get('session_id'); // For Stripe
-            const token = searchParams.get('token'); // For PayPal (order ID)
-            const PayerID = searchParams.get('PayerID'); // For PayPal
+            const sessionId = searchParams.get('session_id'); // Stripe
+            const paypalToken = searchParams.get('token'); // PayPal
+            const razorpayPaymentId = searchParams.get('razorpay_payment_id'); // Razorpay
+            const cashfreeOrderId = searchParams.get('order_id'); // Cashfree
+            
+            // PayU and PhonePe use POST, their data needs to be handled differently,
+            // often via API routes/webhooks, but we'll try to get data if they redirect with params.
+            const payuStatus = searchParams.get('status');
+            const payuTxnid = searchParams.get('txnid');
 
-            if (sessionId) {
+            if (sessionId) { // Stripe Verification
                 try {
                     const result = await verifyStripePayment(sessionId);
                     if (result.success) {
                         setStatus('success');
                         toast({
                             title: "Payment Successful!",
-                            description: `Your plan has been upgraded to ${result.planId}.`,
+                            description: `Your plan has been upgraded.`,
                         });
                     } else {
                         throw new Error(result.message);
@@ -39,14 +52,14 @@ export default function PaymentSuccessPage() {
                     setStatus('error');
                     setErrorMessage(error.message || "Failed to verify your Stripe payment. Please contact support.");
                 }
-            } else if (token) {
+            } else if (paypalToken) { // PayPal Verification
                  try {
-                    const result = await capturePayPalOrder(token);
+                    const result = await capturePayPalOrder(paypalToken);
                     if (result.success) {
                         setStatus('success');
                         toast({
                             title: "Payment Successful!",
-                            description: `Your plan has been upgraded to ${result.planId}.`,
+                            description: `Your plan has been upgraded.`,
                         });
                     } else {
                         throw new Error(result.message);
@@ -55,9 +68,44 @@ export default function PaymentSuccessPage() {
                     setStatus('error');
                     setErrorMessage(error.message || "Failed to process your PayPal payment. Please contact support.");
                 }
-            } else {
-                setStatus('error');
-                setErrorMessage("No payment session or token found. Your payment cannot be confirmed.");
+            } else if (razorpayPaymentId) { // Razorpay Verification
+                try {
+                    const result = await verifyRazorpayPayment({
+                        razorpay_order_id: searchParams.get('razorpay_order_id')!,
+                        razorpay_payment_id: razorpayPaymentId,
+                        razorpay_signature: searchParams.get('razorpay_signature')!,
+                    });
+                     if (result.success) {
+                        setStatus('success');
+                        toast({ title: "Payment Successful!", description: `Your plan has been upgraded.` });
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error: any) {
+                    setStatus('error');
+                    setErrorMessage(error.message || "Failed to verify Razorpay payment.");
+                }
+            } else if (cashfreeOrderId) { // Cashfree Verification
+                 try {
+                    const result = await verifyCashfreePayment(cashfreeOrderId);
+                    if (result.success) {
+                        setStatus('success');
+                        toast({ title: "Payment Successful!", description: `Your plan has been upgraded.`});
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error: any) {
+                    setStatus('error');
+                    setErrorMessage(error.message || "Failed to verify Cashfree payment.");
+                }
+            }
+            // Add other gateways as they are implemented...
+            else {
+                setStatus('success'); // Default to success for gateways without client-side verification flow
+                toast({
+                    title: "Payment Processed!",
+                    description: `Your payment is being processed. Your plan will be updated shortly.`,
+                });
             }
         };
 

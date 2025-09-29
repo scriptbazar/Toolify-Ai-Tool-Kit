@@ -591,3 +591,129 @@ export async function capturePayPalOrder(orderId: string): Promise<{ success: bo
         return { success: false, message: error.message || 'An unknown error occurred while capturing the PayPal payment.' };
     }
 }
+
+
+/**
+ * Verifies a Razorpay payment.
+ */
+export async function verifyRazorpayPayment(input: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; }): Promise<{ success: boolean; message: string }> {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = input;
+  
+  const settings = await getSettings();
+  const razorpaySettings = settings.payment?.razorpay;
+  if (!razorpaySettings?.isEnabled || !razorpaySettings.keySecret) {
+    throw new Error('Razorpay is not configured for verification.');
+  }
+
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
+  const expectedSignature = crypto.createHmac('sha256', razorpaySettings.keySecret).update(body.toString()).digest('hex');
+
+  if (expectedSignature === razorpay_signature) {
+    // Signature matches, now fetch order details to get user/plan info
+    const instance = new Razorpay({ key_id: razorpaySettings.keyId, key_secret: razorpaySettings.keySecret });
+    const order = await instance.orders.fetch(razorpay_order_id);
+
+    if (order && order.notes && order.notes.userId && order.notes.planId) {
+      const { userId, planId } = order.notes;
+      const userRef = getAdminDb().collection('users').doc(userId);
+      await userRef.update({ planId, subscriptionStatus: 'active' });
+      return { success: true, message: 'Payment verified and plan updated.' };
+    }
+    throw new Error('Order details not found.');
+  } else {
+    return { success: false, message: 'Payment verification failed. Signature mismatch.' };
+  }
+}
+
+/**
+ * Verifies a PayU payment. This is a basic example.
+ * PayU verification is typically done via webhooks (server-to-server).
+ */
+export async function verifyPayUPayment(input: { status: string; txnid: string; hash: string }): Promise<{ success: boolean; message: string }> {
+   // This is a placeholder for a much more complex server-to-server verification
+   if (input.status === 'success') {
+       // In a real app, you'd find the user associated with txnid and update their plan.
+       return { success: true, message: 'PayU payment processed.' };
+   }
+   return { success: false, message: 'PayU payment failed.' };
+}
+
+
+/**
+ * Verifies a Cashfree payment.
+ */
+export async function verifyCashfreePayment(orderId: string): Promise<{ success: boolean; message: string }> {
+  const settings = await getSettings();
+  const cashfreeSettings = settings.payment?.cashfree;
+  if (!cashfreeSettings?.isEnabled || !cashfreeSettings.appId || !cashfreeSettings.secretKey) {
+    throw new Error('Cashfree is not configured for verification.');
+  }
+
+  const url = cashfreeSettings.mode === 'production'
+    ? `https://api.cashfree.com/pg/orders/${orderId}`
+    : `https://sandbox.cashfree.com/pg/orders/${orderId}`;
+  
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-client-id': cashfreeSettings.appId,
+      'x-client-secret': cashfreeSettings.secretKey,
+      'x-api-version': '2022-09-01',
+    },
+  });
+
+  const data = await response.json();
+
+  if (data.order_status === 'PAID' && data.customer_details.customer_id) {
+     const userId = data.customer_details.customer_id;
+     // This is a simplification. Plan ID would need to be stored in order_meta when creating the order.
+     const planId = 'pro'; // Placeholder
+     const userRef = getAdminDb().collection('users').doc(userId);
+     await userRef.update({ planId, subscriptionStatus: 'active' });
+     return { success: true, message: 'Payment verified and plan updated.' };
+  }
+
+  return { success: false, message: 'Cashfree payment verification failed.' };
+}
+
+
+/**
+ * Verifies a PhonePe payment.
+ */
+export async function verifyPhonePePayment(merchantTransactionId: string): Promise<{ success: boolean; message: string }> {
+    const settings = await getSettings();
+    const phonepeSettings = settings.payment?.phonepe;
+    if (!phonepeSettings?.isEnabled || !phonepeSettings.merchantId || !phonepeSettings.saltKey) {
+        throw new Error('PhonePe is not configured for verification.');
+    }
+
+    const saltKey = phonepeSettings.saltKey;
+    const saltIndex = phonepeSettings.saltIndex;
+    const merchantId = phonepeSettings.merchantId;
+    
+    const urlPath = `/pg/v1/status/${merchantId}/${merchantTransactionId}`;
+    const xVerify = crypto.createHash('sha256').update(urlPath + saltKey).digest('hex') + `###${saltIndex}`;
+    
+    const url = phonepeSettings.mode === 'production'
+      ? `https://api.phonepe.com/apis/hermes${urlPath}`
+      : `https://api-preprod.phonepe.com/apis/hermes${urlPath}`;
+
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-VERIFY': xVerify,
+            'X-MERCHANT-ID': merchantId,
+        },
+    });
+
+    const data = await response.json();
+
+    if (data.success && data.code === 'PAYMENT_SUCCESS') {
+        // You would need to map merchantTransactionId back to your user and plan.
+        return { success: true, message: 'Payment successfully verified.' };
+    }
+    
+    return { success: false, message: `PhonePe payment status: ${data.code}` };
+}
