@@ -119,8 +119,6 @@ import { WhatIsMyBrowser } from './WhatIsMyBrowser';
 import { WordCounter } from './WordCounter';
 import { WordToPdf } from './WordToPdf';
 import { XmlSitemapGenerator } from './XmlSitemapGenerator';
-import { YouTubeChannelBannerDownloader } from './YouTubeChannelBannerDownloader';
-import { YouTubeChannelLogoDownloader } from './YouTubeChannelLogoDownloader';
 import { YouTubeRegionRestrictionChecker } from './YouTubeRegionRestrictionChecker';
 import { YouTubeVideoDescriptionExtractor } from './YouTubeVideoDescriptionExtractor';
 import { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownloader';
@@ -249,14 +247,14 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'word-counter': WordCounter,
   'word-to-pdf': WordToPdf,
   'xml-sitemap-generator': XmlSitemapGenerator,
-  'youtube-channel-banner-downloader': YouTubeChannelBannerDownloader,
-  'youtube-channel-logo-downloader': YouTubeChannelLogoDownloader,
   'youtube-region-restriction-checker': YouTubeRegionRestrictionChecker,
   'youtube-video-description-extractor': YouTubeVideoDescriptionExtractor,
   'youtube-video-thumbnail-downloader': YouTubeVideoThumbnailDownloader,
   'youtube-video-title-extractor': YouTubeVideoTitleExtractor,
   'unit-converter': UnitConverter,
 };
+
+    
 
     
 

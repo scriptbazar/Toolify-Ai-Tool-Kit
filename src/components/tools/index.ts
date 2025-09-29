@@ -121,8 +121,6 @@ export { WhatIsMyBrowser } from './WhatIsMyBrowser';
 export { WordCounter } from './WordCounter';
 export { WordToPdf } from './WordToPdf';
 export { XmlSitemapGenerator } from './XmlSitemapGenerator';
-export { YouTubeChannelBannerDownloader } from './YouTubeChannelBannerDownloader';
-export { YouTubeChannelLogoDownloader } from './YouTubeChannelLogoDownloader';
 export { YouTubeRegionRestrictionChecker } from './YouTubeRegionRestrictionChecker';
 export { YouTubeVideoDescriptionExtractor } from './YouTubeVideoDescriptionExtractor';
 export { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownloader';
@@ -130,3 +128,5 @@ export { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
 export { UpgradeProDialog } from './UpgradeProDialog';
 export { UnitConverter } from './UnitConverter';
 export { HtmlMinifier } from './HtmlMinifier';
+
+    
