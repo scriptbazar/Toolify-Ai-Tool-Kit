@@ -9,7 +9,6 @@ import { UploadCloud, Copy, Mic, Loader2, FileText, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast';
 import { speechToText } from '@/ai/flows/speech-to-text';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Skeleton } from '../ui/skeleton';
 
@@ -116,7 +115,7 @@ export function SpeechToText() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <div 
-                    className={cn("w-full aspect-video border-2 border-dashed rounded-lg text-center cursor-pointer flex items-center justify-center relative transition-colors", 
+                    className={cn("w-full p-6 border-2 border-dashed rounded-lg text-center cursor-pointer flex flex-col items-center justify-center relative transition-colors", 
                         isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/30 hover:bg-muted/50'
                     )}
                     onClick={() => fileInputRef.current?.click()}
