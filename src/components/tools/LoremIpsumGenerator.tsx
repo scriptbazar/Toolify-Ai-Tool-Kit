@@ -9,8 +9,57 @@ import { Copy, Trash2, Wand2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { generateLoremIpsum } from '@/ai/flows/lorem-ipsum-generator';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+
+const LOREM_WORDS = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'.split(' ');
+
+const generateLocalLoremIpsum = (count: number, type: 'paragraphs' | 'sentences' | 'words') => {
+  let result = '';
+  switch (type) {
+    case 'words':
+      const words = [];
+      for (let i = 0; i < count; i++) {
+        words.push(LOREM_WORDS[Math.floor(Math.random() * LOREM_WORDS.length)]);
+      }
+      result = words.join(' ');
+      break;
+    case 'sentences':
+      const sentences = [];
+      for (let i = 0; i < count; i++) {
+        const sentenceLength = Math.floor(Math.random() * 10) + 5;
+        let sentence = '';
+        for (let j = 0; j < sentenceLength; j++) {
+          sentence += LOREM_WORDS[Math.floor(Math.random() * LOREM_WORDS.length)] + ' ';
+        }
+        sentence = sentence.trim();
+        sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1) + '.';
+        sentences.push(sentence);
+      }
+      result = sentences.join(' ');
+      break;
+    case 'paragraphs':
+      const paragraphs = [];
+      for (let i = 0; i < count; i++) {
+        const paragraphSentences = Math.floor(Math.random() * 4) + 3;
+        let paragraph = '';
+        for (let j = 0; j < paragraphSentences; j++) {
+            const sentenceLength = Math.floor(Math.random() * 10) + 8;
+            let sentence = '';
+            for (let k = 0; k < sentenceLength; k++) {
+                sentence += LOREM_WORDS[Math.floor(Math.random() * LOREM_WORDS.length)] + ' ';
+            }
+            sentence = sentence.trim();
+            sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1) + '. ';
+            paragraph += sentence;
+        }
+        paragraphs.push(paragraph.trim());
+      }
+      result = paragraphs.join('\n\n');
+      break;
+  }
+  return result;
+};
+
 
 export function LoremIpsumGenerator() {
   const [text, setText] = useState('');
@@ -22,13 +71,11 @@ export function LoremIpsumGenerator() {
 
   const handleGenerate = async () => {
     setIsLoading(true);
+    // Simulate async operation for consistent UX
+    await new Promise(resolve => setTimeout(resolve, 100)); 
     try {
-      const result = await generateLoremIpsum({
-        count,
-        type,
-        topic: topic || undefined,
-      });
-      setText(result.text);
+      const resultText = generateLocalLoremIpsum(count, type);
+      setText(resultText);
       toast({
         title: 'Generated!',
         description: `Generated ${count} ${type} of text.`,
@@ -80,8 +127,9 @@ export function LoremIpsumGenerator() {
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
                         placeholder="e.g., space exploration, ancient Rome"
+                        disabled // Disabled as local generator doesn't use topic
                     />
-                     <p className="text-xs text-muted-foreground">Leave blank for traditional "Lorem Ipsum".</p>
+                     <p className="text-xs text-muted-foreground">Topic-based generation is an AI feature and is currently disabled.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
