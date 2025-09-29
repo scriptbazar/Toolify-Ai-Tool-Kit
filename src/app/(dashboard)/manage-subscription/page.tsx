@@ -130,7 +130,123 @@ export default function ManageSubscriptionPage() {
       return;
     }
 
-    // Other Gateways
+    // Razorpay
+    if (paymentSettings?.razorpay?.isEnabled) {
+        try {
+            const razorpayOrder = await createRazorpayOrder({
+                planId: plan.id,
+                planName: plan.name,
+                planPrice: plan.price,
+                userId: user.uid,
+                userEmail: userProfile.email,
+                userName: `${userProfile.firstName} ${userProfile.lastName}`,
+            });
+            
+            const options = {
+                key: razorpayOrder.key,
+                amount: razorpayOrder.amount,
+                currency: razorpayOrder.currency,
+                name: razorpayOrder.name,
+                description: razorpayOrder.description,
+                order_id: razorpayOrder.id,
+                handler: function (response: any){
+                    // This should be verified on a server
+                    console.log(response);
+                    router.push('/payment/success');
+                },
+                prefill: razorpayOrder.prefill,
+                notes: razorpayOrder.notes,
+            };
+            const rzp = new (window as any).Razorpay(options);
+            rzp.open();
+        } catch (error: any) {
+            toast({ title: 'Razorpay Error', description: error.message, variant: 'destructive'});
+        } finally {
+            setIsProcessing(null);
+        }
+        return;
+    }
+    
+    // PayU
+    if (paymentSettings?.payu?.isEnabled) {
+        try {
+            const payuData = await createPayUPayment({
+                planId: plan.id,
+                planName: plan.name,
+                planPrice: plan.price,
+                userId: user.uid,
+                userEmail: userProfile.email,
+                userName: `${userProfile.firstName} ${userProfile.lastName}`,
+            });
+
+            // Create a form and submit it to redirect to PayU
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = payuData.action;
+            
+            Object.entries(payuData).forEach(([key, value]) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value.toString();
+                form.appendChild(input);
+            });
+            
+            document.body.appendChild(form);
+            form.submit();
+
+        } catch (error: any) {
+            toast({ title: 'PayU Error', description: error.message, variant: 'destructive'});
+        } finally {
+            setIsProcessing(null);
+        }
+        return;
+    }
+    
+    // Cashfree
+    if (paymentSettings?.cashfree?.isEnabled) {
+        try {
+            const cashfreeData = await createCashfreePayment({
+                planId: plan.id,
+                planName: plan.name,
+                planPrice: plan.price,
+                userId: user.uid,
+                userEmail: userProfile.email,
+                userName: `${userProfile.firstName} ${userProfile.lastName}`,
+            });
+            const cashfree = new (window as any).Cashfree(cashfreeData.mode);
+            cashfree.checkout({
+                paymentSessionId: cashfreeData.payment_session_id,
+                returnUrl: `${window.location.origin}/payment/success?order_id={order_id}`,
+            });
+        } catch (error: any) {
+            toast({ title: 'Cashfree Error', description: error.message, variant: 'destructive'});
+        } finally {
+            setIsProcessing(null);
+        }
+        return;
+    }
+
+    // PhonePe
+    if (paymentSettings?.phonepe?.isEnabled) {
+         try {
+            const phonepeData = await createPhonePePayment({
+                planId: plan.id,
+                planName: plan.name,
+                planPrice: plan.price,
+                userId: user.uid,
+                userEmail: userProfile.email,
+                userName: `${userProfile.firstName} ${userProfile.lastName}`,
+            });
+            window.location.href = phonepeData.redirectUrl;
+         } catch (error: any) {
+             toast({ title: 'PhonePe Error', description: error.message, variant: 'destructive'});
+         } finally {
+            setIsProcessing(null);
+         }
+         return;
+    }
+
     toast({ title: 'Not Available', description: 'This payment gateway is not yet supported. Please contact support.', variant: 'destructive'});
     setIsProcessing(null);
   };
