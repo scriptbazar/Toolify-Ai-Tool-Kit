@@ -2,14 +2,17 @@
 'use server';
 
 /**
- * @fileOverview A function to save media details to a user's collection.
+ * @fileOverview A function to save media details to a user's collection and generate AI images.
  * 
  * - saveUserMedia - A function to save media details to a user's collection.
+ * - generateImage - A function to generate an image from a text prompt using AI.
  */
 
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
+import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 
 export const SaveMediaInputSchema = z.object({
     userId: z.string(),
@@ -51,5 +54,51 @@ export async function saveUserMedia(input: SaveMediaInput): Promise<{ success: b
   } catch (error) {
     console.error("Error saving user media:", error);
     return { success: false };
+  }
+}
+
+
+const GenerateImageInputSchema = z.object({
+  promptText: z.string().describe('The text prompt to generate an image from.'),
+  userId: z.string(), // To track usage, although not directly used in the model call
+});
+type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
+
+const GenerateImageOutputSchema = z.object({
+  imageDataUri: z.string().describe('The generated image as a base64 data URI.'),
+});
+type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
+
+
+export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
+  const { promptText, userId } = GenerateImageInputSchema.parse(input);
+  
+  try {
+    const { media } = await ai.generate({
+      model: googleAI.model('imagen-2'),
+      prompt: promptText,
+    });
+    
+    const imageDataUri = media.url;
+    if (!imageDataUri) {
+      throw new Error('The AI did not return an image.');
+    }
+    
+    // Save the generated image details to user's media collection
+    await saveUserMedia({
+      userId: userId,
+      type: 'ai-generated',
+      mediaUrl: imageDataUri,
+      prompt: promptText,
+    });
+
+    return { imageDataUri };
+  } catch (error: any) {
+    console.error("AI Image Generation Error:", error);
+    // Provide a more user-friendly error message
+    if (error.message.includes('rate limit')) {
+        throw new Error('Image generation limit reached for today. Please try again tomorrow.');
+    }
+    throw new Error('Failed to generate image. The prompt may have been blocked for safety reasons.');
   }
 }

@@ -27,7 +27,7 @@ import {
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, db } from '@/lib/firebase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { generateImage } from '@/ai/flows/ai-image-generator';
+import { generateImage } from '@/ai/flows/media-management';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 
 
@@ -340,7 +340,7 @@ export default function AddNewPostPage() {
     
     setIsGenerating(true);
     try {
-      const result = await aiWriter({ topic: title });
+      const result = await aiWriter({ topic: title, length: "Medium", tone: "Informative" });
       form.setValue('content', result.content);
       toast({
         title: 'Content Generated!',
