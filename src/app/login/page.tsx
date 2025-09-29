@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -87,7 +88,7 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // Log the successful login activity
+      // Log the successful login activity. This will also revalidate the path.
       await logUserLogin(user.uid);
 
       // Check user role from Firestore

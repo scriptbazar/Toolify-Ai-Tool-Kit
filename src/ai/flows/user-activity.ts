@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -9,6 +10,7 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { type UserActivity, type UserActivityDetails, type UserActivityType, type UserLoginHistory } from './user-activity.types';
 import { headers } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 
 export type ToolUsageStat = {
     toolName: string;
@@ -152,6 +154,9 @@ export async function logUserLogin(userId: string): Promise<{ success: boolean }
     });
     
     await addUserActivity(userId, 'login', { name: 'User logged in' });
+
+    // Revalidate the cache for the entire site to ensure the new session is picked up
+    revalidatePath('/', 'layout');
 
     return { success: true };
   } catch (error) {
