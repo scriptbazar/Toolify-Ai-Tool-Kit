@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -6,6 +5,8 @@
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { googleAI } from '@genkit-ai/googleai';
+
 
 const SpeechToTextInputSchema = z.object({
   audioDataUri: z.string().describe('The audio file as a data URI.'),
@@ -19,14 +20,10 @@ export type SpeechToTextOutput = z.infer<typeof SpeechToTextOutputSchema>;
 
 
 export async function speechToText(input: SpeechToTextInput): Promise<SpeechToTextOutput> {
-    const { text } = await ai.generate({
-      model: 'googleai/gemini-1.5-flash-latest',
-      prompt: [
-        { text: 'Transcribe the following audio with accurate punctuation and paragraphing:' },
-        { media: { url: input.audioDataUri } }
-      ],
-      config: {
-        responseMimeType: 'text/plain',
+    const { text } = await ai.transcribe({
+      model: googleAI.model('gemini-1.5-flash-latest'),
+      media: {
+        url: input.audioDataUri,
       },
     });
 
