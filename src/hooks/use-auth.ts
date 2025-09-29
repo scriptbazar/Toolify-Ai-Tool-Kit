@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -58,7 +59,7 @@ export function useAuth() {
             setLoading(false);
         }
       } else {
-        nookies.destroy(undefined, 'session');
+        nookies.destroy(undefined, 'session', { path: '/' });
         setUser(null);
         setUserData(null);
         setIsAdmin(false);
