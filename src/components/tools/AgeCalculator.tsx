@@ -16,6 +16,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 const useWindowSize = () => {
     const [size, setSize] = useState({ width: 0, height: 0 });
     useEffect(() => {
+        if (typeof window === 'undefined') return;
+        
         const handleResize = () => {
             setSize({
                 width: window.innerWidth,
@@ -31,118 +33,7 @@ const useWindowSize = () => {
     return size;
 };
 
-
-export function AgeCalculator() {
-  const [day, setDay] = useState('');
-  const [month, setMonth] = useState('');
-  const [year, setYear] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
-  const [age, setAge] = useState<{ years: number; months: number; days: number; hours: number; minutes: number; seconds: number; milliseconds: number; } | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [isBirthday, setIsBirthday] = useState(false);
-  const [isBirthdayExplosion, setIsBirthdayExplosion] = useState(false);
-  const { width, height } = useWindowSize();
-
-
-  const monthInputRef = useRef<HTMLInputElement>(null);
-  const yearInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const parsedDate = parse(`${year}-${month}-${day}`, 'yyyy-MM-dd', new Date());
-    if (isValid(parsedDate) && year.length === 4 && parseInt(year, 10) > 1900 && parsedDate < new Date()) {
-      setDateOfBirth(parsedDate);
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000); // Stop confetti after 5 seconds
-
-      // Check for birthday
-      const today = new Date();
-      if (parsedDate.getDate() === today.getDate() && parsedDate.getMonth() === today.getMonth()) {
-        setIsBirthday(true);
-      } else {
-        setIsBirthday(false);
-      }
-
-    } else {
-      setDateOfBirth(undefined);
-      setIsBirthday(false);
-    }
-  }, [day, month, year]);
-
-  useEffect(() => {
-    if (dateOfBirth) {
-        const now = new Date();
-        if (dateOfBirth > now) {
-            setAge(null); // Don't calculate for future dates
-            return;
-        }
-
-        const calculateAge = () => {
-            const nowForCalc = new Date();
-            const years = differenceInYears(nowForCalc, dateOfBirth);
-            const dateAfterYears = addYears(dateOfBirth, years);
-            
-            const months = differenceInMonths(nowForCalc, dateAfterYears);
-            const dateAfterMonths = add(dateAfterYears, { months });
-
-            const days = differenceInDays(nowForCalc, dateAfterMonths);
-            const dateAfterDays = add(dateAfterMonths, { days });
-
-            const remainingMilliseconds = differenceInMilliseconds(nowForCalc, dateAfterDays);
-            
-            const hours = Math.floor(remainingMilliseconds / (1000 * 60 * 60));
-            const minutes = Math.floor((remainingMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((remainingMilliseconds % (1000 * 60)) / 1000);
-            const milliseconds = remainingMilliseconds % 1000;
-
-            setAge({ years, months, days, hours, minutes, seconds, milliseconds });
-        };
-        
-        calculateAge(); // Initial calculation
-        const interval = setInterval(calculateAge, 100); // Update frequently for live milliseconds
-
-        return () => clearInterval(interval);
-    } else {
-        setAge(null);
-    }
-  }, [dateOfBirth]);
-  
-  const nextBirthday = () => {
-    if (!dateOfBirth) return null;
-    const now = new Date();
-    let nextBday = new Date(now.getFullYear(), dateOfBirth.getMonth(), dateOfBirth.getDate());
-    if (now > nextBday) {
-        nextBday.setFullYear(now.getFullYear() + 1);
-    }
-    return { date: format(nextBday, 'PPP'), daysLeft: differenceInDays(nextBday, now), nextBdayDate: nextBday };
-  };
-
-  const handleBirthdayExplosion = () => {
-    setIsBirthdayExplosion(true);
-    setTimeout(() => {
-        setIsBirthdayExplosion(false);
-        setIsBirthday(false); // Close the dialog after the explosion
-    }, 8000); // Let the explosion last for 8 seconds
-  };
-
-  const nextBdayInfo = nextBirthday();
-  
-  const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setDay(value);
-    if (value.length === 2) {
-      monthInputRef.current?.focus();
-    }
-  };
-
-  const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setMonth(value);
-    if (value.length === 2) {
-      yearInputRef.current?.focus();
-    }
-  };
-  
-  const CakeWithCandles = ({ age }: { age: number }) => {
+const CakeWithCandles = ({ age }: { age: number }) => {
     const candles = Array.from({ length: age > 0 ? age : 1 }, (_, i) => i);
     const candleWidth = 4;
     const candleSpacing = age > 20 ? 3 : (age > 10 ? 4 : 6);
@@ -166,10 +57,119 @@ export function AgeCalculator() {
     )
   }
 
+
+export function AgeCalculator() {
+  const [day, setDay] = useState('');
+  const [month, setMonth] = useState('');
+  const [year, setYear] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
+  const [age, setAge] = useState<{ years: number; months: number; days: number; hours: number; minutes: number; seconds: number; milliseconds: number; } | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [isBirthday, setIsBirthday] = useState(false);
+  const [isBirthdayExplosion, setIsBirthdayExplosion] = useState(false);
+  const { width, height } = useWindowSize();
+
+
+  const monthInputRef = useRef<HTMLInputElement>(null);
+  const yearInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const parsedDate = parse(`${year}-${month}-${day}`, 'yyyy-MM-dd', new Date());
+    if (isValid(parsedDate) && year.length === 4 && parseInt(year, 10) > 1900 && parsedDate < new Date()) {
+      setDateOfBirth(parsedDate);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
+
+      const today = new Date();
+      if (isSameDay(parsedDate, today)) {
+        setIsBirthday(true);
+      } else {
+        setIsBirthday(false);
+      }
+
+    } else {
+      setDateOfBirth(undefined);
+      setIsBirthday(false);
+    }
+  }, [day, month, year]);
+
+  useEffect(() => {
+    if (dateOfBirth) {
+        const calculateAge = () => {
+            const nowForCalc = new Date();
+            if (dateOfBirth > nowForCalc) {
+                setAge(null);
+                return;
+            }
+            
+            const years = differenceInYears(nowForCalc, dateOfBirth);
+            const dateAfterYears = addYears(dateOfBirth, years);
+            
+            const months = differenceInMonths(nowForCalc, dateAfterYears);
+            const dateAfterMonths = add(dateAfterYears, { months });
+
+            const days = differenceInDays(nowForCalc, dateAfterMonths);
+            const dateAfterDays = add(dateAfterMonths, { days });
+
+            const remainingMilliseconds = differenceInMilliseconds(nowForCalc, dateAfterDays);
+            
+            const hours = Math.floor(remainingMilliseconds / (1000 * 60 * 60));
+            const minutes = Math.floor((remainingMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remainingMilliseconds % (1000 * 60)) / 1000);
+            const milliseconds = remainingMilliseconds % 1000;
+
+            setAge({ years, months, days, hours, minutes, seconds, milliseconds });
+        };
+        
+        calculateAge();
+        const interval = setInterval(calculateAge, 100);
+
+        return () => clearInterval(interval);
+    } else {
+        setAge(null);
+    }
+  }, [dateOfBirth]);
+  
+  const nextBirthday = () => {
+    if (!dateOfBirth) return null;
+    const now = new Date();
+    let nextBday = new Date(now.getFullYear(), dateOfBirth.getMonth(), dateOfBirth.getDate());
+    if (now > nextBday) {
+        nextBday.setFullYear(now.getFullYear() + 1);
+    }
+    return { date: format(nextBday, 'PPP'), daysLeft: differenceInDays(nextBday, now), nextBdayDate: nextBday };
+  };
+
+  const handleBirthdayExplosion = () => {
+    setIsBirthdayExplosion(true);
+    setTimeout(() => {
+        setIsBirthdayExplosion(false);
+        setIsBirthday(false);
+    }, 8000);
+  };
+
+  const nextBdayInfo = nextBirthday();
+  
+  const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setDay(value);
+    if (value.length === 2) {
+      monthInputRef.current?.focus();
+    }
+  };
+
+  const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMonth(value);
+    if (value.length === 2) {
+      yearInputRef.current?.focus();
+    }
+  };
+  
   return (
     <>
-      {showConfetti && <ReactConfetti recycle={false} numberOfPieces={200} gravity={0.2} initialVelocityY={-10} />}
-      {isBirthdayExplosion && <ReactConfetti width={width} height={height} numberOfPieces={500} recycle={false} />}
+      {showConfetti && <ReactConfetti recycle={false} numberOfPieces={200} gravity={0.1} initialVelocityY={-10} />}
+      {isBirthdayExplosion && <ReactConfetti width={width} height={height} numberOfPieces={500} recycle={false} gravity={0.2} />}
 
        <Dialog open={isBirthday} onOpenChange={setIsBirthday}>
         <DialogContent className="sm:max-w-md text-center">
@@ -179,14 +179,14 @@ export function AgeCalculator() {
                     Wishing you a fantastic day filled with joy and happiness.
                 </DialogDescription>
             </DialogHeader>
-            <div className="flex flex-col items-center justify-center my-4">
+            <div className="flex flex-col items-center justify-center my-4 relative">
                <CakeWithCandles age={age?.years || 0} />
                <div 
                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
                  onClick={handleBirthdayExplosion}
                >
-                   <span className="text-7xl font-bold text-white drop-shadow-lg group-hover:scale-110 transition-transform">{age?.years}</span>
-                   <p className="text-xs text-white/80 animate-pulse">Click my age!</p>
+                   <span className="text-7xl font-bold text-white [text-shadow:0_0_10px_rgba(0,0,0,0.5),0_0_20px_theme(colors.primary)] group-hover:scale-110 transition-transform">{age?.years}</span>
+                   <p className="text-xs text-white/90 animate-pulse font-semibold [text-shadow:0_0_5px_black]">Click my age!</p>
                </div>
             </div>
         </DialogContent>
