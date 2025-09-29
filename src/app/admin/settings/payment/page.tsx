@@ -14,6 +14,7 @@ import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { PaymentSettings } from '@/ai/flows/settings-management.types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 const initialSettings: PaymentSettings = {
   stripe: { isEnabled: false, name: 'Stripe', publishableKey: '', secretKey: '' },
@@ -91,7 +92,7 @@ export default function PaymentSettingsPage() {
     }
   };
 
-  const renderGatewayCard = (gatewayKey: keyof PaymentSettings, title: string, fields: {id: string, label: string, type?: string, placeholder?: string}[], modeOptions?: {value: string, label: string}[]) => {
+  const renderGatewayCard = (gatewayKey: keyof PaymentSettings, title: string, fields: {id: string, label: string, type?: string, placeholder?: string}[], modeOptions?: {value: string, label: string}[], isLive?: boolean) => {
     const gatewaySettings = settings ? settings[gatewayKey] : null;
 
     return (
@@ -100,6 +101,11 @@ export default function PaymentSettingsPage() {
           <div className="flex items-center gap-3">
              <CreditCard className="w-5 h-5 text-muted-foreground"/>
              <CardTitle className="text-base">{title}</CardTitle>
+             {isLive ? (
+                <Badge variant="default" className="bg-green-500 hover:bg-green-600">Live</Badge>
+             ) : (
+                <Badge variant="outline">Setup Required</Badge>
+             )}
           </div>
           <Switch
               checked={gatewaySettings?.isEnabled || false}
@@ -179,34 +185,34 @@ export default function PaymentSettingsPage() {
         {renderGatewayCard('stripe', 'Stripe', [
           { id: 'publishableKey', label: 'Publishable Key', placeholder: 'pk_live_...' },
           { id: 'secretKey', label: 'Secret Key', placeholder: 'sk_live_...' },
-        ])}
+        ], undefined, true)}
         
         {renderGatewayCard('paypal', 'PayPal', [
           { id: 'clientId', label: 'Client ID' },
           { id: 'clientSecret', label: 'Client Secret' },
-        ], [{value: 'sandbox', label: 'Sandbox'}, {value: 'live', label: 'Live'}])}
+        ], [{value: 'sandbox', label: 'Sandbox'}, {value: 'live', label: 'Live'}], true)}
 
         {renderGatewayCard('razorpay', 'Razorpay', [
           { id: 'keyId', label: 'Key ID' },
           { id: 'keySecret', label: 'Key Secret' },
-        ])}
+        ], undefined, false)}
 
         {renderGatewayCard('payu', 'PayU', [
           { id: 'merchantKey', label: 'Merchant Key' },
           { id: 'merchantSalt', label: 'Merchant Salt' },
-        ], [{value: 'test', label: 'Test'}, {value: 'live', label: 'Live'}])}
+        ], [{value: 'test', label: 'Test'}, {value: 'live', label: 'Live'}], false)}
         
         {renderGatewayCard('cashfree', 'Cashfree', [
           { id: 'appId', label: 'App ID' },
           { id: 'secretKey', label: 'Secret Key' },
-        ], [{value: 'sandbox', label: 'Sandbox'}, {value: 'production', label: 'Production'}])}
+        ], [{value: 'sandbox', label: 'Sandbox'}, {value: 'production', label: 'Production'}], false)}
         
         {renderGatewayCard('phonepe', 'PhonePe', [
           { id: 'merchantId', label: 'Merchant ID' },
           { id: 'merchantUserId', label: 'Merchant User ID' },
           { id: 'saltKey', label: 'Salt Key' },
           { id: 'saltIndex', label: 'Salt Index' },
-        ], [{value: 'uat', label: 'UAT (Test)'}, {value: 'production', label: 'Production'}])}
+        ], [{value: 'uat', label: 'UAT (Test)'}, {value: 'production', label: 'Production'}], false)}
       </div>
 
       <div className="flex justify-end pt-6">
