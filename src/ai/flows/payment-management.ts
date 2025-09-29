@@ -160,6 +160,16 @@ async function getPayPalClient() {
  */
 export async function createPayPalOrder(input: CreatePayPalOrderInput): Promise<z.infer<typeof CreatePayPalOrderOutputSchema>> {
   const { planId, planName, planPrice, userId } = CreatePayPalOrderInputSchema.parse(input);
+  
+  const settings = await getSettings();
+  const paypalSettings = settings.payment?.paypal;
+  if (!paypalSettings?.isEnabled || !paypalSettings.clientId || !paypalSettings.clientSecret) {
+    throw new Error('PayPal is not configured or enabled.');
+  }
+
+  process.env['PAYPAL_CLIENT_ID'] = paypalSettings.clientId;
+  process.env['PAYPAL_CLIENT_SECRET'] = paypalSettings.clientSecret;
+
   const client = await getPayPalClient();
   const request = new paypal.orders.OrdersCreateRequest();
   
