@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { Calendar as CalendarIcon, Gift, Sparkles, Clock } from 'lucide-react';
-import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, add, differenceInMilliseconds, isValid, parse } from 'date-fns';
+import { Calendar as CalendarIcon, Gift, Sparkles, Clock, PartyPopper } from 'lucide-react';
+import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, add, differenceInMilliseconds, isValid, parse, isSameDay } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { CountdownTimer } from '@/components/common/CountdownTimer';
+import ReactConfetti from 'react-confetti';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 
 
 export function AgeCalculator() {
@@ -18,6 +20,8 @@ export function AgeCalculator() {
   const [year, setYear] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
   const [age, setAge] = useState<{ years: number; months: number; days: number; hours: number; minutes: number; seconds: number; milliseconds: number; } | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [isBirthday, setIsBirthday] = useState(false);
 
   const monthInputRef = useRef<HTMLInputElement>(null);
   const yearInputRef = useRef<HTMLInputElement>(null);
@@ -26,8 +30,20 @@ export function AgeCalculator() {
     const parsedDate = parse(`${year}-${month}-${day}`, 'yyyy-MM-dd', new Date());
     if (isValid(parsedDate) && year.length === 4 && parseInt(year, 10) > 1900 && parsedDate < new Date()) {
       setDateOfBirth(parsedDate);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000); // Stop confetti after 5 seconds
+
+      // Check for birthday
+      const today = new Date();
+      if (parsedDate.getDate() === today.getDate() && parsedDate.getMonth() === today.getMonth()) {
+        setIsBirthday(true);
+      } else {
+        setIsBirthday(false);
+      }
+
     } else {
       setDateOfBirth(undefined);
+      setIsBirthday(false);
     }
   }, [day, month, year]);
 
@@ -98,6 +114,22 @@ export function AgeCalculator() {
   };
 
   return (
+    <>
+      {showConfetti && <ReactConfetti recycle={false} numberOfPieces={200} />}
+       <Dialog open={isBirthday} onOpenChange={setIsBirthday}>
+        <DialogContent className="sm:max-w-md text-center">
+            <DialogHeader>
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
+                    <PartyPopper className="h-10 w-10 text-primary" />
+                </div>
+                <DialogTitle className="text-2xl">Happy Birthday!</DialogTitle>
+                <DialogDescription>
+                    Wishing you a fantastic day filled with joy and happiness.
+                </DialogDescription>
+            </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
     <div className="space-y-6">
       <div className="space-y-2">
         <label className="text-lg font-semibold flex items-center gap-2">
@@ -169,5 +201,6 @@ export function AgeCalculator() {
         </Card>
       )}
     </div>
+    </>
   );
 }
