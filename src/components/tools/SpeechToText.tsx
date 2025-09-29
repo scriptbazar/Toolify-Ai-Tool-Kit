@@ -109,13 +109,12 @@ export function SpeechToText() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      <div className="space-y-4">
+    <div className="space-y-6">
         <Card>
             <CardHeader>
                 <CardTitle>Upload Your Audio</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
                 <div 
                     className={cn("w-full aspect-video border-2 border-dashed rounded-lg text-center cursor-pointer flex items-center justify-center relative transition-colors", 
                         isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/30 hover:bg-muted/50'
@@ -141,13 +140,12 @@ export function SpeechToText() {
                         </div>
                     )}
                 </div>
+                <Button onClick={handleTranscribe} disabled={isLoading || !audioFile} className="w-full">
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mic className="mr-2 h-4 w-4" />}
+                    Transcribe Audio
+                </Button>
             </CardContent>
         </Card>
-        <Button onClick={handleTranscribe} disabled={isLoading || !audioFile} className="w-full">
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mic className="mr-2 h-4 w-4" />}
-            Transcribe Audio
-        </Button>
-      </div>
 
        {(isLoading || transcribedText) && (
             <Card>
@@ -161,7 +159,7 @@ export function SpeechToText() {
                         value={transcribedText}
                         readOnly
                         placeholder={isLoading ? "Analyzing your audio, please wait..." : "Transcription will appear here..."}
-                        className="min-h-[300px] bg-muted"
+                        className="min-h-[200px] bg-muted"
                     />
                     {isLoading && (
                         <div className="space-y-2 mt-2">
