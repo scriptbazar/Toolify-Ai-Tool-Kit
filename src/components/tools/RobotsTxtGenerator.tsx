@@ -29,7 +29,7 @@ export function RobotsTxtGenerator() {
         link.href = url;
         link.download = 'robots.txt';
         link.click();
-        URL.revokeObjectURL(link.href);
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -46,3 +46,4 @@ export function RobotsTxtGenerator() {
         </div>
     );
 }
+
