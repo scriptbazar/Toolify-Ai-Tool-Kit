@@ -137,21 +137,22 @@ const CreatePhonePePaymentOutputSchema = z.object({
 type CreatePhonePePaymentOutput = z.infer<typeof CreatePhonePePaymentOutputSchema>;
 
 
-function getPayPalClient() {
-  return new Promise<paypal.core.PayPalHttpClient>(async (resolve, reject) => {
+async function getPayPalClient() {
     const settings = await getSettings();
     const paypalSettings = settings.payment?.paypal;
     if (!paypalSettings?.isEnabled || !paypalSettings.clientId || !paypalSettings.clientSecret) {
-      return reject(new Error('PayPal is not configured or enabled.'));
+      throw new Error('PayPal is not configured or enabled.');
     }
 
-    const environment = paypalSettings.mode === 'live'
-      ? new paypal.core.LiveEnvironment(paypalSettings.clientId, paypalSettings.clientSecret)
-      : new paypal.core.SandboxEnvironment(paypalSettings.clientId, paypalSettings.clientSecret);
+    let environment;
+    if (paypalSettings.mode === 'live') {
+      environment = new paypal.core.LiveEnvironment(paypalSettings.clientId, paypalSettings.clientSecret);
+    } else {
+      environment = new paypal.core.SandboxEnvironment(paypalSettings.clientId, paypalSettings.clientSecret);
+    }
       
     const client = new paypal.core.PayPalHttpClient(environment);
-    resolve(client);
-  });
+    return client;
 }
 
 /**
@@ -191,7 +192,9 @@ export async function createPayPalOrder(input: CreatePayPalOrderInput): Promise<
     });
   } catch (error: any) {
     console.error("PayPal Error:", error);
-    throw new Error(`Failed to create PayPal order: ${error.message}`);
+    // The error from PayPal SDK often has a helpful message in the 'details' field of the error object
+    const errorDetails = error.details ? JSON.stringify(error.details) : error.message;
+    throw new Error(`Failed to create PayPal order: ${errorDetails}`);
   }
 }
 
