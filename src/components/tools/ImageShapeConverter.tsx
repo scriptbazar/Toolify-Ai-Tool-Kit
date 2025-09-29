@@ -4,11 +4,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, Loader2, Circle, Heart, Star as StarIcon, Hexagon, Triangle, VenetianMask, Cross, Frame, Badge, MessageSquare, Octagon, Bot, Diamond, Pentagon, ArrowRight } from 'lucide-react';
+import { UploadCloud, Download, Loader2, Circle, Heart, Star as StarIcon, Hexagon, Triangle, VenetianMask, Cross, Frame, Badge, MessageSquare, Octagon, Bot, Diamond, Pentagon, ArrowRight, ZoomIn } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '../ui/card';
+import { Slider } from '../ui/slider';
 
 const shapes = [
     { id: 'circle', name: 'Circle', icon: Circle },
@@ -34,6 +35,7 @@ export function ImageShapeConverter() {
     const [selectedShape, setSelectedShape] = useState('circle');
     const [convertedImage, setConvertedImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [zoom, setZoom] = useState(100);
     const { toast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const imageRef = useRef<HTMLImageElement | null>(null);
@@ -174,21 +176,28 @@ export function ImageShapeConverter() {
         
         ctx.clip();
         
-        const ratio = Math.max(size / img.naturalWidth, size / img.naturalHeight);
-        const x = (size - img.naturalWidth * ratio) / 2;
-        const y = (size - img.naturalHeight * ratio) / 2;
-        ctx.drawImage(img, x, y, img.naturalWidth * ratio, img.naturalHeight * ratio);
+        const zoomFactor = zoom / 100;
+        // Start with 'contain' logic and then apply zoom
+        const ratio = Math.min(size / img.naturalWidth, size / img.naturalHeight) * zoomFactor;
+        const imgWidth = img.naturalWidth * ratio;
+        const imgHeight = img.naturalHeight * ratio;
+
+        const x = (size - imgWidth) / 2;
+        const y = (size - imgHeight) / 2;
+        
+        ctx.drawImage(img, x, y, imgWidth, imgHeight);
         ctx.restore();
         
         setConvertedImage(canvas.toDataURL('image/png'));
         setIsLoading(false);
-    }, [selectedShape, drawShape]);
+    }, [selectedShape, drawShape, zoom]);
+
 
     useEffect(() => {
         if (imagePreview && imageRef.current) {
             processImage();
         }
-    }, [imagePreview, selectedShape, processImage]);
+    }, [imagePreview, selectedShape, processImage, zoom]);
 
     const handleDownload = () => {
         if (!convertedImage || !imageFile) return;
@@ -231,6 +240,10 @@ export function ImageShapeConverter() {
                         })}
                     </div>
                 </div>
+                 <div className="space-y-4 pt-4 border-t">
+                    <Label htmlFor="zoom-slider" className="flex items-center gap-2"><ZoomIn className="h-4 w-4"/>Zoom: {zoom}%</Label>
+                    <Slider id="zoom-slider" value={[zoom]} onValueChange={([val]) => setZoom(val)} min={100} max={200} step={5} disabled={!imageFile}/>
+                </div>
             </div>
 
             <div className="space-y-6">
@@ -250,3 +263,5 @@ export function ImageShapeConverter() {
         </div>
     );
 }
+
+    
