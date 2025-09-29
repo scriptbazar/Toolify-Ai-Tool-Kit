@@ -1,8 +1,8 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ListChecks,
   Sparkles,
@@ -26,40 +26,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 interface AdminToolFiltersProps {
   allTools: Tool[];
+  setFilteredTools: (tools: Tool[]) => void;
 }
 
-export function AdminToolFilters({ allTools }: AdminToolFiltersProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export function AdminToolFilters({ allTools, setFilteredTools }: AdminToolFiltersProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeFilter, setActiveFilter] = useState('all');
 
-  // Get initial values from URL search params
-  const searchQuery = searchParams.get('q') || '';
-  const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
-  const activeFilter = searchParams.get('filter') || 'all';
-  
-  const createQueryString = useCallback((params: Record<string, string | null>) => {
-    const currentParams = new URLSearchParams(searchParams.toString());
-    for (const [key, value] of Object.entries(params)) {
-      if (value === null || value === '' || value === 'all') {
-        currentParams.delete(key);
-      } else {
-        currentParams.set(key, value);
-      }
-    }
-    return currentParams.toString();
-  }, [searchParams]);
-
-  const handleFilterChange = (value: string) => {
-    router.push(`/admin/tools?${createQueryString({ filter: value })}`);
-  };
-
-  const handleCategoryChange = (value: string) => {
-    router.push(`/admin/tools?${createQueryString({ category: value })}`);
-  };
-  
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-     router.replace(`/admin/tools?${createQueryString({ q: e.target.value })}`);
-  };
+  useEffect(() => {
+    const filtered = allTools
+        .filter(tool => {
+            if (activeFilter === 'all') return true;
+            if (activeFilter === 'pro') return tool.plan === 'Pro';
+            if (activeFilter === 'free') return tool.plan === 'Free';
+            if (activeFilter === 'new') return tool.isNew;
+            return tool.status.toLowerCase().replace(/\s/g, '') === activeFilter.toLowerCase();
+        })
+        .filter(tool => {
+            if (activeCategory === 'all') return true;
+            return tool.category === activeCategory;
+        })
+        .filter(tool =>
+            tool.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    setFilteredTools(filtered);
+  }, [searchQuery, activeCategory, activeFilter, allTools, setFilteredTools]);
   
   const counts = useMemo(() => ({
     all: allTools.length,
@@ -96,7 +88,7 @@ export function AdminToolFilters({ allTools }: AdminToolFiltersProps) {
                 variant={activeFilter === tab.id ? 'default' : 'outline'}
                 size="sm"
                 className="shrink-0 gap-1.5 px-3"
-                onClick={() => handleFilterChange(tab.id)}
+                onClick={() => setActiveFilter(tab.id)}
             >
                 <tab.icon className="h-4 w-4" />
                 {tab.label} ({tab.count})
@@ -108,13 +100,13 @@ export function AdminToolFilters({ allTools }: AdminToolFiltersProps) {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                     name="q"
-                    defaultValue={searchQuery}
-                    onChange={handleSearchChange}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search tools..."
                     className="pl-9 w-full sm:max-w-xs h-10"
                 />
             </div>
-            <Select value={activeCategory} onValueChange={handleCategoryChange}>
+            <Select value={activeCategory} onValueChange={setActiveCategory}>
                 <SelectTrigger className="w-full sm:w-[180px] h-10">
                     <SelectValue placeholder="All Categories" />
                 </SelectTrigger>

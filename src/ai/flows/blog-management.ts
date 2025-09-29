@@ -189,7 +189,7 @@ export async function deletePost(postId: string): Promise<{ success: boolean; me
 /**
  * Fetches all blog categories from Firestore.
  */
-export async function getCategories(): Promise<Category[]> {
+export const getCategories = cache(async (): Promise<Category[]> => {
   const adminDb = getAdminDb();
   if (!adminDb) return [];
   try {
@@ -199,7 +199,10 @@ export async function getCategories(): Promise<Category[]> {
     console.error("Error fetching categories:", error);
     return [];
   }
-}
+},
+['categories'],
+{ revalidate: 3600 }
+);
 
 /**
  * Adds a new blog category.

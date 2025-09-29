@@ -1,9 +1,9 @@
 
+
 'use client';
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -23,17 +23,17 @@ import { EditToolForm } from '@/app/admin/tools/[id]/EditToolForm';
 import { upsertTool, deleteTool } from '@/ai/flows/tool-management';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-
+import { AdminToolFilters } from '@/app/admin/tools/_components/AdminToolFilters';
 
 interface AdminToolTableProps {
-  tools: Tool[];
-  onToolUpdate: () => void;
+  allTools: Tool[];
 }
 
-export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
-  const router = useRouter();
+export function AdminToolTable({ allTools }: AdminToolTableProps) {
   const [editingTool, setEditingTool] = React.useState<Tool | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [filteredTools, setFilteredTools] = React.useState<Tool[]>(allTools);
+
   const { toast } = useToast();
 
   const getCategoryName = (categoryId: string) => {
@@ -70,7 +70,8 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
         description: `The tool "${data.name}" has been saved.`,
       });
       setIsModalOpen(false);
-      onToolUpdate(); // Refresh the list
+      // Not ideal to refresh, but necessary to get fresh server data without complex state management
+      window.location.reload(); 
     } else {
       toast({ title: 'Error', description: result.message, variant: 'destructive' });
     }
@@ -82,7 +83,7 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
     if (result.success) {
         toast({ title: 'Tool Deleted', description: result.message });
         setIsModalOpen(false);
-        onToolUpdate();
+        window.location.reload();
     } else {
         toast({ title: 'Error', description: result.message, variant: 'destructive' });
     }
@@ -91,6 +92,7 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
 
   return (
     <>
+    <AdminToolFilters allTools={allTools} setFilteredTools={setFilteredTools} />
     <div className="overflow-x-auto mt-6">
         <Table>
             <TableHeader>
@@ -103,7 +105,7 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
             </TableRow>
             </TableHeader>
             <TableBody>
-            {tools.map(tool => {
+            {filteredTools.map(tool => {
                 const IconComponent = (Icons as any)[tool.icon] || Icons.HelpCircle;
                 return (
                 <TableRow key={tool.id}>
@@ -129,7 +131,7 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
                 </TableRow>
                 )
             })}
-            {tools.length === 0 && (
+            {filteredTools.length === 0 && (
                 <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
                     No tools found for the current selection.
@@ -162,7 +164,7 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
                           <AlertDialogHeader>
                               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                               <AlertDialogDesc>
-                                  This action cannot be undone. This will permanently delete the tool. Note: The associated component file will not be deleted automatically.
+                                  This action cannot be undone. This will permanently delete the tool and its associated data. Note: The associated component file will not be deleted automatically.
                               </AlertDialogDesc>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
