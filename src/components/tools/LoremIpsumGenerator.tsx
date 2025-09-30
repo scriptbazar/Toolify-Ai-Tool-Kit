@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { generateLoremIpsum } from '@/ai/flows/lorem-ipsum-generator';
+
 
 const LOREM_WORDS = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'.split(' ');
 
@@ -71,10 +73,18 @@ export function LoremIpsumGenerator() {
 
   const handleGenerate = async () => {
     setIsLoading(true);
-    // Simulate async operation for consistent UX
-    await new Promise(resolve => setTimeout(resolve, 100)); 
     try {
-      const resultText = generateLocalLoremIpsum(count, type);
+      let resultText;
+      if (topic.trim()) {
+        const result = await generateLoremIpsum({
+          count,
+          type,
+          topic,
+        });
+        resultText = result.text;
+      } else {
+        resultText = generateLocalLoremIpsum(count, type);
+      }
       setText(resultText);
       toast({
         title: 'Generated!',
@@ -127,9 +137,8 @@ export function LoremIpsumGenerator() {
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
                         placeholder="e.g., space exploration, ancient Rome"
-                        disabled // Disabled as local generator doesn't use topic
                     />
-                     <p className="text-xs text-muted-foreground">Topic-based generation is an AI feature and is currently disabled.</p>
+                     <p className="text-xs text-muted-foreground">If a topic is provided, AI will generate relevant placeholder text.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
