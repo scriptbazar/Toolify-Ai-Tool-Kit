@@ -8,7 +8,7 @@
 
 import { z } from 'zod';
 import { ImageAnnotatorClient } from '@google-cloud/vision';
-import serviceAccount from '../../firebase-service-account-key.json';
+import serviceAccount from '../../../firebase-service-account-key.json';
 
 // --- Input Schema ---
 const AnalyzeImageInputSchema = z.object({
