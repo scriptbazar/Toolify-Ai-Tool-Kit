@@ -127,6 +127,8 @@ export { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownload
 export { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
 export { UpgradeProDialog } from './UpgradeProDialog';
 export { UnitConverter } from './UnitConverter';
-export { HtmlMinifier } from './HtmlMinifier';
 
     
+
+    
+
