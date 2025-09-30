@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/card';
 import { PlusCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { AdminToolTable } from '@/components/tools/AdminToolTable';
+import { AdminToolTable } from '@/app/admin/tools/_components/AdminToolTable';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminToolsPage() {

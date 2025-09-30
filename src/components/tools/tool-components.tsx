@@ -6,7 +6,6 @@ import { AddWatermarkToPdf } from './AddWatermarkToPdf';
 import { AesEncryptionDecryption } from './AesEncryptionDecryption';
 import { AgeCalculator } from './AgeCalculator';
 import { AiBlogPostWriter } from './AiBlogPostWriter';
-import { AiCodeAssistant } from './AiCodeAssistant';
 import { AiContentSummarizer } from './AiContentSummarizer';
 import { AiEmailComposer } from './AiEmailComposer';
 import { AiProductDescriptionWriter } from './AiProductDescriptionWriter';
@@ -52,7 +51,7 @@ import { ImageCropper } from './ImageCropper';
 import { ImageMetadataViewer } from './ImageMetadataViewer';
 import { ImageResizer } from './ImageResizer';
 import { ImageShapeConverter } from './ImageShapeConverter';
-import { TextRecognizer } from './TextRecognizer';
+import { ImageTextExtractor } from './ImageTextExtractor';
 import { ImageToBase64 } from './ImageToBase64';
 import { ImageToPdf } from './ImageToPdf';
 import { InterestCalculator } from './InterestCalculator';
@@ -133,7 +132,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'aes-encryption-and-decryption': AesEncryptionDecryption,
   'age-calculator': AgeCalculator,
   'ai-blog-post-writer': AiBlogPostWriter,
-  'ai-code-assistant': AiCodeAssistant,
   'ai-content-summarizer': AiContentSummarizer,
   'ai-email-composer': AiEmailComposer,
   'ai-product-description-writer': AiProductDescriptionWriter,
@@ -179,7 +177,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'image-metadata-viewer': ImageMetadataViewer,
   'image-resizer': ImageResizer,
   'image-shape-converter': ImageShapeConverter,
-  'text-recognizer': TextRecognizer,
+  'image-text-extractor': ImageTextExtractor,
   'image-to-base64': ImageToBase64,
   'image-to-pdf': ImageToPdf,
   'interest-calculator': InterestCalculator,
@@ -259,5 +257,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
     
 
     
+
 
 

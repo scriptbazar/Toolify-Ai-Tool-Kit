@@ -5,7 +5,6 @@ export { AddWatermarkToPdf } from './AddWatermarkToPdf';
 export { AesEncryptionDecryption } from './AesEncryptionDecryption';
 export { AgeCalculator } from './AgeCalculator';
 export { AiBlogPostWriter } from './AiBlogPostWriter';
-export { AiCodeAssistant } from './AiCodeAssistant';
 export { AiContentSummarizer } from './AiContentSummarizer';
 export { AiEmailComposer } from './AiEmailComposer';
 export { AiProductDescriptionWriter } from './AiProductDescriptionWriter';
@@ -52,7 +51,7 @@ export { ImageCropper } from './ImageCropper';
 export { ImageMetadataViewer } from './ImageMetadataViewer';
 export { ImageResizer } from './ImageResizer';
 export { ImageShapeConverter } from './ImageShapeConverter';
-export { TextRecognizer } from './TextRecognizer';
+export { ImageTextExtractor } from './ImageTextExtractor';
 export { ImageToBase64 } from './ImageToBase64';
 export { ImageToPdf } from './ImageToPdf';
 export { InterestCalculator } from './InterestCalculator';
@@ -131,6 +130,7 @@ export { HtmlMinifier } from './HtmlMinifier';
     
 
     
+
 
 
 
