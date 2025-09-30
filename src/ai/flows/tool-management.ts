@@ -128,6 +128,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Credit Card Interest Calculator', description: '💳 Calculate the interest on your credit card balance and see how long it will take to pay it off. An essential tool for financial planning.', icon: 'CreditCard', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Enter your credit card balance, APR, and your planned monthly payment.', 'The tool will show you how long it will take to pay off and the total interest paid.', 'You can also see an amortization schedule.'] },
     { name: 'YouTubeChannelBannerDownloader', description: '🖼️ Download high-quality YouTube channel banners by providing the channel URL. A great tool for designers and marketers.', icon: 'Download', category: 'video', plan: 'Free', isNew: true, status: 'Coming Soon', howToUse: ['Paste the YouTube channel URL.', 'Click "Fetch Banner".', 'Preview and download the banner in the highest available resolution.'] },
     { name: 'YouTubeChannelLogoDownloader', description: '👤 Download the logo or profile picture of any YouTube channel in high resolution. Simply provide the channel URL.', icon: 'UserCircle', category: 'video', plan: 'Free', isNew: true, status: 'Coming Soon', howToUse: ['Paste the YouTube channel URL.', 'Click "Fetch Logo".', 'Download the channel\'s profile picture.'] },
+    { name: 'Html Minifier', description: '⚡ Minify your HTML code to reduce file size, remove comments, and improve your website\'s loading times.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste your HTML code into the "Original HTML" box.', 'Click the "Minify HTML" button.', 'The minified code will appear in the "Minified HTML" box.', 'Click "Copy" to use the minified code.'] },
 ];
 
 const generateSlug = (name: string) => {
@@ -252,12 +253,12 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
     const adminDb = getAdminDb();
     const { id, ...data } = toolData;
     
-    if (data.name) {
+    if (data.name && !data.slug) { // Only generate slug if not already present, especially for new tools
       data.slug = generateSlug(data.name);
     }
     
     // Validate data before saving
-    const validatedData = ToolSchema.partial().parse(data);
+    const validatedData = UpsertToolInputSchema.parse(data);
 
     if (id) {
       const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(id);
@@ -477,7 +478,6 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
     
 
-    
 
 
 
