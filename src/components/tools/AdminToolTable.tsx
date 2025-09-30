@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -27,14 +26,19 @@ import { AdminToolFilters } from '@/app/admin/tools/_components/AdminToolFilters
 
 interface AdminToolTableProps {
   allTools: Tool[];
+  onToolUpdate: () => void;
 }
 
-export function AdminToolTable({ allTools }: AdminToolTableProps) {
+export function AdminToolTable({ allTools, onToolUpdate }: AdminToolTableProps) {
   const [editingTool, setEditingTool] = React.useState<Tool | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [filteredTools, setFilteredTools] = React.useState<Tool[]>(allTools);
 
   const { toast } = useToast();
+  
+  React.useEffect(() => {
+    setFilteredTools(allTools);
+  }, [allTools]);
 
   const getCategoryName = (categoryId: string) => {
     return toolCategories.find(c => c.id === categoryId)?.name || 'Unknown';
@@ -70,8 +74,7 @@ export function AdminToolTable({ allTools }: AdminToolTableProps) {
         description: `The tool "${data.name}" has been saved.`,
       });
       setIsModalOpen(false);
-      // Not ideal to refresh, but necessary to get fresh server data without complex state management
-      window.location.reload(); 
+      onToolUpdate(); // Refresh the list
     } else {
       toast({ title: 'Error', description: result.message, variant: 'destructive' });
     }
@@ -83,7 +86,7 @@ export function AdminToolTable({ allTools }: AdminToolTableProps) {
     if (result.success) {
         toast({ title: 'Tool Deleted', description: result.message });
         setIsModalOpen(false);
-        window.location.reload();
+        onToolUpdate();
     } else {
         toast({ title: 'Error', description: result.message, variant: 'destructive' });
     }
