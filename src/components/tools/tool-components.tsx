@@ -52,7 +52,7 @@ import { ImageCropper } from './ImageCropper';
 import { ImageMetadataViewer } from './ImageMetadataViewer';
 import { ImageResizer } from './ImageResizer';
 import { ImageShapeConverter } from './ImageShapeConverter';
-import { ImageTextExtractor } from './ImageTextExtractor';
+import { TextRecognizer } from './TextRecognizer';
 import { ImageToBase64 } from './ImageToBase64';
 import { ImageToPdf } from './ImageToPdf';
 import { InterestCalculator } from './InterestCalculator';
@@ -179,7 +179,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'image-metadata-viewer': ImageMetadataViewer,
   'image-resizer': ImageResizer,
   'image-shape-converter': ImageShapeConverter,
-  'image-text-extractor': ImageTextExtractor,
+  'text-recognizer': TextRecognizer,
   'image-to-base64': ImageToBase64,
   'image-to-pdf': ImageToPdf,
   'interest-calculator': InterestCalculator,
@@ -259,3 +259,5 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
     
 
     
+
+

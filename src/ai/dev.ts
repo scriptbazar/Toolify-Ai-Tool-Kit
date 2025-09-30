@@ -23,7 +23,6 @@ import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/prompt-generator.ts';
 import '@/ai/flows/json-prompt-generator.ts';
 import '@/ai/flows/ai-content-summarizer.ts';
-import '@/ai/flows/ai-code-assistant.ts';
 import '@/ai/flows/ai-writer.ts';
 import '@/ai/flows/ai-story-generator.ts';
 import '@/ai/flows/ai-tweet-generator.ts';
@@ -34,13 +33,15 @@ import '@/ai/flows/ai-web-content-summarizer.ts';
 import '@/ai/flows/ai-seo-keyword-generator.ts';
 import '@/ai/flows/media-management.ts';
 import '@/ai/flows/currency-converter.ts';
-import '@/ai/flows/image-text-extractor.ts';
+import '@/ai/flows/text-recognizer.ts';
 import '@/ai/flows/encryption-actions.ts';
 import '@/ai/flows/serp-checker.ts';
 
 
 
     
+
+
 
 
 

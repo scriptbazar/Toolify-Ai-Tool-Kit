@@ -52,7 +52,7 @@ export { ImageCropper } from './ImageCropper';
 export { ImageMetadataViewer } from './ImageMetadataViewer';
 export { ImageResizer } from './ImageResizer';
 export { ImageShapeConverter } from './ImageShapeConverter';
-export { ImageTextExtractor } from './ImageTextExtractor';
+export { TextRecognizer } from './TextRecognizer';
 export { ImageToBase64 } from './ImageToBase64';
 export { ImageToPdf } from './ImageToPdf';
 export { InterestCalculator } from './InterestCalculator';
@@ -131,5 +131,7 @@ export { HtmlMinifier } from './HtmlMinifier';
     
 
     
+
+
 
 
