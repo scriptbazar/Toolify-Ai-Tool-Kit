@@ -8,6 +8,7 @@
 
 import { z } from 'zod';
 import { ImageAnnotatorClient } from '@google-cloud/vision';
+import serviceAccount from '../../firebase-service-account-key.json';
 
 // --- Input Schema ---
 const AnalyzeImageInputSchema = z.object({
@@ -17,8 +18,8 @@ export type AnalyzeImageInput = z.infer<typeof AnalyzeImageInputSchema>;
 
 // --- Output Schemas (simplified from Vision API response for clarity) ---
 const VertexSchema = z.object({
-  x: z.number(),
-  y: z.number(),
+  x: z.number().optional(),
+  y: z.number().optional(),
 });
 
 const BoundingPolySchema = z.object({
@@ -26,8 +27,8 @@ const BoundingPolySchema = z.object({
 });
 
 const DetectedLanguageSchema = z.object({
-  languageCode: z.string(),
-  confidence: z.number(),
+  languageCode: z.string().optional(),
+  confidence: z.number().optional(),
 });
 
 const TextPropertySchema = z.object({
@@ -94,7 +95,11 @@ export async function analyzeImageForText(input: AnalyzeImageInput): Promise<Ana
     }
 
     const client = new ImageAnnotatorClient({
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        credentials: {
+            client_email: serviceAccount.client_email,
+            private_key: serviceAccount.private_key,
+        },
+        projectId: serviceAccount.project_id,
     });
 
     const request = {
