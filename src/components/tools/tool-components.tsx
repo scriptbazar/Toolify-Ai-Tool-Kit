@@ -124,6 +124,7 @@ import { YouTubeVideoDescriptionExtractor } from './YouTubeVideoDescriptionExtra
 import { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownloader';
 import { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
 import { UnitConverter } from './UnitConverter';
+import { HtmlMinifier } from './HtmlMinifier';
 
 export const toolComponents: { [key: string]: React.ComponentType } = {
   'admob-revenue-calculator': AdMobRevenueCalculator,
@@ -250,6 +251,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'youtube-video-thumbnail-downloader': YouTubeVideoThumbnailDownloader,
   'youtube-video-title-extractor': YouTubeVideoTitleExtractor,
   'unit-converter': UnitConverter,
+  'html-minifier': HtmlMinifier,
 };
 
     
