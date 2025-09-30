@@ -8,7 +8,6 @@
 
 import { z } from 'zod';
 import { ImageAnnotatorClient } from '@google-cloud/vision';
-import { auth } from 'google-auth-library';
 
 // --- Input Schema ---
 const AnalyzeImageInputSchema = z.object({
@@ -94,7 +93,9 @@ export async function analyzeImageForText(input: AnalyzeImageInput): Promise<Ana
       throw new Error('Invalid image data URI format.');
     }
 
-    const client = new ImageAnnotatorClient();
+    const client = new ImageAnnotatorClient({
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    });
 
     const request = {
       image: {
