@@ -2,6 +2,10 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // This is required for the middleware to be able to run in the Node.js runtime.
+    nodeMiddleware: true,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -45,10 +49,22 @@ const nextConfig: NextConfig = {
     // "handlebars" library.
     //
     config.externals.push('handlebars');
+
+    // This alias is necessary to resolve the 'node:process' import used by
+    // some dependencies, which is not supported by Webpack by default.
+    if (!config.resolve) {
+      config.resolve = {};
+    }
+    if (!config.resolve.alias) {
+      config.resolve.alias = {};
+    }
+    config.resolve.alias['node:process'] = 'process/browser';
+    
     return config;
   },
 };
 
 export default nextConfig;
+
 
 
