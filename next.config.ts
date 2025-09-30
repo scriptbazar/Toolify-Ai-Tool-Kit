@@ -2,10 +2,6 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // This is required for the middleware to be able to run in the Node.js runtime.
-    nodeMiddleware: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -65,6 +61,7 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
 
 
 
