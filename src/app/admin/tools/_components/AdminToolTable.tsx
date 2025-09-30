@@ -23,17 +23,20 @@ import { EditToolForm } from '@/app/admin/tools/[id]/EditToolForm';
 import { upsertTool, deleteTool } from '@/ai/flows/tool-management';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-
+import { AdminToolFilters } from '@/app/admin/tools/_components/AdminToolFilters';
 
 interface AdminToolTableProps {
-  tools: Tool[];
+  allTools: Tool[];
+  filteredTools: Tool[];
+  setFilteredTools: (tools: Tool[]) => void;
   onToolUpdate: () => void;
 }
 
-export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
+export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onToolUpdate }: AdminToolTableProps) {
   const router = useRouter();
   const [editingTool, setEditingTool] = React.useState<Tool | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+
   const { toast } = useToast();
 
   const getCategoryName = (categoryId: string) => {
@@ -60,6 +63,7 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
   const handleSave = async (data: any) => {
     const toolData = {
       id: editingTool?.id,
+      slug: editingTool?.slug,
       ...data,
     };
     const result = await upsertTool(toolData);
@@ -90,6 +94,7 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
 
   return (
     <>
+    <AdminToolFilters allTools={allTools} setFilteredTools={setFilteredTools} />
     <div className="overflow-x-auto mt-6">
         <Table>
             <TableHeader>
@@ -102,7 +107,7 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
             </TableRow>
             </TableHeader>
             <TableBody>
-            {tools.map(tool => {
+            {filteredTools.map(tool => {
                 const IconComponent = (Icons as any)[tool.icon] || Icons.HelpCircle;
                 return (
                 <TableRow key={tool.id}>
@@ -128,7 +133,7 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
                 </TableRow>
                 )
             })}
-            {tools.length === 0 && (
+            {filteredTools.length === 0 && (
                 <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
                     No tools found for the current selection.
@@ -161,7 +166,7 @@ export function AdminToolTable({ tools, onToolUpdate }: AdminToolTableProps) {
                           <AlertDialogHeader>
                               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                               <AlertDialogDesc>
-                                  This action cannot be undone. This will permanently delete the tool and its associated data.
+                                  This action cannot be undone. This will permanently delete the tool and its associated data. Note: The associated component file will not be deleted automatically.
                               </AlertDialogDesc>
                           </AlertDialogHeader>
                           <AlertDialogFooter>

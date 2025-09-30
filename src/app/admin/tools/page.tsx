@@ -19,12 +19,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminToolsPage() {
     const [allTools, setAllTools] = useState<Tool[]>([]);
+    const [filteredTools, setFilteredTools] = useState<Tool[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchTools = async () => {
         setLoading(true);
         const tools = await getTools();
         setAllTools(tools);
+        setFilteredTools(tools);
         setLoading(false);
     };
 
@@ -74,7 +76,12 @@ export default function AdminToolsPage() {
                     <CardDescription>A comprehensive list of all tools available in the application.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <AdminToolTable allTools={allTools} onToolUpdate={fetchTools} />
+                    <AdminToolTable 
+                        allTools={allTools}
+                        filteredTools={filteredTools}
+                        setFilteredTools={setFilteredTools}
+                        onToolUpdate={fetchTools} 
+                    />
                 </CardContent>
             </Card>
         </div>
