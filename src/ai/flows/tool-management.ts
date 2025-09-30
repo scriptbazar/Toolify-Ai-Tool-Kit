@@ -262,12 +262,13 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
 
     if (id) {
       const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(id);
-      await toolRef.update(validatedData);
+      // Ensure slug is not removed on update
+      await toolRef.update({ ...validatedData, slug: id });
       return { success: true, message: 'Tool updated successfully.', toolId: id };
     } else {
       if (!data.slug) throw new Error("Slug is required for a new tool.");
       const docRef = adminDb.collection(TOOLS_COLLECTION).doc(data.slug);
-      await docRef.set({ ...validatedData, createdAt: FieldValue.serverTimestamp() });
+      await docRef.set({ ...validatedData, slug: data.slug, createdAt: FieldValue.serverTimestamp() });
       return { success: true, message: 'Tool added successfully.', toolId: docRef.id };
     }
   } catch (error: any) {
@@ -476,7 +477,6 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
     
 
-    
 
 
 
