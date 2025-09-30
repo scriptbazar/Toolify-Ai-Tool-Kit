@@ -3,6 +3,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -26,19 +27,21 @@ import { AdminToolFilters } from '@/app/admin/tools/_components/AdminToolFilters
 
 interface AdminToolTableProps {
   allTools: Tool[];
+  filteredTools: Tool[];
+  setFilteredTools: (tools: Tool[]) => void;
   onToolUpdate: () => void;
 }
 
-export function AdminToolTable({ allTools, onToolUpdate }: AdminToolTableProps) {
+export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onToolUpdate }: AdminToolTableProps) {
+  const router = useRouter();
   const [editingTool, setEditingTool] = React.useState<Tool | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [filteredTools, setFilteredTools] = React.useState<Tool[]>(allTools);
 
   const { toast } = useToast();
   
   React.useEffect(() => {
     setFilteredTools(allTools);
-  }, [allTools]);
+  }, [allTools, setFilteredTools]);
 
   const getCategoryName = (categoryId: string) => {
     return toolCategories.find(c => c.id === categoryId)?.name || 'Unknown';
