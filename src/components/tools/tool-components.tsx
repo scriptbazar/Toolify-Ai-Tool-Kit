@@ -6,6 +6,7 @@ import { AddWatermarkToPdf } from './AddWatermarkToPdf';
 import { AesEncryptionDecryption } from './AesEncryptionDecryption';
 import { AgeCalculator } from './AgeCalculator';
 import { AiBlogPostWriter } from './AiBlogPostWriter';
+import { AiCodeAssistant } from './AiCodeAssistant';
 import { AiContentSummarizer } from './AiContentSummarizer';
 import { AiEmailComposer } from './AiEmailComposer';
 import { AiProductDescriptionWriter } from './AiProductDescriptionWriter';
@@ -42,6 +43,7 @@ import { GpaCalculator } from './GpaCalculator';
 import { GpaToCgpaCalculator } from './GpaToCgpaCalculator';
 import { GpaToPercentageConverter } from './GpaToPercentageConverter';
 import { GSTCalculator } from './GSTCalculator';
+import { HtmlMinifier } from './HtmlMinifier';
 import { IcoConverter } from './IcoConverter';
 import { IFSCodetoBankDetails } from './IFSCCodeToBankDetails';
 import { ImageColorExtractor } from './ImageColorExtractor';
@@ -123,15 +125,15 @@ import { YouTubeVideoDescriptionExtractor } from './YouTubeVideoDescriptionExtra
 import { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownloader';
 import { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
 import { UnitConverter } from './UnitConverter';
-import { HtmlMinifier } from './HtmlMinifier';
 
 export const toolComponents: { [key: string]: React.ComponentType } = {
   'admob-revenue-calculator': AdMobRevenueCalculator,
   'adsense-revenue-calculator': AdSenseRevenueCalculator,
   'add-watermark-to-pdf': AddWatermarkToPdf,
-  'aes-encryption-and-decryption': AesEncryptionDecryption,
+  'aes-encryption-decryption': AesEncryptionDecryption,
   'age-calculator': AgeCalculator,
   'ai-blog-post-writer': AiBlogPostWriter,
+  'ai-code-assistant': AiCodeAssistant,
   'ai-content-summarizer': AiContentSummarizer,
   'ai-email-composer': AiEmailComposer,
   'ai-product-description-writer': AiProductDescriptionWriter,
@@ -168,6 +170,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'gpa-to-cgpa-calculator': GpaToCgpaCalculator,
   'gpa-to-percentage-converter': GpaToPercentageConverter,
   'gst-calculator': GSTCalculator,
+  'html-minifier': HtmlMinifier,
   'ico-converter': IcoConverter,
   'ifsc-code-to-bank-details': IFSCodetoBankDetails,
   'image-color-extractor': ImageColorExtractor,
@@ -249,7 +252,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'youtube-video-thumbnail-downloader': YouTubeVideoThumbnailDownloader,
   'youtube-video-title-extractor': YouTubeVideoTitleExtractor,
   'unit-converter': UnitConverter,
-  'html-minifier': HtmlMinifier,
 };
 
     
@@ -257,6 +259,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
     
 
     
+
 
 
 

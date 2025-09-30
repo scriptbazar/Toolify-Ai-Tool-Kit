@@ -4,11 +4,11 @@
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, Loader2, FileText, Bot, Copy, Trash2, ZoomIn, ZoomOut, Move, Languages, Text, Square, Sigma, Baseline } from 'lucide-react';
+import { UploadCloud, Loader2, FileText, Copy, Trash2, ZoomIn, ZoomOut, Move, Languages, Baseline } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { analyzeImageForText } from '@/ai/flows/text-recognizer';
-import { type TextAnnotation } from '@/ai/flows/text-recognizer';
+import type { AnalyzeImageOutput } from '@/ai/flows/text-recognizer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Skeleton } from '../ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
@@ -25,9 +25,7 @@ interface BoundingBox {
 export function ImageTextExtractor() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [fullText, setFullText] = useState<string>('');
-  const [blocks, setBlocks] = useState<any[]>([]);
-  const [detectedLanguage, setDetectedLanguage] = useState<string>('');
+  const [analysisResult, setAnalysisResult] = useState<AnalyzeImageOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -46,9 +44,7 @@ export function ImageTextExtractor() {
             return;
         }
         setImageFile(file);
-        setFullText('');
-        setBlocks([]);
-        setDetectedLanguage('');
+        setAnalysisResult(null);
         setHighlightedBox(null);
         setZoom(1);
         setOffset({ x: 0, y: 0 });
@@ -83,11 +79,8 @@ export function ImageTextExtractor() {
       reader.onloadend = async () => {
         const base64Image = reader.result as string;
         const result = await analyzeImageForText({ imageDataUri: base64Image });
-        if (result.fullTextAnnotation) {
-          setFullText(result.fullTextAnnotation.text);
-          setBlocks(result.fullTextAnnotation.pages[0]?.blocks || []);
-          setDetectedLanguage(result.fullTextAnnotation.pages[0]?.property?.detectedLanguages?.[0]?.languageCode || 'N/A');
-        } else {
+        setAnalysisResult(result);
+        if (!result.fullTextAnnotation) {
           toast({ title: 'No Text Detected', description: 'The AI could not find any text in this image.', variant: 'default'});
         }
         setIsLoading(false);
@@ -99,9 +92,8 @@ export function ImageTextExtractor() {
   };
 
   const handleCopy = (text: string) => { navigator.clipboard.writeText(text); toast({ title: "Copied to clipboard!" }); };
-  const handleClear = () => { setImageFile(null); setImagePreview(null); setFullText(''); setBlocks([]); setDetectedLanguage(''); if (fileInputRef.current) fileInputRef.current.value = ''; };
+  const handleClear = () => { setImageFile(null); setImagePreview(null); setAnalysisResult(null); if (fileInputRef.current) fileInputRef.current.value = ''; };
   
-  // Panning and Zooming Logic
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => { if (e.button === 0) { setIsPanning(true); lastMousePos.current = { x: e.clientX, y: e.clientY }; }};
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => { if (isPanning) { const dx = e.clientX - lastMousePos.current.x; const dy = e.clientY - lastMousePos.current.y; setOffset(prev => ({ x: prev.x + dx, y: prev.y + dy })); lastMousePos.current = { x: e.clientX, y: e.clientY }; }};
   const handleMouseUp = () => setIsPanning(false);
@@ -138,11 +130,12 @@ export function ImageTextExtractor() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent 
-                        className={cn("relative w-full h-[500px] overflow-hidden bg-muted rounded-md", isPanning && "cursor-grabbing")}
+                        className={cn("relative w-full h-[500px] overflow-hidden bg-muted cursor-grab active:cursor-grabbing rounded-md")}
                         onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseLeave} onWheel={handleWheel}
                     >
                          {imagePreview && (
                             <div style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`, transformOrigin: 'center center', width: imageSize.width, height: imageSize.height }} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={imagePreview} alt="Uploaded preview" />
                                 {highlightedBox && (
                                     <div 
@@ -168,30 +161,46 @@ export function ImageTextExtractor() {
                                 <TabsTrigger value="by-block">By Block</TabsTrigger>
                             </TabsList>
                              <div className="flex items-center justify-between mt-4">
-                                <Badge variant="outline" className="flex items-center gap-1.5"><Languages className="h-4 w-4"/> Detected: <span className="font-semibold">{detectedLanguage}</span></Badge>
+                                <Badge variant="outline" className="flex items-center gap-1.5"><Languages className="h-4 w-4"/> Detected: <span className="font-semibold">{analysisResult?.fullTextAnnotation?.pages[0]?.property?.detectedLanguages?.[0]?.languageCode || 'N/A'}</span></Badge>
                                 <div className="flex gap-1">
-                                    <Button variant="outline" size="sm" onClick={() => handleCopy(fullText)} disabled={!fullText}><Copy className="mr-2 h-4 w-4"/>Copy All</Button>
+                                    <Button variant="outline" size="sm" onClick={() => handleCopy(analysisResult?.fullTextAnnotation?.text || '')} disabled={!analysisResult?.fullTextAnnotation?.text}><Copy className="mr-2 h-4 w-4"/>Copy All</Button>
                                     <Button variant="destructive" size="sm" onClick={handleClear}><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
                                 </div>
                             </div>
                             <TabsContent value="full-text" className="mt-4">
                                 <ScrollArea className="h-[400px] w-full p-4 border rounded-md bg-muted">
-                                    <p className="text-sm whitespace-pre-wrap">{fullText || "No text detected."}</p>
+                                    <p className="text-sm whitespace-pre-wrap">{analysisResult?.fullTextAnnotation?.text || "No text detected."}</p>
                                 </ScrollArea>
                             </TabsContent>
                              <TabsContent value="by-block" className="mt-4">
                                 <ScrollArea className="h-[400px] w-full border rounded-md">
-                                    <div className="space-y-2 p-2">
-                                        {blocks.map((block, index) => (
-                                             <p key={index} 
-                                                className="text-sm p-2 rounded-md hover:bg-primary/10 cursor-pointer"
-                                                onMouseEnter={() => block.boundingBox && setHighlightedBox({ x: block.boundingBox.vertices[0].x, y: block.boundingBox.vertices[0].y, width: block.boundingBox.vertices[1].x - block.boundingBox.vertices[0].x, height: block.boundingBox.vertices[2].y - block.boundingBox.vertices[0].y })}
-                                                onMouseLeave={() => setHighlightedBox(null)}
-                                             >
-                                                {block.paragraphs.map((p: any) => p.words.map((w: any) => w.symbols.map((s: any) => s.text).join('')).join(' ')).join('\n')}
-                                            </p>
-                                        ))}
-                                    </div>
+                                    <Table>
+                                        <TableHeader className="sticky top-0 bg-background"><TableRow><TableHead>Type</TableHead><TableHead>Text</TableHead></TableRow></TableHeader>
+                                        <TableBody>
+                                            {(analysisResult?.fullTextAnnotation?.pages[0]?.blocks || []).flatMap(block => 
+                                                block.paragraphs.flatMap(para => 
+                                                    para.words.flatMap(word => 
+                                                        word.symbols.map(symbol => ({
+                                                            type: 'Symbol',
+                                                            text: symbol.text,
+                                                            boundingBox: symbol.boundingBox,
+                                                            confidence: symbol.confidence,
+                                                        }))
+                                                    )
+                                                )
+                                            ).map((item, index) => (
+                                                <TableRow 
+                                                    key={index}
+                                                    onMouseEnter={() => item.boundingBox && setHighlightedBox({ x: item.boundingBox.vertices[0].x, y: item.boundingBox.vertices[0].y, width: item.boundingBox.vertices[1].x - item.boundingBox.vertices[0].x, height: item.boundingBox.vertices[2].y - item.boundingBox.vertices[0].y })}
+                                                    onMouseLeave={() => setHighlightedBox(null)}
+                                                    className="cursor-pointer"
+                                                >
+                                                    <TableCell><Badge variant="secondary"><Baseline className="h-3 w-3 mr-1" />{item.type}</Badge></TableCell>
+                                                    <TableCell className="font-mono text-xs">{item.text}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
                                 </ScrollArea>
                             </TabsContent>
                         </Tabs>

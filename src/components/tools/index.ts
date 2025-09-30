@@ -5,6 +5,7 @@ export { AddWatermarkToPdf } from './AddWatermarkToPdf';
 export { AesEncryptionDecryption } from './AesEncryptionDecryption';
 export { AgeCalculator } from './AgeCalculator';
 export { AiBlogPostWriter } from './AiBlogPostWriter';
+export { AiCodeAssistant } from './AiCodeAssistant';
 export { AiContentSummarizer } from './AiContentSummarizer';
 export { AiEmailComposer } from './AiEmailComposer';
 export { AiProductDescriptionWriter } from './AiProductDescriptionWriter';
@@ -42,6 +43,7 @@ export { GpaCalculator } from './GpaCalculator';
 export { GpaToCgpaCalculator } from './GpaToCgpaCalculator';
 export { GpaToPercentageConverter } from './GpaToPercentageConverter';
 export { GSTCalculator } from './GSTCalculator';
+export { HtmlMinifier } from './HtmlMinifier';
 export { IcoConverter } from './IcoConverter';
 export { IFSCodetoBankDetails } from './IFSCCodeToBankDetails';
 export { ImageColorExtractor } from './ImageColorExtractor';
@@ -126,10 +128,10 @@ export { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownload
 export { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
 export { UpgradeProDialog } from './UpgradeProDialog';
 export { UnitConverter } from './UnitConverter';
-export { HtmlMinifier } from './HtmlMinifier';
     
 
     
+
 
 
 
