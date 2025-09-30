@@ -10,8 +10,8 @@ import {
 } from '@/components/ui/card';
 import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';
-import { AdminToolTable } from './_components/AdminToolTable';
-import { AdminToolFilters } from './_components/AdminToolFilters';
+import { AdminToolTable } from '@/components/tools/AdminToolTable';
+
 
 export const revalidate = 0; // Disable caching for this page
 
