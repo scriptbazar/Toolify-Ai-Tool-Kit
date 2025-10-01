@@ -3,7 +3,7 @@
  * @fileOverview Initializes and exports the Firebase Admin SDK instances.
  * This file handles server-side Firebase connections.
  */
-import { initializeApp, getApps, App, cert, ServiceAccount } from 'firebase-admin/app';
+import { initializeApp, getApps, App, cert, type ServiceAccount } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import serviceAccount from '@/firebase-service-account-key.json';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
