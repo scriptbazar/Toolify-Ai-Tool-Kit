@@ -4,52 +4,121 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Allow logged-in users to read their own user document and admins to read any
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    // Helper functions
+    function isUserAuthenticated() {
+      return request.auth != null;
     }
 
-    // Public read for tools, posts, and settings
-    match /tools/{toolId} {
-      allow read: if true;
-      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    function isOwner(userId) {
+      return request.auth.uid == userId;
     }
     
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Settings collection
+    match /settings/{docId} {
+      allow read: if true; // Everyone can read settings
+      allow write: if isUserAuthenticated() && isAdmin(); // Only admins can write
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isUserAuthenticated();
+      allow create: if true; // Anyone can create a user document (signup)
+      allow update: if isOwner(userId) || isAdmin(); // User can update their own, or admin can update any
+      allow delete: if isAdmin(); // Only admins can delete users
+      
+      // Subcollections for user
+      match /activity/{activityId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /loginHistory/{historyId} {
+         allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Leads collection
+    match /leads/{leadId} {
+      allow read: if isUserAuthenticated() && isAdmin();
+      allow create: if true; // Anyone can create a lead (e.g., chat widget)
+      allow write: if isUserAuthenticated() && isAdmin();
+    }
+    
+    // Tools collection
+    match /tools/{toolId} {
+      allow read: if true;
+      allow write: if isUserAuthenticated() && isAdmin();
+    }
+    
+    // Blog Posts collection
     match /blogPosts/{postId} {
-      allow read: if true;
-       allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+        allow read: if true;
+        allow write: if isUserAuthenticated() && isAdmin();
     }
-
-    match /settings/main {
-      allow read: if true;
-      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    
+    // Blog Categories collection
+    match /blogCategories/{categoryId} {
+        allow read: if true;
+        allow write: if isUserAuthenticated() && isAdmin();
     }
-
-    // Community Chat Rules
-    match /communityChat/{messageId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && request.resource.data.fromId == request.auth.uid;
-      allow update: if request.auth != null; // Allow logged-in users to update (e.g., for reactions)
-      allow delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    
+    // Comments for Blog Posts
+    match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isUserAuthenticated();
+        allow update, delete: if isUserAuthenticated() && isAdmin();
     }
-
-    // Ticket Management Rules
-    match /tickets/{ticketId} {
-        allow read, update, delete: if request.auth != null && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' || request.auth.uid == resource.data.userId);
-        allow create: if request.auth != null;
-    }
-
-    // Reviews Management Rules
+    
+    // Reviews for Tools
     match /reviews/{reviewId} {
         allow read: if true;
-        allow create: if request.auth != null;
-        allow update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+        allow create: if isUserAuthenticated();
+        allow update, delete: if isUserAuthenticated() && isAdmin();
+    }
+    
+    // Tool Requests
+    match /toolRequests/{requestId} {
+        allow read, write: if isUserAuthenticated();
     }
 
-    // All other collections can only be accessed by admins
-    match /{document=**} {
-      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    // Community Chat
+    match /communityChat/{messageId} {
+      allow read: if isUserAuthenticated();
+      allow create: if isUserAuthenticated();
+      allow update: if isUserAuthenticated();
+    }
+    
+    // User Media
+    match /userMedia/{mediaId} {
+        allow read, write: if isUserAuthenticated();
+    }
+    
+    // Tickets
+    match /tickets/{ticketId} {
+        allow read, write: if isUserAuthenticated();
+    }
+
+    // Payments
+    match /payments/{paymentId} {
+      allow read, write: if isUserAuthenticated();
+    }
+
+    // Email Log
+    match /emailLog/{logId} {
+        allow read, write: if isUserAuthenticated() && isAdmin();
+    }
+
+    // Announcements
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow create, update, delete: if isUserAuthenticated() && isAdmin();
     }
   }
 }
