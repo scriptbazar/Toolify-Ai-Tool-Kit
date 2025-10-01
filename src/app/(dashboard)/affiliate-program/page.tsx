@@ -13,12 +13,13 @@ import { Copy, Users, DollarSign, MousePointerClick, Percent, Calendar, Hourglas
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getSettings } from '@/ai/flows/settings-management';
-import { type ReferralSettings, type ReferralStatus, type FaqItem } from '@/ai/flows/settings-management.types';
+import { type ReferralSettings, type FaqItem } from '@/ai/flows/settings-management.types';
 import { requestToJoinAffiliateProgram } from '@/ai/flows/user-management';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { StatCard } from '@/components/common/StatCard';
 import * as Icons from 'lucide-react';
 
+type ReferralStatus = 'not_joined' | 'pending' | 'approved' | 'rejected';
 
 interface ReferredUser {
     id: string;
@@ -76,17 +77,20 @@ export default function AffiliateProgramPage() {
                             const conversionRate = clicks > 0 ? ((referrals / clicks) * 100).toFixed(2) + '%' : '0.00%';
                             setStats({ clicks, referrals, earnings, conversionRate });
 
-                            const q = query(collection(db, "users"), where("referredBy", "==", firebaseUser.uid));
-                            const referredUsersSnapshot = await getDocs(q);
-                            const fetchedReferredUsers: ReferredUser[] = referredUsersSnapshot.docs.map(doc => {
+                            // Fetch all users and filter client-side to avoid needing a composite index
+                            const allUsersSnapshot = await getDocs(collection(db, "users"));
+                            const fetchedReferredUsers: ReferredUser[] = [];
+                            allUsersSnapshot.forEach(doc => {
                                 const data = doc.data();
-                                return {
-                                    id: doc.id,
-                                    name: `${data.firstName} ${data.lastName}`,
-                                    date: data.createdAt.toDate().toLocaleDateString(),
-                                    status: data.planId === 'free' ? 'Free Plan' : 'Pro Plan',
-                                    earnings: '$0.00' // This would require more complex logic
-                                };
+                                if (data.referredBy === firebaseUser.uid) {
+                                     fetchedReferredUsers.push({
+                                        id: doc.id,
+                                        name: `${data.firstName} ${data.lastName}`,
+                                        date: data.createdAt.toDate().toLocaleDateString(),
+                                        status: data.planId === 'free' ? 'Free Plan' : 'Pro Plan',
+                                        earnings: '$0.00' // This would require more complex logic
+                                    });
+                                }
                             });
                             setReferredUsers(fetchedReferredUsers);
                         }
