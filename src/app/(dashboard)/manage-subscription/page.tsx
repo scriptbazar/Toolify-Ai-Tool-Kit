@@ -15,8 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { createPayPalOrder, createRazorpayOrder } from '@/ai/flows/payment-management';
-import { useRouter } from 'next/navigation';
+import { PaymentMethodDialog } from '@/components/dashboard/PaymentMethodDialog';
 
 
 interface UserProfile {
@@ -33,9 +32,9 @@ export default function ManageSubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
-  const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
@@ -74,76 +73,13 @@ export default function ManageSubscriptionPage() {
   
   const currentPlanId = userProfile?.planId || 'free';
 
-  const handleUpgradeClick = async (plan: Plan) => {
+  const handleUpgradeClick = (plan: Plan) => {
     if (!userProfile || !user) {
         toast({ title: 'Error', description: 'You must be logged in to upgrade.', variant: 'destructive'});
         return;
     }
-    
-    setIsProcessing(plan.id);
-    
-    // PayPal
-    if (paymentSettings?.paypal?.isEnabled) {
-      try {
-        const { id, links } = await createPayPalOrder({
-            planId: plan.id,
-            planName: plan.name,
-            planPrice: plan.price,
-            userId: user.uid,
-        });
-        const approvalLink = links.find(link => link.rel === 'approve');
-        if (approvalLink) {
-            window.location.href = approvalLink.href;
-        } else {
-            throw new Error('Could not find PayPal approval link.');
-        }
-      } catch (error: any) {
-        toast({ title: 'PayPal Error', description: error.message, variant: 'destructive' });
-      } finally {
-         setIsProcessing(null);
-      }
-      return;
-    }
-
-    // Razorpay
-    if (paymentSettings?.razorpay?.isEnabled) {
-        try {
-            const razorpayOrder = await createRazorpayOrder({
-                planId: plan.id,
-                planName: plan.name,
-                planPrice: plan.price,
-                userId: user.uid,
-                userEmail: userProfile.email,
-                userName: `${userProfile.firstName} ${userProfile.lastName}`,
-            });
-            
-            const options = {
-                key: razorpayOrder.key,
-                amount: razorpayOrder.amount,
-                currency: razorpayOrder.currency,
-                name: razorpayOrder.name,
-                description: razorpayOrder.description,
-                order_id: razorpayOrder.id,
-                handler: function (response: any){
-                    // This should be verified on a server
-                    console.log(response);
-                    router.push('/payment/success');
-                },
-                prefill: razorpayOrder.prefill,
-                notes: razorpayOrder.notes,
-            };
-            const rzp = new (window as any).Razorpay(options);
-            rzp.open();
-        } catch (error: any) {
-            toast({ title: 'Razorpay Error', description: error.message, variant: 'destructive'});
-        } finally {
-            setIsProcessing(null);
-        }
-        return;
-    }
-
-    toast({ title: 'Not Available', description: 'No payment gateway is enabled. Please contact support.', variant: 'destructive'});
-    setIsProcessing(null);
+    setSelectedPlan(plan);
+    setIsModalOpen(true);
   };
 
   return (
@@ -179,7 +115,6 @@ export default function ManageSubscriptionPage() {
         ) : (
             plans.map((plan) => {
                 const isCurrentPlan = plan.id === currentPlanId;
-                const isProcessingThisPlan = isProcessing === plan.id;
                 return (
                     <Card key={plan.id} className={cn(
                         'flex flex-col h-full transition-all',
@@ -219,10 +154,8 @@ export default function ManageSubscriptionPage() {
                             </ul>
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full" disabled={isCurrentPlan || !!isProcessing} onClick={() => handleUpgradeClick(plan)}>
-                                {isProcessingThisPlan ? (
-                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Processing...</>
-                                ) : isCurrentPlan ? 'Your Current Plan' : 'Upgrade Plan'}
+                            <Button className="w-full" disabled={isCurrentPlan} onClick={() => handleUpgradeClick(plan)}>
+                                {isCurrentPlan ? 'Your Current Plan' : 'Upgrade Plan'}
                             </Button>
                         </CardFooter>
                     </Card>
@@ -230,6 +163,16 @@ export default function ManageSubscriptionPage() {
             })
         )}
       </div>
+      {selectedPlan && user && userProfile && (
+        <PaymentMethodDialog 
+            isOpen={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            plan={selectedPlan}
+            user={user}
+            userProfile={userProfile}
+            paymentSettings={paymentSettings}
+        />
+      )}
     </div>
   );
 }
