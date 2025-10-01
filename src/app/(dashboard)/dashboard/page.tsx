@@ -32,7 +32,7 @@ const getDashboardData = cache(async (uid: string) => {
       getCountFromServer(activityQuery),
     ]);
   
-    const userData = userDocSnap.exists ? userDocSnap.data() : null;
+    const userData = userDocSnap.exists() ? userDocSnap.data() : null;
     
     // Convert Firestore Timestamps to serializable format (ISO strings)
     const serializableProfile = userData ? {
