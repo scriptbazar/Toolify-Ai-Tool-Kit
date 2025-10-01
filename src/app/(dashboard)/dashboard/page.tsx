@@ -14,6 +14,7 @@ import { DashboardClient } from './_components/DashboardClient';
 import { unstable_cache as cache, revalidatePath } from 'next/cache';
 import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
+import { Timestamp } from 'firebase-admin/firestore';
 
 
 const getDashboardData = cache(async (uid: string) => {
@@ -27,7 +28,17 @@ const getDashboardData = cache(async (uid: string) => {
       adminDb.collection(`users/${uid}/activity`).where('type', '==', 'tool_usage').get()
     ]);
   
-    const userData = userDocSnap.exists ? userDocSnap.data() : null;
+    const userData = userDocSnap.exists() ? userDocSnap.data() : null;
+    
+    // Convert Firestore Timestamps to serializable format (ISO strings)
+    const serializableProfile = userData ? {
+        ...userData,
+        createdAt: (userData.createdAt as Timestamp)?.toDate().toISOString() || null,
+        lastActive: (userData.lastActive as Timestamp)?.toDate().toISOString() || null,
+        subscriptionEndDate: (userData.subscriptionEndDate as Timestamp)?.toDate().toISOString() || null,
+        referralRequestDate: (userData.referralRequestDate as Timestamp)?.toDate().toISOString() || null,
+    } : null;
+
     const userPlan = settings.plan?.plans.find(p => p.id === userData?.planId) || settings.plan?.plans.find(p => p.id === 'free') || null;
   
     const stats = {
@@ -36,7 +47,7 @@ const getDashboardData = cache(async (uid: string) => {
     };
   
     return {
-      profile: userData,
+      profile: serializableProfile,
       plan: userPlan,
       announcements: fetchedAnnouncements,
       stats: stats,
