@@ -1,12 +1,11 @@
 
-
 /**
  * @fileOverview Initializes and exports the Firebase Admin SDK instances.
  * This file handles server-side Firebase connections.
  */
 import { initializeApp, getApps, App, cert, ServiceAccount } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
-import serviceAccount from '../../../firebase-service-account-key.json';
+import serviceAccount from '@/firebase-service-account-key.json';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import { z } from 'zod';
 import { getAuth } from 'firebase-admin/auth';
@@ -17,10 +16,16 @@ let adminApp: App;
 
 function initializeAdmin() {
     if (!getApps().length) {
-      adminApp = initializeApp({
-        credential: cert(serviceAccount as ServiceAccount),
-      });
-      adminDb = getFirestore(adminApp);
+      try {
+        adminApp = initializeApp({
+          credential: cert(serviceAccount as ServiceAccount),
+        });
+        adminDb = getFirestore(adminApp);
+      } catch (error: any) {
+        console.error("Firebase Admin initialization error:", error.message);
+        // Avoid crashing the server on initialization failure.
+        // Functions calling getAdminDb/getAdminAuth should handle the case where they are null.
+      }
     } else {
       adminApp = getApps()[0];
       adminDb = getFirestore(adminApp);

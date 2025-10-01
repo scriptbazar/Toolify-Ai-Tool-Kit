@@ -1,3 +1,4 @@
+
 {
   "compilerOptions": {
     "target": "ES2017",
@@ -19,7 +20,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/firebase-service-account-key.json": ["./firebase-service-account-key.json"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
