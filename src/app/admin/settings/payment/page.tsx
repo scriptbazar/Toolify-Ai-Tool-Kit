@@ -18,12 +18,8 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 const initialSettings: PaymentSettings = {
-  stripe: { isEnabled: false, name: 'Stripe', publishableKey: '', secretKey: '' },
   paypal: { isEnabled: false, name: 'PayPal', clientId: '', clientSecret: '', mode: 'sandbox' },
   razorpay: { isEnabled: false, name: 'Razorpay', keyId: '', keySecret: '' },
-  payu: { isEnabled: false, name: 'PayU', merchantKey: '', merchantSalt: '', mode: 'test' },
-  cashfree: { isEnabled: false, name: 'Cashfree', appId: '', secretKey: '', mode: 'sandbox' },
-  phonepe: { isEnabled: false, name: 'PhonePe', merchantId: '', merchantUserId: '', saltKey: '', saltIndex: '', mode: 'uat' },
 };
 
 export default function PaymentSettingsPage() {
@@ -40,12 +36,8 @@ export default function PaymentSettingsPage() {
         // Deep merge fetched settings with initial structure to ensure all keys exist
         const fetchedPaymentSettings = appSettings.payment || {};
         const mergedSettings = {
-          stripe: { ...initialSettings.stripe, ...fetchedPaymentSettings.stripe },
           paypal: { ...initialSettings.paypal, ...fetchedPaymentSettings.paypal },
           razorpay: { ...initialSettings.razorpay, ...fetchedPaymentSettings.razorpay },
-          payu: { ...initialSettings.payu, ...fetchedPaymentSettings.payu },
-          cashfree: { ...initialSettings.cashfree, ...fetchedPaymentSettings.cashfree },
-          phonepe: { ...initialSettings.phonepe, ...fetchedPaymentSettings.phonepe },
         };
         setSettings(mergedSettings);
       } catch (error) {
@@ -159,7 +151,7 @@ export default function PaymentSettingsPage() {
         <Skeleton className="h-10 w-1/3" />
         <Skeleton className="h-8 w-2/3" />
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(2)].map((_, i) => (
                 <Card key={i}>
                     <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
                     <CardContent className="space-y-4">
@@ -183,11 +175,6 @@ export default function PaymentSettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {renderGatewayCard('stripe', 'Stripe', [
-          { id: 'publishableKey', label: 'Publishable Key', placeholder: 'pk_live_...' },
-          { id: 'secretKey', label: 'Secret Key', placeholder: 'sk_live_...' },
-        ])}
-        
         {renderGatewayCard('paypal', 'PayPal', [
           { id: 'clientId', label: 'Client ID' },
           { id: 'clientSecret', label: 'Client Secret' },
@@ -197,23 +184,6 @@ export default function PaymentSettingsPage() {
           { id: 'keyId', label: 'Key ID' },
           { id: 'keySecret', label: 'Key Secret' },
         ])}
-
-        {renderGatewayCard('payu', 'PayU', [
-          { id: 'merchantKey', label: 'Merchant Key' },
-          { id: 'merchantSalt', label: 'Merchant Salt' },
-        ], [{value: 'test', label: 'Test'}, {value: 'live', label: 'Live'}])}
-        
-        {renderGatewayCard('cashfree', 'Cashfree', [
-          { id: 'appId', label: 'App ID' },
-          { id: 'secretKey', label: 'Secret Key' },
-        ], [{value: 'sandbox', label: 'Sandbox'}, {value: 'production', label: 'Production'}])}
-        
-        {renderGatewayCard('phonepe', 'PhonePe', [
-          { id: 'merchantId', label: 'Merchant ID' },
-          { id: 'merchantUserId', label: 'Merchant User ID' },
-          { id: 'saltKey', label: 'Salt Key' },
-          { id: 'saltIndex', label: 'Salt Index' },
-        ], [{value: 'uat', label: 'UAT (Test)'}, {value: 'production', label: 'Production'}])}
       </div>
 
       <div className="flex justify-end pt-6">

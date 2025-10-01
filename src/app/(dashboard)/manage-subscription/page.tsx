@@ -15,8 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { createStripeCheckoutSession, createPayPalOrder, createRazorpayOrder, createPayUPayment, createCashfreePayment, createPhonePePayment } from '@/ai/flows/payment-management';
-import { loadStripe } from '@stripe/stripe-js';
+import { createPayPalOrder, createRazorpayOrder } from '@/ai/flows/payment-management';
 import { useRouter } from 'next/navigation';
 
 
@@ -82,32 +81,6 @@ export default function ManageSubscriptionPage() {
     }
     
     setIsProcessing(plan.id);
-
-    // Stripe
-    if (paymentSettings?.stripe?.isEnabled) {
-        try {
-            const { sessionId, publishableKey } = await createStripeCheckoutSession({
-                planId: plan.id,
-                planName: plan.name,
-                planPrice: plan.price,
-                userId: user.uid,
-                userEmail: userProfile.email,
-            });
-
-            if (!sessionId || !publishableKey) throw new Error('Could not create a checkout session.');
-            const stripe = await loadStripe(publishableKey);
-            if (!stripe) throw new Error('Stripe.js failed to load.');
-
-            const { error } = await stripe.redirectToCheckout({ sessionId });
-            if (error) throw new Error(error.message);
-
-        } catch (error: any) {
-            toast({ title: 'Stripe Error', description: error.message, variant: 'destructive' });
-        } finally {
-            setIsProcessing(null);
-        }
-        return;
-    }
     
     // PayPal
     if (paymentSettings?.paypal?.isEnabled) {
@@ -168,88 +141,8 @@ export default function ManageSubscriptionPage() {
         }
         return;
     }
-    
-    // PayU
-    if (paymentSettings?.payu?.isEnabled) {
-        try {
-            const payuData = await createPayUPayment({
-                planId: plan.id,
-                planName: plan.name,
-                planPrice: plan.price,
-                userId: user.uid,
-                userEmail: userProfile.email,
-                userName: `${userProfile.firstName} ${userProfile.lastName}`,
-            });
 
-            // Create a form and submit it to redirect to PayU
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = payuData.action;
-            
-            Object.entries(payuData).forEach(([key, value]) => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = value.toString();
-                form.appendChild(input);
-            });
-            
-            document.body.appendChild(form);
-            form.submit();
-
-        } catch (error: any) {
-            toast({ title: 'PayU Error', description: error.message, variant: 'destructive'});
-        } finally {
-            setIsProcessing(null);
-        }
-        return;
-    }
-    
-    // Cashfree
-    if (paymentSettings?.cashfree?.isEnabled) {
-        try {
-            const cashfreeData = await createCashfreePayment({
-                planId: plan.id,
-                planName: plan.name,
-                planPrice: plan.price,
-                userId: user.uid,
-                userEmail: userProfile.email,
-                userName: `${userProfile.firstName} ${userProfile.lastName}`,
-            });
-            const cashfree = new (window as any).Cashfree(cashfreeData.mode);
-            cashfree.checkout({
-                paymentSessionId: cashfreeData.payment_session_id,
-                returnUrl: `${window.location.origin}/payment/success?order_id={order_id}`,
-            });
-        } catch (error: any) {
-            toast({ title: 'Cashfree Error', description: error.message, variant: 'destructive'});
-        } finally {
-            setIsProcessing(null);
-        }
-        return;
-    }
-
-    // PhonePe
-    if (paymentSettings?.phonepe?.isEnabled) {
-         try {
-            const phonepeData = await createPhonePePayment({
-                planId: plan.id,
-                planName: plan.name,
-                planPrice: plan.price,
-                userId: user.uid,
-                userEmail: userProfile.email,
-                userName: `${userProfile.firstName} ${userProfile.lastName}`,
-            });
-            window.location.href = phonepeData.redirectUrl;
-         } catch (error: any) {
-             toast({ title: 'PhonePe Error', description: error.message, variant: 'destructive'});
-         } finally {
-            setIsProcessing(null);
-         }
-         return;
-    }
-
-    toast({ title: 'Not Available', description: 'This payment gateway is not yet supported. Please contact support.', variant: 'destructive'});
+    toast({ title: 'Not Available', description: 'No payment gateway is enabled. Please contact support.', variant: 'destructive'});
     setIsProcessing(null);
   };
 

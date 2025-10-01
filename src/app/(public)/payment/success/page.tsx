@@ -9,12 +9,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { 
-    verifyStripePayment, 
     capturePayPalOrder,
     verifyRazorpayPayment,
-    verifyPayUPayment,
-    verifyCashfreePayment,
-    verifyPhonePePayment
 } from '@/ai/flows/payment-management';
 
 
@@ -26,33 +22,10 @@ export default function PaymentSuccessPage() {
 
     useEffect(() => {
         const processPayment = async () => {
-            const sessionId = searchParams.get('session_id'); // Stripe
             const paypalToken = searchParams.get('token'); // PayPal
             const razorpayPaymentId = searchParams.get('razorpay_payment_id'); // Razorpay
-            const cashfreeOrderId = searchParams.get('order_id'); // Cashfree
             
-            // PayU and PhonePe use POST, their data needs to be handled differently,
-            // often via API routes/webhooks, but we'll try to get data if they redirect with params.
-            const payuStatus = searchParams.get('status');
-            const payuTxnid = searchParams.get('txnid');
-
-            if (sessionId) { // Stripe Verification
-                try {
-                    const result = await verifyStripePayment(sessionId);
-                    if (result.success) {
-                        setStatus('success');
-                        toast({
-                            title: "Payment Successful!",
-                            description: `Your plan has been upgraded.`,
-                        });
-                    } else {
-                        throw new Error(result.message);
-                    }
-                } catch (error: any) {
-                    setStatus('error');
-                    setErrorMessage(error.message || "Failed to verify your Stripe payment. Please contact support.");
-                }
-            } else if (paypalToken) { // PayPal Verification
+            if (paypalToken) { // PayPal Verification
                  try {
                     const result = await capturePayPalOrder(paypalToken);
                     if (result.success) {
@@ -84,19 +57,6 @@ export default function PaymentSuccessPage() {
                 } catch (error: any) {
                     setStatus('error');
                     setErrorMessage(error.message || "Failed to verify Razorpay payment.");
-                }
-            } else if (cashfreeOrderId) { // Cashfree Verification
-                 try {
-                    const result = await verifyCashfreePayment(cashfreeOrderId);
-                    if (result.success) {
-                        setStatus('success');
-                        toast({ title: "Payment Successful!", description: `Your plan has been upgraded.`});
-                    } else {
-                        throw new Error(result.message);
-                    }
-                } catch (error: any) {
-                    setStatus('error');
-                    setErrorMessage(error.message || "Failed to verify Cashfree payment.");
                 }
             }
             // Add other gateways as they are implemented...
