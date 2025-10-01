@@ -1,12 +1,10 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import nookies from 'nookies';
 
 interface AppUser {
   firstName: string;
@@ -17,7 +15,6 @@ interface AppUser {
   favorites?: string[];
 }
 
-// Ensure planId and role are part of the CombinedUser type
 interface CombinedUser extends FirebaseUser {
     planId?: string;
     role?: 'user' | 'admin';
@@ -30,38 +27,50 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    return onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const token = await firebaseUser.getIdToken();
-        nookies.set(undefined, "session", token, { path: "/" });
-        
-        // Set user immediately to stop loading state
-        setUser(firebaseUser as CombinedUser);
+        try {
+            const token = await firebaseUser.getIdToken();
+            // Call the new API route to set the session cookie
+            await fetch('/api/auth/session-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token }),
+            });
 
-        // Fetch user data in the background
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        getDoc(userDocRef).then(userDocSnap => {
-          if (userDocSnap.exists()) {
-            const data = userDocSnap.data() as AppUser;
-            setUserData(data);
-            setIsAdmin(data.role === 'admin');
-            // Update user state with full data
-            setUser(prevUser => prevUser ? { ...prevUser, ...data } : null);
-          }
-        }).catch(error => {
-          console.error("Auth hook error fetching user data:", error);
-        }).finally(() => {
+            const userDocRef = doc(db, "users", firebaseUser.uid);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists()) {
+                const data = userDocSnap.data() as AppUser;
+                setUserData(data);
+                setIsAdmin(data.role === 'admin');
+                setUser({ ...firebaseUser, ...data } as CombinedUser);
+            } else {
+                // Handle case where user exists in Auth but not Firestore
+                setUser(firebaseUser as CombinedUser);
+            }
+        } catch (error) {
+            console.error("Auth hook error:", error);
+            setUser(null);
+            setUserData(null);
+            setIsAdmin(false);
+        } finally {
             setLoading(false);
-        });
-
+        }
       } else {
-        nookies.destroy(undefined, "session", { path: "/" });
+        // User is signed out
+        await fetch('/api/auth/session-logout', { method: 'POST' });
         setUser(null);
         setUserData(null);
         setIsAdmin(false);
         setLoading(false);
       }
     });
+
+    return () => unsubscribe();
   }, []);
 
   return { user, userData, isAdmin, loading };
