@@ -4,55 +4,90 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Allow anyone to read public collections
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // GENERAL PUBLIC READ RULES
+    // Anyone can read tools, blog posts, and main settings
     match /tools/{toolId} {
       allow read: if true;
+      allow write: if false; // Should be managed from Admin SDK
     }
-    match /settings/{settingId} {
-        allow read: if true;
+    match /blogPosts/{postId} {
+      allow read: if true;
+      allow write: if false; // Should be managed from Admin SDK
     }
-     match /comments/{commentId} {
+    match /blogCategories/{categoryId} {
         allow read: if true;
+        allow write: if false; // Should be managed from Admin SDK
+    }
+    match /settings/main {
+      allow read: if true;
+      allow write: if false; // Should be managed from Admin SDK
     }
     match /announcements/{announcementId} {
-      allow read: if true;
+        allow read: if true;
+        allow write: if false; // Should be managed from Admin SDK
     }
 
-    // Allow anyone to submit leads and tickets
-    match /leads/{leadId} {
-        allow create: if true;
-    }
-    match /tickets/{ticketId} {
-        allow create: if true;
+
+    // USER-SPECIFIC RULES
+    match /users/{userId} {
+      // A user can read and update their own document
+      allow read, update: if isUser(userId);
+      // Only admin can create or delete users via server-side logic, not client
+      allow create, delete: if false; 
+      
+      // Subcollections for a user
+      match /activity/{activityId} {
+        allow read, write: if isUser(userId);
+      }
+      match /loginHistory/{historyId} {
+        allow read, write: if isUser(userId);
+      }
     }
     
-    // Logged-in users can manage their own data
-    match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      // Allow users to create their own document on signup
-      allow create: if request.auth != null && request.auth.uid == userId;
-      // Allow users to update their own profile, but not change their role
-      allow update: if request.auth != null && request.auth.uid == userId && !('role' in request.resource.data);
+    // REVIEWS
+    match /reviews/{reviewId} {
+        // Anyone can read approved reviews
+        allow read: if resource.data.status == 'approved' || isSignedIn();
+        // Only signed-in users can create reviews
+        allow create: if isSignedIn();
+        // Only the user who wrote the review can update/delete it (or an admin)
+        allow update, delete: if isUser(resource.data.authorId);
     }
 
-    // Users can read and update their own tickets
-     match /tickets/{ticketId} {
-      allow read, update: if request.auth != null && resource.data.userId == request.auth.uid;
+    // TICKETS & MEDIA
+    match /tickets/{ticketId} {
+        allow read, write: if isUser(resource.data.userId);
+        allow create: if isSignedIn();
     }
-
-    // Community Chat Rules
+    match /userMedia/{mediaId} {
+        allow read, write: if isUser(resource.data.userId);
+        allow create: if isSignedIn();
+    }
+    
+    // COMMUNITY CHAT
     match /communityChat/{messageId} {
-      // Any logged-in user can read all chat messages
-      allow read: if request.auth != null;
-
-      // Any logged-in user can create a message, but only as themselves
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.fromId;
-
-      // No one can update or delete chat messages to preserve history
-      allow update, delete: if false;
+        // Any signed-in user can read and write to the community chat
+        allow read, write: if isSignedIn();
+    }
+    
+    // LEADS & TOOL REQUESTS (write-only for users)
+    match /leads/{leadId} {
+        allow create: if true;
+        allow read, update, delete: if false;
+    }
+     match /toolRequests/{requestId} {
+        allow create: if isSignedIn();
+        allow read, update, delete: if false;
     }
 
-    // Default deny: For any other collection not specified, deny all access.
-    // This is safer than a broad allow rule. Admin access is handled by Admin SDK and is not affected by these rules.
   }
 }
