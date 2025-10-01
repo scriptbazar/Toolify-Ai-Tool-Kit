@@ -28,6 +28,11 @@ function initializeAdmin() {
       }
     } else {
       adminApp = getApps()[0];
+      if (!adminApp) {
+         adminApp = initializeApp({
+          credential: cert(serviceAccount as ServiceAccount),
+        });
+      }
       adminDb = getFirestore(adminApp);
     }
 }
