@@ -5,44 +5,40 @@
  */
 import { initializeApp, getApps, App, cert, type ServiceAccount } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
-import serviceAccount from '@/firebase-service-account-key.json';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import { z } from 'zod';
 import { getAuth } from 'firebase-admin/auth';
-
+import serviceAccount from '@/firebase-service-account-key.json';
 
 let adminDb: Firestore;
 let adminApp: App;
 
 function initializeAdmin() {
-    if (!getApps().length) {
-      try {
-        adminApp = initializeApp({
-          credential: cert(serviceAccount as ServiceAccount),
-        });
-        adminDb = getFirestore(adminApp);
-      } catch (error: any) {
-        console.error("Firebase Admin initialization error:", error.message);
-        // Avoid crashing the server on initialization failure.
-        // Functions calling getAdminDb/getAdminAuth should handle the case where they are null.
-      }
+    // Check if the app is already initialized to prevent re-initialization error
+    if (getApps().length === 0) {
+        try {
+            console.log("Initializing Firebase Admin SDK...");
+            adminApp = initializeApp({
+                credential: cert(serviceAccount as ServiceAccount)
+            });
+            adminDb = getFirestore(adminApp);
+            console.log("Firebase Admin SDK initialized successfully.");
+        } catch (error: any) {
+            console.error("Firebase Admin initialization error:", error.message);
+            // In case of error, subsequent calls will try to re-initialize
+        }
     } else {
-      adminApp = getApps()[0];
-      if (!adminApp) {
-         adminApp = initializeApp({
-          credential: cert(serviceAccount as ServiceAccount),
-        });
-      }
-      adminDb = getFirestore(adminApp);
+        adminApp = getApps()[0];
+        adminDb = getFirestore(adminApp);
     }
 }
 
-// Initialize on module load
+// Call initialization on module load
 initializeAdmin();
-
 
 export function getAdminDb() {
     if (!adminDb) {
+        console.warn("Admin DB not initialized, attempting to re-initialize.");
         initializeAdmin();
     }
     return adminDb;
@@ -50,17 +46,20 @@ export function getAdminDb() {
 
 export function getAdminAuth() {
     if (!adminApp) {
+        console.warn("Admin App not initialized, attempting to re-initialize.");
         initializeAdmin();
     }
     return getAuth(adminApp);
 }
-
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
 
 export async function getSettingsData(): Promise<AppSettings> {
     const db = getAdminDb();
+    if (!db) {
+        throw new Error("Firestore Admin DB is not available.");
+    }
     try {
         const docRef = db.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
         const docSnap = await docRef.get();
@@ -71,11 +70,9 @@ export async function getSettingsData(): Promise<AppSettings> {
                 return parsedData.data;
             } else {
                 console.warn("Firestore settings data is invalid, returning partial valid data.", parsedData.error);
-                // Return what we can, with defaults for the rest.
                 return { ...AppSettingsSchema.parse({}), ...docSnap.data() };
             }
         } else {
-           // This case should ideally not happen if defaults are set on first write.
            return AppSettingsSchema.parse({});
         }
     } catch (error: any) {
