@@ -29,6 +29,7 @@ interface User {
     seconds: number;
     nanoseconds: number;
   };
+  createdAtString?: string;
 }
 
 interface UserTableProps {
@@ -45,11 +46,11 @@ export function UserTable({ users, onRoleChange, onDeleteUser }: UserTableProps)
     toast({ description: `Copied ${fieldName}: ${text}` });
   };
   
-  const formatDate = (timestamp?: { seconds: number; nanoseconds: number; }) => {
-    if (!timestamp || typeof timestamp.seconds !== 'number') {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) {
       return 'N/A';
     }
-    return new Date(timestamp.seconds * 1000).toLocaleString();
+    return new Date(dateString).toLocaleString();
   };
 
   return (
@@ -102,7 +103,7 @@ export function UserTable({ users, onRoleChange, onDeleteUser }: UserTableProps)
                     {user.role}
                   </Badge>
                 </TableCell>
-                <TableCell>{formatDate(user.createdAt)}</TableCell>
+                <TableCell>{formatDate(user.createdAtString)}</TableCell>
                  <TableCell className="text-right">
                   <DropdownMenu>
                       <DropdownMenuTrigger asChild>

@@ -40,6 +40,7 @@ interface User {
     seconds: number;
     nanoseconds: number;
   };
+  createdAtString?: string;
 }
 
 
@@ -85,6 +86,7 @@ export default function AdminUsersPage() {
        
         const usersList: User[] = usersSnapshot?.docs.map(doc => {
             const data = doc.data();
+            const createdAtTimestamp = data.createdAt;
             return {
             id: doc.id,
             name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
@@ -92,19 +94,22 @@ export default function AdminUsersPage() {
             userName: data.userName,
             role: data.role,
             type: 'Signup',
-            createdAt: data.createdAt,
+            createdAt: createdAtTimestamp,
+            createdAtString: createdAtTimestamp?.toDate ? createdAtTimestamp.toDate().toISOString() : new Date().toISOString(),
             };
         }) || [];
 
         const leadsList: User[] = leadsSnapshot?.docs.map(doc => {
             const data = doc.data();
+            const createdAtTimestamp = data.createdAt;
             return {
             id: doc.id,
             name: data.name,
             email: data.email,
             role: 'lead',
             type: 'Lead',
-            createdAt: data.createdAt,
+            createdAt: createdAtTimestamp,
+            createdAtString: createdAtTimestamp?.toDate ? createdAtTimestamp.toDate().toISOString() : new Date().toISOString(),
             };
         }) || [];
         
