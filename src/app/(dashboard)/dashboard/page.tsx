@@ -14,18 +14,22 @@ import { DashboardClient } from './_components/DashboardClient';
 import { unstable_cache as cache, revalidatePath } from 'next/cache';
 import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
-import { Timestamp } from 'firebase-admin/firestore';
+import { Timestamp, getCountFromServer } from 'firebase-admin/firestore';
 
 
 const getDashboardData = cache(async (uid: string) => {
     const adminDb = getAdminDb();
+    const settings = await getSettings(); // Fetch settings outside to leverage its own cache
     
-    const [settings, userDocSnap, fetchedAnnouncements, referralsSnapshot, activitySnapshot] = await Promise.all([
-      getSettings(),
-      adminDb.collection("users").doc(uid).get(),
+    const userDocRef = adminDb.collection("users").doc(uid);
+    const referralsQuery = adminDb.collection("users").where("referredBy", "==", uid);
+    const activityQuery = adminDb.collection(`users/${uid}/activity`).where('type', '==', 'tool_usage');
+
+    const [userDocSnap, fetchedAnnouncements, referralsCountSnap, activityCountSnap] = await Promise.all([
+      userDocRef.get(),
       getAnnouncementsForUser(uid),
-      adminDb.collection("users").where("referredBy", "==", uid).get(),
-      adminDb.collection(`users/${uid}/activity`).where('type', '==', 'tool_usage').get()
+      getCountFromServer(referralsQuery),
+      getCountFromServer(activityQuery),
     ]);
   
     const userData = userDocSnap.exists ? userDocSnap.data() : null;
@@ -42,8 +46,8 @@ const getDashboardData = cache(async (uid: string) => {
     const userPlan = settings.plan?.plans.find(p => p.id === userData?.planId) || settings.plan?.plans.find(p => p.id === 'free') || null;
   
     const stats = {
-      toolsUsed: activitySnapshot.size,
-      referrals: referralsSnapshot.size,
+      toolsUsed: activityCountSnap.data().count,
+      referrals: referralsCountSnap.data().count,
     };
   
     return {
@@ -75,7 +79,7 @@ export default async function UserDashboard() {
   const uid = decodedToken.uid;
   
   const { profile, plan, announcements, stats } = await getDashboardData(uid);
-  const welcomeMessage = profile?.firstName ? `Welcome Back, ${profile.firstName} ${profile.lastName}!` : "User Dashboard";
+  const welcomeMessage = profile?.firstName ? `Welcome Back, ${profile.firstName}!` : "User Dashboard";
 
   return (
     <DashboardClient 
@@ -88,3 +92,4 @@ export default async function UserDashboard() {
     />
   );
 }
+

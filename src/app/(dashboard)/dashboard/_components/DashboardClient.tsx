@@ -6,7 +6,7 @@ import { Activity, CreditCard, DollarSign, Users, ArrowRight, Newspaper, Package
 import type { Plan } from '@/ai/flows/settings-management.types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDesc } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { markAnnouncementsAsRead } from '@/ai/flows/announcement-flow';
 import { type Announcement } from '@/ai/flows/announcement-flow.types';
@@ -175,9 +175,9 @@ export function DashboardClient({ welcomeMessage, profile, plan, stats, announce
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>What's New at ToolifyAI</DialogTitle>
-              <DialogDesc>
+              <DialogDescription>
                 Here are the latest updates, features, and fixes from our team.
-              </DialogDesc>
+              </DialogDescription>
             </DialogHeader>
             <ScrollArea className="h-[60vh] -mx-6 px-6">
                 <div className="space-y-4 py-4">
