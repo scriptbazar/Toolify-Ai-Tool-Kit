@@ -28,7 +28,7 @@ const getDashboardData = cache(async (uid: string) => {
       adminDb.collection(`users/${uid}/activity`).where('type', '==', 'tool_usage').get()
     ]);
   
-    const userData = userDocSnap.exists() ? userDocSnap.data() : null;
+    const userData = userDocSnap.exists ? userDocSnap.data() : null;
     
     // Convert Firestore Timestamps to serializable format (ISO strings)
     const serializableProfile = userData ? {
