@@ -33,6 +33,12 @@ const nextConfig: NextConfig = {
         hostname: 'www.google.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'image.thum.io',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
@@ -61,6 +67,7 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
 
 
 
