@@ -11,6 +11,7 @@ const SerpResultSchema = z.object({
   title: z.string().describe('The main title of the search result link.'),
   url: z.string().url().describe('The full URL of the resulting page.'),
   snippet: z.string().describe('A brief, descriptive summary of the page content, as seen in a search result.'),
+  thumbnailUrl: z.string().url().optional().describe('URL of a thumbnail for the search result.'),
 });
 export type SerpResult = z.infer<typeof SerpResultSchema>;
 
@@ -26,6 +27,11 @@ const GoogleSearchApiResponseSchema = z.object({
         title: z.string(),
         link: z.string(),
         snippet: z.string(),
+        pagemap: z.object({
+            cse_thumbnail: z.array(z.object({
+                src: z.string().url(),
+            })).optional(),
+        }).optional(),
     })).optional(),
 });
 
@@ -69,6 +75,7 @@ export async function getSerpResults(input: SerpCheckerInput): Promise<SerpResul
       title: item.title,
       url: item.link,
       snippet: item.snippet,
+      thumbnailUrl: item.pagemap?.cse_thumbnail?.[0]?.src,
     }));
     
   } catch (error: any) {
