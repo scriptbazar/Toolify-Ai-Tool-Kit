@@ -1,4 +1,5 @@
 
+
 import { getTools } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
 import { getReviews } from '@/ai/flows/review-management';
@@ -12,6 +13,7 @@ import Link from 'next/link';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import * as Icons from 'lucide-react';
 import { ToolPageClient } from './_components/ToolPageClient';
+import { cache } from 'react';
 
 export async function generateStaticParams() {
   const tools = await getTools();
@@ -31,13 +33,17 @@ const SidebarWidget = ({ title, children }: { title: string, children: React.Rea
     </Card>
 );
 
+const getCachedTools = cache(getTools);
+const getCachedPosts = cache(getPosts);
+
+
 export default async function ToolPage({ params }: { params: { slug: string } }) {
     const { slug } = params;
 
     const [settings, allPosts, allTools, toolReviews] = await Promise.all([
         getSettings(),
-        getPosts(),
-        getTools(),
+        getCachedPosts(),
+        getCachedTools(),
         getReviews({ toolId: slug })
     ]);
 
