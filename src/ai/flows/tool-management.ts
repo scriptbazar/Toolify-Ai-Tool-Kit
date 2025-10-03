@@ -169,7 +169,7 @@ interface GetToolsOptions {
  * Fetches tools from Firestore with optional filtering and limiting.
  * This function is now optimized for server-side operations.
  */
-export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Tool[]> => {
+export async function getTools(options: GetToolsOptions = {}): Promise<Tool[]> {
     try {
         const adminDb = getAdminDb();
         if (!adminDb) {
@@ -195,10 +195,7 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
         console.error("Error in getTools:", e.message);
         return [];
     }
-},
-['tools'],
-{ revalidate: 3600 } // Revalidate every hour
-);
+};
 
 
 function processSnapshot(snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>, options: GetToolsOptions): Tool[] {
@@ -475,7 +472,6 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
     
 
-    
 
 
 
