@@ -73,7 +73,7 @@ export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onTo
         description: `The tool "${data.name}" has been saved.`,
       });
       setIsModalOpen(false);
-      onToolUpdate(); // Refresh the list
+      onToolUpdate(); // Refresh the list by calling the parent's fetch function
     } else {
       toast({ title: 'Error', description: result.message, variant: 'destructive' });
     }
@@ -152,7 +152,7 @@ export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onTo
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto p-1 pr-4">
-             <EditToolForm tool={editingTool} onSave={handleSave} />
+             <EditToolForm key={editingTool?.id} tool={editingTool} onSave={handleSave} />
           </div>
            {editingTool && (
               <DialogFooter className="pt-4 border-t">
