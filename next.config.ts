@@ -61,12 +61,18 @@ const nextConfig: NextConfig = {
       config.resolve.alias = {};
     }
     config.resolve.alias['node:process'] = 'process/browser';
+
+    // This is to solve the "topLevelAwait" issue with pdfjs-dist.
+    // It prevents webpack from trying to bundle a node-specific canvas module
+    // on the client.
+    config.externals.push('canvas');
     
     return config;
   },
 };
 
 export default nextConfig;
+
 
 
 
