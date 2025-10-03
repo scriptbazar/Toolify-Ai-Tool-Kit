@@ -45,9 +45,8 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
 
     const ToolComponent = useMemo(() => {
         if (!tool || !toolComponents[tool.slug]) return null;
-        return dynamic(() => Promise.resolve(toolComponents[tool.slug]), {
-            loading: () => <div className="flex justify-center items-center min-h-[300px]"><Loader2 className="h-8 w-8 animate-spin" /></div>
-        });
+        // The component is already a dynamic component from our new tool-components file
+        return toolComponents[tool.slug];
     }, [tool]);
 
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
@@ -169,3 +168,5 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
         </div>
     );
 }
+
+    
