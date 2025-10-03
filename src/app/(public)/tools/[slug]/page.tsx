@@ -38,7 +38,8 @@ const getCachedPosts = cache(getPosts);
 
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
-    const { slug } = params;
+    const awaitedParams = await params;
+    const slug = awaitedParams.slug;
 
     const [settings, allPosts, allTools, toolReviews] = await Promise.all([
         getSettings(),
