@@ -3,62 +3,53 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileCode, Download, Copy } from 'lucide-react';
+import { FileCode, Download, Copy, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '../ui/textarea';
 
 export function XmlSitemapGenerator() {
-    const [url, setUrl] = useState('');
+    const [urls, setUrls] = useState('');
     const [sitemap, setSitemap] = useState('');
     const { toast } = useToast();
 
     const handleGenerate = () => {
-        if (!url.trim()) {
-            toast({ title: "URL is required", description: "Please enter your website's base URL.", variant: "destructive" });
+        if (!urls.trim()) {
+            toast({ title: "URL list is empty", description: "Please enter at least one URL.", variant: "destructive" });
             return;
         }
 
-        let fullUrl = url;
-        if (!/^https?:\/\//i.test(url)) {
-            fullUrl = `https://${url}`;
-        }
-        
-        try {
-            // Validate URL
-            new URL(fullUrl);
-        } catch (e) {
-            toast({ title: "Invalid URL", description: "Please enter a valid website URL.", variant: "destructive" });
-            return;
-        }
+        const urlList = urls.split('\n').filter(u => u.trim() !== '');
 
-        // Dummy data for demonstration. A real implementation would crawl the site server-side.
-        const dummySitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-   <url>
-      <loc>${fullUrl}</loc>
-      <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-      <priority>1.00</priority>
-   </url>
-   <url>
-      <loc>${fullUrl}/about</loc>
-      <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-      <priority>0.80</priority>
-   </url>
-   <url>
-      <loc>${fullUrl}/contact</loc>
-      <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-      <priority>0.80</priority>
-   </url>
+        const urlset = urlList.map(url => {
+            let loc;
+            try {
+                // Validate and format URL
+                loc = new URL(url.trim()).href;
+            } catch (e) {
+                // If it's a relative path, assume a base
+                loc = new URL(url.trim(), 'https://example.com').href.replace('https://example.com', '');
+            }
+            
+            return `
+  <url>
+    <loc>${loc}</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <priority>0.80</priority>
+  </url>`;
+        }).join('');
+
+        const fullSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urlset}
 </urlset>`;
-        setSitemap(dummySitemap);
-        toast({ title: "Sitemap Generated", description: "A basic sitemap has been created based on your URL." });
+        
+        setSitemap(fullSitemap);
+        toast({ title: "Sitemap Generated!" });
     };
 
     const handleDownload = () => {
         if (!sitemap) {
-            toast({ title: "Nothing to download", description: "Please generate a sitemap first.", variant: "destructive" });
+            toast({ title: "Nothing to download", variant: "destructive" });
             return;
         }
         const blob = new Blob([sitemap], { type: 'application/xml' });
@@ -71,49 +62,53 @@ export function XmlSitemapGenerator() {
 
     const handleCopy = () => {
         if (!sitemap) {
-             toast({ title: "Nothing to copy", description: "Please generate a sitemap first.", variant: "destructive" });
+            toast({ title: "Nothing to copy", variant: "destructive" });
             return;
         }
         navigator.clipboard.writeText(sitemap);
         toast({ title: 'Sitemap content copied to clipboard!' });
     };
+    
+    const handleClear = () => {
+        setUrls('');
+        setSitemap('');
+    }
 
     return (
-        <div className="space-y-6">
-            <div className="space-y-2">
-                <Label htmlFor="website-url">Your Website's Base URL</Label>
-                <div className="flex gap-2">
-                    <Input 
-                        id="website-url"
-                        value={url} 
-                        onChange={e => setUrl(e.target.value)} 
-                        placeholder="https://example.com" 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="urls-input">Enter URLs (one per line)</Label>
+                    <Textarea 
+                        id="urls-input"
+                        value={urls}
+                        onChange={e => setUrls(e.target.value)}
+                        placeholder="https://example.com/&#10;https://example.com/about&#10;https://example.com/contact"
+                        className="min-h-[300px] font-mono"
                     />
-                    <Button onClick={handleGenerate}>
-                        <FileCode className="mr-2 h-4 w-4" /> Generate Sitemap
-                    </Button>
                 </div>
+                <Button onClick={handleGenerate} className="w-full">
+                    <FileCode className="mr-2 h-4 w-4" /> Generate Sitemap
+                </Button>
             </div>
             
-            {(sitemap) && (
-                <div>
+            <div className="space-y-4">
+                <div className="space-y-2">
                     <Label htmlFor="sitemap-output">Generated sitemap.xml</Label>
                     <Textarea 
                         id="sitemap-output"
                         value={sitemap} 
                         readOnly 
-                        className="min-h-[300px] font-mono bg-muted mt-2" 
+                        className="min-h-[300px] font-mono bg-muted"
+                        placeholder="Your generated XML sitemap will appear here."
                     />
-                    <div className="flex gap-2 mt-2">
-                        <Button onClick={handleCopy} variant="outline" className="w-full">
-                            <Copy className="mr-2 h-4 w-4"/> Copy
-                        </Button>
-                        <Button onClick={handleDownload} className="w-full">
-                            <Download className="mr-2 h-4 w-4"/> Download sitemap.xml
-                        </Button>
-                    </div>
                 </div>
-            )}
+                <div className="flex justify-end gap-2">
+                    <Button onClick={handleCopy} variant="outline" disabled={!sitemap}><Copy className="mr-2 h-4 w-4"/> Copy</Button>
+                    <Button onClick={handleDownload} disabled={!sitemap}><Download className="mr-2 h-4 w-4"/> Download</Button>
+                    <Button onClick={handleClear} variant="destructive" disabled={!urls && !sitemap}><Trash2 className="mr-2 h-4 w-4"/> Clear</Button>
+                </div>
+            </div>
         </div>
     );
 }
