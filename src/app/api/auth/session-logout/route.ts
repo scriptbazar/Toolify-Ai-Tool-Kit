@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 export async function POST() {
   try {
     // Clear the session cookie
-    cookies().set('session', '', {
+    await cookies().set('session', '', {
       maxAge: -1,
       path: '/',
     });
