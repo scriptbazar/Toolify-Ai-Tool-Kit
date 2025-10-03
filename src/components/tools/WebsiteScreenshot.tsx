@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,81 +9,52 @@ import { Camera, Download, Loader2, Link as LinkIcon, MonitorSmartphone } from '
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import Image from 'next/image';
-
-interface PagespeedApiResponse {
-  lighthouseResult?: {
-    audits?: {
-      'final-screenshot'?: {
-        details?: {
-          data: string;
-        };
-      };
-    };
-  };
-  error?: {
-    message: string;
-  };
-}
-
+import { useDebounce } from 'use-debounce';
 
 export function WebsiteScreenshot() {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [screenshotData, setScreenshotData] = useState<string | null>(null);
+  const [debouncedUrl] = useDebounce(url, 1000); // Debounce input by 1 second
   const { toast } = useToast();
-  
-  const handleTakeScreenshot = async () => {
-    if (!url.trim()) {
-      toast({ title: "URL is required", description: "Please enter a website URL.", variant: "destructive" });
-      return;
-    }
-    
-    let fullUrl = url;
-    if (!/^https?:\/\//i.test(url)) {
-        fullUrl = `https://${url}`;
-    }
 
-    setIsLoading(true);
-    setScreenshotData(null);
-    
+  const screenshotUrl = useMemo(() => {
+    if (!debouncedUrl.trim()) return null;
+    let fullUrl = debouncedUrl;
+    if (!/^https?:\/\//i.test(debouncedUrl)) {
+        fullUrl = `https://${debouncedUrl}`;
+    }
     try {
-        const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(fullUrl)}&screenshot=true`;
-        const response = await fetch(apiUrl);
-        const data: PagespeedApiResponse = await response.json();
-
-        if (data.error) {
-            throw new Error(data.error.message);
-        }
-        
-        const screenshot = data.lighthouseResult?.audits?.['final-screenshot']?.details?.data;
-        
-        if (screenshot) {
-            // The data is base64 but with URL-safe characters. Replace them back.
-            const formattedScreenshot = screenshot.replace(/_/g, '/').replace(/-/g, '+');
-            setScreenshotData(formattedScreenshot);
-        } else {
-            throw new Error("Could not capture a screenshot for this URL. It might be inaccessible.");
-        }
-        
-    } catch (error: any) {
-        console.error("Screenshot error:", error);
-        if (typeof error.message === 'string' && error.message.includes('Quota exceeded')) {
-             toast({ title: 'Daily Limit Reached', description: 'The screenshot service has reached its daily usage limit. Please try again tomorrow.', variant: 'destructive'});
-        } else {
-            toast({ title: 'Error', description: error.message || 'An unknown error occurred.', variant: 'destructive'});
-        }
-    } finally {
-        setIsLoading(false);
+      // Validate URL before creating the screenshot URL
+      new URL(fullUrl);
+      return `https://image.thum.io/get/width/1080/crop/1920/fullpage/noanimate/${fullUrl}`;
+    } catch (e) {
+      return null;
     }
-  };
+  }, [debouncedUrl]);
 
-  const handleDownload = () => {
-    if (!screenshotData) return;
-    const link = document.createElement('a');
-    link.href = screenshotData;
-    const domain = new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
-    link.download = `screenshot-${domain}.jpeg`; // PageSpeed API returns JPEG
-    link.click();
+  const handleDownload = async () => {
+    if (!screenshotUrl) return;
+    try {
+      // Fetch the image as a blob to allow naming the file
+      const response = await fetch(screenshotUrl);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      const domain = new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
+      link.download = `screenshot-${domain}.jpeg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error("Download failed", error);
+      toast({
+        title: "Download Failed",
+        description: "Could not download the screenshot. You can try right-clicking the image and saving it.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -93,21 +64,22 @@ export function WebsiteScreenshot() {
                 <LinkIcon className="h-5 w-5"/>
                 Website URL
             </Label>
-            <div className="flex gap-2">
-                <Input 
-                    id="url-input" 
-                    value={url} 
-                    onChange={e => setUrl(e.target.value)} 
-                    placeholder="https://example.com" 
-                />
-                <Button onClick={handleTakeScreenshot} disabled={isLoading}>
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Camera className="mr-2 h-4 w-4" />}
-                    Take Screenshot
-                </Button>
-            </div>
+            <Input 
+                id="url-input" 
+                value={url} 
+                onChange={e => {
+                  setUrl(e.target.value);
+                  if(e.target.value.trim()){
+                    setIsLoading(true);
+                  } else {
+                    setIsLoading(false);
+                  }
+                }}
+                placeholder="https://example.com" 
+            />
         </div>
 
-        {(isLoading || screenshotData) && (
+        {(isLoading || screenshotUrl) && (
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -115,24 +87,30 @@ export function WebsiteScreenshot() {
                         Screenshot Preview
                     </CardTitle>
                     <CardDescription>
-                        This is a full-page screenshot of the provided URL.
+                        A full-page screenshot of the provided URL.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center space-y-4">
                     <div className="w-full max-w-lg aspect-[9/16] border rounded-lg bg-muted flex items-center justify-center overflow-hidden">
-                        {isLoading ? (
-                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                        ) : screenshotData && (
+                        {screenshotUrl && (
                             <Image 
-                                src={screenshotData}
+                                src={screenshotUrl}
                                 alt={`Screenshot of ${url}`}
                                 width={375} // A common mobile width for preview
                                 height={667} // Corresponding height for a 9:16 aspect ratio
                                 className="w-full h-full object-contain"
+                                onLoadingComplete={() => setIsLoading(false)}
+                                onError={() => {
+                                  setIsLoading(false);
+                                  toast({ title: "Failed to load screenshot", description: "The URL might be invalid or the site could be blocking screenshots.", variant: "destructive" });
+                                }}
                             />
                         )}
+                        {isLoading && !screenshotUrl && (
+                           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        )}
                     </div>
-                     <Button onClick={handleDownload} disabled={!screenshotData} className="w-full max-w-lg">
+                     <Button onClick={handleDownload} disabled={!screenshotUrl || isLoading} className="w-full max-w-lg">
                         <Download className="mr-2 h-4 w-4"/>
                         Download Screenshot
                     </Button>
