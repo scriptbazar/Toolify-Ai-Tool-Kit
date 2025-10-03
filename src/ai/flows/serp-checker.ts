@@ -1,11 +1,10 @@
 'use server';
 /**
  * @fileOverview An AI agent for checking Search Engine Results Pages (SERP).
- * This flow uses an AI model to simulate real-time search results.
+ * This flow now uses the Google Custom Search Engine API to fetch live results.
  */
 
 import { z } from 'zod';
-import { ai } from '@/ai/genkit';
 
 const SerpResultSchema = z.object({
   position: z.number().int().positive().describe('The ranking position of the search result, starting from 1.'),
@@ -22,64 +21,58 @@ const SerpCheckerInputSchema = z.object({
 });
 type SerpCheckerInput = z.infer<typeof SerpCheckerInputSchema>;
 
-const SerpCheckerOutputSchema = z.object({
-    results: z.array(SerpResultSchema).describe('An array of the top 10 search results.'),
-});
-type SerpCheckerOutput = z.infer<typeof SerpCheckerOutputSchema>;
-
-const serpPrompt = ai.definePrompt({
-    name: 'serpCheckerPrompt',
-    input: { schema: z.object({ keyword: z.string(), country: z.string(), domain: z.string().optional() }) },
-    output: { schema: SerpCheckerOutputSchema },
-    prompt: `You are a highly advanced search engine simulation. Your task is to generate a realistic and relevant list of the top 10 search engine results for a given keyword and country.
-
-**Instructions:**
-1.  **Keyword:** "{{{keyword}}}"
-2.  **Country for Search:** {{{country}}}
-3.  **Analyze Intent:** Determine the user's likely intent (informational, transactional, commercial, navigational) based on the keyword.
-4.  **Generate Realistic Titles:** Create diverse, high-quality, and plausible titles for each search result. Include a mix of blog posts, commercial pages, informational sites, and official sources where appropriate.
-5.  **Generate Plausible URLs:** Create realistic-looking URLs for each result. They should look authentic and match the title and snippet.
-6.  **Write Snippets:** For each result, write a concise and descriptive snippet (1-2 sentences) that accurately summarizes the page content, just like Google does.
-7.  **Check for User's Domain:** {{#if domain}}If the provided domain "{{{domain}}}" seems highly relevant to the keyword, you MUST include it as one of the top 10 results at a realistic position. If it is not relevant, you do not need to include it.{{/if}}
-8.  **Positioning:** Ensure the 'position' field is numbered sequentially from 1 to 10.
-9.  **Relevance is Key:** All results must be highly relevant to the keyword and the specified country.
-
-Generate the top 10 search results now.
-`
+const GoogleSearchApiResponseSchema = z.object({
+    items: z.array(z.object({
+        title: z.string(),
+        link: z.string(),
+        snippet: z.string(),
+    })).optional(),
 });
 
 
 export async function getSerpResults(input: SerpCheckerInput): Promise<SerpResult[]> {
   const validatedInput = SerpCheckerInputSchema.parse(input);
-  
-  const { output } = await serpPrompt(validatedInput);
+  const { keyword, country, domain } = validatedInput;
 
-  if (!output?.results) {
-    throw new Error('The AI failed to generate SERP results. Please try again.');
+  const apiKey = process.env.GOOGLE_API_KEY;
+  const cx = process.env.GOOGLE_CSE_ID;
+
+  if (!apiKey || !cx) {
+    throw new Error('Google Search API is not configured on the server. Please provide an API key and Custom Search Engine ID.');
   }
 
-  // Ensure domain is highlighted if present
-  if (validatedInput.domain) {
-      const domainToFind = validatedInput.domain.toLowerCase();
-      let found = false;
-      const processedResults = output.results.map(res => {
-          if (res.url.toLowerCase().includes(domainToFind)) {
-              found = true;
-          }
-          return res;
-      });
-      // If AI didn't include the domain, and it was provided, add it manually to demonstrate highlighting.
-      if (!found) {
-          processedResults[4] = {
-              position: 5,
-              title: `Your Awesome Page about ${validatedInput.keyword}`,
-              url: `https://${validatedInput.domain}/relevant-page`,
-              snippet: `A special snippet for your domain, highlighting the best content on ${validatedInput.keyword}.`,
-          }
-          return processedResults.slice(0, 10);
-      }
-      return processedResults;
-  }
+  const apiUrl = new URL('https://www.googleapis.com/customsearch/v1');
+  apiUrl.searchParams.append('key', apiKey);
+  apiUrl.searchParams.append('cx', cx);
+  apiUrl.searchParams.append('q', keyword);
+  apiUrl.searchParams.append('gl', country); // Geolocation
+  apiUrl.searchParams.append('num', '10'); // Fetch top 10 results
 
-  return output.results;
+  try {
+    const response = await fetch(apiUrl.toString());
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Google Search API Error:", errorData);
+        throw new Error(`Failed to fetch search results. Status: ${response.status}. Message: ${errorData.error?.message || 'Unknown API error'}`);
+    }
+
+    const data = await response.json();
+    const validatedData = GoogleSearchApiResponseSchema.safeParse(data);
+
+    if (!validatedData.success || !validatedData.data.items) {
+        console.error("Google Search API response validation error:", validatedData.error);
+        throw new Error('Received invalid data from Google Search API.');
+    }
+    
+    return validatedData.data.items.map((item, index) => ({
+      position: index + 1,
+      title: item.title,
+      url: item.link,
+      snippet: item.snippet,
+    }));
+    
+  } catch (error: any) {
+    console.error("SERP Checker Error:", error);
+    throw new Error(error.message || 'An unexpected error occurred while fetching SERP data.');
+  }
 }
