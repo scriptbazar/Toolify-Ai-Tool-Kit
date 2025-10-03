@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -10,8 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { generateLoremIpsum } from '@/ai/flows/lorem-ipsum-generator';
-
 
 const LOREM_WORDS = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'.split(' ');
 
@@ -67,38 +64,21 @@ export function LoremIpsumGenerator() {
   const [text, setText] = useState('');
   const [count, setCount] = useState(5);
   const [type, setType] = useState<'paragraphs' | 'sentences' | 'words'>('paragraphs');
-  const [topic, setTopic] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleGenerate = async () => {
     setIsLoading(true);
-    try {
-      let resultText;
-      if (topic.trim()) {
-        const result = await generateLoremIpsum({
-          count,
-          type,
-          topic,
-        });
-        resultText = result.text;
-      } else {
-        resultText = generateLocalLoremIpsum(count, type);
-      }
-      setText(resultText);
-      toast({
-        title: 'Generated!',
-        description: `Generated ${count} ${type} of text.`,
-      });
-    } catch (error: any) {
+    // Simulate a short delay for better UX, as local generation is very fast
+    setTimeout(() => {
+        const resultText = generateLocalLoremIpsum(count, type);
+        setText(resultText);
         toast({
-            title: 'Generation Failed',
-            description: error.message || 'Could not generate text.',
-            variant: 'destructive',
+            title: 'Generated!',
+            description: `Generated ${count} ${type} of text.`,
         });
-    } finally {
         setIsLoading(false);
-    }
+    }, 200);
   };
 
   const handleCopy = () => {
@@ -120,7 +100,6 @@ export function LoremIpsumGenerator() {
     setText('');
     setCount(5);
     setType('paragraphs');
-    setTopic('');
   };
 
   return (
@@ -130,16 +109,6 @@ export function LoremIpsumGenerator() {
                 <CardTitle>Configuration</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="topic-input">Topic (Optional)</Label>
-                    <Input 
-                        id="topic-input"
-                        value={topic}
-                        onChange={(e) => setTopic(e.target.value)}
-                        placeholder="e.g., space exploration, ancient Rome"
-                    />
-                     <p className="text-xs text-muted-foreground">If a topic is provided, AI will generate relevant placeholder text.</p>
-                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="type-select">Generate Type</Label>
