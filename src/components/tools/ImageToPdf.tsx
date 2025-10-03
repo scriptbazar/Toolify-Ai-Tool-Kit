@@ -4,12 +4,15 @@
 import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, FileDown, Loader2, Trash2, GripVertical } from 'lucide-react';
+import { UploadCloud, FileDown, Loader2, Trash2, GripVertical, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { ScrollArea } from '../ui/scroll-area';
+import * as pdfjsLib from 'pdfjs-dist';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 interface FileWithPreview {
   file: File;
@@ -47,6 +50,7 @@ export function ImageToPdf() {
   
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     handleFile(e.target.files);
+    // Reset input value to allow re-uploading the same file
     if (e.target) e.target.value = '';
   };
 
@@ -103,10 +107,12 @@ export function ImageToPdf() {
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `converted-${Date.now()}.pdf`;
+      document.body.appendChild(link);
       link.click();
-      URL.revokeObjectURL(link.href);
-
+      document.body.removeChild(link);
+      
       toast({ title: 'Success!', description: 'Your PDF has been created and downloaded.' });
+
     } catch (error) {
       console.error(error);
       toast({ title: 'Error', description: 'Could not convert images to PDF.', variant: 'destructive' });
