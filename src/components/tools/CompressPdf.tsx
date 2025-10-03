@@ -6,11 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { UploadCloud, FileArchive, Loader2, FileText, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { PDFDocument, PDFImage } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 import { Label } from '../ui/label';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import imageCompression from 'browser-image-compression';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Set worker path
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
 
 type CompressionLevel = 'low' | 'medium' | 'high';
 
@@ -49,50 +54,37 @@ export function CompressPdf() {
     setCompressedSize(null);
 
     try {
-      const existingPdfBytes = await pdfFile.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
-      const newPdfDoc = await PDFDocument.create();
+        const qualityMap = { low: 0.85, medium: 0.6, high: 0.4 };
+        const quality = qualityMap[compressionLevel];
 
-      const qualityMap = { low: 0.8, medium: 0.6, high: 0.4 };
-      const quality = qualityMap[compressionLevel];
+        const fileBytes = await pdfFile.arrayBuffer();
+        const loadingTask = pdfjsLib.getDocument({ data: fileBytes });
+        const pdf = await loadingTask.promise;
+        const newPdfDoc = await PDFDocument.create();
 
-      const pages = pdfDoc.getPages();
-      for (let i = 0; i < pages.length; i++) {
-        const originalPage = pages[i];
-        const newPage = newPdfDoc.addPage([originalPage.getWidth(), originalPage.getHeight()]);
-        
-        const imageObjects = originalPage.getXObjects();
-        const images = Array.from(imageObjects.values()).filter((obj): obj is PDFImage => 'decode' in obj);
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 1.5 }); // Use a reasonable scale
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const context = canvas.getContext('2d');
+            if (!context) continue;
 
-        if (images.length === 0) { // If no images, just copy the page content
-          const contentStream = originalPage.getContentStream();
-          const content = contentStream ? new TextDecoder().decode(contentStream.getContents()) : '';
-          // This is a simplification; a full copy would be more complex.
-          // For now, we will focus on image compression which is the main size reducer.
-        } else {
-           for (const image of images) {
-              const imageBytes = image.data;
-              const imageFile = new File([imageBytes], 'temp.jpg', { type: 'image/jpeg' });
-              
-              const compressedImageFile = await imageCompression(imageFile, {
-                  maxSizeMB: undefined,
-                  initialQuality: quality,
-              });
-              
-              const compressedBytes = await compressedImageFile.arrayBuffer();
-              const embeddedImage = await newPdfDoc.embedJpg(compressedBytes);
-              
-              // This simplified logic places the compressed image at the same size as the page.
-              // A more advanced version would need to parse content streams to get original image positions.
-              newPage.drawImage(embeddedImage, {
-                  x: 0,
-                  y: 0,
-                  width: originalPage.getWidth(),
-                  height: originalPage.getHeight(),
-              });
-          }
+            await page.render({ canvasContext: context, viewport }).promise;
+
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            const imageBytes = await fetch(dataUrl).then(res => res.arrayBuffer());
+            const embeddedImage = await newPdfDoc.embedJpg(imageBytes);
+
+            const newPage = newPdfDoc.addPage([viewport.width, viewport.height]);
+            newPage.drawImage(embeddedImage, {
+                x: 0,
+                y: 0,
+                width: viewport.width,
+                height: viewport.height,
+            });
         }
-      }
       
       const newPdfBytes = await newPdfDoc.save();
       
@@ -108,7 +100,7 @@ export function CompressPdf() {
       toast({ title: 'Success!', description: 'Your PDF has been compressed and downloaded.' });
     } catch (error: any) {
       console.error("PDF Compression Error:", error);
-      toast({ title: 'Compression Failed', description: 'This tool primarily compresses images inside PDFs. If your PDF has no images, the size may not change. Error: ' + error.message, variant: 'destructive' });
+      toast({ title: 'Compression Failed', description: error.message || 'An unknown error occurred.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -155,7 +147,7 @@ export function CompressPdf() {
         <Card className="animate-in fade-in-50">
           <CardHeader>
             <CardTitle>Compression Settings</CardTitle>
-            <CardDescription>Choose a compression level. Higher compression may reduce quality.</CardDescription>
+            <CardDescription>Choose a compression level. Higher compression may reduce image quality.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <RadioGroup value={compressionLevel} onValueChange={(val) => setCompressionLevel(val as CompressionLevel)} className="grid grid-cols-1 md:grid-cols-3 gap-4">
