@@ -62,9 +62,20 @@ const ImageResizerBox = ({
         return;
       }
       
+      // Fill background with white
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, targetWidth, targetHeight);
-      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+      
+      // Calculate aspect ratio to fit image inside canvas without stretching
+      const hRatio = targetWidth / img.width;
+      const vRatio = targetHeight / img.height;
+      const ratio = Math.min(hRatio, vRatio);
+      
+      const centerShift_x = (targetWidth - img.width * ratio) / 2;
+      const centerShift_y = (targetHeight - img.height * ratio) / 2;
+      
+      ctx.drawImage(img, 0, 0, img.width, img.height,
+                    centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
 
       let quality = 0.9;
       let dataUrl = canvas.toDataURL('image/jpeg', quality);
