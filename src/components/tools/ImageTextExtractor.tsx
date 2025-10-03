@@ -1,14 +1,12 @@
-
 'use client';
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, Loader2, FileText, Copy, Trash2, ZoomIn, ZoomOut, Move, Languages, Baseline } from 'lucide-react';
+import { UploadCloud, Loader2, FileText, Bot, Copy, Trash2, ZoomIn, ZoomOut, Move, Languages, Text, Square, Sigma, Baseline } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { analyzeImageForText } from '@/ai/flows/text-recognizer';
-import type { AnalyzeImageOutput } from '@/ai/flows/text-recognizer';
+import { analyzeImageForText, type AnalyzeImageOutput, type TextAnnotation } from '@/ai/flows/text-recognizer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Skeleton } from '../ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
@@ -94,6 +92,7 @@ export function ImageTextExtractor() {
   const handleCopy = (text: string) => { navigator.clipboard.writeText(text); toast({ title: "Copied to clipboard!" }); };
   const handleClear = () => { setImageFile(null); setImagePreview(null); setAnalysisResult(null); if (fileInputRef.current) fileInputRef.current.value = ''; };
   
+  // Panning and Zooming Logic
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => { if (e.button === 0) { setIsPanning(true); lastMousePos.current = { x: e.clientX, y: e.clientY }; }};
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => { if (isPanning) { const dx = e.clientX - lastMousePos.current.x; const dy = e.clientY - lastMousePos.current.y; setOffset(prev => ({ x: prev.x + dx, y: prev.y + dy })); lastMousePos.current = { x: e.clientX, y: e.clientY }; }};
   const handleMouseUp = () => setIsPanning(false);
@@ -117,7 +116,7 @@ export function ImageTextExtractor() {
         
         {isLoading && <div className="flex justify-center items-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary"/></div>}
 
-        {(imagePreview && !isLoading) && (
+        {(imagePreview && !isLoading && analysisResult) && (
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in-50">
                  <Card className="h-full">
                     <CardHeader>
@@ -163,15 +162,15 @@ export function ImageTextExtractor() {
                                 <TabsTrigger value="by-block">By Block</TabsTrigger>
                             </TabsList>
                              <div className="flex items-center justify-between mt-4">
-                                <Badge variant="outline" className="flex items-center gap-1.5"><Languages className="h-4 w-4"/> Detected: <span className="font-semibold">{analysisResult?.fullTextAnnotation?.pages[0]?.property?.detectedLanguages?.[0]?.languageCode || 'N/A'}</span></Badge>
+                                <Badge variant="outline" className="flex items-center gap-1.5"><Languages className="h-4 w-4"/> Detected: <span className="font-semibold">{analysisResult.fullTextAnnotation?.pages[0]?.property?.detectedLanguages?.[0]?.languageCode || 'N/A'}</span></Badge>
                                 <div className="flex gap-1">
-                                    <Button variant="outline" size="sm" onClick={() => handleCopy(analysisResult?.fullTextAnnotation?.text || '')} disabled={!analysisResult?.fullTextAnnotation?.text}><Copy className="mr-2 h-4 w-4"/>Copy All</Button>
+                                    <Button variant="outline" size="sm" onClick={() => handleCopy(analysisResult.fullTextAnnotation?.text || '')} disabled={!analysisResult.fullTextAnnotation?.text}><Copy className="mr-2 h-4 w-4"/>Copy All</Button>
                                     <Button variant="destructive" size="sm" onClick={handleClear}><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
                                 </div>
                             </div>
                             <TabsContent value="full-text" className="mt-4">
                                 <ScrollArea className="h-[400px] w-full p-4 border rounded-md bg-muted">
-                                    <p className="text-sm whitespace-pre-wrap">{analysisResult?.fullTextAnnotation?.text || "No text detected."}</p>
+                                    <p className="text-sm whitespace-pre-wrap">{analysisResult.fullTextAnnotation?.text || "No text detected."}</p>
                                 </ScrollArea>
                             </TabsContent>
                              <TabsContent value="by-block" className="mt-4">
@@ -179,7 +178,7 @@ export function ImageTextExtractor() {
                                     <Table>
                                         <TableHeader className="sticky top-0 bg-background"><TableRow><TableHead>Type</TableHead><TableHead>Text</TableHead></TableRow></TableHeader>
                                         <TableBody>
-                                            {(analysisResult?.fullTextAnnotation?.pages[0]?.blocks || []).flatMap(block => 
+                                            {(analysisResult.fullTextAnnotation?.pages[0]?.blocks || []).flatMap(block => 
                                                 block.paragraphs.flatMap(para => 
                                                     para.words.flatMap(word => 
                                                         word.symbols.map(symbol => ({
@@ -193,7 +192,7 @@ export function ImageTextExtractor() {
                                             ).map((item, index) => (
                                                 <TableRow 
                                                     key={index}
-                                                    onMouseEnter={() => item.boundingBox && setHighlightedBox({ x: item.boundingBox.vertices[0].x!, y: item.boundingBox.vertices[0].y!, width: item.boundingBox.vertices[1].x! - item.boundingBox.vertices[0].x!, height: item.boundingBox.vertices[2].y! - item.boundingBox.vertices[0].y! })}
+                                                    onMouseEnter={() => item.boundingBox && item.boundingBox.vertices && setHighlightedBox({ x: item.boundingBox.vertices[0].x!, y: item.boundingBox.vertices[0].y!, width: item.boundingBox.vertices[1].x! - item.boundingBox.vertices[0].x!, height: item.boundingBox.vertices[2].y! - item.boundingBox.vertices[0].y! })}
                                                     onMouseLeave={() => setHighlightedBox(null)}
                                                     className="cursor-pointer"
                                                 >
