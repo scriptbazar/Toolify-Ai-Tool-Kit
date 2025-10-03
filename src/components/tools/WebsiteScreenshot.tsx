@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Camera, Download, Loader2, Link as LinkIcon, Monitor, Tablet, Smartphone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import Image from 'next/image';
 import { useDebounce } from 'use-debounce';
 import { cn } from '@/lib/utils';
