@@ -30,16 +30,6 @@ export function useAuth() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-            const token = await firebaseUser.getIdToken();
-            // Call the new API route to set the session cookie
-            await fetch('/api/auth/session-login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ token }),
-            });
-
             const userDocRef = doc(db, "users", firebaseUser.uid);
             const userDocSnap = await getDoc(userDocRef);
 
@@ -51,6 +41,8 @@ export function useAuth() {
             } else {
                 // Handle case where user exists in Auth but not Firestore
                 setUser(firebaseUser as CombinedUser);
+                 setUserData(null);
+                setIsAdmin(false);
             }
         } catch (error) {
             console.error("Auth hook error:", error);
@@ -62,7 +54,6 @@ export function useAuth() {
         }
       } else {
         // User is signed out
-        await fetch('/api/auth/session-logout', { method: 'POST' });
         setUser(null);
         setUserData(null);
         setIsAdmin(false);
