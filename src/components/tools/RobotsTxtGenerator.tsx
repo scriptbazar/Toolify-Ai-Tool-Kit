@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Copy, Download, RefreshCw, Trash2, PlusCircle, Shield, ShieldOff, Bot } from 'lucide-react';
+import { Copy, Download, Trash2, PlusCircle, Shield, ShieldOff, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
