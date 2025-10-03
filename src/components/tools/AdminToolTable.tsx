@@ -38,10 +38,6 @@ export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onTo
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const { toast } = useToast();
-  
-  React.useEffect(() => {
-    setFilteredTools(allTools);
-  }, [allTools, setFilteredTools]);
 
   const getCategoryName = (categoryId: string) => {
     return toolCategories.find(c => c.id === categoryId)?.name || 'Unknown';
@@ -156,7 +152,7 @@ export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onTo
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto p-1 pr-4">
-             <EditToolForm tool={editingTool} onSave={handleSave} />
+             <EditToolForm key={editingTool?.id} tool={editingTool} onSave={handleSave} />
           </div>
            {editingTool && (
               <DialogFooter className="pt-4 border-t">
