@@ -12,18 +12,21 @@ const PHOTO_WIDTH = 213;
 const PHOTO_HEIGHT = 213;
 const SIGNATURE_WIDTH = 400;
 const SIGNATURE_HEIGHT = 200;
-const MAX_FILE_SIZE_KB = 20;
+const MAX_PHOTO_SIZE_KB = 20;
+const MAX_SIGNATURE_SIZE_KB = 60; // NSDL signature size is generally larger
 
 const ImageResizerBox = ({
   title,
   icon: Icon,
   targetWidth,
   targetHeight,
+  maxSizeKb,
 }: {
   title: string;
   icon: React.ElementType;
   targetWidth: number;
   targetHeight: number;
+  maxSizeKb: number;
 }) => {
   const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [originalPreview, setOriginalPreview] = useState<string | null>(null);
@@ -59,19 +62,32 @@ const ImageResizerBox = ({
         return;
       }
       
+      // Fill background with white
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, targetWidth, targetHeight);
-      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+      
+      // Calculate aspect ratio to fit image inside canvas without stretching
+      const hRatio = targetWidth / img.width;
+      const vRatio = targetHeight / img.height;
+      const ratio = Math.min(hRatio, vRatio);
+      
+      const centerShift_x = (targetWidth - img.width * ratio) / 2;
+      const centerShift_y = (targetHeight - img.height * ratio) / 2;
+      
+      ctx.drawImage(img, 0, 0, img.width, img.height,
+                    centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
 
-      // Attempt to get the desired file size
       let quality = 0.9;
       let dataUrl = canvas.toDataURL('image/jpeg', quality);
       
       // Simple loop to reduce quality if size is too large
-      // A more sophisticated approach might use binary search
-      while (dataUrl.length > MAX_FILE_SIZE_KB * 1024 * 4/3 && quality > 0.1) {
+      while (dataUrl.length > maxSizeKb * 1024 * 4/3 && quality > 0.1) {
           quality -= 0.1;
           dataUrl = canvas.toDataURL('image/jpeg', quality);
+      }
+      
+      if (dataUrl.length > maxSizeKb * 1024 * 4/3) {
+          toast({ title: "Warning", description: `Image size could not be reduced below ${maxSizeKb}KB. Result may be larger than required.`, variant: "default" });
       }
 
       setResizedPreview(dataUrl);
@@ -88,7 +104,6 @@ const ImageResizerBox = ({
       if (!resizedPreview || !originalFile) return;
       const link = document.createElement('a');
       link.href = resizedPreview;
-      const extension = originalFile.name.split('.').pop();
       link.download = `nsdl-${title.toLowerCase()}-${Date.now()}.jpeg`;
       link.click();
   }
@@ -111,7 +126,7 @@ const ImageResizerBox = ({
                 <div className="flex flex-col items-center">
                     <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
                     <p className="text-sm text-muted-foreground">Upload {title}</p>
-                    <p className="text-xs text-muted-foreground">Target: {targetWidth}x{targetHeight}px</p>
+                    <p className="text-xs text-muted-foreground">Target: {targetWidth}x{targetHeight}px, &lt;{maxSizeKb}KB</p>
                 </div>
             )}
         </div>
@@ -147,12 +162,14 @@ export function NSDLPANCardPhotoAndSignatureResizer() {
         icon={ImageIcon}
         targetWidth={PHOTO_WIDTH}
         targetHeight={PHOTO_HEIGHT}
+        maxSizeKb={MAX_PHOTO_SIZE_KB}
       />
       <ImageResizerBox 
         title="Signature"
         icon={PenLine}
         targetWidth={SIGNATURE_WIDTH}
         targetHeight={SIGNATURE_HEIGHT}
+        maxSizeKb={MAX_SIGNATURE_SIZE_KB}
       />
     </div>
   );
