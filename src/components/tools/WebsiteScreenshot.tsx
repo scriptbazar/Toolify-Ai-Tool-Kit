@@ -37,8 +37,8 @@ export function WebsiteScreenshot() {
     try {
       new URL(fullUrl);
       const width = deviceConfig[activeDevice].width;
-      // Using thum.io service
-      return `https://image.thum.io/get/width/${width}/crop/600/fullpage/noanimate/${fullUrl}`;
+      // Using thum.io service - removed crop for full page high quality
+      return `https://image.thum.io/get/width/${width}/fullpage/noanimate/${fullUrl}`;
     } catch (e) {
       return null;
     }
@@ -110,15 +110,15 @@ export function WebsiteScreenshot() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center space-y-4">
-                    <div className="w-full max-w-4xl border rounded-lg bg-muted flex items-center justify-center overflow-hidden" style={{ aspectRatio: `${deviceConfig[activeDevice].width}/600` }}>
+                    <div className="w-full max-w-4xl border rounded-lg bg-muted flex items-center justify-center overflow-hidden">
                         {screenshotUrl && (
                             <Image 
                                 key={screenshotUrl} // Add key to force re-render on URL change
                                 src={screenshotUrl}
                                 alt={`Screenshot of ${url}`}
                                 width={deviceConfig[activeDevice].width}
-                                height={600}
-                                className="w-full h-full object-contain"
+                                height={600} // This is just for aspect ratio, full page is loaded
+                                className="w-full h-auto object-contain"
                                 onLoadingComplete={() => setIsLoading(false)}
                                 onError={() => {
                                   setIsLoading(false);
