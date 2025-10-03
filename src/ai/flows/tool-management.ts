@@ -9,7 +9,6 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp, Query } from 'firebase-admin/firestore';
 import { type Tool, ToolSchema, UpsertToolInputSchema, type ToolRequest, ToolRequestSchema } from './tool-management.types';
 import { z } from 'zod';
-import { unstable_cache as cache } from 'next/cache';
 
 const TOOLS_COLLECTION = 'tools';
 const TOOL_REQUESTS_COLLECTION = 'toolRequests';
@@ -462,7 +461,6 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
   }
 }
     
-    
 
     
 
@@ -471,6 +469,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
 
 
 
