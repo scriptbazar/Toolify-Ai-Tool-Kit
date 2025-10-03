@@ -134,20 +134,22 @@ export function ImageTextExtractor() {
                         onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseLeave} onWheel={handleWheel}
                     >
                          {imagePreview && (
-                            <div style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`, transformOrigin: 'center center', width: imageSize.width, height: imageSize.height }} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={imagePreview} alt="Uploaded preview" />
-                                {highlightedBox && (
-                                    <div 
-                                        className="absolute border-2 border-primary bg-primary/20"
-                                        style={{ 
-                                            left: `${highlightedBox.x}px`,
-                                            top: `${highlightedBox.y}px`,
-                                            width: `${highlightedBox.width}px`,
-                                            height: `${highlightedBox.height}px`,
-                                        }}
-                                    />
-                                )}
+                            <div style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`, transformOrigin: 'center center' }}>
+                                <div style={{ width: imageSize.width, height: imageSize.height, position: 'relative'}}>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={imagePreview} alt="Uploaded preview" className="absolute top-0 left-0" />
+                                    {highlightedBox && (
+                                        <div 
+                                            className="absolute border-2 border-primary bg-primary/20"
+                                            style={{ 
+                                                left: `${highlightedBox.x}px`,
+                                                top: `${highlightedBox.y}px`,
+                                                width: `${highlightedBox.width}px`,
+                                                height: `${highlightedBox.height}px`,
+                                            }}
+                                        />
+                                    )}
+                                </div>
                             </div>
                         )}
                     </CardContent>
@@ -191,7 +193,7 @@ export function ImageTextExtractor() {
                                             ).map((item, index) => (
                                                 <TableRow 
                                                     key={index}
-                                                    onMouseEnter={() => item.boundingBox && setHighlightedBox({ x: item.boundingBox.vertices[0].x, y: item.boundingBox.vertices[0].y, width: item.boundingBox.vertices[1].x - item.boundingBox.vertices[0].x, height: item.boundingBox.vertices[2].y - item.boundingBox.vertices[0].y })}
+                                                    onMouseEnter={() => item.boundingBox && setHighlightedBox({ x: item.boundingBox.vertices[0].x!, y: item.boundingBox.vertices[0].y!, width: item.boundingBox.vertices[1].x! - item.boundingBox.vertices[0].x!, height: item.boundingBox.vertices[2].y! - item.boundingBox.vertices[0].y! })}
                                                     onMouseLeave={() => setHighlightedBox(null)}
                                                     className="cursor-pointer"
                                                 >
