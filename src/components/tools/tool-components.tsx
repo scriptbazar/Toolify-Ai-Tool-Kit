@@ -79,7 +79,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'pdf-merger': dynamic(() => import('./PdfMerger').then(mod => mod.PdfMerger)),
   'pdf-organizer': dynamic(() => import('./PdfOrganizer').then(mod => mod.PdfOrganizer)),
   'pdf-page-counter': dynamic(() => import('./PdfPageCounter').then(mod => mod.PdfPageCounter)),
-  'pdf-page-numberer': dynamic(() => import('./PdfPageNumberer').then(mod => mod.PdfPageRemover)),
+  'pdf-page-numberer': dynamic(() => import('./PdfPageNumberer').then(mod => mod.PdfPageNumberer)),
   'pdf-page-remover': dynamic(() => import('./PdfPageRemover').then(mod => mod.PdfPageRemover)),
   'pdf-page-reorder': dynamic(() => import('./PdfPageReorder').then(mod => mod.PdfPageReorder)),
   'pdf-signer': dynamic(() => import('./PdfSigner').then(mod => mod.PdfSigner)),
@@ -130,3 +130,4 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
 };
 
     
+
