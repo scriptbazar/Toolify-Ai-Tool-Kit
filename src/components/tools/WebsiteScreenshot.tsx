@@ -37,6 +37,7 @@ export function WebsiteScreenshot() {
     try {
       new URL(fullUrl);
       const width = deviceConfig[activeDevice].width;
+      // Using thum.io service
       return `https://image.thum.io/get/width/${width}/crop/600/fullpage/noanimate/${fullUrl}`;
     } catch (e) {
       return null;
