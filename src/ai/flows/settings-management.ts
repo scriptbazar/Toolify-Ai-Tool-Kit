@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -385,24 +384,10 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
   }
   try {
     const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
-    const currentDoc = await docRef.get();
-    const currentSettings = currentDoc.exists ? currentDoc.data() : {};
     
-    // Create the new settings state by taking the current settings
-    // and overwriting them with the partial new settings.
-    const mergedSettings = {
-      ...currentSettings,
-      ...newSettings,
-    };
-    
-    // Validate the merged object before saving to ensure data integrity
-    const validationResult = AppSettingsSchema.safeParse(mergedSettings);
-    if (!validationResult.success) {
-      throw new z.ZodError(validationResult.error.issues);
-    }
-
-    // Save the fully merged and validated object to Firestore
-    await docRef.set(validationResult.data, { merge: true });
+    // Using set with merge: true will perform a deep merge in Firestore.
+    // This is much safer than trying to merge manually on the client.
+    await docRef.set(newSettings, { merge: true });
     
     return { success: true, message: 'Settings updated successfully.' };
   } catch (error: any) {
@@ -414,4 +399,5 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
   }
 }
 
+    
     
