@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -320,24 +321,36 @@ export const getSettings = cache(async (): Promise<AppSettings> => {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            // Start with the default settings to ensure all keys exist
-            const settingsWithDefaults = defaultSettings;
             const dbData = docSnap.data();
 
-            // Manually merge nested objects to avoid overwriting them with undefined
-            const merged = {
-              ...settingsWithDefaults,
+            // Deep merge defaults with database data
+            const merged: AppSettings = {
+              ...defaultSettings,
               ...dbData,
               general: {
-                ...settingsWithDefaults.general,
+                ...defaultSettings.general,
                 ...dbData.general,
-                socialLinks: { ...settingsWithDefaults.general?.socialLinks, ...dbData.general?.socialLinks },
-                webmaster: { ...settingsWithDefaults.general?.webmaster, ...dbData.general?.webmaster },
-                apiKeys: { ...settingsWithDefaults.general?.apiKeys, ...dbData.general?.apiKeys },
-                security: { ...settingsWithDefaults.general?.security, ...dbData.general?.security },
+                socialLinks: { ...defaultSettings.general?.socialLinks, ...dbData.general?.socialLinks },
+                webmaster: { ...defaultSettings.general?.webmaster, ...dbData.general?.webmaster },
+                apiKeys: { ...defaultSettings.general?.apiKeys, ...dbData.general?.apiKeys },
+                security: { ...defaultSettings.general?.security, ...dbData.general?.security },
               },
-              payment: { ...settingsWithDefaults.payment, ...dbData.payment },
-              sidebar: { ...settingsWithDefaults.sidebar, ...dbData.sidebar },
+              payment: {
+                 ...defaultSettings.payment,
+                 ...dbData.payment,
+                 paypal: { ...defaultSettings.payment?.paypal, ...dbData.payment?.paypal },
+                 razorpay: { ...defaultSettings.payment?.razorpay, ...dbData.payment?.razorpay },
+              },
+              sidebar: { 
+                ...defaultSettings.sidebar,
+                ...dbData.sidebar,
+                toolSidebar: { ...defaultSettings.sidebar?.toolSidebar, ...dbData.sidebar?.toolSidebar },
+                blogSidebar: { ...defaultSettings.sidebar?.blogSidebar, ...dbData.sidebar?.blogSidebar },
+              },
+              faqs: {
+                ...defaultSettings.faqs,
+                ...dbData.faqs,
+              },
               // Add other nested objects here if they exist
             };
 
@@ -389,7 +402,7 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
     // This is much safer than trying to merge manually on the client.
     await docRef.set(newSettings, { merge: true });
     
-    return { success: true, message: 'Settings updated successfully.' };
+    return { success: true, message: "Settings updated successfully. Use the 'Clear Cache' button to apply changes immediately." };
   } catch (error: any) {
     console.error("Error updating settings:", error);
     if (error instanceof z.ZodError) {
