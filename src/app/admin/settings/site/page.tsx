@@ -238,7 +238,7 @@ export default function SiteSettingsPage() {
       await updateSettings({ general: settings });
       toast({
         title: 'Success!',
-        description: 'Site settings have been saved. Some changes may require a page refresh or server restart to take effect.',
+        description: "Site settings have been saved. Use the 'Clear Cache' button to apply changes immediately.",
       });
     } catch (error: any) {
       console.error('Failed to save settings:', error);
