@@ -79,6 +79,12 @@ export const SecuritySettingsSchema = z.object({
 });
 export type SecuritySettings = z.infer<typeof SecuritySettingsSchema>;
 
+export const ApiKeysSchema = z.object({
+    googleApiKey: z.string().optional(),
+    googleCseId: z.string().optional(),
+});
+export type ApiKeys = z.infer<typeof ApiKeysSchema>;
+
 
 export const GeneralSettingsSchema = z.object({
   siteTitle: z.string().default('ToolifyAI'),
@@ -92,6 +98,7 @@ export const GeneralSettingsSchema = z.object({
   socialLinks: SocialLinksSchema.optional(),
   webmaster: WebmasterSettingsSchema.optional(),
   security: SecuritySettingsSchema.optional(),
+  apiKeys: ApiKeysSchema.optional(),
 });
 export type GeneralSettings = z.infer<typeof GeneralSettingsSchema>;
 

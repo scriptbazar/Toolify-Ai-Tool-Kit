@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -118,6 +119,10 @@ export default function SiteSettingsPage() {
                  baidu: '',
                  yahooSearchConsole: '',
             },
+            apiKeys: {
+                googleApiKey: '',
+                googleCseId: '',
+            },
             security: {
                 enableTwoFactorAuth: false,
                 twoFactorAuthMethods: {
@@ -141,6 +146,7 @@ export default function SiteSettingsPage() {
             ...generalData,
             socialLinks: { ...defaultSettingsData.socialLinks, ...generalData.socialLinks },
             webmaster: { ...defaultSettingsData.webmaster, ...generalData.webmaster },
+            apiKeys: { ...defaultSettingsData.apiKeys, ...generalData.apiKeys },
             security: { 
                 ...defaultSettingsData.security, 
                 ...generalData.security,
@@ -186,6 +192,17 @@ export default function SiteSettingsPage() {
       ...prev,
       webmaster: {
         ...(prev.webmaster || {}),
+        [name]: value
+      }
+    } : null));
+  };
+  
+    const handleApiKeysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSettings(prev => (prev ? {
+      ...prev,
+      apiKeys: {
+        ...(prev.apiKeys || {}),
         [name]: value
       }
     } : null));
@@ -295,6 +312,7 @@ export default function SiteSettingsPage() {
     { id: 'branding', title: 'Branding & Contact', description: "Customize your site's appearance and contact info.", icon: Palette },
     { id: 'social', title: 'Social Media Links', description: 'Provide links to your social media profiles.', icon: LinkIcon },
     { id: 'webmaster', title: 'Webmaster Tools', description: 'Add verification codes for webmaster tools.', icon: Globe },
+    { id: 'apiKeys', title: 'API Keys for Tools', description: 'Configure API keys for third-party services.', icon: KeyRound },
     { id: 'security', title: 'Security & Utilities', description: 'Manage site security and maintenance.', icon: ShieldCheck },
   ];
 
@@ -472,6 +490,19 @@ export default function SiteSettingsPage() {
                     <Input id="yahooSearchConsole" name="yahooSearchConsole" value={settings.webmaster?.yahooSearchConsole || ''} onChange={handleWebmasterInputChange} placeholder="Verification code" className="pl-10" />
                   </div>
               </div>
+            </div>
+        </CollapsibleSection>
+        
+        <CollapsibleSection id="apiKeys" title="API Keys for Tools" description="Configure API keys for third-party services." icon={KeyRound} isOpen={openSection === 'apiKeys'} onToggle={handleToggle} isFullWidth={openSection === 'apiKeys'}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <Label htmlFor="googleApiKey">Google API Key</Label>
+                     <Input id="googleApiKey" name="googleApiKey" value={settings.apiKeys?.googleApiKey || ''} onChange={handleApiKeysChange} placeholder="Enter Google API Key"/>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="googleCseId">Google Custom Search Engine ID</Label>
+                     <Input id="googleCseId" name="googleCseId" value={settings.apiKeys?.googleCseId || ''} onChange={handleApiKeysChange} placeholder="Enter CSE ID"/>
+                </div>
             </div>
         </CollapsibleSection>
 
