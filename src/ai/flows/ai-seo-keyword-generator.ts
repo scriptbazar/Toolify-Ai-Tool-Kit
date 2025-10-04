@@ -43,35 +43,33 @@ const aiSeoKeywordGeneratorFlow = ai.defineFlow(
     outputSchema: AiSeoKeywordGeneratorOutputSchema,
   },
   async ({ topic, targetAudience }) => {
-    // 1. Get live primary and long-tail keywords from Google Autocomplete
-    const [primarySuggestions, longTailSuggestions] = await Promise.all([
+    // 1. Get live keywords from Google Autocomplete
+    const [
+      primarySuggestions, 
+      longTailSuggestions, 
+      secondarySuggestions
+    ] = await Promise.all([
       getGoogleSuggestions(topic),
       Promise.all([
           getGoogleSuggestions(`how to ${topic}`),
-          getGoogleSuggestions(`best ${topic} for`),
           getGoogleSuggestions(`what is ${topic}`),
           getGoogleSuggestions(`why is ${topic}`),
           getGoogleSuggestions(`${topic} vs`),
           getGoogleSuggestions(`${topic} for beginners`),
           getGoogleSuggestions(`${topic} examples`),
           getGoogleSuggestions(`alternatives to ${topic}`),
+      ]),
+      Promise.all([
+        getGoogleSuggestions(`${topic} for ${targetAudience}`),
+        getGoogleSuggestions(`best ${topic} for`),
       ])
     ]);
     
     // Clean and prepare live data
     const primaryKeywords = [...new Set([topic, ...primarySuggestions])].slice(0, 10);
+    const secondaryKeywords = [...new Set(secondarySuggestions.flat())].slice(0, 20);
     const longTailKeywords = [...new Set(longTailSuggestions.flat())].slice(0, 20);
     
-    // 2. Use AI to generate secondary keywords based on the live primary keywords
-    const secondaryKeywordPrompt = ai.definePrompt({
-        name: 'generateSecondaryKeywords',
-        input: { schema: z.object({ pks: z.array(z.string()), topic: z.string(), audience: z.string() }) },
-        output: { schema: z.object({ keywords: z.array(z.string()) }) },
-        prompt: `You are an SEO expert. Based on the main topic "{{topic}}", the target audience "{{audience}}", and these primary keywords [{{{pks}}}], generate a list of 15-20 semantically related "body" or secondary keywords (2-3 words). These should be topically related sub-themes, not just variations of the primary keywords.`,
-    });
-
-    const { output } = await secondaryKeywordPrompt({ pks: primaryKeywords, topic: topic, audience: targetAudience });
-    const secondaryKeywords = output?.keywords || [];
 
     if (!primaryKeywords.length && !secondaryKeywords.length && !longTailKeywords.length) {
         throw new Error("Could not generate any keywords. Please try a different topic.");
@@ -84,4 +82,3 @@ const aiSeoKeywordGeneratorFlow = ai.defineFlow(
     };
   }
 );
-    
