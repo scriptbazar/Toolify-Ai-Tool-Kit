@@ -50,19 +50,24 @@ const aiSeoKeywordGeneratorFlow = ai.defineFlow(
           getGoogleSuggestions(`how to ${topic}`),
           getGoogleSuggestions(`best ${topic} for`),
           getGoogleSuggestions(`what is ${topic}`),
+          getGoogleSuggestions(`why is ${topic}`),
+          getGoogleSuggestions(`${topic} vs`),
+          getGoogleSuggestions(`${topic} for beginners`),
+          getGoogleSuggestions(`${topic} examples`),
+          getGoogleSuggestions(`alternatives to ${topic}`),
       ])
     ]);
     
     // Clean and prepare live data
-    const primaryKeywords = [...new Set([topic, ...primarySuggestions])].slice(0, 7);
-    const longTailKeywords = [...new Set(longTailSuggestions.flat())].slice(0, 15);
+    const primaryKeywords = [...new Set([topic, ...primarySuggestions])].slice(0, 10);
+    const longTailKeywords = [...new Set(longTailSuggestions.flat())].slice(0, 20);
     
     // 2. Use AI to generate secondary keywords based on the live primary keywords
     const secondaryKeywordPrompt = ai.definePrompt({
         name: 'generateSecondaryKeywords',
         input: { schema: z.object({ pks: z.array(z.string()), topic: z.string(), audience: z.string() }) },
         output: { schema: z.object({ keywords: z.array(z.string()) }) },
-        prompt: `Based on the main topic "{{topic}}", the target audience "{{audience}}", and these primary keywords [{{{pks}}}], generate a list of 10-15 related "body" or secondary keywords (2-3 words). They should cover different facets of the main topic.`,
+        prompt: `You are an SEO expert. Based on the main topic "{{topic}}", the target audience "{{audience}}", and these primary keywords [{{{pks}}}], generate a list of 15-20 semantically related "body" or secondary keywords (2-3 words). These should be topically related sub-themes, not just variations of the primary keywords.`,
     });
 
     const { output } = await secondaryKeywordPrompt({ pks: primaryKeywords, topic: topic, audience: targetAudience });
