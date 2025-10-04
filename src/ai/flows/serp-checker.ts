@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { getSettings } from '@/ai/flows/settings-management';
 
 const SerpResultSchema = z.object({
   position: z.number().int().positive().describe('The ranking position of the search result, starting from 1.'),
@@ -40,11 +41,13 @@ export async function getSerpResults(input: SerpCheckerInput): Promise<SerpResul
   const validatedInput = SerpCheckerInputSchema.parse(input);
   const { keyword, country, domain } = validatedInput;
 
-  const apiKey = process.env.GOOGLE_API_KEY;
-  const cx = process.env.GOOGLE_CSE_ID;
+  const settings = await getSettings();
+  const apiKey = settings.general?.apiKeys?.googleApiKey;
+  const cx = settings.general?.apiKeys?.googleCseId;
+
 
   if (!apiKey || !cx) {
-    throw new Error('Google Search API is not configured on the server. Please provide an API key and Custom Search Engine ID.');
+    throw new Error('Google Search API is not configured on the server. Please provide an API key and Custom Search Engine ID in the site settings.');
   }
 
   const apiUrl = new URL('https://www.googleapis.com/customsearch/v1');
@@ -67,7 +70,7 @@ export async function getSerpResults(input: SerpCheckerInput): Promise<SerpResul
 
     if (!validatedData.success || !validatedData.data.items) {
         console.error("Google Search API response validation error:", validatedData.error);
-        throw new Error('Received invalid data from Google Search API.');
+        return []; // Return empty array instead of throwing an error for invalid data
     }
     
     return validatedData.data.items.map((item, index) => ({
