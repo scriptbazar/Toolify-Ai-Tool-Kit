@@ -12,7 +12,6 @@
 import { z } from 'zod';
 import { getAdminDb, getSettingsData } from '@/lib/firebase-admin';
 import { AppSettingsSchema, type AppSettings } from './settings-management.types';
-import { cache } from 'react';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { placeholderImages } from '@/lib/placeholder-images';
@@ -315,15 +314,14 @@ const defaultSettings = AppSettingsSchema.parse({
  * This function is cached to prevent excessive database reads.
  * @returns {Promise<AppSettings>} The application settings.
  */
-export const getSettings = cache(async (): Promise<AppSettings> => {
+export const getSettings = async (): Promise<AppSettings> => {
     try {
-        const docRef = doc(db, SETTINGS_COLLECTION, MAIN_SETTINGS_DOC_ID);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            const dbData = docSnap.data();
-
-            // Deep merge defaults with database data
+        // This function uses the Admin SDK, so it will always fetch the latest data from the server,
+        // bypassing any client-side or Next.js caching issues.
+        const dbData = await getSettingsData();
+        
+        if (dbData) {
+            // Deep merge defaults with database data to ensure all properties are present
             const merged: AppSettings = {
               ...defaultSettings,
               ...dbData,
@@ -363,25 +361,17 @@ export const getSettings = cache(async (): Promise<AppSettings> => {
             }
         } else {
             console.log("No settings document found, creating one with default values.");
-            await setDoc(docRef, defaultSettings);
+            const adminDb = getAdminDb();
+            const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
+            await docRef.set(defaultSettings);
             return defaultSettings;
         }
     } catch (error: any) {
         console.error("Error getting settings:", error.message);
-        // On client-side errors (e.g., network), it's better to return defaults than crash.
-        // For server-side, this indicates a more serious problem.
-        if (typeof window === 'undefined') { // Server-side check
-            // Use the server-only function as a fallback to get data directly
-            try {
-                return await getSettingsData();
-            } catch (adminError: any) {
-                 console.error("Fallback to admin fetch also failed:", adminError.message);
-                 return defaultSettings;
-            }
-        }
+        // On any error, return the hardcoded default settings to prevent the app from crashing.
         return defaultSettings;
     }
-});
+};
 
 
 /**
@@ -414,3 +404,4 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
 
     
     
+
