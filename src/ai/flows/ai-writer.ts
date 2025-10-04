@@ -33,6 +33,7 @@ export async function aiWriter(input: AiWriterInput): Promise<AiWriterOutput> {
   const aiWriterPrompt = ai.definePrompt(
   {
     name: 'aiWriterPrompt',
+    model: 'googleai/gemini-pro',
     input: { schema: AiWriterInputSchema },
     output: { schema: AiWriterOutputSchema },
     prompt: `You are an expert content writer and SEO specialist. Your task is to generate a comprehensive, engaging, and well-structured blog post based on the provided topic, desired length, and tone. The output must be in HTML format.
@@ -81,6 +82,7 @@ export async function generateMetaDescription(input: GenerateMetaDescInput): Pro
 
 const metaDescPrompt = ai.definePrompt({
     name: 'generateMetaDescPrompt',
+    model: 'googleai/gemini-pro',
     input: { schema: GenerateMetaDescInputSchema },
     output: { schema: GenerateMetaDescOutputSchema },
     prompt: `You are an SEO expert specializing in creating compelling meta descriptions. Your task is to generate a meta description for a blog post.
@@ -124,6 +126,7 @@ export async function generateTargetKeywords(input: GenerateKeywordsInput): Prom
 
 const keywordsPrompt = ai.definePrompt({
     name: 'generateKeywordsPrompt',
+    model: 'googleai/gemini-pro',
     input: { schema: GenerateKeywordsInputSchema },
     output: { schema: GenerateKeywordsOutputSchema },
     prompt: `You are an SEO keyword specialist. Based on the blog post title and content, generate a list of 5-7 relevant, high-ranking, and long-tail keywords that will help this post rank well in search engines.
@@ -159,6 +162,7 @@ export async function generateProductDescription(input: GenerateProductDescripti
 
 const productDescriptionPrompt = ai.definePrompt({
   name: 'generateProductDescriptionPrompt',
+  model: 'googleai/gemini-pro',
   input: { schema: GenerateProductDescriptionInputSchema },
   output: { schema: GenerateProductDescriptionOutputSchema },
   prompt: `You are an expert e-commerce copywriter and SEO specialist. Your task is to write a compelling, persuasive, and benefit-oriented product description in HTML format based on the provided details.

@@ -14,6 +14,7 @@ export async function generatePrompt(input: GeneratePromptInput): Promise<Genera
 
 const prompt = ai.definePrompt({
   name: 'generatePrompt',
+  model: 'googleai/gemini-pro',
   input: { schema: GeneratePromptInputSchema },
   output: { schema: GeneratePromptOutputSchema },
   prompt: `You are an expert prompt engineer. Your task is to expand a simple user-provided topic into a detailed, well-structured, and creative prompt suitable for an AI model.

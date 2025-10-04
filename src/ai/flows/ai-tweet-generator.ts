@@ -22,6 +22,7 @@ export async function aiTweetGenerator(input: AiTweetGeneratorInput): Promise<Ai
 
 const prompt = ai.definePrompt({
   name: 'aiTweetGeneratorPrompt',
+  model: 'googleai/gemini-pro',
   input: {schema: AiTweetGeneratorInputSchema},
   output: {schema: AiTweetGeneratorOutputSchema},
   prompt: `You are an expert social media manager specializing in writing engaging tweets. Your task is to generate a concise, impactful tweet based on the user's provided topic and tone.

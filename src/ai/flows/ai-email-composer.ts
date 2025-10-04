@@ -28,6 +28,7 @@ export async function composeEmail(input: AiEmailComposerInput): Promise<AiEmail
 
 const prompt = ai.definePrompt({
   name: 'composeEmailPrompt',
+  model: 'googleai/gemini-pro',
   input: {schema: AiEmailComposerInputSchema},
   output: {schema: AiEmailComposerOutputSchema},
   prompt: `You are an expert email copywriter. Your task is to write a clear, concise, and effective email based on the provided information.
@@ -67,6 +68,7 @@ export async function regenerateEmailTemplate(input: RegenerateTemplateInput): P
 
 const regeneratePrompt = ai.definePrompt({
   name: 'regenerateEmailTemplatePrompt',
+  model: 'googleai/gemini-pro',
   input: {schema: RegenerateTemplateInputSchema},
   output: {schema: AiEmailComposerOutputSchema},
   prompt: `You are an expert email copywriter. Your task is to write a new, professional, and effective email body for the following template type:
@@ -104,6 +106,7 @@ export async function generateFeatureAnnouncementEmail(input: GenerateFeatureAnn
 
 const featureAnnouncementPrompt = ai.definePrompt({
   name: 'featureAnnouncementPrompt',
+  model: 'googleai/gemini-pro',
   input: {schema: GenerateFeatureAnnouncementInputSchema},
   output: {schema: AiEmailComposerOutputSchema},
   prompt: `You are an expert marketing copywriter specializing in software feature announcements. Your task is to write an engaging and exciting email announcing a new feature.

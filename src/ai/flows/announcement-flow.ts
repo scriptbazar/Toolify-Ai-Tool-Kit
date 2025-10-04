@@ -29,6 +29,7 @@ export async function generateAnnouncement(input: GenerateAnnouncementInput): Pr
 
 const generateAnnouncementPrompt = ai.definePrompt({
   name: 'generateAnnouncementPrompt',
+  model: 'googleai/gemini-pro',
   input: { schema: GenerateAnnouncementInputSchema },
   output: { schema: GenerateAnnouncementOutputSchema },
   prompt: `You are an expert marketing copywriter for a SaaS company called ToolifyAI. Your task is to write a short, exciting announcement about a new feature.

@@ -22,6 +22,7 @@ export async function aiStoryVisualizer(input: AiStoryVisualizerInput): Promise<
 
 const prompt = ai.definePrompt({
   name: 'aiStoryVisualizerPrompt',
+  model: 'googleai/gemini-pro',
   input: { schema: AiStoryVisualizerInputSchema },
   output: { schema: AiStoryVisualizerOutputSchema },
   prompt: `You are an expert screenplay writer and concept artist with a powerful visual imagination. Your task is to read the following story, break it down into a comprehensive list of distinct scenes, and generate a powerful, descriptive image prompt for each scene that could be used with an AI image generator.

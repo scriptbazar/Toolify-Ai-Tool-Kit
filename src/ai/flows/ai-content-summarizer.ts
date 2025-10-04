@@ -22,6 +22,7 @@ export async function summarizeContent(input: AiContentSummarizerInput): Promise
 
 const prompt = ai.definePrompt({
   name: 'summarizeContentPrompt',
+  model: 'googleai/gemini-pro',
   input: {schema: AiContentSummarizerInputSchema},
   output: {schema: AiContentSummarizerOutputSchema},
   prompt: `You are an expert at summarizing long and complex texts. Your task is to read the following text and provide a summary based on the requested length. The summary should be in HTML format.
@@ -54,4 +55,3 @@ const summarizeContentFlow = ai.defineFlow(
     return output;
   }
 );
-
