@@ -16,6 +16,16 @@ import { PlusCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { AdminToolTable } from '@/app/admin/tools/_components/AdminToolTable';
 import { Skeleton } from '@/components/ui/skeleton';
+import dynamic from 'next/dynamic';
+
+const AdminToolTableDynamic = dynamic(() => import('@/app/admin/tools/_components/AdminToolTable').then(mod => mod.AdminToolTable), {
+    loading: () => (
+        <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-64 w-full" />
+        </div>
+    )
+});
 
 export default function AdminToolsPage() {
     const [allTools, setAllTools] = useState<Tool[]>([]);
@@ -76,7 +86,7 @@ export default function AdminToolsPage() {
                     <CardDescription>A comprehensive list of all tools available in the application.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <AdminToolTable 
+                    <AdminToolTableDynamic 
                         allTools={allTools}
                         filteredTools={filteredTools}
                         setFilteredTools={setFilteredTools}

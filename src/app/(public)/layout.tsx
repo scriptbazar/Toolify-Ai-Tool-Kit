@@ -3,8 +3,12 @@
 import Footer from '@/components/common/Footer';
 import Header from '@/components/common/Header';
 import { AdBlockerDetector } from '@/components/common/AdBlockerDetector';
-import { DynamicChatWidget } from '@/components/common/DynamicChatWidget';
+import dynamic from 'next/dynamic';
 import { DevelopmentNoticeDialog } from '@/components/common/DevelopmentNoticeDialog';
+
+const DynamicChatWidget = dynamic(() => import('@/components/common/DynamicChatWidget').then(mod => mod.DynamicChatWidget), {
+  ssr: false,
+});
 
 
 export default function PublicLayout({
