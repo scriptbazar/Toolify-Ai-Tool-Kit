@@ -11,7 +11,7 @@
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/googleai';
+// import { googleAI } from '@genkit-ai/googleai';
 import {
     SaveMediaInputSchema,
     GenerateImageInputSchema,
@@ -62,25 +62,25 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
   const { promptText, userId } = GenerateImageInputSchema.parse(input);
   
   try {
-    const { media } = await ai.generate({
-      model: googleAI.model('imagen-4.0-fast-generate-001'),
-      prompt: promptText,
-    });
+    // const { media } = await ai.generate({
+    //   model: googleAI.model('imagen-4.0-fast-generate-001'),
+    //   prompt: promptText,
+    // });
     
-    const imageDataUri = media.url;
-    if (!imageDataUri) {
-      throw new Error('The AI did not return an image.');
-    }
+    // const imageDataUri = media.url;
+    // if (!imageDataUri) {
+      throw new Error('Image generation is currently disabled.');
+    // }
     
-    // Save the generated image details to user's media collection
-    await saveUserMedia({
-      userId: userId,
-      type: 'ai-generated',
-      mediaUrl: imageDataUri,
-      prompt: promptText,
-    });
+    // // Save the generated image details to user's media collection
+    // await saveUserMedia({
+    //   userId: userId,
+    //   type: 'ai-generated',
+    //   mediaUrl: imageDataUri,
+    //   prompt: promptText,
+    // });
 
-    return { imageDataUri };
+    // return { imageDataUri };
   } catch (error: any) {
     console.error("AI Image Generation Error:", error);
     // Provide a more user-friendly error message

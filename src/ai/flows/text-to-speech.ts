@@ -58,44 +58,45 @@ export async function textToSpeech(
   input: TextToSpeechInput
 ): Promise<TextToSpeechOutput> {
   
-  let speechConfig: any;
+  // let speechConfig: any;
 
-  if (input.isMultiSpeaker && input.multiSpeakerConfig) {
-      const speakerConfigs = Object.entries(input.multiSpeakerConfig).map(([speaker, voice]) => ({
-          speaker: speaker,
-          voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: voice.name },
-          }
-      }));
-      speechConfig = { multiSpeakerVoiceConfig: { speakerVoiceConfigs: speakerConfigs } };
-  } else {
-      speechConfig = {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: input.singleVoice || 'Algenib' },
-          }
-      };
-  }
+  // if (input.isMultiSpeaker && input.multiSpeakerConfig) {
+  //     const speakerConfigs = Object.entries(input.multiSpeakerConfig).map(([speaker, voice]) => ({
+  //         speaker: speaker,
+  //         voiceConfig: {
+  //             prebuiltVoiceConfig: { voiceName: voice.name },
+  //         }
+  //     }));
+  //     speechConfig = { multiSpeakerVoiceConfig: { speakerVoiceConfigs: speakerConfigs } };
+  // } else {
+  //     speechConfig = {
+  //         voiceConfig: {
+  //           prebuiltVoiceConfig: { voiceName: input.singleVoice || 'Algenib' },
+  //         }
+  //     };
+  // }
 
 
-  const { media } = await ai.generate({
-    model: 'googleai/gemini-2.5-flash-preview-tts',
-    config: {
-      responseModalities: ['AUDIO'],
-      speechConfig: speechConfig,
-    },
-    prompt: input.text,
-  });
+  // const { media } = await ai.generate({
+  //   model: 'googleai/gemini-2.5-flash-preview-tts',
+  //   config: {
+  //     responseModalities: ['AUDIO'],
+  //     speechConfig: speechConfig,
+  //   },
+  //   prompt: input.text,
+  // });
 
-  if (!media) {
-    throw new Error('no media returned');
-  }
+  // if (!media) {
+  //   throw new Error('no media returned');
+  // }
 
-  const audioBuffer = Buffer.from(
-    media.url.substring(media.url.indexOf(',') + 1),
-    'base64'
-  );
+  // const audioBuffer = Buffer.from(
+  //   media.url.substring(media.url.indexOf(',') + 1),
+  //   'base64'
+  // );
 
-  return {
-    audioDataUri: 'data:audio/wav;base64,' + (await toWav(audioBuffer)),
-  };
+  // return {
+  //   audioDataUri: 'data:audio/wav;base64,' + (await toWav(audioBuffer)),
+  // };
+  throw new Error('Text-to-speech functionality is currently disabled.');
 }

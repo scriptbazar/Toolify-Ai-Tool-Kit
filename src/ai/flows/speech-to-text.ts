@@ -5,7 +5,7 @@
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { googleAI } from '@genkit-ai/googleai';
+// import { googleAI } from '@genkit-ai/googleai';
 
 
 const SpeechToTextInputSchema = z.object({
@@ -20,18 +20,19 @@ export type SpeechToTextOutput = z.infer<typeof SpeechToTextOutputSchema>;
 
 
 export async function speechToText(input: SpeechToTextInput): Promise<SpeechToTextOutput> {
-    const { text } = await ai.transcribe({
-      model: googleAI.model('gemini-1.5-flash-latest'),
-      media: {
-        url: input.audioDataUri,
-      },
-    });
+    // const { text } = await ai.transcribe({
+    //   model: googleAI.model('gemini-1.5-flash-latest'),
+    //   media: {
+    //     url: input.audioDataUri,
+    //   },
+    // });
 
-    if (!text) {
-      throw new Error('The model did not return any transcribed text.');
-    }
+    // if (!text) {
+    //   throw new Error('The model did not return any transcribed text.');
+    // }
 
-    return {
-      transcribedText: text,
-    };
+    // return {
+    //   transcribedText: text,
+    // };
+    throw new Error('Speech-to-text functionality is currently disabled.');
 }
