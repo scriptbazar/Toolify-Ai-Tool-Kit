@@ -25,9 +25,11 @@ export async function aiCodeAssistant(
 
 const prompt = ai.definePrompt({
   name: 'aiCodeAssistantPrompt',
-  model: 'googleai/gemini-pro',
   input: { schema: AiCodeAssistantInputSchema },
   output: { schema: AiCodeAssistantOutputSchema },
+  config: {
+    responseMimeType: "application/json",
+  },
   prompt: `You are an expert software architect and a senior code reviewer with a specialization in security and performance. Your task is to provide an in-depth, multi-faceted analysis of the following code snippet.
 
 Code to Analyze:

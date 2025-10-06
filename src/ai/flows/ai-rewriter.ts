@@ -22,9 +22,11 @@ export async function aiRewriter(input: AiRewriterInput): Promise<AiRewriterOutp
 
 const prompt = ai.definePrompt({
   name: 'aiRewriterPrompt',
-  model: 'googleai/gemini-pro',
   input: {schema: AiRewriterInputSchema},
   output: {schema: AiRewriterOutputSchema},
+  config: {
+    responseMimeType: "application/json",
+  },
   prompt: `You are an expert editor and copywriter. Your task is to rewrite the given text based on the user's specified goal.
 
 User's Goal: **{{{goal}}}**

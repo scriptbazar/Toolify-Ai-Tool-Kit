@@ -22,9 +22,11 @@ export async function aiStoryGenerator(input: AiStoryGeneratorInput): Promise<Ai
 
 const prompt = ai.definePrompt({
   name: 'aiStoryGeneratorPrompt',
-  model: 'googleai/gemini-pro',
   input: {schema: AiStoryGeneratorInputSchema},
   output: {schema: AiStoryGeneratorOutputSchema},
+  config: {
+    responseMimeType: "application/json",
+  },
   prompt: `You are an expert storyteller. Your task is to write a short, engaging story based on the user's provided topic and genre.
 
 {{#if language}}

@@ -247,9 +247,11 @@ export async function generateTicketContent(input: z.infer<typeof GenerateTicket
 
 const generateTicketContentPrompt = ai.definePrompt({
   name: 'generateTicketContentPrompt',
-  model: 'googleai/gemini-pro',
   input: { schema: GenerateTicketContentInputSchema },
   output: { schema: GenerateTicketContentOutputSchema },
+  config: {
+    responseMimeType: "application/json",
+  },
   prompt: `You are an expert at writing clear and detailed support ticket messages.
 A user has provided a short summary of their problem. Expand this summary into a full support message.
 

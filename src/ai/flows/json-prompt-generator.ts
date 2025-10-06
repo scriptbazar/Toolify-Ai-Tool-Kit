@@ -15,9 +15,11 @@ export async function generateJsonPrompt(input: GeneratePromptInput): Promise<Js
 
 const prompt = ai.definePrompt({
   name: 'generateJsonPrompt',
-  model: 'googleai/gemini-pro',
   input: { schema: GeneratePromptInputSchema },
   output: { schema: JsonPromptOutputSchema },
+  config: {
+    responseMimeType: "application/json",
+  },
   prompt: `You are an expert prompt engineer specializing in creating highly detailed and structured JSON prompts. Your task is to expand a simple user-provided topic into a sophisticated, multi-level, and creative prompt in JSON format.
 
 The final output must be a single, valid JSON object.

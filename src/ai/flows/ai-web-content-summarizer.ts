@@ -21,9 +21,11 @@ export async function summarizeAndExplainWebContent(input: AiWebContentSummarize
 
 const prompt = ai.definePrompt({
   name: 'summarizeAndExplainWebContentPrompt',
-  model: 'googleai/gemini-pro',
   input: { schema: AiWebContentSummarizerInputSchema },
   output: { schema: AiWebContentSummarizerOutputSchema },
+  config: {
+    responseMimeType: "application/json",
+  },
   prompt: `You are an expert web content analyst and SEO strategist. Your task is to perform an in-depth analysis of the content from the provided URL.
 
 **URL to Analyze:** {{{url}}}
