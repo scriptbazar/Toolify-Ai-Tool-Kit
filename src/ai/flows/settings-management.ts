@@ -353,6 +353,11 @@ export const getSettings = async (): Promise<AppSettings> => {
         const dbData = await getSettingsData();
         
         if (dbData) {
+            // FIX: Ensure placeholderImages is not null before merging
+            if (!dbData.placeholderImages) {
+                dbData.placeholderImages = defaultSettings.placeholderImages;
+            }
+
             // Deep merge defaults with database data to ensure all properties are present
             const mergedSettings = deepMerge(defaultSettings, dbData);
 
@@ -408,4 +413,5 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
 
     
     
+
 
