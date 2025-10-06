@@ -309,6 +309,40 @@ const defaultSettings = AppSettingsSchema.parse({
 });
 
 /**
+ * Checks if a value is an object and not null.
+ */
+function isObject(item: any): item is Record<string, any> {
+  return item && typeof item === 'object' && !Array.isArray(item);
+}
+
+/**
+ * Deeply merges two objects. The `source` object's properties overwrite the `target` object's properties.
+ * This is especially useful for merging nested configuration objects.
+ *
+ * @param target - The target object to merge into.
+ * @param source - The source object with new properties.
+ * @returns The merged object.
+ */
+function deepMerge<T extends object, U extends object>(target: T, source: U): T & U {
+  let output = { ...target } as any;
+
+  if (isObject(target) && isObject(source)) {
+    Object.keys(source).forEach(key => {
+      if (isObject(source[key])) {
+        if (!(key in target))
+          Object.assign(output, { [key]: source[key] });
+        else
+          output[key] = deepMerge(target[key as keyof T] as any, source[key]);
+      } else {
+        Object.assign(output, { [key]: source[key] });
+      }
+    });
+  }
+
+  return output;
+}
+
+/**
  * Retrieves the application settings from Firestore.
  * If no settings exist, it returns the default values defined in the schema.
  * This function is cached to prevent excessive database reads.
@@ -316,43 +350,13 @@ const defaultSettings = AppSettingsSchema.parse({
  */
 export const getSettings = async (): Promise<AppSettings> => {
     try {
-        // This function uses the Admin SDK, so it will always fetch the latest data from the server,
-        // bypassing any client-side or Next.js caching issues.
         const dbData = await getSettingsData();
         
         if (dbData) {
             // Deep merge defaults with database data to ensure all properties are present
-            const merged: AppSettings = {
-              ...defaultSettings,
-              ...dbData,
-              general: {
-                ...defaultSettings.general,
-                ...dbData.general,
-                socialLinks: { ...defaultSettings.general?.socialLinks, ...dbData.general?.socialLinks },
-                webmaster: { ...defaultSettings.general?.webmaster, ...dbData.general?.webmaster },
-                apiKeys: { ...defaultSettings.general?.apiKeys, ...dbData.general?.apiKeys },
-                security: { ...defaultSettings.general?.security, ...dbData.general?.security },
-              },
-              payment: {
-                 ...defaultSettings.payment,
-                 ...dbData.payment,
-                 paypal: { ...defaultSettings.payment?.paypal, ...dbData.payment?.paypal },
-                 razorpay: { ...defaultSettings.payment?.razorpay, ...dbData.payment?.razorpay },
-              },
-              sidebar: { 
-                ...defaultSettings.sidebar,
-                ...dbData.sidebar,
-                toolSidebar: { ...defaultSettings.sidebar?.toolSidebar, ...dbData.sidebar?.toolSidebar },
-                blogSidebar: { ...defaultSettings.sidebar?.blogSidebar, ...dbData.sidebar?.blogSidebar },
-              },
-              faqs: {
-                ...defaultSettings.faqs,
-                ...dbData.faqs,
-              },
-              // Add other nested objects here if they exist
-            };
+            const mergedSettings = deepMerge(defaultSettings, dbData);
 
-            const parsedData = AppSettingsSchema.safeParse(merged);
+            const parsedData = AppSettingsSchema.safeParse(mergedSettings);
             if (parsedData.success) {
                 return parsedData.data;
             } else {
