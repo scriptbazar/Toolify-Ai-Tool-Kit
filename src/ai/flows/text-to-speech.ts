@@ -79,7 +79,7 @@ export async function textToSpeech(
 
 
   const { media } = await ai.generate({
-    model: googleAI.model('gemini-2.5-flash-preview-tts'),
+    model: 'googleai/gemini-2.5-flash-preview-tts',
     config: {
       responseModalities: ['AUDIO'],
       speechConfig: speechConfig,

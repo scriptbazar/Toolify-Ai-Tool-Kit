@@ -63,7 +63,7 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
   
   try {
     const { media } = await ai.generate({
-      model: googleAI.model('imagen-4.0-fast-generate-001'),
+      model: 'googleai/imagen-4.0-fast-generate-001',
       prompt: promptText,
     });
     

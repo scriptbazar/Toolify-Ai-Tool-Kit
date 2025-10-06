@@ -22,7 +22,7 @@ export type SpeechToTextOutput = z.infer<typeof SpeechToTextOutputSchema>;
 
 export async function speechToText(input: SpeechToTextInput): Promise<SpeechToTextOutput> {
     const { text } = await ai.transcribe({
-      model: googleAI.model('gemini-1.5-flash-latest'),
+      model: 'googleai/gemini-1.5-flash-latest',
       media: {
         url: input.audioDataUri,
       },
