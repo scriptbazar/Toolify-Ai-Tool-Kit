@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -88,8 +87,20 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // Log the successful login activity. This will also revalidate the path.
-      await logUserLogin(user.uid);
+      // Get the ID token from the user
+      const token = await user.getIdToken();
+      
+      // Send the token to the server to create a session cookie
+      const sessionResponse = await fetch('/api/auth/session-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      
+      if (!sessionResponse.ok) {
+        const errorData = await sessionResponse.json();
+        throw new Error(errorData.error || 'Failed to create session.');
+      }
 
       // Check user role from Firestore
       const userDocRef = doc(db, "users", user.uid);
@@ -99,6 +110,8 @@ export default function LoginPage() {
         title: "Logged in successfully!",
         description: "Redirecting...",
       });
+      
+      await logUserLogin(user.uid);
 
       if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
         router.push('/admin/dashboard');
@@ -110,6 +123,8 @@ export default function LoginPage() {
        let description = "There was a problem with your request.";
       if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
         description = "Invalid email or password.";
+      } else {
+        description = error.message;
       }
       toast({
         title: "Uh oh! Something went wrong.",
