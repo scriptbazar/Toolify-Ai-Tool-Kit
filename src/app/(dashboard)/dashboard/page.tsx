@@ -4,7 +4,7 @@ import { getAnnouncementsForUser } from '@/ai/flows/announcement-flow';
 import { DashboardClient } from './_components/DashboardClient';
 import { unstable_cache as cache } from 'next/cache';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
-import { Timestamp, getDocs, type DocumentData } from 'firebase-admin/firestore';
+import { Timestamp, type DocumentData } from 'firebase-admin/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -20,8 +20,8 @@ const getDashboardData = cache(async (uid: string) => {
     const [userDocSnap, fetchedAnnouncements, referralsSnapshot, activitySnapshot] = await Promise.all([
       userDocRef.get(),
       getAnnouncementsForUser(uid),
-      getDocs(referralsQuery),
-      getDocs(activityQuery),
+      referralsQuery.get(),
+      activityQuery.get(),
     ]);
   
     const userData = userDocSnap.exists ? userDocSnap.data() : null;
