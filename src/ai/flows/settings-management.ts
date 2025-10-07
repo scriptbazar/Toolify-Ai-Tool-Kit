@@ -90,6 +90,14 @@ const defaultFaqSettings = {
 
 
 const defaultSettings = AppSettingsSchema.parse({ 
+  general: {
+    siteTitle: 'ToolifyAI',
+    slogan: 'Your All-in-One Smart Toolkit',
+    siteDescription: 'Over 100 smart utility tools and AI-powered solutions.',
+    metaKeywords: 'ai tools, utility, productivity, developer tools',
+    copyrightText: '© {year} ToolifyAI. All rights reserved.',
+    contactEmail: undefined,
+  },
   page: { pages: [
     {
       id: 'about-us',
@@ -365,6 +373,7 @@ export const getSettings = async (): Promise<AppSettings> => {
             if (parsedData.success) {
                 return parsedData.data;
             } else {
+                console.warn("Firestore settings data is invalid after merge, returning defaults.", parsedData.error);
                 return defaultSettings;
             }
         } else {
@@ -412,6 +421,7 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
 
     
     
+
 
 
 
