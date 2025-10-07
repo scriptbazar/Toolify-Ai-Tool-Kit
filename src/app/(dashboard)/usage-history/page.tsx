@@ -25,7 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 const ITEMS_PER_PAGE = 10;
-const ACTIVITY_FETCH_LIMIT = 100; // Fetch last 100 activities for a better overview
+const ACTIVITY_FETCH_LIMIT = 100; 
 
 const getActivityIcon = (type: UserActivityType) => {
   switch (type) {
@@ -137,7 +137,7 @@ export default function UsageHistoryPage() {
             <CardContent>
               {toolUsageData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={toolUsageData} margin={{ left: 20, right: 20 }}>
+                   <BarChart data={toolUsageData} margin={{ left: 20, right: 20 }}>
                     <XAxis dataKey="name" type="category" tick={{ fontSize: 12 }} interval={0} angle={-45} textAnchor="end" height={80} />
                     <YAxis allowDecimals={false} />
                     <Tooltip
