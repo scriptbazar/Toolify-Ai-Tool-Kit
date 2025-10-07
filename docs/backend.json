@@ -1,0 +1,44 @@
+
+{
+    "entities": {
+        "User": {
+            "title": "User",
+            "description": "Represents a user of the application.",
+            "type": "object",
+            "properties": {
+                "uid": { "type": "string" },
+                "email": { "type": "string", "format": "email" },
+                "name": { "type": "string" },
+                "role": { "type": "string", "enum": ["user", "admin"] }
+            },
+            "required": ["uid", "email", "name", "role"]
+        },
+        "UserMedia": {
+            "title": "User Media",
+            "description": "Media generated or uploaded by a user.",
+            "type": "object",
+            "properties": {
+                "userId": { "type": "string", "description": "The UID of the user who owns the media." },
+                "type": { "type": "string", "enum": ["ai-generated", "community-chat", "ticket-media"] },
+                "mediaUrl": { "type": "string", "format": "uri" },
+                "prompt": { "type": "string", "description": "The prompt used to generate the media, if applicable." },
+                "createdAt": { "type": "string", "format": "date-time" },
+                "expiresAt": { "type": "string", "format": "date-time" }
+            },
+            "required": ["userId", "type", "mediaUrl", "createdAt", "expiresAt"]
+        }
+    },
+    "auth": {
+        "providers": ["anonymous", "google.com"]
+    },
+    "firestore": {
+        "/users/{userId}": {
+            "schema": { "$ref": "#/entities/User" },
+            "description": "Stores public user profile information."
+        },
+        "/userMedia/{mediaId}": {
+            "schema": { "$ref": "#/entities/UserMedia" },
+            "description": "Stores media files associated with a user."
+        }
+    }
+}
