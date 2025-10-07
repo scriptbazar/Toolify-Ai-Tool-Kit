@@ -4,7 +4,27 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { DashboardLayoutClient } from '@/app/(dashboard)/_components/DashboardLayoutClient';
 import { type User as FirebaseUser } from 'firebase/auth';
-import type { DocumentData } from 'firebase-admin/firestore';
+import { type DocumentData, Timestamp } from 'firebase-admin/firestore';
+
+// Helper function to safely convert Timestamps to ISO strings
+function serializeTimestamps(obj: any): any {
+  if (!obj) return obj;
+  if (obj instanceof Timestamp) {
+    return obj.toDate().toISOString();
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(serializeTimestamps);
+  }
+  if (typeof obj === 'object') {
+    const newObj: { [key: string]: any } = {};
+    for (const key in obj) {
+      newObj[key] = serializeTimestamps(obj[key]);
+    }
+    return newObj;
+  }
+  return obj;
+}
+
 
 async function getAuthenticatedUser(): Promise<{ user: FirebaseUser; userData: DocumentData | null; isAdmin: boolean } | null> {
     const sessionCookie = cookies().get('session')?.value;
@@ -19,9 +39,13 @@ async function getAuthenticatedUser(): Promise<{ user: FirebaseUser; userData: D
 
         if (userDocSnap.exists) {
             const userData = userDocSnap.data() as DocumentData;
+            
+            // Serialize the userData object to convert Timestamps
+            const serializableUserData = serializeTimestamps(userData);
+            
             return {
                 user: decodedToken as unknown as FirebaseUser,
-                userData,
+                userData: serializableUserData,
                 isAdmin: userData.role === 'admin'
             };
         }
