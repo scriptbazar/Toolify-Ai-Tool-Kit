@@ -30,7 +30,6 @@ function serializeTimestamps(obj: any): any {
 async function getAuthenticatedAdmin(): Promise<{ user: FirebaseUser; userData: DocumentData | null; } | null> {
     const sessionCookie = cookies().get('session')?.value;
     if (!sessionCookie) {
-        console.log("No session cookie found, redirecting to login.");
         return null;
     };
 
@@ -42,30 +41,20 @@ async function getAuthenticatedAdmin(): Promise<{ user: FirebaseUser; userData: 
         const userDocRef = db.collection('users').doc(decodedToken.uid);
         const userDocSnap = await userDocRef.get();
         
-        // This check is crucial. If the user document doesn't exist, they can't be an admin.
-        if (!userDocSnap.exists) {
-            console.log(`User document for UID ${decodedToken.uid} not found. Denying access.`);
+        if (!userDocSnap.exists || userDocSnap.data()?.role !== 'admin') {
             return null;
         }
 
         const userData = userDocSnap.data() as DocumentData;
+        const serializableUserData = serializeTimestamps(userData);
         
-        // Explicitly check for the 'admin' role.
-        if (userData.role === 'admin') {
-            const serializableUserData = serializeTimestamps(userData);
-            return {
-                user: decodedToken as unknown as FirebaseUser,
-                userData: serializableUserData,
-            };
-        }
-        
-        // If user is not an admin, deny access.
-        console.log(`User ${decodedToken.uid} is not an admin. Denying access.`);
-        return null;
+        return {
+            user: decodedToken as unknown as FirebaseUser,
+            userData: serializableUserData,
+        };
 
     } catch (error: any) {
         console.error('Admin auth check error in layout:', error.code, error.message);
-        // On any error (e.g., expired cookie, network issue), deny access.
         return null;
     }
 }
