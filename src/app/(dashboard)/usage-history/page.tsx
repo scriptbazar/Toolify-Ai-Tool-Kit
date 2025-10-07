@@ -52,7 +52,7 @@ export default function UsageHistoryPage() {
       if (firebaseUser) {
         setUser(firebaseUser);
         try {
-          const userActivities = await getUserActivity(firebaseUser.uid, 15); 
+          const userActivities = await getUserActivity(firebaseUser.uid, 100); 
           setActivities(userActivities);
         } catch (error) {
           console.error("Failed to load usage history:", error);
