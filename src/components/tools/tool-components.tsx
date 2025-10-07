@@ -79,6 +79,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'percentage-to-cgpa-converter': dynamic(() => import('./PercentageToCgpaConverter').then(mod => mod.PercentageToCgpaConverter)),
   'prn-to-pdf': dynamic(() => import('./PRNToPDF').then(mod => mod.PRNToPDF)),
   'ppt-to-pdf': dynamic(() => import('./PptToPdf').then(mod => mod.PptToPdf)),
+  'qr-code-scanner': dynamic(() => import('./QrCodeScanner').then(mod => mod.QrCodeScanner)),
   'random-word-generator': dynamic(() => import('./RandomWordGenerator').then(mod => mod.RandomWordGenerator)),
   'redirect-checker': dynamic(() => import('./RedirectChecker').then(mod => mod.RedirectChecker)),
   'remove-extra-spaces': dynamic(() => import('./RemoveExtraSpaces').then(mod => mod.RemoveExtraSpaces)),
@@ -112,5 +113,4 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'youtube-video-thumbnail-downloader': dynamic(() => import('./YouTubeVideoThumbnailDownloader').then(mod => mod.YouTubeVideoThumbnailDownloader)),
   'youtube-video-title-extractor': dynamic(() => import('./YouTubeVideoTitleExtractor').then(mod => mod.YouTubeVideoTitleExtractor)),
   'unit-converter': dynamic(() => import('./UnitConverter').then(mod => mod.UnitConverter)),
-  'qr-code-scanner': dynamic(() => import('./QrCodeScanner').then(mod => mod.QrCodeScanner)),
 };
