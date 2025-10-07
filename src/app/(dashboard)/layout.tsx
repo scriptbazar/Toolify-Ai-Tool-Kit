@@ -75,9 +75,10 @@ export default async function UserPanelLayout({
         redirect('/admin/dashboard');
     }
 
-  return (
-    <DashboardLayoutClient user={authData.user} userData={authData.userData}>
-        {children}
-    </DashboardLayoutClient>
-  );
+    // Pass the necessary props to the client layout, which will then pass them to the page
+    return (
+        <DashboardLayoutClient user={authData.user} userData={authData.userData}>
+            {children}
+        </DashboardLayoutClient>
+    );
 }

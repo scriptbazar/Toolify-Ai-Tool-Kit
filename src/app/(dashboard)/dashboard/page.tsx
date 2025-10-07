@@ -52,7 +52,15 @@ const getDashboardData = cache(async (uid: string) => {
 
 
 // This page now receives user and userData from the server-side layout
-export default async function UserDashboard({ user, userData }: { user: FirebaseUser, userData: DocumentData | null }) {
+export default async function UserDashboard(props: { user: FirebaseUser, userData: DocumentData | null }) {
+  const { user } = props;
+  
+  // Ensure user object exists before proceeding
+  if (!user) {
+    // This should theoretically not be reached if the layout redirects correctly,
+    // but it's good practice for robustness.
+    return <div>Please log in to view your dashboard.</div>;
+  }
   
   const { profile, plan, announcements, stats } = await getDashboardData(user.uid);
   const welcomeMessage = profile?.firstName ? `Welcome Back, ${profile.firstName}!` : "User Dashboard";
