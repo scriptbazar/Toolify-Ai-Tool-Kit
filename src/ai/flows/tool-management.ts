@@ -163,6 +163,21 @@ export async function getTools(options: GetToolsOptions = {}): Promise<Tool[]> {
             return [];
         }
 
+        // --- DELETION LOGIC FOR AI TOOLS ---
+        const aiToolsQuery = adminDb.collection(TOOLS_COLLECTION).where('category', '==', 'ai');
+        const aiToolsSnapshot = await aiToolsQuery.get();
+        if (!aiToolsSnapshot.empty) {
+            console.log(`Found ${aiToolsSnapshot.size} AI tools to delete...`);
+            const batch = adminDb.batch();
+            aiToolsSnapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+            console.log("Successfully deleted AI tools from the database.");
+        }
+        // --- END DELETION LOGIC ---
+
+
         let queryRef: Query = adminDb.collection(TOOLS_COLLECTION);
         
         const snapshot = await queryRef.orderBy('name').get();
@@ -471,3 +486,6 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
 
+
+
+    
