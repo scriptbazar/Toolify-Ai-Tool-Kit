@@ -47,7 +47,7 @@ export async function getSerpResults(input: SerpCheckerInput): Promise<SerpResul
 
 
   if (!apiKey || !cx) {
-    throw new Error('Google Search API is not configured on the server. Please provide an API key and Custom Search Engine ID in the site settings.');
+    throw new Error('Google Search API is not configured. Please provide an API key and Custom Search Engine ID in the admin settings.');
   }
 
   const apiUrl = new URL('https://www.googleapis.com/customsearch/v1');

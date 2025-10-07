@@ -9,26 +9,34 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui
 import { Youtube, Globe, Loader2, Search, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
-
-interface OEmbedResponse {
-    title?: string;
-    error?: string;
-}
-
-const dummyBlockedCountries = [
-    'Germany', 'China', 'North Korea', 'Iran', 'Syria', 'Cuba', 'Sudan'
-];
+import { getVideoDetails } from '@/ai/flows/youtube-data';
 
 export function YouTubeRegionRestrictionChecker() {
     const [url, setUrl] = useState('');
-    const [results, setResults] = useState<{ title: string; blocked: string[] } | null>(null);
+    const [results, setResults] = useState<{ title: string; blocked: string[]; allowed?: string[] } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
 
+    const getVideoId = (inputUrl: string): string | null => {
+        if (!inputUrl) return null;
+        try {
+            const urlObj = new URL(inputUrl);
+            if (urlObj.hostname === 'youtu.be') {
+                return urlObj.pathname.slice(1);
+            }
+            if (urlObj.hostname.includes('youtube.com')) {
+                const videoIdParam = urlObj.searchParams.get('v');
+                if (videoIdParam) return videoIdParam;
+            }
+        } catch (e) { return null; }
+        return null;
+    }
+
     const handleCheck = async () => {
-        if (!url.trim()) {
-            toast({ title: 'Please enter a YouTube URL.', variant: 'destructive' });
+        const videoId = getVideoId(url);
+        if (!videoId) {
+            toast({ title: 'Invalid YouTube URL', description: 'Please enter a valid YouTube video URL.', variant: 'destructive' });
             return;
         }
         setIsLoading(true);
@@ -36,27 +44,17 @@ export function YouTubeRegionRestrictionChecker() {
         setError(null);
         
         try {
-            // Using a public oEmbed endpoint to validate the URL and get the title.
-            // A real restriction checker would need a server-side call to the YouTube Data API.
-            const oEmbedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
-            const response = await fetch(oEmbedUrl);
-
-            if (!response.ok) {
-                 throw new Error(`Could not fetch video data. Please check if the URL is correct and public.`);
+            const data = await getVideoDetails({ videoId });
+            if (data.error) {
+                throw new Error(data.error);
             }
+            
+            setResults({
+                title: data.title || 'Unknown Title',
+                blocked: data.regionRestriction?.blocked || [],
+                allowed: data.regionRestriction?.allowed || [],
+            });
 
-            const data: OEmbedResponse = await response.json();
-
-            if (data.title) {
-                // Simulate restriction check. In a real app, this would be an API call result.
-                const isRestricted = Math.random() > 0.5; // 50% chance of being restricted for demo
-                setResults({
-                    title: data.title,
-                    blocked: isRestricted ? dummyBlockedCountries.slice(0, Math.floor(Math.random() * 4) + 1) : []
-                });
-            } else {
-                throw new Error(data.error || 'Could not extract data from this URL.');
-            }
         } catch (e: any) {
             setError(e.message || 'An unknown error occurred.');
             toast({
@@ -108,13 +106,19 @@ export function YouTubeRegionRestrictionChecker() {
                         ) : results && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="p-4 border rounded-lg bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-                                    <h3 className="font-semibold flex items-center gap-2 text-green-700 dark:text-green-400"><CheckCircle/>Available Worldwide</h3>
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                        This video appears to be available in most countries.
-                                    </p>
+                                    <h3 className="font-semibold flex items-center gap-2 text-green-700 dark:text-green-400"><CheckCircle/>Available In</h3>
+                                      {results.allowed && results.allowed.length > 0 ? (
+                                        <ScrollArea className="h-24 mt-2">
+                                            <ul className="text-sm text-muted-foreground list-disc pl-5">
+                                               {results.allowed.map(country => <li key={country}>{country}</li>)}
+                                            </ul>
+                                        </ScrollArea>
+                                     ) : (
+                                         <p className="text-sm text-muted-foreground mt-1">This video appears to be available worldwide.</p>
+                                     )}
                                 </div>
                                 <div className="p-4 border rounded-lg bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-                                     <h3 className="font-semibold flex items-center gap-2 text-red-700 dark:text-red-400"><XCircle/>Potentially Blocked In</h3>
+                                     <h3 className="font-semibold flex items-center gap-2 text-red-700 dark:text-red-400"><XCircle/>Blocked In</h3>
                                       {results.blocked.length > 0 ? (
                                         <ScrollArea className="h-24 mt-2">
                                             <ul className="text-sm text-muted-foreground list-disc pl-5">

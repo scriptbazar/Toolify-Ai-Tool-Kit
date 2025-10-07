@@ -9,12 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui
 import { Youtube, Copy, Trash2, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '../ui/textarea';
-
-interface OEmbedResponse {
-    title?: string;
-    html?: string;
-    error?: string;
-}
+import { getVideoDetails } from '@/ai/flows/youtube-data';
 
 export function YouTubeVideoDescriptionExtractor() {
     const [url, setUrl] = useState('');
@@ -23,38 +18,38 @@ export function YouTubeVideoDescriptionExtractor() {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
-    // A simple client-side approach using a public oEmbed endpoint.
-    // Note: This doesn't directly provide the description text.
-    // A proper implementation would use a server-side proxy or the YouTube Data API.
-    // For this demonstration, we'll simulate extracting from a mock description.
+    const getVideoId = (inputUrl: string): string | null => {
+        if (!inputUrl) return null;
+        try {
+            const urlObj = new URL(inputUrl);
+            if (urlObj.hostname === 'youtu.be') {
+                return urlObj.pathname.slice(1);
+            }
+            if (urlObj.hostname.includes('youtube.com')) {
+                const videoIdParam = urlObj.searchParams.get('v');
+                if (videoIdParam) return videoIdParam;
+            }
+        } catch (e) { return null; }
+        return null;
+    }
+
     const handleExtract = async () => {
-        if (!url.trim()) {
-            toast({ title: 'Please enter a YouTube URL.', variant: 'destructive' });
+        const videoId = getVideoId(url);
+        if (!videoId) {
+            toast({ title: 'Invalid YouTube URL', description: 'Please enter a valid YouTube video URL.', variant: 'destructive' });
             return;
         }
         setIsLoading(true);
         setDescription(null);
         setVideoTitle(null);
+        
         try {
-            // Using a public oEmbed endpoint to get video title.
-            const oEmbedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
-            const response = await fetch(oEmbedUrl);
-
-            if (!response.ok) {
-                 throw new Error(`Could not fetch video data. Status: ${response.status}`);
+            const data = await getVideoDetails({ videoId });
+            if (data.error) {
+                throw new Error(data.error);
             }
-
-            const data: OEmbedResponse = await response.json();
-
-            if (data.title) {
-                setVideoTitle(data.title);
-                // SIMULATED DESCRIPTION
-                const simulatedDescription = `This is a simulated description for the video titled "${data.title}".\n\nIn a real-world application, this would be fetched using the YouTube Data API on the server to avoid client-side limitations.\n\nKey features often found in descriptions:\n- Links to social media.\n- Affiliate links.\n- Timestamps for video chapters.\n- Hashtags like #YouTube #API #Demo.`;
-                setDescription(simulatedDescription);
-
-            } else {
-                throw new Error(data.error || 'Could not extract data from this URL.');
-            }
+            setVideoTitle(data.title || 'Unknown Title');
+            setDescription(data.description || 'No description found.');
         } catch (error: any) {
             console.error("Extraction error:", error);
             toast({
@@ -108,8 +103,7 @@ export function YouTubeVideoDescriptionExtractor() {
                     <CardContent className="space-y-4">
                         {isLoading ? (
                             <div className="space-y-2">
-                                <div className="h-4 w-full bg-muted animate-pulse rounded-md" />
-                                <div className="h-4 w-5/6 bg-muted animate-pulse rounded-md" />
+                                <div className="h-20 w-full bg-muted animate-pulse rounded-md" />
                             </div>
                         ) : (
                             <Textarea value={description || ''} readOnly className="min-h-[200px] bg-muted"/>
