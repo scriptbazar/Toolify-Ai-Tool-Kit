@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 const ITEMS_PER_PAGE = 10;
+const ACTIVITY_FETCH_LIMIT = 30; // Fetch last 30 activities
 
 const getActivityIcon = (type: UserActivityType) => {
   switch (type) {
@@ -52,7 +53,7 @@ export default function UsageHistoryPage() {
       if (firebaseUser) {
         setUser(firebaseUser);
         try {
-          const userActivities = await getUserActivity(firebaseUser.uid, 100); 
+          const userActivities = await getUserActivity(firebaseUser.uid, ACTIVITY_FETCH_LIMIT); 
           setActivities(userActivities);
         } catch (error) {
           console.error("Failed to load usage history:", error);
@@ -130,15 +131,15 @@ export default function UsageHistoryPage() {
             <CardHeader>
               <CardTitle>Usage Overview</CardTitle>
               <CardDescription>
-                Your top 10 tools based on your last 100 activities.
+                Your top 10 tools based on your last {ACTIVITY_FETCH_LIMIT} activities.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {toolUsageData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={toolUsageData} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 20 }}>
-                    <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" width={150} tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
+                  <BarChart data={toolUsageData}>
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} angle={-45} textAnchor="end" height={80} interval={0} />
+                    <YAxis allowDecimals={false} />
                     <Tooltip
                       cursor={{ fill: 'hsl(var(--muted))' }}
                       content={({ active, payload }) => {
@@ -152,7 +153,7 @@ export default function UsageHistoryPage() {
                         return null;
                       }}
                     />
-                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} layout="vertical" />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
