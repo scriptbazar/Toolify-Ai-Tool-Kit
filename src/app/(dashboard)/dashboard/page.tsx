@@ -4,7 +4,7 @@ import { getAnnouncementsForUser } from '@/ai/flows/announcement-flow';
 import { DashboardClient } from './_components/DashboardClient';
 import { unstable_cache as cache } from 'next/cache';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
-import { Timestamp, getCountFromServer, type DocumentData } from 'firebase-admin/firestore';
+import { Timestamp, getDocs, type DocumentData } from 'firebase-admin/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -17,11 +17,11 @@ const getDashboardData = cache(async (uid: string) => {
     const referralsQuery = adminDb.collection("users").where("referredBy", "==", uid);
     const activityQuery = adminDb.collection(`users/${uid}/activity`).where('type', '==', 'tool_usage');
 
-    const [userDocSnap, fetchedAnnouncements, referralsCountSnap, activityCountSnap] = await Promise.all([
+    const [userDocSnap, fetchedAnnouncements, referralsSnapshot, activitySnapshot] = await Promise.all([
       userDocRef.get(),
       getAnnouncementsForUser(uid),
-      getCountFromServer(referralsQuery),
-      getCountFromServer(activityQuery),
+      getDocs(referralsQuery),
+      getDocs(activityQuery),
     ]);
   
     const userData = userDocSnap.exists ? userDocSnap.data() : null;
@@ -38,8 +38,8 @@ const getDashboardData = cache(async (uid: string) => {
     const userPlan = settings.plan?.plans.find(p => p.id === userData?.planId) || settings.plan?.plans.find(p => p.id === 'free') || null;
   
     const stats = {
-      toolsUsed: activityCountSnap.data().count,
-      referrals: referralsCountSnap.data().count,
+      toolsUsed: activitySnapshot.size,
+      referrals: referralsSnapshot.size,
     };
   
     return {
