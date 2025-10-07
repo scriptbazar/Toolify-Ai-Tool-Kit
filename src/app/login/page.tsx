@@ -87,10 +87,8 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // Get the ID token from the user
       const token = await user.getIdToken();
       
-      // Send the token to the server to create a session cookie
       const sessionResponse = await fetch('/api/auth/session-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,8 +99,9 @@ export default function LoginPage() {
         const errorData = await sessionResponse.json();
         throw new Error(errorData.error || 'Failed to create session.');
       }
+      
+      await sessionResponse.json(); // Wait for the session creation to complete
 
-      // Check user role from Firestore
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
@@ -114,9 +113,9 @@ export default function LoginPage() {
       await logUserLogin(user.uid);
 
       if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-        router.push('/admin/dashboard');
+        window.location.href = '/admin/dashboard';
       } else {
-        router.push('/dashboard');
+        window.location.href = '/dashboard';
       }
     } catch (error: any) {
       console.error("Login error:", error);

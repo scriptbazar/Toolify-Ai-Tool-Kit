@@ -83,23 +83,33 @@ export default function AdminLoginPage() {
     }
 
     try {
-      // 1. Sign in the user with Firebase Auth
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // 2. Check the user's role in Firestore
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
       if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-        // 3. If user is an admin, redirect to dashboard
+        const token = await user.getIdToken();
+        const sessionResponse = await fetch('/api/auth/session-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+
+        if (!sessionResponse.ok) {
+          const errorData = await sessionResponse.json();
+          throw new Error(errorData.error || 'Failed to create session.');
+        }
+
+        await sessionResponse.json(); // Wait for the session creation to complete
+
         toast({
           title: "Admin login successful!",
           description: "Redirecting to the admin panel...",
         });
-        router.push('/admin/dashboard');
+        window.location.href = '/admin/dashboard';
       } else {
-        // 4. If user is not an admin, show error and log out
         await auth.signOut();
         toast({
           title: "Access Denied",
