@@ -9,7 +9,6 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { ai } from '@/ai/genkit';
 import { getStorage } from 'firebase-admin/storage';
-import { saveUserMedia } from './media-management';
 import { type Ticket, type TicketMessage, type CreateTicketInput, type AddReplyInput, type UpdateTicketDetailsInput, TicketMessageSchema, CreateTicketInputSchema, AddReplyInputSchema, UpdateTicketDetailsInputSchema } from './ticket-management.types';
 
 /**
@@ -54,18 +53,6 @@ export async function createTicket(input: CreateTicketInput): Promise<{ success:
             messages: [initialMessage, automatedReply],
         });
         
-        // This part is for permanent storage of ticket media and is kept for reference
-        if (attachments && attachments.length > 0) {
-            for (const url of attachments) {
-                await saveUserMedia({
-                    userId,
-                    type: 'ticket-media',
-                    mediaUrl: url,
-                    prompt: `Attachment for ticket ${ticketId}`,
-                });
-            }
-        }
-
         return { success: true, message: 'Ticket created successfully.' };
     } catch (error: any) {
         console.error("Error creating ticket:", error);
