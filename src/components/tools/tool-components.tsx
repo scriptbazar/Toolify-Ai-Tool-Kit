@@ -112,4 +112,5 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'youtube-video-thumbnail-downloader': dynamic(() => import('./YouTubeVideoThumbnailDownloader').then(mod => mod.YouTubeVideoThumbnailDownloader)),
   'youtube-video-title-extractor': dynamic(() => import('./YouTubeVideoTitleExtractor').then(mod => mod.YouTubeVideoTitleExtractor)),
   'unit-converter': dynamic(() => import('./UnitConverter').then(mod => mod.UnitConverter)),
+  'qr-code-scanner': dynamic(() => import('./QrCodeScanner').then(mod => mod.QrCodeScanner)),
 };
