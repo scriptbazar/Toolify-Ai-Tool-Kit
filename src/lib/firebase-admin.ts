@@ -1,41 +1,56 @@
 
-
 /**
  * @fileOverview Initializes and exports the Firebase Admin SDK instances.
  * This file handles server-side Firebase connections.
  */
 import { initializeApp, getApps, App, cert, type ServiceAccount } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
-import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
-import { z } from 'zod';
 import { getAuth, Auth } from 'firebase-admin/auth';
+import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import serviceAccount from '@/firebase-service-account-key.json';
 
-let adminApp: App;
-let adminAuth: Auth;
-let adminDb: Firestore;
-
-if (getApps().length === 0) {
-  try {
-    adminApp = initializeApp({
-      credential: cert(serviceAccount as ServiceAccount)
-    });
-    console.log("Firebase Admin SDK initialized successfully.");
-  } catch (error: any) {
-    console.error("Firebase Admin initialization error:", error.message);
-  }
-} else {
-  adminApp = getApps()[0];
+// Define a type for our global variable to ensure type safety.
+declare global {
+  var __firebaseAdminApp__: App | undefined;
 }
 
-adminAuth = getAuth(adminApp!);
-adminDb = getFirestore(adminApp!);
+function getAdminApp(): App {
+  if (global.__firebaseAdminApp__) {
+    return global.__firebaseAdminApp__;
+  }
 
-export function getAdminDb() {
+  if (getApps().length > 0) {
+    global.__firebaseAdminApp__ = getApps()[0];
+    return global.__firebaseAdminApp__!;
+  }
+
+  try {
+    const app = initializeApp({
+      credential: cert(serviceAccount as ServiceAccount)
+    });
+    global.__firebaseAdminApp__ = app;
+    console.log("Firebase Admin SDK initialized successfully.");
+    return app;
+  } catch (error: any) {
+    console.error("Firebase Admin initialization error:", error.message);
+    throw new Error("Failed to initialize Firebase Admin SDK.");
+  }
+}
+
+let adminAuth: Auth | null = null;
+let adminDb: Firestore | null = null;
+
+export function getAdminDb(): Firestore {
+    if (!adminDb) {
+        adminDb = getFirestore(getAdminApp());
+    }
     return adminDb;
 }
 
-export function getAdminAuth() {
+export function getAdminAuth(): Auth {
+    if (!adminAuth) {
+        adminAuth = getAuth(getAdminApp());
+    }
     return adminAuth;
 }
 
@@ -44,9 +59,6 @@ const MAIN_SETTINGS_DOC_ID = 'main';
 
 export async function getSettingsData(): Promise<AppSettings> {
     const db = getAdminDb();
-    if (!db) {
-        throw new Error("Firestore Admin DB is not available.");
-    }
     try {
         const docRef = db.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
         const docSnap = await docRef.get();
@@ -56,7 +68,7 @@ export async function getSettingsData(): Promise<AppSettings> {
             if (parsedData.success) {
                 return parsedData.data;
             } else {
-                console.warn("Firestore settings data is invalid, returning partial valid data.", parsedData.error);
+                console.warn("Firestore settings data is invalid, returning partial valid data.", parsedData.error.flatten());
                 return { ...AppSettingsSchema.parse({}), ...docSnap.data() };
             }
         } else {

@@ -38,11 +38,10 @@ async function getAuthenticatedAdmin(): Promise<{ user: FirebaseUser; userData: 
         const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
         
         const db = getAdminDb();
-        const userDocRef = db.collection('users').doc(decodedToken.uid);
-        const userDocSnap = await userDocRef.get();
+        const userDocSnap = await db.collection('users').doc(decodedToken.uid).get();
         
         if (!userDocSnap.exists || userDocSnap.data()?.role !== 'admin') {
-            return null;
+            return null; // Not an admin or user document doesn't exist
         }
 
         const userData = userDocSnap.data() as DocumentData;
@@ -53,8 +52,9 @@ async function getAuthenticatedAdmin(): Promise<{ user: FirebaseUser; userData: 
             userData: serializableUserData,
         };
 
-    } catch (error: any) {
-        console.error('Admin auth check error in layout:', error.code, error.message);
+    } catch (error) {
+        // If verifySessionCookie fails (e.g., cookie expired), it's not a valid session.
+        console.error('Admin auth check error in layout:', error);
         return null;
     }
 }
