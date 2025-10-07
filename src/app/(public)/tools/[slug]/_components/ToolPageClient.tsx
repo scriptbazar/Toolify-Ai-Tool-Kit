@@ -15,7 +15,6 @@ import { ReviewForm } from '@/components/tools/ReviewForm';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, Loader2, MousePointerClick, ShieldCheck, Sparkles, Star, Zap, BrainCircuit, Construction } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { toolComponents } from '@/components/tools/tool-components';
 import { addUserActivity } from '@/ai/flows/user-activity';
 
@@ -170,3 +169,4 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
 }
 
     
+
