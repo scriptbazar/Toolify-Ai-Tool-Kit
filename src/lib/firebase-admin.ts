@@ -8,49 +8,35 @@ import { initializeApp, getApps, App, cert, type ServiceAccount } from 'firebase
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import { z } from 'zod';
-import { getAuth } from 'firebase-admin/auth';
+import { getAuth, Auth } from 'firebase-admin/auth';
 import serviceAccount from '@/firebase-service-account-key.json';
 
-let adminDb: Firestore;
 let adminApp: App;
+let adminAuth: Auth;
+let adminDb: Firestore;
 
-function initializeAdmin() {
-    // Check if the app is already initialized to prevent re-initialization error
-    if (getApps().length === 0) {
-        try {
-            console.log("Initializing Firebase Admin SDK...");
-            adminApp = initializeApp({
-                credential: cert(serviceAccount as ServiceAccount)
-            });
-            adminDb = getFirestore(adminApp);
-            console.log("Firebase Admin SDK initialized successfully.");
-        } catch (error: any) {
-            console.error("Firebase Admin initialization error:", error.message);
-            // In case of error, subsequent calls will try to re-initialize
-        }
-    } else {
-        adminApp = getApps()[0];
-        adminDb = getFirestore(adminApp);
-    }
+if (getApps().length === 0) {
+  try {
+    adminApp = initializeApp({
+      credential: cert(serviceAccount as ServiceAccount)
+    });
+    console.log("Firebase Admin SDK initialized successfully.");
+  } catch (error: any) {
+    console.error("Firebase Admin initialization error:", error.message);
+  }
+} else {
+  adminApp = getApps()[0];
 }
 
-// Call initialization on module load
-initializeAdmin();
+adminAuth = getAuth(adminApp!);
+adminDb = getFirestore(adminApp!);
 
 export function getAdminDb() {
-    if (!adminDb) {
-        console.warn("Admin DB not initialized, attempting to re-initialize.");
-        initializeAdmin();
-    }
     return adminDb;
 }
 
 export function getAdminAuth() {
-    if (!adminApp) {
-        console.warn("Admin App not initialized, attempting to re-initialize.");
-        initializeAdmin();
-    }
-    return getAuth(adminApp);
+    return adminAuth;
 }
 
 const SETTINGS_COLLECTION = 'settings';
