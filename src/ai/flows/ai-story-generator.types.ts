@@ -1,14 +1,21 @@
+// Since Next.js now handles dotenv, we don't need it here for the dev server
+// if it shares the same environment. If running separately, you might need it.
+// For now, we assume a unified environment.
 
-import { z } from 'zod';
-
-export const AiStoryGeneratorInputSchema = z.object({
-  topic: z.string().describe('The topic or a short prompt for the story.'),
-  genre: z.enum(['Fantasy', 'Sci-Fi', 'Mystery', 'Horror', 'Adventure', 'Romance', 'Comedy']).describe('The genre of the story.'),
-  language: z.string().optional().describe('The language in which the story should be written.'),
-});
-export type AiStoryGeneratorInput = z.infer<typeof AiStoryGeneratorInputSchema>;
-
-export const AiStoryGeneratorOutputSchema = z.object({
-  story: z.string().describe('The AI-generated story.'),
-});
-export type AiStoryGeneratorOutput = z.infer<typeof AiStoryGeneratorOutputSchema>;
+import '@/ai/flows/user-management.ts';
+import '@/ai/flows/settings-management.ts';
+import '@/ai/flows/send-email.ts';
+import '@/ai/flows/ticket-management.ts';
+import '@/ai/flows/payment-management.ts';
+import '@/ai/flows/blog-management.ts';
+import '@/ai/flows/tool-management.ts';
+import '@/ai/flows/user-activity.ts';
+import '@/ai/flows/announcement-flow.ts';
+import '@/ai/flows/review-management.ts';
+import '@/ai/flows/backup-restore.ts';
+import '@/ai/flows/utility-actions.ts';
+import '@/ai/flows/verify-recaptcha.ts';
+import '@/ai/flows/pdf-management.ts';
+import '@/ai/flows/media-management.ts';
+import '@/ai/flows/currency-converter.ts';
+import '@/ai/flows/text-recognizer.ts';

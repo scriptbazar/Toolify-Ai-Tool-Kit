@@ -1,84 +1,21 @@
-'use server';
-/**
- * @fileOverview An AI agent that generates SEO keywords for a given topic by fetching live suggestions from Google.
- * 
- * - aiSeoKeywordGenerator - The main function for generating keywords.
- */
+// Since Next.js now handles dotenv, we don't need it here for the dev server
+// if it shares the same environment. If running separately, you might need it.
+// For now, we assume a unified environment.
 
-import { ai } from '@/ai/genkit';
-import {
-    AiSeoKeywordGeneratorInputSchema,
-    AiSeoKeywordGeneratorOutputSchema,
-    type AiSeoKeywordGeneratorInput,
-    type AiSeoKeywordGeneratorOutput,
-} from './ai-seo-keyword-generator.types';
-import { z } from 'zod';
-
-// Helper function to call Google Suggest API
-async function getGoogleSuggestions(query: string): Promise<string[]> {
-    try {
-        const response = await fetch(`http://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`);
-        if (!response.ok) {
-            return [];
-        }
-        const data = await response.json();
-        return data[1] || [];
-    } catch (error) {
-        console.error("Error fetching Google suggestions:", error);
-        return [];
-    }
-}
-
-
-export async function aiSeoKeywordGenerator(input: AiSeoKeywordGeneratorInput): Promise<AiSeoKeywordGeneratorOutput> {
-  return aiSeoKeywordGeneratorFlow(input);
-}
-
-
-// This new flow combines live data with AI for better results.
-const aiSeoKeywordGeneratorFlow = ai.defineFlow(
-  {
-    name: 'aiSeoKeywordGeneratorFlow',
-    inputSchema: AiSeoKeywordGeneratorInputSchema,
-    outputSchema: AiSeoKeywordGeneratorOutputSchema,
-  },
-  async ({ topic, targetAudience }) => {
-    // 1. Get live keywords from Google Autocomplete
-    const [
-      primarySuggestions, 
-      longTailSuggestions, 
-      secondarySuggestions
-    ] = await Promise.all([
-      getGoogleSuggestions(topic),
-      Promise.all([
-          getGoogleSuggestions(`how to ${topic}`),
-          getGoogleSuggestions(`what is ${topic}`),
-          getGoogleSuggestions(`why is ${topic}`),
-          getGoogleSuggestions(`${topic} vs`),
-          getGoogleSuggestions(`${topic} for beginners`),
-          getGoogleSuggestions(`${topic} examples`),
-          getGoogleSuggestions(`alternatives to ${topic}`),
-      ]),
-      Promise.all([
-        getGoogleSuggestions(`${topic} for ${targetAudience}`),
-        getGoogleSuggestions(`best ${topic} for`),
-      ])
-    ]);
-    
-    // Clean and prepare live data
-    const primaryKeywords = [...new Set([topic, ...primarySuggestions])].slice(0, 10);
-    const secondaryKeywords = [...new Set(secondarySuggestions.flat())].slice(0, 20);
-    const longTailKeywords = [...new Set(longTailSuggestions.flat())].slice(0, 20);
-    
-
-    if (!primaryKeywords.length && !secondaryKeywords.length && !longTailKeywords.length) {
-        throw new Error("Could not generate any keywords. Please try a different topic.");
-    }
-    
-    return {
-        primaryKeywords,
-        secondaryKeywords,
-        longTailKeywords,
-    };
-  }
-);
+import '@/ai/flows/user-management.ts';
+import '@/ai/flows/settings-management.ts';
+import '@/ai/flows/send-email.ts';
+import '@/ai/flows/ticket-management.ts';
+import '@/ai/flows/payment-management.ts';
+import '@/ai/flows/blog-management.ts';
+import '@/ai/flows/tool-management.ts';
+import '@/ai/flows/user-activity.ts';
+import '@/ai/flows/announcement-flow.ts';
+import '@/ai/flows/review-management.ts';
+import '@/ai/flows/backup-restore.ts';
+import '@/ai/flows/utility-actions.ts';
+import '@/ai/flows/verify-recaptcha.ts';
+import '@/ai/flows/pdf-management.ts';
+import '@/ai/flows/media-management.ts';
+import '@/ai/flows/currency-converter.ts';
+import '@/ai/flows/text-recognizer.ts';

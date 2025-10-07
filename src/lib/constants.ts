@@ -25,12 +25,6 @@ export interface ToolCategoryDetails {
 
 export const toolCategories: ToolCategoryDetails[] = [
   {
-    id: 'ai',
-    name: 'AI Tools',
-    description: 'Leverage the power of AI for creative and analytical tasks.',
-    Icon: Cpu,
-  },
-  {
     id: 'text',
     name: 'Text Tools',
     description: 'Manipulate and analyze text with ease.',

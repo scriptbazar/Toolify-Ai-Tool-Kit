@@ -1,20 +1,21 @@
-import { z } from 'zod';
+// Since Next.js now handles dotenv, we don't need it here for the dev server
+// if it shares the same environment. If running separately, you might need it.
+// For now, we assume a unified environment.
 
-export const AiWebContentSummarizerInputSchema = z.object({
-  url: z.string().url({ message: "Please enter a valid URL." }).describe('The URL of the web page to analyze.'),
-});
-export type AiWebContentSummarizerInput = z.infer<typeof AiWebContentSummarizerInputSchema>;
-
-export const AiWebContentSummarizerOutputSchema = z.object({
-  summary: z.string().describe('A concise, one-paragraph summary of the content.'),
-  coreConcepts: z.array(z.string()).describe('A list of the 3-5 most important concepts discussed.'),
-  keyTakeaways: z.array(z.string()).describe('A list of the main takeaways or conclusions from the content.'),
-  targetAudience: z.string().describe('The intended target audience for the content.'),
-  toneOfVoice: z.string().describe('The tone and style of the writing.'),
-  seoAnalysis: z.object({
-    primaryKeywords: z.array(z.string()).describe('A list of the primary SEO keywords targeted.'),
-    lsiKeywords: z.array(z.string()).describe('A list of related LSI keywords.'),
-  }).describe('An analysis of the content\'s SEO elements.'),
-  finalVerdict: z.string().describe('A brief, one-sentence final verdict on the content.'),
-});
-export type AiWebContentSummarizerOutput = z.infer<typeof AiWebContentSummarizerOutputSchema>;
+import '@/ai/flows/user-management.ts';
+import '@/ai/flows/settings-management.ts';
+import '@/ai/flows/send-email.ts';
+import '@/ai/flows/ticket-management.ts';
+import '@/ai/flows/payment-management.ts';
+import '@/ai/flows/blog-management.ts';
+import '@/ai/flows/tool-management.ts';
+import '@/ai/flows/user-activity.ts';
+import '@/ai/flows/announcement-flow.ts';
+import '@/ai/flows/review-management.ts';
+import '@/ai/flows/backup-restore.ts';
+import '@/ai/flows/utility-actions.ts';
+import '@/ai/flows/verify-recaptcha.ts';
+import '@/ai/flows/pdf-management.ts';
+import '@/ai/flows/media-management.ts';
+import '@/ai/flows/currency-converter.ts';
+import '@/ai/flows/text-recognizer.ts';

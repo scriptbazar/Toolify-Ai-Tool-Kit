@@ -1,38 +1,21 @@
+// Since Next.js now handles dotenv, we don't need it here for the dev server
+// if it shares the same environment. If running separately, you might need it.
+// For now, we assume a unified environment.
 
-'use server';
-
-/**
- * @fileOverview A flow for converting speech to text using Google's Gemini model.
- */
-import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { googleAI } from '@genkit-ai/googleai';
-
-
-const SpeechToTextInputSchema = z.object({
-  audioDataUri: z.string().describe('The audio file as a data URI.'),
-});
-export type SpeechToTextInput = z.infer<typeof SpeechToTextInputSchema>;
-
-const SpeechToTextOutputSchema = z.object({
-  transcribedText: z.string().describe('The transcribed text from the audio.'),
-});
-export type SpeechToTextOutput = z.infer<typeof SpeechToTextOutputSchema>;
-
-
-export async function speechToText(input: SpeechToTextInput): Promise<SpeechToTextOutput> {
-    const { text } = await ai.transcribe({
-      model: 'googleai/gemini-1.5-flash-latest',
-      media: {
-        url: input.audioDataUri,
-      },
-    });
-
-    if (!text) {
-      throw new Error('The model did not return any transcribed text.');
-    }
-
-    return {
-      transcribedText: text,
-    };
-}
+import '@/ai/flows/user-management.ts';
+import '@/ai/flows/settings-management.ts';
+import '@/ai/flows/send-email.ts';
+import '@/ai/flows/ticket-management.ts';
+import '@/ai/flows/payment-management.ts';
+import '@/ai/flows/blog-management.ts';
+import '@/ai/flows/tool-management.ts';
+import '@/ai/flows/user-activity.ts';
+import '@/ai/flows/announcement-flow.ts';
+import '@/ai/flows/review-management.ts';
+import '@/ai/flows/backup-restore.ts';
+import '@/ai/flows/utility-actions.ts';
+import '@/ai/flows/verify-recaptcha.ts';
+import '@/ai/flows/pdf-management.ts';
+import '@/ai/flows/media-management.ts';
+import '@/ai/flows/currency-converter.ts';
+import '@/ai/flows/text-recognizer.ts';

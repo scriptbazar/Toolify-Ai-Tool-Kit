@@ -1,20 +1,21 @@
+// Since Next.js now handles dotenv, we don't need it here for the dev server
+// if it shares the same environment. If running separately, you might need it.
+// For now, we assume a unified environment.
 
-import { z } from 'zod';
-
-export const AiRewriterInputSchema = z.object({
-  textToRewrite: z.string().describe('The original text provided by the user.'),
-  goal: z.enum([
-      'Improve Clarity', 
-      'Make it Formal', 
-      'Make it Casual', 
-      'Fix Grammar & Spelling', 
-      'Shorten', 
-      'Expand'
-    ]).describe('The user\'s objective for the rewrite.'),
-});
-export type AiRewriterInput = z.infer<typeof AiRewriterInputSchema>;
-
-export const AiRewriterOutputSchema = z.object({
-  rewrittenText: z.string().describe('The AI-generated rewritten text.'),
-});
-export type AiRewriterOutput = z.infer<typeof AiRewriterOutputSchema>;
+import '@/ai/flows/user-management.ts';
+import '@/ai/flows/settings-management.ts';
+import '@/ai/flows/send-email.ts';
+import '@/ai/flows/ticket-management.ts';
+import '@/ai/flows/payment-management.ts';
+import '@/ai/flows/blog-management.ts';
+import '@/ai/flows/tool-management.ts';
+import '@/ai/flows/user-activity.ts';
+import '@/ai/flows/announcement-flow.ts';
+import '@/ai/flows/review-management.ts';
+import '@/ai/flows/backup-restore.ts';
+import '@/ai/flows/utility-actions.ts';
+import '@/ai/flows/verify-recaptcha.ts';
+import '@/ai/flows/pdf-management.ts';
+import '@/ai/flows/media-management.ts';
+import '@/ai/flows/currency-converter.ts';
+import '@/ai/flows/text-recognizer.ts';
