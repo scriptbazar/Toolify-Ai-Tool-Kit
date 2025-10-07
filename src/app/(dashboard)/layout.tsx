@@ -3,8 +3,8 @@ import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { DashboardLayoutClient } from '@/app/(dashboard)/_components/DashboardLayoutClient';
-import { type User as FirebaseUser } from 'firebase/auth';
-import { type DocumentData, Timestamp } from 'firebase-admin/firestore';
+import type { User as FirebaseUser } from 'firebase/auth';
+import type { DocumentData, Timestamp } from 'firebase-admin/firestore';
 import React from 'react';
 
 // Helper function to safely convert Timestamps to ISO strings
@@ -76,10 +76,11 @@ export default async function UserPanelLayout({
         redirect('/admin/dashboard');
     }
 
-    // Pass the necessary props to the client layout, which will then pass them to the page
+    // Pass user and userData to the client layout for UI elements like the avatar/dropdown.
+    // The `children` (the page) will fetch its own data.
     return (
         <DashboardLayoutClient user={authData.user} userData={authData.userData}>
-            {React.cloneElement(children as React.ReactElement, { user: authData.user, userData: authData.userData })}
+            {children}
         </DashboardLayoutClient>
     );
 }

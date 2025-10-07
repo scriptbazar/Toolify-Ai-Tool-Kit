@@ -1,13 +1,13 @@
 
-
 import { getSettings } from '@/ai/flows/settings-management';
 import { getAnnouncementsForUser } from '@/ai/flows/announcement-flow';
 import { DashboardClient } from './_components/DashboardClient';
 import { unstable_cache as cache } from 'next/cache';
-import { getAdminDb } from '@/lib/firebase-admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { Timestamp, getCountFromServer, type DocumentData } from 'firebase-admin/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
-
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 const getDashboardData = cache(async (uid: string) => {
     const adminDb = getAdminDb();
@@ -24,7 +24,7 @@ const getDashboardData = cache(async (uid: string) => {
       getCountFromServer(activityQuery),
     ]);
   
-    const userData = userDocSnap.exists() ? userDocSnap.data() : null;
+    const userData = userDocSnap.exists ? userDocSnap.data() : null;
     
     // Convert Firestore Timestamps to serializable format (ISO strings)
     const serializableProfile = userData ? {
@@ -50,16 +50,27 @@ const getDashboardData = cache(async (uid: string) => {
     };
   }, ['dashboard-data'], { revalidate: 300 }); // Cache for 5 minutes
 
+// Helper function to get user from cookie, specific to this Server Component
+async function getPageUser(): Promise<FirebaseUser | null> {
+    const sessionCookie = cookies().get('session')?.value;
+    if (!sessionCookie) return null;
 
-// This page now receives user and userData from the server-side layout
-export default async function UserDashboard(props: { user: FirebaseUser, userData: DocumentData | null }) {
-  const { user } = props;
+    try {
+        const adminAuth = getAdminAuth();
+        const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+        return decodedToken as unknown as FirebaseUser;
+    } catch (error) {
+        return null;
+    }
+}
+
+// This is a Server Component and will fetch its own data.
+export default async function UserDashboard() {
+  const user = await getPageUser();
   
-  // Ensure user object exists before proceeding
   if (!user) {
-    // This should theoretically not be reached if the layout redirects correctly,
-    // but it's good practice for robustness.
-    return <div>Please log in to view your dashboard.</div>;
+    // This should not happen if the layout's redirect works, but it's a safeguard.
+    redirect('/login');
   }
   
   const { profile, plan, announcements, stats } = await getDashboardData(user.uid);
