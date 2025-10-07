@@ -58,37 +58,26 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
-import { useEffect } from 'react';
 import { AdminSidebarNav } from '@/components/admin/AdminSidebarNav';
-import { useAuth } from '@/hooks/use-auth';
 import type { User as FirebaseUser } from 'firebase/auth';
+import type { DocumentData } from 'firebase-admin/firestore';
 
 
 // The actual client-side layout component
 export function AdminLayoutClient({
   children,
-  user: serverUser
+  user,
+  userData,
 }: {
   children: React.ReactNode;
   user: FirebaseUser | null;
+  userData: DocumentData | null;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
-  const { user, userData, loading, isAdmin } = useAuth();
   
   const isLoginPage = pathname === '/admin/login';
-
-  useEffect(() => {
-    if (!loading) {
-      if (!user || !isAdmin) {
-        if (!isLoginPage) {
-          router.replace('/admin/login');
-        }
-      }
-    }
-  }, [user, isAdmin, loading, router, isLoginPage]);
-
 
   const handleLogout = async () => {
     try {
@@ -114,7 +103,7 @@ export function AdminLayoutClient({
     return <>{children}</>;
   }
   
-  if (loading || !user) {
+  if (!user) {
     return (
         <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
           <Logo className="h-16 w-16 animate-pulse" />
