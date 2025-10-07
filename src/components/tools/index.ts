@@ -88,7 +88,6 @@ export { RotatePdf } from './RotatePdf';
 export { SchemaGenerator } from './SchemaGenerator';
 export { SerpChecker } from './SerpChecker';
 export { Sha256HashGenerator } from './Sha256HashGenerator';
-export { SqlFormatter } from './SqlFormatter';
 export { SrmToCgpaCalculator } from './SrmToCgpaCalculator';
 export { TextEncryptionDecryption } from './TextEncryptionDecryption';
 export { TextRepeater } from './TextRepeater';
@@ -131,3 +130,4 @@ export { UnitConverter } from './UnitConverter';
 
 
     
+

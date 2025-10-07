@@ -88,7 +88,6 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'schema-generator': dynamic(() => import('./SchemaGenerator').then(mod => mod.SchemaGenerator)),
   'serp-checker': dynamic(() => import('./SerpChecker').then(mod => mod.SerpChecker)),
   'sha256-hash-generator': dynamic(() => import('./Sha256HashGenerator').then(mod => mod.Sha256HashGenerator)),
-  'sql-formatter': dynamic(() => import('./SqlFormatter').then(mod => mod.SqlFormatter)),
   'srm-to-cgpa-calculator': dynamic(() => import('./SrmToCgpaCalculator').then(mod => mod.SrmToCgpaCalculator)),
   'text-encryption-and-decryption': dynamic(() => import('./TextEncryptionDecryption').then(mod => mod.TextEncryptionDecryption)),
   'text-repeater': dynamic(() => import('./TextRepeater').then(mod => mod.TextRepeater)),
@@ -125,3 +124,4 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
 
 
     
+
