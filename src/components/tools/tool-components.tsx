@@ -68,7 +68,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'pdf-organizer': dynamic(() => import('./PdfOrganizer').then(mod => mod.PdfOrganizer)),
   'pdf-page-counter': dynamic(() => import('./PdfPageCounter').then(mod => mod.PdfPageCounter)),
   'pdf-page-numberer': dynamic(() => import('./PdfPageNumberer').then(mod => mod.PdfPageNumberer)),
-  'pdf-page-remover': dynamic(() => import('./PdfPageRemover').then(mod => mod.PdfPageRemover)),
+  'pdf-page-remover': dynamic(() => import('./PdfPageRemover').then(mod => mod.PdfPageReorder)),
   'pdf-page-reorder': dynamic(() => import('./PdfPageReorder').then(mod => mod.PdfPageReorder)),
   'pdf-signer': dynamic(() => import('./PdfSigner').then(mod => mod.PdfSigner)),
   'pdf-splitter': dynamic(() => import('./PdfSplitter').then(mod => mod.PdfSplitter)),
