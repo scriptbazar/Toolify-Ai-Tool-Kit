@@ -11,6 +11,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'age-calculator': dynamic(() => import('./AgeCalculator').then(mod => mod.AgeCalculator)),
   'amazon-shipping-label-cropper': dynamic(() => import('./AmazonShippingLabelCropper').then(mod => mod.AmazonShippingLabelCropper)),
   'barcode-generator': dynamic(() => import('./BarcodeGenerator').then(mod => mod.BarcodeGenerator)),
+  'barcode-scanner': dynamic(() => import('./BarcodeScanner').then(mod => mod.BarcodeScanner)),
   'base64-converter': dynamic(() => import('./Base64Converter').then(mod => mod.Base64Converter)),
   'binary-to-text': dynamic(() => import('./BinaryToText').then(mod => mod.BinaryToText)),
   'bmi-calculator': dynamic(() => import('./BmiCalculator').then(mod => mod.BmiCalculator)),
