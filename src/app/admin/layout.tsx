@@ -37,22 +37,13 @@ async function getAuthenticatedAdmin(): Promise<{ user: FirebaseUser; userData: 
 
     try {
         const adminAuth = getAdminAuth();
-        if (!adminAuth) {
-            console.error("Admin auth is not initialized");
-            return null;
-        }
         const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
         
         const db = getAdminDb();
-        if (!db) {
-            console.error("Admin DB is not initialized");
-            return null;
-        }
-        
         const userDocRef = db.collection('users').doc(decodedToken.uid);
         const userDocSnap = await userDocRef.get();
 
-        if (userDocSnap.exists()) {
+        if (userDocSnap.exists) {
             const userData = userDocSnap.data() as DocumentData;
             
             if (userData.role === 'admin') {
@@ -64,10 +55,13 @@ async function getAuthenticatedAdmin(): Promise<{ user: FirebaseUser; userData: 
             }
         }
         
+        // If document doesn't exist OR user is not an admin, deny access.
         console.log(`User ${decodedToken.uid} is not an admin or document does not exist.`);
         return null;
+
     } catch (error: any) {
         console.error('Admin auth check error in layout:', error.code, error.message);
+        // On any error (e.g., expired cookie), deny access.
         return null;
     }
 }
