@@ -75,6 +75,7 @@
     "react-signature-canvas": "^1.0.6",
     "react-syntax-highlighter": "^15.5.0",
     "recharts": "^2.15.1",
+    "sql-formatter": "^15.3.2",
     "stripe": "^17.1.0",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",

@@ -8,42 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Copy, Trash2, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-
-const formatSql = (sql: string, indent: string): string => {
-  let formatted = sql
-    .replace(/\s+/g, ' ')
-    .replace(/\s*([,()=<>!])\s*/g, ' $1 ');
-
-  const keywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'ON', 'AND', 'OR', 'UPDATE', 'SET', 'DELETE', 'INSERT INTO', 'VALUES'];
-  
-  keywords.forEach(keyword => {
-    formatted = formatted.replace(new RegExp(`\\b${keyword}\\b`, 'gi'), `\n${keyword}`);
-  });
-
-  let lines = formatted.split('\n');
-  let indentLevel = 0;
-  let newLines = [];
-
-  for (const line of lines) {
-    let trimmedLine = line.trim();
-    if (trimmedLine.startsWith(')')) {
-      indentLevel = Math.max(0, indentLevel - 1);
-    }
-    
-    newLines.push(indent.repeat(indentLevel) + trimmedLine);
-
-    if (trimmedLine.endsWith('(')) {
-      indentLevel++;
-    }
-  }
-
-  return newLines.join('\n').trim();
-}
+import { format } from 'sql-formatter';
 
 export function SqlFormatter() {
-  const [sqlInput, setSqlInput] = useState('');
+  const [sqlInput, setSqlInput] = useState('SELECT * FROM users WHERE id = 1');
   const [formattedSql, setFormattedSql] = useState('');
-  const [dialect, setDialect] = useState('sql');
+  const [dialect, setDialect] = useState<'sql' | 'mysql' | 'postgresql' | 'tsql'>('sql');
   const [indentation, setIndentation] = useState('2');
   const { toast } = useToast();
 
@@ -52,9 +22,17 @@ export function SqlFormatter() {
       toast({ title: 'Input is empty!', description: 'Please enter some SQL to format.', variant: 'destructive' });
       return;
     }
-    const indentString = ' '.repeat(parseInt(indentation));
-    const result = formatSql(sqlInput, indentString);
-    setFormattedSql(result);
+    try {
+        const result = format(sqlInput, {
+            language: dialect,
+            tabWidth: parseInt(indentation),
+            keywordCase: 'upper',
+        });
+        setFormattedSql(result);
+    } catch (error) {
+        console.error("SQL Formatting Error:", error);
+        toast({ title: 'Formatting Error', description: 'Could not format the SQL. Please check for syntax errors.', variant: 'destructive'});
+    }
   };
 
   const handleCopy = () => {
@@ -73,7 +51,7 @@ export function SqlFormatter() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="dialect-select">SQL Dialect</Label>
-            <Select value={dialect} onValueChange={setDialect}>
+            <Select value={dialect} onValueChange={(val) => setDialect(val as any)}>
               <SelectTrigger id="dialect-select"><SelectValue/></SelectTrigger>
               <SelectContent>
                 <SelectItem value="sql">Standard SQL</SelectItem>

@@ -8,14 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Copy, Trash2, Shuffle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { wordList } from '@/lib/word-list';
 
-// A small list of common English words for demonstration
-const wordList = [
-  'apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 'honeydew',
-  'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'papaya', 'quince', 'raspberry',
-  'strawberry', 'tangerine', 'ugli', 'vanilla', 'watermelon', 'xigua', 'yuzu', 'zucchini',
-  'cat', 'dog', 'house', 'tree', 'sun', 'moon', 'star', 'book', 'pen', 'computer'
-];
 
 export function RandomWordGenerator() {
   const [count, setCount] = useState(10);
