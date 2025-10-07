@@ -17,7 +17,7 @@ async function getAuthenticatedUser(): Promise<{ user: FirebaseUser; userData: D
         const userDocRef = getAdminDb().collection('users').doc(decodedToken.uid);
         const userDocSnap = await userDocRef.get();
 
-        if (userDocSnap.exists()) {
+        if (userDocSnap.exists) {
             const userData = userDocSnap.data() as DocumentData;
             return {
                 user: decodedToken as unknown as FirebaseUser,
