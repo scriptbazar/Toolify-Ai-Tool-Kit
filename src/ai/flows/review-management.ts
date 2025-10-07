@@ -7,7 +7,7 @@
  */
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp }from 'firebase-admin/firestore';
-import { type Review, ReviewSchema, AddReviewInputSchema, AddReviewInput, ReviewStatusSchema, type ReviewStatus } from './review-management.types';
+import { z } from 'zod';
 import { unstable_cache as cache } from 'next/cache';
 
 interface GetReviewsOptions {
@@ -15,6 +15,36 @@ interface GetReviewsOptions {
     limit?: number;
     status?: ReviewStatus;
 }
+
+
+export const ReviewStatusSchema = z.enum(['approved', 'pending', 'rejected']);
+export type ReviewStatus = z.infer<typeof ReviewStatusSchema>;
+
+export const ReviewSchema = z.object({
+  id: z.string(),
+  authorId: z.string(),
+  authorName: z.string(),
+  authorAvatar: z.string().url(),
+  comment: z.string(),
+  toolId: z.string(),
+  toolName: z.string(),
+  rating: z.number().min(1).max(5),
+  submittedOn: z.string().datetime({ offset: true }),
+  status: ReviewStatusSchema,
+});
+export type Review = z.infer<typeof ReviewSchema>;
+
+export const AddReviewInputSchema = ReviewSchema.pick({
+    authorId: true,
+    authorName: true,
+    authorAvatar: true,
+    comment: true,
+    toolId: true,
+    toolName: true,
+    rating: true,
+});
+export type AddReviewInput = z.infer<typeof AddReviewInputSchema>;
+
 
 
 /**
