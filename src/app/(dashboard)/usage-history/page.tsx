@@ -82,7 +82,7 @@ export default function UsageHistoryPage() {
     return Object.entries(toolCounts)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 7); // Show top 7 tools
+      .slice(0, 10); // Show top 10 tools
   }, [activities]);
 
   const paginatedActivities = useMemo(() => {
@@ -136,21 +136,16 @@ export default function UsageHistoryPage() {
             <CardContent>
               {toolUsageData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={toolUsageData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
-                    <XAxis
+                  <BarChart data={toolUsageData} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 20 }}>
+                    <XAxis type="number" hide />
+                    <YAxis
                       dataKey="name"
-                      stroke="#888888"
-                      fontSize={12}
+                      type="category"
+                      width={150}
                       tickLine={false}
                       axisLine={false}
-                      angle={-45}
-                      textAnchor="end"
-                    />
-                    <YAxis 
-                       stroke="#888888"
-                       fontSize={12}
-                       tickLine={false}
-                       axisLine={false}
+                      stroke="#888888"
+                      fontSize={12}
                     />
                     <Tooltip
                       cursor={{ fill: 'hsl(var(--muted))' }}
@@ -165,7 +160,7 @@ export default function UsageHistoryPage() {
                         return null;
                       }}
                     />
-                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
