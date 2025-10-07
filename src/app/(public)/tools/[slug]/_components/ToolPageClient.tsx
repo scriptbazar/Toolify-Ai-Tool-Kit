@@ -167,6 +167,3 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
         </div>
     );
 }
-
-    
-
