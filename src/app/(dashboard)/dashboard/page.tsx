@@ -1,20 +1,12 @@
 
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, CreditCard, DollarSign, Users, ArrowRight, Newspaper, Package, Star, Megaphone } from "lucide-react";
 import { getSettings } from '@/ai/flows/settings-management';
-import type { Plan } from '@/ai/flows/settings-management.types';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDesc, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { getAnnouncementsForUser } from '@/ai/flows/announcement-flow';
-import { type Announcement } from '@/ai/flows/announcement-flow.types';
 import { DashboardClient } from './_components/DashboardClient';
-import { unstable_cache as cache, revalidatePath } from 'next/cache';
-import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
-import { cookies } from 'next/headers';
-import { Timestamp, getCountFromServer } from 'firebase-admin/firestore';
+import { unstable_cache as cache } from 'next/cache';
+import { getAdminDb } from '@/lib/firebase-admin';
+import { Timestamp, getCountFromServer, type DocumentData } from 'firebase-admin/firestore';
+import type { User as FirebaseUser } from 'firebase/auth';
 
 
 const getDashboardData = cache(async (uid: string) => {
@@ -59,26 +51,10 @@ const getDashboardData = cache(async (uid: string) => {
   }, ['dashboard-data'], { revalidate: 300 }); // Cache for 5 minutes
 
 
-export default async function UserDashboard() {
-  const cookieStore = cookies();
-  const sessionCookie = cookieStore.get('session')?.value;
-
-  if (!sessionCookie) {
-       return <div className="flex items-center justify-center h-full"><p>Please log in to view your dashboard.</p></div>;
-  }
+// This page now receives user and userData from the server-side layout
+export default async function UserDashboard({ user, userData }: { user: FirebaseUser, userData: DocumentData | null }) {
   
-  let decodedToken;
-  try {
-    const adminAuth = getAdminAuth();
-    decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-  } catch (error) {
-    console.error('Error verifying session cookie:', error);
-    return <div className="flex items-center justify-center h-full"><p>Your session is invalid. Please log in again.</p></div>;
-  }
-  
-  const uid = decodedToken.uid;
-  
-  const { profile, plan, announcements, stats } = await getDashboardData(uid);
+  const { profile, plan, announcements, stats } = await getDashboardData(user.uid);
   const welcomeMessage = profile?.firstName ? `Welcome Back, ${profile.firstName}!` : "User Dashboard";
 
   return (
@@ -88,8 +64,7 @@ export default async function UserDashboard() {
         plan={plan as any}
         stats={stats}
         announcements={announcements}
-        uid={uid}
+        uid={user.uid}
     />
   );
 }
-
