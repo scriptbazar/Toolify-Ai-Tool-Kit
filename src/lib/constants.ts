@@ -79,3 +79,5 @@ export const toolCategories: ToolCategoryDetails[] = [
     Icon: GanttChartSquare,
   }
 ];
+
+    
