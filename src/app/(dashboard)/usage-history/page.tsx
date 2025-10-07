@@ -83,7 +83,7 @@ export default function UsageHistoryPage() {
     return Object.entries(toolCounts)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 15); // Show top 15 tools
+      .slice(0, 20); // Show top 20 tools
   }, [activities]);
 
   const paginatedActivities = useMemo(() => {
@@ -131,7 +131,7 @@ export default function UsageHistoryPage() {
             <CardHeader>
               <CardTitle>Usage Overview</CardTitle>
               <CardDescription>
-                Your top 15 tools based on your last 100 activities.
+                Your top 20 tools based on your last 100 activities.
               </CardDescription>
             </CardHeader>
             <CardContent>
