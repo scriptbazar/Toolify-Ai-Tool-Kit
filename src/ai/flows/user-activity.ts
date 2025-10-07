@@ -74,7 +74,7 @@ export async function addUserActivity(userId: string, type: UserActivityType, de
  * @param count - The number of activities to fetch.
  * @returns A promise that resolves to an array of user activities.
  */
-export async function getUserActivity(userId: string, count = 25): Promise<UserActivity[]> {
+export async function getUserActivity(userId: string, count = 100): Promise<UserActivity[]> {
   const adminDb = getAdminDb();
   if (!userId) return [];
   try {

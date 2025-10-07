@@ -130,15 +130,15 @@ export default function UsageHistoryPage() {
             <CardHeader>
               <CardTitle>Usage Overview</CardTitle>
               <CardDescription>
-                Your top tools based on usage in your recent activities.
+                Your top 10 tools based on your last 100 activities.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {toolUsageData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                   <BarChart data={toolUsageData} margin={{ top: 5, right: 20, left: 10, bottom: 20 }}>
-                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                  <BarChart data={toolUsageData} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 20 }}>
+                    <XAxis type="number" hide />
+                    <YAxis dataKey="name" type="category" width={150} tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
                     <Tooltip
                       cursor={{ fill: 'hsl(var(--muted))' }}
                       content={({ active, payload }) => {
@@ -152,7 +152,7 @@ export default function UsageHistoryPage() {
                         return null;
                       }}
                     />
-                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} layout="vertical" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
