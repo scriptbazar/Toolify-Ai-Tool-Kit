@@ -8,6 +8,8 @@ import { z } from 'zod';
 import { ai } from '@/ai/genkit';
 import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
+import { type SplitPdfInput, type SplitPdfOutput, SplitPdfInputSchema } from './pdf-management.types';
+
 
 // Helper to parse page ranges e.g., "1-5, 8, 10-12" into an array of zero-based indices
 const parsePageRanges = (rangesStr: string, totalPages: number): number[][] => {
@@ -29,21 +31,6 @@ const parsePageRanges = (rangesStr: string, totalPages: number): number[][] => {
         return [];
     }).filter(range => range.length > 0);
 };
-
-const SplitPdfInputSchema = z.object({
-  pdfDataUri: z.string().describe("The PDF file to be split, as a data URI."),
-  splitMode: z.enum(['ranges', 'fixed', 'extract']),
-  ranges: z.string().optional().describe("Comma-separated page ranges (e.g., '1-5, 8, 11-12'). Used in 'ranges' mode."),
-  fixedRangeSize: z.number().int().min(1).optional().describe("Number of pages per file. Used in 'fixed' mode."),
-  extractPages: z.string().optional().describe("Comma-separated list of pages to extract into a single file. Used in 'extract' mode."),
-});
-export type SplitPdfInput = z.infer<typeof SplitPdfInputSchema>;
-
-const SplitPdfOutputSchema = z.object({
-  zipDataUri: z.string().describe("A data URI of the ZIP file containing the split PDFs."),
-});
-export type SplitPdfOutput = z.infer<typeof SplitPdfOutputSchema>;
-
 
 export async function splitPdf(input: SplitPdfInput): Promise<SplitPdfOutput> {
     const { pdfDataUri, splitMode, ranges, fixedRangeSize, extractPages } = SplitPdfInputSchema.parse(input);

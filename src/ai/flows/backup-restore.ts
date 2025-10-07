@@ -6,15 +6,12 @@
  */
 
 import { FirestoreAdminClient } from '@google-cloud/firestore';
+import type { BackupInfo } from './backup-restore.types';
 
 const firestoreAdminClient = new FirestoreAdminClient();
 const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 const bucketName = `gs://${projectId}-backups`;
 
-export type BackupInfo = {
-    id: string;
-    updated: string;
-}
 
 /**
  * Creates a new backup of specified Firestore collections.

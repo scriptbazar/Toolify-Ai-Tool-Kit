@@ -14,43 +14,12 @@
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { z } from 'zod';
 import { getAdminDb } from '@/lib/firebase-admin';
-
-
-export const UpdateUserRoleInputSchema = z.object({
-  userId: z.string().describe("The ID of the user to update."),
-  newRole: z.enum(['user', 'admin']).describe("The new role to assign to the user."),
-});
-export type UpdateUserRoleInput = z.infer<typeof UpdateUserRoleInputSchema>;
-
-export const AddLeadUserInputSchema = z.object({
-  name: z.string().describe("The name of the lead."),
-  email: z.string().email().describe("The email of the lead."),
-  message: z.string().optional().describe("The initial message from the lead."),
-});
-export type AddLeadUserInput = z.infer<typeof AddLeadUserInputSchema>;
-
-export const ReferralStatusSchema = z.enum(['not_joined', 'pending', 'approved', 'rejected']);
-
-export const ReferralRequestSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string().email(),
-    avatar: z.string().url().or(z.literal('')),
-    requestDate: z.string().datetime(),
-    status: z.literal('pending'),
-});
-export type ReferralRequest = z.infer<typeof ReferralRequestSchema>;
-
-export const AffiliateSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string().email(),
-    avatar: z.string().url().or(z.literal('')),
-    referrals: z.number().default(0),
-    earnings: z.number().default(0),
-    status: z.enum(['Active', 'Inactive']).default('Active'),
-});
-export type Affiliate = z.infer<typeof AffiliateSchema>;
+import { 
+    UpdateUserRoleInputSchema, 
+    AddLeadUserInputSchema,
+    type UpdateUserRoleInput,
+    type AddLeadUserInput,
+} from './user-management.schemas';
 
 
 export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ success: boolean; message: string }> {
@@ -253,7 +222,7 @@ export async function requestToJoinAffiliateProgram(userId: string): Promise<{ s
 /**
  * Fetches all users who have a 'pending' affiliate status.
  */
-export async function getAffiliateRequests(): Promise<ReferralRequest[]> {
+export async function getAffiliateRequests(): Promise<any[]> {
   const adminDb = getAdminDb();
   if (!adminDb) return [];
   try {
@@ -263,14 +232,14 @@ export async function getAffiliateRequests(): Promise<ReferralRequest[]> {
       
     return snapshot.docs.map(doc => {
         const data = doc.data();
-        return ReferralRequestSchema.parse({
+        return {
             id: doc.id,
             name: `${data.firstName} ${data.lastName}`,
             email: data.email,
             avatar: data.avatar || `https://i.pravatar.cc/150?u=${data.email}`,
             requestDate: (data.referralRequestDate as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
             status: data.affiliateStatus
-        });
+        };
     });
   } catch (error) {
     console.error("Error fetching affiliate requests:", error);
@@ -281,7 +250,7 @@ export async function getAffiliateRequests(): Promise<ReferralRequest[]> {
 /**
  * Fetches all users who have an 'approved' affiliate status.
  */
-export async function getAffiliates(): Promise<Affiliate[]> {
+export async function getAffiliates(): Promise<any[]> {
     const adminDb = getAdminDb();
     if (!adminDb) return [];
     try {
@@ -291,7 +260,7 @@ export async function getAffiliates(): Promise<Affiliate[]> {
 
         return snapshot.docs.map(doc => {
             const data = doc.data();
-            return AffiliateSchema.parse({
+            return {
                 id: doc.id,
                 name: `${data.firstName} ${data.lastName}`,
                 email: data.email,
@@ -300,7 +269,7 @@ export async function getAffiliates(): Promise<Affiliate[]> {
                 referrals: data.referrals || 0, 
                 earnings: data.earnings || 0.00,
                 status: 'Active', 
-            });
+            };
         });
     } catch (error) {
         console.error("Error fetching affiliates:", error);
