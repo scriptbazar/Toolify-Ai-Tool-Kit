@@ -1,4 +1,5 @@
 
+'use client';
 
 import dynamic from 'next/dynamic';
 
@@ -73,7 +74,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'pdf-signer': dynamic(() => import('./PdfSigner').then(mod => mod.PdfSigner)),
   'pdf-splitter': dynamic(() => import('./PdfSplitter').then(mod => mod.PdfSplitter)),
   'pdf-to-jpg': dynamic(() => import('./PdfToJpg').then(mod => mod.PdfToJpg)),
-  'pdf-to-word': dynamic(() => import('./WordToPdf').then(mod => mod.WordToPdf)),
+  'pdf-to-word': dynamic(() => import('./PdfToWord').then(mod => mod.PdfToWord)),
   'percentage-calculator': dynamic(() => import('./PercentageCalculator').then(mod => mod.PercentageCalculator)),
   'percentage-to-cgpa-converter': dynamic(() => import('./PercentageToCgpaConverter').then(mod => mod.PercentageToCgpaConverter)),
   'prn-to-pdf': dynamic(() => import('./PRNToPDF').then(mod => mod.PRNToPDF)),
@@ -112,18 +113,3 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'youtube-video-title-extractor': dynamic(() => import('./YouTubeVideoTitleExtractor').then(mod => mod.YouTubeVideoTitleExtractor)),
   'unit-converter': dynamic(() => import('./UnitConverter').then(mod => mod.UnitConverter)),
 };
-
-    
-
-
-
-
-
-
-
-
-
-    
-
-
-
