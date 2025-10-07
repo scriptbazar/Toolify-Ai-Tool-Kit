@@ -4,7 +4,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { DashboardLayoutClient } from '@/app/(dashboard)/_components/DashboardLayoutClient';
 import type { User as FirebaseUser } from 'firebase/auth';
-import type { DocumentData, Timestamp } from 'firebase-admin/firestore';
+import type { DocumentData } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 import React from 'react';
 
 // Helper function to safely convert Timestamps to ISO strings
