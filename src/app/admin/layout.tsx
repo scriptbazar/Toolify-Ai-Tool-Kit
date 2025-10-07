@@ -6,6 +6,27 @@ import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { DocumentData } from 'firebase-admin/firestore';
 import React from 'react';
+import { Timestamp } from 'firebase-admin/firestore';
+
+// Helper function to safely convert Timestamps to ISO strings
+function serializeTimestamps(obj: any): any {
+  if (!obj) return obj;
+  if (obj instanceof Timestamp) {
+    return obj.toDate().toISOString();
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(serializeTimestamps);
+  }
+  if (typeof obj === 'object') {
+    const newObj: { [key: string]: any } = {};
+    for (const key in obj) {
+      newObj[key] = serializeTimestamps(obj[key]);
+    }
+    return newObj;
+  }
+  return obj;
+}
+
 
 async function getAuthenticatedAdmin(): Promise<{ user: FirebaseUser; userData: DocumentData | null; } | null> {
     const sessionCookie = cookies().get('session')?.value;
@@ -33,21 +54,20 @@ async function getAuthenticatedAdmin(): Promise<{ user: FirebaseUser; userData: 
 
         if (userDocSnap.exists()) {
             const userData = userDocSnap.data() as DocumentData;
-            // Ensure this is an admin user
+            
             if (userData.role === 'admin') {
+                const serializableUserData = serializeTimestamps(userData);
                 return {
                     user: decodedToken as unknown as FirebaseUser,
-                    userData,
+                    userData: serializableUserData,
                 };
             }
         }
-        // If user doc doesn't exist or user is not an admin
+        
         console.log(`User ${decodedToken.uid} is not an admin or document does not exist.`);
         return null;
     } catch (error: any) {
         console.error('Admin auth check error in layout:', error.code, error.message);
-        // Clear the invalid cookie
-        cookies().set('session', '', { maxAge: -1 });
         return null;
     }
 }
