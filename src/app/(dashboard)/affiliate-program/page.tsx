@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -77,20 +76,19 @@ export default function AffiliateProgramPage() {
                             const conversionRate = clicks > 0 ? ((referrals / clicks) * 100).toFixed(2) + '%' : '0.00%';
                             setStats({ clicks, referrals, earnings, conversionRate });
 
-                            // Fetch all users and filter client-side to avoid needing a composite index
-                            const allUsersSnapshot = await getDocs(collection(db, "users"));
+                            // Fetch all users and filter client-side to find referrals
+                            const allUsersSnapshot = await getDocs(query(collection(db, "users"), where("referredBy", "==", firebaseUser.uid)));
                             const fetchedReferredUsers: ReferredUser[] = [];
                             allUsersSnapshot.forEach(doc => {
                                 const data = doc.data();
-                                if (data.referredBy === firebaseUser.uid) {
-                                     fetchedReferredUsers.push({
-                                        id: doc.id,
-                                        name: `${data.firstName} ${data.lastName}`,
-                                        date: data.createdAt.toDate().toLocaleDateString(),
-                                        status: data.planId === 'free' ? 'Free Plan' : 'Pro Plan',
-                                        earnings: '$0.00' // This would require more complex logic
-                                    });
-                                }
+                                const isPro = data.planId && data.planId !== 'free';
+                                fetchedReferredUsers.push({
+                                    id: doc.id,
+                                    name: `${data.firstName} ${data.lastName}`,
+                                    date: data.createdAt?.toDate().toLocaleDateString() || new Date().toLocaleDateString(),
+                                    status: isPro ? 'Pro Plan' : 'Free Plan',
+                                    earnings: isPro ? `$${(settings.plan?.plans.find(p => p.id === data.planId)?.price || 0) * ( (settings.referral?.commissionRate || 20) / 100 )}` : '$0.00'
+                                });
                             });
                             setReferredUsers(fetchedReferredUsers);
                         }
