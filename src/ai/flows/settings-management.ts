@@ -365,7 +365,6 @@ export const getSettings = async (): Promise<AppSettings> => {
             if (parsedData.success) {
                 return parsedData.data;
             } else {
-                console.warn("Firestore settings data is invalid after merge, returning defaults.", parsedData.error);
                 return defaultSettings;
             }
         } else {
@@ -413,5 +412,6 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
 
     
     
+
 
 
