@@ -12,13 +12,7 @@ import { Slider } from '@/components/ui/slider';
 import { Download, SlidersHorizontal, QrCode } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Barcode from 'react-barcode';
-import QRCode from 'react-qr-code';
-
-type HtmlToImageLibrary = {
-    toPng: (node: HTMLElement, options?: any) => Promise<string>;
-    toJpeg: (node: HTMLElement, options?: any) => Promise<string>;
-    toSvg: (node: HTMLElement, options?: any) => Promise<string>;
-};
+import { toPng, toJpeg, toSvg } from 'html-to-image';
 
 export function BarcodeGenerator() {
   const [value, setValue] = useState('https://toolifyai.com');
@@ -31,23 +25,11 @@ export function BarcodeGenerator() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const barcodeRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const [htmlToImage, setHtmlToImage] = useState<HtmlToImageLibrary | null>(null);
-
-  useEffect(() => {
-    import('html-to-image').then((module) => {
-      setHtmlToImage(module);
-    }).catch(err => console.error("Failed to load html-to-image", err));
-  }, []);
 
   const handleDownload = useCallback(async (downloadFormat: 'png' | 'jpeg' | 'svg') => {
     if (!barcodeRef.current) {
       toast({ title: "Error", description: "Barcode reference not found.", variant: "destructive" });
       return;
-    }
-    
-    if (!htmlToImage) {
-        toast({ title: "Library not loaded", description: "Image generation library is still loading, please try again in a moment.", variant: "destructive" });
-        return;
     }
 
     try {
@@ -56,13 +38,13 @@ export function BarcodeGenerator() {
       
       switch (downloadFormat) {
         case 'png':
-          dataUrl = await htmlToImage.toPng(barcodeRef.current, downloadOptions);
+          dataUrl = await toPng(barcodeRef.current, downloadOptions);
           break;
         case 'jpeg':
-          dataUrl = await htmlToImage.toJpeg(barcodeRef.current, { ...downloadOptions, quality: 0.95 });
+          dataUrl = await toJpeg(barcodeRef.current, { ...downloadOptions, quality: 0.95 });
           break;
         case 'svg':
-          dataUrl = await htmlToImage.toSvg(barcodeRef.current, downloadOptions);
+          dataUrl = await toSvg(barcodeRef.current, downloadOptions);
           break;
       }
       
@@ -75,7 +57,7 @@ export function BarcodeGenerator() {
       console.error(err);
       toast({ title: "Download Failed", description: "Could not generate the image file.", variant: "destructive"});
     }
-  }, [background, htmlToImage, toast]);
+  }, [background, toast]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -94,7 +76,6 @@ export function BarcodeGenerator() {
                     <Select value={format} onValueChange={setFormat}>
                         <SelectTrigger id="format-select"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="QRCode">QR Code</SelectItem>
                             <SelectItem value="CODE128">Code 128</SelectItem>
                             <SelectItem value="CODE39">Code 39</SelectItem>
                             <SelectItem value="EAN13">EAN-13</SelectItem>
@@ -144,25 +125,16 @@ export function BarcodeGenerator() {
           <CardTitle>Barcode Preview</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center space-y-4">
-            <div ref={barcodeRef} className="p-4 overflow-x-auto max-w-full" style={{ background }}>
-                {format === 'QRCode' ? (
-                    <QRCode
-                        value={value}
-                        bgColor={background}
-                        fgColor={lineColor}
-                        size={256}
-                    />
-                ) : (
-                    <Barcode 
-                        value={value} 
-                        format={format} 
-                        width={width}
-                        height={height}
-                        displayValue={displayValue}
-                        lineColor={lineColor}
-                        background={background}
-                    />
-                )}
+            <div ref={barcodeRef} className="p-4 overflow-x-auto max-w-full bg-white">
+                <Barcode 
+                    value={value} 
+                    format={format} 
+                    width={width}
+                    height={height}
+                    displayValue={displayValue}
+                    lineColor={lineColor}
+                    background={background}
+                />
             </div>
             <div className="w-full space-y-2">
                 <div className="flex gap-2">

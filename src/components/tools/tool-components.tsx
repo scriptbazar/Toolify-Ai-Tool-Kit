@@ -80,6 +80,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'prn-to-pdf': dynamic(() => import('./PRNToPDF').then(mod => mod.PRNToPDF)),
   'ppt-to-pdf': dynamic(() => import('./PptToPdf').then(mod => mod.PptToPdf)),
   'qr-code-scanner': dynamic(() => import('./QrCodeScanner').then(mod => mod.QrCodeScanner)),
+  'qr-code-generator': dynamic(() => import('./QrCodeGenerator').then(mod => mod.QrCodeGenerator)),
   'random-word-generator': dynamic(() => import('./RandomWordGenerator').then(mod => mod.RandomWordGenerator)),
   'redirect-checker': dynamic(() => import('./RedirectChecker').then(mod => mod.RedirectChecker)),
   'remove-extra-spaces': dynamic(() => import('./RemoveExtraSpaces').then(mod => mod.RemoveExtraSpaces)),
