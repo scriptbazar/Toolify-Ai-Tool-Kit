@@ -12,6 +12,7 @@ import { Download, SlidersHorizontal, QrCode } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import QRCode from 'react-qr-code';
 import { toPng, toJpeg, toSvg } from 'html-to-image';
+import { Switch } from '../ui/switch';
 
 export function QrCodeGenerator() {
   const [value, setValue] = useState('https://toolifyai.com');
