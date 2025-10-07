@@ -136,15 +136,21 @@ export default function UsageHistoryPage() {
             <CardContent>
               {toolUsageData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={toolUsageData} layout="vertical" margin={{ left: 20 }}>
-                    <XAxis type="number" hide />
-                    <YAxis
+                  <BarChart data={toolUsageData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
+                    <XAxis
                       dataKey="name"
-                      type="category"
-                      width={150}
+                      stroke="#888888"
+                      fontSize={12}
                       tickLine={false}
                       axisLine={false}
-                      tick={{ fontSize: 12 }}
+                      angle={-45}
+                      textAnchor="end"
+                    />
+                    <YAxis 
+                       stroke="#888888"
+                       fontSize={12}
+                       tickLine={false}
+                       axisLine={false}
                     />
                     <Tooltip
                       cursor={{ fill: 'hsl(var(--muted))' }}
@@ -159,7 +165,7 @@ export default function UsageHistoryPage() {
                         return null;
                       }}
                     />
-                    <Bar dataKey="count" layout="vertical" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
