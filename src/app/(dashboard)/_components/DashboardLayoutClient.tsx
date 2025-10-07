@@ -256,7 +256,7 @@ export function DashboardLayoutClient({
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/40">
-           {React.cloneElement(children as React.ReactElement, { user, userData })}
+           {children}
         </main>
       </div>
     </div>
