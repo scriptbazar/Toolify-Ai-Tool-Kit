@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -10,16 +9,37 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {
-    AiEmailComposerInputSchema, 
-    AiEmailComposerOutputSchema, 
-    RegenerateTemplateInputSchema, 
-    GenerateFeatureAnnouncementInputSchema,
-    type AiEmailComposerInput,
-    type AiEmailComposerOutput,
-    type RegenerateTemplateInput,
-    type GenerateFeatureAnnouncementInput
-} from './ai-email-composer.types';
+import { z } from 'zod';
+
+// Types were moved here from the deleted .types.ts file
+
+export const AiEmailComposerInputSchema = z.object({
+  subject: z.string().describe('The subject line of the email.'),
+  keyPoints: z
+    .string()
+    .describe('The key points or a rough draft of the email content.'),
+  tone: z
+    .enum(['Formal', 'Casual', 'Friendly', 'Professional', 'Humorous'])
+    .describe('The desired tone for the email.'),
+});
+export type AiEmailComposerInput = z.infer<typeof AiEmailComposerInputSchema>;
+
+export const AiEmailComposerOutputSchema = z.object({
+  emailBody: z.string().describe('The AI-generated email body.'),
+});
+export type AiEmailComposerOutput = z.infer<typeof AiEmailComposerOutputSchema>;
+
+export const RegenerateTemplateInputSchema = z.object({
+  templateType: z.string().describe("The type of email template to regenerate (e.g., 'Welcome Email', 'Forgot Password').")
+});
+export type RegenerateTemplateInput = z.infer<typeof RegenerateTemplateInputSchema>;
+
+export const GenerateFeatureAnnouncementInputSchema = z.object({
+  featureName: z.string().describe('The name of the new feature.'),
+  featureDescription: z.string().describe('A brief description of what the new feature does.'),
+});
+export type GenerateFeatureAnnouncementInput = z.infer<typeof GenerateFeatureAnnouncementInputSchema>;
+
 
 
 export async function composeEmail(input: AiEmailComposerInput): Promise<AiEmailComposerOutput> {
