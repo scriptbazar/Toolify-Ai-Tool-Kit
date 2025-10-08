@@ -9,24 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { Textarea } from '../ui/textarea';
-
-// A mock decoder function as a placeholder for a real barcode library.
-// In a real scenario, you'd use a library like QuaggaJS or similar.
-const decodeBarcodeFromImage = (img: HTMLImageElement): Promise<string | null> => {
-    return new Promise((resolve) => {
-        // This is a simulation. A real library would do complex image processing here.
-        setTimeout(() => {
-            // Let's pretend it found a barcode based on image size for demonstration
-            if (img.width > 100) {
-                const mockBarcode = Math.random().toString(36).substring(2, 15).toUpperCase();
-                resolve(mockBarcode);
-            } else {
-                resolve(null);
-            }
-        }, 1500); // Simulate processing time
-    });
-};
-
+import jsQR from 'jsqr';
 
 export function BarcodeScanner() {
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -55,17 +38,36 @@ export function BarcodeScanner() {
         }
     };
     
-    const scanCode = async (img: HTMLImageElement) => {
+    const scanCode = (img: HTMLImageElement) => {
         setIsLoading(true);
         setDecodedText(null);
         
-        const code = await decodeBarcodeFromImage(img);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            setIsLoading(false);
+            toast({ title: "Canvas Error", description: "Could not initialize the image scanner.", variant: "destructive" });
+            return;
+        }
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+        
+        // Using jsQR to decode the image data
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
 
         if (code) {
-            setDecodedText(code);
+            setDecodedText(code.data);
             toast({ title: 'Barcode Scanned!', description: 'Content has been extracted.' });
         } else {
-            toast({ title: 'No Barcode Found', description: 'Could not detect a barcode in the uploaded image.', variant: "default" });
+            // Fallback for non-QR barcodes (this is a mock)
+            setTimeout(() => {
+                toast({ title: 'No QR Code Found', description: 'This tool currently specializes in QR codes. For other barcodes, a different library would be needed.', variant: "default" });
+                setDecodedText('Unsupported Barcode Type');
+                 setIsLoading(false);
+            }, 1000);
+            return;
         }
         setIsLoading(false);
     };
