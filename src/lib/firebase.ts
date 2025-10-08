@@ -6,7 +6,7 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig: FirebaseOptions = {
-  apiKey: "AIzaSyA4259SgKef4wJ9wD6vZN-ko-tP3E1a8_Y",
+  apiKey: "AIzaSyA5Jz8oG_a-x8E8-g9wX3sYvB2eI4U5oHk",
   authDomain: "toolifyai-7sfvi.firebaseapp.com",
   projectId: "toolifyai-7sfvi",
   storageBucket: "toolifyai-7sfvi.appspot.com",
