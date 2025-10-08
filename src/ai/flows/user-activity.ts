@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -323,5 +322,3 @@ export async function getAdminActivityLog(): Promise<AdminActivityLogItem[]> {
         return [];
     }
 }
-
-    

@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -255,5 +254,3 @@ const generateTicketContentFlow = ai.defineFlow(
     return output;
   }
 );
-
-    

@@ -15,6 +15,7 @@ import { AppSettingsSchema, type AppSettings } from './settings-management.types
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { placeholderImages } from '@/lib/placeholder-images';
+import { unstable_cache as cache } from 'next/cache';
 
 
 const SETTINGS_COLLECTION = 'settings';
@@ -356,7 +357,7 @@ function deepMerge<T extends object, U extends object>(target: T, source: U): T 
  * This function is cached to prevent excessive database reads.
  * @returns {Promise<AppSettings>} The application settings.
  */
-export const getSettings = async (): Promise<AppSettings> => {
+export const getSettings = cache(async (): Promise<AppSettings> => {
     try {
         const dbData = await getSettingsData();
         
@@ -388,7 +389,7 @@ export const getSettings = async (): Promise<AppSettings> => {
         // On any error, return the hardcoded default settings to prevent the app from crashing.
         return defaultSettings;
     }
-};
+}, ['settings'], { revalidate: 3600 });
 
 
 /**
@@ -418,10 +419,3 @@ export async function updateSettings(newSettings: Partial<AppSettings>): Promise
     return { success: false, message: error.message || 'An unknown error occurred while updating settings.' };
   }
 }
-
-    
-    
-
-
-
-
