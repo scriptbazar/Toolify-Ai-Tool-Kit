@@ -1,8 +1,12 @@
 
+'use client';
+
 import { AdminLayoutClient } from '@/app/admin/_components/AdminLayoutClient';
-import { getAdminAuth } from '@/lib/firebase-admin';
-import { cookies } from 'next/headers';
-import type { User as FirebaseUser } from 'firebase/auth';
+import { useEffect } from 'react';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
+import { useState } from 'react';
 
 // This is now a simplified root layout for /admin routes
 // Authentication logic is moved to the (dashboard) group layout
@@ -11,14 +15,26 @@ export default function AdminRootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [userData, setUserData] = useState<any | null>(null);
   
-  // This layout doesn't need to be a client component anymore.
-  // We pass null for user/userData because the authentication check
-  // will happen in a deeper, more specific layout.
-  // The AdminLayoutClient component will handle showing a login
-  // state if it receives null user.
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+            const userDocRef = doc(db, 'users', firebaseUser.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+                const data = userDocSnap.data();
+                setUser(firebaseUser);
+                setUserData(data);
+            }
+        }
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
-      <AdminLayoutClient user={null} userData={null}>
+      <AdminLayoutClient user={user} userData={userData}>
         {children}
       </AdminLayoutClient>
   );

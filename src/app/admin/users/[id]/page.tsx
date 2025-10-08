@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -29,13 +28,13 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import { onAuthStateChanged, updatePassword, type User as FirebaseUser } from 'firebase/auth';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { countries } from '@/lib/countries';
 import { Combobox } from '@/components/ui/combobox';
-import { sendPasswordChangeEmail } from '@/ai/flows/send-email';
+import { updateUserProfile } from '@/ai/flows/user-management';
 import { useParams, useRouter } from 'next/navigation';
 
 
@@ -152,9 +151,10 @@ export default function EditUserDetailPage() {
 
     setIsSaving(true);
     try {
-      // Update profile in Firestore
-      const userDocRef = doc(db, 'users', id);
-      await updateDoc(userDocRef, { ...profile });
+      const result = await updateUserProfile(id, profile);
+      if (!result.success) {
+          throw new Error(result.message);
+      }
 
        toast({
         title: 'Profile Updated',
