@@ -7,11 +7,11 @@ import { getFirestore } from "firebase/firestore";
 // Your web app's Firebase configuration
 const firebaseConfig: FirebaseOptions = {
   apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  authDomain: "toolifyai-7sfvi.firebaseapp.com",
+  projectId: "toolifyai-7sfvi",
+  storageBucket: "toolifyai-7sfvi.appspot.com",
+  messagingSenderId: "1091938363769",
+  appId: "1:1091938363769:web:a37651a8a253965158189c"
 };
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
