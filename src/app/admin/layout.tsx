@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -32,21 +31,25 @@ export default function AdminPanelLayout({
           if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
             setUser(firebaseUser);
             setUserData(userDocSnap.data());
+             if (window.location.pathname === '/admin' || window.location.pathname === '/admin/') {
+              window.location.href = '/admin/dashboard';
+              return;
+            }
           } else {
             // User is not an admin or doesn't exist in Firestore, redirect
             await auth.signOut();
-            router.replace('/admin/login');
+            window.location.href = '/admin/login';
             return;
           }
         } catch (error) {
           console.error("Auth check error in admin layout:", error);
-          router.replace('/admin/login');
+          window.location.href = '/admin/login';
         } finally {
             setLoading(false);
         }
       } else {
         // No user is signed in
-        router.replace('/admin/login');
+        window.location.href = '/admin/login';
       }
     });
 
