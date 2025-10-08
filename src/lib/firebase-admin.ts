@@ -10,17 +10,25 @@ import { getStorage } from 'firebase-admin/storage';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import serviceAccount from '@/firebase-service-account-key.json';
 
-const getInitializedApp = (): App => {
+let adminApp: App | null = null;
+
+function getInitializedApp(): App {
+    if (adminApp) {
+        return adminApp;
+    }
+
     const apps = getApps();
     if (apps.length > 0) {
-        return apps[0];
+        adminApp = apps[0];
+        return adminApp;
     }
     
     try {
-        return initializeApp({
+        adminApp = initializeApp({
             credential: cert(serviceAccount as ServiceAccount),
             storageBucket: `${serviceAccount.project_id}.appspot.com`,
         });
+        return adminApp;
     } catch (error: any) {
         console.error("Firebase Admin initialization error:", error.message);
         throw new Error("Failed to initialize Firebase Admin SDK. Check service account credentials and server environment.");
@@ -60,4 +68,3 @@ export async function getSettingsData(): Promise<AppSettings> {
         throw new Error("Could not fetch settings from Firestore.");
     }
 }
-
