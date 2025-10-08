@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Initializes and exports the Firebase Admin SDK instances.
  * This file handles server-side Firebase connections.
@@ -16,8 +17,9 @@ function getInitializedApp(): App {
     return adminApp;
   }
 
-  if (getApps().length > 0) {
-    adminApp = getApps()[0];
+  const apps = getApps();
+  if (apps.length > 0) {
+    adminApp = apps[0];
     return adminApp;
   }
 
@@ -31,11 +33,13 @@ function getInitializedApp(): App {
 
 
 export function getAdminDb(): Firestore {
-    return getFirestore(getInitializedApp());
+    const app = getInitializedApp();
+    return getFirestore(app);
 }
 
 export function getAdminAuth(): Auth {
-    return getAuth(getInitializedApp());
+    const app = getInitializedApp();
+    return getAuth(app);
 }
 
 const SETTINGS_COLLECTION = 'settings';
