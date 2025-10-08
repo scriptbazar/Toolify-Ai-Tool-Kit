@@ -19,7 +19,7 @@ export function BarcodeGenerator() {
   const [format, setFormat] = useState('CODE128');
   const [width, setWidth] = useState(2);
   const [height, setHeight] = useState(100);
-  const [displayValue, setDisplayValue] = useState(true);
+  const [displayValue, setDisplayValue] = useState(false);
   const [lineColor, setLineColor] = useState('#000000');
   const [background, setBackground] = useState('#ffffff');
   const [showAdvanced, setShowAdvanced] = useState(false);
