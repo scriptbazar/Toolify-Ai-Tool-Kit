@@ -7,8 +7,7 @@
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { getAdminDb } from '@/lib/firebase-admin';
-import { FieldValue, addDoc, collection } from 'firebase-admin/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { UserMediaSchema, type UserMedia } from './media-management.types';
 import { db } from '@/lib/firebase';
 
