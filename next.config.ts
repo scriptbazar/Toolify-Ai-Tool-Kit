@@ -69,25 +69,26 @@ const nextConfig: NextConfig = {
     // on the client.
     config.externals.push('canvas');
 
-    // Copy pdf.js CMaps to public directory
-    config.plugins.push(
-        new CopyWebpackPlugin({
-            patterns: [
-                {
-                    from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'cmaps'),
-                    to: path.join(process.cwd(), 'public', 'cmaps'),
-                },
-                {
-                    from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'build', 'pdf.worker.min.mjs'),
-                    to: path.join(process.cwd(), 'public'),
-                }
-            ],
-        })
-    );
+    // Copy pdf.js CMaps and worker to public directory only for server build
+    if (isServer) {
+        config.plugins.push(
+            new CopyWebpackPlugin({
+                patterns: [
+                    {
+                        from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'cmaps'),
+                        to: path.join(process.cwd(), 'public', 'cmaps'),
+                    },
+                    {
+                        from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'build', 'pdf.worker.min.mjs'),
+                        to: path.join(process.cwd(), 'public'),
+                    }
+                ],
+            })
+        );
+    }
     
     return config;
   },
 };
 
 export default nextConfig;
-
