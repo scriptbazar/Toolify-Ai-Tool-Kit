@@ -4,10 +4,11 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { getPosts, type Post } from '@/ai/flows/blog-management';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Logo } from '@/components/common/Logo';
 
 const POSTS_PER_PAGE = 6;
 
@@ -33,7 +34,15 @@ export default function BlogPage() {
     );
 
     if (loading) {
-        return <div className="container mx-auto px-4 py-12 md:py-20">Loading posts...</div>
+        return (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-background py-20">
+                <Logo className="h-16 w-16 animate-pulse" />
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <p className="text-lg">Loading posts...</p>
+                </div>
+            </div>
+        );
     }
 
     return (

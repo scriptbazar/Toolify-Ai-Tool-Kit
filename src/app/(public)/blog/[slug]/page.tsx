@@ -14,6 +14,8 @@ import Link from 'next/link';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import * as Icons from 'lucide-react';
 import { type AppSettings } from '@/ai/flows/settings-management.types';
+import { Logo } from '@/components/common/Logo';
+import { Loader2 } from 'lucide-react';
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <Card>
@@ -60,7 +62,15 @@ export default function BlogPostPage() {
     }, [slug]);
 
     if (loading || !post || !settings) {
-        return <div>Loading post...</div>; // Or a skeleton loader
+        return (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-background py-20">
+                <Logo className="h-16 w-16 animate-pulse" />
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <p className="text-lg">Loading post...</p>
+                </div>
+            </div>
+        );
     }
 
   const sidebarSettings = settings.sidebar?.blogSidebar;

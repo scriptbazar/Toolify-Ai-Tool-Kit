@@ -13,6 +13,8 @@ import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firesto
 import { db } from '@/lib/firebase';
 import { type Plan } from '@/ai/flows/settings-management.types';
 import { type Announcement } from '@/ai/flows/announcement-flow.types';
+import { Logo } from '@/components/common/Logo';
+import { Loader2 } from 'lucide-react';
 
 // This is a Server Component and will fetch its own data.
 export default function UserDashboard() {
@@ -70,7 +72,15 @@ export default function UserDashboard() {
   }, [user]);
 
   if (loading || !dashboardData) {
-      return <div>Loading...</div>;
+      return (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-background">
+            <Logo className="h-16 w-16 animate-pulse" />
+            <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <p className="text-lg">Loading...</p>
+            </div>
+        </div>
+      );
   }
   
   const welcomeMessage = dashboardData.profile?.firstName ? `Welcome Back, ${dashboardData.profile.firstName}!` : "User Dashboard";

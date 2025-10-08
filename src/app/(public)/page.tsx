@@ -11,6 +11,8 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 import { type Review } from '@/ai/flows/review-management.types';
 import { type Post } from '@/ai/flows/blog-management.types';
 import { type HomepageSettings } from '@/ai/flows/settings-management.types';
+import { Logo } from '@/components/common/Logo';
+import { Loader2 } from 'lucide-react';
 
 
 export default function Home() {
@@ -41,7 +43,15 @@ export default function Home() {
     }, []);
 
     if (!pageData) {
-        return <div>Loading...</div>; // Or a proper skeleton loader
+        return (
+            <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
+                <Logo className="h-16 w-16 animate-pulse" />
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <p className="text-lg">Loading...</p>
+                </div>
+            </div>
+        );
     }
 
   return (

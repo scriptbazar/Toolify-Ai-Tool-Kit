@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { getChatUsers } from '@/ai/flows/user-management';
 import { saveUserMedia } from '@/ai/flows/ai-image-generator';
+import type { User as FirebaseUser } from 'firebase/auth';
 
 
 type Poll = {
@@ -461,7 +462,7 @@ export function CommunityChat({ isAdmin }: CommunityChatProps) {
             if (replyingTo) {
                 messagePayload.replyTo = {
                     id: replyingTo.id,
-                    text: replyingTo.text || (replyingTo.imageUrl ? 'Image' : 'Attachment'),
+                    text: replyingTo.text || (replyingTo?.imageUrl ? 'Image' : 'Attachment'),
                     fromName: replyingTo.fromName
                 };
             }
@@ -573,7 +574,7 @@ export function CommunityChat({ isAdmin }: CommunityChatProps) {
 
     if (loading) {
         return (
-            <div className="flex h-full flex-col items-center justify-center gap-4 bg-transparent">
+            <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-background">
               <Logo className="h-16 w-16 animate-pulse" />
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin" />
