@@ -8,41 +8,28 @@ import { getAuth, Auth } from 'firebase-admin/auth';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import serviceAccount from '@/firebase-service-account-key.json';
 
-let adminApp: App | undefined;
-
+// This function ensures that the admin app is initialized only once.
 function getInitializedApp(): App {
-  if (getApps().length === 0) {
-      try {
-          adminApp = initializeApp({
-              credential: cert(serviceAccount as ServiceAccount)
-          });
-          console.log("Firebase Admin SDK initialized successfully.");
-      } catch (error: any) {
-          console.error("Firebase Admin initialization error:", error.message);
-          throw new Error("Failed to initialize Firebase Admin SDK. Check service account credentials and server environment.");
-      }
-  } else {
-      adminApp = getApps()[0];
+  if (getApps().length > 0) {
+    return getApps()[0];
   }
-  return adminApp!;
+  
+  try {
+    return initializeApp({
+      credential: cert(serviceAccount as ServiceAccount)
+    });
+  } catch (error: any) {
+    console.error("Firebase Admin initialization error:", error.message);
+    throw new Error("Failed to initialize Firebase Admin SDK. Check service account credentials and server environment.");
+  }
 }
 
-// Firestore and Auth instances are lazy-loaded to ensure the app is initialized first.
-let adminDb: Firestore | null = null;
-let adminAuth: Auth | null = null;
-
 export function getAdminDb(): Firestore {
-    if (!adminDb) {
-        adminDb = getFirestore(getInitializedApp());
-    }
-    return adminDb;
+    return getFirestore(getInitializedApp());
 }
 
 export function getAdminAuth(): Auth {
-    if (!adminAuth) {
-        adminAuth = getAuth(getInitializedApp());
-    }
-    return adminAuth;
+    return getAuth(getInitializedApp());
 }
 
 
