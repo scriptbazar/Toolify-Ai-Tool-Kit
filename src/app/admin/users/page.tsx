@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
       const combinedList = await getAllEmails();
       
       const mappedList: User[] = combinedList.map(item => ({
-          id: item.email, // Using email as a unique ID for leads/comments without a real ID
+          id: item.source === 'Signup' ? item.id : item.email, // Use real ID for signups
           name: item.name || item.email.split('@')[0],
           email: item.email,
           role: item.source === 'Signup' ? (item.role || 'user') : 'lead',
@@ -84,7 +84,7 @@ export default function AdminUsersPage() {
     });
   }, [allUsers, activeFilter, searchQuery]);
 
-  const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment'>) => {
+  const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment') => {
       setActiveFilter(filter);
   };
   
