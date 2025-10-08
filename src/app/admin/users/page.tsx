@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, Users, UserPlus, Search, MessageSquare } from 'lucide-react';
+import { AlertCircle, Users, UserPlus, Search, MessageSquare, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -84,7 +84,7 @@ export default function AdminUsersPage() {
     });
   }, [allUsers, activeFilter, searchQuery]);
 
-  const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment') => {
+  const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment'>) => {
       setActiveFilter(filter);
   };
   
