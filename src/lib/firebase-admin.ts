@@ -10,35 +10,24 @@ import { getStorage } from 'firebase-admin/storage';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import serviceAccount from '@/firebase-service-account-key.json';
 
-let adminApp: App | undefined;
-
-function getInitializedApp(): App {
-  if (adminApp) {
-    return adminApp;
+// This is a singleton pattern to ensure Firebase Admin is initialized only once.
+const getAdminApp = (): App => {
+  if (getApps().length > 0) {
+    return getApps()[0];
   }
-
-  const apps = getApps();
-  if (apps.length > 0) {
-    adminApp = apps[0];
-    return adminApp;
-  }
-
-  adminApp = initializeApp({
+  return initializeApp({
     credential: cert(serviceAccount as ServiceAccount),
     storageBucket: `${serviceAccount.project_id}.appspot.com`,
   });
-
-  return adminApp;
-}
-
+};
 
 export function getAdminDb(): Firestore {
-    const app = getInitializedApp();
+    const app = getAdminApp();
     return getFirestore(app);
 }
 
 export function getAdminAuth(): Auth {
-    const app = getInitializedApp();
+    const app = getAdminApp();
     return getAuth(app);
 }
 
