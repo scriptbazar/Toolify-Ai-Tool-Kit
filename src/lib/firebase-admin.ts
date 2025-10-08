@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Initializes and exports the Firebase Admin SDK instances.
  * This file handles server-side Firebase connections.
@@ -10,24 +9,33 @@ import { getStorage } from 'firebase-admin/storage';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import serviceAccount from '@/firebase-service-account-key.json';
 
-// This function ensures that the Firebase Admin app is initialized only once.
-const getAdminApp = (): App => {
-    if (getApps().length > 0) {
-        return getApps()[0];
-    }
-    
-    return initializeApp({
-        credential: cert(serviceAccount as ServiceAccount),
-        storageBucket: `${serviceAccount.project_id}.appspot.com`,
-    });
-};
+let adminApp: App | undefined;
+
+function getInitializedApp(): App {
+  if (adminApp) {
+    return adminApp;
+  }
+
+  if (getApps().length > 0) {
+    adminApp = getApps()[0];
+    return adminApp;
+  }
+
+  adminApp = initializeApp({
+    credential: cert(serviceAccount as ServiceAccount),
+    storageBucket: `${serviceAccount.project_id}.appspot.com`,
+  });
+
+  return adminApp;
+}
+
 
 export function getAdminDb(): Firestore {
-    return getFirestore(getAdminApp());
+    return getFirestore(getInitializedApp());
 }
 
 export function getAdminAuth(): Auth {
-    return getAuth(getAdminApp());
+    return getAuth(getInitializedApp());
 }
 
 const SETTINGS_COLLECTION = 'settings';
