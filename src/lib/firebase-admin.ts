@@ -11,11 +11,12 @@ import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-managem
 import serviceAccount from '@/firebase-service-account-key.json';
 
 const getAdminApp = (): App => {
-    const apps = getApps();
-    if (apps.length > 0) {
-        return apps[0];
+    // Check if an app is already initialized
+    if (getApps().length > 0) {
+        return getApps()[0];
     }
     
+    // If not, initialize a new one
     try {
         return initializeApp({
             credential: cert(serviceAccount as ServiceAccount),
@@ -39,7 +40,7 @@ const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
 
 export async function getSettingsData(): Promise<AppSettings> {
-    const db = getAdminDb();
+    const db = getAdminDb(); // Always get the DB instance from the helper
     try {
         const docRef = db.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
         const docSnap = await docRef.get();
