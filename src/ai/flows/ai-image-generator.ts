@@ -8,7 +8,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { getAdminDb } from '@/lib/firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, addDoc, collection } from 'firebase-admin/firestore';
 import { UserMediaSchema, type UserMedia } from './media-management.types';
 
 const GenerateImageInputSchema = z.object({
@@ -42,35 +42,18 @@ export async function generateImage(input: z.infer<typeof GenerateImageInputSche
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 15);
 
-  await saveUserMedia({
+  const adminDb = getAdminDb();
+  if (!adminDb) {
+    throw new Error("Database not initialized.");
+  }
+  await addDoc(collection(adminDb, 'userMedia'), {
       userId: userId,
       type: 'ai-generated',
       mediaUrl: generatedImage.url,
       prompt: promptText,
-      createdAt: new Date().toISOString(),
-      expiresAt: expiresAt.toISOString(),
+      createdAt: FieldValue.serverTimestamp(),
+      expiresAt: expiresAt,
   });
   
   return { imageDataUri: generatedImage.url };
-}
-
-
-export async function saveUserMedia(mediaData: SaveUserMediaInput): Promise<{ success: boolean; id?: string }> {
-  try {
-    const adminDb = getAdminDb();
-    if (!adminDb) {
-      throw new Error("Database not initialized.");
-    }
-
-    const docRef = await adminDb.collection('userMedia').add({
-      ...mediaData,
-      createdAt: FieldValue.serverTimestamp(),
-      expiresAt: new Date(mediaData.expiresAt),
-    });
-
-    return { success: true, id: docRef.id };
-  } catch (error: any) {
-    console.error("Error saving user media:", error);
-    return { success: false };
-  }
 }
