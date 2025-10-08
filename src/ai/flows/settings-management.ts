@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -361,27 +360,20 @@ export const getSettings = cache(async (): Promise<AppSettings> => {
     try {
         const dbData = await getSettingsData();
         
-        if (dbData) {
-            // FIX: Ensure placeholderImages is not null before merging
-            if (!dbData.placeholderImages) {
-                dbData.placeholderImages = defaultSettings.placeholderImages;
-            }
+        // Deep merge defaults with database data to ensure all properties are present
+        const mergedSettings = deepMerge(defaultSettings, dbData);
 
-            // Deep merge defaults with database data to ensure all properties are present
-            const mergedSettings = deepMerge(defaultSettings, dbData);
+        // Convert date strings to Date objects if they exist
+        if (mergedSettings?.general?.security?.maintenanceModeUntil) {
+            mergedSettings.general.security.maintenanceModeUntil = new Date(mergedSettings.general.security.maintenanceModeUntil);
+        }
 
-            const parsedData = AppSettingsSchema.safeParse(mergedSettings);
-            if (parsedData.success) {
-                return parsedData.data;
-            } else {
-                console.warn("Firestore settings data is invalid after merge, returning defaults.", parsedData.error);
-                return defaultSettings;
-            }
+        const parsedData = AppSettingsSchema.safeParse(mergedSettings);
+
+        if (parsedData.success) {
+            return parsedData.data;
         } else {
-            console.log("No settings document found, creating one with default values.");
-            const adminDb = getAdminDb();
-            const docRef = adminDb.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
-            await docRef.set(defaultSettings);
+            console.warn("Firestore settings data is invalid after merge, returning defaults.", parsedData.error.flatten());
             return defaultSettings;
         }
     } catch (error: any) {

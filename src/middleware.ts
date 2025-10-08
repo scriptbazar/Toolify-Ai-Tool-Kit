@@ -2,7 +2,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export const runtime = 'nodejs';
+// NOTE: Middleware is running in the edge runtime.
+// It cannot access Node.js APIs or packages that rely on them (like firebase-admin).
+// The maintenance mode logic has been removed to prevent crashes.
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -11,10 +13,6 @@ export async function middleware(request: NextRequest) {
   if (pathname === '/admin' || pathname === '/admin/') {
     return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
-
-  // The maintenance mode logic has been removed from here to prevent build errors.
-  // This logic should be handled within page components or layouts if needed,
-  // to avoid pulling server-side dependencies into the edge runtime.
 
   return NextResponse.next();
 }
