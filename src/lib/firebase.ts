@@ -1,3 +1,4 @@
+
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp, type FirebaseOptions } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -20,21 +21,9 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
   throw new Error("Missing Firebase configuration. Please check your .env file.");
 }
 
-
-let app;
-let auth;
-let db;
-
-try {
-    app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-} catch (error) {
-    console.error("Firebase initialization failed:", error);
-    // You might want to handle this error gracefully in your app
-    // For now, we are leaving auth and db as undefined, which will cause errors
-    // downstream, but the console error will be more informative.
-}
-
+// Initialize Firebase
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 export { app, auth, db };
