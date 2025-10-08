@@ -1,74 +1,25 @@
 
-'use client';
+import { AdminLayoutClient } from '@/app/admin/_components/AdminLayoutClient';
+import { getAdminAuth } from '@/lib/firebase-admin';
+import { cookies } from 'next/headers';
+import type { User as FirebaseUser } from 'firebase/auth';
 
-import { useEffect, useState } from 'react';
-import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
-import { useRouter } from 'next/navigation';
-import { DashboardLayoutClient } from '@/app/admin/_components/DashboardLayoutClient';
-import type { DocumentData } from 'firebase-admin/firestore';
-import { Loader2 } from 'lucide-react';
-import { Logo } from '@/components/common/Logo';
-import React from 'react';
-
-export default function AdminPanelLayout({
+// This is now a simplified root layout for /admin routes
+// Authentication logic is moved to the (dashboard) group layout
+export default function AdminRootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [userData, setUserData] = useState<DocumentData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const userDocRef = doc(db, 'users', firebaseUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
-
-          if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-            setUser(firebaseUser);
-            setUserData(userDocSnap.data());
-          } else {
-            // User is not an admin or doesn't exist in Firestore, redirect
-            await auth.signOut();
-            // Use router.replace for client-side navigation to the login page
-            router.replace('/admin/login');
-            return;
-          }
-        } catch (error) {
-          console.error("Auth check error in admin layout:", error);
-          router.replace('/admin/login');
-        } finally {
-            setLoading(false);
-        }
-      } else {
-        // No user is signed in
-        router.replace('/admin/login');
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
-  if (loading || !user) {
-    return (
-      <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
-        <Logo className="h-16 w-16 animate-pulse" />
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <p className="text-lg">Verifying Admin Access...</p>
-        </div>
-      </div>
-    );
-  }
-
+  
+  // This layout doesn't need to be a client component anymore.
+  // We pass null for user/userData because the authentication check
+  // will happen in a deeper, more specific layout.
+  // The AdminLayoutClient component will handle showing a login
+  // state if it receives null user.
   return (
-    <DashboardLayoutClient user={user} userData={userData}>
-      {children}
-    </DashboardLayoutClient>
+      <AdminLayoutClient user={null} userData={null}>
+        {children}
+      </AdminLayoutClient>
   );
 }
