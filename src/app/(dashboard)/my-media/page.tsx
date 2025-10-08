@@ -13,7 +13,7 @@ import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { CountdownTimer } from '@/components/common/CountdownTimer';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 
 
 // Define the type based on expected Firestore structure
@@ -28,7 +28,6 @@ type UserMedia = {
 };
 
 const getUserMedia = async (userId: string): Promise<UserMedia[]> => {
-    console.log(`Fetching media for user: ${userId}`);
     const mediaCollection = collection(db, 'userMedia');
     const q = query(mediaCollection, where("userId", "==", userId));
     const querySnapshot = await getDocs(q);
@@ -38,8 +37,8 @@ const getUserMedia = async (userId: string): Promise<UserMedia[]> => {
         mediaList.push({
             id: doc.id,
             ...data,
-            createdAt: data.createdAt?.toDate()?.toISOString() || new Date().toISOString(),
-            expiresAt: data.expiresAt?.toDate()?.toISOString() || new Date().toISOString(),
+            createdAt: (data.createdAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString(),
+            expiresAt: (data.expiresAt as Timestamp)?.toDate()?.toISOString() || new Date().toISOString(),
         } as UserMedia);
     });
     return mediaList;

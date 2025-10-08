@@ -20,7 +20,7 @@ const GenerateImageOutputSchema = z.object({
   imageDataUri: z.string().describe("The generated image as a Base64 encoded data URI."),
 });
 
-const SaveUserMediaInputSchema = UserMediaSchema.omit({ id: true });
+const SaveUserMediaInputSchema = UserMediaSchema.omit({ id: true, createdAt: true });
 type SaveUserMediaInput = z.infer<typeof SaveUserMediaInputSchema>;
 
 export async function saveUserMedia(input: SaveUserMediaInput): Promise<{ success: boolean; message: string }> {
