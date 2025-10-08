@@ -1,5 +1,7 @@
 
 import type {NextConfig} from 'next';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -42,7 +44,7 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     //
     // The "handlebars" library is a sub-dependency of genkit, and it uses
     // an old "require.extensions" feature that is not supported by webpack.
@@ -66,6 +68,24 @@ const nextConfig: NextConfig = {
     // It prevents webpack from trying to bundle a node-specific canvas module
     // on the client.
     config.externals.push('canvas');
+
+    // Copy pdf.js CMaps and worker to public directory only for server build
+    if (isServer) {
+        config.plugins.push(
+            new CopyWebpackPlugin({
+                patterns: [
+                    {
+                        from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'cmaps'),
+                        to: path.join(process.cwd(), 'public', 'cmaps'),
+                    },
+                    {
+                        from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'build', 'pdf.worker.min.mjs'),
+                        to: path.join(process.cwd(), 'public'),
+                    }
+                ],
+            })
+        );
+    }
     
     return config;
   },
