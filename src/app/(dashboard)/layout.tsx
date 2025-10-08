@@ -1,87 +1,79 @@
 
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
 import { DashboardLayoutClient } from '@/app/(dashboard)/_components/DashboardLayoutClient';
-import type { User as FirebaseUser } from 'firebase/auth';
 import type { DocumentData } from 'firebase-admin/firestore';
-import { Timestamp } from 'firebase-admin/firestore';
+import { Loader2 } from 'lucide-react';
+import { Logo } from '@/components/common/Logo';
 import React from 'react';
 
-// Helper function to safely convert Timestamps to ISO strings
-function serializeTimestamps(obj: any): any {
-  if (!obj) return obj;
-  if (obj instanceof Timestamp) {
-    return obj.toDate().toISOString();
-  }
-  if (Array.isArray(obj)) {
-    return obj.map(serializeTimestamps);
-  }
-  if (typeof obj === 'object') {
-    const newObj: { [key: string]: any } = {};
-    for (const key in obj) {
-      newObj[key] = serializeTimestamps(obj[key]);
-    }
-    return newObj;
-  }
-  return obj;
-}
-
-
-async function getAuthenticatedUser(): Promise<{ user: FirebaseUser; userData: DocumentData | null; isAdmin: boolean } | null> {
-    const sessionCookie = cookies().get('session')?.value;
-    if (!sessionCookie) return null;
-
-    try {
-        const adminAuth = getAdminAuth();
-        const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-        
-        const userDocRef = getAdminDb().collection('users').doc(decodedToken.uid);
-        const userDocSnap = await userDocRef.get();
-
-        if (userDocSnap.exists) {
-            const userData = userDocSnap.data() as DocumentData;
-            
-            // Serialize the userData object to convert Timestamps
-            const serializableUserData = serializeTimestamps(userData);
-            
-            return {
-                user: decodedToken as unknown as FirebaseUser,
-                userData: serializableUserData,
-                isAdmin: userData.role === 'admin'
-            };
-        }
-        
-        // This case should ideally not happen for a logged-in user.
-        return { user: decodedToken as unknown as FirebaseUser, userData: null, isAdmin: false };
-    } catch (error) {
-        console.error('Auth check error in layout:', error);
-        return null;
-    }
-}
-
-
-export default async function UserPanelLayout({
+export default function UserPanelLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-    const authData = await getAuthenticatedUser();
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [userData, setUserData] = useState<DocumentData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-    if (!authData?.user) {
-        redirect('/login');
-    }
-    
-    // If an admin tries to access the user dashboard, redirect them.
-    if (authData.isAdmin) {
-        redirect('/admin/dashboard');
-    }
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const userDocRef = doc(db, 'users', firebaseUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
 
-    // Pass user and userData to the client layout for UI elements like the avatar/dropdown.
-    // The `children` (the page) will fetch its own data.
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data();
+             if (data.role === 'admin') {
+                // If an admin tries to access the user dashboard, redirect them.
+                router.replace('/admin/dashboard');
+                return;
+             }
+            setUser(firebaseUser);
+            setUserData(data);
+          } else {
+             // User exists in auth but not firestore, probably an error state
+            await auth.signOut();
+            router.replace('/login');
+            return;
+          }
+        } catch (error) {
+          console.error("Auth check error in user layout:", error);
+          router.replace('/login');
+        } finally {
+            setLoading(false);
+        }
+      } else {
+        // No user is signed in
+        router.replace('/login');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  if (loading || !user || !userData) {
     return (
-        <DashboardLayoutClient user={authData.user} userData={authData.userData}>
-            {children}
-        </DashboardLayoutClient>
+      <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
+        <Logo className="h-16 w-16 animate-pulse" />
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <p className="text-lg">Loading Dashboard...</p>
+        </div>
+      </div>
     );
+  }
+
+  return (
+    <DashboardLayoutClient user={user} userData={userData}>
+      {children}
+    </DashboardLayoutClient>
+  );
 }

@@ -10,7 +10,7 @@ import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient';
 import { Loader2 } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
 import type { User as FirebaseUser } from 'firebase/auth';
-import type { DocumentData } from 'firebase/firestore';
+import type { DocumentData } from 'firebase-admin/firestore';
 import React from 'react';
 
 export default function AdminLayout({
@@ -42,12 +42,13 @@ export default function AdminLayout({
         } catch (error) {
           console.error("Auth check error in admin layout:", error);
           router.replace('/admin/login');
+        } finally {
+            setLoading(false);
         }
       } else {
         // No user is signed in
         router.replace('/admin/login');
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
