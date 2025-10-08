@@ -6,7 +6,7 @@ import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { DashboardLayoutClient } from '@/app/admin/(dashboard)/_components/DashboardLayoutClient';
+import { DashboardLayoutClient } from '@/app/admin/_components/DashboardLayoutClient';
 import type { DocumentData } from 'firebase-admin/firestore';
 import { Loader2 } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';

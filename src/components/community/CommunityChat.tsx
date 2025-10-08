@@ -13,8 +13,8 @@ import { cn } from '@/lib/utils';
 import { RefreshCw, UserPlus, Users, Vote, Wifi, Send, Paperclip, Bot, User, Copy, PlusCircle, Trash2, Loader2, MessageSquare, X, Image as ImageIcon, MoreHorizontal, Smile, MessageSquareReply, ThumbsUp, AtSign } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDesc, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
+import { useAuth } from '@/hooks/use-auth';
+import { db } from '@/lib/firebase';
 import { doc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, updateDoc, arrayUnion, arrayRemove, Timestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Logo } from '@/components/common/Logo';
@@ -24,7 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { getChatUsers } from '@/ai/flows/user-management';
-
+import { saveUserMedia } from '@/ai/flows/ai-image-generator';
 
 type Poll = {
     question: string;
@@ -60,11 +60,6 @@ interface ChatUser {
     username: string;
     createdAt?: string | null;
     lastActive?: string | null;
-}
-
-interface AppUser {
-  firstName: string;
-  lastName: string;
 }
 
 const renderMessageWithTags = (text: string, users: ChatUser[]) => {
@@ -344,8 +339,7 @@ interface CommunityChatProps {
 }
 
 export function CommunityChat({ isAdmin }: CommunityChatProps) {
-    const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-    const [userData, setUserData] = useState<AppUser | null>(null);
+    const { user: currentUser, userData } = useAuth();
     const [allUsers, setAllUsers] = useState<ChatUser[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
@@ -361,18 +355,8 @@ export function CommunityChat({ isAdmin }: CommunityChatProps) {
     const [loading, setLoading] = useState(true);
     const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
+
      useEffect(() => {
-        const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-            setCurrentUser(user);
-            if (user) {
-                const userDocRef = doc(db, 'users', user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                if (userDocSnap.exists()) {
-                    setUserData(userDocSnap.data() as AppUser);
-                }
-            }
-        });
-        
         const q = query(collection(db, "communityChat"), orderBy("timestamp", "asc"));
         const unsubscribeMessages = onSnapshot(q, (querySnapshot) => {
             const fetchedMessages: Message[] = [];
@@ -397,7 +381,6 @@ export function CommunityChat({ isAdmin }: CommunityChatProps) {
         fetchUsers();
 
         return () => {
-            unsubscribeAuth();
             unsubscribeMessages();
         };
     }, [toast]);
@@ -450,6 +433,13 @@ export function CommunityChat({ isAdmin }: CommunityChatProps) {
                 const storageRef = ref(storage, `community-chat/${currentUser.uid}/${Date.now()}_${attachment.name}`);
                 const snapshot = await uploadBytes(storageRef, attachment);
                 imageUrl = await getDownloadURL(snapshot.ref);
+
+                await saveUserMedia({
+                    userId: currentUser.uid,
+                    type: 'community-chat',
+                    mediaUrl: imageUrl,
+                    prompt: `Community Chat Attachment: ${attachment.name}`
+                });
             }
             
             const messagePayload: Partial<Omit<Message, 'id'>> = {
