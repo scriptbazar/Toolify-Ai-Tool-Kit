@@ -1,7 +1,6 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getSettings } from '@/ai/flows/settings-management';
 
 export const runtime = 'nodejs';
 
