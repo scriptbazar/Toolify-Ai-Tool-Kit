@@ -26,7 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, updatePassword, type User as FirebaseUser } from 'firebase/auth';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -35,9 +35,8 @@ import { cn } from '@/lib/utils';
 import { countries } from '@/lib/countries';
 import { Combobox } from '@/components/ui/combobox';
 import { sendPasswordChangeEmail } from '@/ai/flows/send-email';
+import { updateUserProfile } from '@/ai/flows/user-management';
 import { useParams, useRouter } from 'next/navigation';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 
 interface UserProfile {
@@ -157,36 +156,37 @@ export default function EditUserDetailPage() {
     }
 
     setIsSaving(true);
-    const userDocRef = doc(db, 'users', user.uid);
-
-    updateDoc(userDocRef, { ...profile })
-      .then(async () => {
-        if (newPassword && user) {
-          await updatePassword(user, newPassword);
-          await sendPasswordChangeEmail({
-            to: profile.email,
-            name: profile.firstName,
-          });
-          setNewPassword('');
-          setConfirmPassword('');
-        }
-        toast({
-          title: 'Profile Updated',
-          description: 'Your profile has been saved successfully.',
+    
+    try {
+      const result = await updateUserProfile(user.uid, profile);
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+      
+      if (newPassword && user) {
+        await updatePassword(user, newPassword);
+        await sendPasswordChangeEmail({
+          to: profile.email,
+          name: profile.firstName,
         });
-      })
-      .catch((serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: userDocRef.path,
-          operation: 'update',
-          requestResourceData: profile,
-        } satisfies SecurityRuleContext, serverError);
+        setNewPassword('');
+        setConfirmPassword('');
+      }
 
-        errorEmitter.emit('permission-error', permissionError);
-      })
-      .finally(() => {
-        setIsSaving(false);
+      toast({
+        title: 'Profile Updated',
+        description: 'Your profile has been saved successfully.',
       });
+
+    } catch (error: any) {
+       toast({
+        title: "Update Failed",
+        description: error.message || "An unknown error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
   
   if (loading || !profile) {
@@ -374,3 +374,5 @@ export default function EditUserDetailPage() {
     </div>
   );
 }
+
+    

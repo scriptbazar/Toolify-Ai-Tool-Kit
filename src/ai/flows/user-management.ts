@@ -21,6 +21,38 @@ import {
     type AddLeadUserInput,
 } from './user-management.schemas';
 
+const UserProfileUpdateSchema = z.object({
+  firstName: z.string().min(1, 'First name is required.'),
+  lastName: z.string().min(1, 'Last name is required.'),
+  userName: z.string().min(3, 'Username must be at least 3 characters.'),
+  mobileNumber: z.string().optional(),
+  countryCode: z.string().optional(),
+  enable2FA: z.boolean().optional(),
+  twoFactorAuthMethods: z.object({
+    email: z.boolean().optional(),
+    authenticatorApp: z.boolean().optional(),
+    mobileNumber: z.boolean().optional(),
+  }).optional(),
+});
+
+export async function updateUserProfile(userId: string, profileData: any): Promise<{ success: boolean; message: string }> {
+  const adminDb = getAdminDb();
+  if (!adminDb || !userId) {
+    return { success: false, message: 'Invalid user or database connection.' };
+  }
+  try {
+    const validatedData = UserProfileUpdateSchema.parse(profileData);
+    const userRef = adminDb.collection('users').doc(userId);
+    await userRef.update(validatedData);
+    return { success: true, message: 'Profile updated successfully.' };
+  } catch (error: any) {
+    console.error("Error updating user profile:", error);
+     if (error.name === 'ZodError') {
+      return { success: false, message: `Validation error: ${error.errors.map((e: any) => e.message).join(', ')}` };
+    }
+    return { success: false, message: error.message || 'An unknown error occurred.' };
+  }
+}
 
 export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ success: boolean; message: string }> {
   const adminDb = getAdminDb();
@@ -361,3 +393,5 @@ export async function deleteUser(userId: string): Promise<{ success: boolean; me
     return { success: false, message: error.message || 'An unknown error occurred.' };
   }
 }
+
+    
