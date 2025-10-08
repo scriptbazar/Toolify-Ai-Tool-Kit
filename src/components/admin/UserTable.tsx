@@ -99,7 +99,7 @@ export function UserTable({ users, onRoleChange, onDeleteUser }: UserTableProps)
                   ) : '—'}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={user.role === 'admin' ? 'default' : (user.role === 'user' ? 'secondary' : 'outline')}>
+                  <Badge variant={user.role === 'admin' ? 'default' : (user.type === 'Signup' ? 'secondary' : 'outline')}>
                     {user.role}
                   </Badge>
                 </TableCell>
@@ -115,7 +115,7 @@ export function UserTable({ users, onRoleChange, onDeleteUser }: UserTableProps)
                         <DropdownMenuItem asChild>
                           <Link href={`/admin/users/${user.id}`}><Edit className="mr-2 h-4 w-4" /> Edit User</Link>
                         </DropdownMenuItem>
-                        {user.role !== 'lead' && (
+                        {user.type === 'Signup' && (
                         <DropdownMenuSub>
                           <DropdownMenuSubTrigger><UserCog className="mr-2 h-4 w-4"/> Set Role</DropdownMenuSubTrigger>
                           <DropdownMenuSubContent>

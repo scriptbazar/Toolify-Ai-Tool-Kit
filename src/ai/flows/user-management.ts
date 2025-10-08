@@ -101,7 +101,7 @@ export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: b
   }
 }
 
-export async function getAllEmails(): Promise<{ email: string; source: string; date: string }[]> {
+export async function getAllEmails(): Promise<{ id: string, name: string, email: string; userName?: string; role?: 'admin' | 'user'; source: string; date: string }[]> {
    const adminDb = getAdminDb();
    if (!adminDb) {
     console.error("Firebase Admin is not initialized. Cannot fetch emails.");
@@ -112,21 +112,20 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
     const leadsSnapshot = await adminDb.collection('leads').get();
     const commentsSnapshot = await adminDb.collection('comments').get();
 
-    const emailMap = new Map<string, { source: string; date: string }>();
+    const emailMap = new Map<string, { id: string; name: string; userName?: string; role?: 'admin' | 'user'; source: string; date: string }>();
 
     const processDoc = (doc: FirebaseFirestore.QueryDocumentSnapshot, source: 'Signup' | 'Lead' | 'Comment') => {
       const data = doc.data();
-      // Assume email exists; validation can be added.
       const email = data.email || (source === 'Comment' ? data.authorEmail : undefined);
       
       if (!email || typeof email !== 'string') return;
 
-      // If an email already exists from a "higher" source, don't overwrite it.
-      // Precedence: Signup > Lead > Comment
-      const existingSource = emailMap.get(email)?.source;
-      if (existingSource === 'Signup') return;
-      if (existingSource === 'Lead' && source === 'Comment') return;
-      
+      const existing = emailMap.get(email);
+      const isSignup = source === 'Signup';
+      // Prioritize 'Signup' source over others
+      if (existing && existing.source === 'Signup' && !isSignup) return;
+
+
       const timestamp = data.createdAt || data.submittedOn;
       let dateString: string;
 
@@ -138,17 +137,25 @@ export async function getAllEmails(): Promise<{ email: string; source: string; d
         dateString = new Date().toISOString();
       }
       
-      emailMap.set(email, { source, date: dateString });
+      const name = isSignup ? `${data.firstName || ''} ${data.lastName || ''}`.trim() : data.name || data.authorName || 'Unknown';
+
+      emailMap.set(email, { 
+          id: doc.id,
+          name: name,
+          userName: data.userName,
+          role: data.role,
+          source, 
+          date: dateString 
+        });
     };
     
     usersSnapshot.forEach(doc => processDoc(doc, 'Signup'));
     leadsSnapshot.forEach(doc => processDoc(doc, 'Lead'));
     commentsSnapshot.forEach(doc => processDoc(doc, 'Comment'));
 
-    const allEmails = Array.from(emailMap.entries()).map(([email, { source, date }]) => ({
+    const allEmails = Array.from(emailMap.entries()).map(([email, data]) => ({
       email,
-      source,
-      date,
+      ...data
     }));
 
     allEmails.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -393,5 +400,3 @@ export async function deleteUser(userId: string): Promise<{ success: boolean; me
     return { success: false, message: error.message || 'An unknown error occurred.' };
   }
 }
-
-    

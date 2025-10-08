@@ -2,16 +2,14 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collection, getDocs, query, orderBy, limit, startAfter, endBefore, Query, DocumentData, QueryDocumentSnapshot, where, QueryConstraint } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, MoreHorizontal, User, Users, UserPlus, Search, MessageSquare, Edit, Copy, UserCog, Trash2, Check, Shield, ArrowLeft, ArrowRight } from 'lucide-react';
+import { AlertCircle, Users, UserPlus, Search, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { updateUserRole, deleteUser } from '@/ai/flows/user-management';
+import { updateUserRole, deleteUser, getAllEmails } from '@/ai/flows/user-management';
 import dynamic from 'next/dynamic';
 
 const UserTable = dynamic(() => import('@/components/admin/UserTable').then(mod => mod.UserTable), {
@@ -22,10 +20,9 @@ const UserTable = dynamic(() => import('@/components/admin/UserTable').then(mod 
     )
 });
 
-
 interface User {
   id: string;
-  name: string; // Combined name
+  name: string;
   email: string;
   userName?: string;
   role: 'admin' | 'user' | 'lead';
@@ -37,88 +34,32 @@ interface User {
   createdAtString?: string;
 }
 
-
-const ITEMS_PER_PAGE = 10;
-
 export default function AdminUsersPage() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'signup' | 'lead' | 'comment'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageDocs, setPageDocs] = useState<(QueryDocumentSnapshot<DocumentData> | null)[]>( [null] );
   
   const { toast } = useToast();
 
-  const fetchUsersAndLeads = async (page = 1, direction: 'next' | 'prev' | 'first' = 'first') => {
+  const fetchUsersAndLeads = async () => {
     setLoading(true);
     try {
-        const usersCollection = collection(db, 'users');
-        const leadsCollection = collection(db, 'leads');
-        const constraints: QueryConstraint[] = [orderBy('createdAt', 'desc')];
-        
-        const getQuery = (coll: Query<DocumentData>) => {
-            let q = query(coll, ...constraints);
-            if (direction === 'next' && page > 1 && pageDocs[page - 1]) {
-                q = query(coll, ...constraints, startAfter(pageDocs[page - 1]), limit(ITEMS_PER_PAGE));
-            } else if (direction === 'prev' && page > 0 && pageDocs[page - 1]) {
-                q = query(coll, ...constraints, endBefore(pageDocs[page - 1]), limit(ITEMS_PER_PAGE));
-            } else {
-                 q = query(coll, ...constraints, limit(ITEMS_PER_PAGE));
-            }
-            return q;
-        }
+      const combinedList = await getAllEmails();
+      
+      const mappedList: User[] = combinedList.map(item => ({
+          id: item.email, // Using email as a unique ID for leads/comments without a real ID
+          name: item.name || item.email.split('@')[0],
+          email: item.email,
+          role: item.source === 'Signup' ? (item.role || 'user') : 'lead',
+          type: item.source as 'Signup' | 'Lead' | 'Comment',
+          userName: item.userName,
+          createdAtString: item.date,
+      }));
 
-        let usersSnapshot, leadsSnapshot;
-        if (activeFilter === 'all' || activeFilter === 'signup') {
-            usersSnapshot = await getDocs(getQuery(usersCollection));
-        }
-        if (activeFilter === 'all' || activeFilter === 'lead') {
-            leadsSnapshot = await getDocs(getQuery(leadsCollection));
-        }
-       
-        const usersList: User[] = usersSnapshot?.docs.map(doc => {
-            const data = doc.data();
-            const createdAtTimestamp = data.createdAt;
-            return {
-            id: doc.id,
-            name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
-            email: data.email,
-            userName: data.userName,
-            role: data.role,
-            type: 'Signup',
-            createdAt: createdAtTimestamp,
-            createdAtString: createdAtTimestamp?.toDate ? createdAtTimestamp.toDate().toISOString() : new Date().toISOString(),
-            };
-        }) || [];
-
-        const leadsList: User[] = leadsSnapshot?.docs.map(doc => {
-            const data = doc.data();
-            const createdAtTimestamp = data.createdAt;
-            return {
-            id: doc.id,
-            name: data.name,
-            email: data.email,
-            role: 'lead',
-            type: 'Lead',
-            createdAt: createdAtTimestamp,
-            createdAtString: createdAtTimestamp?.toDate ? createdAtTimestamp.toDate().toISOString() : new Date().toISOString(),
-            };
-        }) || [];
-        
-        const combinedList = [...usersList, ...leadsList].sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0));
-        
-        const lastDoc = usersSnapshot?.docs[usersSnapshot.docs.length - 1] || leadsSnapshot?.docs[leadsSnapshot.docs.length - 1];
-        
-        setPageDocs(prev => {
-            const newDocs = [...prev];
-            newDocs[page] = lastDoc || null;
-            return newDocs;
-        });
-
-        setAllUsers(combinedList);
-        setError(null);
+      setAllUsers(mappedList);
+      setError(null);
     } catch (err: any) {
       console.error("Error fetching data:", err);
       if (err.code === 'permission-denied' || err.code === 'failed-precondition') {
@@ -132,21 +73,8 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
-    fetchUsersAndLeads(1, 'first');
-  }, [activeFilter]);
-  
-  const handleNextPage = () => {
-    const newPage = currentPage + 1;
-    setCurrentPage(newPage);
-    fetchUsersAndLeads(newPage, 'next');
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage <= 1) return;
-    const newPage = currentPage - 1;
-    setCurrentPage(newPage);
-    fetchUsersAndLeads(newPage, 'prev');
-  };
+    fetchUsersAndLeads();
+  }, []);
 
   const filteredUsers = useMemo(() => {
     return allUsers.filter(user => {
@@ -158,13 +86,10 @@ export default function AdminUsersPage() {
 
   const handleFilterChange = (filter: 'all' | 'signup' | 'lead' | 'comment') => {
       setActiveFilter(filter);
-      setCurrentPage(1);
-      setPageDocs([null]);
   };
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchQuery(e.target.value);
-      setCurrentPage(1);
   };
 
   return (
@@ -213,7 +138,7 @@ export default function AdminUsersPage() {
           </div>
           {loading && (
              <div className="space-y-2">
-                {[...Array(ITEMS_PER_PAGE)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+                {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
              </div>
           )}
           {error && (
@@ -230,7 +155,7 @@ export default function AdminUsersPage() {
                   updateUserRole({ userId, newRole }).then(result => {
                     if (result.success) {
                       toast({ title: 'Success', description: 'User role updated successfully.' });
-                      fetchUsersAndLeads(currentPage, 'first');
+                      fetchUsersAndLeads();
                     } else {
                       toast({ title: 'Error', description: result.message, variant: 'destructive' });
                     }
@@ -240,7 +165,7 @@ export default function AdminUsersPage() {
                   deleteUser(userId).then(result => {
                     if (result.success) {
                       toast({ title: 'Success', description: 'User has been deleted.' });
-                      fetchUsersAndLeads(currentPage, 'first');
+                      fetchUsersAndLeads();
                     } else {
                       toast({ title: 'Error', description: result.message, variant: 'destructive' });
                     }
@@ -248,27 +173,6 @@ export default function AdminUsersPage() {
                 }}
               />
           )}
-           <div className="flex items-center justify-end space-x-2 pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePrevPage}
-                disabled={currentPage === 1}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                  Page {currentPage}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleNextPage}
-                disabled={filteredUsers.length < ITEMS_PER_PAGE}
-              >
-                Next <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
         </CardContent>
       </Card>
     </div>
