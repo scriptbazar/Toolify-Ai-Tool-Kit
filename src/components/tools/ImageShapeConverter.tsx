@@ -76,34 +76,36 @@ export function ImageShapeConverter() {
           ctx.ellipse(w / 2, h / 2, w / 2, h * 0.4, 0, 0, Math.PI * 2);
           break;
         case 'heart':
-            ctx.moveTo(w/2, h*0.35);
-            ctx.bezierCurveTo(w/2, h*0.3, w*0.4, h*0.15, w/2, h*0.15);
-            ctx.bezierCurveTo(w*0.1, h*0.15, 0, h*0.625, 0, h*0.625);
-            ctx.bezierCurveTo(0, h*0.8, w*0.15, h*0.9, w/2, h);
-            ctx.bezierCurveTo(w*0.85, h*0.9, w, h*0.8, w, h*0.625);
-            ctx.bezierCurveTo(w, h*0.625, w*0.9, h*0.15, w/2, h*0.15);
-            ctx.bezierCurveTo(w*0.6, h*0.15, w/2, h*0.3, w/2, h*0.35);
+            ctx.moveTo(w / 2, h * 0.35);
+            ctx.bezierCurveTo(w / 2, h * 0.3, w * 0.4, h * 0.15, w / 2, h * 0.15);
+            ctx.bezierCurveTo(w * 0.1, h * 0.15, 0, h * 0.625, 0, h * 0.625);
+            ctx.bezierCurveTo(0, h * 0.8, w * 0.15, h * 0.95, w / 2, h);
+            ctx.bezierCurveTo(w * 0.85, h * 0.95, w, h * 0.8, w, h * 0.625);
+            ctx.bezierCurveTo(w, h * 0.625, w * 0.9, h * 0.15, w / 2, h * 0.15);
+            ctx.bezierCurveTo(w * 0.6, h * 0.15, w / 2, h * 0.3, w / 2, h * 0.35);
             break;
         case 'star':
             const spikes = 5; let rot = Math.PI / 2 * 3;
             const step = Math.PI / spikes; const outerRadius = w / 2; const innerRadius = w / 4;
-            ctx.moveTo(w/2, h/2 - outerRadius);
+            ctx.moveTo(w / 2, 0);
             for (let i = 0; i < spikes; i++) {
-                ctx.lineTo(w/2 + Math.cos(rot) * outerRadius, h/2 + Math.sin(rot) * outerRadius);
+                ctx.lineTo(w / 2 + Math.cos(rot) * outerRadius, h / 2 + Math.sin(rot) * outerRadius);
                 rot += step;
-                ctx.lineTo(w/2 + Math.cos(rot) * innerRadius, h/2 + Math.sin(rot) * innerRadius);
+                ctx.lineTo(w / 2 + Math.cos(rot) * innerRadius, h / 2 + Math.sin(rot) * innerRadius);
                 rot += step;
             }
-            ctx.closePath();
             break;
         case 'hexagon':
-            for (let i = 0; i < 6; i++) { ctx.lineTo(w/2 + w/2 * Math.cos(Math.PI / 3 * i), h/2 + h/2 * Math.sin(Math.PI / 3 * i));}
+            ctx.moveTo(w, h / 2);
+            for (let i = 1; i <= 6; i++) { ctx.lineTo(w/2 + w/2 * Math.cos(Math.PI / 3 * i), h/2 + h/2 * Math.sin(Math.PI / 3 * i));}
             break;
         case 'octagon':
-            for (let i = 0; i < 8; i++) { ctx.lineTo(w/2 + w/2 * Math.cos(Math.PI / 4 * i + Math.PI/8), h/2 + h/2 * Math.sin(Math.PI / 4 * i + Math.PI/8));}
+            ctx.moveTo(w / 2 + (w / 2) * Math.cos(Math.PI / 8), h / 2 + (h / 2) * Math.sin(Math.PI / 8));
+            for (let i = 1; i <= 8; i++) { ctx.lineTo(w/2 + w/2 * Math.cos(Math.PI / 4 * i + Math.PI/8), h/2 + h/2 * Math.sin(Math.PI / 4 * i + Math.PI/8));}
             break;
         case 'pentagon':
-            for (let i = 0; i < 5; i++) { ctx.lineTo(w / 2 + (w / 2) * Math.sin(2 * Math.PI * i / 5), h / 2 - (h / 2) * Math.cos(2 * Math.PI * i / 5)); }
+            ctx.moveTo(w / 2, 0);
+            for (let i = 1; i <= 5; i++) { ctx.lineTo(w / 2 + (w / 2) * Math.sin(2 * Math.PI * i / 5), h / 2 - (h / 2) * Math.cos(2 * Math.PI * i / 5)); }
             break;
         case 'triangle':
            ctx.moveTo(w / 2, 0); ctx.lineTo(w, h); ctx.lineTo(0, h);
