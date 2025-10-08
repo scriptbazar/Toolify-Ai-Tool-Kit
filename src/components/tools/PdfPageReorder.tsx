@@ -4,7 +4,7 @@
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, Download, Loader2, Shuffle, Trash2, GripVertical, FileText } from 'lucide-react';
+import { UploadCloud, Download, Loader2, Shuffle, Trash2, GripVertical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
@@ -179,7 +179,7 @@ export function PdfPageReorder() {
                                 onDragEnd={handleDragSort}
                                 onDragOver={(e) => e.preventDefault()}
                             >
-                                <GripVertical className="h-5 w-5 text-muted-foreground self-center"/>
+                                <GripVertical className="h-5 w-5 text-muted-foreground self-center shrink-0"/>
                                  <div className="w-full aspect-[2/3] bg-white flex items-center justify-center text-5xl font-bold text-muted-foreground shadow-md relative">
                                     {page.dataUrl ? (
                                         <Image src={page.dataUrl} alt={`Page ${page.originalIndex + 1}`} layout="fill" objectFit="contain" />
