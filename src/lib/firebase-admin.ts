@@ -9,10 +9,11 @@ import { getAuth, Auth } from 'firebase-admin/auth';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import serviceAccount from '@/firebase-service-account-key.json';
 
-// This function ensures that the admin app is initialized only once.
+
 function getAdminApp(): App {
-  if (getApps().length > 0) {
-    return getApps()[0];
+  const apps = getApps();
+  if (apps.length > 0) {
+    return apps[0];
   }
   
   try {
@@ -26,11 +27,13 @@ function getAdminApp(): App {
 }
 
 export function getAdminDb(): Firestore {
-    return getFirestore(getAdminApp());
+    const app = getAdminApp();
+    return getFirestore(app);
 }
 
 export function getAdminAuth(): Auth {
-    return getAuth(getAdminApp());
+    const app = getAdminApp();
+    return getAuth(app);
 }
 
 
