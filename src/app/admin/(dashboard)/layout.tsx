@@ -1,58 +1,79 @@
 
+'use client';
 
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { DashboardLayoutClient } from '@/app/(dashboard)/_components/DashboardLayoutClient';
-import type { User as FirebaseUser } from 'firebase/auth';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
+import { DashboardLayoutClient } from '@/app/admin/_components/DashboardLayoutClient';
 import type { DocumentData } from 'firebase-admin/firestore';
+import { Loader2 } from 'lucide-react';
+import { Logo } from '@/components/common/Logo';
+import React from 'react';
 
-// Server-side function to get user and check admin role
-async function getAdminUser(): Promise<{ user: FirebaseUser, userData: DocumentData } | null> {
-  const sessionCookie = cookies().get('session')?.value;
-  if (!sessionCookie) return null;
-
-  try {
-    const adminAuth = getAdminAuth();
-    const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-    
-    const adminDb = getAdminDb();
-    const userDocRef = adminDb.collection("users").doc(decodedToken.uid);
-    const userDocSnap = await userDocRef.get();
-
-    if (userDocSnap.exists() && userDocSnap.data()?.role === 'admin') {
-      return { 
-        user: decodedToken as unknown as FirebaseUser, 
-        userData: userDocSnap.data()! 
-      };
-    }
-    return null;
-  } catch (error) {
-    console.error("Admin verification failed:", error);
-    return null;
-  }
-}
-
-export default async function AdminDashboardLayout({
+export default function UserPanelLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const adminData = await getAdminUser();
-  
-  if (!adminData) {
-    // If not an admin, redirect to login page at the server level.
-    // This is more reliable than client-side redirects.
-    redirect('/admin/login');
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [userData, setUserData] = useState<DocumentData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const userDocRef = doc(db, 'users', firebaseUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data();
+             if (data.role !== 'admin') {
+                // If a non-admin tries to access the admin dashboard, redirect them.
+                router.replace('/dashboard');
+                return;
+             }
+            setUser(firebaseUser);
+            setUserData(data);
+          } else {
+             // User exists in auth but not firestore, probably an error state
+            await auth.signOut();
+            router.replace('/login');
+            return;
+          }
+        } catch (error) {
+          console.error("Auth check error in admin layout:", error);
+          router.replace('/login');
+        } finally {
+            setLoading(false);
+        }
+      } else {
+        // No user is signed in
+        router.replace('/admin/login');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  if (loading || !user || !userData) {
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
+        <Logo className="h-16 w-16 animate-pulse" />
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <p className="text-lg">Loading Admin Panel...</p>
+        </div>
+      </div>
+    );
   }
 
-  const { user, userData } = adminData;
-
-  // Pass the verified user and data to the client component for rendering the UI.
   return (
     <DashboardLayoutClient user={user} userData={userData}>
       {children}
     </DashboardLayoutClient>
   );
 }
-
