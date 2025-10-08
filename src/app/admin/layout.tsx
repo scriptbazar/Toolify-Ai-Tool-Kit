@@ -6,6 +6,7 @@ import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { DocumentData } from 'firebase-admin/firestore';
 import React from 'react';
+import { unstable_cache as cache } from 'next/cache';
 import { Timestamp } from 'firebase-admin/firestore';
 
 // Helper function to safely convert Timestamps to ISO strings
@@ -27,37 +28,42 @@ function serializeTimestamps(obj: any): any {
   return obj;
 }
 
-async function getAuthenticatedAdmin(): Promise<{ user: FirebaseUser; userData: DocumentData | null; } | null> {
+
+const getAuthenticatedAdmin = cache(
+  async () => {
     const sessionCookie = cookies().get('session')?.value;
     if (!sessionCookie) {
-        return null;
-    };
+      return null;
+    }
 
     try {
-        const adminAuth = getAdminAuth();
-        const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-        
-        const db = getAdminDb();
-        const userDocSnap = await db.collection('users').doc(decodedToken.uid).get();
-        
-        if (!userDocSnap.exists || userDocSnap.data()?.role !== 'admin') {
-            return null; // Not an admin or user document doesn't exist
-        }
+      const adminAuth = getAdminAuth();
+      const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+      
+      const db = getAdminDb();
+      const userDocSnap = await db.collection('users').doc(decodedToken.uid).get();
+      
+      if (!userDocSnap.exists() || userDocSnap.data()?.role !== 'admin') {
+        return null; // Not an admin or user document doesn't exist
+      }
 
-        const userData = userDocSnap.data() as DocumentData;
-        const serializableUserData = serializeTimestamps(userData);
-        
-        return {
-            user: decodedToken as unknown as FirebaseUser,
-            userData: serializableUserData,
-        };
+      const userData = userDocSnap.data() as DocumentData;
+      const serializableUserData = serializeTimestamps(userData);
+      
+      return {
+        user: decodedToken as unknown as FirebaseUser,
+        userData: serializableUserData,
+      };
 
     } catch (error) {
-        // If verifySessionCookie fails (e.g., cookie expired), it's not a valid session.
-        console.error('Admin auth check error in layout:', error);
-        return null;
+      // If verifySessionCookie fails (e.g., cookie expired), it's not a valid session.
+      console.error('Admin auth check error in layout:', error);
+      return null;
     }
-}
+  },
+  ['admin-auth-check'],
+  { revalidate: 5 } // Revalidate every 5 seconds
+);
 
 
 export default async function AdminLayout({
