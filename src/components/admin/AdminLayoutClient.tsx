@@ -60,7 +60,8 @@ import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
 import { AdminSidebarNav } from '@/components/admin/AdminSidebarNav';
 import type { User as FirebaseUser } from 'firebase/auth';
-import type { DocumentData } from 'firebase-admin/firestore';
+import type { DocumentData } from 'firebase/firestore';
+import React, { useEffect } from 'react';
 
 
 // The actual client-side layout component
@@ -78,6 +79,17 @@ export function AdminLayoutClient({
   const { toast } = useToast();
   
   const isLoginPage = pathname === '/admin/login';
+
+  useEffect(() => {
+    if (!user) {
+      if (!isLoginPage) {
+        router.replace('/admin/login');
+      }
+    } else if (userData?.role !== 'admin') {
+      router.replace('/dashboard');
+    }
+  }, [user, userData, isLoginPage, router]);
+
 
   const handleLogout = async () => {
     try {
@@ -103,7 +115,7 @@ export function AdminLayoutClient({
     return <>{children}</>;
   }
   
-  if (!user) {
+  if (!user || userData?.role !== 'admin') {
     return (
         <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
           <Logo className="h-16 w-16 animate-pulse" />
