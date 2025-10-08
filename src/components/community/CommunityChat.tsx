@@ -438,7 +438,9 @@ export function CommunityChat({ isAdmin }: CommunityChatProps) {
                     userId: currentUser.uid,
                     type: 'community-chat',
                     mediaUrl: imageUrl,
-                    prompt: `Community Chat Attachment: ${attachment.name}`
+                    prompt: `Community Chat Attachment: ${attachment.name}`,
+                    createdAt: new Date().toISOString(),
+                    expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
                 });
             }
             

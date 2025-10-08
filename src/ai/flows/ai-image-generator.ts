@@ -23,6 +23,36 @@ const GenerateImageOutputSchema = z.object({
 const SaveUserMediaInputSchema = UserMediaSchema.omit({ id: true });
 type SaveUserMediaInput = z.infer<typeof SaveUserMediaInputSchema>;
 
+export async function saveUserMedia(input: SaveUserMediaInput): Promise<{ success: boolean; message: string }> {
+    const adminDb = getAdminDb();
+    if (!adminDb) {
+        return { success: false, message: "Database not initialized." };
+    }
+
+    try {
+        const { userId, type, mediaUrl, prompt } = input;
+        
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + (type === 'community-chat' ? 2 : 15)); // 2 days for chat, 15 for others
+
+        await addDoc(collection(adminDb, 'userMedia'), {
+            userId,
+            type,
+            mediaUrl,
+            prompt: prompt || '',
+            createdAt: FieldValue.serverTimestamp(),
+            expiresAt: expiresAt,
+        });
+
+        return { success: true, message: "Media saved successfully." };
+
+    } catch (error: any) {
+        console.error("Error saving user media:", error);
+        return { success: false, message: error.message || 'An unknown error occurred.' };
+    }
+}
+
+
 export async function generateImage(input: z.infer<typeof GenerateImageInputSchema>): Promise<z.infer<typeof GenerateImageOutputSchema>> {
   const { promptText, userId } = input;
   
@@ -39,20 +69,13 @@ export async function generateImage(input: z.infer<typeof GenerateImageInputSche
   }
 
   // Save the generated media to the user's library with a 15-day expiration
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 15);
-
-  const adminDb = getAdminDb();
-  if (!adminDb) {
-    throw new Error("Database not initialized.");
-  }
-  await addDoc(collection(adminDb, 'userMedia'), {
+  await saveUserMedia({
       userId: userId,
       type: 'ai-generated',
       mediaUrl: generatedImage.url,
       prompt: promptText,
-      createdAt: FieldValue.serverTimestamp(),
-      expiresAt: expiresAt,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
   });
   
   return { imageDataUri: generatedImage.url };
