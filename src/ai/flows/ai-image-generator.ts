@@ -58,8 +58,6 @@ export async function generateImage(input: z.infer<typeof GenerateImageInputSche
   if (!generatedImage) {
     throw new Error('Image generation failed.');
   }
-
-  // The media saving logic is now moved to the client-side component that calls this.
   
   return { imageDataUri: generatedImage.url };
 }
