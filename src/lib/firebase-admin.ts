@@ -13,13 +13,14 @@ import serviceAccount from '@/firebase-service-account-key.json';
 // This is a singleton pattern to ensure Firebase Admin is initialized only once.
 let adminApp: App | undefined;
 
-function getInitializedApp(): App {
+function getAdminApp(): App {
   if (adminApp) {
     return adminApp;
   }
 
-  if (getApps().length > 0) {
-    adminApp = getApps()[0];
+  const apps = getApps();
+  if (apps.length > 0) {
+    adminApp = apps[0];
     return adminApp;
   }
 
@@ -31,39 +32,41 @@ function getInitializedApp(): App {
   return adminApp;
 }
 
-
 export function getAdminDb(): Firestore {
-    const app = getInitializedApp();
-    return getFirestore(app);
+  return getFirestore(getAdminApp());
 }
 
 export function getAdminAuth(): Auth {
-    const app = getInitializedApp();
-    return getAuth(app);
+  return getAuth(getAdminApp());
+}
+
+export function getAdminStorage() {
+  return getStorage(getAdminApp());
 }
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
 
 export async function getSettingsData(): Promise<AppSettings> {
+  try {
     const db = getAdminDb();
-    try {
-        const docRef = db.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
-        const docSnap = await docRef.get();
+    const docRef = db.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
+    const docSnap = await docRef.get();
 
-        if (docSnap.exists) {
-            const parsedData = AppSettingsSchema.safeParse(docSnap.data());
-            if (parsedData.success) {
-                return parsedData.data;
-            } else {
-                console.warn("Firestore settings data is invalid, returning partial valid data.", parsedData.error.flatten());
-                return { ...AppSettingsSchema.parse({}), ...docSnap.data() };
-            }
+    if (docSnap.exists) {
+        const parsedData = AppSettingsSchema.safeParse(docSnap.data());
+        if (parsedData.success) {
+            return parsedData.data;
         } else {
-           return AppSettingsSchema.parse({});
+            console.warn("Firestore settings data is invalid, returning partial valid data.", parsedData.error.flatten());
+            // Return what is valid, merged with an empty schema to ensure all keys are present.
+            return { ...AppSettingsSchema.parse({}), ...docSnap.data() };
         }
-    } catch (error: any) {
-        console.error("Error getting settings from admin DB:", error.message);
-        throw new Error("Could not fetch settings from Firestore.");
+    } else {
+       return AppSettingsSchema.parse({});
     }
+  } catch (error: any) {
+    console.error("Error getting settings from admin DB:", error.message);
+    throw new Error("Could not fetch settings from Firestore.");
+  }
 }
