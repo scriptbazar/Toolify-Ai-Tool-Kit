@@ -67,9 +67,6 @@ const nextConfig: NextConfig = {
     // on the client.
     config.externals.push('canvas');
     
-    // Disable caching to resolve "invalid block type" error from corrupted cache
-    config.cache = false;
-    
     return config;
   },
 };
