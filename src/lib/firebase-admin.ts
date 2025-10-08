@@ -10,37 +10,42 @@ import { getStorage } from 'firebase-admin/storage';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import serviceAccount from '@/firebase-service-account-key.json';
 
+// This function ensures that the Firebase Admin app is initialized only once.
 const getAdminApp = (): App => {
-    // Check if an app is already initialized
     if (getApps().length > 0) {
         return getApps()[0];
     }
     
-    // If not, initialize a new one
+    return initializeApp({
+        credential: cert(serviceAccount as ServiceAccount),
+        storageBucket: `${serviceAccount.project_id}.appspot.com`,
+    });
+};
+
+export function getAdminDb(): Firestore {
     try {
-        return initializeApp({
-            credential: cert(serviceAccount as ServiceAccount),
-            storageBucket: `${serviceAccount.project_id}.appspot.com`,
-        });
+        return getFirestore(getAdminApp());
     } catch (error: any) {
-        console.error("Firebase Admin initialization error:", error.message);
-        throw new Error("Failed to initialize Firebase Admin SDK. Check service account credentials and server environment.");
+        console.error("Error getting Firestore instance:", error.message);
+        // Fallback or re-throw to make the error obvious during development
+        throw new Error("Failed to get Firestore instance. Firebase Admin might not be initialized correctly.");
     }
 }
 
-export function getAdminDb(): Firestore {
-    return getFirestore(getAdminApp());
-}
-
 export function getAdminAuth(): Auth {
-    return getAuth(getAdminApp());
+     try {
+        return getAuth(getAdminApp());
+    } catch (error: any) {
+        console.error("Error getting Auth instance:", error.message);
+        throw new Error("Failed to get Auth instance. Firebase Admin might not be initialized correctly.");
+    }
 }
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
 
 export async function getSettingsData(): Promise<AppSettings> {
-    const db = getAdminDb(); // Always get the DB instance from the helper
+    const db = getAdminDb();
     try {
         const docRef = db.collection(SETTINGS_COLLECTION).doc(MAIN_SETTINGS_DOC_ID);
         const docSnap = await docRef.get();
