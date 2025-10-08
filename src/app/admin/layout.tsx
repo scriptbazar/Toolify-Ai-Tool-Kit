@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { AdminLayoutClient } from '@/app/admin/_components/AdminLayoutClient';
+import { AdminLayoutClient } from './_components/AdminLayoutClient';
 import { useEffect } from 'react';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';

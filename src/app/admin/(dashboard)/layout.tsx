@@ -1,4 +1,5 @@
 
+
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -54,3 +55,4 @@ export default async function AdminDashboardLayout({
     </DashboardLayoutClient>
   );
 }
+
