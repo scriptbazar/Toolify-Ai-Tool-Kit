@@ -1,8 +1,11 @@
 
-import { getPosts } from '@/ai/flows/blog-management';
-import { getTools } from '@/ai/flows/tool-management';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { getPosts, type Post } from '@/ai/flows/blog-management';
+import { getTools, type Tool } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -10,13 +13,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import * as Icons from 'lucide-react';
-
-export async function generateStaticParams() {
-  const posts = await getPosts();
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
-}
+import { type AppSettings } from '@/ai/flows/settings-management.types';
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <Card>
@@ -29,19 +26,44 @@ const SidebarWidget = ({ title, children }: { title: string, children: React.Rea
     </Card>
 );
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  const allPosts = await getPosts();
-  const post = allPosts.find((p) => p.slug === params.slug);
-  const settings = await getSettings();
+export default function BlogPostPage() {
+    const params = useParams();
+    const slug = params.slug as string;
 
-  if (!post) {
-    notFound();
-  }
-  
+    const [post, setPost] = useState<Post | null>(null);
+    const [settings, setSettings] = useState<AppSettings | null>(null);
+    const [popularTools, setPopularTools] = useState<Tool[]>([]);
+    const [recentPosts, setRecentPosts] = useState<Post[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchData() {
+            const [allPostsData, settingsData, allToolsData] = await Promise.all([
+                getPosts(),
+                getSettings(),
+                getTools(),
+            ]);
+
+            const currentPost = allPostsData.find((p) => p.slug === slug);
+            if (!currentPost) {
+                notFound();
+                return;
+            }
+
+            setPost(currentPost);
+            setSettings(settingsData);
+            setPopularTools(allToolsData.filter(t => t.status === 'Active').slice(0, 10));
+            setRecentPosts(allPostsData.filter(p => p.status === 'Published' && p.id !== currentPost.id).slice(0, 10));
+            setLoading(false);
+        }
+        fetchData();
+    }, [slug]);
+
+    if (loading || !post || !settings) {
+        return <div>Loading post...</div>; // Or a skeleton loader
+    }
+
   const sidebarSettings = settings.sidebar?.blogSidebar;
-  const popularTools = (await getTools()).filter(t => t.status === 'Active').slice(0, 10);
-  const recentPosts = allPosts.filter(p => p.status === 'Published' && p.id !== post.id).slice(0, 10);
-
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">

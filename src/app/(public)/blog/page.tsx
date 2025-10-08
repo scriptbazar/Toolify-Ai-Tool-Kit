@@ -1,28 +1,40 @@
 
+'use client';
 
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { getPosts } from '@/ai/flows/blog-management';
+import { getPosts, type Post } from '@/ai/flows/blog-management';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 const POSTS_PER_PAGE = 6;
 
-export default async function BlogPage({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
-    const allPosts = await getPosts();
-    const publishedPosts = allPosts.filter(p => p.status === 'Published');
-    
-    const currentPage = Number(searchParams?.page || 1);
-    const totalPages = Math.ceil(publishedPosts.length / POSTS_PER_PAGE);
+export default function BlogPage() {
+    const searchParams = useSearchParams();
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const paginatedPosts = publishedPosts.slice(
+    useEffect(() => {
+        getPosts().then(allPosts => {
+            const publishedPosts = allPosts.filter(p => p.status === 'Published');
+            setPosts(publishedPosts);
+            setLoading(false);
+        });
+    }, []);
+
+    const currentPage = Number(searchParams.get('page') || 1);
+    const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
+
+    const paginatedPosts = posts.slice(
         (currentPage - 1) * POSTS_PER_PAGE,
         currentPage * POSTS_PER_PAGE
     );
+
+    if (loading) {
+        return <div className="container mx-auto px-4 py-12 md:py-20">Loading posts...</div>
+    }
 
     return (
         <div className="container mx-auto px-4 py-12 md:py-20">

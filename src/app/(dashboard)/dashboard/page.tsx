@@ -1,89 +1,88 @@
 
+'use client';
+
 import { getSettings } from '@/ai/flows/settings-management';
 import { getAnnouncementsForUser } from '@/ai/flows/announcement-flow';
 import { DashboardClient } from './_components/DashboardClient';
-import { unstable_cache as cache } from 'next/cache';
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
+import { useEffect, useState } from 'react';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { Timestamp, type DocumentData } from 'firebase-admin/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-
-const getDashboardData = cache(async (uid: string) => {
-    const adminDb = getAdminDb();
-    const settings = await getSettings(); // Fetch settings outside to leverage its own cache
-    
-    const userDocRef = adminDb.collection("users").doc(uid);
-    const referralsQuery = adminDb.collection("users").where("referredBy", "==", uid);
-    const activityQuery = adminDb.collection(`users/${uid}/activity`).where('type', '==', 'tool_usage');
-
-    const [userDocSnap, fetchedAnnouncements, referralsSnapshot, activitySnapshot] = await Promise.all([
-      userDocRef.get(),
-      getAnnouncementsForUser(uid),
-      referralsQuery.get(),
-      activityQuery.get(),
-    ]);
-  
-    const userData = userDocSnap.exists ? userDocSnap.data() : null;
-    
-    // Convert Firestore Timestamps to serializable format (ISO strings)
-    const serializableProfile = userData ? {
-        ...userData,
-        createdAt: (userData.createdAt as Timestamp)?.toDate().toISOString() || null,
-        lastActive: (userData.lastActive as Timestamp)?.toDate().toISOString() || null,
-        subscriptionEndDate: (userData.subscriptionEndDate as Timestamp)?.toDate().toISOString() || null,
-        referralRequestDate: (userData.referralRequestDate as Timestamp)?.toDate().toISOString() || null,
-    } : null;
-
-    const userPlan = settings.plan?.plans.find(p => p.id === userData?.planId) || settings.plan?.plans.find(p => p.id === 'free') || null;
-  
-    const stats = {
-      toolsUsed: activitySnapshot.size,
-      referrals: referralsSnapshot.size,
-    };
-  
-    return {
-      profile: serializableProfile,
-      plan: userPlan,
-      announcements: fetchedAnnouncements,
-      stats: stats,
-    };
-  }, ['dashboard-data'], { revalidate: 300 }); // Cache for 5 minutes
-
-// Helper function to get user from cookie, specific to this Server Component
-async function getPageUser(): Promise<FirebaseUser | null> {
-    const sessionCookie = cookies().get('session')?.value;
-    if (!sessionCookie) return null;
-
-    try {
-        const adminAuth = getAdminAuth();
-        const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-        return decodedToken as unknown as FirebaseUser;
-    } catch (error) {
-        return null;
-    }
-}
+import { useAuth } from '@/hooks/use-auth';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { type Plan } from '@/ai/flows/settings-management.types';
+import { type Announcement } from '@/ai/flows/announcement-flow.types';
 
 // This is a Server Component and will fetch its own data.
-export default async function UserDashboard() {
-  const user = await getPageUser();
-  
-  if (!user) {
-    // This should not happen if the layout's redirect works, but it's a safeguard.
-    redirect('/login');
+export default function UserDashboard() {
+  const { user } = useAuth();
+  const [dashboardData, setDashboardData] = useState<{
+    profile: DocumentData | null,
+    plan: Plan | null,
+    announcements: Announcement[],
+    stats: { toolsUsed: number, referrals: number }
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      const getDashboardData = async (uid: string) => {
+          const settings = await getSettings();
+          const userDocRef = doc(db, "users", uid);
+          const referralsQuery = query(collection(db, "users"), where("referredBy", "==", uid));
+          const activityQuery = query(collection(db, `users/${uid}/activity`), where('type', '==', 'tool_usage'));
+
+          const [userDocSnap, fetchedAnnouncements, referralsSnapshot, activitySnapshot] = await Promise.all([
+            getDoc(userDocRef),
+            getAnnouncementsForUser(uid),
+            getDocs(referralsQuery),
+            getDocs(activityQuery),
+          ]);
+        
+          const userData = userDocSnap.exists() ? userDocSnap.data() : null;
+          
+          const serializableProfile = userData ? {
+              ...userData,
+              createdAt: (userData.createdAt as Timestamp)?.toDate().toISOString() || null,
+              lastActive: (userData.lastActive as Timestamp)?.toDate().toISOString() || null,
+              subscriptionEndDate: (userData.subscriptionEndDate as Timestamp)?.toDate().toISOString() || null,
+              referralRequestDate: (userData.referralRequestDate as Timestamp)?.toDate().toISOString() || null,
+          } : null;
+      
+          const userPlan = settings.plan?.plans.find(p => p.id === userData?.planId) || settings.plan?.plans.find(p => p.id === 'free') || null;
+        
+          const stats = {
+            toolsUsed: activitySnapshot.size,
+            referrals: referralsSnapshot.size,
+          };
+        
+          setDashboardData({
+            profile: serializableProfile,
+            plan: userPlan,
+            announcements: fetchedAnnouncements,
+            stats: stats,
+          });
+          setLoading(false);
+        };
+        getDashboardData(user.uid);
+    }
+  }, [user]);
+
+  if (loading || !dashboardData) {
+      return <div>Loading...</div>;
   }
   
-  const { profile, plan, announcements, stats } = await getDashboardData(user.uid);
-  const welcomeMessage = profile?.firstName ? `Welcome Back, ${profile.firstName}!` : "User Dashboard";
+  const welcomeMessage = dashboardData.profile?.firstName ? `Welcome Back, ${dashboardData.profile.firstName}!` : "User Dashboard";
 
   return (
     <DashboardClient 
         welcomeMessage={welcomeMessage}
-        profile={profile as any}
-        plan={plan as any}
-        stats={stats}
-        announcements={announcements}
-        uid={user.uid}
+        profile={dashboardData.profile}
+        plan={dashboardData.plan}
+        stats={dashboardData.stats}
+        announcements={dashboardData.announcements}
+        uid={user!.uid}
     />
   );
 }
