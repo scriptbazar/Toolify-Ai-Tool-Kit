@@ -60,3 +60,4 @@ export async function getSettingsData(): Promise<AppSettings> {
         throw new Error("Could not fetch settings from Firestore.");
     }
 }
+
