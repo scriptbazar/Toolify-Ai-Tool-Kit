@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Initializes and exports the Firebase Admin SDK instances.
  * This file handles server-side Firebase connections.
@@ -9,7 +10,7 @@ import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-managem
 import serviceAccount from '@/firebase-service-account-key.json';
 
 // This function ensures that the admin app is initialized only once.
-function getInitializedApp(): App {
+function getAdminApp(): App {
   if (getApps().length > 0) {
     return getApps()[0];
   }
@@ -25,11 +26,11 @@ function getInitializedApp(): App {
 }
 
 export function getAdminDb(): Firestore {
-    return getFirestore(getInitializedApp());
+    return getFirestore(getAdminApp());
 }
 
 export function getAdminAuth(): Auth {
-    return getAuth(getInitializedApp());
+    return getAuth(getAdminApp());
 }
 
 

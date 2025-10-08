@@ -1,3 +1,4 @@
+
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp, type FirebaseOptions } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -13,28 +14,8 @@ const firebaseConfig: FirebaseOptions = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-function getFirebaseApp() {
-    if (!getApps().length) {
-        if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-            console.error("Missing Firebase configuration. Please check your .env.local file.");
-            // In a real app, you might want to throw an error or handle this case more gracefully.
-            // For now, we'll return a dummy object to avoid crashing the server during build if env is missing.
-            return null;
-        }
-        return initializeApp(firebaseConfig);
-    } else {
-        return getApp();
-    }
-}
-
-const app = getFirebaseApp();
-const auth = app ? getAuth(app) : null;
-const db = app ? getFirestore(app) : null;
-
-// Throw an error if initialization failed and the objects are null.
-// This will be more descriptive than the downstream Firestore errors.
-if (!app || !auth || !db) {
-    throw new Error("Firebase could not be initialized. Please check your environment variables and Firebase configuration.");
-}
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 export { app, auth, db };
