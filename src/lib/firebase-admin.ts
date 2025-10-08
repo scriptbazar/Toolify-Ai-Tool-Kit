@@ -10,46 +10,30 @@ import { getStorage } from 'firebase-admin/storage';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import serviceAccount from '../../firebase-service-account-key.json';
 
-let adminApp: App;
-let adminAuth: Auth;
-let adminDb: Firestore;
-
+// This is a robust way to ensure Firebase Admin is initialized only once.
 function getAdminApp(): App {
-  if (adminApp) {
-    return adminApp;
-  }
-
   const apps = getApps();
   if (apps.length > 0) {
-    adminApp = apps[0]!;
-  } else {
-    adminApp = initializeApp({
-      credential: cert(serviceAccount as ServiceAccount),
-      storageBucket: `${serviceAccount.project_id}.appspot.com`,
-    });
+    return apps[0]!;
   }
-  return adminApp;
+  return initializeApp({
+    credential: cert(serviceAccount as ServiceAccount),
+    storageBucket: `${serviceAccount.project_id}.appspot.com`,
+  });
 }
 
+const adminApp = getAdminApp();
+
 export function getAdminDb(): Firestore {
-  if (adminDb) {
-    return adminDb;
-  }
-  adminDb = getFirestore(getAdminApp());
-  return adminDb;
+  return getFirestore(adminApp);
 }
 
 export function getAdminAuth(): Auth {
-  if (adminAuth) {
-    return adminAuth;
-  }
-  adminAuth = getAuth(getAdminApp());
-  return adminAuth;
+  return getAuth(adminApp);
 }
 
-
 export function getAdminStorage() {
-  return getStorage(getAdminApp());
+  return getStorage(adminApp);
 }
 
 const SETTINGS_COLLECTION = 'settings';
