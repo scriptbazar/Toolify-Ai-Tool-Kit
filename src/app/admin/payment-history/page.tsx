@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -36,7 +37,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDesc,
+  DialogDescription as DialogDesc,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Badge } from '@/components/ui/badge';

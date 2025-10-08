@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -19,7 +20,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDesc,
+  DialogDescription as DialogDesc,
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";

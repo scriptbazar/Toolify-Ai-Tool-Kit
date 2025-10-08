@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -211,7 +212,7 @@ export default function CommentsPage() {
                                 </Link>
                             </TableCell>
                             <TableCell>{new Date(comment.submittedOn).toLocaleDateString()}</TableCell>
-                            <TableCell>{getStatusBadge(comment.status as FilterType)}</TableCell>
+                            <TableCell>{getStatusBadge(comment.status as CommentStatus)}</TableCell>
                             <TableCell className="text-right">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
