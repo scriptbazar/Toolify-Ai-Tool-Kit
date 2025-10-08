@@ -36,6 +36,8 @@ import { countries } from '@/lib/countries';
 import { Combobox } from '@/components/ui/combobox';
 import { sendPasswordChangeEmail } from '@/ai/flows/send-email';
 import { useParams, useRouter } from 'next/navigation';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 
 interface UserProfile {
@@ -148,45 +150,43 @@ export default function EditUserDetailPage() {
 
   const handleSaveChanges = async () => {
     if (!user || !profile) return;
-    
+
     if (newPassword && newPassword !== confirmPassword) {
-        toast({ title: 'Error', description: 'New passwords do not match.', variant: 'destructive' });
-        return;
+      toast({ title: 'Error', description: 'New passwords do not match.', variant: 'destructive' });
+      return;
     }
 
     setIsSaving(true);
-    try {
-      // Update profile in Firestore
-      const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, { ...profile });
+    const userDocRef = doc(db, 'users', user.uid);
 
-      // Update password in Firebase Auth if a new one is provided
-      if (newPassword && user) {
-        await updatePassword(user, newPassword);
-        
-        // Send password change notification email
-        await sendPasswordChangeEmail({
+    updateDoc(userDocRef, { ...profile })
+      .then(async () => {
+        if (newPassword && user) {
+          await updatePassword(user, newPassword);
+          await sendPasswordChangeEmail({
             to: profile.email,
-            name: profile.firstName
-        });
-        
-        setNewPassword('');
-        setConfirmPassword('');
-      }
-
-       toast({
-        title: 'Profile Updated',
-        description: 'Your profile has been saved successfully.',
-      });
-    } catch (error: any) {
+            name: profile.firstName,
+          });
+          setNewPassword('');
+          setConfirmPassword('');
+        }
         toast({
-            title: 'Error',
-            description: error.message || 'Could not save your profile.',
-            variant: 'destructive',
+          title: 'Profile Updated',
+          description: 'Your profile has been saved successfully.',
         });
-    } finally {
+      })
+      .catch((serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: userDocRef.path,
+          operation: 'update',
+          requestResourceData: profile,
+        } satisfies SecurityRuleContext, serverError);
+
+        errorEmitter.emit('permission-error', permissionError);
+      })
+      .finally(() => {
         setIsSaving(false);
-    }
+      });
   };
   
   if (loading || !profile) {

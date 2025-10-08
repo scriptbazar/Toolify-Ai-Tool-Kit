@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/common/ThemeProvider';
 import { getSettings } from '@/ai/flows/settings-management';
 import Script from 'next/script';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -45,6 +46,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <FirebaseErrorListener />
           {children}
           <Toaster />
         </ThemeProvider>
