@@ -23,22 +23,11 @@ const getAdminApp = (): App => {
 };
 
 export function getAdminDb(): Firestore {
-    try {
-        return getFirestore(getAdminApp());
-    } catch (error: any) {
-        console.error("Error getting Firestore instance:", error.message);
-        // Fallback or re-throw to make the error obvious during development
-        throw new Error("Failed to get Firestore instance. Firebase Admin might not be initialized correctly.");
-    }
+    return getFirestore(getAdminApp());
 }
 
 export function getAdminAuth(): Auth {
-     try {
-        return getAuth(getAdminApp());
-    } catch (error: any) {
-        console.error("Error getting Auth instance:", error.message);
-        throw new Error("Failed to get Auth instance. Firebase Admin might not be initialized correctly.");
-    }
+    return getAuth(getAdminApp());
 }
 
 const SETTINGS_COLLECTION = 'settings';
