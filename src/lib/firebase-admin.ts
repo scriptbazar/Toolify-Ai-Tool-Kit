@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Initializes and exports the Firebase Admin SDK instances.
  * This file handles server-side Firebase connections.
@@ -12,27 +11,20 @@ import serviceAccount from '@/firebase-service-account-key.json';
 let adminApp: App | undefined;
 
 function getInitializedApp(): App {
-  if (adminApp) {
-    return adminApp;
+  if (getApps().length === 0) {
+      try {
+          adminApp = initializeApp({
+              credential: cert(serviceAccount as ServiceAccount)
+          });
+          console.log("Firebase Admin SDK initialized successfully.");
+      } catch (error: any) {
+          console.error("Firebase Admin initialization error:", error.message);
+          throw new Error("Failed to initialize Firebase Admin SDK. Check service account credentials and server environment.");
+      }
+  } else {
+      adminApp = getApps()[0];
   }
-
-  const apps = getApps();
-  if (apps.length > 0) {
-    adminApp = apps[0];
-    return adminApp!;
-  }
-  
-  try {
-      adminApp = initializeApp({
-          credential: cert(serviceAccount as ServiceAccount)
-      });
-      console.log("Firebase Admin SDK initialized successfully.");
-      return adminApp;
-  } catch (error: any) {
-      console.error("Firebase Admin initialization error:", error.message);
-      // This will prevent the app from running if Firebase Admin can't initialize, which is safer.
-      throw new Error("Failed to initialize Firebase Admin SDK. Check service account credentials and server environment.");
-  }
+  return adminApp!;
 }
 
 // Firestore and Auth instances are lazy-loaded to ensure the app is initialized first.
