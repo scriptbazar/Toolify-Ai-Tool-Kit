@@ -9,50 +9,50 @@ import { getAuth, Auth } from 'firebase-admin/auth';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
 import serviceAccount from '@/firebase-service-account-key.json';
 
-// Define a type for our global variable to ensure type safety.
-declare global {
-  var __firebaseAdminApp__: App | undefined;
-}
+let adminApp: App | undefined;
 
-function getAdminApp(): App {
-  if (global.__firebaseAdminApp__) {
-    return global.__firebaseAdminApp__;
+function getInitializedApp(): App {
+  if (adminApp) {
+    return adminApp;
   }
 
-  if (getApps().length > 0) {
-    global.__firebaseAdminApp__ = getApps()[0];
-    return global.__firebaseAdminApp__!;
+  const apps = getApps();
+  if (apps.length > 0) {
+    adminApp = apps[0];
+    return adminApp!;
   }
-
+  
   try {
-    const app = initializeApp({
-      credential: cert(serviceAccount as ServiceAccount)
-    });
-    global.__firebaseAdminApp__ = app;
-    console.log("Firebase Admin SDK initialized successfully.");
-    return app;
+      adminApp = initializeApp({
+          credential: cert(serviceAccount as ServiceAccount)
+      });
+      console.log("Firebase Admin SDK initialized successfully.");
+      return adminApp;
   } catch (error: any) {
-    console.error("Firebase Admin initialization error:", error.message);
-    throw new Error("Failed to initialize Firebase Admin SDK.");
+      console.error("Firebase Admin initialization error:", error.message);
+      // This will prevent the app from running if Firebase Admin can't initialize, which is safer.
+      throw new Error("Failed to initialize Firebase Admin SDK. Check service account credentials and server environment.");
   }
 }
 
-let adminAuth: Auth | null = null;
+// Firestore and Auth instances are lazy-loaded to ensure the app is initialized first.
 let adminDb: Firestore | null = null;
+let adminAuth: Auth | null = null;
 
 export function getAdminDb(): Firestore {
     if (!adminDb) {
-        adminDb = getFirestore(getAdminApp());
+        adminDb = getFirestore(getInitializedApp());
     }
     return adminDb;
 }
 
 export function getAdminAuth(): Auth {
     if (!adminAuth) {
-        adminAuth = getAuth(getAdminApp());
+        adminAuth = getAuth(getInitializedApp());
     }
     return adminAuth;
 }
+
 
 const SETTINGS_COLLECTION = 'settings';
 const MAIN_SETTINGS_DOC_ID = 'main';
