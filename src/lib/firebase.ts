@@ -1,3 +1,4 @@
+
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp, type FirebaseOptions } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -5,7 +6,7 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig: FirebaseOptions = {
-  apiKey: "AIzaSyC5LdE4-CCe4x_T84D-iZkC1x4cKx_xXxx",
+  apiKey: "AIzaSyA4259SgKef4wJ9wD6vZN-ko-tP3E1a8_Y",
   authDomain: "toolifyai-7sfvi.firebaseapp.com",
   projectId: "toolifyai-7sfvi",
   storageBucket: "toolifyai-7sfvi.appspot.com",
