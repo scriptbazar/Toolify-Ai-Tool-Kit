@@ -1,4 +1,4 @@
-'use server';
+
 // Since Next.js now handles dotenv, we don't need it here for the dev server
 // if it shares the same environment. If running separately, you might need it.
 // For now, we assume a unified environment.
@@ -22,3 +22,4 @@ import '@/ai/flows/encryption-actions.ts';
 import '@/ai/flows/ai-email-composer.ts';
 import '@/ai/flows/youtube-data.ts';
 import '@/ai/flows/website-analyzer.ts';
+import '@/ai/flows/ai-image-generator.ts';
