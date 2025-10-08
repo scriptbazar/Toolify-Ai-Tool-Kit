@@ -1,84 +1,77 @@
 
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
 import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient';
+import { Loader2 } from 'lucide-react';
+import { Logo } from '@/components/common/Logo';
 import type { User as FirebaseUser } from 'firebase/auth';
-import type { DocumentData } from 'firebase-admin/firestore';
+import type { DocumentData } from 'firebase/firestore';
 import React from 'react';
-import { unstable_cache as cache } from 'next/cache';
-import { Timestamp } from 'firebase-admin/firestore';
 
-// Helper function to safely convert Timestamps to ISO strings
-function serializeTimestamps(obj: any): any {
-  if (!obj) return obj;
-  if (obj instanceof Timestamp) {
-    return obj.toDate().toISOString();
-  }
-  if (Array.isArray(obj)) {
-    return obj.map(serializeTimestamps);
-  }
-  if (typeof obj === 'object') {
-    const newObj: { [key: string]: any } = {};
-    for (const key in obj) {
-      newObj[key] = serializeTimestamps(obj[key]);
-    }
-    return newObj;
-  }
-  return obj;
-}
-
-
-const getAuthenticatedAdmin = cache(
-  async () => {
-    const sessionCookie = cookies().get('session')?.value;
-    if (!sessionCookie) {
-      return null;
-    }
-
-    try {
-      const adminAuth = getAdminAuth();
-      const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-      
-      const db = getAdminDb();
-      const userDocSnap = await db.collection('users').doc(decodedToken.uid).get();
-      
-      if (!userDocSnap.exists() || userDocSnap.data()?.role !== 'admin') {
-        return null; // Not an admin or user document doesn't exist
-      }
-
-      const userData = userDocSnap.data() as DocumentData;
-      const serializableUserData = serializeTimestamps(userData);
-      
-      return {
-        user: decodedToken as unknown as FirebaseUser,
-        userData: serializableUserData,
-      };
-
-    } catch (error) {
-      // If verifySessionCookie fails (e.g., cookie expired), it's not a valid session.
-      console.error('Admin auth check error in layout:', error);
-      return null;
-    }
-  },
-  ['admin-auth-check'],
-  { revalidate: 5 } // Revalidate every 5 seconds
-);
-
-
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const authData = await getAuthenticatedAdmin();
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [userData, setUserData] = useState<DocumentData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  if (!authData?.user) {
-    redirect('/admin/login');
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const userDocRef = doc(db, 'users', firebaseUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
+            setUser(firebaseUser);
+            setUserData(userDocSnap.data());
+          } else {
+            // User is not an admin or doesn't exist in Firestore, redirect
+            await auth.signOut();
+            router.replace('/admin/login');
+            return;
+          }
+        } catch (error) {
+          console.error("Auth check error in admin layout:", error);
+          router.replace('/admin/login');
+        }
+      } else {
+        // No user is signed in
+        router.replace('/admin/login');
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
+        <Logo className="h-16 w-16 animate-pulse" />
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <p className="text-lg">Verifying Admin Access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    // This case is mostly for when redirect is happening
+    return null; 
   }
 
   return (
-    <AdminLayoutClient user={authData.user} userData={authData.userData}>
+    <AdminLayoutClient user={user} userData={userData}>
       {children}
     </AdminLayoutClient>
   );
