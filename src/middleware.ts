@@ -1,10 +1,13 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getSettings } from '@/ai/flows/settings-management';
+
+export const runtime = 'nodejs';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
+  
   // New Rule: Redirect from /admin or /admin/ to /admin/dashboard
   if (pathname === '/admin' || pathname === '/admin/') {
     return NextResponse.redirect(new URL('/admin/dashboard', request.url));

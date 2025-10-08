@@ -12,9 +12,8 @@ import serviceAccount from '../../firebase-service-account-key.json';
 
 // This is a robust way to ensure Firebase Admin is initialized only once.
 function getAdminApp(): App {
-  const apps = getApps();
-  if (apps.length > 0) {
-    return apps[0]!;
+  if (getApps().length > 0) {
+    return getApps()[0]!;
   }
   return initializeApp({
     credential: cert(serviceAccount as ServiceAccount),
@@ -22,18 +21,16 @@ function getAdminApp(): App {
   });
 }
 
-const adminApp = getAdminApp();
-
 export function getAdminDb(): Firestore {
-  return getFirestore(adminApp);
+  return getFirestore(getAdminApp());
 }
 
 export function getAdminAuth(): Auth {
-  return getAuth(adminApp);
+  return getAuth(getAdminApp());
 }
 
 export function getAdminStorage() {
-  return getStorage(adminApp);
+  return getStorage(getAdminApp());
 }
 
 const SETTINGS_COLLECTION = 'settings';
