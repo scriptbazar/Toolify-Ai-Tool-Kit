@@ -4,6 +4,9 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import path from 'path';
 
 const nextConfig: NextConfig = {
+  experimental: {
+    nodeMiddleware: true,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
