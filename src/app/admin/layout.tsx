@@ -2,18 +2,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient';
+import { DashboardLayoutClient } from '@/app/admin/(dashboard)/_components/DashboardLayoutClient';
+import type { DocumentData } from 'firebase-admin/firestore';
 import { Loader2 } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
-import type { User as FirebaseUser } from 'firebase/auth';
-import type { DocumentData } from 'firebase-admin/firestore';
 import React from 'react';
 
-export default function AdminLayout({
+export default function AdminPanelLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -54,7 +53,7 @@ export default function AdminLayout({
     return () => unsubscribe();
   }, [router]);
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
         <Logo className="h-16 w-16 animate-pulse" />
@@ -66,14 +65,9 @@ export default function AdminLayout({
     );
   }
 
-  if (!user) {
-    // This case is mostly for when redirect is happening
-    return null; 
-  }
-
   return (
-    <AdminLayoutClient user={user} userData={userData}>
+    <DashboardLayoutClient user={user} userData={userData}>
       {children}
-    </AdminLayoutClient>
+    </DashboardLayoutClient>
   );
 }
