@@ -22,3 +22,4 @@ import '@/ai/flows/encryption-actions.ts';
 import '@/ai/flows/ai-email-composer.ts';
 import '@/ai/flows/youtube-data.ts';
 import '@/ai/flows/website-analyzer.ts';
+import '@/ai/flows/ifsc-finder.ts';

@@ -10,6 +10,7 @@ import { Landmark, Loader2, AlertTriangle, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Combobox } from '../ui/combobox';
+import { getBankList, getBranchesForBank } from '@/ai/flows/ifsc-finder';
 
 interface BranchDetails {
     BRANCH: string;
@@ -31,7 +32,9 @@ export function FindIFSCCodeByBankAndCity() {
     const [selectedBank, setSelectedBank] = useState('');
     const [selectedState, setSelectedState] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
-    const [selectedBranch, setSelectedBranch] = useState(''); // Stores the IFSC code of the selected branch
+    const [selectedBranch, setSelectedBranch] = useState('');
+
+    const [bankBranches, setBankBranches] = useState<BranchDetails[]>([]);
 
     const [isLoading, setIsLoading] = useState<'banks' | 'states' | 'cities' | 'branches' | false>(false);
     const [error, setError] = useState<string | null>(null);
@@ -41,10 +44,9 @@ export function FindIFSCCodeByBankAndCity() {
     useEffect(() => {
         async function fetchBanks() {
             setIsLoading('banks');
+            setError(null);
             try {
-                const response = await fetch(`https://ifsc.codes/api/banks`);
-                if (!response.ok) throw new Error('Could not fetch bank list.');
-                const data: { name: string; code: string }[] = await response.json();
+                const data: { name: string; code: string }[] = await getBankList();
                 setBanks(data.map(bank => ({ value: bank.code, label: bank.name })));
             } catch (err: any) {
                 setError(err.message);
@@ -55,22 +57,23 @@ export function FindIFSCCodeByBankAndCity() {
         fetchBanks();
     }, []);
 
-    // Fetch states when a bank is selected
+    // Fetch all branches for a bank when selected, then derive states from it.
     useEffect(() => {
         if (!selectedBank) return;
 
-        async function fetchStates() {
+        async function fetchBankData() {
             setIsLoading('states');
+            setError(null);
             setSelectedState('');
             setStates([]);
             setSelectedCity('');
             setCities([]);
             setBranches([]);
             setSelectedBranch('');
+            setBankBranches([]);
             try {
-                const response = await fetch(`https://ifsc.codes/api/branches/${selectedBank}`);
-                if (!response.ok) throw new Error('Could not fetch states for the selected bank.');
-                const data: BranchDetails[] = await response.json();
+                const data: BranchDetails[] = await getBranchesForBank(selectedBank);
+                setBankBranches(data);
                 const uniqueStates = [...new Set(data.map(branch => branch.STATE))].sort();
                 setStates(uniqueStates);
             } catch (err: any) {
@@ -79,62 +82,32 @@ export function FindIFSCCodeByBankAndCity() {
                 setIsLoading(false);
             }
         }
-        fetchStates();
+        fetchBankData();
     }, [selectedBank]);
     
-    // Fetch cities when a state is selected
+    // Derive cities from the already fetched branches when a state is selected.
     useEffect(() => {
-        if (!selectedBank || !selectedState) return;
-
-        async function fetchCities() {
-            setIsLoading('cities');
-            setSelectedCity('');
-            setCities([]);
-            setBranches([]);
-            setSelectedBranch('');
-            try {
-                // The API doesn't support filtering by state directly when fetching cities.
-                // We fetch all for the bank and then filter.
-                const response = await fetch(`https://ifsc.codes/api/branches/${selectedBank}`);
-                 if (!response.ok) throw new Error('Could not fetch cities.');
-                const data: BranchDetails[] = await response.json();
-                const uniqueCities = [...new Set(data.filter(b => b.STATE === selectedState).map(branch => branch.CITY))].sort();
-                setCities(uniqueCities);
-            } catch (err: any) {
-                setError(err.message);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchCities();
-    }, [selectedState, selectedBank]);
+        if (!selectedState) return;
+        setIsLoading('cities');
+        setSelectedCity('');
+        setCities([]);
+        setBranches([]);
+        setSelectedBranch('');
+        const uniqueCities = [...new Set(bankBranches.filter(b => b.STATE === selectedState).map(branch => branch.CITY))].sort();
+        setCities(uniqueCities);
+        setIsLoading(false);
+    }, [selectedState, bankBranches]);
     
-    // Fetch branches when city is selected
+    // Derive branches when a city is selected
     useEffect(() => {
-        if (!selectedBank || !selectedState || !selectedCity) return;
-        
-        async function fetchBranches() {
-            setIsLoading('branches');
-            setBranches([]);
-            setSelectedBranch('');
-            setError(null);
-             try {
-                const response = await fetch(`https://ifsc.codes/api/branches/${selectedBank}`);
-                if (!response.ok) {
-                    throw new Error('Could not fetch branch details.');
-                }
-                const data: BranchDetails[] = await response.json();
-                const cityBranches = data.filter(b => b.STATE === selectedState && b.CITY === selectedCity);
-                if (cityBranches.length === 0) throw new Error('No branches found for the selected combination.');
-                setBranches(cityBranches);
-            } catch (err: any) {
-                setError(err.message);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchBranches();
-    }, [selectedCity, selectedBank, selectedState]);
+        if (!selectedCity) return;
+        setIsLoading('branches');
+        setBranches([]);
+        setSelectedBranch('');
+        const cityBranches = bankBranches.filter(b => b.STATE === selectedState && b.CITY === selectedCity);
+        setBranches(cityBranches);
+        setIsLoading(false);
+    }, [selectedCity, selectedState, bankBranches]);
 
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
