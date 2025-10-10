@@ -5,12 +5,10 @@ import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient';
 import { useAuth } from '@/hooks/use-auth';
 import { Logo } from '@/components/common/Logo';
 import { Loader2 } from 'lucide-react';
+import { AuthContextProvider } from '@/context/AuthContext';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
-export default function AdminRootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, userData, loading } = useAuth();
   
   if (loading) {
@@ -29,5 +27,19 @@ export default function AdminRootLayout({
       <AdminLayoutClient user={user} userData={userData}>
         {children}
       </AdminLayoutClient>
+  );
+}
+
+
+export default function AdminRootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AuthContextProvider>
+      <FirebaseErrorListener />
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </AuthContextProvider>
   );
 }
