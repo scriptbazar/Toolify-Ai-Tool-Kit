@@ -12,9 +12,8 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { PlusCircle, Loader2 } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';
-import { AdminToolTable } from '@/app/admin/tools/_components/AdminToolTable';
 import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
 
@@ -34,7 +33,7 @@ export default function AdminToolsPage() {
 
     const fetchTools = async () => {
         setLoading(true);
-        const tools = await getTools();
+        const tools = await getTools({status: 'all'});
         setAllTools(tools);
         setFilteredTools(tools); // Initially, filtered tools are all tools
         setLoading(false);

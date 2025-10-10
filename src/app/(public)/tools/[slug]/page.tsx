@@ -1,14 +1,10 @@
 
-
 import { getTools } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
 import { getReviews } from '@/ai/flows/review-management';
 import { getPosts } from '@/ai/flows/blog-management';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import Image from 'next/image';
 import Link from 'next/link';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import * as Icons from 'lucide-react';
@@ -16,7 +12,7 @@ import { ToolPageClient } from './_components/ToolPageClient';
 import { cache } from 'react';
 
 export async function generateStaticParams() {
-  const tools = await getTools();
+  const tools = await getTools({ status: 'Active' });
   return tools.map((tool) => ({
     slug: tool.slug,
   }));
@@ -36,10 +32,8 @@ const SidebarWidget = ({ title, children }: { title: string, children: React.Rea
 const getCachedTools = cache(getTools);
 const getCachedPosts = cache(getPosts);
 
-
 export default async function ToolPage({ params }: { params: { slug: string } }) {
-    const awaitedParams = await params;
-    const slug = awaitedParams.slug;
+    const slug = params.slug;
 
     const [settings, allPosts, allTools, toolReviews] = await Promise.all([
         getSettings(),
@@ -57,7 +51,6 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     const sidebarSettings = settings?.sidebar?.toolSidebar;
     const popularTools = allTools.filter(t => t.status === 'Active' && t.slug !== slug).slice(0, 10);
     const recentPosts = allPosts.filter(p => p.status === 'Published').slice(0, 5);
-    const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
 
     const sidebar = (
         <aside className="w-full lg:w-64 xl:w-80 mt-8 lg:mt-0 space-y-6">
