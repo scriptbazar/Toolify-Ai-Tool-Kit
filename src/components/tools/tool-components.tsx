@@ -29,6 +29,7 @@ export const toolComponents: { [key: string]: React.ComponentType } = {
   'excel-to-pdf': dynamic(() => import('./ExcelToPdf').then(mod => mod.ExcelToPdf)),
   'favicon-checker': dynamic(() => import('./FaviconChecker').then(mod => mod.FaviconChecker)),
   'find-and-replace': dynamic(() => import('./FindAndReplace').then(mod => mod.FindAndReplace)),
+  'find-ifsc-code-by-bank-and-city': dynamic(() => import('./FindIFSCCodeByBankAndCity').then(mod => mod.FindIFSCCodeByBankAndCity)),
   'flip-image': dynamic(() => import('./FlipImage').then(mod => mod.FlipImage)),
   'flipkart-shipping-label-cropper': dynamic(() => import('./FlipkartShippingLabelCropper').then(mod => mod.FlipkartShippingLabelCropper)),
   'fuel-cost-calculator': dynamic(() => import('./FuelCostCalculator').then(mod => mod.FuelCostCalculator)),
