@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { Landmark, Loader2, AlertTriangle, Copy } from 'lucide-react';
+import { Landmark, Loader2, AlertTriangle, Copy, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Combobox } from '../ui/combobox';
@@ -46,8 +46,8 @@ export function FindIFSCCodeByBankAndCity() {
             setIsLoading('banks');
             setError(null);
             try {
-                const data: { name: string; code: string }[] = await getBankList();
-                setBanks(data.map(bank => ({ value: bank.code, label: bank.name })));
+                const data: string[] = await getBankList();
+                setBanks(data.map(bank => ({ value: bank, label: bank })));
             } catch (err: any) {
                 setError(err.message);
             } finally {
@@ -113,6 +113,13 @@ export function FindIFSCCodeByBankAndCity() {
         navigator.clipboard.writeText(text);
         toast({ description: `Copied: ${text}` });
     };
+    
+    const handleFindDetails = () => {
+        if (!selectedBranch) {
+            toast({ title: 'Please select a branch', variant: 'destructive'});
+        }
+        // The details are already shown when a branch is selected, this button is for user confirmation.
+    }
 
     const branchDetailsToShow = useMemo(() => {
         if (!selectedBranch) return null;
@@ -157,12 +164,15 @@ export function FindIFSCCodeByBankAndCity() {
             )}
 
             {branchDetailsToShow && (
-                <Card>
+                <Card className="animate-in fade-in-50">
                     <CardHeader>
                         <CardTitle>{branchDetailsToShow.BANK}</CardTitle>
                         <CardDescription>{branchDetailsToShow.BRANCH} Branch Details</CardDescription>
                     </CardHeader>
                     <CardContent>
+                         <Button onClick={handleFindDetails} className="w-full mb-4">
+                            <Search className="mr-2 h-4 w-4" /> Find IFSC Code & Details
+                        </Button>
                         <Table>
                             <TableBody>
                                 <TableRow>

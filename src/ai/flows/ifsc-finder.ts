@@ -2,14 +2,16 @@
 'use server';
 
 /**
- * @fileOverview A server-side proxy for the ifsc.codes API to avoid CORS issues.
+ * @fileOverview A server-side proxy for the Razorpay IFSC API to avoid CORS issues and handle data fetching.
  */
 
-const API_BASE = 'https://ifsc.codes/api';
+// Note: The ifsc.codes API is down. Switched to Razorpay's unofficial but reliable API.
 
-export async function getBankList() {
+const API_BASE_URL = 'https://ifsc.razorpay.com/';
+
+export async function getBankList(): Promise<string[]> {
     try {
-        const response = await fetch(`${API_BASE}/banks`);
+        const response = await fetch(`${API_BASE_URL}banks`);
         if (!response.ok) {
             throw new Error(`Failed to fetch bank list. Status: ${response.status}`);
         }
@@ -21,11 +23,12 @@ export async function getBankList() {
 }
 
 export async function getBranchesForBank(bankCode: string) {
-     if (!bankCode) {
+    if (!bankCode) {
         throw new Error('Bank code is required.');
     }
     try {
-        const response = await fetch(`${API_BASE}/branches/${bankCode}`);
+        // Razorpay API returns all branches for a bank in a single call.
+        const response = await fetch(`${API_BASE_URL}${bankCode}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch branches for ${bankCode}. Status: ${response.status}`);
         }
