@@ -45,7 +45,11 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
 
     const ToolComponent = useMemo(() => {
         if (!tool || !toolComponents[tool.slug]) return null;
-        return toolComponents[tool.slug];
+        // Use dynamic import here for code splitting
+        return dynamic(() => Promise.resolve(toolComponents[tool.slug]), { 
+            ssr: false,
+            loading: () => <div className="flex justify-center items-center min-h-[200px]"><Icons.Loader2 className="h-8 w-8 animate-spin"/></div>
+        });
     }, [tool]);
 
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
@@ -57,7 +61,7 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
             case 'Coming Soon':
                 return <ToolStatusDisplay icon={Sparkles} title="Coming Soon!" description="Our team is hard at work on this new tool. It will be available shortly!" />;
             default:
-                const Component = ToolComponent ? dynamic(() => Promise.resolve(ToolComponent), { ssr: false }) : null;
+                const Component = ToolComponent;
                 return Component ? <Component /> : (
                     <div className="flex h-full items-center justify-center">
                         <p className="text-lg text-muted-foreground">Tool interface coming soon!</p>
