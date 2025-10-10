@@ -20,18 +20,21 @@ interface BranchDetails {
     STATE: string;
     IFSC: string;
     BANK: string;
+    MICR?: string;
+    CONTACT?: string;
 }
 
 export function FindIFSCCodeByBankAndCity() {
     const [banks, setBanks] = useState<string[]>([]);
     const [states, setStates] = useState<string[]>([]);
     const [cities, setCities] = useState<string[]>([]);
+    const [branches, setBranches] = useState<BranchDetails[]>([]);
     
     const [selectedBank, setSelectedBank] = useState('');
     const [selectedState, setSelectedState] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
+    const [selectedBranch, setSelectedBranch] = useState<string>(''); // For IFSC code
 
-    const [branches, setBranches] = useState<BranchDetails[]>([]);
     const [isLoading, setIsLoading] = useState<'banks' | 'states' | 'cities' | 'branches' | false>(false);
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
@@ -64,6 +67,7 @@ export function FindIFSCCodeByBankAndCity() {
             setSelectedCity('');
             setCities([]);
             setBranches([]);
+            setSelectedBranch('');
             try {
                 const response = await fetch(`https://ifsc.razorpay.com/search?bank=${selectedBank}`);
                 if (!response.ok) throw new Error('Could not fetch states for the selected bank.');
@@ -88,6 +92,7 @@ export function FindIFSCCodeByBankAndCity() {
             setSelectedCity('');
             setCities([]);
             setBranches([]);
+            setSelectedBranch('');
             try {
                 const response = await fetch(`https://ifsc.razorpay.com/search?bank=${selectedBank}&state=${selectedState}`);
                  if (!response.ok) throw new Error('Could not fetch cities.');
@@ -102,45 +107,47 @@ export function FindIFSCCodeByBankAndCity() {
         }
         fetchCities();
     }, [selectedBank, selectedState]);
-
-
-    const handleSearch = async () => {
-        if (!selectedBank || !selectedState || !selectedCity) {
-            toast({ title: 'Missing Information', description: 'Please select a bank, state, and city.', variant: 'destructive' });
-            return;
-        }
-        setIsLoading('branches');
-        setError(null);
-        setBranches([]);
-
-        try {
-            const response = await fetch(`https://ifsc.razorpay.com/search?bank=${selectedBank}&city=${selectedCity}&state=${selectedState}`);
-            if (!response.ok) {
-                 if (response.status === 404) {
-                    throw new Error('No branches found for the selected combination.');
-                }
-                throw new Error('Could not fetch branch details.');
-            }
-            const data: BranchDetails[] = await response.json();
-            if (data.length === 0) {
-                 throw new Error('No branches found for the selected combination.');
-            }
-            setBranches(data);
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
     
+    // Fetch branches when city is selected
+    useEffect(() => {
+        if (!selectedBank || !selectedState || !selectedCity) return;
+        
+        async function fetchBranches() {
+            setIsLoading('branches');
+            setBranches([]);
+            setSelectedBranch('');
+            setError(null);
+             try {
+                const response = await fetch(`https://ifsc.razorpay.com/search?bank=${selectedBank}&city=${selectedCity}&state=${selectedState}`);
+                if (!response.ok) {
+                    if (response.status === 404) throw new Error('No branches found for the selected combination.');
+                    throw new Error('Could not fetch branch details.');
+                }
+                const data: BranchDetails[] = await response.json();
+                if (data.length === 0) throw new Error('No branches found for the selected combination.');
+                setBranches(data);
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchBranches();
+    }, [selectedCity, selectedBank, selectedState]);
+
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
         toast({ description: `Copied: ${text}` });
     };
 
+    const branchDetailsToShow = useMemo(() => {
+        if (!selectedBranch) return null;
+        return branches.find(b => b.IFSC === selectedBranch) || null;
+    }, [selectedBranch, branches]);
+
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 items-end">
                 <div className="space-y-2">
                     <Label htmlFor="bank-select" className="flex items-center gap-2"><Landmark className="h-5 w-5"/>Select Bank</Label>
                     <Combobox items={banks.map(b => ({ value: b, label: b }))} value={selectedBank} onValueChange={setSelectedBank} placeholder="Select a bank..." searchPlaceholder="Search bank..." notFoundMessage="Bank not found."/>
@@ -153,10 +160,18 @@ export function FindIFSCCodeByBankAndCity() {
                     <Label htmlFor="city-select" className="flex items-center gap-2"><Landmark className="h-5 w-5"/>Select City</Label>
                     <Combobox items={cities.map(c => ({ value: c, label: c }))} value={selectedCity} onValueChange={setSelectedCity} placeholder={isLoading === 'cities' ? "Loading..." : "Select a city..."} searchPlaceholder="Search city..." notFoundMessage="City not found." disabled={!selectedState || isLoading === 'cities'} />
                 </div>
-                <Button onClick={handleSearch} disabled={isLoading !== false || !selectedCity}>
-                    {isLoading === 'branches' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Search className="mr-2 h-4 w-4" />}
-                    Find Branches
-                </Button>
+                 <div className="space-y-2">
+                    <Label htmlFor="branch-select" className="flex items-center gap-2"><Landmark className="h-5 w-5"/>Select Branch</Label>
+                    <Combobox 
+                        items={branches.map(b => ({ value: b.IFSC, label: b.BRANCH }))} 
+                        value={selectedBranch} 
+                        onValueChange={setSelectedBranch} 
+                        placeholder={isLoading === 'branches' ? "Loading..." : "Select a branch..."} 
+                        searchPlaceholder="Search branch..." 
+                        notFoundMessage="Branch not found." 
+                        disabled={!selectedCity || isLoading === 'branches'}
+                    />
+                </div>
             </div>
 
             {error && (
@@ -167,48 +182,50 @@ export function FindIFSCCodeByBankAndCity() {
                 </Alert>
             )}
 
-            {(isLoading === 'branches' || branches.length > 0) && (
+            {branchDetailsToShow && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Search Results</CardTitle>
-                        <CardDescription>Found {branches.length} branches for {selectedBank} in {selectedCity}, {selectedState}.</CardDescription>
+                        <CardTitle>{branchDetailsToShow.BANK}</CardTitle>
+                        <CardDescription>{branchDetailsToShow.BRANCH} Branch Details</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ScrollArea className="h-96">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>IFSC Code</TableHead>
-                                        <TableHead>Branch</TableHead>
-                                        <TableHead>Address</TableHead>
+                        <Table>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell className="font-semibold">IFSC Code</TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-mono">{branchDetailsToShow.IFSC}</span>
+                                            <Button variant="ghost" size="icon" onClick={() => handleCopy(branchDetailsToShow.IFSC)}><Copy className="h-4 w-4"/></Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell className="font-semibold">Address</TableCell>
+                                    <TableCell>{branchDetailsToShow.ADDRESS}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell className="font-semibold">City</TableCell>
+                                    <TableCell>{branchDetailsToShow.CITY}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell className="font-semibold">State</TableCell>
+                                    <TableCell>{branchDetailsToShow.STATE}</TableCell>
+                                </TableRow>
+                                 {branchDetailsToShow.MICR && (
+                                     <TableRow>
+                                        <TableCell className="font-semibold">MICR Code</TableCell>
+                                        <TableCell>{branchDetailsToShow.MICR}</TableCell>
                                     </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {isLoading === 'branches' ? (
-                                        [...Array(5)].map((_, i) => (
-                                             <TableRow key={i}>
-                                                <TableCell colSpan={3}><div className="h-6 w-full bg-muted animate-pulse rounded-md" /></TableCell>
-                                             </TableRow>
-                                        ))
-                                    ) : (
-                                        branches.map(branch => (
-                                            <TableRow key={branch.IFSC}>
-                                                <TableCell>
-                                                     <div className="flex items-center gap-1 font-mono text-xs">
-                                                        <span>{branch.IFSC}</span>
-                                                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleCopy(branch.IFSC)}>
-                                                            <Copy className="h-3 w-3" />
-                                                        </Button>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>{branch.BRANCH}</TableCell>
-                                                <TableCell>{branch.ADDRESS}</TableCell>
-                                            </TableRow>
-                                        ))
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </ScrollArea>
+                                 )}
+                                 {branchDetailsToShow.CONTACT && (
+                                     <TableRow>
+                                        <TableCell className="font-semibold">Contact</TableCell>
+                                        <TableCell>{branchDetailsToShow.CONTACT}</TableCell>
+                                    </TableRow>
+                                 )}
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
             )}
