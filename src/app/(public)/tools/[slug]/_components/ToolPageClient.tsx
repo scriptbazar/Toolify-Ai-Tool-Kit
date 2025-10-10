@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, Sparkles, Star, Zap, BrainCircuit, Construction, ShieldCheck, MousePointerClick } from 'lucide-react';
 import { addUserActivity } from '@/ai/flows/user-activity';
-import { toolComponents } from '@/components/tools/tool-components';
 import dynamic from 'next/dynamic';
 
 const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
@@ -34,6 +33,10 @@ interface ToolPageClientProps {
   sidebar: React.ReactNode;
 }
 
+const toPascalCase = (slug: string) => {
+  return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+}
+
 export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolPageClientProps) {
     const { user } = useAuth();
     
@@ -44,12 +47,17 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
     }, [user, tool]);
 
     const ToolComponent = useMemo(() => {
-        if (!tool || !toolComponents[tool.slug]) return null;
-        // Use dynamic import here for code splitting
-        return dynamic(() => Promise.resolve(toolComponents[tool.slug]), { 
-            ssr: false,
-            loading: () => <div className="flex justify-center items-center min-h-[200px]"><Icons.Loader2 className="h-8 w-8 animate-spin"/></div>
-        });
+        if (!tool) return null;
+        
+        const componentName = toPascalCase(tool.slug);
+
+        return dynamic(
+            () => import(`@/components/tools/${componentName}`).then(mod => mod[componentName] || (() => <div>Component not found</div>)),
+            { 
+                ssr: false,
+                loading: () => <div className="flex justify-center items-center min-h-[200px]"><Icons.Loader2 className="h-8 w-8 animate-spin"/></div>
+            }
+        );
     }, [tool]);
 
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
