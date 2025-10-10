@@ -8,8 +8,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/common/ThemeProvider';
 import { getSettings } from '@/ai/flows/settings-management';
 import Script from 'next/script';
-import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
-import { AuthContextProvider } from '@/context/AuthContext';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 

@@ -22,7 +22,7 @@ interface AuthContextType {
   loading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
   user: null,
   userData: null,
   isAdmin: false,
@@ -48,12 +48,14 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
                 setIsAdmin(data.role === 'admin');
                 setUser(firebaseUser);
             } else {
+                // This can happen briefly during user creation
                 setUser(firebaseUser);
                 setUserData(null);
                 setIsAdmin(false);
             }
         } catch (error) {
             console.error("Auth context error:", error);
+            // Reset to a clean state on error
             setUser(null);
             setUserData(null);
             setIsAdmin(false);

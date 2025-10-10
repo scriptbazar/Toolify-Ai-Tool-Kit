@@ -1,45 +1,31 @@
 
 'use client';
 
+import * as React from 'react';
 import {
   Bell,
   Home,
-  LineChart,
-  Settings,
-  Users,
-  PenSquare,
-  Package,
-  History,
-  GitCommitVertical,
-  Megaphone,
-  DatabaseBackup,
-  UserCog,
-  Mail,
-  BookText,
-  Ticket,
-  FileText as FileTextIcon,
-  PlusCircle,
-  LayoutGrid,
-  MessageSquare,
-  BarChart3,
-  Cog,
-  UserPlus,
-  SlidersHorizontal,
-  ListChecks,
-  CreditCard,
   LogOut,
   User,
-  Shield,
+  Settings,
+  Menu,
+  Star,
   ShieldCheck,
+  UserCog,
   Loader2,
-  Footprints,
-  HelpCircle,
-  PanelLeft,
-  Lightbulb,
-  TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { usePathname, useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Logo } from '@/components/common/Logo';
+import { ModeToggle } from '@/components/common/ModeToggle';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,47 +34,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { usePathname, useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Logo } from '@/components/common/Logo';
-import { ModeToggle } from '@/components/common/ModeToggle';
+import { useAuth } from '@/hooks/use-auth';
 import { AdminSidebarNav } from '@/components/admin/AdminSidebarNav';
-import type { User as FirebaseUser } from 'firebase/auth';
-import type { DocumentData } from 'firebase/firestore';
-import React, { useEffect } from 'react';
 
 
 // The actual client-side layout component
 export function AdminLayoutClient({
   children,
-  user,
-  userData,
 }: {
   children: React.ReactNode;
-  user: FirebaseUser | null;
-  userData: DocumentData | null;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
+  const { user, userData, loading } = useAuth();
   
   const isLoginPage = pathname === '/admin/login';
 
-  useEffect(() => {
-    if (!user) {
-      if (!isLoginPage) {
-        router.replace('/admin/login');
+  React.useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        if (!isLoginPage) {
+          router.replace('/admin/login');
+        }
+      } else if (userData?.role !== 'admin') {
+        router.replace('/dashboard');
       }
-    } else if (userData?.role !== 'admin') {
-      router.replace('/dashboard');
     }
-  }, [user, userData, isLoginPage, router]);
+  }, [user, userData, loading, isLoginPage, router]);
 
 
   const handleLogout = async () => {
@@ -115,7 +88,7 @@ export function AdminLayoutClient({
     return <>{children}</>;
   }
   
-  if (!user || userData?.role !== 'admin') {
+  if (loading || !user || userData?.role !== 'admin') {
     return (
         <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
           <Logo className="h-16 w-16 animate-pulse" />
