@@ -3,15 +3,13 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { Table, TableBody, TableCell, TableRow, TableHeader, TableHead } from '@/components/ui/table';
-import { Landmark, Search, Loader2, AlertTriangle, Copy } from 'lucide-react';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { Landmark, Loader2, AlertTriangle, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Combobox } from '../ui/combobox';
-import { ScrollArea } from '../ui/scroll-area';
 
 interface BranchDetails {
     BRANCH: string;
@@ -25,7 +23,7 @@ interface BranchDetails {
 }
 
 export function FindIFSCCodeByBankAndCity() {
-    const [banks, setBanks] = useState<string[]>([]);
+    const [banks, setBanks] = useState<{ value: string; label: string }[]>([]);
     const [states, setStates] = useState<string[]>([]);
     const [cities, setCities] = useState<string[]>([]);
     const [branches, setBranches] = useState<BranchDetails[]>([]);
@@ -33,7 +31,7 @@ export function FindIFSCCodeByBankAndCity() {
     const [selectedBank, setSelectedBank] = useState('');
     const [selectedState, setSelectedState] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
-    const [selectedBranch, setSelectedBranch] = useState<string>(''); // For IFSC code
+    const [selectedBranch, setSelectedBranch] = useState(''); // Stores the IFSC code of the selected branch
 
     const [isLoading, setIsLoading] = useState<'banks' | 'states' | 'cities' | 'branches' | false>(false);
     const [error, setError] = useState<string | null>(null);
@@ -44,10 +42,10 @@ export function FindIFSCCodeByBankAndCity() {
         async function fetchBanks() {
             setIsLoading('banks');
             try {
-                const response = await fetch(`https://ifsc.razorpay.com/banks`);
+                const response = await fetch(`https://ifsc.codes/api/banks`);
                 if (!response.ok) throw new Error('Could not fetch bank list.');
-                const data: string[] = await response.json();
-                setBanks(data);
+                const data: { name: string; code: string }[] = await response.json();
+                setBanks(data.map(bank => ({ value: bank.code, label: bank.name })));
             } catch (err: any) {
                 setError(err.message);
             } finally {
@@ -64,12 +62,13 @@ export function FindIFSCCodeByBankAndCity() {
         async function fetchStates() {
             setIsLoading('states');
             setSelectedState('');
+            setStates([]);
             setSelectedCity('');
             setCities([]);
             setBranches([]);
             setSelectedBranch('');
             try {
-                const response = await fetch(`https://ifsc.razorpay.com/search?bank=${selectedBank}`);
+                const response = await fetch(`https://ifsc.codes/api/branches/${selectedBank}`);
                 if (!response.ok) throw new Error('Could not fetch states for the selected bank.');
                 const data: BranchDetails[] = await response.json();
                 const uniqueStates = [...new Set(data.map(branch => branch.STATE))].sort();
@@ -83,7 +82,7 @@ export function FindIFSCCodeByBankAndCity() {
         fetchStates();
     }, [selectedBank]);
     
-    // Fetch cities when a bank and state are selected
+    // Fetch cities when a state is selected
     useEffect(() => {
         if (!selectedBank || !selectedState) return;
 
@@ -94,10 +93,12 @@ export function FindIFSCCodeByBankAndCity() {
             setBranches([]);
             setSelectedBranch('');
             try {
-                const response = await fetch(`https://ifsc.razorpay.com/search?bank=${selectedBank}&state=${selectedState}`);
+                // The API doesn't support filtering by state directly when fetching cities.
+                // We fetch all for the bank and then filter.
+                const response = await fetch(`https://ifsc.codes/api/branches/${selectedBank}`);
                  if (!response.ok) throw new Error('Could not fetch cities.');
                 const data: BranchDetails[] = await response.json();
-                const uniqueCities = [...new Set(data.map(branch => branch.CITY))].sort();
+                const uniqueCities = [...new Set(data.filter(b => b.STATE === selectedState).map(branch => branch.CITY))].sort();
                 setCities(uniqueCities);
             } catch (err: any) {
                 setError(err.message);
@@ -106,7 +107,7 @@ export function FindIFSCCodeByBankAndCity() {
             }
         }
         fetchCities();
-    }, [selectedBank, selectedState]);
+    }, [selectedState, selectedBank]);
     
     // Fetch branches when city is selected
     useEffect(() => {
@@ -118,14 +119,14 @@ export function FindIFSCCodeByBankAndCity() {
             setSelectedBranch('');
             setError(null);
              try {
-                const response = await fetch(`https://ifsc.razorpay.com/search?bank=${selectedBank}&city=${selectedCity}&state=${selectedState}`);
+                const response = await fetch(`https://ifsc.codes/api/branches/${selectedBank}`);
                 if (!response.ok) {
-                    if (response.status === 404) throw new Error('No branches found for the selected combination.');
                     throw new Error('Could not fetch branch details.');
                 }
                 const data: BranchDetails[] = await response.json();
-                if (data.length === 0) throw new Error('No branches found for the selected combination.');
-                setBranches(data);
+                const cityBranches = data.filter(b => b.STATE === selectedState && b.CITY === selectedCity);
+                if (cityBranches.length === 0) throw new Error('No branches found for the selected combination.');
+                setBranches(cityBranches);
             } catch (err: any) {
                 setError(err.message);
             } finally {
@@ -150,7 +151,7 @@ export function FindIFSCCodeByBankAndCity() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 items-end">
                 <div className="space-y-2">
                     <Label htmlFor="bank-select" className="flex items-center gap-2"><Landmark className="h-5 w-5"/>Select Bank</Label>
-                    <Combobox items={banks.map(b => ({ value: b, label: b }))} value={selectedBank} onValueChange={setSelectedBank} placeholder="Select a bank..." searchPlaceholder="Search bank..." notFoundMessage="Bank not found."/>
+                    <Combobox items={banks} value={selectedBank} onValueChange={setSelectedBank} placeholder="Select a bank..." searchPlaceholder="Search bank..." notFoundMessage="Bank not found."/>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="state-select" className="flex items-center gap-2"><Landmark className="h-5 w-5"/>Select State</Label>
