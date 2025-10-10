@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,20 +13,6 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Combobox } from '../ui/combobox';
 import { ScrollArea } from '../ui/scroll-area';
 
-// A subset of Indian banks for demonstration purposes. A full list would be very large.
-const banks = [
-    "STATE BANK OF INDIA",
-    "HDFC BANK",
-    "ICICI BANK LIMITED",
-    "PUNJAB NATIONAL BANK",
-    "CANARA BANK",
-    "AXIS BANK",
-    "BANK OF BARODA",
-    "UNION BANK OF INDIA",
-    "BANK OF INDIA",
-    "KOTAK MAHINDRA BANK LIMITED"
-];
-
 interface BranchDetails {
     BRANCH: string;
     ADDRESS: string;
@@ -37,36 +23,107 @@ interface BranchDetails {
 }
 
 export function FindIFSCCodeByBankAndCity() {
+    const [banks, setBanks] = useState<string[]>([]);
+    const [states, setStates] = useState<string[]>([]);
+    const [cities, setCities] = useState<string[]>([]);
+    
     const [selectedBank, setSelectedBank] = useState('');
-    const [city, setCity] = useState('');
+    const [selectedState, setSelectedState] = useState('');
+    const [selectedCity, setSelectedCity] = useState('');
+
     const [branches, setBranches] = useState<BranchDetails[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState<'banks' | 'states' | 'cities' | 'branches' | false>(false);
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
 
-    const bankOptions = banks.map(b => ({ value: b, label: b }));
+    // Fetch all banks on initial load
+    useEffect(() => {
+        async function fetchBanks() {
+            setIsLoading('banks');
+            try {
+                const response = await fetch(`https://ifsc.razorpay.com/banks`);
+                if (!response.ok) throw new Error('Could not fetch bank list.');
+                const data: string[] = await response.json();
+                setBanks(data);
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchBanks();
+    }, []);
+
+    // Fetch states when a bank is selected
+    useEffect(() => {
+        if (!selectedBank) return;
+
+        async function fetchStates() {
+            setIsLoading('states');
+            setSelectedState('');
+            setSelectedCity('');
+            setCities([]);
+            setBranches([]);
+            try {
+                const response = await fetch(`https://ifsc.razorpay.com/search?bank=${selectedBank}`);
+                if (!response.ok) throw new Error('Could not fetch states for the selected bank.');
+                const data: BranchDetails[] = await response.json();
+                const uniqueStates = [...new Set(data.map(branch => branch.STATE))].sort();
+                setStates(uniqueStates);
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchStates();
+    }, [selectedBank]);
+    
+    // Fetch cities when a bank and state are selected
+    useEffect(() => {
+        if (!selectedBank || !selectedState) return;
+
+        async function fetchCities() {
+            setIsLoading('cities');
+            setSelectedCity('');
+            setCities([]);
+            setBranches([]);
+            try {
+                const response = await fetch(`https://ifsc.razorpay.com/search?bank=${selectedBank}&state=${selectedState}`);
+                 if (!response.ok) throw new Error('Could not fetch cities.');
+                const data: BranchDetails[] = await response.json();
+                const uniqueCities = [...new Set(data.map(branch => branch.CITY))].sort();
+                setCities(uniqueCities);
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchCities();
+    }, [selectedBank, selectedState]);
+
 
     const handleSearch = async () => {
-        if (!selectedBank || !city) {
-            toast({ title: 'Missing Information', description: 'Please select a bank and enter a city.', variant: 'destructive' });
+        if (!selectedBank || !selectedState || !selectedCity) {
+            toast({ title: 'Missing Information', description: 'Please select a bank, state, and city.', variant: 'destructive' });
             return;
         }
-        setIsLoading(true);
+        setIsLoading('branches');
         setError(null);
         setBranches([]);
 
         try {
-            // Using the unofficial Razorpay IFSC API for searching
-            const response = await fetch(`https://ifsc.razorpay.com/search?bank=${selectedBank}&city=${city}`);
+            const response = await fetch(`https://ifsc.razorpay.com/search?bank=${selectedBank}&city=${selectedCity}&state=${selectedState}`);
             if (!response.ok) {
                  if (response.status === 404) {
-                    throw new Error('No branches found for the selected bank and city combination.');
+                    throw new Error('No branches found for the selected combination.');
                 }
-                throw new Error('Could not fetch branch details. The API might be down.');
+                throw new Error('Could not fetch branch details.');
             }
             const data: BranchDetails[] = await response.json();
             if (data.length === 0) {
-                 throw new Error('No branches found for the selected bank and city combination.');
+                 throw new Error('No branches found for the selected combination.');
             }
             setBranches(data);
         } catch (err: any) {
@@ -83,24 +140,21 @@ export function FindIFSCCodeByBankAndCity() {
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div className="md:col-span-1 space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                <div className="space-y-2">
                     <Label htmlFor="bank-select" className="flex items-center gap-2"><Landmark className="h-5 w-5"/>Select Bank</Label>
-                    <Combobox
-                        items={bankOptions}
-                        value={selectedBank}
-                        onValueChange={setSelectedBank}
-                        placeholder="Select a bank..."
-                        searchPlaceholder="Search bank..."
-                        notFoundMessage="Bank not found."
-                    />
+                    <Combobox items={banks.map(b => ({ value: b, label: b }))} value={selectedBank} onValueChange={setSelectedBank} placeholder="Select a bank..." searchPlaceholder="Search bank..." notFoundMessage="Bank not found."/>
                 </div>
-                <div className="md:col-span-1 space-y-2">
-                     <Label htmlFor="city-input" className="flex items-center gap-2"><Landmark className="h-5 w-5"/>Enter City</Label>
-                    <Input id="city-input" value={city} onChange={(e) => setCity(e.target.value.toUpperCase())} placeholder="e.g., MUMBAI" />
+                <div className="space-y-2">
+                    <Label htmlFor="state-select" className="flex items-center gap-2"><Landmark className="h-5 w-5"/>Select State</Label>
+                    <Combobox items={states.map(s => ({ value: s, label: s }))} value={selectedState} onValueChange={setSelectedState} placeholder={isLoading === 'states' ? "Loading..." : "Select a state..."} searchPlaceholder="Search state..." notFoundMessage="State not found." disabled={!selectedBank || isLoading === 'states'} />
                 </div>
-                <Button onClick={handleSearch} disabled={isLoading} className="w-full md:w-auto">
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Search className="mr-2 h-4 w-4" />}
+                <div className="space-y-2">
+                    <Label htmlFor="city-select" className="flex items-center gap-2"><Landmark className="h-5 w-5"/>Select City</Label>
+                    <Combobox items={cities.map(c => ({ value: c, label: c }))} value={selectedCity} onValueChange={setSelectedCity} placeholder={isLoading === 'cities' ? "Loading..." : "Select a city..."} searchPlaceholder="Search city..." notFoundMessage="City not found." disabled={!selectedState || isLoading === 'cities'} />
+                </div>
+                <Button onClick={handleSearch} disabled={isLoading !== false || !selectedCity}>
+                    {isLoading === 'branches' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Search className="mr-2 h-4 w-4" />}
                     Find Branches
                 </Button>
             </div>
@@ -113,11 +167,11 @@ export function FindIFSCCodeByBankAndCity() {
                 </Alert>
             )}
 
-            {(isLoading || branches.length > 0) && (
+            {(isLoading === 'branches' || branches.length > 0) && (
                 <Card>
                     <CardHeader>
                         <CardTitle>Search Results</CardTitle>
-                        <CardDescription>Found {branches.length} branches for {selectedBank} in {city}.</CardDescription>
+                        <CardDescription>Found {branches.length} branches for {selectedBank} in {selectedCity}, {selectedState}.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ScrollArea className="h-96">
@@ -130,7 +184,7 @@ export function FindIFSCCodeByBankAndCity() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {isLoading ? (
+                                    {isLoading === 'branches' ? (
                                         [...Array(5)].map((_, i) => (
                                              <TableRow key={i}>
                                                 <TableCell colSpan={3}><div className="h-6 w-full bg-muted animate-pulse rounded-md" /></TableCell>
