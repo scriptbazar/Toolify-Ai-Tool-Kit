@@ -33,6 +33,7 @@ export function FindIfscCodeByBankAndCity() {
     const [selectedState, setSelectedState] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
     const [selectedBranch, setSelectedBranch] = useState('');
+    const [branchDetailsToShow, setBranchDetailsToShow] = useState<BranchDetails | null>(null);
 
     const [bankBranches, setBankBranches] = useState<BranchDetails[]>([]);
 
@@ -71,6 +72,7 @@ export function FindIfscCodeByBankAndCity() {
             setBranches([]);
             setSelectedBranch('');
             setBankBranches([]);
+            setBranchDetailsToShow(null);
             try {
                 const data: BranchDetails[] = await getBranchesForBank(selectedBank);
                 setBankBranches(data);
@@ -93,6 +95,7 @@ export function FindIfscCodeByBankAndCity() {
         setCities([]);
         setBranches([]);
         setSelectedBranch('');
+        setBranchDetailsToShow(null);
         const uniqueCities = [...new Set(bankBranches.filter(b => b.STATE === selectedState).map(branch => branch.CITY))].sort();
         setCities(uniqueCities);
         setIsLoading(false);
@@ -104,6 +107,7 @@ export function FindIfscCodeByBankAndCity() {
         setIsLoading('branches');
         setBranches([]);
         setSelectedBranch('');
+        setBranchDetailsToShow(null);
         const cityBranches = bankBranches.filter(b => b.STATE === selectedState && b.CITY === selectedCity);
         setBranches(cityBranches);
         setIsLoading(false);
@@ -117,14 +121,11 @@ export function FindIfscCodeByBankAndCity() {
     const handleFindDetails = () => {
         if (!selectedBranch) {
             toast({ title: 'Please select a branch', variant: 'destructive'});
+            return;
         }
-        // The details are already shown when a branch is selected, this button is for user confirmation.
+        const details = branches.find(b => b.IFSC === selectedBranch) || null;
+        setBranchDetailsToShow(details);
     }
-
-    const branchDetailsToShow = useMemo(() => {
-        if (!selectedBranch) return null;
-        return branches.find(b => b.IFSC === selectedBranch) || null;
-    }, [selectedBranch, branches]);
 
     return (
         <div className="space-y-6">
@@ -154,6 +155,11 @@ export function FindIfscCodeByBankAndCity() {
                     />
                 </div>
             </div>
+            
+            <Button onClick={handleFindDetails} disabled={!selectedBranch} className="w-full">
+                <Search className="mr-2 h-4 w-4" /> Find IFSC Code & Details
+            </Button>
+
 
             {error && (
                 <Alert variant="destructive">
@@ -170,9 +176,6 @@ export function FindIfscCodeByBankAndCity() {
                         <CardDescription>{branchDetailsToShow.BRANCH} Branch Details</CardDescription>
                     </CardHeader>
                     <CardContent>
-                         <Button onClick={handleFindDetails} className="w-full mb-4">
-                            <Search className="mr-2 h-4 w-4" /> Find IFSC Code & Details
-                        </Button>
                         <Table>
                             <TableBody>
                                 <TableRow>
