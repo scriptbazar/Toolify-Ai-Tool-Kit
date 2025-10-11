@@ -128,7 +128,7 @@ export function IfscCodeToBankDetails() {
                                         <TableCell className="font-semibold">MICR Code</TableCell>
                                         <TableCell>{bankDetails.MICR}</TableCell>
                                     </TableRow>
-                                )}
+                                 )}
                                  {bankDetails.CONTACT && (
                                     <TableRow>
                                         <TableCell className="font-semibold">Contact</TableCell>
