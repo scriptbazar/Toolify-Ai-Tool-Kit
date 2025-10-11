@@ -5,9 +5,8 @@
  * @fileOverview A server-side proxy for an IFSC API to avoid CORS issues and handle data fetching.
  */
 
-const API_BASE_URL = 'https://ifsc.bank/api';
-
 export async function getBankList(): Promise<string[]> {
+    const API_BASE_URL = 'https://ifsc.bank/api';
     try {
         const response = await fetch(`${API_BASE_URL}/banks`);
         if (!response.ok) {
@@ -26,6 +25,7 @@ export async function getBankList(): Promise<string[]> {
 }
 
 export async function getBranchesForBank(bankName: string) {
+    const API_BASE_URL = 'https://ifsc.bank/api';
     if (!bankName) {
         throw new Error('Bank name is required.');
     }
