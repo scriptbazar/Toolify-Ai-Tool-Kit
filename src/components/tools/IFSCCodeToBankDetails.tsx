@@ -22,7 +22,7 @@ interface BankDetails {
     CONTACT?: string;
 }
 
-export function IFSCodetoBankDetails() {
+export function IfscCodeToBankDetails() {
     const [ifscCode, setIfscCode] = useState('');
     const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -134,7 +134,7 @@ export function IFSCodetoBankDetails() {
                                         <TableCell className="font-semibold">Contact</TableCell>
                                         <TableCell>{bankDetails.CONTACT}</TableCell>
                                     </TableRow>
-                                )}
+                                 )}
                             </TableBody>
                         </Table>
                     </CardContent>
