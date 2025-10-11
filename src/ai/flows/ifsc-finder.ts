@@ -5,7 +5,6 @@
  * @fileOverview A server-side proxy for an IFSC API to avoid CORS issues and handle data fetching.
  */
 
-// Switched to a new, more reliable API endpoint.
 const API_BASE_URL = 'https://ifsc.bank/api';
 
 export async function getBankList(): Promise<string[]> {
@@ -15,8 +14,6 @@ export async function getBankList(): Promise<string[]> {
             throw new Error(`Failed to fetch bank list. Status: ${response.status}`);
         }
         const data = await response.json();
-        // The new API returns an object with a 'data' key which is an array of objects.
-        // We need to extract the 'bank_name' from each object.
         if (data && Array.isArray(data.data)) {
             return data.data.map((bank: any) => bank.bank_name);
         }
@@ -33,16 +30,15 @@ export async function getBranchesForBank(bankName: string) {
         throw new Error('Bank name is required.');
     }
     try {
-        // The new API requires fetching all branches and then filtering.
-        // This is less efficient but necessary with the new API structure.
-        const response = await fetch(`${API_BASE_URL}/all_branches`);
+        // Corrected to fetch branches for a specific bank directly
+        const response = await fetch(`${API_BASE_URL}/branches/${encodeURIComponent(bankName)}`);
          if (!response.ok) {
             throw new Error(`Failed to fetch branches for ${bankName}. Status: ${response.status}`);
         }
-        const allBranches = await response.json();
+        const data = await response.json();
 
-        if (allBranches && Array.isArray(allBranches.data)) {
-            return allBranches.data.filter((branch: any) => branch.bank_name === bankName);
+        if (data && Array.isArray(data.data)) {
+            return data.data;
         }
         return [];
     } catch (error: any)        {
