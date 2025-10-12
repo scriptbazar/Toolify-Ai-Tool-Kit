@@ -55,7 +55,7 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
         return dynamic(
             () => {
                 if (componentName === 'ImageWatermarkAdder') {
-                    return import(`@/components/tools/AddWatermarkToPdf`).then(mod => mod['AddWatermarkToPdf'] || (() => <div>Component not found</div>));
+                    return import(`@/components/tools/ImageWatermarkAdder`).then(mod => mod['ImageWatermarkAdder'] || (() => <div>Component not found</div>));
                 }
                  if (componentName === 'InterestCalculator') {
                     return import(`@/components/tools/InterestCalculator`).then(mod => mod['InterestCalculator'] || (() => <div>Component not found</div>));

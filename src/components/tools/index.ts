@@ -43,7 +43,7 @@ export { ImageCropper } from './ImageCropper';
 export { ImageResizer } from './ImageResizer';
 export { ImageShapeConverter } from './ImageShapeConverter';
 export { ImageToBase64 } from './ImageToBase64';
-export { ImageWatermarkAdder } from './AddWatermarkToPdf';
+export { ImageWatermarkAdder } from './ImageWatermarkAdder';
 export { ImageMetadataViewer } from './ImageMetadataViewer';
 export { InterestCalculator } from './InterestCalculator';
 export { JavascriptMinifier } from './JavascriptMinifier';
