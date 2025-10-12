@@ -8,21 +8,43 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { Download, SlidersHorizontal, QrCode } from 'lucide-react';
+import { Download, SlidersHorizontal, QrCode, UploadCloud } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import QRCode from 'react-qr-code';
 import { toPng, toJpeg, toSvg } from 'html-to-image';
 import { Switch } from '../ui/switch';
+import Image from 'next/image';
 
 export function QrCodeGenerator() {
   const [value, setValue] = useState('https://toolifyai.com');
   const [size, setSize] = useState(256);
   const [fgColor, setFgColor] = useState('#000000');
   const [bgColor, setBgColor] = useState('#ffffff');
-  const [level, setLevel] = useState<'L' | 'M' | 'Q' | 'H'>('L');
+  const [level, setLevel] = useState<'L' | 'M' | 'Q' | 'H'>('H'); // Higher correction for logo
   const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  // New state for logo
+  const [logoImage, setLogoImage] = useState<string | null>(null);
+  const [logoSize, setLogoSize] = useState(48);
+  const [logoPadding, setLogoPadding] = useState(4);
+  
   const qrCodeRef = useRef<HTMLDivElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setLogoImage(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+    } else {
+        toast({ title: 'Invalid File', description: 'Please select an image file.' });
+    }
+  };
+
 
   const handleDownload = useCallback(async (format: 'png' | 'jpeg' | 'svg') => {
     if (!qrCodeRef.current) {
@@ -101,6 +123,29 @@ export function QrCodeGenerator() {
                                 <Input id="bg-color" type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} />
                             </div>
                         </div>
+
+                         <div className="space-y-4 pt-4 border-t">
+                            <Label className="flex items-center gap-2 font-semibold">
+                                <UploadCloud className="h-5 w-5"/> Logo Options
+                            </Label>
+                            <Button variant="outline" onClick={() => logoInputRef.current?.click()} className="w-full">
+                                {logoImage ? 'Change Logo' : 'Upload Logo'}
+                            </Button>
+                            <input type="file" ref={logoInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*"/>
+                             {logoImage && (
+                                <>
+                                  <div className="space-y-2">
+                                    <Label>Logo Size: {logoSize}px</Label>
+                                    <Slider value={[logoSize]} onValueChange={([val]) => setLogoSize(val)} min={16} max={128} step={4} />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label>Logo Padding: {logoPadding}px</Label>
+                                    <Slider value={[logoPadding]} onValueChange={([val]) => setLogoPadding(val)} min={0} max={16} step={2} />
+                                  </div>
+                                </>
+                            )}
+                        </div>
+
                     </div>
                 )}
             </CardContent>
@@ -111,7 +156,7 @@ export function QrCodeGenerator() {
           <CardTitle>QR Code Preview</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center space-y-4">
-            <div ref={qrCodeRef} className="p-4 inline-block" style={{ background: bgColor }}>
+            <div ref={qrCodeRef} className="p-4 inline-block relative" style={{ background: bgColor }}>
                 <QRCode
                     value={value}
                     size={size}
@@ -119,6 +164,21 @@ export function QrCodeGenerator() {
                     bgColor={bgColor}
                     level={level}
                 />
+                 {logoImage && (
+                    <div 
+                        className="absolute bg-white" 
+                        style={{ 
+                            top: '50%', 
+                            left: '50%', 
+                            transform: 'translate(-50%, -50%)',
+                            width: logoSize,
+                            height: logoSize,
+                            padding: logoPadding,
+                        }}
+                    >
+                        <Image src={logoImage} alt="QR Code Logo" layout="fill" objectFit="contain" />
+                    </div>
+                )}
             </div>
             <div className="w-full space-y-2">
                 <div className="flex gap-2">
@@ -132,3 +192,4 @@ export function QrCodeGenerator() {
     </div>
   );
 }
+
