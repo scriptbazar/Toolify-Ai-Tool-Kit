@@ -5,7 +5,6 @@ import Footer from '@/components/common/Footer';
 import Header from '@/components/common/Header';
 import { AdBlockerDetector } from '@/components/common/AdBlockerDetector';
 import { ClientDynamicChatWidget } from '@/components/common/ClientDynamicChatWidget';
-import { DevelopmentNoticeDialog } from '@/components/common/DevelopmentNoticeDialog';
 import { AuthContextProvider } from '@/context/AuthContext';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
@@ -24,8 +23,8 @@ export default function PublicLayout({
         <ClientDynamicChatWidget />
         <Footer />
         <AdBlockerDetector />
-        <DevelopmentNoticeDialog />
       </div>
     </AuthContextProvider>
   );
 }
+
