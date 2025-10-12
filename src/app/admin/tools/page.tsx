@@ -35,7 +35,7 @@ export default function AdminToolsPage() {
         setLoading(true);
         const tools = await getTools({status: 'all'});
         setAllTools(tools);
-        setFilteredTools(tools); // Initially, filtered tools are all tools
+        setFilteredTools(tools); // Initialize with all tools
         setLoading(false);
     };
 
