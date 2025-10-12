@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import Link from 'next/link';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import * as Icons from 'lucide-react';
-import { ToolPageClient } from './_components/ToolPageClient';
+import { ToolComponentRenderer } from '@/components/tools/tool-components';
 import { useEffect, useState } from 'react';
 import { type Tool } from '@/ai/flows/tool-management.types';
 import { type Review } from '@/ai/flows/review-management.types';
@@ -133,7 +133,7 @@ export default function ToolPage() {
     }
 
     return (
-        <ToolPageClient
+        <ToolComponentRenderer
             tool={pageData.tool}
             toolReviews={pageData.toolReviews}
             adSettings={pageData.adSettings}

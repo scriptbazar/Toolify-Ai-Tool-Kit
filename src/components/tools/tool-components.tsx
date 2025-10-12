@@ -18,6 +18,289 @@ import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, Sparkles, Sta
 import { addUserActivity } from '@/ai/flows/user-activity';
 import dynamic from 'next/dynamic';
 
+// Tool Components
+import { AdMobRevenueCalculator } from '../AdMobRevenueCalculator';
+import { AdSenseRevenueCalculator } from '../AdSenseRevenueCalculator';
+import { AgeCalculator } from '../AgeCalculator';
+import { AmazonShippingLabelCropper } from '../AmazonShippingLabelCropper';
+import { BarcodeGenerator } from '../BarcodeGenerator';
+import { BarcodeScanner } from '../BarcodeScanner';
+import { Base64Converter } from '../Base64Converter';
+import { BinaryToText } from '../BinaryToText';
+import { BmiCalculator } from '../BmiCalculator';
+import { CaseConverter } from '../CaseConverter';
+import { CgpaToGpaConverter } from '../CgpaToGpaConverter';
+import { CgpaToMarksCalculator } from '../CgpaToMarksCalculator';
+import { ColorPicker } from '../ColorPicker';
+import { CompressPdf } from '../CompressPdf';
+import { CreditCardInterestCalculator } from '../CreditCardInterestCalculator';
+import { CrontabGenerator } from '../CrontabGenerator';
+import { CssMinifier } from '../CssMinifier';
+import { CurrencyConverter } from '../CurrencyConverter';
+import { DateCalculator } from '../DateCalculator';
+import { DiscountCalculator } from '../DiscountCalculator';
+import { DropboxDirectLinkGenerator } from '../DropboxDirectLinkGenerator';
+import { ExcelToPdf } from '../ExcelToPdf';
+import { FaviconChecker } from '../FaviconChecker';
+import { FindAndReplace } from '../FindAndReplace';
+import { FindIfscCodeByBankAndCity } from '../FindIfscCodeByBankAndCity';
+import { FlipkartShippingLabelCropper } from '../FlipkartShippingLabelCropper';
+import { FlipImage } from '../FlipImage';
+import { FuelCostCalculator } from '../FuelCostCalculator';
+import { GpaCalculator } from '../GpaCalculator';
+import { GpaToCgpaCalculator } from '../GpaToCgpaCalculator';
+import { GpaToPercentageConverter } from '../GpaToPercentageConverter';
+import { GstCalculator } from '../GSTCalculator';
+import { GoogleDriveDirectLinkGenerator } from '../GoogleDriveDirectLinkGenerator';
+import { HtmlMinifier } from '../HtmlMinifier';
+import { HtmlToMarkdownConverter } from '../HtmlToMarkdownConverter';
+import { IcoConverter } from '../IcoConverter';
+import { IfscCodeToBankDetails } from '../IfscCodeToBankDetails';
+import { ImageColorExtractor } from '../ImageColorExtractor';
+import { ImageCompressor } from '../ImageCompressor';
+import { ImageConverter } from '../ImageConverter';
+import { ImageCropper } from '../ImageCropper';
+import { ImageResizer } from '../ImageResizer';
+import { ImageShapeConverter } from '../ImageShapeConverter';
+import { ImageToBase64 } from '../ImageToBase64';
+import { ImageWatermarkAdder } from '../ImageWatermarkAdder';
+import { ImageMetadataViewer } from '../ImageMetadataViewer';
+import { InterestCalculator } from '../InterestCalculator';
+import { JavascriptMinifier } from '../JavascriptMinifier';
+import { JsonFormatter } from '../JsonFormatter';
+import { KeywordDensityChecker } from '../KeywordDensityChecker';
+import { LoanCalculator } from '../LoanCalculator';
+import { LockPdf } from '../LockPdf';
+import { LoremIpsumGenerator } from '../LoremIpsumGenerator';
+import { MarksToPercentageCalculator } from '../MarksToPercentageCalculator';
+import { MeeshoShippingLabelCropper } from '../MeeshoShippingLabelCropper';
+import { MetaTagGenerator } from '../MetaTagGenerator';
+import { MorseToTextTranslator } from '../MorseToTextTranslator';
+import { MyntraShippingLabelCropper } from '../MyntraShippingLabelCropper';
+import { NegativeMarkingCalculator } from '../NegativeMarkingCalculator';
+import { NsdlpanCardPhotoAndSignatureResizer } from '../NSDLPANCardPhotoAndSignatureResizer';
+import { OneDriveDirectLinkGenerator } from '../OneDriveDirectLinkGenerator';
+import { PasswordGenerator } from '../PasswordGenerator';
+import { PasswordStrengthChecker } from '../PasswordStrengthChecker';
+import { PdfMerger } from '../PdfMerger';
+import { PdfOrganizer } from '../PdfOrganizer';
+import { PdfPageCounter } from '../PdfPageCounter';
+import { PdfPageNumberer } from '../PdfPageNumberer';
+import { PdfPageRemover } from '../PdfPageRemover';
+import { PdfPageReorder } from '../PdfPageReorder';
+import { PdfSigner } from '../PdfSigner';
+import { PdfSplitter } from '../PdfSplitter';
+import { PdfToJpg } from '../PdfToJpg';
+import { PdfToWord } from '../PdfToWord';
+import { PercentageCalculator } from '../PercentageCalculator';
+import { PercentageToCgpaConverter } from '../PercentageToCgpaConverter';
+import { PptToPdf } from '../PptToPdf';
+import { PrnToPdf } from '../PRNToPDF';
+import { QrCodeGenerator } from '../QrCodeGenerator';
+import { QrCodeScanner } from '../QrCodeScanner';
+import { RandomWordGenerator } from '../RandomWordGenerator';
+import { ReadabilityScoreChecker } from '../ReadabilityScoreChecker';
+import { RemoveExtraSpaces } from '../RemoveExtraSpaces';
+import { RedirectChecker } from '../RedirectChecker';
+import { ReverseText } from '../ReverseText';
+import { RobotsTxtGenerator } from '../RobotsTxtGenerator';
+import { RotateImage } from '../RotateImage';
+import { RotatePdf } from '../RotatePdf';
+import { SchemaGenerator } from '../SchemaGenerator';
+import { SerpChecker } from '../SerpChecker';
+import { Sha256HashGenerator } from '../Sha256HashGenerator';
+import { SrmToCgpaCalculator } from '../SrmToCgpaCalculator';
+import { SqlFormatter } from '../SqlFormatter';
+import { TextRepeater } from '../TextRepeater';
+import { TextToBinary } from '../TextToBinary';
+import { TextToMorseCode } from '../TextToMorseCode';
+import { TextEncryptionDecryption } from '../TextEncryptionDecryption';
+import { TextRecognizer } from '../TextRecognizer';
+import { TimeZoneConverter } from '../TimeZoneConverter';
+import { TitleTagChecker } from '../TitleTagChecker';
+import { UnixTimestampConverter } from '../UnixTimestampConverter';
+import { UniversalHashGenerator } from '../UniversalHashGenerator';
+import { UnlockPdf } from '../UnlockPdf';
+import { UuidGenerator } from '../UuidGenerator';
+import { UtipanCardPhotoAndSignatureResizer } from '../UTIPANCardPhotoAndSignatureResizer';
+import { WebsiteScreenshot } from '../WebsiteScreenshot';
+import { WebsiteWordCounter } from '../WebsiteWordCounter';
+import { WhatIsMyBrowser } from '../WhatIsMyBrowser';
+import { WordCounter } from '../WordCounter';
+import { WordToPdf } from '../WordToPdf';
+import { XmlSitemapGenerator } from '../XmlSitemapGenerator';
+import { YouTubeChannelBannerDownloader } from '../YouTubeChannelBannerDownloader';
+import { YouTubeChannelLogoDownloader } from '../YouTubeChannelLogoDownloader';
+import { YouTubeRegionRestrictionChecker } from '../YouTubeRegionRestrictionChecker';
+import { YouTubeVideoDescriptionExtractor } from '../YouTubeVideoDescriptionExtractor';
+import { YouTubeVideoThumbnailDownloader } from '../YouTubeVideoThumbnailDownloader';
+import { YouTubeVideoTitleExtractor } from '../YouTubeVideoTitleExtractor';
+import { ProfitLossCalculator } from '../ProfitLossCalculator';
+import { SIPCalculator } from '../SIPCalculator';
+import { FDCalculator } from '../FDCalculator';
+import { MutualFundCalculator } from '../MutualFundCalculator';
+import { SalesTaxCalculator } from '../SalesTaxCalculator';
+import { TDSCalculator } from '../TDSCalculator';
+import { ImageAspectRatioCalculator } from '../ImageAspectRatioCalculator';
+import { UrlEncoderDecoder } from '../UrlEncoderDecoder';
+import { SpellingChecker } from '../SpellingChecker';
+import { WhatsChatUrlGenerator } from '../WhatsChatUrlGenerator';
+import { WhatsAppGroupUrlGenerator } from '../WhatsAppGroupUrlGenerator';
+import { InternetSpeedTester } from '../InternetSpeedTester';
+import { PageSizeChecker } from '../PageSizeChecker';
+import { DeviceInformationDetector } from '../DeviceInformationDetector';
+import { NumbersToWord } from '../NumbersToWord';
+import { EmojiRemover } from '../EmojiRemover';
+import { RomanToNumberConverter } from '../RomanToNumberConverter';
+import { NumberToRomanConverter } from '../NumberToRomanConverter';
+import { RdCalculator } from '../RdCalculator';
+import { NpsCalculator } from '../NpsCalculator';
+import { AesEncryptionDecryption } from '../AesEncryptionDecryption';
+
+const toPascalCase = (slug: string) => {
+    return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+}
+
+const componentMap: { [key: string]: React.ComponentType<any> } = {
+  AdMobRevenueCalculator,
+  AdSenseRevenueCalculator,
+  AgeCalculator,
+  AmazonShippingLabelCropper,
+  BarcodeGenerator,
+  BarcodeScanner,
+  Base64Converter,
+  BinaryToText,
+  BmiCalculator,
+  CaseConverter,
+  CgpaToGpaConverter,
+  CgpaToMarksCalculator,
+  ColorPicker,
+  CompressPdf,
+  CreditCardInterestCalculator,
+  CrontabGenerator,
+  CssMinifier,
+  CurrencyConverter,
+  DateCalculator,
+  DiscountCalculator,
+  DropboxDirectLinkGenerator,
+  ExcelToPdf,
+  FaviconChecker,
+  FindAndReplace,
+  FindIfscCodeByBankAndCity,
+  FlipkartShippingLabelCropper,
+  FlipImage,
+  FuelCostCalculator,
+  GpaCalculator,
+  GpaToCgpaCalculator,
+  GpaToPercentageConverter,
+  GstCalculator,
+  GoogleDriveDirectLinkGenerator,
+  HtmlMinifier,
+  HTMLToMarkdownConverter,
+  IcoConverter,
+  IfscCodeToBankDetails,
+  ImageColorExtractor,
+  ImageCompressor,
+  ImageConverter,
+  ImageCropper,
+  ImageResizer,
+  ImageShapeConverter,
+  ImageToBase64,
+  ImageWatermarkAdder,
+  ImageMetadataViewer,
+  InterestCalculator,
+  JavascriptMinifier,
+  JsonFormatter,
+  KeywordDensityChecker,
+  LoanCalculator,
+  LockPdf,
+  LoremIpsumGenerator,
+  MarksToPercentageCalculator,
+  MeeshoShippingLabelCropper,
+  MetaTagGenerator,
+  MorseToTextTranslator,
+  MyntraShippingLabelCropper,
+  NegativeMarkingCalculator,
+  NsdlpanCardPhotoAndSignatureResizer: NsdlpanCardPhotoAndSignatureResizer,
+  OneDriveDirectLinkGenerator,
+  PasswordGenerator,
+  PasswordStrengthChecker,
+  PdfMerger,
+  PdfOrganizer,
+  PdfPageCounter,
+  PdfPageNumberer,
+  PdfPageRemover,
+  PdfPageReorder,
+  PdfSigner,
+  PdfSplitter,
+  PdfToJpg,
+  PdfToWord,
+  PercentageCalculator,
+  PercentageToCgpaConverter,
+  PptToPdf,
+  PrnToPdf,
+  QrCodeGenerator,
+  QrCodeScanner,
+  RandomWordGenerator,
+  ReadabilityScoreChecker,
+  RemoveExtraSpaces,
+  RedirectChecker,
+  ReverseText,
+  RobotsTxtGenerator,
+  RotateImage,
+  RotatePdf,
+  SchemaGenerator,
+  SerpChecker,
+  Sha256HashGenerator,
+  SrmToCgpaCalculator,
+  SqlFormatter,
+  TextRepeater,
+  TextToBinary,
+  TextToMorseCode,
+  TextEncryptionDecryption,
+  TextRecognizer,
+  TimeZoneConverter,
+  TitleTagChecker,
+  UnixTimestampConverter,
+  UniversalHashGenerator,
+  UnlockPdf,
+  UuidGenerator,
+  UtipanCardPhotoAndSignatureResizer: UtipanCardPhotoAndSignatureResizer,
+  WebsiteScreenshot,
+  WebsiteWordCounter,
+  WhatIsMyBrowser,
+  WordCounter,
+  WordToPdf,
+  XmlSitemapGenerator,
+  YouTubeChannelBannerDownloader,
+  YouTubeChannelLogoDownloader,
+  YouTubeRegionRestrictionChecker,
+  YouTubeVideoDescriptionExtractor,
+  YouTubeVideoThumbnailDownloader,
+  YouTubeVideoTitleExtractor,
+  ProfitLossCalculator,
+  SIPCalculator,
+  FDCalculator,
+  MutualFundCalculator,
+  SalesTaxCalculator,
+  TDSCalculator,
+  ImageAspectRatioCalculator,
+  UrlEncoderDecoder,
+  SpellingChecker,
+  WhatsChatUrlGenerator,
+  WhatsAppGroupUrlGenerator,
+  InternetSpeedTester,
+  PageSizeChecker,
+  DeviceInformationDetector,
+  NumbersToWord,
+  EmojiRemover,
+  RomanToNumberConverter,
+  NumberToRomanConverter,
+  RdCalculator,
+  NpsCalculator,
+  AesEncryptionDecryption,
+};
+
 const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
     <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-8 bg-muted/50 rounded-lg">
         <Icon className="w-16 h-16 text-primary mb-4" />
@@ -26,18 +309,14 @@ const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.Ele
     </div>
 );
 
-interface ToolPageClientProps {
+interface ToolComponentRendererProps {
   tool: Tool;
   toolReviews: Review[];
   adSettings: AdvertisementSettings | null;
   sidebar: React.ReactNode;
 }
 
-const toPascalCase = (slug: string) => {
-  return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
-}
-
-export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolPageClientProps) {
+export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }: ToolComponentRendererProps) {
     const { user } = useAuth();
     
     useEffect(() => {
@@ -45,43 +324,8 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
             addUserActivity(user.uid, 'tool_usage', { name: tool.name, path: `/tools/${tool.slug}` });
         }
     }, [user, tool]);
-
-    const ToolComponent = useMemo(() => {
-        if (!tool) return null;
-        
-        let componentName = toPascalCase(tool.slug);
-
-        // Manual correction for specific cases
-        if (componentName === 'AdmobRevenueCalculator') {
-            componentName = 'AdMobRevenueCalculator';
-        }
-        if (componentName === 'NsdlpanCardPhotoAndSignatureResizer') {
-            componentName = 'NsdlpanCardPhotoAndSignatureResizer';
-        }
-        if (componentName === 'UtipanCardPhotoAndSignatureResizer') {
-            componentName = 'UtipanCardPhotoAndSignatureResizer';
-        }
-
-
-        return dynamic(
-            () => {
-                if (componentName === 'AesEncryptionDecryption') {
-                    return import(`@/components/tools/AesEncryptionDecryption`).then(mod => mod['AesEncryptionDecryption'] || (() => <div>Component not found</div>));
-                }
-                if (componentName === 'ImageWatermarkAdder') {
-                    return import(`@/components/tools/ImageWatermarkAdder`).then(mod => mod['ImageWatermarkAdder'] || (() => <div>Component not found</div>));
-                }
-                 if (componentName === 'InterestCalculator') {
-                    return import(`@/components/tools/InterestCalculator`).then(mod => mod['InterestCalculator'] || (() => <div>Component not found</div>));
-                }
-                return import(`@/components/tools/${componentName}`).then(mod => mod[componentName] || (() => <div>Component not found</div>));
-            },
-            { 
-                ssr: false,
-                loading: () => <div className="flex justify-center items-center min-h-[200px]"><Icons.Loader2 className="h-8 w-8 animate-spin"/></div>
-            }
-        );
-    }, [tool]);
+    
+    const ToolComponent = componentMap[toPascalCase(tool.slug)];
 
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
 
@@ -92,8 +336,7 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
             case 'Coming Soon':
                 return <ToolStatusDisplay icon={Sparkles} title="Coming Soon!" description="Our team is hard at work on this new tool. It will be available shortly!" />;
             default:
-                const Component = ToolComponent;
-                return Component ? <Component /> : (
+                return ToolComponent ? <ToolComponent /> : (
                     <div className="flex h-full items-center justify-center">
                         <p className="text-lg text-muted-foreground">Tool interface coming soon!</p>
                     </div>
