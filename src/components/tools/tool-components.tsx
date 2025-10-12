@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useMemo } from 'react';
@@ -51,7 +52,15 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
         const componentName = toPascalCase(tool.slug);
 
         return dynamic(
-            () => import(`@/components/tools/${componentName}`).then(mod => mod[componentName] || (() => <div>Component not found</div>)),
+            () => {
+                if (componentName === 'ImageWatermarkAdder') {
+                    return import(`@/components/tools/AddWatermarkToPdf`).then(mod => mod['AddWatermarkToPdf'] || (() => <div>Component not found</div>));
+                }
+                 if (componentName === 'InvestmentCalculator') {
+                    return import(`@/components/tools/InterestCalculator`).then(mod => mod['InterestCalculator'] || (() => <div>Component not found</div>));
+                }
+                return import(`@/components/tools/${componentName}`).then(mod => mod[componentName] || (() => <div>Component not found</div>));
+            },
             { 
                 ssr: false,
                 loading: () => <div className="flex justify-center items-center min-h-[200px]"><Icons.Loader2 className="h-8 w-8 animate-spin"/></div>
