@@ -2,8 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAdminDb } from '@/lib/firebase-admin';
-import { collection, getDocs, limit, orderBy, query, where, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { AdminDashboardClient } from './_components/DashboardClient';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAllEmails } from '@/ai/flows/user-management';
@@ -57,8 +57,10 @@ export default function AdminDashboard() {
         const signupCount = allEmails.filter(u => u.source === 'Signup').length;
         const leadCount = allEmails.filter(u => u.source === 'Lead').length;
         
-        // These are placeholders as we don't have this data readily available
-        const affiliateCount = 0; 
+        // Fetch approved affiliates count
+        const affiliatesQuery = query(collection(db, "users"), where("affiliateStatus", "==", "approved"));
+        const affiliatesSnapshot = await getDocs(affiliatesQuery);
+        const affiliateCount = affiliatesSnapshot.size;
         
         const userCounts = {
             signup: signupCount,
