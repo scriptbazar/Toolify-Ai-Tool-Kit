@@ -66,3 +66,5 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
     </div>
     );
 };
+
+export default Testimonials;

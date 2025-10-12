@@ -18,7 +18,7 @@ import { type HomepageSettings } from '@/ai/flows/settings-management.types';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const Testimonials = dynamic(() => import('./Testimonials').then(mod => mod.Testimonials), {
+const Testimonials = dynamic(() => import('@/app/(public)/_components/Testimonials').then(mod => mod.Testimonials), {
   loading: () => <Skeleton className="h-96 w-full" />,
 });
 

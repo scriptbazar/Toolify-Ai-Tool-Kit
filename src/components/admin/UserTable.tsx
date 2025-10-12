@@ -167,3 +167,5 @@ export function UserTable({ users, onRoleChange, onDeleteUser }: UserTableProps)
     </div>
   );
 }
+
+export default UserTable;

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, cache } from 'react';
 import { getPosts, type Post } from '@/ai/flows/blog-management';
 import { getTools, type Tool } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
@@ -28,6 +28,9 @@ const SidebarWidget = ({ title, children }: { title: string, children: React.Rea
     </Card>
 );
 
+const getCachedPosts = cache(getPosts);
+const getCachedTools = cache(getTools);
+
 export default function BlogPostPage() {
     const params = useParams();
     const slug = params.slug as string;
@@ -41,13 +44,13 @@ export default function BlogPostPage() {
     useEffect(() => {
         async function fetchData() {
             const [allPostsData, settingsData, allToolsData] = await Promise.all([
-                getPosts(),
+                getCachedPosts('all'),
                 getSettings(),
-                getTools(),
+                getCachedTools({}),
             ]);
 
             const currentPost = allPostsData.find((p) => p.slug === slug);
-            if (!currentPost) {
+            if (!currentPost || currentPost.status === 'Draft' || currentPost.status === 'Trash') {
                 notFound();
                 return;
             }
