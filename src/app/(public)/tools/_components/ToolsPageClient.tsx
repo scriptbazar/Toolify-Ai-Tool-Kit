@@ -1,8 +1,8 @@
+
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
-import type { Tool, ToolCategory } from '@/ai/flows/tool-management.types';
+import { useState, useMemo } from 'react';
+import type { Tool } from '@/ai/flows/tool-management.types';
 import { ToolFilters } from './ToolFilters';
 import { ToolGrid } from './ToolGrid';
 
@@ -11,22 +11,20 @@ interface ToolsPageClientProps {
 }
 
 export function ToolsPageClient({ allTools }: ToolsPageClientProps) {
-  const searchParams = useSearchParams();
-  const searchQuery = searchParams.get('q') || '';
-  const activeCategory = (searchParams.get('category') as ToolCategory) || 'all';
+  const [filters, setFilters] = useState({ query: '', category: 'all' });
 
   const filteredTools = useMemo(() => {
     return allTools.filter(tool => {
-      const categoryMatch = activeCategory === 'all' || tool.category === activeCategory;
-      const searchMatch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          tool.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const categoryMatch = filters.category === 'all' || tool.category === filters.category;
+      const searchMatch = tool.name.toLowerCase().includes(filters.query.toLowerCase()) ||
+                          tool.description.toLowerCase().includes(filters.query.toLowerCase());
       return categoryMatch && searchMatch;
     });
-  }, [allTools, activeCategory, searchQuery]);
+  }, [allTools, filters]);
 
   return (
     <>
-      <ToolFilters tools={allTools} />
+      <ToolFilters tools={allTools} onFilterChange={setFilters} />
       <div className="mt-8">
         <ToolGrid tools={filteredTools} />
       </div>
