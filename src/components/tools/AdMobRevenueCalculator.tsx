@@ -24,7 +24,7 @@ export function AdMobRevenueCalculator() {
     const _show = parseFloat(showRate) / 100;
     const _ecpm = parseFloat(ecpm);
 
-    if ([_dau, _impressions, _match, _show, _ecpm].every(v => v > 0)) {
+    if ([_dau, _impressions, _match, _show, _ecpm].every(v => v >= 0)) {
       const daily = _dau * _impressions * _match * _show * (_ecpm / 1000);
       setRevenue({
         daily,
