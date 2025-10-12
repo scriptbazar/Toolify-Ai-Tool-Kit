@@ -10,7 +10,9 @@ import { getSettings } from './settings-management';
 import paypal from '@paypal/checkout-server-sdk';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
-import { type Payment, type PaymentStatus } from './payment-management.types';
+import { type Payment, type PaymentStatus, PaymentSchema } from './payment-management.types';
+import { Timestamp } from 'firebase-admin/firestore';
+
 
 const CreatePayPalOrderInputSchema = z.object({
   planId: z.string(),
@@ -130,27 +132,27 @@ export async function getPayments(): Promise<Payment[]> {
         
         const payments = snapshot.docs.map(doc => {
             const data = doc.data();
-            return {
+            // We use safeParse to avoid crashing if some data is malformed
+            const parsed = PaymentSchema.safeParse({
+                ...data,
                 transactionId: doc.id,
-                userId: data.userId,
-                userName: data.userName,
-                userEmail: data.userEmail,
-                plan: data.plan,
-                amount: data.amount,
-                date: data.date.toDate().toISOString(),
-                status: data.status,
-                paymentMethod: data.paymentMethod,
-            } as Payment;
-        });
+                date: (data.date as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+            });
+            if (parsed.success) {
+                return parsed.data;
+            } else {
+                console.warn(`Invalid payment data in Firestore with ID ${doc.id}:`, parsed.error);
+                return null;
+            }
+        }).filter((p): p is Payment => p !== null);
 
         return payments;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error fetching payments:", error);
-        // In a real app, you might want more robust error handling,
-        // but for now, we'll return an empty array to prevent crashing the client.
-        return [];
+        throw new Error("Could not fetch payment history from the server.");
     }
 }
+
 
 /**
  * Creates a Razorpay order.

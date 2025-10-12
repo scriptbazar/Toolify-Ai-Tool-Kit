@@ -132,7 +132,6 @@ export default function PaymentHistoryPage() {
         const settings = await getSettings();
         const siteTitle = settings.general?.siteTitle || 'ToolifyAI';
         const logoUrl = settings.general?.logoUrl;
-        const socialLinks = settings.general?.socialLinks || {};
         
         const doc = new jsPDF();
         let finalY = 10;
@@ -198,7 +197,7 @@ export default function PaymentHistoryPage() {
 
         // --- Footer with Social Links ---
         const pageHeight = doc.internal.pageSize.getHeight();
-        const activeSocials = Object.entries(socialLinks).filter(([_, url]) => url);
+        const activeSocials = Object.entries(settings.general?.socialLinks || {}).filter(([_, url]) => url);
         
         if (activeSocials.length > 0) {
             let socialY = pageHeight - 15 - (activeSocials.length * 5);
