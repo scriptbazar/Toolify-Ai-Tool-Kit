@@ -4,10 +4,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
-import { Toaster } from '@/components/ui/toaster';
-import { ThemeProvider } from '@/components/common/ThemeProvider';
 import { getSettings } from '@/ai/flows/settings-management';
 import Script from 'next/script';
+import { Providers } from '@/components/common/Providers';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -40,15 +39,9 @@ export default async function RootLayout({
           inter.variable
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Providers>
             {children}
-            <Toaster />
-        </ThemeProvider>
+        </Providers>
         {showAutoAds && autoAdsScript && (
           <Script
             id="auto-ads-script"
