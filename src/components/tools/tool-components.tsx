@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import * as Icons from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, Sparkles, Star, Zap, BrainCircuit, Construction, ShieldCheck, MousePointerClick } from 'lucide-react';
 import { addUserActivity } from '@/ai/flows/user-activity';
-import dynamic from 'next/dynamic';
 
 // Tool Components
 import { AdMobRevenueCalculator } from './AdMobRevenueCalculator';
