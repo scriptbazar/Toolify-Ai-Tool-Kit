@@ -30,8 +30,7 @@ export async function getBranchesForBank(bankName: string) {
         throw new Error('Bank name is required.');
     }
     try {
-        // Corrected to fetch branches for a specific bank directly
-        const response = await fetch(`${API_BASE_URL}/branches/${encodeURIComponent(bankName)}`);
+        const response = await fetch(`${API_BASE_URL}/${encodeURIComponent(bankName)}`);
          if (!response.ok) {
             throw new Error(`Failed to fetch branches for ${bankName}. Status: ${response.status}`);
         }
