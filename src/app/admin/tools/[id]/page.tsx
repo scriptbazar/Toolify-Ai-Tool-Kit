@@ -23,8 +23,8 @@ export default function EditToolPage() {
     useEffect(() => {
         async function fetchTool() {
             if (id) {
-                const allTools = await getTools();
-                const foundTool = allTools.find(t => t.id === id);
+                const allTools = await getTools({ slug: id });
+                const foundTool = allTools.length > 0 ? allTools[0] : null;
                 if (foundTool) {
                     setTool(foundTool);
                 } else {
