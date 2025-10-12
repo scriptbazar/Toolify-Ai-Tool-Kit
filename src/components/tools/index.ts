@@ -45,7 +45,7 @@ export { ImageShapeConverter } from './ImageShapeConverter';
 export { ImageToBase64 } from './ImageToBase64';
 export { ImageWatermarkAdder } from './AddWatermarkToPdf';
 export { ImageMetadataViewer } from './ImageMetadataViewer';
-export { InvestmentCalculator } from './InvestmentCalculator';
+export { InterestCalculator } from './InterestCalculator';
 export { JavascriptMinifier } from './JavascriptMinifier';
 export { JsonFormatter } from './JsonFormatter';
 export { KeywordDensityChecker } from './KeywordDensityChecker';

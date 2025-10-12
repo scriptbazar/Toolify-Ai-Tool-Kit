@@ -1,25 +1,16 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Calculator, Percent, Trash2, PieChart as PieChartIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-
-interface ScheduleItem {
-  month: number;
-  principal: string;
-  interest: string;
-  totalPayment: string;
-  remainingBalance: string;
-}
 
 export function InterestCalculator() {
     const [activeTab, setActiveTab] = useState('simple');
@@ -166,12 +157,12 @@ export function InterestCalculator() {
                     </div>
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Payment Breakdown</CardTitle>
+                            <CardTitle className="flex items-center gap-2 text-lg"><PieChartIcon className="h-5 w-5" />Breakdown</CardTitle>
                         </CardHeader>
                         <CardContent className="h-64 flex items-center justify-center">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                                    <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={(props) => `${((props.percent || 0) * 100).toFixed(0)}%`}>
                                         {pieChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
                                     </Pie>
                                     <Tooltip formatter={(value: number) => formatCurrency(value)} />
