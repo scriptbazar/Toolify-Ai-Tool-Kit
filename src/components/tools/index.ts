@@ -94,6 +94,7 @@ export { TextRepeater } from './TextRepeater';
 export { TextToBinary } from './TextToBinary';
 export { TextToMorseCode } from './TextToMorseCode';
 export { TextEncryptionDecryption } from './TextEncryptionDecryption';
+export { TextRecognizer } from './TextRecognizer';
 export { TimeZoneConverter } from './TimeZoneConverter';
 export { TitleTagChecker } from './TitleTagChecker';
 export { UnixTimestampConverter } from './UnixTimestampConverter';
