@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { type Tool } from '@/ai/flows/tool-management.types';
 import { toolCategories } from '@/lib/constants';
 import * as Icons from 'lucide-react';
-import { Edit, CheckCircle, XCircle, Star, Sparkles, Construction, GitCommitVertical, FlaskConical, Trash2 } from 'lucide-react';
+import { Edit, CheckCircle, XCircle, Star, Sparkles, Construction, GitCommitVertical, FlaskConical, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { EditToolForm } from '@/app/admin/tools/[id]/EditToolForm';
 import { upsertTool, deleteTool } from '@/ai/flows/tool-management';
@@ -32,12 +32,26 @@ interface AdminToolTableProps {
   onToolUpdate: () => void;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onToolUpdate }: AdminToolTableProps) {
   const router = useRouter();
   const [editingTool, setEditingTool] = React.useState<Tool | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-
+  const [currentPage, setCurrentPage] = React.useState(1);
   const { toast } = useToast();
+
+  const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
+  const paginatedTools = filteredTools.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredTools.length]);
+
 
   const getCategoryName = (categoryId: string) => {
     return toolCategories.find(c => c.id === categoryId)?.name || 'Unknown';
@@ -107,7 +121,7 @@ export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onTo
             </TableRow>
             </TableHeader>
             <TableBody>
-            {filteredTools.map(tool => {
+            {paginatedTools.map(tool => {
                 const IconComponent = (Icons as any)[tool.icon] || Icons.HelpCircle;
                 return (
                 <TableRow key={tool.id}>
@@ -133,7 +147,7 @@ export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onTo
                 </TableRow>
                 )
             })}
-            {filteredTools.length === 0 && (
+            {paginatedTools.length === 0 && (
                 <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
                     No tools found for the current selection.
@@ -143,6 +157,29 @@ export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onTo
             </TableBody>
         </Table>
     </div>
+    {totalPages > 1 && (
+        <div className="flex items-center justify-end space-x-2 pt-4">
+            <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+            >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+            </span>
+            <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            >
+            Next <ArrowRight className="mr-2 h-4 w-4" />
+            </Button>
+        </div>
+    )}
      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
