@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useEffect, useMemo } from 'react';
@@ -50,7 +49,19 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
     const ToolComponent = useMemo(() => {
         if (!tool) return null;
         
-        const componentName = toPascalCase(tool.slug);
+        let componentName = toPascalCase(tool.slug);
+
+        // Manual correction for specific cases
+        if (componentName === 'AdmobRevenueCalculator') {
+            componentName = 'AdMobRevenueCalculator';
+        }
+        if (componentName === 'NsdlpanCardPhotoAndSignatureResizer') {
+            componentName = 'NsdlpanCardPhotoAndSignatureResizer';
+        }
+        if (componentName === 'UtipanCardPhotoAndSignatureResizer') {
+            componentName = 'UtipanCardPhotoAndSignatureResizer';
+        }
+
 
         return dynamic(
             () => {

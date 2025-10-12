@@ -35,13 +35,13 @@ const getCachedPosts = cache(getPosts);
 export default async function ToolPage({ params }: { params: { slug: string } }) {
     const slug = params.slug;
 
-    const [settings, allPosts, allTools, toolReviews] = await Promise.all([
+    const [settings, allPosts, allTools] = await Promise.all([
         getSettings(),
         getCachedPosts(),
         getCachedTools(),
-        getReviews({ toolId: slug })
     ]);
 
+    const toolReviews = await getReviews({ toolId: slug });
     const tool = allTools.find(t => t.slug === slug);
 
     if (!tool || tool.status === 'Disabled') {
