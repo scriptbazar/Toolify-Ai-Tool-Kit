@@ -35,13 +35,12 @@ const getCachedPosts = cache(getPosts);
 export default async function ToolPage({ params }: { params: { slug: string } }) {
     const slug = params.slug;
 
-    const [settings, allPosts, allTools] = await Promise.all([
-        getSettings(),
-        getCachedPosts(),
-        getCachedTools(),
-    ]);
-
+    // Fetch data sequentially to avoid issues with Promises and dynamic params
+    const settings = await getSettings();
+    const allPosts = await getCachedPosts();
+    const allTools = await getCachedTools();
     const toolReviews = await getReviews({ toolId: slug });
+
     const tool = allTools.find(t => t.slug === slug);
 
     if (!tool || tool.status === 'Disabled') {
