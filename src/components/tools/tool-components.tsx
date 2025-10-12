@@ -54,6 +54,9 @@ export function ToolPageClient({ tool, toolReviews, adSettings, sidebar }: ToolP
 
         return dynamic(
             () => {
+                if (componentName === 'AesEncryptionDecryption') {
+                    return import(`@/components/tools/AesEncryptionDecryption`).then(mod => mod['AesEncryptionDecryption'] || (() => <div>Component not found</div>));
+                }
                 if (componentName === 'ImageWatermarkAdder') {
                     return import(`@/components/tools/ImageWatermarkAdder`).then(mod => mod['ImageWatermarkAdder'] || (() => <div>Component not found</div>));
                 }
