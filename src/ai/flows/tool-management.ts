@@ -29,7 +29,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Unit Converter', description: '📏 Convert between various units of measurement for length, mass, temperature, and more with this versatile and comprehensive tool.', icon: 'Ruler', category: 'calculator', isNew: false, status: 'Active', howToUse: ['Select the type of conversion (e.g., Length, Mass).', 'Enter the value you want to convert in the "From" field.', 'Select the "From" and "To" units from the dropdown menus.', 'The converted value will automatically appear in the "To" field.'] },
     { name: 'Color Picker', description: '🎨 Pick colors from an interactive color wheel or your screen. Instantly get HEX, RGB, HSL, and CMYK codes for your design projects.', icon: 'Pipette', category: 'image', plan: 'Free', isNew: false, status: 'Active', howToUse: ['Use the color wheel to select your desired color.', 'Alternatively, click the color swatch to use your browser\'s native color picker.', 'The corresponding HEX, RGB, and HSL values will be displayed.', 'Click the "Copy" button next to any value to copy it.'] },
     { name: 'Text Repeater', description: '🔁 Repeat a piece of text multiple times with optional new lines. Perfect for creating test data, generating patterns, or for creative purposes.', icon: 'Repeat', category: 'text', plan: 'Free', isNew: false, status: 'Active', howToUse: ['Enter the text you want to repeat.', 'Specify the number of repetitions.', 'Choose whether to add a new line after each repetition.', 'Click "Repeat Text" to see the result.'] },
-    { name: 'Image Watermark Adder', description: '🛡️ Add a text or image watermark to your images to protect your intellectual property. Customize opacity, size, and rotation.', icon: 'Fingerprint', category: 'image', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload the image you want to watermark.', 'Choose between a text or image watermark.', 'Configure the watermark\'s text/image, opacity, size, and rotation.', 'Click "Apply Watermark & Download" to get your protected image.'] },
     { name: 'Age Calculator', description: '🎂 Calculate your exact age in years, months, and days from your date of birth instantly. Also shows the countdown to your next birthday.', icon: 'Gift', category: 'calculator', isNew: false, status: 'Active', howToUse: ['Select your date of birth using the calendar.', 'The tool will automatically calculate and display your age in years, months, and days.', 'It will also show how many days are left until your next birthday.'] },
     { name: 'Amazon Shipping Label Cropper', description: '📦 Effortlessly crop Amazon FBA labels from 8.5x11 inch to a perfect 4x6 inch format. Ideal for thermal printers and streamlining your shipping process.', icon: 'FileUp', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the standard 8.5" x 11" PDF label from Amazon Seller Central.', 'Click the "Crop Label and Download" button.', 'A new PDF with two 4" x 6" labels will be automatically downloaded.'] },
     { name: 'Myntra Shipping Label Cropper', description: '📦 Quickly convert your standard Myntra shipping labels into a thermal printer-friendly 4x6 inch format. Save time and label paper.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the standard PDF label from Myntra.', 'Click the "Crop Myntra Label" button.', 'A new PDF with a 4" x 6" label will be downloaded.'] },
@@ -140,6 +139,11 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Page Size Checker', description: 'Check the size of any webpage.', icon: 'FileSearch', category: 'seo', isNew: true, status: 'Active', plan: 'Pro' },
     { name: 'Device Information Detector', description: 'Get detailed information about your device.', icon: 'Smartphone', category: 'dev', isNew: true, status: 'Active', plan: 'Free' },
     { name: 'Numbers to Word', description: 'Convert numbers into words.', icon: 'CaseUpper', category: 'text', isNew: true, status: 'Active', plan: 'Free' },
+    { name: 'Emoji Remover', description: 'Remove all emojis from your text.', icon: 'SmileOff', category: 'text', isNew: true, status: 'Active', plan: 'Free' },
+    { name: 'Roman to Number Converter', description: 'Convert Roman numerals to numbers.', icon: 'Hash', category: 'calculator', isNew: true, status: 'Active', plan: 'Free' },
+    { name: 'Number to Roman Converter', description: 'Convert numbers to Roman numerals.', icon: 'Hash', category: 'calculator', isNew: true, status: 'Active', plan: 'Free' },
+    { name: 'RD Calculator', description: 'Calculate the maturity amount of your Recurring Deposit.', icon: 'Repeat', category: 'calculator', isNew: true, status: 'Active', plan: 'Pro' },
+    { name: 'NPS Calculator', description: 'Calculate the future value of your National Pension Scheme investments.', icon: 'Landmark', category: 'calculator', isNew: true, status: 'Active', plan: 'Pro' },
 ];
 
 const generateSlug = (name: string) => {
@@ -477,6 +481,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
 
 
 

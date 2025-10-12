@@ -130,3 +130,8 @@ export { InternetSpeedTester } from './InternetSpeedTester';
 export { PageSizeChecker } from './PageSizeChecker';
 export { DeviceInformationDetector } from './DeviceInformationDetector';
 export { NumbersToWord } from './NumbersToWord';
+export { EmojiRemover } from './EmojiRemover';
+export { RomanToNumberConverter } from './RomanToNumberConverter';
+export { NumberToRomanConverter } from './NumberToRomanConverter';
+export { RdCalculator } from './RdCalculator';
+export { NpsCalculator } from './NpsCalculator';
