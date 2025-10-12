@@ -144,6 +144,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Number to Roman Converter', description: 'Convert numbers to Roman numerals.', icon: 'Hash', category: 'calculator', isNew: true, status: 'Active', plan: 'Free' },
     { name: 'RD Calculator', description: 'Calculate the maturity amount of your Recurring Deposit.', icon: 'Repeat', category: 'calculator', isNew: true, status: 'Active', plan: 'Pro' },
     { name: 'NPS Calculator', description: 'Calculate the future value of your National Pension Scheme investments.', icon: 'Landmark', category: 'calculator', isNew: true, status: 'Active', plan: 'Pro' },
+    { name: 'Image Watermark Adder', description: 'Add a custom text or image watermark to your photos. Adjust opacity, position, and size to protect your images.', icon: 'Fingerprint', category: 'image', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload the image you want to watermark.', 'Choose between a text or image watermark.', 'Customize the watermark\'s content, size, and position.', 'Download your watermarked image.'] },
 ];
 
 const generateSlug = (name: string) => {
@@ -481,6 +482,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
 
 
 
