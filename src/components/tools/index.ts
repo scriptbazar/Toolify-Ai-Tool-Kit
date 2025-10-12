@@ -79,6 +79,7 @@ export { PrnToPdf } from './PRNToPDF';
 export { QrCodeGenerator } from './QrCodeGenerator';
 export { QrCodeScanner } from './QrCodeScanner';
 export { RandomWordGenerator } from './RandomWordGenerator';
+export { ReadabilityScoreChecker } from './ReadabilityScoreChecker';
 export { RemoveExtraSpaces } from './RemoveExtraSpaces';
 export { RedirectChecker } from './RedirectChecker';
 export { ReverseText } from './ReverseText';

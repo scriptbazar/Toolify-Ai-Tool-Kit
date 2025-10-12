@@ -124,6 +124,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Crontab Generator', description: '⏰ Interactively generate Crontab expressions for scheduling tasks. A simple way to create complex cron jobs without memorizing the syntax.', icon: 'Clock', category: 'dev', isNew: true, status: 'Active', howToUse: ['Use the dropdowns to select the minute, hour, day, month, and day of the week.', 'As you make selections, the cron expression and a human-readable description are updated in real-time.', 'Copy the generated expression for use in your server.'] },
     { name: 'HTML to Markdown Converter', description: '🔄 Convert HTML code into clean, readable Markdown format. Paste your HTML and get the equivalent Markdown instantly.', icon: 'FileCode', category: 'dev', isNew: true, status: 'Active', howToUse: ['Paste your HTML code into the input box.', 'The converted Markdown will appear in the output box automatically.', 'Copy the Markdown for use in your documents or applications.'] },
     { name: 'Image to Text', description: '👁️ Extract text from any image. Upload a picture and our OCR tool will recognize and pull out the text for you to copy and use.', icon: 'ScanText', category: 'ai', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload an image file containing text.', 'The tool will automatically scan and extract the text.', 'The extracted text will be displayed in a text box, ready to be copied.'] },
+    { name: 'Readability Score Checker', description: '📝 Analyze your text to determine its readability score using the Flesch-Kincaid formula. Improve your content for better engagement.', icon: 'BookOpen', category: 'text', isNew: true, status: 'Active', howToUse: ['Paste your text into the input area.', 'The tool will instantly calculate the readability score and grade level.', 'Use the feedback to simplify your writing.'] },
 ];
 
 const generateSlug = (name: string) => {
@@ -461,3 +462,4 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
