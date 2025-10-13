@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect } from 'react';
@@ -84,7 +85,7 @@ const dynamicToolComponents: { [key: string]: React.ComponentType<any> } = {
   MorseToTextTranslator: dynamic(() => import('./MorseToTextTranslator').then(mod => mod.MorseToTextTranslator), { loading: () => <Skeleton className="h-48 w-full" /> }),
   MyntraShippingLabelCropper: dynamic(() => import('./MyntraShippingLabelCropper').then(mod => mod.MyntraShippingLabelCropper), { loading: () => <Skeleton className="h-48 w-full" /> }),
   NegativeMarkingCalculator: dynamic(() => import('./NegativeMarkingCalculator').then(mod => mod.NegativeMarkingCalculator), { loading: () => <Skeleton className="h-48 w-full" /> }),
-  NsdlpanCardPhotoAndSignatureResizer: dynamic(() => import('./NSDLPANCardPhotoAndSignatureResizer').then(mod => mod.NSDLPANCardPhotoAndSignatureResizer), { loading: () => <Skeleton className="h-48 w-full" /> }),
+  NSDLPANCardPhotoAndSignatureResizer: dynamic(() => import('./NSDLPANCardPhotoAndSignatureResizer').then(mod => mod.NSDLPANCardPhotoAndSignatureResizer), { loading: () => <Skeleton className="h-48 w-full" /> }),
   OneDriveDirectLinkGenerator: dynamic(() => import('./OneDriveDirectLinkGenerator').then(mod => mod.OneDriveDirectLinkGenerator), { loading: () => <Skeleton className="h-48 w-full" /> }),
   PasswordGenerator: dynamic(() => import('./PasswordGenerator').then(mod => mod.PasswordGenerator), { loading: () => <Skeleton className="h-48 w-full" /> }),
   PasswordStrengthChecker: dynamic(() => import('./PasswordStrengthChecker').then(mod => mod.PasswordStrengthChecker), { loading: () => <Skeleton className="h-48 w-full" /> }),
@@ -101,7 +102,7 @@ const dynamicToolComponents: { [key: string]: React.ComponentType<any> } = {
   PercentageCalculator: dynamic(() => import('./PercentageCalculator').then(mod => mod.PercentageCalculator), { loading: () => <Skeleton className="h-48 w-full" /> }),
   PercentageToCgpaConverter: dynamic(() => import('./PercentageToCgpaConverter').then(mod => mod.PercentageToCgpaConverter), { loading: () => <Skeleton className="h-48 w-full" /> }),
   PptToPdf: dynamic(() => import('./PptToPdf').then(mod => mod.PptToPdf), { loading: () => <Skeleton className="h-48 w-full" /> }),
-  PrnToPdf: dynamic(() => import('./PRNToPDF').then(mod => mod.PRNToPDF), { loading: () => <Skeleton className="h-48 w-full" /> }),
+  PRNToPDF: dynamic(() => import('./PRNToPDF').then(mod => mod.PRNToPDF), { loading: () => <Skeleton className="h-48 w-full" /> }),
   QrCodeGenerator: dynamic(() => import('./QrCodeGenerator').then(mod => mod.QrCodeGenerator), { loading: () => <Skeleton className="h-48 w-full" /> }),
   QrCodeScanner: dynamic(() => import('./QrCodeScanner').then(mod => mod.QrCodeScanner), { loading: () => <Skeleton className="h-48 w-full" /> }),
   RandomWordGenerator: dynamic(() => import('./RandomWordGenerator').then(mod => mod.RandomWordGenerator), { loading: () => <Skeleton className="h-48 w-full" /> }),
@@ -128,7 +129,7 @@ const dynamicToolComponents: { [key: string]: React.ComponentType<any> } = {
   UniversalHashGenerator: dynamic(() => import('./UniversalHashGenerator').then(mod => mod.UniversalHashGenerator), { loading: () => <Skeleton className="h-48 w-full" /> }),
   UnlockPdf: dynamic(() => import('./UnlockPdf').then(mod => mod.UnlockPdf), { loading: () => <Skeleton className="h-48 w-full" /> }),
   UuidGenerator: dynamic(() => import('./UuidGenerator').then(mod => mod.UuidGenerator), { loading: () => <Skeleton className="h-48 w-full" /> }),
-  UtipanCardPhotoAndSignatureResizer: dynamic(() => import('./UTIPANCardPhotoAndSignatureResizer').then(mod => mod.UTIPANCardPhotoAndSignatureResizer), { loading: () => <Skeleton className="h-48 w-full" /> }),
+  UTIPANCardPhotoAndSignatureResizer: dynamic(() => import('./UTIPANCardPhotoAndSignatureResizer').then(mod => mod.UTIPANCardPhotoAndSignatureResizer), { loading: () => <Skeleton className="h-48 w-full" /> }),
   WebsiteScreenshot: dynamic(() => import('./WebsiteScreenshot').then(mod => mod.WebsiteScreenshot), { loading: () => <Skeleton className="h-48 w-full" /> }),
   WebsiteWordCounter: dynamic(() => import('./WebsiteWordCounter').then(mod => mod.WebsiteWordCounter), { loading: () => <Skeleton className="h-48 w-full" /> }),
   WhatIsMyBrowser: dynamic(() => import('./WhatIsMyBrowser').then(mod => mod.WhatIsMyBrowser), { loading: () => <Skeleton className="h-48 w-full" /> }),
@@ -310,5 +311,3 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
         </div>
     );
 }
-
-    
