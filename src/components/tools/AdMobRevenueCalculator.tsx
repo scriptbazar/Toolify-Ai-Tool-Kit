@@ -12,25 +12,43 @@ import { useToast } from '@/hooks/use-toast';
 import { getSettings } from '@/ai/flows/settings-management';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+
+const appCategories = [
+    { value: 'game', label: 'Gaming' },
+    { value: 'social', label: 'Social & Communication' },
+    { value: 'utility', label: 'Utility & Productivity' },
+    { value: 'entertainment', label: 'Entertainment' },
+    { value: 'education', label: 'Education' },
+    { value: 'other', label: 'Other' },
+];
 
 export function AdMobRevenueCalculator() {
-  const [dau, setDau] = useState('10000');
+  const [mau, setMau] = useState('100000');
   const [impressionsPerDau, setImpressionsPerDau] = useState('5');
-  const [matchRate, setMatchRate] = useState('98');
-  const [showRate, setShowRate] = useState('95');
+  const [region, setRegion] = useState('global');
+  const [platform, setPlatform] = useState('android');
+  const [category, setCategory] = useState('game');
   const [ecpm, setEcpm] = useState('1.50');
   const [revenue, setRevenue] = useState<{ daily: number, weekly: number, monthly: number, yearly: number } | null>(null);
   const { toast } = useToast();
 
   const calculateRevenue = () => {
-    const _dau = parseFloat(dau);
+    const _mau = parseFloat(mau);
     const _impressions = parseFloat(impressionsPerDau);
-    const _match = parseFloat(matchRate) / 100;
-    const _show = parseFloat(showRate) / 100;
     const _ecpm = parseFloat(ecpm);
+    const dau = _mau / 30; // Approximate DAU from MAU
 
-    if ([_dau, _impressions, _match, _show, _ecpm].every(v => v >= 0)) {
-      const daily = _dau * _impressions * _match * _show * (_ecpm / 1000);
+    // These are simplified placeholder multipliers. A real calculator would have complex data.
+    const regionMultipliers: { [key: string]: number } = { global: 1.0, us: 1.8, eu: 1.5, in: 0.6, sea: 0.7 };
+    const platformMultipliers = { android: 1.0, ios: 1.4 };
+    const categoryMultipliers = { game: 1.2, social: 1.0, utility: 0.9, entertainment: 1.1, education: 0.8, other: 1.0 };
+    
+    const matchRate = 0.98; // Assuming a constant 98% match rate
+    const showRate = 0.95; // Assuming a constant 95% show rate
+
+    if ([dau, _impressions, _ecpm].every(v => v >= 0)) {
+      const daily = dau * _impressions * matchRate * showRate * (_ecpm / 1000) * (regionMultipliers[region] || 1) * platformMultipliers[platform as keyof typeof platformMultipliers] * categoryMultipliers[category as keyof typeof categoryMultipliers];
       setRevenue({
         daily,
         weekly: daily * 7,
@@ -44,10 +62,11 @@ export function AdMobRevenueCalculator() {
   };
   
   const handleClear = () => {
-    setDau('10000');
+    setMau('100000');
     setImpressionsPerDau('5');
-    setMatchRate('98');
-    setShowRate('95');
+    setRegion('global');
+    setPlatform('android');
+    setCategory('game');
     setEcpm('1.50');
     setRevenue(null);
     toast({ title: "Fields Cleared" });
@@ -77,10 +96,11 @@ export function AdMobRevenueCalculator() {
             startY: 35,
             head: [['Metric', 'Value']],
             body: [
-                ['Daily Active Users (DAU)', dau],
+                ['Monthly Active Users (MAU)', mau],
                 ['Impressions per DAU', impressionsPerDau],
-                ['Match Rate', `${matchRate}%`],
-                ['Show Rate', `${showRate}%`],
+                ['Region', region.toUpperCase()],
+                ['Platform', platform.charAt(0).toUpperCase() + platform.slice(1)],
+                ['App Category', category.charAt(0).toUpperCase() + category.slice(1)],
                 ['eCPM', formatCurrency(parseFloat(ecpm))],
             ],
             theme: 'striped',
@@ -108,8 +128,8 @@ export function AdMobRevenueCalculator() {
       if (!revenue) return '';
       return `*AdMob Earning Estimation*\n\n` +
              `*Inputs:*\n` +
-             `- DAU: ${dau}\n` +
-             `- Impressions/DAU: ${impressionsPerDau}\n` +
+             `- MAU: ${mau}\n` +
+             `- Platform: ${platform}\n` +
              `- eCPM: ${formatCurrency(parseFloat(ecpm))}\n\n` +
              `*Estimated Earnings:*\n` +
              `- Daily: ${formatCurrency(revenue.daily)}\n` +
@@ -138,8 +158,8 @@ export function AdMobRevenueCalculator() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="dau">Daily Active Users (DAU)</Label>
-          <Input id="dau" type="number" value={dau} onChange={(e) => setDau(e.target.value)} placeholder="e.g., 10000" />
+          <Label htmlFor="mau">Monthly Active Users (MAU)</Label>
+          <Input id="mau" type="number" value={mau} onChange={(e) => setMau(e.target.value)} placeholder="e.g., 100000" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="impressions">Ad Impressions per DAU</Label>
@@ -150,12 +170,36 @@ export function AdMobRevenueCalculator() {
           <Input id="ecpm" type="number" value={ecpm} onChange={(e) => setEcpm(e.target.value)} placeholder="e.g., 1.50" />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="match-rate">Match Rate (%)</Label>
-          <Input id="match-rate" type="number" value={matchRate} onChange={(e) => setMatchRate(e.target.value)} placeholder="e.g., 98" />
+            <Label htmlFor="region-select">Region</Label>
+            <Select value={region} onValueChange={setRegion}>
+                <SelectTrigger id="region-select"><SelectValue/></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="global">Global</SelectItem>
+                    <SelectItem value="us">United States</SelectItem>
+                    <SelectItem value="eu">Europe</SelectItem>
+                    <SelectItem value="in">India</SelectItem>
+                    <SelectItem value="sea">Southeast Asia</SelectItem>
+                </SelectContent>
+            </Select>
         </div>
-         <div className="space-y-2">
-          <Label htmlFor="show-rate">Show Rate (%)</Label>
-          <Input id="show-rate" type="number" value={showRate} onChange={(e) => setShowRate(e.target.value)} placeholder="e.g., 95" />
+        <div className="space-y-2">
+            <Label htmlFor="platform-select">Platform</Label>
+            <Select value={platform} onValueChange={setPlatform}>
+                <SelectTrigger id="platform-select"><SelectValue/></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="android">Android</SelectItem>
+                    <SelectItem value="ios">iOS</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="category-select">App Category</Label>
+            <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger id="category-select"><SelectValue/></SelectTrigger>
+                <SelectContent>
+                    {appCategories.map(cat => <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>)}
+                </SelectContent>
+            </Select>
         </div>
       </div>
       <div className="flex gap-2">
@@ -217,19 +261,19 @@ export function AdMobRevenueCalculator() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Share2/>Share or Download</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                <CardContent className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                     <Button variant="outline" className="w-full" onClick={handleDownloadPdf}>
                         <Download className="mr-2 h-4 w-4" /> Download PDF Report
                     </Button>
                     <Button variant="outline" className="w-full" onClick={() => handleShare('whatsapp')}>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="mr-2 h-4 w-4">
-                            <path d="M12.04 2C6.58 2 2.13 6.45 2.13 12c0 1.74.45 3.39 1.22 4.84l-1.18 4.34 4.45-1.16c1.4.74 3 .12 4.58.12h.01c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zM12.04 3.67c4.54 0 8.24 3.7 8.24 8.24 0 4.54-3.7 8.24-8.24 8.24h-.01c-1.48 0-2.92-.39-4.18-1.11l-.3-.17-3.11.81.83-3.04-.19-.32a8.24 8.24 0 0 1-1.26-4.39c0-4.54 3.7-8.24 8.24-8.24zm3.53 10.19c-.17-.08-1-.49-1.15-.55-.16-.06-.27-.08-.39.08s-.44.55-.54.66c-.1.11-.2.13-.37.04s-1.15-.42-2.19-1.34c-.81-.72-1.36-1.61-1.52-1.88-.16-.27-.02-.42.07-.54.08-.11.17-.27.26-.4.1-.13.13-.22.2-.36.06-.15.03-.27-.01-.36-.05-.08-1-2.4-1.37-3.29-.36-.85-.73-.73-.99-.74h-.27c-.22 0-.58.08-.89.36s-1.04 1.01-1.04 2.47c0 1.46 1.06 2.87 1.21 3.07.16.21 2.07 3.16 5.02 4.43.7.3 1.25.48 1.68.61.69.21 1.32.18 1.82.11.55-.07 1.66-.68 1.9-1.33.23-.65.23-1.21.16-1.33-.07-.12-.25-.2-.42-.28z"/>
+                         <svg viewBox="0 0 24 24" fill="currentColor" className="mr-2 h-4 w-4">
+                          <path d="M12.04 2C6.58 2 2.13 6.45 2.13 12c0 1.74.45 3.39 1.22 4.84l-1.18 4.34 4.45-1.16c1.4.74 3 .12 4.58.12h.01c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zM16.4 15.2c-.17-.08-1-.49-1.15-.55s-.27-.08-.39.08-.44.55-.54.66-.2.13-.37.04-1.15-.42-2.19-1.34c-.81-.72-1.36-1.61-1.52-1.88s.14-.42.21-.54.17-.27.26-.4.03-.22.06-.36-.02-.27-.06-.36-1-2.4-1.37-3.29c-.36-.85-.73-.73-.99-.74h-.27c-.22 0-.58.08-.89.36s-1.04 1.01-1.04 2.47c0 1.46 1.06 2.87 1.21 3.07s2.07 3.16 5.02 4.43c.7.3 1.25.48 1.68.61s.88.21 1.32.18c.55-.07 1.66-.68 1.9-1.33s.23-1.21.16-1.33c-.07-.12-.25-.2-.42-.28z"/>
                         </svg>
                         Share on WhatsApp
                     </Button>
                      <Button variant="outline" className="w-full" onClick={() => handleShare('telegram')}>
                         <svg viewBox="0 0 24 24" fill="currentColor" className="mr-2 h-4 w-4">
-                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.13-.05.266-.19.395-1.22 1.06-2.06 2.02-2.822 2.914-.595.717-.963 1.122-1.122 1.23a.472.472 0 0 1-.33.123c-.16-.01-.3-.09-.41-.235-1.35-1.145-2.02-1.71-2.02-1.71s-.112-.097-.26-.03c-.15.066-.24.21-.24.21s-.13.14-.24.234c-.1.1-.2.13-.3.13a.43.43 0 0 1-.24-.07c-.12-.09-.15-.2-.15-.2s-.03-.11-.03-.21c0-.1.03-.2.03-.2s.18-.24.54-.54c.36-.3.66-.54.66-.54s.45-.45.81-.81c.36-.36.75-.75 1.05-1.11.3-.36.54-.78.54-.78s.09-.24.21-.36c.12-.12.27-.18.42-.18.15 0 .3.04.45.18l.06.06z"/>
+                          <path d="m9.417 15.181-.397 5.584c.568 0 .814-.244 1.109-.537l2.663-2.545 5.518 4.041c1.012.564 1.725.267 1.998-.931L23.43 3.662c.272-1.21-.488-1.699-1.262-1.428L1.125 8.818c-1.21.49-1.201 1.161-.224 1.445l4.163 1.297 9.876-6.215c.482-.3.923-.142.533.193z"/>
                         </svg>
                         Share on Telegram
                     </Button>
