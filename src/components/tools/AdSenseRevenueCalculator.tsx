@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { Calculator, Download, Share2, MessageCircle, Mail } from 'lucide-react';
+import { Calculator, Download, Share2, MessageCircle, Mail, Trash2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import { getSettings } from '@/ai/flows/settings-management';
@@ -38,6 +38,15 @@ export function AdSenseRevenueCalculator() {
       setRevenue(null);
     }
   };
+
+  const handleClear = () => {
+    setPageViews('');
+    setCtr('');
+    setCpc('');
+    setRevenue(null);
+    toast({ title: "Fields Cleared" });
+  };
+
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
@@ -142,9 +151,16 @@ export function AdSenseRevenueCalculator() {
           <Input id="cpc" type="number" value={cpc} onChange={(e) => setCpc(e.target.value)} placeholder="e.g., 0.25" />
         </div>
       </div>
-      <Button onClick={calculateRevenue} className="w-full">
-        <Calculator className="mr-2 h-4 w-4" /> Calculate Revenue
-      </Button>
+      <div className="flex gap-2">
+        <Button onClick={calculateRevenue} className="w-full">
+            <Calculator className="mr-2 h-4 w-4" /> Calculate Revenue
+        </Button>
+        {revenue !== null && (
+            <Button onClick={handleClear} variant="destructive" className="w-full">
+                <Trash2 className="mr-2 h-4 w-4" /> Clear
+            </Button>
+        )}
+      </div>
 
       {revenue !== null && (
         <div className="space-y-6">
@@ -194,7 +210,7 @@ export function AdSenseRevenueCalculator() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Share2/>Share or Download</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                <CardContent className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                     <Button variant="outline" className="w-full" onClick={handleDownloadPdf}>
                         <Download className="mr-2 h-4 w-4" /> Download PDF Report
                     </Button>
