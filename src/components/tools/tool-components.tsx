@@ -33,7 +33,7 @@ const toPascalCase = (slug: string) => {
     if (slug === 'srm-to-cgpa-calculator') return 'SrmToCgpaCalculator';
     if (slug === 'uti-pan-card-photo-and-signature-resizer') return 'UTIPANCardPhotoAndSignatureResizer';
     if (slug === 'nsdl-pan-card-photo-and-signature-resizer') return 'NSDLPANCardPhotoAndSignatureResizer';
-    if (slug === 'aes-encryption-decryption') return 'AesEncryptionDecryption';
+    if (slug === 'aes-encryption-and-decryption') return 'AesEncryptionDecryption';
     
     return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
 }
@@ -177,7 +177,7 @@ const dynamicToolComponents: { [key: string]: React.ComponentType<any> } = {
   NumberToRomanConverter: dynamic(() => import('./NumberToRomanConverter').then(mod => mod.NumberToRomanConverter), { loading: () => <Skeleton className="h-48 w-full" /> }),
   RdCalculator: dynamic(() => import('./RdCalculator').then(mod => mod.RdCalculator), { loading: () => <Skeleton className="h-48 w-full" /> }),
   NpsCalculator: dynamic(() => import('./NpsCalculator').then(mod => mod.NpsCalculator), { loading: () => <Skeleton className="h-48 w-full" /> }),
-  AesEncryptionDecryption: dynamic(() => import('./AesEncryptionAndDecryption').then(mod => mod.AesEncryptionDecryption), { loading: () => <Skeleton className="h-48 w-full" /> }),
+  AesEncryptionDecryption: dynamic(() => import('./AesEncryptionAndDecryption').then(mod => mod.AesEncryptionAndDecryption), { loading: () => <Skeleton className="h-48 w-full" /> }),
 };
 
 
@@ -277,7 +277,7 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Card className="p-4 bg-background"><h3 className="font-semibold flex items-center gap-2"><ShieldCheck className="text-primary"/>Secure & Reliable</h3><p className="text-sm text-muted-foreground mt-1">Your data privacy is our priority. All tools run securely, and we never store your input data.</p></Card>
+                        <Card className="p-4 bg-background"><h3 className="font-semibold flex items-center gap-2"><ShieldCheck className="text-primary"/>Secure &amp; Reliable</h3><p className="text-sm text-muted-foreground mt-1">Your data privacy is our priority. All tools run securely, and we never store your input data.</p></Card>
                         <Card className="p-4 bg-background"><h3 className="font-semibold flex items-center gap-2"><Zap className="text-primary"/>Blazing Fast</h3><p className="text-sm text-muted-foreground mt-1">Get your results instantly without any unnecessary delays. Our tools are optimized for speed.</p></Card>
                         <Card className="p-4 bg-background"><h3 className="font-semibold flex items-center gap-2"><MousePointerClick className="text-primary"/>User-Friendly Interface</h3><p className="text-sm text-muted-foreground mt-1">No complicated setups. Our tools are designed to be intuitive and easy for everyone.</p></Card>
                         <Card className="p-4 bg-background"><h3 className="font-semibold flex items-center gap-2"><Cpu className="text-primary"/>AI-Powered</h3><p className="text-sm text-muted-foreground mt-1">Many of our tools leverage cutting-edge AI to provide smarter, more accurate, and creative results.</p></Card>
@@ -325,6 +325,8 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
         </div>
     );
 }
+
+    
 
     
 
