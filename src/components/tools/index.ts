@@ -134,9 +134,5 @@ export { RomanToNumberConverter } from './RomanToNumberConverter';
 export { NumberToRomanConverter } from './NumberToRomanConverter';
 export { RdCalculator } from './RdCalculator';
 export { NpsCalculator } from './NpsCalculator';
-export { AesEncryptionDecryption, AesEncryptionDecryption as AesEncryptionAndDecryption } from './AesEncryptionAndDecryption';
+export { AesEncryptionDecryption, AesEncryptionAndDecryption } from './AesEncryptionAndDecryption';
 export { AdSenseRevenueCalculator } from './AdSenseRevenueCalculator';
-
-
-    
-
