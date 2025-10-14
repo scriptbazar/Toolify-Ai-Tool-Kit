@@ -1,12 +1,9 @@
 
-'use client';
-
-import { useState, useEffect, cache } from 'react';
 import { getPosts, type Post } from '@/ai/flows/blog-management';
 import { getTools, type Tool } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
-import { notFound, useParams } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { notFound } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
@@ -14,8 +11,6 @@ import Link from 'next/link';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import * as Icons from 'lucide-react';
 import { type AppSettings } from '@/ai/flows/settings-management.types';
-import { Logo } from '@/components/common/Logo';
-import { Loader2 } from 'lucide-react';
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <Card>
@@ -28,55 +23,30 @@ const SidebarWidget = ({ title, children }: { title: string, children: React.Rea
     </Card>
 );
 
-const getCachedPosts = cache(getPosts);
-const getCachedTools = cache(getTools);
+export async function generateStaticParams() {
+  const posts = await getPosts('Published');
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
 
-export default function BlogPostPage() {
-    const params = useParams();
-    const slug = params.slug as string;
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+    const { slug } = params;
 
-    const [post, setPost] = useState<Post | null>(null);
-    const [settings, setSettings] = useState<AppSettings | null>(null);
-    const [popularTools, setPopularTools] = useState<Tool[]>([]);
-    const [recentPosts, setRecentPosts] = useState<Post[]>([]);
-    const [loading, setLoading] = useState(true);
+    const allPostsData = await getPosts('all');
+    const post = allPostsData.find((p) => p.slug === slug);
 
-    useEffect(() => {
-        async function fetchData() {
-            const [allPostsData, settingsData, allToolsData] = await Promise.all([
-                getCachedPosts('all'),
-                getSettings(),
-                getCachedTools({}),
-            ]);
-
-            const currentPost = allPostsData.find((p) => p.slug === slug);
-            if (!currentPost || currentPost.status === 'Draft' || currentPost.status === 'Trash') {
-                notFound();
-                return;
-            }
-
-            setPost(currentPost);
-            setSettings(settingsData);
-            setPopularTools(allToolsData.filter(t => t.status === 'Active').slice(0, 10));
-            setRecentPosts(allPostsData.filter(p => p.status === 'Published' && p.id !== currentPost.id).slice(0, 10));
-            setLoading(false);
-        }
-        fetchData();
-    }, [slug]);
-
-    if (loading || !post || !settings) {
-        return (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-background py-20">
-                <Logo className="h-16 w-16 animate-pulse" />
-                <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    <p className="text-lg">Loading post...</p>
-                </div>
-            </div>
-        );
+    if (!post || post.status === 'Draft' || post.status === 'Trash') {
+        notFound();
     }
+    
+    const settings = await getSettings();
+    const allToolsData = await getTools({});
+    
+    const sidebarSettings = settings.sidebar?.blogSidebar;
+    const popularTools = allToolsData.filter(t => t.status === 'Active').slice(0, 10);
+    const recentPosts = allPostsData.filter(p => p.status === 'Published' && p.id !== post.id).slice(0, 5);
 
-  const sidebarSettings = settings.sidebar?.blogSidebar;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">

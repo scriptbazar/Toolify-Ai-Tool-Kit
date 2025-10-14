@@ -9,6 +9,7 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp, Query } from 'firebase-admin/firestore';
 import { z } from 'zod';
 import { type Tool, type UpsertToolInput, type ToolRequest, ToolSchema, UpsertToolInputSchema, ToolRequestSchema } from './tool-management.types';
+import { unstable_cache as cache } from 'next/cache';
 
 
 const TOOLS_COLLECTION = 'tools';
@@ -179,13 +180,10 @@ interface GetToolsOptions {
   category?: string;
   limit?: number;
   slug?: string;
+  status?: string;
 }
 
-/**
- * Fetches tools from Firestore with optional filtering and limiting.
- * This function is now optimized for server-side operations.
- */
-export async function getTools(options: GetToolsOptions = {}): Promise<Tool[]> {
+const getToolsFn = async (options: GetToolsOptions = {}): Promise<Tool[]> => {
     try {
         const adminDb = getAdminDb();
         if (!adminDb) {
@@ -213,6 +211,16 @@ export async function getTools(options: GetToolsOptions = {}): Promise<Tool[]> {
         return [];
     }
 };
+
+/**
+ * Fetches tools from Firestore with optional filtering and limiting.
+ * This function is now optimized for server-side operations with caching.
+ */
+export const getTools = cache(
+    async (options: GetToolsOptions = {}) => getToolsFn(options),
+    ['tools'],
+    { revalidate: 3600 } // Revalidate every hour
+);
 
 
 function processSnapshot(snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>, options: GetToolsOptions): Tool[] {
@@ -244,8 +252,8 @@ function processSnapshot(snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFires
         );
     }
     
-    // Filter out disabled tools unless a specific slug is requested (to allow editing)
-    if (!options.slug) {
+    // Filter out disabled tools unless a specific slug is requested OR 'all' status is requested
+    if (options.status !== 'all' && !options.slug) {
         tools = tools.filter(tool => tool.status !== 'Disabled');
     }
     
@@ -478,13 +486,3 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     return { success: false, message: "Could not update favorites." };
   }
 }
-
-    
-
-    
-
-
-
-
-
-
