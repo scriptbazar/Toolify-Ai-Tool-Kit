@@ -194,7 +194,7 @@ export function AdSenseRevenueCalculator() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Share2/>Share or Download</CardTitle>
                 </CardHeader>
-                <CardContent className="flex flex-col sm:flex-row gap-2">
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                     <Button variant="outline" className="w-full" onClick={handleDownloadPdf}>
                         <Download className="mr-2 h-4 w-4" /> Download PDF Report
                     </Button>
