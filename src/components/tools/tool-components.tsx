@@ -20,12 +20,23 @@ import dynamic from 'next/dynamic';
 import { Skeleton } from '../ui/skeleton';
 
 const toPascalCase = (slug: string) => {
-    // Handle specific case for AdSense
-    if (slug === 'adsense-revenue-calculator') {
-        return 'AdSenseRevenueCalculator';
-    }
+    // Handle specific cases for acronyms
+    if (slug === 'adsense-revenue-calculator') return 'AdSenseRevenueCalculator';
+    if (slug === 'admob-revenue-calculator') return 'AdMobRevenueCalculator';
+    if (slug === 'bmi-calculator') return 'BmiCalculator';
+    if (slug === 'css-minifier') return 'CssMinifier';
+    if (slug === 'html-minifier') return 'HtmlMinifier';
+    if (slug === 'javascript-minifier') return 'JavascriptMinifier';
+    if (slug === 'json-formatter') return 'JsonFormatter';
+    if (slug === 'qr-code-generator') return 'QrCodeGenerator';
+    if (slug === 'qr-code-scanner') return 'QrCodeScanner';
+    if (slug === 'srm-to-cgpa-calculator') return 'SrmToCgpaCalculator';
+    if (slug === 'uti-pan-card-photo-and-signature-resizer') return 'UTIPANCardPhotoAndSignatureResizer';
+    if (slug === 'nsdl-pan-card-photo-and-signature-resizer') return 'NSDLPANCardPhotoAndSignatureResizer';
+    
     return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
 }
+
 
 // Dynamically import components to avoid bundling all of them at once.
 const dynamicToolComponents: { [key: string]: React.ComponentType<any> } = {
@@ -313,5 +324,7 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
         </div>
     );
 }
+
+    
 
     
