@@ -98,7 +98,7 @@ const ActionCard = ({
 };
 
 
-export function AesEncryptionDecryption() {
+export function AesEncryptionAndDecryption() {
   const [encryptFile, setEncryptFile] = useState<File | null>(null);
   const [decryptFile, setDecryptFile] = useState<File | null>(null);
   const [password, setPassword] = useState('');
@@ -209,3 +209,5 @@ export function AesEncryptionDecryption() {
     </div>
   );
 }
+
+export { AesEncryptionAndDecryption as AesEncryptionDecryption };
