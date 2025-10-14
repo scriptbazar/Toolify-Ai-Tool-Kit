@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useEffect } from 'react';
@@ -201,11 +200,10 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
             case 'Coming Soon':
                 return <ToolStatusDisplay icon={Sparkles} title="Coming Soon!" description="Our team is hard at work on this new tool. It will be available shortly!" />;
             default:
-                return ToolComponent ? <ToolComponent /> : (
-                    <div className="flex h-full items-center justify-center">
-                        <p className="text-lg text-muted-foreground">Tool interface coming soon!</p>
-                    </div>
-                );
+                if (ToolComponent) {
+                    return <ToolComponent />;
+                }
+                return <ToolStatusDisplay icon={Construction} title="Tool Not Found" description="The interface for this tool could not be loaded. It may be under development." />;
         }
     };
 
