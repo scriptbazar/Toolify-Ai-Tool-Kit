@@ -7,12 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Calculator } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts';
+
 
 export function AdSenseRevenueCalculator() {
   const [pageViews, setPageViews] = useState('50000');
   const [ctr, setCtr] = useState('1.5');
   const [cpc, setCpc] = useState('0.25');
-  const [revenue, setRevenue] = useState<{ daily: number, monthly: number, yearly: number } | null>(null);
+  const [revenue, setRevenue] = useState<{ daily: number, weekly: number, monthly: number, yearly: number } | null>(null);
 
   const calculateRevenue = () => {
     const _pageViews = parseFloat(pageViews);
@@ -23,6 +25,7 @@ export function AdSenseRevenueCalculator() {
       const daily = _pageViews * _ctr * _cpc;
       setRevenue({
         daily,
+        weekly: daily * 7,
         monthly: daily * 30,
         yearly: daily * 365,
       });
@@ -34,6 +37,13 @@ export function AdSenseRevenueCalculator() {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
   }
+  
+  const chartData = revenue ? [
+      { name: 'Daily', Earnings: revenue.daily },
+      { name: 'Weekly', Earnings: revenue.weekly },
+      { name: 'Monthly', Earnings: revenue.monthly },
+      { name: 'Yearly', Earnings: revenue.yearly },
+  ] : [];
 
   return (
     <div className="space-y-6">
@@ -56,25 +66,50 @@ export function AdSenseRevenueCalculator() {
       </Button>
 
       {revenue !== null && (
-        <Card className="mt-6 text-center">
-           <CardHeader>
-                <CardTitle>Estimated AdSense Revenue</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">Daily</p>
-              <p className="text-2xl font-bold text-primary">{formatCurrency(revenue.daily)}</p>
-            </div>
-             <div className="p-4 bg-muted rounded-lg">
-               <p className="text-sm text-muted-foreground">Monthly</p>
-              <p className="text-2xl font-bold text-primary">{formatCurrency(revenue.monthly)}</p>
-            </div>
-             <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">Yearly</p>
-              <p className="text-2xl font-bold text-primary">{formatCurrency(revenue.yearly)}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+            <Card className="text-center">
+                <CardHeader>
+                        <CardTitle>Estimated AdSense Revenue</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">Daily</p>
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(revenue.daily)}</p>
+                    </div>
+                    <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">Weekly</p>
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(revenue.weekly)}</p>
+                    </div>
+                    <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">Monthly</p>
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(revenue.monthly)}</p>
+                    </div>
+                    <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">Yearly</p>
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(revenue.yearly)}</p>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Earnings Visualization</CardTitle>
+                    <CardDescription>A visual representation of your estimated earnings.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis tickFormatter={(value) => formatCurrency(value as number)} />
+                            <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                            <Legend />
+                            <Bar dataKey="Earnings" fill="hsl(var(--primary))" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+        </div>
       )}
     </div>
   );
