@@ -1,6 +1,5 @@
 
 export { AdMobRevenueCalculator } from './AdMobRevenueCalculator';
-export { AdSenseRevenueCalculator } from './AdSenseRevenueCalculator';
 export { AgeCalculator } from './AgeCalculator';
 export { AmazonShippingLabelCropper } from './AmazonShippingLabelCropper';
 export { BarcodeGenerator } from './BarcodeGenerator';
@@ -135,4 +134,8 @@ export { RomanToNumberConverter } from './RomanToNumberConverter';
 export { NumberToRomanConverter } from './NumberToRomanConverter';
 export { RdCalculator } from './RdCalculator';
 export { NpsCalculator } from './NpsCalculator';
-export { AesEncryptionDecryption } from './AesEncryptionDecryption';
+export { AesEncryptionDecryption } from './AesEncryptionAndDecryption';
+export { AdSenseRevenueCalculator } from './AdSenseRevenueCalculator';
+
+
+    

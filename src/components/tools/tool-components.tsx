@@ -20,6 +20,10 @@ import dynamic from 'next/dynamic';
 import { Skeleton } from '../ui/skeleton';
 
 const toPascalCase = (slug: string) => {
+    // Handle specific case for AdSense
+    if (slug === 'adsense-revenue-calculator') {
+        return 'AdSenseRevenueCalculator';
+    }
     return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
 }
 
@@ -309,3 +313,5 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
         </div>
     );
 }
+
+    
