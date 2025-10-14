@@ -9,7 +9,7 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue, Timestamp, Query } from 'firebase-admin/firestore';
 import { z } from 'zod';
 import { type Tool, type UpsertToolInput, type ToolRequest, ToolSchema, UpsertToolInputSchema, ToolRequestSchema } from './tool-management.types';
-import { unstable_cache as cache } from 'next/cache';
+import { unstable_cache as cache, revalidatePath } from 'next/cache';
 
 
 const TOOLS_COLLECTION = 'tools';
@@ -286,11 +286,14 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
       const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(id);
       // Ensure slug is not removed on update
       await toolRef.update({ ...validatedData, slug: id });
+       revalidatePath('/tools');
+       revalidatePath(`/tools/${id}`);
       return { success: true, message: 'Tool updated successfully.', toolId: id };
     } else {
       if (!data.slug) throw new Error("Slug is required for a new tool.");
       const docRef = adminDb.collection(TOOLS_COLLECTION).doc(data.slug);
       await docRef.set({ ...validatedData, slug: data.slug, createdAt: FieldValue.serverTimestamp() });
+       revalidatePath('/tools');
       return { success: true, message: 'Tool added successfully.', toolId: docRef.id };
     }
   } catch (error: any) {
@@ -332,6 +335,8 @@ To complete the deletion, please manually delete the following files:
 *****************************************************************
         `;
         console.log(logMessage);
+        
+        revalidatePath('/tools');
 
         return { success: true, message: 'Tool deleted successfully.' };
     } catch (error: any) {
