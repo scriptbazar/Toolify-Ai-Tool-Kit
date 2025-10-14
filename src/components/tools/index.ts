@@ -29,7 +29,7 @@ export { FuelCostCalculator } from './FuelCostCalculator';
 export { GpaCalculator } from './GpaCalculator';
 export { GpaToCgpaCalculator } from './GpaToCgpaCalculator';
 export { GpaToPercentageConverter } from './GpaToPercentageConverter';
-export { GstCalculator } from './GSTCalculator';
+export { GSTCalculator as GstCalculator } from './GSTCalculator';
 export { GoogleDriveDirectLinkGenerator } from './GoogleDriveDirectLinkGenerator';
 export { HtmlMinifier } from './HtmlMinifier';
 export { HTMLToMarkdownConverter } from './HtmlToMarkdownConverter';
@@ -134,8 +134,9 @@ export { RomanToNumberConverter } from './RomanToNumberConverter';
 export { NumberToRomanConverter } from './NumberToRomanConverter';
 export { RdCalculator } from './RdCalculator';
 export { NpsCalculator } from './NpsCalculator';
-export { AesEncryptionDecryption } from './AesEncryptionAndDecryption';
+export { AesEncryptionDecryption, AesEncryptionDecryption as AesEncryptionAndDecryption } from './AesEncryptionAndDecryption';
 export { AdSenseRevenueCalculator } from './AdSenseRevenueCalculator';
 
 
     
+
