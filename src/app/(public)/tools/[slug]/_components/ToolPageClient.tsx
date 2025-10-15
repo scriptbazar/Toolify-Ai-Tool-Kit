@@ -128,8 +128,8 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'word-counter': 'WordCounter',
     'word-to-pdf': 'WordToPdf',
     'xml-sitemap-generator': 'XmlSitemapGenerator',
-    'yt-banner-downloader': 'YouTubeChannelBannerDownloader',
-    'yt-logo-downloader': 'YouTubeChannelLogoDownloader',
+    'youtube-channel-banner-downloader': 'YouTubeChannelBannerDownloader',
+    'youtube-channel-logo-downloader': 'YouTubeChannelLogoDownloader',
     'youtube-region-restriction-checker': 'YouTubeRegionRestrictionChecker',
     'youtube-video-description-extractor': 'YouTubeVideoDescriptionExtractor',
     'youtube-video-thumbnail-downloader': 'YouTubeVideoThumbnailDownloader',
@@ -154,9 +154,10 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'number-to-roman-converter': 'NumberToRomanConverter',
     'rd-calculator': 'RdCalculator',
     'nps-calculator': 'NpsCalculator',
-    'aes-encryption-and-decryption': 'AesEncryptionAndDecryption',
+    'aes-encryption-and-decryption': 'AesEncryptionDecryption',
     'image-to-pdf': 'ImageToPdf',
     'image-to-text': 'ImageToText',
+    'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
 };
 
 

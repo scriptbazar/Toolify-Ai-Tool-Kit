@@ -137,3 +137,4 @@ export { AdSenseRevenueCalculator } from './AdSenseRevenueCalculator';
 export { UnitConverter } from './UnitConverter';
 export { ImageToPdf } from './ImageToPdf';
 export { ImageToText } from './ImageToText';
+export { IfscCodeToBankDetails } from './IfscCodeToBankDetails';
