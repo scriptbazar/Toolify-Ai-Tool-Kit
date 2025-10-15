@@ -137,3 +137,5 @@ export { NpsCalculator } from './NpsCalculator';
 export { AesEncryptionAndDecryption } from './AesEncryptionAndDecryption';
 export { AdSenseRevenueCalculator } from './AdSenseRevenueCalculator';
 export { UnitConverter } from './UnitConverter';
+export { ImageToPdf } from './ImageToPdf';
+export { ImageToText } from './ImageToText';

@@ -209,5 +209,3 @@ export function AesEncryptionAndDecryption() {
     </div>
   );
 }
-
-export { AesEncryptionAndDecryption as AesEncryptionDecryption };

@@ -157,7 +157,7 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'nps-calculator': 'NpsCalculator',
     'aes-encryption-and-decryption': 'AesEncryptionAndDecryption',
     'image-to-pdf': 'ImageToPdf',
-    'image-to-text': 'ImageToText',
+    'image-to-text': 'TextRecognizer',
 };
 
 
