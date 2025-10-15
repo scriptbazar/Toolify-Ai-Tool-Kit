@@ -56,7 +56,6 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'html-minifier': 'HtmlMinifier',
     'html-to-markdown-converter': 'HtmlToMarkdownConverter',
     'ico-converter': 'IcoConverter',
-    'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
     'image-color-extractor': 'ImageColorExtractor',
     'image-compressor': 'ImageCompressor',
     'image-converter': 'ImageConverter',
@@ -155,7 +154,7 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'number-to-roman-converter': 'NumberToRomanConverter',
     'rd-calculator': 'RdCalculator',
     'nps-calculator': 'NpsCalculator',
-    'aes-encryption-and-decryption': 'AesEncryptionDecryption',
+    'aes-encryption-and-decryption': 'AesEncryptionAndDecryption',
     'image-to-pdf': 'ImageToPdf',
     'image-to-text': 'ImageToText',
 };

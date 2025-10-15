@@ -34,7 +34,6 @@ export { GoogleDriveDirectLinkGenerator } from './GoogleDriveDirectLinkGenerator
 export { HtmlMinifier } from './HtmlMinifier';
 export { HtmlToMarkdownConverter } from './HtmlToMarkdownConverter';
 export { IcoConverter } from './IcoConverter';
-export { IfscCodeToBankDetails } from './IfscCodeToBankDetails';
 export { ImageColorExtractor } from './ImageColorExtractor';
 export { ImageCompressor } from './ImageCompressor';
 export { ImageConverter } from './ImageConverter';
