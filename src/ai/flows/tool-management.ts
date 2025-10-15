@@ -95,7 +95,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image Metadata Viewer', description: '📸 View detailed EXIF and other metadata from your images. Discover information like camera settings, location (if available), and date taken.', icon: 'Camera', category: 'image', isNew: true, status: 'Active', howToUse: ['Upload an image file (JPG, PNG, etc.).', 'The tool will extract and display all available metadata.', 'View details like camera model, aperture, ISO, and GPS data if available.'] },
     { name: 'Flip Image', description: '🔄 Flip an image horizontally or vertically to create a mirrored version of your original picture. A simple but essential editing tool.', icon: 'FlipHorizontal', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image you want to flip.', 'Click "Flip Horizontal" or "Flip Vertical".', 'Download the modified image.'] },
     { name: 'ICO Converter', description: '⭐ Convert your images (PNG, JPG) to the ICO format. Perfect for creating website favicons and application icons.', icon: 'FileHeart', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your source image (preferably square).', 'Click the "Convert & Download .ICO" button.', 'Your new .ico file will be automatically downloaded.'] },
-    { name: 'Website Word Counter', description: '📊 Count the number of words on any webpage by entering its URL. Useful for SEO analysis, content assessment, and competitive research.', icon: 'FileSearch', category: 'seo', isNew: true, status: 'Active', plan: 'Pro' },
     { name: 'Favicon Checker', description: '❤️ Check if a website has a favicon and preview what it looks like. A quick tool for web developers and designers.', icon: 'Heart', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the full URL of the website.', 'Click "Check Favicon".', 'The tool will display the favicon if it exists.'] },
     { name: 'Meta Tag Generator', description: '⚙️ Generate meta tags (title, description) for your website to improve SEO and how your pages appear in search results and on social media.', icon: 'Code', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Enter your site title and description.', 'The tool will generate the appropriate HTML meta tags.', 'Copy the generated code and paste it into the `<head>` section of your HTML.'] },
     { name: 'Keyword Density Checker', description: '📈 Analyze the keyword density of your text to optimize for SEO. Find out which terms appear most frequently in your content.', icon: 'PieChart', category: 'seo', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Paste your article or text into the text area.', 'Click "Analyze Text".', 'The tool will show you the most frequent keywords and their density.'] },
@@ -145,6 +144,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'RD Calculator', description: 'Calculate the maturity amount of your Recurring Deposit.', icon: 'Repeat', category: 'calculator', isNew: true, status: 'Active', plan: 'Pro' },
     { name: 'NPS Calculator', description: 'Calculate the future value of your National Pension Scheme investments.', icon: 'Landmark', category: 'calculator', isNew: true, status: 'Active', plan: 'Pro' },
     { name: 'Image Watermark Adder', description: 'Add a custom text or image watermark to your photos. Adjust opacity, position, and size to protect your images.', icon: 'Fingerprint', category: 'image', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload the image you want to watermark.', 'Choose between a text or image watermark.', 'Customize the watermark\'s content, size, and position.', 'Download your watermarked image.'] },
+    { name: 'Loan Calculator', description: 'Calculate your loan EMI and total interest payable.', icon: 'Banknote', category: 'calculator', isNew: true, status: 'Active', plan: 'Pro' },
+    { name: 'XML Sitemap Generator', description: 'Create an XML sitemap for your website to improve SEO.', icon: 'FileCode', category: 'seo', isNew: true, status: 'Active', plan: 'Pro' },
 ];
 
 const generateSlug = (name: string) => {
@@ -326,7 +327,7 @@ ACTION REQUIRED: Tool '${toolName}' deleted from database.
 To complete the deletion, please manually delete the following files:
 1. Component: ${componentPath}
 2. Entry in: src/components/tools/index.ts
-3. Entry in: src/components/tools/tool-components.tsx
+3. Entry in: src/app/(public)/tools/[slug]/_components/ToolPageClient.tsx (slugToComponentMap)
 *****************************************************************
         `;
         console.log(logMessage);
@@ -487,4 +488,5 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
   }
 }
 
+    
     
