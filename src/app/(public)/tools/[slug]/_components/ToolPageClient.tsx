@@ -133,6 +133,7 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'youtube-region-restriction-checker': 'YouTubeRegionRestrictionChecker',
     'youtube-video-description-extractor': 'YouTubeVideoDescriptionExtractor',
     'youtube-video-thumbnail-downloader': 'YouTubeVideoThumbnailDownloader',
+    'youtube-video-title-extractor': 'YouTubeVideoTitleExtractor',
     'profit-loss-calculator': 'ProfitLossCalculator',
     'sip-calculator': 'SIPCalculator',
     'fd-calculator': 'FDCalculator',
@@ -212,7 +213,7 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
                 </Link>
             </Button>
             <AdPlaceholder adSlotId="toolpage-banner-top" adSettings={adSettings} className="mb-6" />
-            <div className="flex flex-col lg:flex-row lg:gap-8">
+            <div className="flex flex-col lg:flex-row lg:gap-8 lg:items-start">
                 <div className="flex-1 space-y-8">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-center gap-4">
