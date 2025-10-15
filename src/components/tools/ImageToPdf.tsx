@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
+import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { UploadCloud, FileDown, Loader2, Trash2, GripVertical, FileText } from 'lucide-react';
@@ -10,9 +10,6 @@ import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { ScrollArea } from '../ui/scroll-area';
-import * as pdfjsLib from 'pdfjs-dist';
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 interface FileWithPreview {
   file: File;
@@ -111,7 +108,7 @@ export function ImageToPdf() {
       link.click();
       document.body.removeChild(link);
       
-      toast({ title: 'Success!', description: 'Your PDF has been created and downloaded.' });
+      toast({ title: 'Success!', description: 'Your PDF has been created and downloaded.'});
 
     } catch (error) {
       console.error(error);
@@ -133,15 +130,15 @@ export function ImageToPdf() {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
         >
-             <CardContent 
+            <CardContent 
                 className="p-6 text-center cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
             >
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple />
-                <div className="flex flex-col items-center justify-center h-full">
+                 <div className="flex flex-col items-center justify-center h-full">
                     <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold">Click or drag images to upload</h3>
-                    <p className="text-sm text-muted-foreground">Select one or more images to convert to PDF.</p>
+                    <p className="text-sm text-muted-foreground">Select one or more images to merge into a single PDF.</p>
                 </div>
             </CardContent>
        </Card>
@@ -177,12 +174,12 @@ export function ImageToPdf() {
                         ))}
                     </div>
                 </ScrollArea>
-                <div className="flex justify-end mt-4">
+                 <div className="flex justify-end mt-4">
                      <Button variant="secondary" onClick={() => setFiles([])}>
                         <Trash2 className="mr-2 h-4 w-4"/>
                         Clear All
                     </Button>
-                </div>
+                 </div>
             </CardContent>
          </Card>
        )}
