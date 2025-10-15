@@ -16,8 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, Sparkles, Star, Zap, BrainCircuit, Construction, ShieldCheck, MousePointerClick } from 'lucide-react';
 import { addUserActivity } from '@/ai/flows/user-activity';
-import dynamic from 'next/dynamic';
-import { Skeleton } from '../ui/skeleton';
 import * as AllToolComponents from '@/components/tools';
 
 const toPascalCase = (slug: string) => {
