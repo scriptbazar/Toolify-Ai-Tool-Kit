@@ -32,7 +32,7 @@ export { GpaToPercentageConverter } from './GpaToPercentageConverter';
 export { GSTCalculator } from './GSTCalculator';
 export { GoogleDriveDirectLinkGenerator } from './GoogleDriveDirectLinkGenerator';
 export { HtmlMinifier } from './HtmlMinifier';
-export { HTMLToMarkdownConverter } from './HTMLToMarkdownConverter';
+export { HtmlToMarkdownConverter } from './HtmlToMarkdownConverter';
 export { IcoConverter } from './IcoConverter';
 export { IfscCodeToBankDetails } from './IfscCodeToBankDetails';
 export { ImageColorExtractor } from './ImageColorExtractor';
