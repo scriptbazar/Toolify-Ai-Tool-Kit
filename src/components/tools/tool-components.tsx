@@ -51,6 +51,10 @@ const toPascalCase = (slug: string) => {
     if (slug === 'tds-calculator') return 'TDSCalculator';
     if (slug === 'unit-converter') return 'UnitConverter';
     if (slug === 'text-encryption-and-decryption') return 'TextEncryptionDecryption';
+    if (slug === 'url-encoder-decoder') return 'UrlEncoderDecoder';
+    if (slug === 'whats-app-group-url-generator') return 'WhatsAppGroupUrlGenerator';
+    if (slug === 'whats-chat-url-generator') return 'WhatsChatUrlGenerator';
+    if (slug === 'onedrive-direct-link-generator') return 'OneDriveDirectLinkGenerator';
     
     return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
 }

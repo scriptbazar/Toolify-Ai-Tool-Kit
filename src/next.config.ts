@@ -72,7 +72,7 @@ const nextConfig: NextConfig = {
     config.externals.push('canvas');
 
     // Copy pdf.js CMaps and worker to public directory only for server build
-    if (isServer) {
+    if (isServer && !copyWebpackPluginHasRun) {
         config.plugins.push(
             new CopyWebpackPlugin({
                 patterns: [
@@ -87,6 +87,7 @@ const nextConfig: NextConfig = {
                 ],
             })
         );
+        copyWebpackPluginHasRun = true;
     }
     
     return config;
