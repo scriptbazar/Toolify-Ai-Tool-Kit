@@ -29,7 +29,7 @@ export { FuelCostCalculator } from './FuelCostCalculator';
 export { GpaCalculator } from './GpaCalculator';
 export { GpaToCgpaCalculator } from './GpaToCgpaCalculator';
 export { GpaToPercentageConverter } from './GpaToPercentageConverter';
-export { GSTCalculator as GstCalculator } from './GSTCalculator';
+export { GSTCalculator } from './GSTCalculator';
 export { GoogleDriveDirectLinkGenerator } from './GoogleDriveDirectLinkGenerator';
 export { HtmlMinifier } from './HtmlMinifier';
 export { HTMLToMarkdownConverter } from './HtmlToMarkdownConverter';
