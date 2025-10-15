@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Copy, Trash2, SmileMinus } from 'lucide-react';
+import { Copy, Trash2, SmileOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 
@@ -69,7 +69,7 @@ export function EmojiRemover() {
        </Card>
         <div className="flex flex-col sm:flex-row gap-2">
             <Button onClick={handleRemoveEmojis} className="w-full">
-                <SmileMinus className="mr-2 h-4 w-4" /> Remove Emojis
+                <SmileOff className="mr-2 h-4 w-4" /> Remove Emojis
             </Button>
             <Button variant="outline" onClick={handleCopy} disabled={!outputText} className="w-full">
                 <Copy className="mr-2 h-4 w-4" /> Copy Result
