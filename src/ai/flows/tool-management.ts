@@ -158,21 +158,17 @@ const generateSlug = (name: string) => {
 export async function seedInitialTools() {
     const adminDb = getAdminDb();
     const toolsCollection = adminDb.collection(TOOLS_COLLECTION);
-    const snapshot = await toolsCollection.limit(1).get();
-
-    if (snapshot.empty) {
-        console.log("Seeding initial tools into the database...");
-        const batch = adminDb.batch();
-        initialTools.forEach(tool => {
-            const slug = generateSlug(tool.name);
-            const docRef = toolsCollection.doc(slug);
-            batch.set(docRef, { ...tool, slug, createdAt: FieldValue.serverTimestamp() });
-        });
-        await batch.commit();
-        console.log(`${initialTools.length} tools seeded successfully.`);
-        return true;
-    }
-    return false;
+    
+    console.log("Forcing update of all tools in the database...");
+    const batch = adminDb.batch();
+    initialTools.forEach(tool => {
+        const slug = generateSlug(tool.name);
+        const docRef = toolsCollection.doc(slug);
+        batch.set(docRef, { ...tool, slug, createdAt: FieldValue.serverTimestamp() }, { merge: true });
+    });
+    await batch.commit();
+    console.log(`${initialTools.length} tools force-updated successfully.`);
+    return true;
 }
 
 interface GetToolsOptions {
