@@ -1,13 +1,14 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, type ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { AspectRatio, Calculator, RefreshCw } from 'lucide-react';
+import { AspectRatio, Calculator, RefreshCw, UploadCloud } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Image from 'next/image';
 
 // Function to find the greatest common divisor
 const gcd = (a: number, b: number): number => {
@@ -16,9 +17,11 @@ const gcd = (a: number, b: number): number => {
 
 export function ImageAspectRatioCalculator() {
     // For finding ratio
-    const [width1, setWidth1] = useState('1920');
-    const [height1, setHeight1] = useState('1080');
-    const [ratioResult, setRatioResult] = useState('16:9');
+    const [width1, setWidth1] = useState('');
+    const [height1, setHeight1] = useState('');
+    const [ratioResult, setRatioResult] = useState('');
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // For finding dimensions
     const [width2, setWidth2] = useState('');
@@ -61,6 +64,30 @@ export function ImageAspectRatioCalculator() {
         }
     }, [height2, ratioX, ratioY]);
 
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new window.Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    setImagePreview(img.src);
+                    setWidth1(String(img.naturalWidth));
+                    setHeight1(String(img.naturalHeight));
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    
+    const handleClear = () => {
+        setWidth1('');
+        setHeight1('');
+        setImagePreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+
     return (
         <Tabs defaultValue="find-ratio" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -69,14 +96,38 @@ export function ImageAspectRatioCalculator() {
             </TabsList>
             <TabsContent value="find-ratio">
                 <Card>
-                    <CardHeader><CardTitle>Find Aspect Ratio</CardTitle><CardDescription>Enter dimensions to calculate the ratio.</CardDescription></CardHeader>
+                    <CardHeader>
+                        <CardTitle>Find Aspect Ratio</CardTitle>
+                        <CardDescription>Enter dimensions manually or upload an image to calculate the ratio.</CardDescription>
+                    </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2"><Label htmlFor="width1">Width</Label><Input id="width1" type="number" value={width1} onChange={e => setWidth1(e.target.value)} placeholder="e.g., 1920"/></div>
-                            <div className="space-y-2"><Label htmlFor="height1">Height</Label><Input id="height1" type="number" value={height1} onChange={e => setHeight1(e.target.value)} placeholder="e.g., 1080"/></div>
+                             <div className="space-y-2">
+                                <Label htmlFor="width1">Width (px)</Label>
+                                <Input id="width1" type="number" value={width1} onChange={e => setWidth1(e.target.value)} placeholder="e.g., 1920"/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="height1">Height (px)</Label>
+                                <Input id="height1" type="number" value={height1} onChange={e => setHeight1(e.target.value)} placeholder="e.g., 1080"/>
+                            </div>
                         </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                            <Button variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()}><UploadCloud className="mr-2 h-4 w-4"/>Upload Image</Button>
+                             <Button variant="destructive" className="w-full" onClick={handleClear} disabled={!width1 && !height1 && !imagePreview}><RefreshCw className="mr-2 h-4 w-4"/>Clear</Button>
+                        </div>
+                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+                        
+                        {imagePreview && (
+                            <div className="p-2 border rounded-lg bg-muted">
+                                <p className="text-sm font-semibold text-center mb-2">Image Preview</p>
+                                <div className="relative w-full aspect-video">
+                                    <Image src={imagePreview} alt="Preview" layout="fill" objectFit="contain" />
+                                </div>
+                            </div>
+                        )}
+
                         {ratioResult && (
-                            <div className="text-center p-4 bg-muted rounded-lg">
+                            <div className="text-center p-4 bg-primary/10 rounded-lg">
                                 <p className="text-sm text-muted-foreground">Calculated Aspect Ratio</p>
                                 <p className="text-3xl font-bold text-primary">{ratioResult}</p>
                             </div>
