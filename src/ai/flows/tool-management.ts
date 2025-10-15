@@ -491,4 +491,3 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 }
 
     
-    
