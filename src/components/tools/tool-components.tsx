@@ -45,7 +45,7 @@ const toPascalCase = (slug: string) => {
     if (slug === 'profit-loss-calculator') return 'ProfitLossCalculator';
     if (slug === 'rd-calculator') return 'RdCalculator';
     if (slug === 'roman-to-number-converter') return 'RomanToNumberConverter';
-    if (slug === 'page-size-checker') return 'PageSizeChecker';
+    if (slug === 'page-size-checker' || slug === 'website-word-counter') return 'WebsiteWordCounter';
     if (slug === 'sip-calculator') return 'SIPCalculator';
     if (slug === 'sales-tax-calculator') return 'SalesTaxCalculator';
     if (slug === 'tds-calculator') return 'TDSCalculator';
