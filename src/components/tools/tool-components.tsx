@@ -50,6 +50,7 @@ const toPascalCase = (slug: string) => {
     if (slug === 'sales-tax-calculator') return 'SalesTaxCalculator';
     if (slug === 'tds-calculator') return 'TDSCalculator';
     if (slug === 'unit-converter') return 'UnitConverter';
+    if (slug === 'text-encryption-and-decryption') return 'TextEncryptionDecryption';
     
     return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
 }
