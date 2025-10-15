@@ -133,7 +133,6 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'youtube-region-restriction-checker': 'YouTubeRegionRestrictionChecker',
     'youtube-video-description-extractor': 'YouTubeVideoDescriptionExtractor',
     'youtube-video-thumbnail-downloader': 'YouTubeVideoThumbnailDownloader',
-    'youtube-video-title-extractor': 'YouTubeVideoTitleExtractor',
     'profit-loss-calculator': 'ProfitLossCalculator',
     'sip-calculator': 'SIPCalculator',
     'fd-calculator': 'FDCalculator',
