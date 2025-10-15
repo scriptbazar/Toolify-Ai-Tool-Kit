@@ -34,8 +34,21 @@ const toPascalCase = (slug: string) => {
     if (slug === 'srm-to-cgpa-calculator') return 'SrmToCgpaCalculator';
     if (slug === 'uti-pan-card-photo-and-signature-resizer') return 'UTIPANCardPhotoAndSignatureResizer';
     if (slug === 'nsdl-pan-card-photo-and-signature-resizer') return 'NSDLPANCardPhotoAndSignatureResizer';
-    if (slug === 'aes-encryption-and-decryption') return 'AesEncryptionDecryption';
+    if (slug === 'aes-encryption-and-decryption') return 'AesEncryptionAndDecryption';
     if (slug === 'fd-calculator') return 'FDCalculator';
+    if (slug === 'html-to-markdown-converter') return 'HtmlToMarkdownConverter';
+    if (slug === 'image-aspect-ratio-calculator') return 'ImageAspectRatioCalculator';
+    if (slug === 'internet-speed-tester') return 'InternetSpeedTester';
+    if (slug === 'nps-calculator') return 'NpsCalculator';
+    if (slug === 'numbers-to-word') return 'NumbersToWord';
+    if (slug === 'number-to-roman-converter') return 'NumberToRomanConverter';
+    if (slug === 'profit-loss-calculator') return 'ProfitLossCalculator';
+    if (slug === 'rd-calculator') return 'RdCalculator';
+    if (slug === 'roman-to-number-converter') return 'RomanToNumberConverter';
+    if (slug === 'page-size-checker') return 'PageSizeChecker';
+    if (slug === 'sip-calculator') return 'SIPCalculator';
+    if (slug === 'sales-tax-calculator') return 'SalesTaxCalculator';
+    if (slug === 'tds-calculator') return 'TDSCalculator';
     
     return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
 }
