@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -129,8 +130,8 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'word-counter': 'WordCounter',
     'word-to-pdf': 'WordToPdf',
     'xml-sitemap-generator': 'XmlSitemapGenerator',
-    'youtube-channel-banner-downloader': 'YouTubeChannelBannerDownloader',
-    'youtube-channel-logo-downloader': 'YouTubeChannelLogoDownloader',
+    'yt-banner-downloader': 'YouTubeChannelBannerDownloader',
+    'yt-logo-downloader': 'YouTubeChannelLogoDownloader',
     'youtube-region-restriction-checker': 'YouTubeRegionRestrictionChecker',
     'youtube-video-description-extractor': 'YouTubeVideoDescriptionExtractor',
     'youtube-video-thumbnail-downloader': 'YouTubeVideoThumbnailDownloader',
