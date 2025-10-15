@@ -57,7 +57,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     const recentPosts = allPosts.filter(p => p.status === 'Published').slice(0, 5);
 
     const sidebar = (
-        <aside className="w-full lg:w-80 xl:w-96 mt-8 lg:mt-0 space-y-6">
+        <aside className="w-full lg:w-64 xl:w-80 mt-8 lg:mt-0 space-y-6">
             <AdPlaceholder adSlotId="toolpage-sidebar" adSettings={settings?.advertisement ?? null} />
             {sidebarSettings?.showPopularTools && popularTools.length > 0 && (
                 <SidebarWidget title="Popular Tools">
