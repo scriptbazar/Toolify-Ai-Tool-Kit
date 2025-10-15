@@ -74,7 +74,6 @@ export { PdfToWord } from './PdfToWord';
 export { PercentageCalculator } from './PercentageCalculator';
 export { PercentageToCgpaConverter } from './PercentageToCgpaConverter';
 export { PptToPdf } from './PptToPdf';
-export { PRNToPDF } from './PRNToPDF';
 export { QrCodeGenerator } from './QrCodeGenerator';
 export { QrCodeScanner } from './QrCodeScanner';
 export { RandomWordGenerator } from './RandomWordGenerator';

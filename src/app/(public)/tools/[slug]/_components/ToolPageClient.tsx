@@ -96,7 +96,6 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'percentage-calculator': 'PercentageCalculator',
     'percentage-to-cgpa-converter': 'PercentageToCgpaConverter',
     'ppt-to-pdf': 'PptToPdf',
-    'prn-to-pdf': 'PRNToPDF',
     'qr-code-generator': 'QrCodeGenerator',
     'qr-code-scanner': 'QrCodeScanner',
     'random-word-generator': 'RandomWordGenerator',
