@@ -66,7 +66,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
                             const ToolIcon = (Icons as any)[t.icon] || Icons.HelpCircle;
                             return (
                             <li key={t.id}>
-                                <Link href={`/tools/${t.slug}`} className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-muted">
+                                <Link href={`/tools/${t.slug}`} className="flex items-center gap-3 text-base text-muted-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-muted">
                                     <ToolIcon className="h-5 w-5" />
                                     <span>{t.name}</span>
                                 </Link>
