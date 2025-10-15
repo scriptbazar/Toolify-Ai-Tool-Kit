@@ -16,6 +16,8 @@ import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+
 
 const AdminToolTableDynamic = dynamic(() => import('@/app/admin/tools/_components/AdminToolTable').then(mod => mod.AdminToolTable), {
     loading: () => (
@@ -31,6 +33,8 @@ export default function AdminToolsPage() {
     const [filteredTools, setFilteredTools] = useState<Tool[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const router = useRouter();
+
 
     const ITEMS_PER_PAGE = 10;
     const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
@@ -42,6 +46,12 @@ export default function AdminToolsPage() {
         setFilteredTools(tools); // Initialize with all tools
         setLoading(false);
     };
+    
+    // The onToolUpdate function now simply refreshes the page data from the server.
+    const handleToolUpdate = () => {
+        router.refresh();
+    };
+
 
     useEffect(() => {
         fetchTools();
@@ -49,7 +59,7 @@ export default function AdminToolsPage() {
 
     useEffect(() => {
       setCurrentPage(1);
-    }, [filteredTools.length > 0 && filteredTools[0].id]);
+    }, [filteredTools.length > 0 && filteredTools[0]?.id]);
 
     if (loading) {
         return (
@@ -97,7 +107,7 @@ export default function AdminToolsPage() {
                         allTools={allTools}
                         filteredTools={filteredTools}
                         setFilteredTools={setFilteredTools}
-                        onToolUpdate={fetchTools} 
+                        onToolUpdate={handleToolUpdate} 
                         currentPage={currentPage}
                         setCurrentPage={setCurrentPage}
                         totalPages={totalPages}
