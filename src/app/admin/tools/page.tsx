@@ -30,6 +30,10 @@ export default function AdminToolsPage() {
     const [allTools, setAllTools] = useState<Tool[]>([]);
     const [filteredTools, setFilteredTools] = useState<Tool[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const ITEMS_PER_PAGE = 10;
+    const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
 
     const fetchTools = async () => {
         setLoading(true);
@@ -42,6 +46,10 @@ export default function AdminToolsPage() {
     useEffect(() => {
         fetchTools();
     }, []);
+
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [filteredTools.length > 0 && filteredTools[0].id]);
 
     if (loading) {
         return (
@@ -90,6 +98,9 @@ export default function AdminToolsPage() {
                         filteredTools={filteredTools}
                         setFilteredTools={setFilteredTools}
                         onToolUpdate={fetchTools} 
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        totalPages={totalPages}
                     />
                 </CardContent>
             </Card>

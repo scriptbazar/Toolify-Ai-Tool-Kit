@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import * as Icons from 'lucide-react';
-import { ToolComponentRenderer } from '@/components/tools/tool-components';
+import { ToolComponentRenderer } from './_components/ToolPageClient';
 import { type AppSettings } from '@/ai/flows/settings-management.types';
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (

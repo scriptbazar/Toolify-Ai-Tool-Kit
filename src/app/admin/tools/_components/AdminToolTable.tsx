@@ -30,27 +30,22 @@ interface AdminToolTableProps {
   filteredTools: Tool[];
   setFilteredTools: (tools: Tool[]) => void;
   onToolUpdate: () => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalPages: number;
 }
 
-const ITEMS_PER_PAGE = 10;
-
-export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onToolUpdate }: AdminToolTableProps) {
+export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onToolUpdate, currentPage, setCurrentPage, totalPages }: AdminToolTableProps) {
   const router = useRouter();
   const [editingTool, setEditingTool] = React.useState<Tool | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [currentPage, setCurrentPage] = React.useState(1);
   const { toast } = useToast();
-
-  const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
-  const paginatedTools = filteredTools.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
-  // Reset to page 1 when filters change
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [filteredTools.length]);
+  
+  const paginatedTools = React.useMemo(() => {
+    const ITEMS_PER_PAGE = 10;
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredTools.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredTools, currentPage]);
 
 
   const getCategoryName = (categoryId: string) => {
@@ -87,7 +82,7 @@ export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onTo
         description: `The tool "${data.name}" has been saved.`,
       });
       setIsModalOpen(false);
-      onToolUpdate(); // Refresh the list by calling the parent's fetch function
+      onToolUpdate(); // Refresh the list
     } else {
       toast({ title: 'Error', description: result.message, variant: 'destructive' });
     }
