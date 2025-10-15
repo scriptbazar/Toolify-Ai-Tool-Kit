@@ -18,46 +18,147 @@ import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, Sparkles, Sta
 import { addUserActivity } from '@/ai/flows/user-activity';
 import * as AllToolComponents from '@/components/tools';
 
-const toPascalCase = (slug: string) => {
-    // Handle specific cases for acronyms
-    if (slug === 'adsense-revenue-calculator') return 'AdSenseRevenueCalculator';
-    if (slug === 'admob-revenue-calculator') return 'AdMobRevenueCalculator';
-    if (slug === 'bmi-calculator') return 'BmiCalculator';
-    if (slug === 'css-minifier') return 'CssMinifier';
-    if (slug === 'html-minifier') return 'HtmlMinifier';
-    if (slug === 'javascript-minifier') return 'JavascriptMinifier';
-    if (slug === 'json-formatter') return 'JsonFormatter';
-    if (slug === 'qr-code-generator') return 'QrCodeGenerator';
-    if (slug === 'qr-code-scanner') return 'QrCodeScanner';
-    if (slug === 'srm-to-cgpa-calculator') return 'SrmToCgpaCalculator';
-    if (slug === 'uti-pan-card-photo-and-signature-resizer') return 'UTIPANCardPhotoAndSignatureResizer';
-    if (slug === 'nsdl-pan-card-photo-and-signature-resizer') return 'NSDLPANCardPhotoAndSignatureResizer';
-    if (slug === 'aes-encryption-and-decryption') return 'AesEncryptionAndDecryption';
-    if (slug === 'fd-calculator') return 'FDCalculator';
-    if (slug === 'html-to-markdown-converter') return 'HtmlToMarkdownConverter';
-    if (slug === 'image-aspect-ratio-calculator') return 'ImageAspectRatioCalculator';
-    if (slug === 'internet-speed-tester') return 'InternetSpeedTester';
-    if (slug === 'nps-calculator') return 'NpsCalculator';
-    if (slug === 'numbers-to-word') return 'NumbersToWord';
-    if (slug === 'number-to-roman-converter') return 'NumberToRomanConverter';
-    if (slug === 'profit-loss-calculator') return 'ProfitLossCalculator';
-    if (slug === 'rd-calculator') return 'RdCalculator';
-    if (slug === 'roman-to-number-converter') return 'RomanToNumberConverter';
-    if (slug === 'page-size-checker' || slug === 'website-word-counter') return 'WebsiteWordCounter';
-    if (slug === 'sip-calculator') return 'SIPCalculator';
-    if (slug === 'sales-tax-calculator') return 'SalesTaxCalculator';
-    if (slug === 'tds-calculator') return 'TDSCalculator';
-    if (slug === 'unit-converter') return 'UnitConverter';
-    if (slug === 'text-encryption-and-decryption') return 'TextEncryptionDecryption';
-    if (slug === 'url-encoder-decoder') return 'UrlEncoderDecoder';
-    if (slug === 'whats-app-group-url-generator') return 'WhatsAppGroupUrlGenerator';
-    if (slug === 'whats-chat-url-generator') return 'WhatsChatUrlGenerator';
-    if (slug === 'onedrive-direct-link-generator') return 'OneDriveDirectLinkGenerator';
-    if (slug === 'image-to-pdf') return 'ImageToPdf';
-    if (slug === 'image-to-text') return 'ImageToText';
-    
-    return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
-}
+const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
+    'admob-revenue-calculator': 'AdMobRevenueCalculator',
+    'adsense-revenue-calculator': 'AdSenseRevenueCalculator',
+    'age-calculator': 'AgeCalculator',
+    'amazon-shipping-label-cropper': 'AmazonShippingLabelCropper',
+    'barcode-generator': 'BarcodeGenerator',
+    'barcode-scanner': 'BarcodeScanner',
+    'base64-converter': 'Base64Converter',
+    'binary-to-text': 'BinaryToText',
+    'bmi-calculator': 'BmiCalculator',
+    'case-converter': 'CaseConverter',
+    'cgpa-to-gpa-converter': 'CgpaToGpaConverter',
+    'cgpa-to-marks-calculator': 'CgpaToMarksCalculator',
+    'color-picker': 'ColorPicker',
+    'compress-pdf': 'CompressPdf',
+    'credit-card-interest-calculator': 'CreditCardInterestCalculator',
+    'crontab-generator': 'CrontabGenerator',
+    'css-minifier': 'CssMinifier',
+    'currency-converter': 'CurrencyConverter',
+    'date-calculator': 'DateCalculator',
+    'discount-calculator': 'DiscountCalculator',
+    'dropbox-direct-link-generator': 'DropboxDirectLinkGenerator',
+    'excel-to-pdf': 'ExcelToPdf',
+    'favicon-checker': 'FaviconChecker',
+    'find-and-replace': 'FindAndReplace',
+    'find-ifsc-code-by-bank-and-city': 'FindIfscCodeByBankAndCity',
+    'flipkart-shipping-label-cropper': 'FlipkartShippingLabelCropper',
+    'flip-image': 'FlipImage',
+    'fuel-cost-calculator': 'FuelCostCalculator',
+    'gpa-calculator': 'GpaCalculator',
+    'gpa-to-cgpa-calculator': 'GpaToCgpaCalculator',
+    'gpa-to-percentage-converter': 'GpaToPercentageConverter',
+    'gst-calculator': 'GSTCalculator',
+    'google-drive-direct-link-generator': 'GoogleDriveDirectLinkGenerator',
+    'html-minifier': 'HtmlMinifier',
+    'html-to-markdown-converter': 'HtmlToMarkdownConverter',
+    'ico-converter': 'IcoConverter',
+    'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
+    'image-color-extractor': 'ImageColorExtractor',
+    'image-compressor': 'ImageCompressor',
+    'image-converter': 'ImageConverter',
+    'image-cropper': 'ImageCropper',
+    'image-resizer': 'ImageResizer',
+    'image-shape-converter': 'ImageShapeConverter',
+    'image-to-base64': 'ImageToBase64',
+    'image-watermark-adder': 'ImageWatermarkAdder',
+    'image-metadata-viewer': 'ImageMetadataViewer',
+    'interest-calculator': 'InterestCalculator',
+    'javascript-minifier': 'JavascriptMinifier',
+    'json-formatter': 'JsonFormatter',
+    'keyword-density-checker': 'KeywordDensityChecker',
+    'loan-calculator': 'LoanCalculator',
+    'lock-pdf': 'LockPdf',
+    'lorem-ipsum-generator': 'LoremIpsumGenerator',
+    'marks-to-percentage-calculator': 'MarksToPercentageCalculator',
+    'meesho-shipping-label-cropper': 'MeeshoShippingLabelCropper',
+    'meta-tag-generator': 'MetaTagGenerator',
+    'morse-to-text-translator': 'MorseToTextTranslator',
+    'myntra-shipping-label-cropper': 'MyntraShippingLabelCropper',
+    'negative-marking-calculator': 'NegativeMarkingCalculator',
+    'nsdl-pan-card-photo-and-signature-resizer': 'NSDLPANCardPhotoAndSignatureResizer',
+    'onedrive-direct-link-generator': 'OneDriveDirectLinkGenerator',
+    'password-generator': 'PasswordGenerator',
+    'password-strength-checker': 'PasswordStrengthChecker',
+    'pdf-merger': 'PdfMerger',
+    'pdf-organizer': 'PdfOrganizer',
+    'pdf-page-counter': 'PdfPageCounter',
+    'pdf-page-numberer': 'PdfPageNumberer',
+    'pdf-page-remover': 'PdfPageRemover',
+    'pdf-page-reorder': 'PdfPageReorder',
+    'pdf-signer': 'PdfSigner',
+    'pdf-splitter': 'PdfSplitter',
+    'pdf-to-jpg': 'PdfToJpg',
+    'pdf-to-word': 'PdfToWord',
+    'percentage-calculator': 'PercentageCalculator',
+    'percentage-to-cgpa-converter': 'PercentageToCgpaConverter',
+    'ppt-to-pdf': 'PptToPdf',
+    'prn-to-pdf': 'PRNToPDF',
+    'qr-code-generator': 'QrCodeGenerator',
+    'qr-code-scanner': 'QrCodeScanner',
+    'random-word-generator': 'RandomWordGenerator',
+    'readability-score-checker': 'ReadabilityScoreChecker',
+    'remove-extra-spaces': 'RemoveExtraSpaces',
+    'redirect-checker': 'RedirectChecker',
+    'reverse-text': 'ReverseText',
+    'robots-txt-generator': 'RobotsTxtGenerator',
+    'rotate-image': 'RotateImage',
+    'rotate-pdf': 'RotatePdf',
+    'schema-generator': 'SchemaGenerator',
+    'serp-checker': 'SerpChecker',
+    'sha256-hash-generator': 'Sha256HashGenerator',
+    'srm-to-cgpa-calculator': 'SrmToCgpaCalculator',
+    'sql-formatter': 'SqlFormatter',
+    'text-repeater': 'TextRepeater',
+    'text-to-binary': 'TextToBinary',
+    'text-to-morse-code': 'TextToMorseCode',
+    'text-encryption-and-decryption': 'TextEncryptionDecryption',
+    'text-recognizer': 'TextRecognizer',
+    'time-zone-converter': 'TimeZoneConverter',
+    'title-tag-checker': 'TitleTagChecker',
+    'unix-timestamp-converter': 'UnixTimestampConverter',
+    'universal-hash-generator': 'UniversalHashGenerator',
+    'unlock-pdf': 'UnlockPdf',
+    'uuid-generator': 'UuidGenerator',
+    'uti-pan-card-photo-and-signature-resizer': 'UTIPANCardPhotoAndSignatureResizer',
+    'website-screenshot': 'WebsiteScreenshot',
+    'website-word-counter': 'WebsiteWordCounter',
+    'what-is-my-browser': 'WhatIsMyBrowser',
+    'word-counter': 'WordCounter',
+    'word-to-pdf': 'WordToPdf',
+    'xml-sitemap-generator': 'XmlSitemapGenerator',
+    'youtube-channel-banner-downloader': 'YouTubeChannelBannerDownloader',
+    'youtube-channel-logo-downloader': 'YouTubeChannelLogoDownloader',
+    'youtube-region-restriction-checker': 'YouTubeRegionRestrictionChecker',
+    'youtube-video-description-extractor': 'YouTubeVideoDescriptionExtractor',
+    'youtube-video-thumbnail-downloader': 'YouTubeVideoThumbnailDownloader',
+    'youtube-video-title-extractor': 'YouTubeVideoTitleExtractor',
+    'profit-loss-calculator': 'ProfitLossCalculator',
+    'sip-calculator': 'SIPCalculator',
+    'fd-calculator': 'FDCalculator',
+    'mutual-fund-calculator': 'MutualFundCalculator',
+    'sales-tax-calculator': 'SalesTaxCalculator',
+    'tds-calculator': 'TDSCalculator',
+    'image-aspect-ratio-calculator': 'ImageAspectRatioCalculator',
+    'url-encoder-decoder': 'UrlEncoderDecoder',
+    'spelling-checker': 'SpellingChecker',
+    'whats-chat-url-generator': 'WhatsChatUrlGenerator',
+    'whats-app-group-url-generator': 'WhatsAppGroupUrlGenerator',
+    'internet-speed-tester': 'InternetSpeedTester',
+    'page-size-checker': 'PageSizeChecker',
+    'device-information-detector': 'DeviceInformationDetector',
+    'numbers-to-word': 'NumbersToWord',
+    'emoji-remover': 'EmojiRemover',
+    'roman-to-number-converter': 'RomanToNumberConverter',
+    'number-to-roman-converter': 'NumberToRomanConverter',
+    'rd-calculator': 'RdCalculator',
+    'nps-calculator': 'NpsCalculator',
+    'aes-encryption-and-decryption': 'AesEncryptionAndDecryption',
+    'image-to-pdf': 'ImageToPdf',
+    'image-to-text': 'ImageToText',
+};
 
 
 const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
@@ -84,8 +185,8 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
         }
     }, [user, tool]);
     
-    const ComponentName = toPascalCase(tool.slug);
-    const ToolComponent = (AllToolComponents as any)[ComponentName];
+    const componentName = slugToComponentMap[tool.slug];
+    const ToolComponent = componentName ? (AllToolComponents as any)[componentName] : null;
 
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
 
@@ -205,3 +306,5 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
         </div>
     );
 }
+
+    
