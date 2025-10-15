@@ -8,8 +8,8 @@ import { UploadCloud, FileDown, Loader2, Trash2, GripVertical, FileText } from '
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 import { ScrollArea } from '../ui/scroll-area';
+import Image from 'next/image';
 
 interface FileWithPreview {
   file: File;
@@ -44,13 +44,13 @@ export function ImageToPdf() {
 
     setFiles(prev => [...prev, ...newFilesWithPreview]);
   };
-  
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     handleFile(e.target.files);
     // Reset input value to allow re-uploading the same file
-    if (e.target) e.target.value = '';
+    if(e.target) e.target.value = '';
   };
-
+  
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
   const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); handleFile(e.dataTransfer.files); };
@@ -99,8 +99,9 @@ export function ImageToPdf() {
         });
       }
       
-      const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const mergedPdfBytes = await pdfDoc.save();
+
+      const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `converted-${Date.now()}.pdf`;
@@ -137,7 +138,7 @@ export function ImageToPdf() {
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple />
                  <div className="flex flex-col items-center justify-center h-full">
                     <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold">Click or drag images to upload</h3>
+                    <h3 className="text-lg font-semibold">Click or drag files to upload</h3>
                     <p className="text-sm text-muted-foreground">Select one or more images to merge into a single PDF.</p>
                 </div>
             </CardContent>
@@ -147,7 +148,7 @@ export function ImageToPdf() {
          <Card>
             <CardHeader>
                 <CardTitle>Image Queue ({files.length})</CardTitle>
-                <CardDescription>Drag the images to reorder them for the PDF.</CardDescription>
+                <CardDescription>Drag files to reorder them for the PDF.</CardDescription>
             </CardHeader>
             <CardContent>
                  <ScrollArea className="h-72 w-full pr-4 border rounded-lg">
@@ -184,7 +185,7 @@ export function ImageToPdf() {
          </Card>
        )}
 
-      <Button onClick={handleConvert} disabled={isLoading || files.length === 0} className="w-full">
+      <Button onClick={handleConvert} disabled={files.length === 0 || isLoading} className="w-full">
         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
         Convert & Download PDF
       </Button>

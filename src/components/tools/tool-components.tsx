@@ -56,6 +56,7 @@ const toPascalCase = (slug: string) => {
     if (slug === 'whats-chat-url-generator') return 'WhatsChatUrlGenerator';
     if (slug === 'onedrive-direct-link-generator') return 'OneDriveDirectLinkGenerator';
     if (slug === 'image-to-pdf') return 'ImageToPdf';
+    if (slug === 'image-to-text') return 'ImageToText';
     
     return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
 }
