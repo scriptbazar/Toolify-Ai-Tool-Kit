@@ -156,7 +156,7 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'number-to-roman-converter': 'NumberToRomanConverter',
     'rd-calculator': 'RdCalculator',
     'nps-calculator': 'NpsCalculator',
-    'aes-encryption-and-decryption': 'AesEncryptionAndDecryption',
+    'aes-encryption-and-decryption': 'AesEncryptionDecryption',
     'image-to-pdf': 'ImageToPdf',
     'image-to-text': 'ImageToText',
 };
