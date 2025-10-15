@@ -49,6 +49,7 @@ const toPascalCase = (slug: string) => {
     if (slug === 'sip-calculator') return 'SIPCalculator';
     if (slug === 'sales-tax-calculator') return 'SalesTaxCalculator';
     if (slug === 'tds-calculator') return 'TDSCalculator';
+    if (slug === 'unit-converter') return 'UnitConverter';
     
     return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
 }
