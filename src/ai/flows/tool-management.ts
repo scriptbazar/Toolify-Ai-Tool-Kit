@@ -139,7 +139,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Website Word Counter', description: 'Check the size of any webpage.', icon: 'FileSearch', category: 'seo', isNew: true, status: 'Active', plan: 'Pro' },
     { name: 'Device Information Detector', description: 'Get detailed information about your device.', icon: 'Smartphone', category: 'dev', isNew: true, status: 'Active', plan: 'Free' },
     { name: 'Numbers to Word', description: 'Convert numbers into words.', icon: 'CaseUpper', category: 'text', isNew: true, status: 'Active', plan: 'Free' },
-    { name: 'Emoji Remover', description: 'Remove all emojis from your text.', icon: 'SmileOff', category: 'text', isNew: true, status: 'Active', plan: 'Free' },
+    { name: 'Emoji Remover', description: 'Remove all emojis from your text.', icon: 'Eraser', category: 'text', isNew: true, status: 'Active', plan: 'Free' },
     { name: 'Roman to Number Converter', description: 'Convert Roman numerals to numbers.', icon: 'Hash', category: 'calculator', isNew: true, status: 'Active', plan: 'Free' },
     { name: 'Number to Roman Converter', description: 'Convert numbers to Roman numerals.', icon: 'Hash', category: 'calculator', isNew: true, status: 'Active', plan: 'Free' },
     { name: 'RD Calculator', description: 'Calculate the maturity amount of your Recurring Deposit.', icon: 'Repeat', category: 'calculator', isNew: true, status: 'Active', plan: 'Pro' },
@@ -148,6 +148,18 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Loan Calculator', description: 'Calculate your loan EMI and total interest payable.', icon: 'Banknote', category: 'calculator', isNew: true, status: 'Active', plan: 'Active' },
     { name: 'XML Sitemap Generator', description: 'Create an XML sitemap for your website to improve SEO.', icon: 'FileCode', category: 'seo', isNew: true, status: 'Active', plan: 'Active' },
     { name: 'IFSC Code to Bank Details', description: 'Get complete bank branch details instantly from an Indian Financial System Code (IFSC). Find the bank name, branch, address, and more.', icon: 'Landmark', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a valid 11-character IFSC code.', 'Click the "Find Bank Details" button.', 'The tool will display the bank name, branch, address, and other available details.'] },
+    { name: 'YouTube Logo Downloader', description: '👤 Download the logo or profile picture of any YouTube channel in high resolution. Simply provide the channel URL.', icon: 'UserCircle', category: 'video', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste the YouTube channel URL.', 'Click "Fetch Logo".', 'Download the channel\'s profile picture.'] },
+    { name: 'EPF Calculator', description: 'Calculate the maturity amount of your Employee Provident Fund (EPF) account.', icon: 'Landmark', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Gratuity Calculator', description: 'Estimate the gratuity amount you are eligible to receive from your employer.', icon: 'Award', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Inflation Calculator', description: 'Calculate the future value of money and understand the impact of inflation.', icon: 'TrendingUp', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'HRA Calculator', description: 'Calculate your House Rent Allowance (HRA) tax exemption.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Loan Affordability Calculator', description: 'Determine how much loan you can afford based on your income and expenses.', icon: 'Banknote', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'NSC Calculator', description: 'Calculate the maturity value of your National Savings Certificate (NSC) investment.', icon: 'FileText', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'PPF Calculator', description: 'Calculate the maturity amount of your Public Provident Fund (PPF) investment.', icon: 'ShieldCheck', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'SWP Calculator', description: 'Plan your Systematic Withdrawal Plan (SWP) from your mutual fund investments.', icon: 'TrendingDown', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Retirement Savings Calculator', description: 'Estimate the savings you need for a comfortable retirement.', icon: 'User', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Mortgage Calculator', description: 'Calculate your monthly mortgage payments.', icon: 'Home', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
+    { name: 'Average Calculator', description: 'Calculate the average of a set of numbers.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
 ];
 
 const generateSlug = (name: string) => {
@@ -489,5 +501,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     return { success: false, message: "Could not update favorites." };
   }
 }
+
+    
 
     

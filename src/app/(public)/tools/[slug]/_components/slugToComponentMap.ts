@@ -133,9 +133,22 @@ export const slugToComponentMap: { [key: string]: string } = {
   'number-to-roman-converter': 'NumberToRomanConverter',
   'rd-calculator': 'RdCalculator',
   'nps-calculator': 'NpsCalculator',
-  'aes-encryption-decryption': 'AesEncryptionDecryption',
+  'aes-encryption-decryption': 'AesEncryptionAndDecryption',
   'adsense-revenue-calculator': 'AdSenseRevenueCalculator',
   'unit-converter': 'UnitConverter',
   'image-to-pdf': 'ImageToPdf',
   'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
+  'epf-calculator': 'EPFCalculator',
+  'gratuity-calculator': 'GratuityCalculator',
+  'inflation-calculator': 'InflationCalculator',
+  'hra-calculator': 'HraCalculator',
+  'loan-affordability-calculator': 'LoanAffordabilityCalculator',
+  'nsc-calculator': 'NscCalculator',
+  'ppf-calculator': 'PpfCalculator',
+  'swp-calculator': 'SwpCalculator',
+  'retirement-savings-calculator': 'RetirementSavingsCalculator',
+  'mortgage-calculator': 'MortgageCalculator',
+  'average-calculator': 'AverageCalculator',
 };
+
+    

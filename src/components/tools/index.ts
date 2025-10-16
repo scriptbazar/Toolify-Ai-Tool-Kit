@@ -138,3 +138,16 @@ export { UnitConverter } from './UnitConverter';
 export { ImageToPdf } from './ImageToPdf';
 export { ImageToText } from './ImageToText';
 export { IfscCodeToBankDetails } from './IfscCodeToBankDetails';
+export { EPFCalculator } from './EPFCalculator';
+export { GratuityCalculator } from './GratuityCalculator';
+export { InflationCalculator } from './InflationCalculator';
+export { HraCalculator } from './HraCalculator';
+export { LoanAffordabilityCalculator } from './LoanAffordabilityCalculator';
+export { NscCalculator } from './NscCalculator';
+export { PpfCalculator } from './PpfCalculator';
+export { SwpCalculator } from './SwpCalculator';
+export { RetirementSavingsCalculator } from './RetirementSavingsCalculator';
+export { MortgageCalculator } from './MortgageCalculator';
+export { AverageCalculator } from './AverageCalculator';
+
+    
