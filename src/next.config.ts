@@ -3,8 +3,6 @@ import type {NextConfig} from 'next';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import path from 'path';
 
-let copyWebpackPluginHasRun = false;
-
 const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
@@ -73,7 +71,7 @@ const nextConfig: NextConfig = {
     config.externals.push('canvas');
 
     // Copy pdf.js CMaps and worker to public directory only for server build
-    if (isServer && !copyWebpackPluginHasRun) {
+    if (isServer) {
         config.plugins.push(
             new CopyWebpackPlugin({
                 patterns: [
@@ -88,7 +86,6 @@ const nextConfig: NextConfig = {
                 ],
             })
         );
-        copyWebpackPluginHasRun = true;
     }
     
     return config;
