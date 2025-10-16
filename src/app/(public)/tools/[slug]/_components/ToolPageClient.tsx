@@ -3,7 +3,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import * as Icons from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import type { Tool } from '@/ai/flows/tool-management.types';
@@ -15,11 +15,13 @@ import { Separator } from '@/components/ui/separator';
 import { ReviewForm } from '@/components/tools/ReviewForm';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, Sparkles, Star, Zap, BrainCircuit, Construction, ShieldCheck, MousePointerClick } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, Sparkles, Star, Zap, BrainCircuit, Construction, ShieldCheck, MousePointerClick, Loader2 } from 'lucide-react';
 import { addUserActivity } from '@/ai/flows/user-activity';
-import * as AllToolComponents from '@/components/tools';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
+
+const slugToComponentMap: { [key: string]: string } = {
     'admob-revenue-calculator': 'AdMobRevenueCalculator',
     'adsense-revenue-calculator': 'AdSenseRevenueCalculator',
     'age-calculator': 'AgeCalculator',
@@ -154,11 +156,15 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'number-to-roman-converter': 'NumberToRomanConverter',
     'rd-calculator': 'RdCalculator',
     'nps-calculator': 'NpsCalculator',
-    'aes-encryption-and-decryption': 'AesEncryptionAndDecryption',
+    'aes-encryption-and-decryption': 'AesEncryptionDecryption',
     'image-to-pdf': 'ImageToPdf',
     'image-to-text': 'ImageToText',
     'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
     'unit-converter': 'UnitConverter',
+    'gpa-to-percentage-converter': 'GpaToPercentageConverter',
+    'gpa-calculator': 'GpaCalculator',
+    'page-size-checker': 'PageSizeChecker',
+    'sql-formatter': 'SqlFormatter',
 };
 
 
@@ -186,8 +192,23 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
         }
     }, [user, tool]);
     
-    const componentName = slugToComponentMap[tool.slug];
-    const ToolComponent = componentName ? (AllToolComponents as any)[componentName] : null;
+    const ToolComponent = useMemo(() => {
+        const componentName = slugToComponentMap[tool.slug];
+        if (!componentName) {
+            return null;
+        }
+        return dynamic(
+            () => import(`@/components/tools`).then(mod => mod[componentName as keyof typeof mod]),
+            { 
+                ssr: false,
+                loading: () => (
+                    <div className="flex justify-center items-center min-h-[300px]">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                )
+            }
+        );
+    }, [tool.slug]);
 
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
 
