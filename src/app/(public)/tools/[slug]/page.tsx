@@ -32,16 +32,13 @@ export async function generateStaticParams() {
 export default async function ToolPage({ params }: { params: { slug: string } }) {
     const { slug } = params;
 
-    const settingsPromise = getSettings();
-    const postsPromise = getPosts('Published');
-    const toolsPromise = getTools({ slug });
-    const reviewsPromise = getReviews({ toolId: slug });
-    
-    const [settings, allPosts, tools, toolReviews] = await Promise.all([
-        settingsPromise,
-        postsPromise,
-        toolsPromise,
-        reviewsPromise
+    // Optimized data fetching
+    const [settings, allPosts, tools, toolReviews, allTools] = await Promise.all([
+        getSettings(),
+        getPosts('Published'),
+        getTools({ slug }), // Fetch only the specific tool for this page
+        getReviews({ toolId: slug }),
+        getTools({ status: 'Active' }) // Fetch all active tools for the sidebar
     ]);
 
     const tool = tools[0];
@@ -49,11 +46,10 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     if (!tool || tool.status === 'Disabled') {
         notFound();
     }
-    
-    const allTools = await getTools();
 
     const sidebarSettings = settings?.sidebar?.toolSidebar;
-    const popularTools = allTools.filter(t => t.status === 'Active' && t.slug !== slug).slice(0, 10);
+    // Filter popular tools from the already fetched list
+    const popularTools = allTools.filter(t => t.slug !== slug).slice(0, 10);
     const recentPosts = allPosts.filter(p => p.status === 'Published').slice(0, 5);
 
     const sidebar = (
