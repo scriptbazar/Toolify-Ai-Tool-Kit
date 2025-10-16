@@ -22,23 +22,15 @@ const SidebarWidget = ({ title, children }: { title: string, children: React.Rea
     </Card>
 );
 
-export async function generateStaticParams() {
-  const tools = await getTools();
-  return tools.map((tool) => ({
-    slug: tool.slug,
-  }));
-}
-
 export default async function ToolPage({ params }: { params: { slug: string } }) {
     const { slug } = params;
 
     // Optimized data fetching
-    const [settings, allPosts, tools, toolReviews, allTools] = await Promise.all([
+    const [settings, allPosts, tools, toolReviews] = await Promise.all([
         getSettings(),
         getPosts('Published'),
         getTools({ slug }), // Fetch only the specific tool for this page
         getReviews({ toolId: slug }),
-        getTools({ status: 'Active' }) // Fetch all active tools for the sidebar
     ]);
 
     const tool = tools[0];
@@ -46,10 +38,12 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     if (!tool || tool.status === 'Disabled') {
         notFound();
     }
+    
+    // Fetch all tools separately for the sidebar without blocking the page render
+    const allToolsForSidebar = await getTools({ status: 'Active' });
 
     const sidebarSettings = settings?.sidebar?.toolSidebar;
-    // Filter popular tools from the already fetched list
-    const popularTools = allTools.filter(t => t.slug !== slug).slice(0, 10);
+    const popularTools = allToolsForSidebar.filter(t => t.slug !== slug).slice(0, 10);
     const recentPosts = allPosts.filter(p => p.status === 'Published').slice(0, 5);
 
     const sidebar = (
