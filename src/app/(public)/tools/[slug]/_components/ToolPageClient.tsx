@@ -52,7 +52,7 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, children:
             return null;
         }
         return dynamic(
-            () => import(`@/components/tools/${componentName}`),
+            () => import(`@/components/tools/${componentName}`).then((mod) => mod[componentName] || mod.default),
             { 
                 ssr: false,
                 loading: () => (
