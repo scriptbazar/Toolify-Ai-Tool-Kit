@@ -5,65 +5,70 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { Calculator, Home } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Calculator } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Checkbox } from '../ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+
+const metroCities = ['Delhi', 'Mumbai', 'Kolkata', 'Chennai'];
 
 export function HraCalculator() {
-    const [basicSalary, setBasicSalary] = useState('');
-    const [da, setDa] = useState('0');
-    const [hraReceived, setHraReceived] = useState('');
-    const [rentPaid, setRentPaid] = useState('');
-    const [isMetroCity, setIsMetroCity] = useState(true);
-    const [result, setResult] = useState<{ exemptHra: number, taxableHra: number } | null>(null);
+    const [basicSalary, setBasicSalary] = useState('50000');
+    const [hraReceived, setHraReceived] = useState('20000');
+    const [rentPaid, setRentPaid] = useState('15000');
+    const [city, setCity] = useState('non-metro');
+    const [exemption, setExemption] = useState<number | null>(null);
     const { toast } = useToast();
 
-    const calculateHRA = () => {
+    const calculateHra = () => {
         const basic = parseFloat(basicSalary);
-        const daVal = parseFloat(da);
         const hra = parseFloat(hraReceived);
         const rent = parseFloat(rentPaid);
 
-        if (isNaN(basic) || isNaN(daVal) || isNaN(hra) || isNaN(rent)) {
-            toast({ title: 'Invalid Input', description: 'Please fill all the required fields with valid numbers.', variant: 'destructive'});
+        if (isNaN(basic) || isNaN(hra) || isNaN(rent)) {
+            toast({ title: "Invalid Input", variant: "destructive" });
             return;
         }
 
-        const salaryForHra = basic + daVal;
-        
-        const rule1 = hra; // Actual HRA received
-        const rule2 = isMetroCity ? salaryForHra * 0.5 : salaryForHra * 0.4; // 50% or 40% of salary
-        const rule3 = rent - (salaryForHra * 0.1); // Rent paid minus 10% of salary
-        
-        const exemptHra = Math.max(0, Math.min(rule1, rule2, rule3));
-        const taxableHra = Math.max(0, hra - exemptHra);
+        const condition1 = hra;
+        const condition2 = city === 'metro' ? basic * 0.5 : basic * 0.4;
+        const condition3 = Math.max(0, rent - (basic * 0.1));
 
-        setResult({ exemptHra, taxableHra });
+        const hraExemption = Math.min(condition1, condition2, condition3);
+        setExemption(hraExemption);
     };
-    
+
     return (
         <div className="space-y-6">
             <Card>
                 <CardHeader>
                     <CardTitle>HRA Exemption Calculator</CardTitle>
-                    <CardDescription>Calculate your House Rent Allowance tax exemption.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Basic Salary (Annual)</Label><Input type="number" value={basicSalary} onChange={e => setBasicSalary(e.target.value)} /></div>
-                    <div className="space-y-2"><Label>Dearness Allowance (DA) (Annual)</Label><Input type="number" value={da} onChange={e => setDa(e.target.value)} /></div>
-                    <div className="space-y-2"><Label>HRA Received (Annual)</Label><Input type="number" value={hraReceived} onChange={e => setHraReceived(e.target.value)} /></div>
-                    <div className="space-y-2"><Label>Total Rent Paid (Annual)</Label><Input type="number" value={rentPaid} onChange={e => setRentPaid(e.target.value)} /></div>
-                    <div className="flex items-center space-x-2 pt-6"><Checkbox id="is-metro" checked={isMetroCity} onCheckedChange={c => setIsMetroCity(!!c)}/><Label htmlFor="is-metro">Do you live in a metro city? (Delhi, Mumbai, Chennai, Kolkata)</Label></div>
+                    <div className="space-y-2"><Label>Basic Salary (Monthly)</Label><Input type="number" value={basicSalary} onChange={e => setBasicSalary(e.target.value)} /></div>
+                    <div className="space-y-2"><Label>HRA Received (Monthly)</Label><Input type="number" value={hraReceived} onChange={e => setHraReceived(e.target.value)} /></div>
+                    <div className="space-y-2"><Label>Rent Paid (Monthly)</Label><Input type="number" value={rentPaid} onChange={e => setRentPaid(e.target.value)} /></div>
+                    <div className="space-y-2">
+                        <Label>City Type</Label>
+                        <Select value={city} onValueChange={setCity}>
+                            <SelectTrigger><SelectValue/></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="metro">Metro (Delhi, Mumbai, Kolkata, Chennai)</SelectItem>
+                                <SelectItem value="non-metro">Non-Metro</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </CardContent>
             </Card>
-            <Button onClick={calculateHRA} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate Exemption</Button>
-            {result && (
+            <Button onClick={calculateHra} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate HRA Exemption</Button>
+            {exemption !== null && (
                 <Card>
-                    <CardHeader><CardTitle className="flex items-center gap-2"><Home/>HRA Calculation Result</CardTitle></CardHeader>
-                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-                        <div className="p-4 bg-green-100 dark:bg-green-900/20 rounded-lg"><p className="text-sm text-green-700 dark:text-green-400">Exempted HRA</p><p className="text-2xl font-bold text-green-600 dark:text-green-400">₹{result.exemptHra.toLocaleString('en-IN')}</p></div>
-                        <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-lg"><p className="text-sm text-red-700 dark:text-red-400">Taxable HRA</p><p className="text-2xl font-bold text-red-600 dark:text-red-400">₹{result.taxableHra.toLocaleString('en-IN')}</p></div>
+                    <CardHeader>
+                        <CardTitle>Calculated HRA Exemption</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-3xl font-bold text-primary">₹{exemption.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
+                        <p className="text-sm text-muted-foreground">This is the amount exempt from tax per month.</p>
                     </CardContent>
                 </Card>
             )}

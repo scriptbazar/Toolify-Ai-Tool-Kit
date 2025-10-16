@@ -142,7 +142,6 @@ export const slugToComponentMap: { [key: string]: string } = {
   'epf-calculator': 'EPFCalculator',
   'gratuity-calculator': 'GratuityCalculator',
   'inflation-calculator': 'InflationCalculator',
-  'hra-calculator': 'HraCalculator',
   'loan-affordability-calculator': 'LoanAffordabilityCalculator',
   'nsc-calculator': 'NscCalculator',
   'ppf-calculator': 'PpfCalculator',

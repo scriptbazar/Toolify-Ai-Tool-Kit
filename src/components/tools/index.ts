@@ -141,7 +141,7 @@ export { IfscCodeToBankDetails } from './IfscCodeToBankDetails';
 export { EPFCalculator } from './EPFCalculator';
 export { GratuityCalculator } from './GratuityCalculator';
 export { InflationCalculator } from './InflationCalculator';
-export { HraCalculator } from './HraCalculator';
+
 export { LoanAffordabilityCalculator } from './LoanAffordabilityCalculator';
 export { NscCalculator } from './NscCalculator';
 export { PpfCalculator } from './PpfCalculator';
