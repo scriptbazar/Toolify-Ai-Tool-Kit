@@ -224,13 +224,11 @@ const getToolsFn = async (options: GetToolsOptions = {}): Promise<Tool[]> => {
 
 /**
  * Fetches tools from Firestore with optional filtering and limiting.
- * This function is now optimized for server-side operations with caching.
  */
-export const getTools = cache(
-    async (options: GetToolsOptions = {}) => getToolsFn(options),
-    ['tools'],
-    { revalidate: 3600 } // Revalidate every hour
-);
+export const getTools = async (options: GetToolsOptions = {}): Promise<Tool[]> => {
+    // This is now a direct call to the function, removing the cache.
+    return getToolsFn(options);
+};
 
 
 function processSnapshot(snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>, options: GetToolsOptions): Tool[] {
