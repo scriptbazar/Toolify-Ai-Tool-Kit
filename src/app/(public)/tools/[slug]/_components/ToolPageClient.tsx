@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Link from 'next/link';
@@ -162,9 +161,6 @@ const slugToComponentMap: { [key: string]: string } = {
     'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
     'unit-converter': 'UnitConverter',
     'gpa-to-percentage-converter': 'GpaToPercentageConverter',
-    'gpa-calculator': 'GpaCalculator',
-    'page-size-checker': 'PageSizeChecker',
-    'sql-formatter': 'SqlFormatter',
 };
 
 
