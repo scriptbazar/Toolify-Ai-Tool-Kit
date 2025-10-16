@@ -137,6 +137,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'adsense-revenue-calculator': 'AdSenseRevenueCalculator',
   'unit-converter': 'UnitConverter',
   'image-to-pdf': 'ImageToPdf',
+  'image-to-text': 'ImageToText',
   'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
   'epf-calculator': 'EPFCalculator',
   'gratuity-calculator': 'GratuityCalculator',
@@ -150,5 +151,3 @@ export const slugToComponentMap: { [key: string]: string } = {
   'mortgage-calculator': 'MortgageCalculator',
   'average-calculator': 'AverageCalculator',
 };
-
-    
