@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type ChangeEvent, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, FileImage, Info } from 'lucide-react';
+import { UploadCloud, Download, FileImage, Info, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -20,7 +20,7 @@ export function ImageConverter() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [targetFormat, setTargetFormat] = useState<ImageFormat>('jpeg');
-  const [quality, setQuality] = useState(0.9); // Default high quality
+  const [quality, setQuality] = useState(90); // Default high quality
   const [originalSize, setOriginalSize] = useState<string | null>(null);
   const [estimatedSize, setEstimatedSize] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -212,10 +212,10 @@ export function ImageConverter() {
                 {(targetFormat === 'jpeg' || targetFormat === 'webp' || targetFormat === 'avif' || targetFormat === 'jpg') && (
                     <div className="space-y-2">
                         <div className="flex justify-between items-center">
-                            <Label>Quality: {Math.round(quality * 100)}%</Label>
+                            <Label>Quality: {quality}%</Label>
                             {estimatedSize && <span className="text-xs text-muted-foreground">Estimated size: ~{estimatedSize}</span>}
                         </div>
-                        <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={0.1} max={1} step={0.05} />
+                        <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={10} max={100} step={5} />
                     </div>
                 )}
                  <Button onClick={handleConvert} disabled={!imageFile || isLoading} className="w-full">
