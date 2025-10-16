@@ -19,150 +19,7 @@ import { addUserActivity } from '@/ai/flows/user-activity';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UpgradeProDialog } from '@/components/tools/UpgradeProDialog';
-
-
-const slugToComponentMap: { [key: string]: string } = {
-    'admob-revenue-calculator': 'AdMobRevenueCalculator',
-    'adsense-revenue-calculator': 'AdSenseRevenueCalculator',
-    'age-calculator': 'AgeCalculator',
-    'amazon-shipping-label-cropper': 'AmazonShippingLabelCropper',
-    'barcode-generator': 'BarcodeGenerator',
-    'barcode-scanner': 'BarcodeScanner',
-    'base64-converter': 'Base64Converter',
-    'binary-to-text': 'BinaryToText',
-    'bmi-calculator': 'BmiCalculator',
-    'case-converter': 'CaseConverter',
-    'cgpa-to-gpa-converter': 'CgpaToGpaConverter',
-    'cgpa-to-marks-calculator': 'CgpaToMarksCalculator',
-    'color-picker': 'ColorPicker',
-    'compress-pdf': 'CompressPdf',
-    'credit-card-interest-calculator': 'CreditCardInterestCalculator',
-    'crontab-generator': 'CrontabGenerator',
-    'css-minifier': 'CssMinifier',
-    'currency-converter': 'CurrencyConverter',
-    'date-calculator': 'DateCalculator',
-    'discount-calculator': 'DiscountCalculator',
-    'dropbox-direct-link-generator': 'DropboxDirectLinkGenerator',
-    'excel-to-pdf': 'ExcelToPdf',
-    'favicon-checker': 'FaviconChecker',
-    'find-and-replace': 'FindAndReplace',
-    'find-ifsc-code-by-bank-and-city': 'FindIfscCodeByBankAndCity',
-    'flipkart-shipping-label-cropper': 'FlipkartShippingLabelCropper',
-    'flip-image': 'FlipImage',
-    'fuel-cost-calculator': 'FuelCostCalculator',
-    'gpa-calculator': 'GpaCalculator',
-    'gpa-to-cgpa-calculator': 'GpaToCgpaCalculator',
-    'gpa-to-percentage-converter': 'GpaToPercentageConverter',
-    'gst-calculator': 'GSTCalculator',
-    'google-drive-direct-link-generator': 'GoogleDriveDirectLinkGenerator',
-    'html-minifier': 'HtmlMinifier',
-    'html-to-markdown-converter': 'HtmlToMarkdownConverter',
-    'ico-converter': 'IcoConverter',
-    'image-color-extractor': 'ImageColorExtractor',
-    'image-compressor': 'ImageCompressor',
-    'image-converter': 'ImageConverter',
-    'image-cropper': 'ImageCropper',
-    'image-resizer': 'ImageResizer',
-    'image-shape-converter': 'ImageShapeConverter',
-    'image-to-base64': 'ImageToBase64',
-    'image-watermark-adder': 'ImageWatermarkAdder',
-    'image-metadata-viewer': 'ImageMetadataViewer',
-    'interest-calculator': 'InterestCalculator',
-    'javascript-minifier': 'JavascriptMinifier',
-    'json-formatter': 'JsonFormatter',
-    'keyword-density-checker': 'KeywordDensityChecker',
-    'loan-calculator': 'LoanCalculator',
-    'lock-pdf': 'LockPdf',
-    'lorem-ipsum-generator': 'LoremIpsumGenerator',
-    'marks-to-percentage-calculator': 'MarksToPercentageCalculator',
-    'meesho-shipping-label-cropper': 'MeeshoShippingLabelCropper',
-    'meta-tag-generator': 'MetaTagGenerator',
-    'morse-to-text-translator': 'MorseToTextTranslator',
-    'myntra-shipping-label-cropper': 'MyntraShippingLabelCropper',
-    'negative-marking-calculator': 'NegativeMarkingCalculator',
-    'nsdl-pan-card-photo-and-signature-resizer': 'NSDLPANCardPhotoAndSignatureResizer',
-    'onedrive-direct-link-generator': 'OneDriveDirectLinkGenerator',
-    'password-generator': 'PasswordGenerator',
-    'password-strength-checker': 'PasswordStrengthChecker',
-    'pdf-merger': 'PdfMerger',
-    'pdf-organizer': 'PdfOrganizer',
-    'pdf-page-counter': 'PdfPageCounter',
-    'pdf-page-numberer': 'PdfPageNumberer',
-    'pdf-page-remover': 'PdfPageRemover',
-    'pdf-page-reorder': 'PdfPageReorder',
-    'pdf-signer': 'PdfSigner',
-    'pdf-splitter': 'PdfSplitter',
-    'pdf-to-jpg': 'PdfToJpg',
-    'pdf-to-word': 'PdfToWord',
-    'percentage-calculator': 'PercentageCalculator',
-    'percentage-to-cgpa-converter': 'PercentageToCgpaConverter',
-    'ppt-to-pdf': 'PptToPdf',
-    'qr-code-generator': 'QrCodeGenerator',
-    'qr-code-scanner': 'QrCodeScanner',
-    'random-word-generator': 'RandomWordGenerator',
-    'readability-score-checker': 'ReadabilityScoreChecker',
-    'remove-extra-spaces': 'RemoveExtraSpaces',
-    'redirect-checker': 'RedirectChecker',
-    'reverse-text': 'ReverseText',
-    'robots-txt-generator': 'RobotsTxtGenerator',
-    'rotate-image': 'RotateImage',
-    'rotate-pdf': 'RotatePdf',
-    'schema-generator': 'SchemaGenerator',
-    'serp-checker': 'SerpChecker',
-    'sha256-hash-generator': 'Sha256HashGenerator',
-    'srm-to-cgpa-calculator': 'SrmToCgpaCalculator',
-    'sql-formatter': 'SqlFormatter',
-    'text-repeater': 'TextRepeater',
-    'text-to-binary': 'TextToBinary',
-    'text-to-morse-code': 'TextToMorseCode',
-    'text-encryption-and-decryption': 'TextEncryptionDecryption',
-    'text-recognizer': 'TextRecognizer',
-    'time-zone-converter': 'TimeZoneConverter',
-    'title-tag-checker': 'TitleTagChecker',
-    'unix-timestamp-converter': 'UnixTimestampConverter',
-    'universal-hash-generator': 'UniversalHashGenerator',
-    'unlock-pdf': 'UnlockPdf',
-    'uuid-generator': 'UuidGenerator',
-    'uti-pan-card-photo-and-signature-resizer': 'UTIPANCardPhotoAndSignatureResizer',
-    'website-screenshot': 'WebsiteScreenshot',
-    'website-word-counter': 'WebsiteWordCounter',
-    'what-is-my-browser': 'WhatIsMyBrowser',
-    'word-counter': 'WordCounter',
-    'word-to-pdf': 'WordToPdf',
-    'xml-sitemap-generator': 'XmlSitemapGenerator',
-    'youtube-channel-banner-downloader': 'YouTubeChannelBannerDownloader',
-    'youtube-channel-logo-downloader': 'YouTubeChannelLogoDownloader',
-    'youtube-region-restriction-checker': 'YouTubeRegionRestrictionChecker',
-    'youtube-video-description-extractor': 'YouTubeVideoDescriptionExtractor',
-    'youtube-video-thumbnail-downloader': 'YouTubeVideoThumbnailDownloader',
-    'youtube-video-title-extractor': 'YouTubeVideoTitleExtractor',
-    'profit-loss-calculator': 'ProfitLossCalculator',
-    'sip-calculator': 'SIPCalculator',
-    'fd-calculator': 'FDCalculator',
-    'mutual-fund-calculator': 'MutualFundCalculator',
-    'sales-tax-calculator': 'SalesTaxCalculator',
-    'tds-calculator': 'TDSCalculator',
-    'image-aspect-ratio-calculator': 'ImageAspectRatioCalculator',
-    'url-encoder-decoder': 'UrlEncoderDecoder',
-    'spelling-checker': 'SpellingChecker',
-    'whats-chat-url-generator': 'WhatsChatUrlGenerator',
-    'whats-app-group-url-generator': 'WhatsAppGroupUrlGenerator',
-    'internet-speed-tester': 'InternetSpeedTester',
-    'page-size-checker': 'PageSizeChecker',
-    'device-information-detector': 'DeviceInformationDetector',
-    'numbers-to-word': 'NumbersToWord',
-    'emoji-remover': 'EmojiRemover',
-    'roman-to-number-converter': 'RomanToNumberConverter',
-    'number-to-roman-converter': 'NumberToRomanConverter',
-    'rd-calculator': 'RdCalculator',
-    'nps-calculator': 'NpsCalculator',
-    'aes-encryption-and-decryption': 'AesEncryptionDecryption',
-    'ad-sense-revenue-calculator': 'AdSenseRevenueCalculator',
-    'unit-converter': 'UnitConverter',
-    'image-to-pdf': 'ImageToPdf',
-    'image-to-text': 'ImageToText',
-    'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
-};
+import { slugToComponentMap } from './slugToComponentMap';
 
 
 const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
@@ -177,10 +34,10 @@ interface ToolComponentRendererProps {
   tool: Tool;
   toolReviews: Review[];
   adSettings: AdvertisementSettings | null;
-  sidebar: React.ReactNode;
+  children: React.ReactNode;
 }
 
-export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }: ToolComponentRendererProps) {
+export function ToolComponentRenderer({ tool, toolReviews, adSettings, children: sidebar }: ToolComponentRendererProps) {
     const { user, userData } = useAuth();
     
     useEffect(() => {
@@ -190,7 +47,7 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
     }, [user, tool]);
     
     const ToolComponent = useMemo(() => {
-        const componentName = slugToComponentMap[tool.slug];
+        const componentName = slugToComponentMap[tool.slug as keyof typeof slugToComponentMap];
         if (!componentName) {
             return null;
         }
@@ -210,9 +67,10 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
 
     const isProUser = userData?.role === 'admin' || userData?.planId === 'pro' || userData?.planId === 'team';
+    const isProTool = tool.plan === 'Pro';
 
     const renderToolContent = () => {
-        if (tool.plan === 'Pro' && !isProUser) {
+        if (isProTool && !isProUser) {
             return (
                  <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-8 bg-muted/50 rounded-lg">
                     <ShieldAlert className="w-16 h-16 text-primary mb-4" />
