@@ -22,7 +22,12 @@ export async function encryptOrDecryptFile(
       const encrypted = CryptoJS.AES.encrypt(fileDataUrl, password).toString();
       // To make it downloadable, we need to convert the encrypted string to a Blob and then to a Data URL.
       const blob = new Blob([encrypted], { type: 'text/plain' });
-      const dataUrl = await blobToBase64(blob);
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
       return { success: true, dataUrl };
     } else { // decrypt
       // The file content is a Data URL of the encrypted text file.
@@ -44,13 +49,4 @@ export async function encryptOrDecryptFile(
       message: error.message || `An error occurred during file ${input.mode}.`,
     };
   }
-}
-
-function blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
 }
