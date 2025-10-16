@@ -40,7 +40,7 @@ export function LoanAffordabilityCalculator() {
         const affordableLoan = maxEmi * ( (Math.pow(1 + rate, tenureMonths) - 1) / (rate * Math.pow(1 + rate, tenureMonths)) );
         setResult({ affordableLoan, affordableEmi: maxEmi });
     };
-
+    
     return (
         <div className="space-y-6">
             <Card>
@@ -57,17 +57,11 @@ export function LoanAffordabilityCalculator() {
             </Card>
             <Button onClick={calculateAffordability} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate Affordability</Button>
             {result && (
-                <Card className="text-center">
+                <Card>
                     <CardHeader><CardTitle className="flex items-center justify-center gap-2"><Banknote/>Your Loan Affordability</CardTitle></CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-4 bg-muted rounded-lg">
-                            <p className="text-sm text-muted-foreground">Affordable Loan Amount</p>
-                            <p className="text-3xl font-bold text-primary">₹{result.affordableLoan.toLocaleString('en-IN', {maximumFractionDigits: 0})}</p>
-                        </div>
-                        <div className="p-4 bg-muted rounded-lg">
-                            <p className="text-sm text-muted-foreground">Affordable Monthly EMI</p>
-                            <p className="text-3xl font-bold text-primary">₹{result.affordableEmi.toLocaleString('en-IN', {maximumFractionDigits: 0})}</p>
-                        </div>
+                        <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Affordable Loan Amount</p><p className="text-3xl font-bold text-primary">₹{result.affordableLoan.toLocaleString('en-IN', {maximumFractionDigits: 0})}</p></div>
+                        <div className="p-4 bg-muted rounded-lg text-center"><p className="text-sm text-muted-foreground">Affordable Monthly EMI</p><p className="text-3xl font-bold text-primary">₹{result.affordableEmi.toLocaleString('en-IN', {maximumFractionDigits: 0})}</p></div>
                     </CardContent>
                 </Card>
             )}

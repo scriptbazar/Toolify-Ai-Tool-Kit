@@ -45,7 +45,7 @@ export function NscCalculator() {
             </Card>
             <Button onClick={calculateNSC} className="w-full"><Calculator className="mr-2 h-4 w-4"/>Calculate Maturity Value</Button>
             {result && (
-                <Card className="text-center">
+                <Card className="mt-6 text-center">
                     <CardHeader><CardTitle className="flex items-center justify-center gap-2"><FileText/>NSC Maturity Details</CardTitle></CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="p-4 bg-muted rounded-lg"><p className="text-sm text-muted-foreground">Total Investment</p><p className="text-xl font-bold">{new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(parseFloat(investment))}</p></div>

@@ -50,7 +50,9 @@ export function RetirementSavingsCalculator() {
     return (
         <div className="space-y-6">
             <Card>
-                <CardHeader><CardTitle>Retirement Planning</CardTitle></CardHeader>
+                <CardHeader>
+                    <CardTitle>Retirement Planning</CardTitle>
+                </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="space-y-2"><Label>Current Age (Years)</Label><Input type="number" value={currentAge} onChange={e => setCurrentAge(e.target.value)} /></div>
                     <div className="space-y-2"><Label>Retirement Age</Label><Input type="number" value={retirementAge} onChange={e => setRetirementAge(e.target.value)} /></div>
