@@ -15,7 +15,7 @@ import {
 import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AdminToolTableClient } from '@/app/admin/tools/_components/AdminToolTableClient';
+import { AdminToolTableClient } from './_components/AdminToolTable';
 import { useRouter } from 'next/navigation';
 
 
