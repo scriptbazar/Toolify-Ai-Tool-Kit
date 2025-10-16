@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { AdminToolFilters } from '@/app/admin/tools/_components/AdminToolFilters';
 
-interface AdminToolTableProps {
+interface AdminToolTableClientProps {
   allTools: Tool[];
   filteredTools: Tool[];
   setFilteredTools: (tools: Tool[]) => void;
@@ -35,7 +35,7 @@ interface AdminToolTableProps {
   totalPages: number;
 }
 
-export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onToolUpdate, currentPage, setCurrentPage, totalPages }: AdminToolTableProps) {
+export function AdminToolTableClient({ allTools, filteredTools, setFilteredTools, onToolUpdate, currentPage, setCurrentPage, totalPages }: AdminToolTableClientProps) {
   const router = useRouter();
   const [editingTool, setEditingTool] = React.useState<Tool | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
