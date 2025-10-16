@@ -26,22 +26,18 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     const { slug } = params;
 
     // Optimized data fetching
-    const [settings, allPosts, tools, toolReviews] = await Promise.all([
+    const [settings, allPosts, tool, allToolsForSidebar, toolReviews] = await Promise.all([
         getSettings(),
         getPosts('Published'),
-        getTools({ slug }), // Fetch only the specific tool for this page
+        getTools({ slug }).then(tools => tools[0]), // Fetch only the specific tool for this page
+        getTools({ status: 'Active' }), // Fetch all tools separately for the sidebar
         getReviews({ toolId: slug }),
     ]);
-
-    const tool = tools[0];
 
     if (!tool || tool.status === 'Disabled') {
         notFound();
     }
     
-    // Fetch all tools separately for the sidebar without blocking the page render
-    const allToolsForSidebar = await getTools({ status: 'Active' });
-
     const sidebarSettings = settings?.sidebar?.toolSidebar;
     const popularTools = allToolsForSidebar.filter(t => t.slug !== slug).slice(0, 10);
     const recentPosts = allPosts.filter(p => p.status === 'Published').slice(0, 5);
