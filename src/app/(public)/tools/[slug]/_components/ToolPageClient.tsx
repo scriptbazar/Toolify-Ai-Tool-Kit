@@ -158,6 +158,7 @@ const slugToComponentMap: { [key: string]: keyof typeof AllToolComponents } = {
     'image-to-pdf': 'ImageToPdf',
     'image-to-text': 'ImageToText',
     'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
+    'unit-converter': 'UnitConverter',
 };
 
 
