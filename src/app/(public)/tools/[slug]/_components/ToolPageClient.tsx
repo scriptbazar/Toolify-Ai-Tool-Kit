@@ -14,10 +14,11 @@ import { Separator } from '@/components/ui/separator';
 import { ReviewForm } from '@/components/tools/ReviewForm';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, Sparkles, Star, Zap, BrainCircuit, Construction, ShieldCheck, MousePointerClick, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, Sparkles, Star, Zap, BrainCircuit, Construction, ShieldCheck, MousePointerClick, Loader2, ShieldAlert } from 'lucide-react';
 import { addUserActivity } from '@/ai/flows/user-activity';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
+import { UpgradeProDialog } from '@/components/tools/UpgradeProDialog';
 
 
 const slugToComponentMap: { [key: string]: string } = {
@@ -156,11 +157,11 @@ const slugToComponentMap: { [key: string]: string } = {
     'rd-calculator': 'RdCalculator',
     'nps-calculator': 'NpsCalculator',
     'aes-encryption-and-decryption': 'AesEncryptionDecryption',
+    'ad-sense-revenue-calculator': 'AdSenseRevenueCalculator',
+    'unit-converter': 'UnitConverter',
     'image-to-pdf': 'ImageToPdf',
     'image-to-text': 'ImageToText',
     'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
-    'unit-converter': 'UnitConverter',
-    'gpa-to-percentage-converter': 'GpaToPercentageConverter',
 };
 
 
@@ -180,7 +181,7 @@ interface ToolComponentRendererProps {
 }
 
 export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }: ToolComponentRendererProps) {
-    const { user } = useAuth();
+    const { user, userData } = useAuth();
     
     useEffect(() => {
         if (user && tool) {
@@ -194,7 +195,7 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
             return null;
         }
         return dynamic(
-            () => import(`@/components/tools`).then(mod => mod[componentName as keyof typeof mod]),
+            () => import(`@/components/tools/${componentName}`),
             { 
                 ssr: false,
                 loading: () => (
@@ -208,7 +209,22 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, sidebar }
 
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
 
+    const isProUser = userData?.role === 'admin' || userData?.planId === 'pro' || userData?.planId === 'team';
+
     const renderToolContent = () => {
+        if (tool.plan === 'Pro' && !isProUser) {
+            return (
+                 <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-8 bg-muted/50 rounded-lg">
+                    <ShieldAlert className="w-16 h-16 text-primary mb-4" />
+                    <h2 className="text-2xl font-bold mb-2">Pro Tool Access</h2>
+                    <p className="text-muted-foreground mb-6">This tool is exclusive to our Pro members. Please upgrade your plan to get access.</p>
+                    <Button asChild>
+                        <Link href="/manage-subscription">Upgrade to Pro</Link>
+                    </Button>
+                </div>
+            )
+        }
+
         switch (tool.status) {
             case 'Maintenance':
                 return <ToolStatusDisplay icon={Construction} title="Under Maintenance" description="This tool is currently undergoing maintenance to improve its features. Please check back later." />;
