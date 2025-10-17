@@ -141,7 +141,6 @@ export const slugToComponentMap: { [key: string]: string } = {
   'gratuity-calculator': 'GratuityCalculator',
   'inflation-calculator': 'InflationCalculator',
   'loan-affordability-calculator': 'LoanAffordabilityCalculator',
-  'hra-calculator': 'LoanAffordabilityCalculator',
   'nsc-calculator': 'NscCalculator',
   'ppf-calculator': 'PpfCalculator',
   'swp-calculator': 'SwpCalculator',
@@ -149,3 +148,5 @@ export const slugToComponentMap: { [key: string]: string } = {
   'mortgage-calculator': 'MortgageCalculator',
   'average-calculator': 'AverageCalculator',
 };
+
+    

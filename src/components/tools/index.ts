@@ -140,10 +140,11 @@ export { EPFCalculator } from './EPFCalculator';
 export { GratuityCalculator } from './GratuityCalculator';
 export { InflationCalculator } from './InflationCalculator';
 export { LoanAffordabilityCalculator } from './LoanAffordabilityCalculator';
-export { LoanAffordabilityCalculator as HraCalculator } from './LoanAffordabilityCalculator';
 export { NscCalculator } from './NscCalculator';
 export { PpfCalculator } from './PpfCalculator';
 export { SwpCalculator } from './SwpCalculator';
 export { RetirementSavingsCalculator } from './RetirementSavingsCalculator';
 export { MortgageCalculator } from './MortgageCalculator';
 export { AverageCalculator } from './AverageCalculator';
+
+    

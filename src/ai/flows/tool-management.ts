@@ -153,7 +153,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Gratuity Calculator', description: 'Estimate the gratuity amount you are eligible to receive from your employer.', icon: 'Award', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Inflation Calculator', description: 'Calculate the future value of money and understand the impact of inflation.', icon: 'TrendingUp', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Loan Affordability Calculator', description: 'Determine how much loan you can afford based on your income and expenses.', icon: 'Banknote', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
-    { name: 'HRA Calculator', description: 'Determine how much loan you can afford based on your income and expenses.', icon: 'Banknote', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Nsc Calculator', description: 'Calculate the maturity value of your National Savings Certificate (NSC) investment.', icon: 'FileText', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Ppf Calculator', description: 'Calculate the maturity amount of your Public Provident Fund (PPF) investment.', icon: 'ShieldCheck', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Swp Calculator', description: 'Plan your Systematic Withdrawal Plan (SWP) from your mutual fund investments.', icon: 'TrendingDown', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
@@ -499,3 +498,5 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     return { success: false, message: "Could not update favorites." };
   }
 }
+
+    
