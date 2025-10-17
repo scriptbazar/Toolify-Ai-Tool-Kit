@@ -9,7 +9,8 @@ import { ToolSidebar } from '@/components/tools/ToolSidebar';
 export default async function ToolPage({ params }: { params: { slug: string } }) {
     // Fetch data sequentially to avoid potential server hangs with Promise.all
     const settings = await getSettings();
-    const tool = await getTools({ slug: params.slug }).then(tools => tools[0]);
+    const tools = await getTools({ slug: params.slug });
+    const tool = tools[0];
 
     if (!tool || tool.status === 'Disabled') {
         notFound();
@@ -33,3 +34,5 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         </ToolComponentRenderer>
     );
 }
+
+    

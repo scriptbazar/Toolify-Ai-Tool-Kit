@@ -203,17 +203,21 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
             return [];
         }
 
-        let queryRef: Query = adminDb.collection(TOOLS_COLLECTION);
+        let queryRef: Query | FirebaseFirestore.DocumentReference;
 
-        // Apply server-side filtering
         if (options.slug) {
-            queryRef = queryRef.where('slug', '==', options.slug);
+            queryRef = adminDb.collection(TOOLS_COLLECTION).doc(options.slug);
+             const docSnap = await queryRef.get();
+            if (!docSnap.exists) {
+                return [];
+            }
+            return processSnapshot([docSnap], options);
         }
+        
+        queryRef = adminDb.collection(TOOLS_COLLECTION);
+
         if (options.category && options.category !== 'all') {
             queryRef = queryRef.where('category', '==', options.category);
-        }
-        if (options.status && options.status !== 'all') {
-            queryRef = queryRef.where('status', '!=', 'Disabled');
         }
         
         const snapshot = await queryRef.get();
@@ -221,10 +225,10 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
         if (snapshot.empty && !options.slug && !options.category) {
             await seedInitialTools();
             const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).get();
-            return processSnapshot(retrySnapshot, options);
+            return processSnapshot(retrySnapshot.docs, options);
         }
         
-        return processSnapshot(snapshot, options);
+        return processSnapshot(snapshot.docs, options);
 
     } catch(e: any) {
         console.error("Error in getTools:", e.message);
@@ -233,9 +237,9 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
 }, ['tools'], { revalidate: 3600 });
 
 
-function processSnapshot(snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>, options: GetToolsOptions): Tool[] {
+function processSnapshot(docs: FirebaseFirestore.DocumentData[], options: GetToolsOptions): Tool[] {
     let tools: Tool[] = [];
-    snapshot.docs.forEach(doc => {
+    docs.forEach(doc => {
         const data = doc.data();
         const tool = ToolSchema.safeParse({ id: doc.id, slug: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
         if (tool.success) {
@@ -498,4 +502,5 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 }
     
 
+    
     
