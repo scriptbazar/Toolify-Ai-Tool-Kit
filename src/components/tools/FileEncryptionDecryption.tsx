@@ -209,3 +209,5 @@ export function FileEncryptionDecryption() {
     </div>
   );
 }
+
+export default FileEncryptionDecryption;

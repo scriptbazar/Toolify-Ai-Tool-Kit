@@ -186,7 +186,7 @@ export function ImageConverter() {
                  >
                     <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
                     {imagePreview ? (
-                        <Image src={imagePreview} alt="Preview" layout="fill" objectFit="contain" className="p-2" />
+                        <Image src={imagePreview} alt="Preview" layout="fill" objectFit="contain" className="p-2"/>
                     ) : (
                         <div className="flex flex-col items-center p-4">
                             <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
