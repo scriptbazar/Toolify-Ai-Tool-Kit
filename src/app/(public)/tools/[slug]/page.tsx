@@ -6,14 +6,13 @@ import { notFound } from 'next/navigation';
 import { ToolComponentRenderer } from './_components/ToolPageClient';
 import { ToolSidebar } from '@/components/tools/ToolSidebar';
 
-
 export default async function ToolPage({ params }: { params: { slug: string } }) {
+    const { slug } = await params;
+
     // Fetch only the essential data for this specific tool page.
-    const [settings, tool, toolReviews] = await Promise.all([
-        getSettings(),
-        getTools({ slug: params.slug }).then(tools => tools[0]), // Fetch only the specific tool
-        getReviews({ toolId: params.slug }),
-    ]);
+    const settings = await getSettings();
+    const tool = await getTools({ slug: slug }).then(tools => tools[0]);
+    const toolReviews = await getReviews({ toolId: slug });
 
     if (!tool || tool.status === 'Disabled') {
         notFound();
@@ -31,7 +30,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
             <ToolSidebar
                 adSettings={adSettings}
                 sidebarSettings={sidebarSettings}
-                currentToolSlug={params.slug}
+                currentToolSlug={slug}
             />
         </ToolComponentRenderer>
     );
