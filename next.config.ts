@@ -45,6 +45,7 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
+    config.experiments = { ...config.experiments, topLevelAwait: true };
     //
     // The "handlebars" library is a sub-dependency of genkit, and it uses
     // an old "require.extensions" feature that is not supported by webpack.
