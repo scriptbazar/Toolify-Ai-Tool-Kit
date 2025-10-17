@@ -147,6 +147,5 @@ export const slugToComponentMap: { [key: string]: string } = {
   'retirement-savings-calculator': 'RetirementSavingsCalculator',
   'mortgage-calculator': 'MortgageCalculator',
   'average-calculator': 'AverageCalculator',
+  'hra-calculator': 'HraCalculator',
 };
-
-    

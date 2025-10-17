@@ -159,6 +159,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Retirement Savings Calculator', description: 'Estimate the savings you need for a comfortable retirement.', icon: 'User', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Mortgage Calculator', description: 'Calculate your monthly mortgage payments.', icon: 'Home', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Average Calculator', description: 'Calculate the average of a set of numbers.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'HRA Calculator', description: 'Calculate your House Rent Allowance exemption.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
 ];
 
 const generateSlug = (name: string) => {
@@ -498,5 +499,3 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     return { success: false, message: "Could not update favorites." };
   }
 }
-
-    
