@@ -8,13 +8,11 @@ import { ToolSidebar } from '@/components/tools/ToolSidebar';
 
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
-    const { slug } = params;
-
     // Fetch only the essential data for this specific tool page.
     const [settings, tool, toolReviews] = await Promise.all([
         getSettings(),
-        getTools({ slug }).then(tools => tools[0]), // Fetch only the specific tool
-        getReviews({ toolId: slug }),
+        getTools({ slug: params.slug }).then(tools => tools[0]), // Fetch only the specific tool
+        getReviews({ toolId: params.slug }),
     ]);
 
     if (!tool || tool.status === 'Disabled') {
@@ -33,7 +31,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
             <ToolSidebar
                 adSettings={adSettings}
                 sidebarSettings={sidebarSettings}
-                currentToolSlug={slug}
+                currentToolSlug={params.slug}
             />
         </ToolComponentRenderer>
     );
