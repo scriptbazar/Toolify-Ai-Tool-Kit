@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect, type ChangeEvent, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, FileImage, Info, Loader2 } from 'lucide-react';
+import { UploadCloud, Download, FileImage, Info, Loader2, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -13,6 +13,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui
 import { Alert, AlertDescription } from '../ui/alert';
 import imageCompression from 'browser-image-compression';
 import { PDFDocument } from 'pdf-lib';
+import { cn } from '@/lib/utils';
 
 type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'jpg';
 
@@ -24,6 +25,7 @@ export function ImageConverter() {
   const [originalSize, setOriginalSize] = useState<string | null>(null);
   const [estimatedSize, setEstimatedSize] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -36,17 +38,22 @@ export function ImageConverter() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFile = (file: File) => {
     if (file && file.type.startsWith('image/')) {
-      setImageFile(file);
-      setOriginalSize(formatBytes(file.size));
-      setImagePreview(URL.createObjectURL(file));
-      setEstimatedSize(null);
+        setImageFile(file);
+        setOriginalSize(formatBytes(file.size));
+        setImagePreview(URL.createObjectURL(file));
+        setEstimatedSize(null); // Reset on new file
     } else if (file) {
-      toast({ title: "Invalid File", description: "Please upload a valid image file.", variant: "destructive" });
+        toast({ title: "Invalid File", description: "Please upload a valid image file.", variant: "destructive" });
     }
   };
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) handleFile(file); if (e.target) e.target.value = ''; };
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); e.dataTransfer.files && handleFile(e.dataTransfer.files[0]); };
+
 
   const estimateSize = async () => {
     if (!imageFile) return;
@@ -59,7 +66,7 @@ export function ImageConverter() {
       const options = {
         maxSizeMB: 20, // High limit to not resize unintentionally
         useWebWorker: true,
-        initialQuality: quality,
+        initialQuality: quality / 100,
         fileType: `image/${targetFormat === 'jpg' ? 'jpeg' : targetFormat}`,
         exifOrientation: true,
       };
@@ -132,13 +139,13 @@ export function ImageConverter() {
                     if (blob) {
                         handleDownload(blob, targetFormat);
                     }
-                }, `image/${targetFormat}`, quality);
+                }, `image/${targetFormat}`, quality / 100);
             }
       } else {
         const options = {
             maxSizeMB: 20,
             useWebWorker: true,
-            initialQuality: quality,
+            initialQuality: quality / 100,
             fileType: `image/${targetFormat === 'jpg' ? 'jpeg' : targetFormat}`,
             exifOrientation: true,
         };
@@ -153,6 +160,14 @@ export function ImageConverter() {
         setIsLoading(false);
     }
   };
+  
+  const handleClear = () => {
+      setImageFile(null);
+      setImagePreview(null);
+      setOriginalSize(null);
+      setEstimatedSize(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
@@ -162,16 +177,21 @@ export function ImageConverter() {
             </CardHeader>
             <CardContent className="space-y-4">
                  <div 
-                    className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
+                    className={cn(
+                        "w-full aspect-video border-2 border-dashed rounded-lg text-center cursor-pointer flex items-center justify-center relative transition-colors",
+                        isDragging ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted/50'
+                    )}
                     onClick={() => fileInputRef.current?.click()}
-                >
+                    onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+                 >
                     <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
                     {imagePreview ? (
                         <Image src={imagePreview} alt="Preview" layout="fill" objectFit="contain" className="p-2" />
                     ) : (
-                        <div className="flex flex-col items-center">
+                        <div className="flex flex-col items-center p-4">
                             <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
                             <p className="text-sm text-muted-foreground">Click or drag image to upload</p>
+                            <p className="text-xs text-muted-foreground">(JPG, PNG, WEBP, etc.)</p>
                         </div>
                     )}
                 </div>
@@ -218,12 +238,20 @@ export function ImageConverter() {
                         <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={10} max={100} step={5} />
                     </div>
                 )}
-                 <Button onClick={handleConvert} disabled={!imageFile || isLoading} className="w-full">
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4" />}
-                    Convert & Download
-                </Button>
+                 <div className="flex flex-col sm:flex-row gap-2">
+                    <Button onClick={handleConvert} disabled={!imageFile || isLoading} className="w-full">
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4" />}
+                        Convert & Download
+                    </Button>
+                     <Button variant="destructive" onClick={handleClear} className="w-full">
+                        <Trash2 className="mr-2 h-4 w-4"/>
+                        Clear
+                    </Button>
+                </div>
             </CardContent>
         </Card>
     </div>
   );
 }
+
+    
