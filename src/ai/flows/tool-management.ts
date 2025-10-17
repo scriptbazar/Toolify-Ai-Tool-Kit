@@ -158,8 +158,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Retirement Savings Calculator', description: 'Estimate the savings you need for a comfortable retirement.', icon: 'User', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Mortgage Calculator', description: 'Calculate your monthly mortgage payments.', icon: 'Home', category: 'calculator', plan: 'Pro', isNew: true, status: 'Active' },
     { name: 'Average Calculator', description: 'Calculate the average of a set of numbers.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
-    { name: 'Hra Calculator', description: 'Calculate your House Rent Allowance exemption.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'File Encryption & Decryption', description: '🔒 Encrypt and decrypt your files using the Advanced Encryption Standard (AES) for maximum security. Protect your sensitive data with a password.', icon: 'Key', category: 'dev', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload the file you want to process.', 'Choose whether to encrypt or decrypt.', 'Enter your secret password.', 'Download the processed file.'] },
+    { name: 'Hra Calculator', description: 'Calculate your House Rent Allowance exemption.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
 ];
 
 const generateSlug = (name: string) => {
@@ -225,10 +225,42 @@ const getToolsFn = async (options: GetToolsOptions = {}): Promise<Tool[]> => {
 /**
  * Fetches tools from Firestore with optional filtering and limiting.
  */
-export const getTools = async (options: GetToolsOptions = {}): Promise<Tool[]> => {
-    // This is now a direct call to the function, removing the cache.
-    return getToolsFn(options);
-};
+export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Tool[]> => {
+    try {
+        const adminDb = getAdminDb();
+        if (!adminDb) {
+            console.error("Firebase Admin is not initialized. Cannot fetch tools.");
+            return [];
+        }
+
+        let queryRef: Query = adminDb.collection(TOOLS_COLLECTION);
+
+        // Apply server-side filtering
+        if (options.slug) {
+            queryRef = queryRef.where('slug', '==', options.slug);
+        }
+        if (options.category && options.category !== 'all') {
+            queryRef = queryRef.where('category', '==', options.category);
+        }
+        if (options.status && options.status !== 'all') {
+            queryRef = queryRef.where('status', '!=', 'Disabled');
+        }
+        
+        const snapshot = await queryRef.orderBy('name').get();
+        
+        if (snapshot.empty && !options.slug && !options.category) {
+            await seedInitialTools();
+            const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).orderBy('name').get();
+            return processSnapshot(retrySnapshot, options);
+        }
+        
+        return processSnapshot(snapshot, options);
+
+    } catch(e: any) {
+        console.error("Error in getTools:", e.message);
+        return [];
+    }
+}, ['tools'], { revalidate: 3600 });
 
 
 function processSnapshot(snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>, options: GetToolsOptions): Tool[] {
@@ -243,15 +275,7 @@ function processSnapshot(snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFires
         }
     });
     
-    // Manual filtering after fetch
-    if (options.slug) {
-        tools = tools.filter(tool => tool.slug === options.slug);
-    }
-     if (options.category && options.category !== 'all') {
-        tools = tools.filter(tool => tool.category === options.category);
-    }
-
-    // Manual client-side-like filtering for search query
+    // Manual filtering after fetch for search query which is not efficient to do on server for substrings
     if (options.query) {
         const lowercasedQuery = options.query.toLowerCase();
         tools = tools.filter(tool => 

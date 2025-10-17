@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useMemo, useCallback } from 'react';
@@ -11,21 +12,30 @@ import { type Tool } from '@/ai/flows/tool-management.types';
 
 interface ToolFiltersProps {
   tools: Tool[];
-  onFilterChange: (filters: { query: string; category: string }) => void;
 }
 
-export function ToolFilters({ tools, onFilterChange }: ToolFiltersProps) {
+export function ToolFilters({ tools }: ToolFiltersProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   
   const initialQuery = searchParams.get('q') || '';
   const initialCategory = searchParams.get('category') || 'all';
 
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set(name, value)
+      return params.toString()
+    },
+    [searchParams]
+  );
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFilterChange({ query: e.target.value, category: initialCategory });
+    router.push(`/tools?${createQueryString('q', e.target.value)}`);
   };
 
   const handleCategoryChange = (category: string) => {
-    onFilterChange({ query: initialQuery, category: category });
+     router.push(`/tools?${createQueryString('category', category)}`);
   };
 
   const categoryCounts = useMemo(() => {
