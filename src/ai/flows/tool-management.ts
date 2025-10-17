@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -109,7 +110,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'PDF to JPG', description: '🖼️ Convert each page of a PDF document into a high-quality JPG image. Download individual images or a ZIP file of all pages.', icon: 'FileImage', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload your PDF file.', 'Select which pages you want to convert.', 'Choose the image quality.', 'Download the converted JPG images as a ZIP file.'] },
     { name: 'PDF to Word', description: '✍️ Convert PDF documents to editable Microsoft Word files (.docx). Retains formatting to make editing easy.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload your PDF file.', 'Click "Convert to Word".', 'The tool will process the file and provide a downloadable .docx file.'] },
     { name: 'Morse to Text Translator', description: '💬 Translate Morse code back into readable text. Also lets you hear the sound of the Morse code audio.', icon: 'MessageSquare', plan: 'Free', isNew: true, status: 'Active', category: 'miscellaneous', howToUse: ['Enter Morse code using dots (.), dashes (-), and slashes (/) for spaces.', 'The translated text will appear automatically.', 'Use the "Play Sound" button to hear the Morse code audio.'] },
-    { name: 'File Encryption & Decryption', description: '🔒 Encrypt and decrypt your files using the Advanced Encryption Standard (AES) for maximum security. Protect your sensitive data with a password.', icon: 'Key', category: 'dev', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload the file you want to process.', 'Choose whether to encrypt or decrypt.', 'Enter your secret password.', 'Download the processed file.'] },
+    { name: 'file-encryption-and-decryption', description: '🔒 Encrypt and decrypt your files using the Advanced Encryption Standard (AES) for maximum security. Protect your sensitive data with a password.', icon: 'Key', category: 'dev', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload the file you want to process.', 'Choose whether to encrypt or decrypt.', 'Enter your secret password.', 'Download the processed file.'] },
     { name: 'GPA To Percentage Converter', description: '🎓 Convert your GPA score back into a percentage using your university\'s specific formula or a standard calculation.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your GPA.', 'Select your university or enter a custom conversion formula.', 'The tool will display the equivalent percentage.'] },
     { name: 'PPT to PDF', description: '📄 Convert PowerPoint presentations (.ppt, .pptx) to PDF format. Easily share your slides in a universally accessible format.', icon: 'FileText', category: 'pdf', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload your PowerPoint file (.ppt or .pptx).', 'The file will be converted to PDF.', 'Download your new PDF file.'] },
     { name: 'Text to Morse Code', description: ' Morse code. Convert your text messages into a series of dots and dashes and hear the audio.', icon: 'MessageSquare', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the text you want to convert.', 'The corresponding Morse code will appear automatically.', 'Use the "Play Sound" button to hear the generated Morse code.'] },
@@ -191,35 +192,6 @@ interface GetToolsOptions {
   status?: string;
 }
 
-const getToolsFn = async (options: GetToolsOptions = {}): Promise<Tool[]> => {
-    try {
-        const adminDb = getAdminDb();
-        if (!adminDb) {
-            console.error("Firebase Admin is not initialized. Cannot fetch tools.");
-            return [];
-        }
-
-        let queryRef: Query = adminDb.collection(TOOLS_COLLECTION);
-        
-        const snapshot = await queryRef.orderBy('name').get();
-        
-        if (snapshot.empty && !options.slug && !options.category) {
-            const seeded = await seedInitialTools();
-            if (seeded) {
-                // If we just seeded, we need to fetch the data again.
-                const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).orderBy('name').get();
-                return processSnapshot(retrySnapshot, options);
-            }
-        }
-        
-        return processSnapshot(snapshot, options);
-
-    } catch(e: any) {
-        console.error("Error in getTools:", e.message);
-        return [];
-    }
-};
-
 /**
  * Fetches tools from Firestore with optional filtering and limiting.
  */
@@ -244,11 +216,11 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
             queryRef = queryRef.where('status', '!=', 'Disabled');
         }
         
-        const snapshot = await queryRef.orderBy('name').get();
+        const snapshot = await queryRef.get();
         
         if (snapshot.empty && !options.slug && !options.category) {
             await seedInitialTools();
-            const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).orderBy('name').get();
+            const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).get();
             return processSnapshot(retrySnapshot, options);
         }
         
@@ -273,6 +245,9 @@ function processSnapshot(snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFires
         }
     });
     
+    // Sort after fetching
+    tools.sort((a, b) => a.name.localeCompare(b.name));
+
     // Manual filtering after fetch for search query which is not efficient to do on server for substrings
     if (options.query) {
         const lowercasedQuery = options.query.toLowerCase();
@@ -524,3 +499,4 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
