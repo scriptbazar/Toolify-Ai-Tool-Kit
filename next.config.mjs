@@ -1,9 +1,9 @@
 
-import type {NextConfig} from 'next';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import path from 'path';
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
