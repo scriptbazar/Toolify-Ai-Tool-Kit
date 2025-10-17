@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useState, useRef, useEffect, type ChangeEvent, type DragEvent } from 'react';
+import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, FileImage, Info, Loader2, Trash2 } from 'lucide-react';
+import { UploadCloud, Download, Loader2, Trash2, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import imageCompression from 'browser-image-compression';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
+import { Info } from 'lucide-react';
 
 type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'jpg';
 
@@ -253,3 +254,5 @@ export function ImageConverter() {
     </div>
   );
 }
+
+    
