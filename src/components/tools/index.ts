@@ -2,6 +2,8 @@
 export { AdMobRevenueCalculator } from './AdMobRevenueCalculator';
 export { AgeCalculator } from './AgeCalculator';
 export { AmazonShippingLabelCropper } from './AmazonShippingLabelCropper';
+export { AsciiToTextConverter } from './AsciiToTextConverter';
+export { AverageCalculator } from './AverageCalculator';
 export { BarcodeGenerator } from './BarcodeGenerator';
 export { BarcodeScanner } from './BarcodeScanner';
 export { Base64Converter } from './Base64Converter';
@@ -153,4 +155,5 @@ export { AverageCalculator } from './AverageCalculator';
 export { HraCalculator } from './HraCalculator';
 export { TextToHandwritingConverter } from './TextToHandwritingConverter';
 export { TextToAsciiConverter } from './TextToAsciiConverter';
-export { AsciiToTextConverter } from './AsciiToTextConverter';
+
+    

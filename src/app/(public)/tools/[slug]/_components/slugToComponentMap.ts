@@ -96,7 +96,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'sql-formatter': 'SqlFormatter',
   'text-to-binary': 'TextToBinary',
   'text-to-morse-code': 'TextToMorseCode',
-  'file-encryption-decryption': 'FileEncryptionDecryption',
+  'file-encryption-&-decryption': 'FileEncryptionDecryption',
   'image-to-text': 'ImageToText',
   'time-zone-converter': 'TimeZoneConverter',
   'title-tag-checker': 'TitleTagChecker',
@@ -156,5 +156,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'text-to-handwriting-generator': 'TextToHandwritingConverter',
   'text-to-ascii-converter': 'TextToAsciiConverter',
 };
+
+    
 
     

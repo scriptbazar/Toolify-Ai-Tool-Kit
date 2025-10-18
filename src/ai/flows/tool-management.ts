@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -199,55 +198,57 @@ interface GetToolsOptions {
   status?: string;
 }
 
-export const getTools = cache(
-    async (options: GetToolsOptions = {}) => {
-        try {
-            const adminDb = getAdminDb();
-            if (!adminDb) {
-                console.error("Firebase Admin is not initialized. Cannot fetch tools.");
-                return [];
-            }
-
-            let query: Query | FirebaseFirestore.DocumentReference | FirebaseFirestore.CollectionReference = adminDb.collection(TOOLS_COLLECTION);
-            
-            if (options.slug) {
-                const docRef = adminDb.collection(TOOLS_COLLECTION).doc(options.slug);
-                const docSnap = await docRef.get();
-                 if (!docSnap.exists) {
-                    return [];
-                }
-                const data = docSnap.data();
-                if (!data) return [];
-                const tool = ToolSchema.safeParse({ id: docSnap.id, slug: docSnap.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
-                if (tool.success) {
-                    return [tool.data];
-                } else {
-                     console.warn(`Invalid tool data in Firestore with ID ${docSnap.id}:`, tool.error);
-                    return [];
-                }
-            }
-            
-            if (options.category && options.category !== 'all') {
-                query = query.where('category', '==', options.category);
-            }
-            
-            const snapshot = await query.get();
-            
-            if (snapshot.empty && !options.slug && !options.category) {
-                await seedInitialTools();
-                const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).get();
-                return processSnapshot(retrySnapshot.docs, options);
-            }
-            
-            return processSnapshot(snapshot.docs, options);
-
-        } catch(e: any) {
-            console.error("Error in getTools:", e.message);
+const getToolsFn = async (options: GetToolsOptions = {}) => {
+    try {
+        const adminDb = getAdminDb();
+        if (!adminDb) {
+            console.error("Firebase Admin is not initialized. Cannot fetch tools.");
             return [];
         }
-    },
-    ['tools'],
-    { revalidate: 3600 }
+
+        let query: Query | FirebaseFirestore.DocumentReference | FirebaseFirestore.CollectionReference = adminDb.collection(TOOLS_COLLECTION);
+        
+        if (options.slug) {
+            const docRef = adminDb.collection(TOOLS_COLLECTION).doc(options.slug);
+            const docSnap = await docRef.get();
+             if (!docSnap.exists) {
+                return [];
+            }
+            const data = docSnap.data();
+            if (!data) return [];
+            const tool = ToolSchema.safeParse({ id: docSnap.id, slug: docSnap.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
+            if (tool.success) {
+                return [tool.data];
+            } else {
+                 console.warn(`Invalid tool data in Firestore with ID ${docSnap.id}:`, tool.error);
+                return [];
+            }
+        }
+        
+        if (options.category && options.category !== 'all') {
+            query = query.where('category', '==', options.category);
+        }
+        
+        const snapshot = await query.get();
+        
+        if (snapshot.empty && !options.slug && !options.category) {
+            await seedInitialTools();
+            const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).get();
+            return processSnapshot(retrySnapshot.docs, options);
+        }
+        
+        return processSnapshot(snapshot.docs, options);
+
+    } catch(e: any) {
+        console.error("Error in getTools:", e.message);
+        return [];
+    }
+};
+
+export const getTools = cache(
+  async (options: GetToolsOptions = {}) => getToolsFn(options),
+  ['tools'],
+  { revalidate: 3600, tags: ['tools'] }
 );
 
 
@@ -536,6 +537,8 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
 
+
+    
 
     
 
