@@ -5,9 +5,11 @@ import { getReviews } from '@/ai/flows/review-management';
 import { HomePageClient } from './_components/HomePageClient';
 
 export default async function Home() {
-    const settings = await getSettings();
-    const posts = await getPosts('Published');
-    const testimonials = await getReviews({ status: 'approved', limit: 12 });
+    const [settings, posts, testimonials] = await Promise.all([
+        getSettings(),
+        getPosts('Published'),
+        getReviews({ status: 'approved', limit: 12 })
+    ]);
 
     const homepageSettings = settings.homepage || {};
     const steps = homepageSettings.steps || [];
