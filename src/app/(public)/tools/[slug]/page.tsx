@@ -5,27 +5,39 @@ import { getReviews } from '@/ai/flows/review-management';
 import { notFound } from 'next/navigation';
 import { ToolComponentRenderer } from './_components/ToolPageClient';
 import { ToolSidebar } from '@/components/tools/ToolSidebar';
+import { getPosts } from '@/ai/flows/blog-management';
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
     const { slug } = params;
     
-    // Fetch data in parallel for better performance
-    const [settings, tools] = await Promise.all([
+    // Fetch all necessary data in parallel for this page and its sidebar
+    const [settings, tools, allTools, allPosts] = await Promise.all([
         getSettings(),
-        getTools({ slug: slug })
+        getTools({ slug: slug }),
+        getTools({ status: 'Active' }), // For popular tools in sidebar
+        getPosts('Published') // For recent posts in sidebar
     ]);
     
     const tool = tools[0];
-
-    // Fetch reviews only if the tool exists
-    const toolReviews = tool ? await getReviews({ toolId: tool.slug }) : [];
-
+    
+    // If the main tool is not found, return 404
     if (!tool || tool.status === 'Disabled') {
         notFound();
     }
+
+    // Fetch reviews only if the tool exists
+    const toolReviews = await getReviews({ toolId: tool.slug });
     
     const adSettings = settings?.advertisement ?? null;
     const sidebarSettings = settings?.sidebar?.toolSidebar ?? null;
+
+    // Prepare data for the sidebar
+    const popularTools = sidebarSettings?.showPopularTools 
+        ? allTools.filter(t => t.slug !== slug).slice(0, 10) 
+        : [];
+    const recentPosts = sidebarSettings?.showRecentPosts 
+        ? allPosts.slice(0, 5) 
+        : [];
 
     return (
         <ToolComponentRenderer
@@ -36,9 +48,9 @@ export default async function ToolPage({ params }: { params: { slug: string } })
             <ToolSidebar
                 adSettings={adSettings}
                 sidebarSettings={sidebarSettings}
-                currentToolSlug={slug}
+                popularTools={popularTools}
+                recentPosts={recentPosts}
             />
         </ToolComponentRenderer>
     );
 }
-
