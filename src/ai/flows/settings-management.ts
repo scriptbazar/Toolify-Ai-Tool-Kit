@@ -96,7 +96,7 @@ const defaultSettings = AppSettingsSchema.parse({
     siteDescription: 'Over 100 smart utility tools and AI-powered solutions.',
     metaKeywords: 'ai tools, utility, productivity, developer tools',
     copyrightText: '© {year} ToolifyAI. All rights reserved.',
-    contactEmail: undefined,
+    contactEmail: '',
   },
   page: { pages: [
     {
