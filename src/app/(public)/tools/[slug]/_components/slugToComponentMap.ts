@@ -94,7 +94,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'sha256-hash-generator': 'Sha256HashGenerator',
   'srm-to-cgpa-calculator': 'SrmToCgpaCalculator',
   'sql-formatter': 'SqlFormatter',
-  'text-to-binary-/-binary-to-text': 'TextToBinary',
+  'text-to-binary': 'TextToBinary',
   'text-to-morse-code': 'TextToMorseCode',
   'file-encryption-decryption': 'FileEncryptionDecryption',
   'image-to-text': 'ImageToText',
@@ -155,7 +155,6 @@ export const slugToComponentMap: { [key: string]: string } = {
   'hra-calculator': 'HraCalculator',
   'text-to-handwriting-generator': 'TextToHandwritingConverter',
   'text-to-ascii-converter': 'TextToAsciiConverter',
-  'ascii-to-text-converter': 'AsciiToTextConverter',
 };
 
     

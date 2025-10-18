@@ -38,7 +38,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Flipkart Shipping Label Cropper', description: '📦 Crop your Flipkart shipping labels from a full page to a 4x6 inch size in seconds. Perfect for thermal printers and efficient order fulfillment.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the standard PDF label from Flipkart.', 'Click the "Crop Flipkart Label" button.', 'A new PDF with a 4" x 6" label will be downloaded.'] },
     { name: 'Meesho Shipping Label Cropper', description: '📦 Optimize your Meesho shipping process by cropping default labels to a 4x6 inch format. A must-have tool for Meesho sellers using thermal printers.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the standard PDF label from Meesho.', 'Click the "Crop Meesho Label" button.', 'A new PDF with a 4" x 6" label will be downloaded.'] },
     { name: 'Base64 Encoder & Decoder', description: '🔄 Encode your text and data into Base64 format or decode Base64 strings back to their original form. A crucial tool for developers working with web data.', icon: 'Package', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter text in the input box.', 'Click "Encode" to convert it to Base64.', 'Alternatively, paste a Base64 string in the input box and click "Decode".', 'Use the "Swap" button to switch between input and output.'] },
-    { name: 'Text to Binary / Binary to Text', description: '🔡 Convert binary code into readable ASCII text or vice versa. Quickly decode or encode data for debugging or educational purposes in computer science.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter text or binary code in the input area.', 'Click the appropriate button to convert.', 'The result will appear in the output area.'] },
+    { name: 'Text to Binary', description: '🔡 Convert readable ASCII text into binary code. Quickly encode data for debugging or educational purposes in computer science.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter text in the input area.', 'The binary representation will be generated automatically.', 'Copy the result to your clipboard.'] },
+    { name: 'Binary to Text', description: '🔡 Convert binary code into readable ASCII text. Quickly decode data for debugging or educational purposes.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter binary code in the input area, with each byte separated by a space.', 'The translated text will appear automatically.', 'Copy the result to your clipboard.'] },
     { name: 'CSS Minifier', description: '⚡ Minify your CSS code to reduce file size, remove comments, and improve your website\'s loading times. A simple step for web performance optimization.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste your CSS code into the "Original CSS" box.', 'Click the "Minify CSS" button.', 'The minified code will appear in the "Minified CSS" box.', 'Click "Copy" to use the minified code.'] },
     { name: 'Discount Calculator', description: '💰 Easily calculate the final price after a discount. See exactly how much money you save on your purchases during sales or promotions.', icon: 'BadgePercent', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the original price of the item.', 'Enter the discount percentage.', 'Click the "Calculate" button.', 'View the final price and the amount you saved.'] },
     { name: 'Date Calculator', description: '📅 Calculate the duration between two dates or find a future/past date by adding or subtracting days, months, and years. Useful for project planning and event scheduling.', icon: 'CalendarDays', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select the "Add/Subtract" or "Duration" tab.', 'For Add/Subtract: Pick a start date and enter the years, months, or days to add or subtract.', 'For Duration: Pick a start and end date.', 'Click the appropriate button to see the calculated result.'] },
@@ -199,57 +200,56 @@ interface GetToolsOptions {
 }
 
 export const getTools = cache(
-  async (options: GetToolsOptions = {}) => {
-    try {
-        const adminDb = getAdminDb();
-        if (!adminDb) {
-            console.error("Firebase Admin is not initialized. Cannot fetch tools.");
+    async (options: GetToolsOptions = {}) => {
+        try {
+            const adminDb = getAdminDb();
+            if (!adminDb) {
+                console.error("Firebase Admin is not initialized. Cannot fetch tools.");
+                return [];
+            }
+
+            let query: Query | FirebaseFirestore.DocumentReference | FirebaseFirestore.CollectionReference = adminDb.collection(TOOLS_COLLECTION);
+            
+            if (options.slug) {
+                const docRef = adminDb.collection(TOOLS_COLLECTION).doc(options.slug);
+                const docSnap = await docRef.get();
+                 if (!docSnap.exists) {
+                    return [];
+                }
+                const data = docSnap.data();
+                if (!data) return [];
+                const tool = ToolSchema.safeParse({ id: docSnap.id, slug: docSnap.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
+                if (tool.success) {
+                    return [tool.data];
+                } else {
+                     console.warn(`Invalid tool data in Firestore with ID ${docSnap.id}:`, tool.error);
+                    return [];
+                }
+            }
+            
+            if (options.category && options.category !== 'all') {
+                query = query.where('category', '==', options.category);
+            }
+            
+            const snapshot = await query.get();
+            
+            if (snapshot.empty && !options.slug && !options.category) {
+                await seedInitialTools();
+                const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).get();
+                return processSnapshot(retrySnapshot.docs, options);
+            }
+            
+            return processSnapshot(snapshot.docs, options);
+
+        } catch(e: any) {
+            console.error("Error in getTools:", e.message);
             return [];
         }
-
-        let query: Query | FirebaseFirestore.DocumentReference | FirebaseFirestore.CollectionReference = adminDb.collection(TOOLS_COLLECTION);
-        
-        // If a specific slug is requested, fetch that single document.
-        if (options.slug) {
-            const docRef = adminDb.collection(TOOLS_COLLECTION).doc(options.slug);
-            const docSnap = await docRef.get();
-             if (!docSnap.exists) {
-                return [];
-            }
-            const data = docSnap.data();
-            if (!data) return [];
-            const tool = ToolSchema.safeParse({ id: docSnap.id, slug: docSnap.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
-            if (tool.success) {
-                return [tool.data];
-            } else {
-                 console.warn(`Invalid tool data in Firestore with ID ${docSnap.id}:`, tool.error);
-                return [];
-            }
-        }
-        
-        // For multiple tools, build the query
-        if (options.category && options.category !== 'all') {
-            query = query.where('category', '==', options.category);
-        }
-        
-        const snapshot = await query.get();
-        
-        if (snapshot.empty && !options.slug && !options.category) {
-            await seedInitialTools();
-            const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).get();
-            return processSnapshot(retrySnapshot.docs, options);
-        }
-        
-        return processSnapshot(snapshot.docs, options);
-
-    } catch(e: any) {
-        console.error("Error in getTools:", e.message);
-        return [];
-    }
-  },
-  ['tools'],
-  { revalidate: 3600, tags: ['tools'] }
+    },
+    ['tools'],
+    { revalidate: 3600 }
 );
+
 
 function processSnapshot(docs: FirebaseFirestore.DocumentData[], options: GetToolsOptions): Tool[] {
     let tools: Tool[] = [];
