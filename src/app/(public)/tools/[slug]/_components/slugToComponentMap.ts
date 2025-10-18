@@ -19,6 +19,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'currency-converter': 'CurrencyConverter',
   'date-calculator': 'DateCalculator',
   'discount-calculator': 'DiscountCalculator',
+  'driving-licence-photo-and-signature-resizer': 'DrivingLicenceResizer',
   'dropbox-direct-link-generator': 'DropboxDirectLinkGenerator',
   'excel-to-pdf': 'ExcelToPdf',
   'favicon-checker': 'FaviconChecker',

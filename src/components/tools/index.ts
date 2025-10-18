@@ -18,6 +18,7 @@ export { CssMinifier } from './CssMinifier';
 export { CurrencyConverter } from './CurrencyConverter';
 export { DateCalculator } from './DateCalculator';
 export { DiscountCalculator } from './DiscountCalculator';
+export { DrivingLicenceResizer } from './DrivingLicenceResizer';
 export { DropboxDirectLinkGenerator } from './DropboxDirectLinkGenerator';
 export { ExcelToPdf } from './ExcelToPdf';
 export { FaviconChecker } from './FaviconChecker';

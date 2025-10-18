@@ -87,6 +87,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'OneDrive Direct Link Generator', description: '🔗 Convert your OneDrive sharing links into permanent, direct download links for seamless file sharing. Bypass the OneDrive web interface for downloads.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste your OneDrive sharing link.', 'Click "Generate Direct Link".', 'The tool will provide a new link that initiates a direct download.'] },
     { name: 'NSDL PAN Card Photo and Signature Resizer', description: '🇮🇳 Resize your photo and signature to the exact dimensions and file size required for NSDL PAN card applications. Avoid submission errors.', icon: 'Crop', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your photo and signature images separately.', 'The tool will automatically resize them to the NSDL-specified dimensions and file size.', 'Download the perfectly formatted images.'] },
     { name: 'UTI PAN Card Photo and Signature Resizer', description: '🇮🇳 Resize your photo and signature to meet the specific requirements for UTI PAN card applications online. Get your application right the first time.', icon: 'Crop', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your photo and signature images.', 'The tool will automatically crop and resize them according to UTI guidelines.', 'Download the ready-to-upload images.'] },
+    { name: 'Driving Licence Photo and Signature Resizer', description: '🇮🇳 Resize your photo and signature for driving licence applications. Get the perfect size and format required for online submissions.', icon: 'Crop', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your photo and signature images.', 'The tool will resize them to the specified dimensions.', 'Download the ready-to-upload images.'] },
     { name: 'Password Strength Checker', description: '💪 Check the strength and security of your password against common patterns and vulnerabilities. Get instant feedback to create stronger passwords.', icon: 'CheckCheck', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Type your password into the input field.', 'The tool will instantly analyze its strength and provide feedback.', 'It will check for length, character types, and common patterns.'] },
     { name: 'SHA256 Hash Generator', description: '#️⃣ Generate a secure SHA-256 hash for any text string. Commonly used for data integrity checks, digital signatures, and password storage.', icon: 'Hash', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter any text or string into the input box.', 'The tool will automatically generate the corresponding SHA-256 hash.', 'Copy the generated hash.'] },
     { name: 'Universal Hash Generator', description: '#️⃣ Generate various types of cryptographic hashes for your text, including MD5, SHA1, SHA512, and more. A versatile tool for developers.', icon: 'Hash', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the text you want to hash.', 'Select the desired hashing algorithm (MD5, SHA1, etc.).', 'The generated hash will be displayed for you to copy.'] },
@@ -242,9 +243,9 @@ const getToolsFn = async (options: GetToolsOptions = {}): Promise<Tool[]> => {
 };
 
 export const getTools = cache(
-    async (options: GetToolsOptions = {}) => getToolsFn(options),
-    ['tools'],
-    { revalidate: 3600, tags: ['tools'] }
+  (options: GetToolsOptions = {}) => getToolsFn(options),
+  ['tools'],
+  { revalidate: 3600, tags: ['tools'] }
 );
 
 function processSnapshot(docs: FirebaseFirestore.DocumentData[], options: GetToolsOptions): Tool[] {
@@ -296,7 +297,7 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
     
     let docId = id;
 
-    if (data.name && !id) { // Generate slug only for new tools
+    if (data.name && !id) { // Generate slug for new tools
       data.slug = generateSlug(data.name);
       docId = data.slug;
     }
@@ -306,7 +307,7 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
 
     if (docId) {
       const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(docId);
-      await toolRef.update({ ...validatedData });
+      await toolRef.set({ ...validatedData }, { merge: true });
       revalidatePath('/tools');
       revalidatePath(`/tools/${docId}`);
       revalidatePath(`/admin/tools`);
@@ -524,4 +525,5 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
       
+
 
