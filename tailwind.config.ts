@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -17,6 +18,17 @@ export default {
     extend: {
       fontFamily: {
         sans: ['var(--font-sans)', 'sans-serif'],
+        cursive: ['Cursive', 'sans-serif'],
+        cedarville: ['"Cedarville Cursive"', 'cursive'],
+        dancing: ['"Dancing Script"', 'cursive'],
+        indie: ['"Indie Flower"', 'cursive'],
+        kalam: ['"Kalam"', 'cursive'],
+        marck: ['"Marck Script"', 'cursive'],
+        nanum: ['"Nanum Pen Script"', 'cursive'],
+        patrick: ['"Patrick Hand"', 'cursive'],
+        permanent: ['"Permanent Marker"', 'cursive'],
+        rocksalt: ['"Rock Salt"', 'cursive'],
+        sacramento: ['"Sacramento"', 'cursive'],
       },
       colors: {
         background: 'hsl(var(--background))',

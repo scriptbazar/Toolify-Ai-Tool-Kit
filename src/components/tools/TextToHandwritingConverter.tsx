@@ -9,9 +9,25 @@ import { Copy, Download, Trash2, PenLine } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { jsPDF } from 'jspdf';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { cn } from '@/lib/utils';
+
+const fontOptions = [
+    { name: 'Cedarville Cursive', value: 'font-cedarville' },
+    { name: 'Dancing Script', value: 'font-dancing' },
+    { name: 'Indie Flower', value: 'font-indie' },
+    { name: 'Kalam', value: 'font-kalam' },
+    { name: 'Marck Script', value: 'font-marck' },
+    { name: 'Nanum Pen Script', value: 'font-nanum' },
+    { name: 'Patrick Hand', value: 'font-patrick' },
+    { name: 'Permanent Marker', value: 'font-permanent' },
+    { name: 'Rock Salt', value: 'font-rocksalt' },
+    { name: 'Sacramento', value: 'font-sacramento' },
+];
 
 export function TextToHandwritingConverter() {
     const [text, setText] = useState('This is a sample of handwritten text.');
+    const [selectedFont, setSelectedFont] = useState(fontOptions[0].value);
     const { toast } = useToast();
 
     const handleCopy = () => {
@@ -23,6 +39,8 @@ export function TextToHandwritingConverter() {
     const handleDownload = () => {
         if (!text) return;
         const doc = new jsPDF();
+        // NOTE: jsPDF does not support custom web fonts easily without TTF files.
+        // It will use a default cursive-like font. The web preview is more accurate.
         doc.setFont('cursive');
         doc.setFontSize(16);
         doc.text(text, 10, 10);
@@ -45,13 +63,28 @@ export function TextToHandwritingConverter() {
                     className="min-h-[200px]"
                 />
             </div>
+             <div className="space-y-2">
+                <Label htmlFor="font-select">Choose a Handwriting Style</Label>
+                <Select value={selectedFont} onValueChange={setSelectedFont}>
+                    <SelectTrigger id="font-select">
+                        <SelectValue placeholder="Select a font" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {fontOptions.map(font => (
+                            <SelectItem key={font.value} value={font.value} className={font.value}>
+                                {font.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
 
             <Card>
                 <CardHeader>
                     <CardTitle>Handwriting Preview</CardTitle>
                 </CardHeader>
-                <CardContent className="min-h-[200px] border rounded-md p-4 font-cursive text-xl leading-loose bg-muted">
-                    <pre>{text}</pre>
+                <CardContent className="min-h-[200px] border rounded-md p-4 text-xl leading-loose bg-muted">
+                    <pre className={cn(selectedFont)}>{text}</pre>
                 </CardContent>
             </Card>
 
@@ -69,5 +102,3 @@ export function TextToHandwritingConverter() {
         </div>
     );
 }
-
-    

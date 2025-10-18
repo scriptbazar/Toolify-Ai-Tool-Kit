@@ -158,7 +158,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Swp Calculator', description: 'Plan your Systematic Withdrawal Plan (SWP) from your mutual fund investments.', icon: 'TrendingDown', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Retirement Savings Calculator', description: 'Estimate the savings you need for a comfortable retirement.', icon: 'User', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Mortgage Calculator', description: 'Calculate your monthly mortgage payments.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
-    { name: 'Average Calculator', description: 'Calculate the average of a set of numbers.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Hra Calculator', description: 'Calculate your House Rent Allowance exemption.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Text to Handwriting Generator', description: 'Convert your typed text into a realistic handwriting style.', icon: 'PenLine', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'URL Shortener', description: 'Create short, shareable links from long URLs.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
@@ -198,7 +197,7 @@ interface GetToolsOptions {
   status?: string;
 }
 
-const getToolsFn = async (options: GetToolsOptions = {}) => {
+async function getToolsFn (options: GetToolsOptions = {}) {
     try {
         const adminDb = getAdminDb();
         if (!adminDb) {
