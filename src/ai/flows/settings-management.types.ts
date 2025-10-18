@@ -94,7 +94,7 @@ export const GeneralSettingsSchema = z.object({
   copyrightText: z.string().default('© {year} ToolifyAI. All rights reserved.'),
   logoUrl: z.string().optional(),
   faviconUrl: z.string().optional(),
-  contactEmail: z.string().email().optional(),
+  contactEmail: z.string().email().optional().or(z.literal('')),
   socialLinks: SocialLinksSchema.optional(),
   webmaster: WebmasterSettingsSchema.optional(),
   security: SecuritySettingsSchema.optional(),
