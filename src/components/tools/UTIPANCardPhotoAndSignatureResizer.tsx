@@ -14,6 +14,8 @@ const SIGNATURE_WIDTH = 400;
 const SIGNATURE_HEIGHT = 200;
 const MAX_PHOTO_SIZE_KB = 30;
 const MAX_SIGNATURE_SIZE_KB = 60;
+const PHOTO_DPI = 300;
+const SIGNATURE_DPI = 600;
 
 const ImageResizerBox = ({
   title,
@@ -21,12 +23,14 @@ const ImageResizerBox = ({
   targetWidth,
   targetHeight,
   maxSizeKb,
+  dpi,
 }: {
   title: string;
   icon: React.ElementType;
   targetWidth: number;
   targetHeight: number;
   maxSizeKb: number;
+  dpi: number;
 }) => {
   const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [originalPreview, setOriginalPreview] = useState<string | null>(null);
@@ -121,12 +125,12 @@ const ImageResizerBox = ({
         >
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
             {originalPreview ? (
-                <Image src={originalPreview} alt="Preview" layout="fill" objectFit="contain" className="p-2"/>
+                <Image src={originalPreview} alt="Preview" fill objectFit="contain" className="p-2"/>
             ) : (
                 <div className="flex flex-col items-center">
                     <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
                     <p className="text-sm text-muted-foreground">Upload {title}</p>
-                    <p className="text-xs text-muted-foreground">Target: {targetWidth}x{targetHeight}px, &lt;{maxSizeKb}KB</p>
+                    <p className="text-xs text-muted-foreground">Target: {targetWidth}x{targetHeight}px @ {dpi}DPI, &lt;{maxSizeKb}KB</p>
                 </div>
             )}
         </div>
@@ -163,6 +167,7 @@ export function UTIPANCardPhotoAndSignatureResizer() {
         targetWidth={PHOTO_WIDTH}
         targetHeight={PHOTO_HEIGHT}
         maxSizeKb={MAX_PHOTO_SIZE_KB}
+        dpi={PHOTO_DPI}
       />
       <ImageResizerBox 
         title="Signature"
@@ -170,6 +175,7 @@ export function UTIPANCardPhotoAndSignatureResizer() {
         targetWidth={SIGNATURE_WIDTH}
         targetHeight={SIGNATURE_HEIGHT}
         maxSizeKb={MAX_SIGNATURE_SIZE_KB}
+        dpi={SIGNATURE_DPI}
       />
     </div>
   );
