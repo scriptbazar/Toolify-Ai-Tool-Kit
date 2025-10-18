@@ -20,15 +20,9 @@ export async function encryptOrDecryptFile(
 
     if (mode === 'encrypt') {
       const encrypted = CryptoJS.AES.encrypt(fileDataUrl, password).toString();
-      // To make it downloadable, we need to convert the encrypted string to a Blob and then to a Data URL.
-      const blob = new Blob([encrypted], { type: 'text/plain' });
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-      return { success: true, dataUrl };
+      // Convert the encrypted string to a Base64 Data URL so it can be downloaded.
+      const encryptedDataUrl = `data:text/plain;base64,${Buffer.from(encrypted).toString('base64')}`;
+      return { success: true, dataUrl: encryptedDataUrl };
     } else { // decrypt
       // The file content is a Data URL of the encrypted text file.
       const response = await fetch(fileDataUrl);
