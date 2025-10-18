@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { UploadCloud, Download, FileArchive, Loader2 } from 'lucide-react';
@@ -16,7 +16,7 @@ type CompressionType = 'lossy' | 'lossless';
 export function ImageCompressor() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [quality, setQuality] = useState(80); // Quality as a percentage
+  const [quality, setQuality] = useState(80);
   const [compressionType, setCompressionType] = useState<CompressionType>('lossy');
   const [originalSize, setOriginalSize] = useState(0);
   const [compressedSize, setCompressedSize] = useState(0);
@@ -43,6 +43,8 @@ export function ImageCompressor() {
 
     try {
         let compressedFile: File;
+        let downloadName: string;
+
         if (compressionType === 'lossy') {
             const options = {
                 maxSizeMB: (imageFile.size / 1024 / 1024) * (quality / 100),
@@ -51,23 +53,30 @@ export function ImageCompressor() {
                 initialQuality: quality / 100,
             };
             compressedFile = await imageCompression(imageFile, options);
-        } else {
-            // For "lossless", we still need to process it to some extent.
-            // Using a very high quality setting in the library is the closest we can get to a browser-based "lossless" feel
-            // without complex server-side tooling. This will optimize metadata and encoding without visible quality loss.
-            const options = {
-                maxSizeMB: 20, // High limit to prevent accidental resizing
-                initialQuality: 1.0,
-                alwaysKeepResolution: true,
-            };
-             compressedFile = await imageCompression(imageFile, options);
+            downloadName = `compressed-${imageFile.name}`;
+        } else { // Lossless (PNG)
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.src = URL.createObjectURL(imageFile);
+            await new Promise(resolve => { img.onload = resolve; });
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx?.drawImage(img, 0, 0);
+            
+            const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) throw new Error("Canvas to Blob conversion failed.");
+            
+            compressedFile = new File([blob], imageFile.name.replace(/\.[^/.]+$/, "") + ".png", { type: 'image/png' });
+            downloadName = `lossless-${compressedFile.name}`;
         }
         
         setCompressedSize(compressedFile.size);
         
         const link = document.createElement('a');
         link.href = URL.createObjectURL(compressedFile);
-        link.download = `compressed-${imageFile.name}`;
+        link.download = downloadName;
         link.click();
         URL.revokeObjectURL(link.href);
         toast({ title: 'Success!', description: 'Your compressed image has been downloaded.' });
@@ -114,12 +123,12 @@ export function ImageCompressor() {
             <RadioGroup value={compressionType} onValueChange={(val) => setCompressionType(val as CompressionType)} className="grid grid-cols-2 gap-4">
               <Label htmlFor="lossless" className="p-4 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary text-center">
                 <RadioGroupItem value="lossless" id="lossless" className="sr-only"/>
-                <p className="font-semibold">Lossless</p>
+                <p className="font-semibold">Lossless (PNG)</p>
                 <p className="text-xs text-muted-foreground">Best quality, larger size</p>
               </Label>
               <Label htmlFor="lossy" className="p-4 border rounded-lg cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary text-center">
                 <RadioGroupItem value="lossy" id="lossy" className="sr-only"/>
-                 <p className="font-semibold">Lossy</p>
+                 <p className="font-semibold">Lossy (JPG/WEBP)</p>
                 <p className="text-xs text-muted-foreground">Smaller size, adjustable quality</p>
               </Label>
             </RadioGroup>

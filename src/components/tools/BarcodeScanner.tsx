@@ -8,8 +8,7 @@ import { UploadCloud, Loader2, Link as LinkIcon, ScanLine, Copy, Trash2 } from '
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { Textarea } from '../ui/textarea';
-import jsQR from 'jsqr';
+import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from '@zxing/library';
 
 export function BarcodeScanner() {
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -38,38 +37,31 @@ export function BarcodeScanner() {
         }
     };
     
-    const scanCode = (img: HTMLImageElement) => {
+    const scanCode = async (img: HTMLImageElement) => {
         setIsLoading(true);
         setDecodedText(null);
         
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            setIsLoading(false);
-            toast({ title: "Canvas Error", description: "Could not initialize the image scanner.", variant: "destructive" });
-            return;
-        }
-        ctx.drawImage(img, 0, 0, img.width, img.height);
-        const imageData = ctx.getImageData(0, 0, img.width, img.height);
-        
-        // Using jsQR to decode the image data
-        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        try {
+            const hints = new Map();
+            const formats = [
+                BarcodeFormat.QR_CODE, BarcodeFormat.CODE_128, BarcodeFormat.EAN_13,
+                BarcodeFormat.EAN_8, BarcodeFormat.UPC_A, BarcodeFormat.UPC_E,
+                BarcodeFormat.CODE_39, BarcodeFormat.ITF, BarcodeFormat.DATA_MATRIX,
+                BarcodeFormat.AZTEC, BarcodeFormat.PDF_417, BarcodeFormat.CODE_93
+            ];
+            hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
 
-        if (code) {
-            setDecodedText(code.data);
-            toast({ title: 'Barcode Scanned!', description: 'Content has been extracted.' });
-        } else {
-            // Fallback for non-QR barcodes (this is a mock)
-            setTimeout(() => {
-                toast({ title: 'No QR Code Found', description: 'This tool currently specializes in QR codes. For other barcodes, a different library would be needed.', variant: "default" });
-                setDecodedText('Unsupported Barcode Type');
-                 setIsLoading(false);
-            }, 1000);
-            return;
+            const reader = new BrowserMultiFormatReader(hints);
+            const result = await reader.decodeFromImage(img);
+            
+            setDecodedText(result.getText());
+            toast({ title: `Barcode Scanned!`, description: 'Content has been extracted.' });
+        } catch (err) {
+            console.error(err);
+            toast({ title: 'Scan Failed', description: 'Could not detect a barcode in the image.', variant: 'default' });
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) handleFile(file); };
