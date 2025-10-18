@@ -203,24 +203,32 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
             return [];
         }
 
-        let queryRef: Query | FirebaseFirestore.DocumentReference;
-
+        let query: Query | FirebaseFirestore.DocumentReference | FirebaseFirestore.CollectionReference = adminDb.collection(TOOLS_COLLECTION);
+        
+        // If a specific slug is requested, fetch that single document.
         if (options.slug) {
-            queryRef = adminDb.collection(TOOLS_COLLECTION).doc(options.slug);
-             const docSnap = await queryRef.get();
-            if (!docSnap.exists) {
+            const docRef = adminDb.collection(TOOLS_COLLECTION).doc(options.slug);
+            const docSnap = await docRef.get();
+             if (!docSnap.exists) {
                 return [];
             }
-            return processSnapshot([docSnap], options);
+            const data = docSnap.data();
+            if (!data) return [];
+            const tool = ToolSchema.safeParse({ id: docSnap.id, slug: docSnap.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
+            if (tool.success) {
+                return [tool.data];
+            } else {
+                 console.warn(`Invalid tool data in Firestore with ID ${docSnap.id}:`, tool.error);
+                return [];
+            }
         }
         
-        queryRef = adminDb.collection(TOOLS_COLLECTION);
-
+        // For multiple tools, build the query
         if (options.category && options.category !== 'all') {
-            queryRef = queryRef.where('category', '==', options.category);
+            query = query.where('category', '==', options.category);
         }
         
-        const snapshot = await queryRef.get();
+        const snapshot = await query.get();
         
         if (snapshot.empty && !options.slug && !options.category) {
             await seedInitialTools();
