@@ -192,11 +192,7 @@ interface GetToolsOptions {
   status?: string;
 }
 
-/**
- * Fetches tools from Firestore with optional filtering and limiting.
- */
-export const getTools = cache(
-  async (options: GetToolsOptions = {}): Promise<Tool[]> => {
+const getToolsFn = async (options: GetToolsOptions = {}): Promise<Tool[]> => {
     try {
         const adminDb = getAdminDb();
         if (!adminDb) {
@@ -243,11 +239,13 @@ export const getTools = cache(
         console.error("Error in getTools:", e.message);
         return [];
     }
-  },
-  ['tools'],
-  { revalidate: 3600, tags: ['tools', (options: GetToolsOptions) => JSON.stringify(options)] }
-);
+};
 
+export const getTools = cache(
+    async (options: GetToolsOptions = {}) => getToolsFn(options),
+    ['tools'],
+    { revalidate: 3600, tags: ['tools'] }
+);
 
 function processSnapshot(docs: FirebaseFirestore.DocumentData[], options: GetToolsOptions): Tool[] {
     let tools: Tool[] = [];
@@ -296,27 +294,29 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
     const adminDb = getAdminDb();
     const { id, ...data } = toolData;
     
-    if (data.name && !data.slug) { // Only generate slug if not already present, especially for new tools
+    let docId = id;
+
+    if (data.name && !id) { // Generate slug only for new tools
       data.slug = generateSlug(data.name);
+      docId = data.slug;
     }
     
     // Validate data before saving
     const validatedData = UpsertToolInputSchema.parse(data);
 
-    if (id) {
-      const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(id);
-      // Ensure slug is not removed on update
+    if (docId) {
+      const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(docId);
       await toolRef.update({ ...validatedData });
-       revalidatePath('/tools');
-       revalidatePath(`/tools/${id}`);
-       revalidatePath(`/admin/tools`);
-      return { success: true, message: 'Tool updated successfully.', toolId: id };
+      revalidatePath('/tools');
+      revalidatePath(`/tools/${docId}`);
+      revalidatePath(`/admin/tools`);
+      return { success: true, message: 'Tool updated successfully.', toolId: docId };
     } else {
       if (!data.slug) throw new Error("Slug is required for a new tool.");
       const docRef = adminDb.collection(TOOLS_COLLECTION).doc(data.slug);
       await docRef.set({ ...validatedData, slug: data.slug, createdAt: FieldValue.serverTimestamp() });
-       revalidatePath('/tools');
-       revalidatePath(`/admin/tools`);
+      revalidatePath('/tools');
+      revalidatePath(`/admin/tools`);
       return { success: true, message: 'Tool added successfully.', toolId: docRef.id };
     }
   } catch (error: any) {
@@ -524,3 +524,4 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
       
+
