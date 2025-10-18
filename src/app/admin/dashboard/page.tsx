@@ -4,9 +4,28 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { AdminDashboardClient } from './_components/DashboardClient';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAllEmails } from '@/ai/flows/user-management';
+import dynamic from 'next/dynamic';
+
+const AdminDashboardClient = dynamic(() => import('./_components/DashboardClient').then(mod => mod.AdminDashboardClient), {
+    loading: () => (
+         <div className="space-y-6">
+            <Skeleton className="h-10 w-64 mb-2" />
+            <Skeleton className="h-4 w-80" />
+            <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+                <Skeleton className="h-28" />
+                <Skeleton className="h-28" />
+                <Skeleton className="h-28" />
+                <Skeleton className="h-28" />
+            </div>
+             <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
+                <Skeleton className="h-96" />
+                <Skeleton className="h-96" />
+             </div>
+        </div>
+      )
+});
 
 interface User {
   id: string;
