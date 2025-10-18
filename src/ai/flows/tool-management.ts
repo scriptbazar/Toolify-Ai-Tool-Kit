@@ -241,7 +241,10 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
         console.error("Error in getTools:", e.message);
         return [];
     }
-}, ['tools'], { revalidate: 3600 });
+}, 
+['tools'],
+{ revalidate: 3600, tags: ['tools'] }
+);
 
 
 function processSnapshot(docs: FirebaseFirestore.DocumentData[], options: GetToolsOptions): Tool[] {
@@ -304,12 +307,14 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
       await toolRef.update({ ...validatedData, slug: id });
        revalidatePath('/tools');
        revalidatePath(`/tools/${id}`);
+       revalidatePath(`/admin/tools`);
       return { success: true, message: 'Tool updated successfully.', toolId: id };
     } else {
       if (!data.slug) throw new Error("Slug is required for a new tool.");
       const docRef = adminDb.collection(TOOLS_COLLECTION).doc(data.slug);
       await docRef.set({ ...validatedData, slug: data.slug, createdAt: FieldValue.serverTimestamp() });
        revalidatePath('/tools');
+       revalidatePath(`/admin/tools`);
       return { success: true, message: 'Tool added successfully.', toolId: docRef.id };
     }
   } catch (error: any) {
@@ -353,6 +358,7 @@ To complete the deletion, please manually delete the following files:
         console.log(logMessage);
         
         revalidatePath('/tools');
+        revalidatePath(`/admin/tools`);
 
         return { success: true, message: 'Tool deleted successfully.' };
     } catch (error: any) {
@@ -511,3 +517,5 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
     
     
+
+      
