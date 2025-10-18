@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -36,9 +37,8 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Myntra Shipping Label Cropper', description: '📦 Quickly convert your standard Myntra shipping labels into a thermal printer-friendly 4x6 inch format. Save time and label paper.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the standard PDF label from Myntra.', 'Click the "Crop Myntra Label" button.', 'A new PDF with a 4" x 6" label will be downloaded.'] },
     { name: 'Flipkart Shipping Label Cropper', description: '📦 Crop your Flipkart shipping labels from a full page to a 4x6 inch size in seconds. Perfect for thermal printers and efficient order fulfillment.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the standard PDF label from Flipkart.', 'Click the "Crop Flipkart Label" button.', 'A new PDF with a 4" x 6" label will be downloaded.'] },
     { name: 'Meesho Shipping Label Cropper', description: '📦 Optimize your Meesho shipping process by cropping default labels to a 4x6 inch format. A must-have tool for Meesho sellers using thermal printers.', icon: 'Crop', category: 'ecommerce', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the standard PDF label from Meesho.', 'Click the "Crop Meesho Label" button.', 'A new PDF with a 4" x 6" label will be downloaded.'] },
-    { name: 'Base64 Converter', description: '🔄 Encode your text and data into Base64 format or decode Base64 strings back to their original form. A crucial tool for developers working with web data.', icon: 'Package', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter text in the input box.', 'Click "Encode" to convert it to Base64.', 'Alternatively, paste a Base64 string in the input box and click "Decode".', 'Use the "Swap" button to switch between input and output.'] },
-    { name: 'Binary to Text', description: '🔡 Convert binary code into readable ASCII text. Quickly decode binary data into a human-readable format for debugging or analysis.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the binary code (e.g., 01001000 01100101 01101100 01101100 01101111) in the input area.', 'Click the "Convert to Text" button.', 'The corresponding ASCII text will appear in the output area.'] },
-    { name: 'Text to Binary', description: '🔢 Convert any text into binary code format. Useful for understanding data representation or for educational purposes in computer science.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the text you want to convert into the input area.', 'Click the "Convert to Binary" button.', 'The binary representation of your text will be displayed.'] },
+    { name: 'Base64 Encoder & Decoder', description: '🔄 Encode your text and data into Base64 format or decode Base64 strings back to their original form. A crucial tool for developers working with web data.', icon: 'Package', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter text in the input box.', 'Click "Encode" to convert it to Base64.', 'Alternatively, paste a Base64 string in the input box and click "Decode".', 'Use the "Swap" button to switch between input and output.'] },
+    { name: 'Text to Binary / Binary to Text', description: '🔡 Convert binary code into readable ASCII text or vice versa. Quickly decode or encode data for debugging or educational purposes in computer science.', icon: 'Binary', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter text or binary code in the input area.', 'Click the appropriate button to convert.', 'The result will appear in the output area.'] },
     { name: 'CSS Minifier', description: '⚡ Minify your CSS code to reduce file size, remove comments, and improve your website\'s loading times. A simple step for web performance optimization.', icon: 'FileCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste your CSS code into the "Original CSS" box.', 'Click the "Minify CSS" button.', 'The minified code will appear in the "Minified CSS" box.', 'Click "Copy" to use the minified code.'] },
     { name: 'Discount Calculator', description: '💰 Easily calculate the final price after a discount. See exactly how much money you save on your purchases during sales or promotions.', icon: 'BadgePercent', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the original price of the item.', 'Enter the discount percentage.', 'Click the "Calculate" button.', 'View the final price and the amount you saved.'] },
     { name: 'Date Calculator', description: '📅 Calculate the duration between two dates or find a future/past date by adding or subtracting days, months, and years. Useful for project planning and event scheduling.', icon: 'CalendarDays', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select the "Add/Subtract" or "Duration" tab.', 'For Add/Subtract: Pick a start date and enter the years, months, or days to add or subtract.', 'For Duration: Pick a start and end date.', 'Click the appropriate button to see the calculated result.'] },
@@ -130,7 +130,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Sales Tax Calculator', description: 'Easily calculate sales tax for any amount.', icon: 'ShoppingBag', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'TDS Calculator', description: 'Calculate Tax Deducted at Source for your income.', icon: 'IndianRupee', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Image Aspect Ratio Calculator', description: 'Calculate the aspect ratio or dimensions of an image.', icon: 'AspectRatio', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
-    { name: 'URL Encoder Decoder', description: 'Encode or decode URLs for safe transmission.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'URL Encoder & Decoder', description: 'Encode or decode URLs for safe transmission.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Spelling Checker', description: 'Check and correct spelling in your text.', icon: 'SpellCheck', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Whats Chat URL Generator', description: 'Generate a WhatsApp chat link with a pre-filled message.', icon: 'MessageSquare', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Whats App Group URL Generator', description: 'Generate a WhatsApp group invitation link.', icon: 'Users', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active' },
@@ -160,6 +160,11 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Mortgage Calculator', description: 'Calculate your monthly mortgage payments.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Average Calculator', description: 'Calculate the average of a set of numbers.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Hra Calculator', description: 'Calculate your House Rent Allowance exemption.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Text to Handwriting Generator', description: 'Convert your typed text into a realistic handwriting style.', icon: 'PenLine', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'URL Shortener', description: 'Create short, shareable links from long URLs.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Image Grayscale Converter', description: 'Convert colorful images into black and white (grayscale).', icon: 'Palette', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'ASCII to Text Converter', description: 'Convert ASCII character codes into readable text.', icon: 'Binary', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'Text to ASCII Converter', description: 'Convert text into a sequence of ASCII character codes.', icon: 'Binary', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
 ];
 
 const generateSlug = (name: string) => {
@@ -531,5 +536,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
 
+
+    
 
     
