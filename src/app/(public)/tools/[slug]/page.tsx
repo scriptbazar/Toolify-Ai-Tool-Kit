@@ -7,16 +7,19 @@ import { ToolComponentRenderer } from './_components/ToolPageClient';
 import { ToolSidebar } from '@/components/tools/ToolSidebar';
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
-    // Fetch data sequentially to avoid potential server hangs with Promise.all
-    const settings = await getSettings();
-    const tools = await getTools({ slug: params.slug });
+    // Fetch data in parallel for better performance.
+    const [settings, tools, toolReviews] = await Promise.all([
+        getSettings(),
+        getTools({ slug: params.slug }),
+        getReviews({ toolId: params.slug })
+    ]);
+    
     const tool = tools[0];
 
     if (!tool || tool.status === 'Disabled') {
         notFound();
     }
     
-    const toolReviews = await getReviews({ toolId: params.slug });
     const adSettings = settings?.advertisement ?? null;
     const sidebarSettings = settings?.sidebar?.toolSidebar ?? null;
 
@@ -34,5 +37,3 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         </ToolComponentRenderer>
     );
 }
-
-    
