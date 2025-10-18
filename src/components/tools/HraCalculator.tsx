@@ -44,15 +44,14 @@ export function HraCalculator() {
     const salaryForHra = basic + dearness;
 
     const exemption1 = hra;
-    const exemption2 = rent - (0.10 * salaryForHra); // Corrected from 0.01 to 0.10
+    const exemption2 = Math.max(0, rent - (0.10 * salaryForHra));
     const exemption3 = (isMetroCity ? 0.50 : 0.40) * salaryForHra;
 
     const hraExemption = Math.min(exemption1, exemption2, exemption3);
-    const finalExemption = Math.max(0, hraExemption);
     
     setResult({
-        hraExemption: finalExemption,
-        taxableHra: Math.max(0, hra - finalExemption),
+        hraExemption: hraExemption,
+        taxableHra: Math.max(0, hra - hraExemption),
         totalHra: hra,
     });
   };
