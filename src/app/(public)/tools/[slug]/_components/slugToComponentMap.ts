@@ -92,7 +92,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'text-repeater': 'TextRepeater',
   'text-to-binary': 'TextToBinary',
   'text-to-morse-code': 'TextToMorseCode',
-  'file-encryption-and-decryption': 'FileEncryptionDecryption',
+  'file-encryption-decryption': 'FileEncryptionDecryption',
   'image-to-text': 'ImageToText',
   'time-zone-converter': 'TimeZoneConverter',
   'title-tag-checker': 'TitleTagChecker',
