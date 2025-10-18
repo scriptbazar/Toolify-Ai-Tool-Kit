@@ -17,6 +17,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'crontab-generator': 'CrontabGenerator',
   'css-minifier': 'CssMinifier',
   'currency-converter': 'CurrencyConverter',
+  'crypto-converter': 'CryptoConverter',
   'date-calculator': 'DateCalculator',
   'discount-calculator': 'DiscountCalculator',
   'driving-licence-photo-and-signature-resizer': 'DrivingLicenceResizer',

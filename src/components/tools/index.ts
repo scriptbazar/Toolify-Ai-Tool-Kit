@@ -14,6 +14,7 @@ export { ColorPicker } from './ColorPicker';
 export { CompressPdf } from './CompressPdf';
 export { CreditCardInterestCalculator } from './CreditCardInterestCalculator';
 export { CrontabGenerator } from './CrontabGenerator';
+export { CryptoConverter } from './CryptoConverter';
 export { CssMinifier } from './CssMinifier';
 export { CurrencyConverter } from './CurrencyConverter';
 export { DateCalculator } from './DateCalculator';

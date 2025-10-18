@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -16,6 +15,7 @@ const TOOLS_COLLECTION = 'tools';
 const TOOL_REQUESTS_COLLECTION = 'toolRequests';
 
 const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
+    { name: 'Crypto Converter', description: 'Convert between different cryptocurrencies with live exchange rates. Essential for crypto enthusiasts and investors.', icon: 'Bitcoin', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the amount you wish to convert.', 'Select the "From" and "To" cryptocurrencies.', 'The converted amount will be displayed based on real-time exchange rates.'] },
     { name: 'File Encryption & Decryption', description: 'Encrypt and decrypt your files securely using AES encryption right in your browser.', icon: 'FileLock', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the file you want to encrypt or decrypt.', 'Enter a strong password.', 'Click the button to process your file and download the result.'] },
     { name: 'QR Code Generator', description: 'Generate custom QR codes from any text or URL. Download as PNG, JPG, or SVG for your personal or business needs.', icon: 'QrCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the text or URL you want to encode.', 'Customize the QR code size and colors if needed.', 'Click "Download" and choose your desired format (PNG, JPG, or SVG).'] },
     { name: 'Barcode Generator', description: 'Create various types of barcodes like Code 128, EAN-13, and UPC. Customize dimensions and download your barcode for inventory, retail, and more.', icon: 'Barcode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select the barcode format you need.', 'Enter the data to be encoded in the barcode.', 'Adjust settings like width and height.', 'Download your generated barcode image.'] },
@@ -51,7 +51,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Rotate Image', description: '🔄 Rotate an image by 90, 180, or 270 degrees to get the perfect orientation for your needs. Simple and fast.', icon: 'RotateCw', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image you want to rotate.', 'Click "Rotate Left" or "Rotate Right" to adjust the orientation.', 'Click "Download Rotated Image" to save your result.'] },
     { name: 'Image to Base64', description: '🖼️ Convert an image file (PNG, JPG, etc.) into a Base64 data URI. Easily embed images directly into your HTML or CSS files.', icon: 'Code', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image file you want to convert.', 'The Base64 data URI will automatically appear in the text box.', 'Click the "Copy" button to copy the Base64 string.'] },
     { name: 'Image Resizer', description: '↔️ Resize your images by specifying new dimensions in pixels or by a percentage of the original size. Maintain aspect ratio to avoid distortion.', icon: 'Scaling', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image you want to resize.', 'Enter the new width or height in pixels.', 'Check "Maintain aspect ratio" to avoid distortion.', 'Click "Resize & Download" to save your new image.'] },
-    { name: 'AdMob Revenue Calculator', description: '📱 Estimate your potential AdMob earnings based on DAU, impressions, eCPM, and other key metrics. A valuable tool for mobile app developers.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your Daily Active Users (DAU).', 'Provide your ad impressions per DAU and average eCPM.', 'Adjust the match rate and show rate percentages.', 'Click "Calculate Revenue" to see your daily, monthly, and yearly estimates.'] },
     { name: 'AdSense Revenue Calculator', description: '🌐 Estimate your potential AdSense earnings based on page views, Click-Through Rate (CTR), and Cost Per Click (CPC). Useful for bloggers and website owners.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your daily page views.', 'Provide your average Click-Through Rate (CTR) percentage.', 'Enter your average Cost Per Click (CPC) in dollars.', 'Click "Calculate Revenue" to see your estimated daily, monthly, and yearly earnings.'] },
     { name: 'Find IFSC Code By Bank and City', description: '🏦 Find the IFSC code and other details of a bank branch by selecting the bank and city. A convenient tool for Indian bank searches.', icon: 'Search', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select the bank from the dropdown list.', 'Select the city where the branch is located.', 'A list of matching branches with their IFSC codes will be displayed.', 'Use the search box to quickly filter branches.'] },
     { name: 'GST Calculator', description: '🇮🇳 Calculate the Goods and Services Tax (GST) for any amount with customizable tax slabs. Easily add or remove GST from a given price.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the base amount.', 'Select whether to add or remove GST.', 'Choose the correct GST slab (e.g., 5%, 12%, 18%, 28%).', 'The calculator will show the GST amount and the final price.'] },
@@ -144,6 +143,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Number to Roman Converter', description: 'Convert numbers to Roman numerals.', icon: 'Hash', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'RD Calculator', description: 'Calculate the maturity amount of your Recurring Deposit.', icon: 'Repeat', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'NPS Calculator', description: 'Calculate the future value of your National Pension Scheme investments.', icon: 'Landmark', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
+    { name: 'AdMob Revenue Calculator', description: '📱 Estimate your potential AdMob earnings based on DAU, impressions, eCPM, and other key metrics. A valuable tool for mobile app developers.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your Daily Active Users (DAU).', 'Provide your ad impressions per DAU and average eCPM.', 'Adjust the match rate and show rate percentages.', 'Click "Calculate Revenue" to see your daily, monthly, and yearly estimates.'] },
     { name: 'Image Watermark Adder', description: 'Add a custom text or image watermark to your photos. Adjust opacity, position, and size to protect your images.', icon: 'Fingerprint', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image you want to watermark.', 'Choose between a text or image watermark.', 'Customize the watermark\'s content, size, and position.', 'Download your watermarked image.'] },
     { name: 'Loan Calculator', description: 'Calculate your loan EMI and total interest payable.', icon: 'Banknote', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'XML Sitemap Generator', description: 'Create an XML sitemap for your website to improve SEO.', icon: 'FileCode', category: 'seo', plan: 'Free', isNew: true, status: 'Active' },
@@ -193,7 +193,8 @@ interface GetToolsOptions {
   status?: string;
 }
 
-const getToolsFn = async (options: GetToolsOptions = {}): Promise<Tool[]> => {
+export const getTools = cache(
+  async (options: GetToolsOptions = {}) => {
     try {
         const adminDb = getAdminDb();
         if (!adminDb) {
@@ -240,10 +241,7 @@ const getToolsFn = async (options: GetToolsOptions = {}): Promise<Tool[]> => {
         console.error("Error in getTools:", e.message);
         return [];
     }
-};
-
-export const getTools = cache(
-  (options: GetToolsOptions = {}) => getToolsFn(options),
+  },
   ['tools'],
   { revalidate: 3600, tags: ['tools'] }
 );
@@ -297,28 +295,32 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
     
     let docId = id;
 
-    if (data.name && !id) { // Generate slug for new tools
+    // For new tools, generate a slug from the name. This becomes the document ID.
+    if (data.name && !id) {
       data.slug = generateSlug(data.name);
       docId = data.slug;
+    }
+
+    if (!docId) {
+       throw new Error("Document ID (slug) is required for updating a tool or could not be generated for a new tool.");
     }
     
     // Validate data before saving
     const validatedData = UpsertToolInputSchema.parse(data);
 
-    if (docId) {
-      const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(docId);
+    const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(docId);
+    
+    if (id) { // This is an update
       await toolRef.set({ ...validatedData }, { merge: true });
       revalidatePath('/tools');
       revalidatePath(`/tools/${docId}`);
       revalidatePath(`/admin/tools`);
       return { success: true, message: 'Tool updated successfully.', toolId: docId };
-    } else {
-      if (!data.slug) throw new Error("Slug is required for a new tool.");
-      const docRef = adminDb.collection(TOOLS_COLLECTION).doc(data.slug);
-      await docRef.set({ ...validatedData, slug: data.slug, createdAt: FieldValue.serverTimestamp() });
+    } else { // This is a new tool
+      await toolRef.set({ ...validatedData, slug: docId, createdAt: FieldValue.serverTimestamp() });
       revalidatePath('/tools');
       revalidatePath(`/admin/tools`);
-      return { success: true, message: 'Tool added successfully.', toolId: docRef.id };
+      return { success: true, message: 'Tool added successfully.', toolId: docId };
     }
   } catch (error: any) {
     console.error("Error upserting tool:", error);
@@ -527,3 +529,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
       
 
 
+
+
+
+    
