@@ -5,7 +5,6 @@ import Footer from '@/components/common/Footer';
 import Header from '@/components/common/Header';
 import { AdBlockerDetector } from '@/components/common/AdBlockerDetector';
 import { ClientDynamicChatWidget } from '@/components/common/ClientDynamicChatWidget';
-import { AuthContextProvider } from '@/context/AuthContext';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 
@@ -15,7 +14,7 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthContextProvider>
+    <>
       <FirebaseErrorListener />
       <div className="relative flex min-h-screen flex-col">
         <Header />
@@ -24,7 +23,7 @@ export default function PublicLayout({
         <Footer />
         <AdBlockerDetector />
       </div>
-    </AuthContextProvider>
+    </>
   );
 }
 
