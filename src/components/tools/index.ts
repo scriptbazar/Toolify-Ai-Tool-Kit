@@ -91,7 +91,7 @@ export { SqlFormatter } from './SqlFormatter';
 export { TextRepeater } from './TextRepeater';
 export { TextToBinary } from './TextToBinary';
 export { TextToMorseCode } from './TextToMorseCode';
-
+export { FileEncryptionDecryption } from './FileEncryptionDecryption';
 export { ImageToText } from './ImageToText';
 export { TimeZoneConverter } from './TimeZoneConverter';
 export { TitleTagChecker } from './TitleTagChecker';

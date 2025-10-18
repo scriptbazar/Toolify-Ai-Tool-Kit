@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -16,6 +15,7 @@ const TOOLS_COLLECTION = 'tools';
 const TOOL_REQUESTS_COLLECTION = 'toolRequests';
 
 const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
+    { name: 'File Encryption & Decryption', description: 'Encrypt and decrypt your files securely using AES encryption right in your browser.', icon: 'FileLock', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the file you want to encrypt or decrypt.', 'Enter a strong password.', 'Click the button to process your file and download the result.'] },
     { name: 'QR Code Generator', description: 'Generate custom QR codes from any text or URL. Download as PNG, JPG, or SVG for your personal or business needs.', icon: 'QrCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the text or URL you want to encode.', 'Customize the QR code size and colors if needed.', 'Click "Download" and choose your desired format (PNG, JPG, or SVG).'] },
     { name: 'Barcode Generator', description: 'Create various types of barcodes like Code 128, EAN-13, and UPC. Customize dimensions and download your barcode for inventory, retail, and more.', icon: 'Barcode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select the barcode format you need.', 'Enter the data to be encoded in the barcode.', 'Adjust settings like width and height.', 'Download your generated barcode image.'] },
     { name: 'QR Code Scanner', description: '📷 Scan a QR code from an image file to reveal its content. Find out what URL, text, or data is hidden in any QR code.', icon: 'ScanLine', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload an image file containing a QR code.', 'The tool will automatically scan the image.', 'The decoded text or URL from the QR code will be displayed below.'] },
@@ -389,7 +389,7 @@ export async function getFavoriteTools(userId: string): Promise<Tool[]> {
       return [];
     }
 
-    const allTools = await getTools();
+    const allTools = await getTools({});
     const userFavorites = allTools.filter(tool => favoriteSlugs.includes(tool.slug));
     
     return userFavorites;
