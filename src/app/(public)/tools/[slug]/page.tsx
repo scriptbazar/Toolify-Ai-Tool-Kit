@@ -7,12 +7,14 @@ import { ToolComponentRenderer } from './_components/ToolPageClient';
 import { ToolSidebar } from '@/components/tools/ToolSidebar';
 import { getPosts } from '@/ai/flows/blog-management';
 
-export default async function ToolPage({ params }: { params: { slug: string } }) {
-    
+export default async function ToolPage(props: { params: { slug: string } }) {
+    const { params } = props;
+    const slug = params.slug;
+
     // Fetch all necessary data in parallel for this page and its sidebar
     const [settings, tools, allTools, allPosts] = await Promise.all([
         getSettings(),
-        getTools({ slug: params.slug }),
+        getTools({ slug: slug }),
         getTools({ status: 'Active' }), // For popular tools in sidebar
         getPosts('Published') // For recent posts in sidebar
     ]);
@@ -32,7 +34,7 @@ export default async function ToolPage({ params }: { params: { slug: string } })
 
     // Prepare data for the sidebar
     const popularTools = sidebarSettings?.showPopularTools 
-        ? allTools.filter(t => t.slug !== params.slug).slice(0, 10) 
+        ? allTools.filter(t => t.slug !== slug).slice(0, 10) 
         : [];
     const recentPosts = sidebarSettings?.showRecentPosts 
         ? allPosts.slice(0, 5) 
