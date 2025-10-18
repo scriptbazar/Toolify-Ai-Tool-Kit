@@ -54,7 +54,7 @@ export const cryptoCurrencies = [
   { code: "BEAM", name: "Beam" },
   { code: "SAND", name: "The Sandbox" },
   { code: "AXS", name: "Axie Infinity" },
-  { code: "FTM", name"Fantom" },
+  { code: "FTM", name: "Fantom" },
   { code: "EOS", name: "EOS" },
   { code: "XTZ", name: "Tezos" },
   { code: "MANA", name: "Decentraland" },
