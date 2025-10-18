@@ -39,7 +39,10 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     async function getDashboardData() {
-        const allEmails = await getAllEmails();
+        const [allEmails, affiliatesSnapshot] = await Promise.all([
+          getAllEmails(),
+          getDocs(query(collection(db, "users"), where("affiliateStatus", "==", "approved")))
+        ]);
 
         const recentUsers = allEmails
             .filter(u => u.source === 'Signup')
@@ -56,10 +59,6 @@ export default function AdminDashboard() {
 
         const signupCount = allEmails.filter(u => u.source === 'Signup').length;
         const leadCount = allEmails.filter(u => u.source === 'Lead').length;
-        
-        // Fetch approved affiliates count
-        const affiliatesQuery = query(collection(db, "users"), where("affiliateStatus", "==", "approved"));
-        const affiliatesSnapshot = await getDocs(affiliatesQuery);
         const affiliateCount = affiliatesSnapshot.size;
         
         const userCounts = {

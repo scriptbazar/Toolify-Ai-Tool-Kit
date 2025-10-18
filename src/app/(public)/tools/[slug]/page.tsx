@@ -8,10 +8,16 @@ import { ToolSidebar } from '@/components/tools/ToolSidebar';
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
     const { slug } = params;
-    // Fetch only the essential data for this specific tool page.
-    const settings = await getSettings();
-    const tools = await getTools({ slug: slug });
+    
+    // Fetch data in parallel for better performance
+    const [settings, tools] = await Promise.all([
+        getSettings(),
+        getTools({ slug: slug })
+    ]);
+    
     const tool = tools[0];
+
+    // Fetch reviews only if the tool exists
     const toolReviews = tool ? await getReviews({ toolId: tool.slug }) : [];
 
     if (!tool || tool.status === 'Disabled') {
