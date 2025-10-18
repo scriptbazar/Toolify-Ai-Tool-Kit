@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -194,7 +195,8 @@ interface GetToolsOptions {
 /**
  * Fetches tools from Firestore with optional filtering and limiting.
  */
-export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Tool[]> => {
+export const getTools = cache(
+  async (options: GetToolsOptions = {}): Promise<Tool[]> => {
     try {
         const adminDb = getAdminDb();
         if (!adminDb) {
@@ -241,9 +243,9 @@ export const getTools = cache(async (options: GetToolsOptions = {}): Promise<Too
         console.error("Error in getTools:", e.message);
         return [];
     }
-}, 
-['tools'],
-{ revalidate: 3600, tags: ['tools'] }
+  },
+  ['tools'],
+  { revalidate: 3600, tags: ['tools', (options: GetToolsOptions) => JSON.stringify(options)] }
 );
 
 
@@ -304,7 +306,7 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
     if (id) {
       const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(id);
       // Ensure slug is not removed on update
-      await toolRef.update({ ...validatedData, slug: id });
+      await toolRef.update({ ...validatedData });
        revalidatePath('/tools');
        revalidatePath(`/tools/${id}`);
        revalidatePath(`/admin/tools`);
@@ -517,5 +519,8 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
     
     
+
+      
+
 
       
