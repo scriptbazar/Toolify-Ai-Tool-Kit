@@ -8,12 +8,12 @@ import { UploadCloud, Download, Image as ImageIcon, PenLine, Loader2 } from 'luc
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 
-const PHOTO_WIDTH = 213;
-const PHOTO_HEIGHT = 213;
-const SIGNATURE_WIDTH = 400;
-const SIGNATURE_HEIGHT = 200;
-const MAX_PHOTO_SIZE_KB = 20;
-const MAX_SIGNATURE_SIZE_KB = 60; // NSDL signature size is generally larger
+const PHOTO_WIDTH = 197;
+const PHOTO_HEIGHT = 276;
+const SIGNATURE_WIDTH = 354;
+const SIGNATURE_HEIGHT = 157;
+const MAX_PHOTO_SIZE_KB = 50;
+const MAX_SIGNATURE_SIZE_KB = 50;
 
 const ImageResizerBox = ({
   title,
