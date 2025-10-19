@@ -7,19 +7,28 @@
  */
 
 export async function getBankList(): Promise<string[]> {
-    // The correct endpoint to get a JSON list of banks is /banks
     const API_URL = 'https://ifsc.razorpay.com/';
     try {
         const response = await fetch(API_URL);
         if (!response.ok) {
             throw new Error(`Failed to fetch bank list. Status: ${response.status}`);
         }
-        // The response body is a JSON array of strings
-        const data = await response.json();
-        
-        if (Array.isArray(data)) {
-            return data;
+        // The response is an HTML page with an embedded JSON array.
+        // We need to extract the JSON string from the HTML.
+        const html = await response.text();
+        const jsonString = html.split('window.STATE = ')[1]?.split('</script>')[0];
+
+        if (!jsonString) {
+            throw new Error('Could not find bank list data in the API response.');
         }
+
+        const data = JSON.parse(jsonString);
+        
+        // The bank list is inside data.api.bankList
+        if (data && data.api && Array.isArray(data.api.bankList)) {
+            return data.api.bankList;
+        }
+
         return [];
 
     } catch (error: any) {
@@ -48,3 +57,6 @@ export async function getBranchesForBank(bankName: string) {
 }
 
 
+
+
+    
