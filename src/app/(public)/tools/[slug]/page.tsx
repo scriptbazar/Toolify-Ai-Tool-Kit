@@ -7,9 +7,8 @@ import { ToolComponentRenderer } from './_components/ToolPageClient';
 import { ToolSidebar } from '@/components/tools/ToolSidebar';
 import { getPosts } from '@/ai/flows/blog-management';
 
-export default async function ToolPage(props: { params: { slug: string } }) {
-    const { params } = props;
-    const slug = params.slug;
+export default async function ToolPage({ params }: { params: { slug: string } }) {
+    const { slug } = params;
 
     // Fetch all necessary data in parallel for this page and its sidebar
     const [settings, tools, allTools, allPosts] = await Promise.all([
