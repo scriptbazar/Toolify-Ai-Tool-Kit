@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -148,7 +149,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Loan Calculator', description: 'Calculate your loan EMI and total interest payable.', icon: 'Banknote', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'XML Sitemap Generator', description: 'Create an XML sitemap for your website to improve SEO.', icon: 'FileCode', category: 'seo', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'IFSC Code to Bank Details', description: 'Get complete bank branch details instantly from an Indian Financial System Code (IFSC). Find the bank name, branch, address, and more.', icon: 'Landmark', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a valid 11-character IFSC code.', 'Click the "Find Bank Details" button.', 'The tool will display the bank name, branch, address, and other available details.'] },
-    { name: 'YouTube Logo Downloader', description: '👤 Download the logo or profile picture of any YouTube channel in high resolution. Simply provide the channel URL.', icon: 'UserCircle', category: 'video', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste the YouTube channel URL.', 'Click "Fetch Logo".', 'Download the channel\'s profile picture.'] },
     { name: 'EPF Calculator', description: 'Calculate the maturity amount of your Employee Provident Fund (EPF) account.', icon: 'Landmark', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Gratuity Calculator', description: 'Estimate the gratuity amount you are eligible to receive from your employer.', icon: 'Award', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Inflation Calculator', description: 'Calculate the future value of money and understand the impact of inflation.', icon: 'TrendingUp', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
@@ -159,7 +159,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Retirement Savings Calculator', description: 'Estimate the savings you need for a comfortable retirement.', icon: 'User', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Mortgage Calculator', description: 'Calculate your monthly mortgage payments.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Hra Calculator', description: 'Calculate your House Rent Allowance exemption.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active' },
-    { name: 'Text to Handwriting Generator', description: 'Convert your typed text into a realistic handwriting style.', icon: 'PenLine', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'URL Shortener', description: 'Create short, shareable links from long URLs.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'Image Grayscale Converter', description: 'Convert colorful images into black and white (grayscale).', icon: 'Palette', category: 'image', plan: 'Free', isNew: true, status: 'Active' },
     { name: 'ASCII to Text Converter', description: 'Convert ASCII character codes into readable text.', icon: 'Binary', category: 'text', plan: 'Free', isNew: true, status: 'Active' },
@@ -542,3 +541,4 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
