@@ -16,12 +16,22 @@ export async function getBankList(): Promise<string[]> {
         // The response is an HTML page with an embedded JSON array.
         // We need to extract the JSON string from the HTML.
         const html = await response.text();
-        const jsonString = html.split('window.STATE = ')[1]?.split('</script>')[0];
-
-        if (!jsonString) {
+        
+        // Find the start of the JSON data
+        const jsonStartMarker = 'window.STATE = ';
+        const startIndex = html.indexOf(jsonStartMarker);
+        if (startIndex === -1) {
             throw new Error('Could not find bank list data in the API response.');
         }
 
+        // Find the end of the JSON data
+        const endIndex = html.indexOf('</script>', startIndex);
+        if (endIndex === -1) {
+            throw new Error('Could not find the end of the bank list data in the API response.');
+        }
+
+        const jsonString = html.substring(startIndex + jsonStartMarker.length, endIndex).trim();
+        
         const data = JSON.parse(jsonString);
         
         // The bank list is inside data.api.bankList
