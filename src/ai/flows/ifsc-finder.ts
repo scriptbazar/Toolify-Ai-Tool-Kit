@@ -13,26 +13,33 @@ export async function getBankList(): Promise<string[]> {
         if (!response.ok) {
             throw new Error(`Failed to fetch bank list. Status: ${response.status}`);
         }
-        // The response is an HTML page with an embedded JSON array.
-        // We need to extract the JSON string from the HTML.
+        
         const html = await response.text();
         
-        // Find the start of the JSON data
+        // The bank list is embedded in a script tag within the HTML.
+        // We need to extract the JSON string assigned to window.STATE.
         const jsonStartMarker = 'window.STATE = ';
         const startIndex = html.indexOf(jsonStartMarker);
+        
         if (startIndex === -1) {
             throw new Error('Could not find bank list data in the API response.');
         }
 
-        // Find the end of the JSON data
+        // Find the end of the script tag that contains the state
         const endIndex = html.indexOf('</script>', startIndex);
         if (endIndex === -1) {
-            throw new Error('Could not find the end of the bank list data in the API response.');
+            throw new Error('Could not find the end of the bank list data script.');
         }
 
+        // Extract the JSON object string
+        // We add the length of the marker to the start index to get the beginning of the JSON.
+        // The end is before the closing script tag.
         const jsonString = html.substring(startIndex + jsonStartMarker.length, endIndex).trim();
         
-        const data = JSON.parse(jsonString);
+        // Remove trailing semicolon if it exists
+        const cleanJsonString = jsonString.endsWith(';') ? jsonString.slice(0, -1) : jsonString;
+
+        const data = JSON.parse(cleanJsonString);
         
         // The bank list is inside data.api.bankList
         if (data && data.api && Array.isArray(data.api.bankList)) {
