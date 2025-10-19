@@ -9,7 +9,7 @@
 export async function getBankList(): Promise<string[]> {
     const API_BASE_URL = 'https://ifsc.razorpay.com';
     try {
-        const response = await fetch(`${API_BASE_URL}/banks`);
+        const response = await fetch(`${API_BASE_URL}/bank-list`);
         if (!response.ok) {
             throw new Error(`Failed to fetch bank list. Status: ${response.status}`);
         }
