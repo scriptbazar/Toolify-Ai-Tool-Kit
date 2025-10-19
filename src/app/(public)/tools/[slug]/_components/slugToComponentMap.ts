@@ -151,7 +151,6 @@ export const slugToComponentMap: { [key: string]: string } = {
   'swp-calculator': 'SwpCalculator',
   'retirement-savings-calculator': 'RetirementSavingsCalculator',
   'mortgage-calculator': 'MortgageCalculator',
-  'average-calculator': 'AverageCalculator',
   'hra-calculator': 'HraCalculator',
   'text-to-handwriting-generator': 'TextToHandwritingConverter',
   'text-to-ascii-converter': 'TextToAsciiConverter',
