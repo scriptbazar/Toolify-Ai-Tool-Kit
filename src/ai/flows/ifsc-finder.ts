@@ -72,4 +72,3 @@ export async function getBranchesForBank(bankName: string) {
         throw new Error(error.message || `Could not fetch branches for ${bankName}.`);
     }
 }
-
