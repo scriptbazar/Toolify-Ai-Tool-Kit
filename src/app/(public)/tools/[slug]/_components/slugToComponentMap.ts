@@ -7,7 +7,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'average-calculator': 'AverageCalculator',
   'barcode-generator': 'BarcodeGenerator',
   'barcode-scanner': 'BarcodeScanner',
-  'base64-encoder-&-decoder': 'Base64Converter',
+  'base64-encoder-and-decoder': 'Base64Converter',
   'binary-to-text': 'BinaryToText',
   'bmi-calculator': 'BmiCalculator',
   'case-converter': 'CaseConverter',
