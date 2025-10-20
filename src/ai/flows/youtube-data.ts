@@ -84,7 +84,7 @@ export async function getChannelDetails(input: z.infer<typeof GetChannelDetailsI
 
     if (channelId.startsWith('@')) {
         searchParams = new URLSearchParams({
-            forUsername: channelId.substring(1),
+            forUsername: channelId,
             part: 'snippet,brandingSettings',
             key: apiKey,
         });
