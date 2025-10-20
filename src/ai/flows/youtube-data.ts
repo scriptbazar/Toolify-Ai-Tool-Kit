@@ -10,15 +10,6 @@ const GetVideoDetailsInputSchema = z.object({
     videoId: z.string().min(1, 'Video ID is required.'),
 });
 
-const OEmbedResponseSchema = z.object({
-    title: z.string().optional(),
-    author_name: z.string().optional(),
-    provider_name: z.string().optional(),
-    thumbnail_url: z.string().url().optional(),
-    html: z.string().optional(),
-    error: z.string().optional(),
-});
-
 
 export async function getVideoDetails(input: z.infer<typeof GetVideoDetailsInputSchema>): Promise<{
     title?: string;
@@ -30,8 +21,25 @@ export async function getVideoDetails(input: z.infer<typeof GetVideoDetailsInput
     const apiKey = process.env.YOUTUBE_API_KEY;
 
     if (!apiKey) {
-        throw new Error('YouTube API key is not configured in Admin > Settings > Site Settings.');
+        // Fallback to noembed.com if API key is not available
+        console.warn("YouTube API key not configured. Using fallback service.");
+        const oembedUrl = `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`;
+        try {
+            const oembedResponse = await fetch(oembedUrl);
+            if (!oembedResponse.ok) {
+                const errorData = await oembedResponse.json();
+                throw new Error(errorData.error || 'Failed to fetch video data from fallback service.');
+            }
+            const data = await oembedResponse.json();
+            return {
+                title: data.title,
+                description: "Full description extraction via this method is not available. Please configure the YouTube API Key in Admin > Settings > Site Settings for full details.",
+            };
+        } catch (error: any) {
+            return { error: error.message || 'An unknown error occurred while fetching video details.' };
+        }
     }
+
 
     const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet,contentDetails`;
 
@@ -39,7 +47,10 @@ export async function getVideoDetails(input: z.infer<typeof GetVideoDetailsInput
         const response = await fetch(url);
         if (!response.ok) {
             const errorData = await response.json();
-            const message = errorData.error?.message || `Failed to fetch video data. Status: ${response.status}`;
+            let message = `Failed to fetch video data. Status: ${response.status}`;
+            if (errorData.error?.message) {
+                message = errorData.error.message;
+            }
             throw new Error(message);
         }
         
@@ -84,7 +95,7 @@ export async function getChannelDetails(input: z.infer<typeof GetChannelDetailsI
 
     if (channelId.startsWith('@')) {
         searchParams = new URLSearchParams({
-            forUsername: channelId,
+            forUsername: channelId.substring(1), // Remove the '@' symbol
             part: 'snippet,brandingSettings',
             key: apiKey,
         });
