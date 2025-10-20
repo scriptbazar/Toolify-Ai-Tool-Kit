@@ -8,7 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Youtube, Copy, Trash2, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getVideoDetails } from '@/ai/flows/youtube-data';
+
+interface OEmbedResponse {
+    title?: string;
+    error?: string;
+}
 
 export function YouTubeVideoTitleExtractor() {
     const [url, setUrl] = useState('');
@@ -16,36 +20,30 @@ export function YouTubeVideoTitleExtractor() {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
-    const getVideoId = (inputUrl: string): string | null => {
-        if (!inputUrl) return null;
-        try {
-            const urlObj = new URL(inputUrl);
-            if (urlObj.hostname === 'youtu.be') {
-                return urlObj.pathname.slice(1);
-            }
-            if (urlObj.hostname.includes('youtube.com')) {
-                const videoIdParam = urlObj.searchParams.get('v');
-                if (videoIdParam) return videoIdParam;
-            }
-        } catch (e) { return null; }
-        return null;
-    }
-
     const handleExtract = async () => {
-        const videoId = getVideoId(url);
-        if (!videoId) {
-            toast({ title: 'Invalid YouTube URL', description: 'Please enter a valid YouTube video URL.', variant: 'destructive' });
+        if (!url.trim()) {
+            toast({ title: 'Please enter a YouTube video URL.', variant: 'destructive' });
             return;
         }
         setIsLoading(true);
         setTitle(null);
         
         try {
-            const data = await getVideoDetails({ videoId });
-            if (data.error) {
-                throw new Error(data.error);
+            // Use the public oEmbed endpoint which doesn't require an API key
+            const response = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+            
+            if (!response.ok) {
+                 throw new Error(`Could not fetch video data. Status: ${response.status}`);
             }
-            setTitle(data.title || 'No title found.');
+
+            const data: OEmbedResponse = await response.json();
+            
+            if (data.title) {
+                setTitle(data.title);
+            } else {
+                throw new Error(data.error || 'Could not extract title from this URL.');
+            }
+
         } catch (error: any) {
             console.error("Extraction error:", error);
             toast({
