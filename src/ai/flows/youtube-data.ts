@@ -4,7 +4,7 @@
  * @fileOverview A flow for fetching live data from YouTube using public oEmbed services.
  */
 import { z } from 'zod';
-import { getSettings } from './settings-management';
+import { getSettings } from '@/ai/flows/settings-management';
 
 const GetVideoDetailsInputSchema = z.object({
     videoId: z.string().min(1, 'Video ID is required.'),
@@ -67,48 +67,57 @@ const GetChannelDetailsInputSchema = z.object({
     channelId: z.string().min(1, 'Channel ID is required.'),
 });
 
-const ChannelOEmbedResponseSchema = z.object({
-    author_name: z.string().optional(),
-    author_url: z.string().url().optional(),
-    error: z.string().optional(),
-});
-
-
 export async function getChannelDetails(input: z.infer<typeof GetChannelDetailsInputSchema>): Promise<{
     title?: string;
-    bannerUrl?: string; // Note: Banner URL is not available via public oEmbed
+    bannerUrl?: string;
+    logoUrl?: string;
     error?: string;
 }> {
     const { channelId } = GetChannelDetailsInputSchema.parse(input);
-    let channelUrl = '';
+    const apiKey = process.env.YOUTUBE_API_KEY;
 
-    // Construct URL based on ID or username format
-    if (channelId.startsWith('UC')) {
-        channelUrl = `https://www.youtube.com/channel/${channelId}`;
-    } else {
-        channelUrl = `https://www.youtube.com/${channelId.startsWith('@') ? '' : 'c/'}${channelId}`;
+    if (!apiKey) {
+        throw new Error('YouTube API key is not configured in Admin > Settings > Site Settings.');
     }
 
-    const oembedUrl = `https://noembed.com/embed?url=${encodeURIComponent(channelUrl)}`;
+    let searchParams: URLSearchParams;
+
+    if (channelId.startsWith('@')) {
+        searchParams = new URLSearchParams({
+            forUsername: channelId.substring(1),
+            part: 'snippet,brandingSettings',
+            key: apiKey,
+        });
+    } else {
+        searchParams = new URLSearchParams({
+            id: channelId,
+            part: 'snippet,brandingSettings',
+            key: apiKey,
+        });
+    }
+    
+    const url = `https://www.googleapis.com/youtube/v3/channels?${searchParams.toString()}`;
 
     try {
-        const response = await fetch(oembedUrl);
+        const response = await fetch(url);
         if (!response.ok) {
-            throw new Error(`Failed to fetch channel data. Status: ${response.status}`);
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || `Failed to fetch channel data. Status: ${response.status}`);
         }
         
         const data = await response.json();
-        
-        const validatedData = ChannelOEmbedResponseSchema.safeParse(data);
-        if (!validatedData.success || validatedData.data.error) {
-            console.error("Channel oEmbed response validation error:", validatedData.error);
-            throw new Error(validatedData.data.error || 'Invalid data received from oEmbed service for the channel.');
+
+        if (!data.items || data.items.length === 0) {
+            throw new Error('Channel not found.');
         }
+
+        const channel = data.items[0];
         
-        // Public oEmbed does not provide banner images. We can return a placeholder or notify the user.
         return {
-            title: validatedData.data.author_name,
-            bannerUrl: undefined, // Set to undefined as it's not available
+            title: channel.snippet?.title,
+            // Select the highest resolution available for banner
+            bannerUrl: channel.brandingSettings?.image?.bannerExternalUrl,
+            logoUrl: channel.snippet?.thumbnails?.high?.url || channel.snippet?.thumbnails?.default?.url,
         };
 
     } catch (error: any) {

@@ -9,46 +9,67 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui
 import { Download, Youtube, Loader2, Search } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
+import { getChannelDetails } from '@/ai/flows/youtube-data';
+import { Alert, AlertTitle } from '../ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
-interface OEmbedResponse {
-    thumbnail_url?: string;
-    title?: string;
-    error?: string;
-}
 
 export function YouTubeChannelLogoDownloader() {
     const [url, setUrl] = useState('');
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
     const [channelTitle, setChannelTitle] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
 
+    const getChannelIdOrUsername = (inputUrl: string): string | null => {
+        if (!inputUrl) return null;
+        try {
+            const urlObj = new URL(inputUrl);
+            const pathParts = urlObj.pathname.split('/').filter(Boolean);
+            
+            if (pathParts[0] === 'channel' && pathParts[1]) {
+                return pathParts[1]; // Returns UC... ID
+            }
+            if (pathParts[0]?.startsWith('@')) {
+                return pathParts[0]; // Returns @handle
+            }
+             if (pathParts[0] === 'c' && pathParts[1]) {
+                return `@${pathParts[1]}`; // Convert /c/ to @handle
+            }
+             if (pathParts[0] === 'user' && pathParts[1]) {
+                return `@${pathParts[1]}`; // Convert /user/ to @handle
+            }
+
+        } catch (e) { return null; }
+        return null;
+    }
+
     const handleFetchLogo = async () => {
-        if (!url.trim()) {
-            toast({ title: 'Please enter a YouTube channel URL.', variant: 'destructive' });
+        const channelIdentifier = getChannelIdOrUsername(url);
+        if (!channelIdentifier) {
+            toast({ title: 'Invalid YouTube Channel URL', description: 'Please enter a valid channel URL.', variant: 'destructive' });
             return;
         }
         setIsLoading(true);
         setLogoUrl(null);
         setChannelTitle(null);
-
+        setError(null);
+        
         try {
-            const response = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
-             if (!response.ok) {
-                 throw new Error(`Could not fetch channel data. Status: ${response.status}`);
-            }
-            const data: OEmbedResponse = await response.json();
+            const data = await getChannelDetails({ channelId: channelIdentifier });
+            if (data.error) throw new Error(data.error);
 
-            if (data.thumbnail_url && data.title) {
-                // The oEmbed thumbnail is usually low-res. We can often get a higher-res version by modifying the URL.
-                const highResUrl = data.thumbnail_url.replace(/s\d+-c-k-c0x00ffffff-no-rj/, 's512-c-k-c0x00ffffff-no-rj');
-                setLogoUrl(highResUrl);
+            if (data.logoUrl && data.title) {
+                setLogoUrl(data.logoUrl);
                 setChannelTitle(data.title);
             } else {
-                throw new Error(data.error || 'Could not extract logo from this URL.');
+                 throw new Error('Could not extract logo from this URL.');
             }
+
         } catch (error: any) {
             console.error("Fetch error:", error);
+            setError(error.message || 'An unknown error occurred.');
             toast({
                 title: 'Failed to Fetch Logo',
                 description: error.message || 'Please check the URL and try again.',
@@ -98,22 +119,28 @@ export function YouTubeChannelLogoDownloader() {
                 </div>
             </div>
 
-            {(isLoading || logoUrl) && (
-                 <Card>
+            {isLoading && (
+                <div className="flex justify-center items-center p-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            )}
+             {error && (
+                <Alert variant="destructive" className="mt-4">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Error Fetching Logo</AlertTitle>
+                    <div>{error}</div>
+                </Alert>
+            )}
+            {logoUrl && channelTitle && (
+                 <Card className="animate-in fade-in-50">
                     <CardHeader>
-                        <CardTitle>{channelTitle ? `${channelTitle}'s Logo` : 'Channel Logo'}</CardTitle>
+                        <CardTitle>{channelTitle}'s Logo</CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center space-y-4">
-                        {isLoading ? (
-                            <div className="flex items-center justify-center h-48 w-48">
-                                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                            </div>
-                        ) : logoUrl ? (
-                            <div className="relative w-48 h-48 rounded-full overflow-hidden border">
-                                <Image src={logoUrl} alt={`${channelTitle} Logo`} layout="fill" objectFit="cover" />
-                            </div>
-                        ) : null}
-                        <Button onClick={handleDownload} disabled={!logoUrl || isLoading} className="w-full max-w-sm">
+                        <div className="relative w-48 h-48 rounded-full overflow-hidden border">
+                            <Image src={logoUrl} alt={`${channelTitle} Logo`} layout="fill" objectFit="cover" unoptimized/>
+                        </div>
+                        <Button onClick={handleDownload} className="w-full max-w-sm">
                             <Download className="mr-2 h-4 w-4"/>
                             Download Logo (High Quality)
                         </Button>
