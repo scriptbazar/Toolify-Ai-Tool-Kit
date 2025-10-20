@@ -27,8 +27,7 @@ export async function getVideoDetails(input: z.infer<typeof GetVideoDetailsInput
     error?: string;
 }> {
     const { videoId } = GetVideoDetailsInputSchema.parse(input);
-    const settings = await getSettings();
-    const apiKey = settings.general?.apiKeys?.youtubeApiKey;
+    const apiKey = process.env.YOUTUBE_API_KEY;
 
     if (!apiKey) {
         throw new Error('YouTube API key is not configured in Admin > Settings > Site Settings.');
