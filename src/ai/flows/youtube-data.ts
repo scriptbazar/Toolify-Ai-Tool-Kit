@@ -4,6 +4,7 @@
  * @fileOverview A flow for fetching live data from YouTube using public oEmbed services.
  */
 import { z } from 'zod';
+import { getSettings } from './settings-management';
 
 const GetVideoDetailsInputSchema = z.object({
     videoId: z.string().min(1, 'Video ID is required.'),
@@ -19,47 +20,46 @@ const OEmbedResponseSchema = z.object({
 });
 
 
-// This function now uses the public noembed.com service to avoid needing an API key.
 export async function getVideoDetails(input: z.infer<typeof GetVideoDetailsInputSchema>): Promise<{
     title?: string;
-    description?: string; // Note: oEmbed does not provide a standard description. This will be undefined.
+    description?: string;
     regionRestriction?: { allowed?: string[]; blocked?: string[] };
     error?: string;
 }> {
     const { videoId } = GetVideoDetailsInputSchema.parse(input);
+    const settings = await getSettings();
+    const apiKey = settings.general?.apiKeys?.youtubeApiKey;
 
-    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-    const oembedUrl = `https://noembed.com/embed?url=${encodeURIComponent(videoUrl)}`;
+    if (!apiKey) {
+        throw new Error('YouTube API key is not configured in Admin > Settings > Site Settings.');
+    }
+
+    const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet,contentDetails`;
 
     try {
-        const response = await fetch(oembedUrl);
+        const response = await fetch(url);
         if (!response.ok) {
-            throw new Error(`Failed to fetch video data. Status: ${response.status}`);
+            const errorData = await response.json();
+            const message = errorData.error?.message || `Failed to fetch video data. Status: ${response.status}`;
+            throw new Error(message);
         }
         
         const data = await response.json();
-
-        const validatedData = OEmbedResponseSchema.safeParse(data);
         
-        if (!validatedData.success) {
-            console.error("oEmbed response validation error:", validatedData.error);
-            throw new Error('Invalid data received from oEmbed service.');
-        }
-        
-        if (validatedData.data.error) {
-             throw new Error(validatedData.data.error);
+        if (!data.items || data.items.length === 0) {
+            throw new Error('Video not found or access is restricted.');
         }
 
-        // oEmbed generally doesn't provide a full description, so we return a placeholder.
-        // The title is available and is the main purpose of this function now.
+        const item = data.items[0];
+        
         return {
-            title: validatedData.data.title,
-            description: "Full description extraction via this method is not available. Only the title can be reliably retrieved.",
-            regionRestriction: undefined, // This information is not available via oEmbed
+            title: item.snippet?.title,
+            description: item.snippet?.description,
+            regionRestriction: item.contentDetails?.regionRestriction,
         };
 
     } catch (error: any) {
-        console.error("YouTube Data Fetch Error:", error);
+        console.error("YouTube Data API Fetch Error:", error);
         return { error: error.message || 'An unknown error occurred while fetching video details.' };
     }
 }

@@ -82,6 +82,7 @@ export type SecuritySettings = z.infer<typeof SecuritySettingsSchema>;
 export const ApiKeysSchema = z.object({
     googleApiKey: z.string().optional(),
     googleCseId: z.string().optional(),
+    youtubeApiKey: z.string().optional(),
 });
 export type ApiKeys = z.infer<typeof ApiKeysSchema>;
 
