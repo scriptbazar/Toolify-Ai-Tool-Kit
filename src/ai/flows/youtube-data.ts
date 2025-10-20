@@ -68,77 +68,52 @@ const GetChannelDetailsInputSchema = z.object({
     channelId: z.string().min(1, 'Channel ID is required.'),
 });
 
-const YouTubeChannelApiResponseSchema = z.object({
-  items: z.array(z.object({
-    id: z.string(),
-    snippet: z.object({
-      title: z.string(),
-    }),
-    brandingSettings: z.object({
-      image: z.object({
-        bannerExternalUrl: z.string().optional(),
-      }).optional(),
-    }).optional(),
-  })).optional(),
-  error: z.object({
-    message: z.string(),
-  }).optional(),
+const ChannelOEmbedResponseSchema = z.object({
+    author_name: z.string().optional(),
+    author_url: z.string().url().optional(),
+    error: z.string().optional(),
 });
 
 
 export async function getChannelDetails(input: z.infer<typeof GetChannelDetailsInputSchema>): Promise<{
     title?: string;
-    bannerUrl?: string;
+    bannerUrl?: string; // Note: Banner URL is not available via public oEmbed
     error?: string;
 }> {
-    // This function still relies on an API key, but it's not being used by the currently broken tools.
-    // Leaving it as is for now.
     const { channelId } = GetChannelDetailsInputSchema.parse(input);
-    const { getSettings } = await import('@/ai/flows/settings-management');
-    const settings = await getSettings();
-    const apiKey = settings.general?.apiKeys?.googleApiKey;
+    let channelUrl = '';
 
-    if (!apiKey) {
-        throw new Error('YouTube Data API key is not configured in the admin settings.');
-    }
-    
-    const apiUrl = new URL('https://www.googleapis.com/youtube/v3/channels');
-    apiUrl.searchParams.append('key', apiKey);
-    apiUrl.searchParams.append('part', 'snippet,brandingSettings');
-
-    // Determine if it's an ID or a username
+    // Construct URL based on ID or username format
     if (channelId.startsWith('UC')) {
-        apiUrl.searchParams.append('id', channelId);
+        channelUrl = `https://www.youtube.com/channel/${channelId}`;
     } else {
-        apiUrl.searchParams.append('forUsername', channelId);
+        channelUrl = `https://www.youtube.com/${channelId.startsWith('@') ? '' : 'c/'}${channelId}`;
     }
+
+    const oembedUrl = `https://noembed.com/embed?url=${encodeURIComponent(channelUrl)}`;
 
     try {
-        const response = await fetch(apiUrl.toString());
+        const response = await fetch(oembedUrl);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch channel data. Status: ${response.status}`);
+        }
+        
         const data = await response.json();
         
-        const validatedData = YouTubeChannelApiResponseSchema.safeParse(data);
-        if (!validatedData.success) {
-            console.error("YouTube Channel API response validation error:", validatedData.error);
-            throw new Error('Invalid data received from YouTube Channel API.');
+        const validatedData = ChannelOEmbedResponseSchema.safeParse(data);
+        if (!validatedData.success || validatedData.data.error) {
+            console.error("Channel oEmbed response validation error:", validatedData.error);
+            throw new Error(validatedData.data.error || 'Invalid data received from oEmbed service for the channel.');
         }
-
-        if (validatedData.data.error) {
-             throw new Error(validatedData.data.error.message);
-        }
-
-        const channel = validatedData.data.items?.[0];
-        if (!channel) {
-            return { error: 'Channel not found.' };
-        }
-
+        
+        // Public oEmbed does not provide banner images. We can return a placeholder or notify the user.
         return {
-            title: channel.snippet.title,
-            bannerUrl: channel.brandingSettings?.image?.bannerExternalUrl,
+            title: validatedData.data.author_name,
+            bannerUrl: undefined, // Set to undefined as it's not available
         };
 
     } catch (error: any) {
-        console.error("YouTube Channel Data API Error:", error);
+        console.error("YouTube Channel Data Fetch Error:", error);
         return { error: error.message || 'An unknown error occurred while fetching channel details.' };
     }
 }
