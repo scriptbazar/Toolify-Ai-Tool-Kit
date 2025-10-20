@@ -20,7 +20,7 @@ export function YouTubeChannelBannerDownloader() {
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
 
-    const getChannelIdOrUsername = (inputUrl: string): string | null => {
+    const getChannelIdentifier = (inputUrl: string): string | null => {
         if (!inputUrl) return null;
         try {
             const urlObj = new URL(inputUrl);
@@ -44,7 +44,7 @@ export function YouTubeChannelBannerDownloader() {
     }
 
     const handleFetchBanner = async () => {
-        const channelIdentifier = getChannelIdOrUsername(url);
+        const channelIdentifier = getChannelIdentifier(url);
         if (!channelIdentifier) {
             toast({ title: 'Invalid YouTube Channel URL', description: 'Please enter a valid channel URL.', variant: 'destructive' });
             return;
@@ -72,7 +72,7 @@ export function YouTubeChannelBannerDownloader() {
      const handleDownload = async () => {
         if (!bannerUrl) return;
         try {
-            // The banner URL from the API often requires no-cors fetching in the browser
+            // Using a server-side proxy to fetch could avoid CORS, but for client-side, this is the approach.
             const response = await fetch(bannerUrl);
             const blob = await response.blob();
             const downloadUrl = window.URL.createObjectURL(blob);
