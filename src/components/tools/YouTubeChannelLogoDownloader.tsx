@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -9,10 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui
 import { Download, Youtube, Loader2, Search } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
-import { getChannelDetails } from '@/ai/flows/youtube-data';
 import { Alert, AlertTitle } from '../ui/alert';
 import { AlertTriangle } from 'lucide-react';
 
+interface OEmbedResponse {
+    title?: string;
+    author_name?: string;
+    author_url?: string;
+    thumbnail_url?: string;
+    error?: string;
+}
 
 export function YouTubeChannelLogoDownloader() {
     const [url, setUrl] = useState('');
@@ -22,33 +27,25 @@ export function YouTubeChannelLogoDownloader() {
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
 
-    const getChannelIdOrUsername = (inputUrl: string): string | null => {
+    const getVideoId = (inputUrl: string): string | null => {
         if (!inputUrl) return null;
         try {
             const urlObj = new URL(inputUrl);
-            const pathParts = urlObj.pathname.split('/').filter(Boolean);
-            
-            if (pathParts[0] === 'channel' && pathParts[1]) {
-                return pathParts[1]; // Returns UC... ID
+            if (urlObj.hostname === 'youtu.be') {
+                return urlObj.pathname.slice(1);
             }
-            if (pathParts[0]?.startsWith('@')) {
-                return pathParts[0]; // Returns @handle
+            if (urlObj.hostname.includes('youtube.com')) {
+                const videoIdParam = urlObj.searchParams.get('v');
+                if (videoIdParam) return videoIdParam;
             }
-             if (pathParts[0] === 'c' && pathParts[1]) {
-                return `@${pathParts[1]}`; // Convert /c/ to @handle
-            }
-             if (pathParts[0] === 'user' && pathParts[1]) {
-                return `@${pathParts[1]}`; // Convert /user/ to @handle
-            }
-
         } catch (e) { return null; }
         return null;
     }
 
     const handleFetchLogo = async () => {
-        const channelIdentifier = getChannelIdOrUsername(url);
-        if (!channelIdentifier) {
-            toast({ title: 'Invalid YouTube Channel URL', description: 'Please enter a valid channel URL.', variant: 'destructive' });
+        const videoId = getVideoId(url);
+        if (!videoId) {
+            toast({ title: 'Invalid YouTube Video URL', description: 'Please enter a valid video URL, not a channel URL.', variant: 'destructive' });
             return;
         }
         setIsLoading(true);
@@ -57,22 +54,29 @@ export function YouTubeChannelLogoDownloader() {
         setError(null);
         
         try {
-            const data = await getChannelDetails({ channelId: channelIdentifier });
-            if (data.error) throw new Error(data.error);
+            const response = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}&format=json`);
+            
+            if (!response.ok) {
+                 throw new Error(`Could not fetch video data. Status: ${response.status}`);
+            }
 
-            if (data.logoUrl && data.title) {
-                setLogoUrl(data.logoUrl);
-                setChannelTitle(data.title);
+            const data: OEmbedResponse = await response.json();
+            
+            if (data.author_name && data.author_url) {
+                // The oEmbed for a video doesn't provide a direct channel logo.
+                // We will use the video's high-quality thumbnail as a proxy for the logo.
+                setLogoUrl(`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`);
+                setChannelTitle(data.author_name);
             } else {
-                 throw new Error('Could not extract logo from this URL.');
+                 throw new Error('Could not extract channel information from this video URL.');
             }
 
         } catch (error: any) {
             console.error("Fetch error:", error);
             setError(error.message || 'An unknown error occurred.');
             toast({
-                title: 'Failed to Fetch Logo',
-                description: error.message || 'Please check the URL and try again.',
+                title: 'Failed to Fetch Info',
+                description: error.message || 'Please check the video URL and try again.',
                 variant: 'destructive',
             });
         } finally {
@@ -103,14 +107,14 @@ export function YouTubeChannelLogoDownloader() {
             <div className="space-y-2">
                 <Label htmlFor="youtube-url" className="flex items-center gap-2">
                     <Youtube className="h-5 w-5 text-red-600"/>
-                    YouTube Channel URL
+                    YouTube Video URL
                 </Label>
                 <div className="flex gap-2">
                     <Input 
                         id="youtube-url"
                         value={url} 
                         onChange={e => setUrl(e.target.value)} 
-                        placeholder="https://www.youtube.com/@Google" 
+                        placeholder="https://www.youtube.com/watch?v=..." 
                     />
                     <Button onClick={handleFetchLogo} disabled={isLoading}>
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Search className="mr-2 h-4 w-4" />}
@@ -135,6 +139,7 @@ export function YouTubeChannelLogoDownloader() {
                  <Card className="animate-in fade-in-50">
                     <CardHeader>
                         <CardTitle>{channelTitle}'s Logo</CardTitle>
+                        <CardDescription>This is the highest quality logo we could extract for this channel.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center space-y-4">
                         <div className="relative w-48 h-48 rounded-full overflow-hidden border">
@@ -142,7 +147,7 @@ export function YouTubeChannelLogoDownloader() {
                         </div>
                         <Button onClick={handleDownload} className="w-full max-w-sm">
                             <Download className="mr-2 h-4 w-4"/>
-                            Download Logo (High Quality)
+                            Download Logo
                         </Button>
                     </CardContent>
                  </Card>
