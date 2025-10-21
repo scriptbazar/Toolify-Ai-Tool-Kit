@@ -11,7 +11,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { Textarea } from '../ui/textarea';
 
 // Set worker path
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
 
 export function PdfToWord() {
@@ -112,8 +112,8 @@ export function PdfToWord() {
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
                 <div className="flex flex-col items-center justify-center h-full">
                     <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold">{file ? file.name : "Click or drag PDF file to upload"}</h3>
-                    <p className="text-sm text-muted-foreground">The text from your PDF will be extracted.</p>
+                    <h3 className="text-lg font-semibold">{file ? file.name : "Click or drag Word file to upload"}</h3>
+                    <p className="text-sm text-muted-foreground">Your Word document will be converted to a PDF.</p>
                 </div>
             </CardContent>
        </Card>
