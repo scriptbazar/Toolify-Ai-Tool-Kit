@@ -46,7 +46,8 @@ export async function createShortUrl(input: CreateShortUrlInput): Promise<Create
       createdAt: FieldValue.serverTimestamp(),
     });
     
-    const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+    // Use the production domain directly
+    const baseUrl = 'https://toolifyai.in';
     const shortUrl = `${baseUrl}/s/${shortId}`;
 
     return { shortUrl };
