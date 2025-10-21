@@ -46,10 +46,8 @@ export async function createShortUrl(input: CreateShortUrlInput): Promise<Create
       createdAt: FieldValue.serverTimestamp(),
     });
     
-    // Construct the full short URL to return to the client
-    // This assumes the Next.js app is served at the root.
     const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
-    const shortUrl = `${baseUrl}/api/s/${shortId}`;
+    const shortUrl = `${baseUrl}/s/${shortId}`;
 
     return { shortUrl };
 
@@ -57,4 +55,25 @@ export async function createShortUrl(input: CreateShortUrlInput): Promise<Create
     console.error('Error creating short URL:', error);
     return { error: error.message || 'An unknown error occurred.' };
   }
+}
+
+/**
+ * Fetches the original URL for a given short ID.
+ * @param {string} shortId - The short ID to look up.
+ * @returns {Promise<string | null>} The original URL or null if not found.
+ */
+export async function getOriginalUrl(shortId: string): Promise<string | null> {
+    if (!shortId) return null;
+    try {
+        const adminDb = getAdminDb();
+        const docRef = adminDb.collection('shortenedUrls').doc(shortId);
+        const docSnap = await docRef.get();
+        if (docSnap.exists) {
+            return (docSnap.data() as { originalUrl: string }).originalUrl;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching original URL:", error);
+        return null;
+    }
 }
