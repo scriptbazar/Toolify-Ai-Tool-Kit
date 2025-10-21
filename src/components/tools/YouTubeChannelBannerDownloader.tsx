@@ -30,13 +30,13 @@ export function YouTubeChannelBannerDownloader() {
                 return pathParts[1]; // Returns UC... ID
             }
             if (pathParts[0]?.startsWith('@')) {
-                return pathParts[0]; // Returns @handle
+                return pathParts[0].substring(1); // Returns handle without @
             }
              if (pathParts[0] === 'c' && pathParts[1]) {
-                return `@${pathParts[1]}`; // Convert /c/ to @handle
+                return pathParts[1]; // Convert /c/ to handle
             }
              if (pathParts[0] === 'user' && pathParts[1]) {
-                return `@${pathParts[1]}`; // Convert /user/ to @handle
+                return pathParts[1]; // Convert /user/ to handle
             }
 
         } catch (e) { return null; }
@@ -69,23 +69,11 @@ export function YouTubeChannelBannerDownloader() {
         }
     };
     
-     const handleDownload = async () => {
+     const handleDownload = () => {
         if (!bannerUrl) return;
-        try {
-            // Using a server-side proxy to fetch could avoid CORS, but for client-side, this is the approach.
-            const response = await fetch(bannerUrl);
-            const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = `banner-${channelTitle?.replace(/\s/g, '_') || 'youtube'}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(downloadUrl);
-        } catch (error) {
-            toast({ title: "Download Failed", description: "Could not download the banner. You can try right-clicking the image and saving it.", variant: "destructive" });
-        }
+        // Open the image in a new tab. The user can then right-click to save.
+        // This is more reliable than direct download due to potential CORS issues.
+        window.open(bannerUrl, '_blank');
     };
 
 

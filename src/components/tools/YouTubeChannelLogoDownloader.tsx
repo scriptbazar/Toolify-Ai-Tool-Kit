@@ -31,13 +31,13 @@ export function YouTubeChannelLogoDownloader() {
                 return pathParts[1]; // Returns UC... ID
             }
             if (pathParts[0]?.startsWith('@')) {
-                return pathParts[0]; // Returns @handle
+                return pathParts[0].substring(1); // Returns handle without @
             }
              if (pathParts[0] === 'c' && pathParts[1]) {
-                return `@${pathParts[1]}`; // Convert /c/ to @handle
+                return pathParts[1]; // Convert /c/ to handle
             }
              if (pathParts[0] === 'user' && pathParts[1]) {
-                return `@${pathParts[1]}`; // Convert /user/ to @handle
+                return pathParts[1]; // Convert /user/ to handle
             }
 
         } catch (e) { return null; }
@@ -79,24 +79,11 @@ export function YouTubeChannelLogoDownloader() {
         }
     };
     
-    const handleDownload = async () => {
+    const handleDownload = () => {
         if (!logoUrl) return;
-        try {
-            // Use a proxy or server-side fetch if CORS becomes an issue.
-            // For now, a direct fetch should work for most CDN-hosted images.
-            const response = await fetch(logoUrl);
-            const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = `logo-${channelTitle?.replace(/\s/g, '_') || 'youtube'}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(downloadUrl);
-        } catch (error) {
-            toast({ title: "Download Failed", description: "Could not download the logo. You can try right-clicking the image and saving it.", variant: "destructive" });
-        }
+        // Open the image in a new tab. The user can then right-click to save.
+        // This is more reliable than direct download due to potential CORS issues.
+        window.open(logoUrl, '_blank');
     };
 
     return (
@@ -111,7 +98,7 @@ export function YouTubeChannelLogoDownloader() {
                         id="youtube-url"
                         value={url} 
                         onChange={e => setUrl(e.target.value)} 
-                        placeholder="e.g., https://www.youtube.com/@Google" 
+                        placeholder="https://www.youtube.com/@Google" 
                     />
                     <Button onClick={handleFetchLogo} disabled={isLoading}>
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Search className="mr-2 h-4 w-4" />}
