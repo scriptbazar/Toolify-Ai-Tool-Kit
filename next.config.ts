@@ -72,7 +72,9 @@ const nextConfig: NextConfig = {
     // This is to solve the "topLevelAwait" issue with pdfjs-dist.
     // It prevents webpack from trying to bundle a node-specific canvas module
     // on the client.
-    config.externals.push('canvas');
+    if (isServer) {
+        config.externals.push('canvas');
+    }
 
     // Copy pdf.js CMaps and worker to public directory only for server build
     if (isServer) {
