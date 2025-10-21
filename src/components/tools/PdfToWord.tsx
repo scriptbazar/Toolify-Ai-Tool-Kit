@@ -11,7 +11,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { Textarea } from '../ui/textarea';
 
 // Set worker path
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 
 export function PdfToWord() {
