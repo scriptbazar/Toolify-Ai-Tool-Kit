@@ -48,56 +48,42 @@ export async function getChannelDetails(input: z.infer<typeof GetChannelDetailsI
         return { error: "YouTube API key is not configured on the server." };
     }
     
-    let searchParams: URLSearchParams;
+    let finalChannelId = channelId;
 
-    if (channelId.startsWith('@')) {
-        // It's a handle, search for it. Note: API expects the handle without the '@'.
-        searchParams = new URLSearchParams({
-            part: 'snippet',
-            q: channelId.substring(1),
-            type: 'channel',
-            key: apiKey,
-        });
+    // If the identifier is a handle (e.g., starts with @ or doesn't start with UC), 
+    // we first need to search for its channel ID.
+    if (!channelId.startsWith('UC')) {
+        const handle = channelId.startsWith('@') ? channelId.substring(1) : channelId;
+        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${handle}&type=channel&key=${apiKey}`;
         
         try {
-            const searchResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?${searchParams.toString()}`);
+            const searchResponse = await fetch(searchUrl);
             const searchData: YouTubeApiResponse = await searchResponse.json();
-            
+
             if (searchData.error) {
-                throw new Error(searchData.error?.errors?.[0]?.message || 'Failed to search for channel.');
+                throw new Error(searchData.error?.message || 'Failed to search for channel.');
             }
-
-            const foundChannelId = searchData.items?.[0]?.id?.channelId;
-
-            if (!foundChannelId) {
-                throw new Error('Channel not found with that handle.');
-            }
-            // Now use the found channel ID for the main query
-            searchParams = new URLSearchParams({
-                part: 'snippet,brandingSettings',
-                id: foundChannelId,
-                key: apiKey,
-            });
             
+            const foundChannel = searchData.items?.[0];
+            if (foundChannel && foundChannel.id?.channelId) {
+                finalChannelId = foundChannel.id.channelId;
+            } else {
+                throw new Error('Channel not found.');
+            }
         } catch (error: any) {
              return { error: error.message || 'An error occurred while searching for the channel.' };
         }
-
-    } else {
-        // It's likely a channel ID (UC...)
-        searchParams = new URLSearchParams({
-            part: 'snippet,brandingSettings',
-            id: channelId,
-            key: apiKey,
-        });
     }
 
+    // Now, use the definitive channel ID to get details.
+    const detailsUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${finalChannelId}&key=${apiKey}`;
+
     try {
-        const response = await fetch(`https://www.googleapis.com/youtube/v3/channels?${searchParams.toString()}`);
+        const response = await fetch(detailsUrl);
         const data: YouTubeApiResponse = await response.json();
         
         if (data.error || !data.items || data.items.length === 0) {
-            throw new Error(data.error?.errors?.[0]?.message || 'Channel not found.');
+            throw new Error(data.error?.message || 'Channel not found.');
         }
 
         const channel = data.items[0];
