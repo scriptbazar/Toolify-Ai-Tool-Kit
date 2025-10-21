@@ -5,13 +5,15 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Link as LinkIcon, Copy, Trash2, Wand2 } from 'lucide-react';
+import { Link as LinkIcon, Copy, Trash2, Wand2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { createShortUrl } from '@/ai/flows/url-shortener';
 
 export function UrlShortener() {
     const [longUrl, setLongUrl] = useState('');
     const [shortUrl, setShortUrl] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
     const handleShorten = async () => {
@@ -19,10 +21,20 @@ export function UrlShortener() {
             toast({ title: 'URL is required', variant: 'destructive' });
             return;
         }
-        // Placeholder for a real URL shortener API
-        const shortened = `https://short.ly/${Math.random().toString(36).substring(2, 8)}`;
-        setShortUrl(shortened);
-        toast({ title: 'URL Shortened!', description: 'Note: This is a placeholder and not a real short link.'});
+        setIsLoading(true);
+        try {
+            const result = await createShortUrl({ originalUrl: longUrl });
+            if (result.shortUrl) {
+                setShortUrl(result.shortUrl);
+                toast({ title: 'URL Shortened!', description: 'Your short link is ready.' });
+            } else {
+                throw new Error(result.error || 'Failed to shorten URL');
+            }
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleCopy = () => {
@@ -48,8 +60,9 @@ export function UrlShortener() {
                         <Label htmlFor="long-url">Long URL</Label>
                         <Input id="long-url" value={longUrl} onChange={(e) => setLongUrl(e.target.value)} placeholder="https://example.com/very/long/url/to/shorten"/>
                     </div>
-                    <Button onClick={handleShorten} className="w-full">
-                        <Wand2 className="mr-2 h-4 w-4"/> Shorten URL
+                    <Button onClick={handleShorten} disabled={isLoading} className="w-full">
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
+                        Shorten URL
                     </Button>
                 </CardContent>
             </Card>
@@ -77,5 +90,3 @@ export function UrlShortener() {
         </div>
     );
 }
-
-    

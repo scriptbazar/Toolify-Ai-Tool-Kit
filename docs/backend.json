@@ -26,6 +26,28 @@
                 "expiresAt": { "type": "string", "format": "date-time" }
             },
             "required": ["userId", "type", "mediaUrl", "createdAt", "expiresAt"]
+        },
+        "ShortenedURL": {
+            "title": "Shortened URL",
+            "description": "Represents a shortened URL mapping.",
+            "type": "object",
+            "properties": {
+                "originalUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The original, long URL."
+                },
+                "shortId": {
+                    "type": "string",
+                    "description": "The unique short identifier for the URL."
+                },
+                "createdAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The timestamp when the short URL was created."
+                }
+            },
+            "required": ["originalUrl", "shortId", "createdAt"]
         }
     },
     "auth": {
@@ -39,6 +61,10 @@
         "/userMedia/{mediaId}": {
             "schema": { "$ref": "#/entities/UserMedia" },
             "description": "Stores media files associated with a user."
+        },
+        "/shortenedUrls/{shortId}": {
+            "schema": { "$ref": "#/entities/ShortenedURL" },
+            "description": "Stores the mapping between short URL IDs and original URLs."
         }
     }
 }
