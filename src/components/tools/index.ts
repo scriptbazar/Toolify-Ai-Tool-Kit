@@ -21,7 +21,7 @@ export { CssMinifier } from './CssMinifier';
 export { CurrencyConverter } from './CurrencyConverter';
 export { DateCalculator } from './DateCalculator';
 export { DiscountCalculator } from './DiscountCalculator';
-export { DrivingLicenceResizer } from './DrivingLicenceResizer';
+export * from './DrivingLicenceResizer';
 export { DropboxDirectLinkGenerator } from './DropboxDirectLinkGenerator';
 export { ExcelToPdf } from './ExcelToPdf';
 export { FaviconChecker } from './FaviconChecker';
@@ -154,4 +154,3 @@ export { MortgageCalculator } from './MortgageCalculator';
 export { HraCalculator } from './HraCalculator';
 export { TextToHandwritingConverter } from './TextToHandwritingConverter';
 export { TextToAsciiConverter } from './TextToAsciiConverter';
-    

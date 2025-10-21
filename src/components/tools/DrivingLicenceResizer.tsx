@@ -116,7 +116,7 @@ const ImageResizerBox = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <div 
-            className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
+            className="w-full aspect-square border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative bg-muted"
             onClick={() => fileInputRef.current?.click()}
         >
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
@@ -126,7 +126,7 @@ const ImageResizerBox = ({
                 <div className="flex flex-col items-center">
                     <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
                     <p className="text-sm text-muted-foreground">Upload {title}</p>
-                    <p className="text-xs text-muted-foreground">Target: {targetWidth}x{targetHeight}px</p>
+                    <p className="text-xs text-muted-foreground">Target: {targetWidth}x{targetHeight}px, &lt;{maxSizeKb}KB</p>
                 </div>
             )}
         </div>
@@ -140,7 +140,7 @@ const ImageResizerBox = ({
           <div className="space-y-2 pt-4 border-t">
             <h4 className="font-semibold text-center">Resized Preview</h4>
             <div className="border rounded-lg p-2 bg-muted flex justify-center">
-              <Image src={resizedPreview} alt="Resized Preview" width={targetWidth / 4} height={targetHeight / 4} />
+              <Image src={resizedPreview} alt="Resized Preview" width={targetWidth} height={targetHeight} />
             </div>
             <Button onClick={handleDownload} className="w-full">
               <Download className="mr-2 h-4 w-4" />
@@ -154,7 +154,7 @@ const ImageResizerBox = ({
 };
 
 
-export default function DrivingLicenceResizer() {
+export function DrivingLicenceResizer() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       <ImageResizerBox 
@@ -163,7 +163,7 @@ export default function DrivingLicenceResizer() {
         targetWidth={PHOTO_WIDTH}
         targetHeight={PHOTO_HEIGHT}
         minSizeKb={MIN_SIZE_KB}
-        maxSizeKb={MAX_SIZE_KB}
+        maxSizeKb={MAX_PHOTO_SIZE_KB}
       />
       <ImageResizerBox 
         title="Signature"
@@ -171,7 +171,7 @@ export default function DrivingLicenceResizer() {
         targetWidth={SIGNATURE_WIDTH}
         targetHeight={SIGNATURE_HEIGHT}
         minSizeKb={MIN_SIZE_KB}
-        maxSizeKb={MAX_SIZE_KB}
+        maxSizeKb={MAX_SIGNATURE_SIZE_KB}
       />
     </div>
   );
