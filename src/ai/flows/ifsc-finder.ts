@@ -18,8 +18,14 @@ export const getBankList = cache(async (): Promise<string[]> => {
         if (!response.ok) {
             throw new Error('Failed to fetch bank list');
         }
-        const data = await response.json();
-        return data as string[];
+        // Check if the response is JSON before parsing
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            const data = await response.json();
+            return data as string[];
+        } else {
+            throw new Error("Received non-JSON response from bank list API.");
+        }
     } catch (error: any) {
         console.error("Error fetching bank list:", error);
         throw new Error(error.message || "Could not fetch the list of banks.");
@@ -34,15 +40,28 @@ export const getBankList = cache(async (): Promise<string[]> => {
 export const getBranchesForBank = cache(async (bankName: string): Promise<any[]> => {
      if (!bankName) return [];
     try {
-        const response = await fetch(`${API_BASE_URL}/${bankName}`);
+        // Encode the bank name to handle spaces and special characters in the URL
+        const encodedBankName = encodeURIComponent(bankName);
+        const response = await fetch(`${API_BASE_URL}/${encodedBankName}`);
+        
         if (!response.ok) {
             if (response.status === 404) {
                 return []; // Bank not found or has no branches listed
             }
             throw new Error(`Failed to fetch branches for ${bankName}`);
         }
-        const data = await response.json();
-        return data;
+
+        // Check if the response is JSON before parsing
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+             const data = await response.json();
+            return data;
+        } else {
+            console.error(`Received non-JSON response for bank: ${bankName}`);
+            // This might happen if the URL is wrong and leads to an HTML error page.
+            return [];
+        }
+
     } catch (error: any) {
         console.error(`Error fetching branches for ${bankName}:`, error);
         throw new Error(error.message || "Could not fetch branch data.");
