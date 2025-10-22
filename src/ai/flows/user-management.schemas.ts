@@ -7,13 +7,6 @@ export const UpdateUserRoleInputSchema = z.object({
 });
 export type UpdateUserRoleInput = z.infer<typeof UpdateUserRoleInputSchema>;
 
-export const AddLeadUserInputSchema = z.object({
-  name: z.string().describe("The name of the lead."),
-  email: z.string().email().describe("The email of the lead."),
-  message: z.string().optional().describe("The initial message from the lead."),
-});
-export type AddLeadUserInput = z.infer<typeof AddLeadUserInputSchema>;
-
 export const ReferralStatusSchema = z.enum(['not_joined', 'pending', 'approved', 'rejected']);
 
 export const ReferralRequestSchema = z.object({

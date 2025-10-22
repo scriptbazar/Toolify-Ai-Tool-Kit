@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { LogIn, Menu, UserPlus, Home, Newspaper, Info, Mail, DollarSign, MessageSquare, User, LayoutDashboard, LogOut as LogoutIcon, ShieldCheck, Lightbulb, Star } from 'lucide-react';
+import { LogIn, Menu, UserPlus, Home, Newspaper, Info, Mail, DollarSign, User, LayoutDashboard, LogOut as LogoutIcon, ShieldCheck, Lightbulb, Star } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
@@ -30,13 +30,8 @@ const mainNavLinks = [
 const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }) => {
   const pathname = usePathname();
   
-  const communityChatHref = isAdmin ? '/admin/community-chat' : '/community-chat';
-
   const allLinks = [
     ...mainNavLinks,
-    ...(isLoggedIn ? [
-      { href: communityChatHref, label: 'Community Chat', icon: MessageSquare }
-    ] : []),
   ];
 
   return (

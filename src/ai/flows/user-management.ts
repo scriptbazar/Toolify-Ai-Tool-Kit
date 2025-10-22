@@ -5,10 +5,8 @@
  * @fileOverview Manages user data in Firestore.
  *
  * - updateUserRole - A function that updates a user's role in the database.
- * - addLeadUser - Saves lead information from the chat widget.
  * - getAllEmails - Fetches all unique emails from both users and leads collections.
  * - updateUserActivity - Updates the last active timestamp for a user.
- * - getChatUsers - Fetches a list of all signed-up users for the community chat.
  */
 
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
@@ -16,9 +14,7 @@ import { z } from 'zod';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { 
     UpdateUserRoleInputSchema, 
-    AddLeadUserInputSchema,
     type UpdateUserRoleInput,
-    type AddLeadUserInput,
 } from './user-management.schemas';
 
 const UserProfileUpdateSchema = z.object({
@@ -69,32 +65,6 @@ export async function updateUserRole(input: UpdateUserRoleInput): Promise<{ succ
   } catch (error: any) {
     console.error("Error updating user role:", error);
     if (error.name === 'ZodError') {
-      return { success: false, message: `Validation error: ${error.errors.map((e: any) => e.message).join(', ')}` };
-    }
-    return { success: false, message: error.message || 'An unknown error occurred.' };
-  }
-}
-
-export async function addLeadUser(input: AddLeadUserInput): Promise<{ success: boolean; message: string }> {
-  const adminDb = getAdminDb();
-  if (!adminDb) {
-    const message = "Firebase Admin is not initialized. Check server environment variables.";
-    console.error(message);
-    return { success: false, message };
-  }
-  try {
-    const { name, email, message } = AddLeadUserInputSchema.parse(input);
-    const leadsRef = adminDb.collection('leads');
-    await leadsRef.add({
-      name,
-      email,
-      message,
-      createdAt: FieldValue.serverTimestamp(),
-    });
-    return { success: true, message: 'Lead added successfully.' };
-  } catch (error: any) {
-    console.error("Error adding lead user:", error);
-     if (error.name === 'ZodError') {
       return { success: false, message: `Validation error: ${error.errors.map((e: any) => e.message).join(', ')}` };
     }
     return { success: false, message: error.message || 'An unknown error occurred.' };
@@ -197,41 +167,6 @@ export async function updateUserActivity(userId: string): Promise<{ success: boo
     console.error(`Could not update activity for user ${userId}:`, error);
     return { success: false };
   }
-}
-
-
-/**
- * Fetches all signed-up users for the community chat.
- */
-export async function getChatUsers(): Promise<any[]> {
-    const adminDb = getAdminDb();
-    if (!adminDb) {
-        console.error("Firebase Admin is not initialized. Cannot fetch chat users.");
-        return [];
-    }
-    try {
-        const usersRef = adminDb.collection('users');
-        const usersSnapshot = await usersRef.get();
-        const usersList = usersSnapshot.docs.map(doc => {
-            const data = doc.data();
-            const name = `${data.firstName || ''} ${data.lastName || ''}`.trim();
-            const createdAt = data.createdAt ? (data.createdAt as Timestamp).toDate().toISOString() : null;
-            const lastActive = data.lastActive ? (data.lastActive as Timestamp).toDate().toISOString() : null;
-
-            return {
-                id: doc.id,
-                initials: `${data.firstName?.[0] || ''}${data.lastName?.[0] || ''}` || 'U',
-                name: name,
-                username: data.userName,
-                createdAt,
-                lastActive,
-            };
-        });
-        return usersList;
-    } catch (error) {
-        console.error("Error fetching chat users:", error);
-        return []; // Return empty array on error to prevent crashing the client
-    }
 }
 
 
