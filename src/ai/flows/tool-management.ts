@@ -232,11 +232,12 @@ async function getToolsFn (options: GetToolsOptions = {}) {
         
         const snapshot = await query.get();
         
-        if (snapshot.empty && !options.slug && !options.category) {
-            await seedInitialTools();
-            const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).get();
-            return processSnapshot(retrySnapshot.docs, options);
-        }
+        // This seeding logic is problematic with caching. Let's remove it for now.
+        // if (snapshot.empty && !options.slug && !options.category) {
+        //     await seedInitialTools();
+        //     const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).get();
+        //     return processSnapshot(retrySnapshot.docs, options);
+        // }
         
         return processSnapshot(snapshot.docs, options);
 
