@@ -78,6 +78,9 @@ const nextConfig: NextConfig = {
     config.module.rules.push({
       test: /pdf\.worker\.min\.mjs/,
       type: 'asset/resource',
+      generator: {
+        filename: 'static/chunks/[name].[hash][ext]'
+      }
     });
 
     // Copy pdf.js CMaps and worker to public directory only for server build
