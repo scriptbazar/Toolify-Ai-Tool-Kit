@@ -26,7 +26,6 @@ export { DropboxDirectLinkGenerator } from './DropboxDirectLinkGenerator';
 export { ExcelToPdf } from './ExcelToPdf';
 export { FaviconChecker } from './FaviconChecker';
 export { FindAndReplace } from './FindAndReplace';
-export { FindIfscCodeByBankAndCity } from './FindIfscCodeByBankAndCity';
 export { FlipkartShippingLabelCropper } from './FlipkartShippingLabelCropper';
 export { FlipImage } from './FlipImage';
 export { FuelCostCalculator } from './FuelCostCalculator';

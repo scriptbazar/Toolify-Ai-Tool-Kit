@@ -28,7 +28,6 @@ export const slugToComponentMap: { [key: string]: string } = {
   'excel-to-pdf': 'ExcelToPdf',
   'favicon-checker': 'FaviconChecker',
   'find-and-replace': 'FindAndReplace',
-  'find-ifsc-code-by-bank-and-city': 'FindIfscCodeByBankAndCity',
   'flipkart-shipping-label-cropper': 'FlipkartShippingLabelCropper',
   'flip-image': 'FlipImage',
   'fuel-cost-calculator': 'FuelCostCalculator',
