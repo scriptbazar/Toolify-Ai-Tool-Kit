@@ -55,7 +55,7 @@ export function AdvanceTextCleaner() {
       return;
     }
     navigator.clipboard.writeText(outputText);
-    toast({ title: '✅ Clean Text Copy हो गया है!', description: 'अब Facebook पर Paste करें।' });
+    toast({ title: 'Clean text copied to clipboard!' });
   };
 
   const handleClear = () => {
@@ -67,7 +67,7 @@ export function AdvanceTextCleaner() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
       <Card>
         <CardHeader>
-            <CardTitle>Codes वाला Text Paste करें</CardTitle>
+            <CardTitle>Paste Text with Codes</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
             <Textarea
@@ -78,26 +78,26 @@ export function AdvanceTextCleaner() {
               className="min-h-[300px]"
             />
             <Button onClick={handleCleanText} className="w-full">
-                <Wand2 className="mr-2 h-4 w-4" /> Clean Text Generate करें
+                <Wand2 className="mr-2 h-4 w-4" /> Generate Clean Text
             </Button>
         </CardContent>
       </Card>
       
       <Card>
          <CardHeader>
-            <CardTitle>Copy करने के लिए Clean Text</CardTitle>
+            <CardTitle>Clean Text to Copy</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
             <Textarea
                 id="output-text"
                 value={outputText}
                 readOnly
-                placeholder="Saaf kiya gaya text yahan dikhega..."
+                placeholder="Cleaned text will appear here..."
                 className="min-h-[300px] bg-muted"
             />
              <div className="flex flex-col sm:flex-row gap-2">
                 <Button onClick={handleCopy} disabled={!outputText} className="w-full">
-                    <Copy className="mr-2 h-4 w-4" /> Clean Text Copy करें
+                    <Copy className="mr-2 h-4 w-4" /> Copy Clean Text
                 </Button>
                 <Button variant="destructive" onClick={handleClear} disabled={!inputText && !outputText} className="w-full">
                     <Trash2 className="mr-2 h-4 w-4" /> Clear All
@@ -110,5 +110,3 @@ export function AdvanceTextCleaner() {
 }
 
 export default AdvanceTextCleaner;
-
-  
