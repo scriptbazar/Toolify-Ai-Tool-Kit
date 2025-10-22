@@ -50,13 +50,11 @@ const nextConfig: NextConfig = {
   },
   webpack: (config, { isServer }) => {
     config.experiments = { ...config.experiments, topLevelAwait: true };
-    //
+    
     // The "handlebars" library is a sub-dependency of genkit, and it uses
     // an old "require.extensions" feature that is not supported by webpack.
-    //
     // This can be worked around by telling webpack to not try and bundle the
     // "handlebars" library.
-    //
     config.externals.push('handlebars');
 
     // This alias is necessary to resolve the 'node:process' import used by
@@ -75,6 +73,12 @@ const nextConfig: NextConfig = {
     if (isServer) {
         config.externals.push('canvas');
     }
+
+    // Exclude the pdf.worker.min.mjs from being processed by webpack on the client.
+    config.module.rules.push({
+      test: /pdf\.worker\.min\.mjs/,
+      type: 'asset/resource',
+    });
 
     // Copy pdf.js CMaps and worker to public directory only for server build
     if (isServer) {
