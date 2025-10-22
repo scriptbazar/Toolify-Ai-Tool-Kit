@@ -95,6 +95,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'sha256-hash-generator': 'Sha256HashGenerator',
   'srm-to-cgpa-calculator': 'SrmToCgpaCalculator',
   'sql-formatter': 'SqlFormatter',
+  'text-repeater': 'TextRepeater',
   'text-to-binary': 'TextToBinary',
   'text-to-morse-code': 'TextToMorseCode',
   'file-encryption-and-decryption': 'FileEncryptionDecryption',
