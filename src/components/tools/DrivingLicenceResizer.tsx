@@ -13,7 +13,9 @@ const PHOTO_HEIGHT = 1062;
 const SIGNATURE_WIDTH = 826;
 const SIGNATURE_HEIGHT = 1062; 
 const MIN_SIZE_KB = 10;
-const MAX_SIZE_KB = 50;
+const MAX_PHOTO_SIZE_KB = 50;
+const MAX_SIGNATURE_SIZE_KB = 50;
+
 
 const ImageResizerBox = ({
   title,
