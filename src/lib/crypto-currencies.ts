@@ -93,5 +93,4 @@ export const cryptoCurrencies = [
   { code: "KSM", name: "Kusama" },
   { code: "RVN", name: "Ravencoin" },
   { code: "COMP", name: "Compound" },
-  { code: "AR", name: "Arweave" },
 ];
