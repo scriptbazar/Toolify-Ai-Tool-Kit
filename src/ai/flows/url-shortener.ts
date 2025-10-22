@@ -46,7 +46,6 @@ export async function createShortUrl(input: CreateShortUrlInput): Promise<Create
       createdAt: FieldValue.serverTimestamp(),
     });
     
-    // Use the production domain directly
     const baseUrl = 'https://toolifyai.in';
     const shortUrl = `${baseUrl}/s/${shortId}`;
 
@@ -70,7 +69,8 @@ export async function getOriginalUrl(shortId: string): Promise<string | null> {
         const docRef = adminDb.collection('shortenedUrls').doc(shortId);
         const docSnap = await docRef.get();
         if (docSnap.exists) {
-            return (docSnap.data() as { originalUrl: string }).originalUrl;
+            const data = docSnap.data();
+            return data?.originalUrl || null;
         }
         return null;
     } catch (error) {
