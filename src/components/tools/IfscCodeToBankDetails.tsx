@@ -10,27 +10,15 @@ import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { Landmark, Loader2, Copy, Search, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-
-interface BranchDetails {
-    BRANCH: string;
-    ADDRESS: string;
-    CITY: string;
-    STATE: string;
-    IFSC: string;
-    BANK: string;
-    MICR?: string;
-    CONTACT?: string;
-}
+import { getBankDetailsFromIfsc, type BankDetails } from '@/ai/flows/ifsc-finder';
 
 export function IfscCodeToBankDetails() {
     const [ifsc, setIfsc] = useState('');
-    const [details, setDetails] = useState<BranchDetails | null>(null);
+    const [details, setDetails] = useState<BankDetails | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
     
-    const API_BASE_URL = 'https://ifsc.razorpay.com';
-
     const handleFetchDetails = async () => {
         if (!ifsc.trim() || ifsc.trim().length !== 11) {
             toast({ title: 'Invalid IFSC', description: 'Please enter a valid 11-character IFSC code.', variant: 'destructive' });
@@ -40,14 +28,7 @@ export function IfscCodeToBankDetails() {
         setError(null);
         setDetails(null);
         try {
-            const response = await fetch(`${API_BASE_URL}/${ifsc.trim()}`);
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error('IFSC code not found. Please check the code and try again.');
-                }
-                throw new Error(`Failed to fetch details. Status: ${response.status}`);
-            }
-            const data: BranchDetails = await response.json();
+            const data = await getBankDetailsFromIfsc(ifsc.trim());
             setDetails(data);
         } catch (err: any) {
             setError(err.message);
@@ -128,3 +109,5 @@ export function IfscCodeToBankDetails() {
         </div>
     );
 }
+
+export default IfscCodeToBankDetails;

@@ -156,6 +156,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'text-to-handwriting-generator': 'TextToHandwritingConverter',
   'text-to-ascii-converter': 'TextToAsciiConverter',
   'random-name-generator': 'RandomNameGenerator',
+  'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
 };
 
   

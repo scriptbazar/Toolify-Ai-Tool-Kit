@@ -165,6 +165,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image Grayscale Converter', description: 'Convert colorful images into black and white (grayscale).', icon: 'Palette', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload an image you want to convert.', 'The tool will automatically convert it to grayscale.', 'Download your new black and white image.'] },
     { name: 'Image to PDF', description: '📑 Convert your JPG, PNG, and other image files into a single, easy-to-share PDF document. Combine multiple images into one file.', icon: 'FileImage', category: 'pdf', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload one or more image files.', 'Drag and drop to reorder the images if needed.', 'Click "Convert & Download PDF".', 'A single PDF containing all your images will be created.'] },
     { name: 'Average Calculator', description: 'Calculate the average of a set of numbers.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a set of numbers separated by commas or spaces.', 'The tool will calculate the sum, count, and average of the numbers.'] },
+    { name: 'IFSC Code to Bank Details', description: 'Find bank branch details from an IFSC code.', icon: 'Landmark', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the 11-character IFSC code.', 'Click "Find Details".', 'The bank and branch information will be displayed.'] },
 ];
 
 const generateSlug = (name: string) => {
