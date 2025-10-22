@@ -1,5 +1,4 @@
 
-
 export const slugToComponentMap: { [key: string]: string } = {
   'advance-text-cleaner': 'AdvanceTextCleaner',
   'admob-revenue-calculator': 'AdMobRevenueCalculator',
@@ -153,7 +152,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'retirement-savings-calculator': 'RetirementSavingsCalculator',
   'mortgage-calculator': 'MortgageCalculator',
   'hra-calculator': 'HraCalculator',
-  'text-to-handwriting-generator': 'TextToHandwritingConverter',
+  'text-to-handwriting-converter': 'TextToHandwritingConverter',
   'text-to-ascii-converter': 'TextToAsciiConverter',
   'random-name-generator': 'RandomNameGenerator',
   'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
