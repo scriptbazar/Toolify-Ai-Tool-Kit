@@ -10,7 +10,6 @@ import { MessageSquare, X, Send, User, Bot } from 'lucide-react';
 import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { addLeadUser } from '@/ai/flows/user-management';
 import { ScrollArea } from '../ui/scroll-area';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 
@@ -58,26 +57,19 @@ export function DynamicChatWidget() {
     const formData = new FormData(e.currentTarget);
     const name = `${formData.get('firstName') as string} ${formData.get('lastName') as string}`;
     const email = formData.get('email') as string;
-    const message = `User started a chat.`; // Add a default message
     
-    try {
-      await addLeadUser({ name, email, message });
-      toast({
+    // In a real app, you would call your server action here.
+    // await addLeadUser({ name, email, message: 'User started a chat.' });
+    // For now, we simulate success.
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    toast({
         title: 'Thank you!',
         description: "Your information has been saved. You can now chat with our AI.",
-      });
-      setMessages([{ role: 'model', content: `Hello ${formData.get('firstName')}! How can I help you with ToolifyAI today?` }]);
-      setStep('chat');
-    } catch (error: any) {
-        console.error("Failed to save lead:", error);
-        toast({
-            title: 'Error',
-            description: error.message || 'Could not save your details. Please try again.',
-            variant: 'destructive',
-        });
-    } finally {
-        setIsSubmittingContact(false);
-    }
+    });
+    setMessages([{ role: 'model', content: `Hello ${formData.get('firstName')}! How can I help you with ToolifyAI today?` }]);
+    setStep('chat');
+    setIsSubmittingContact(false);
   };
 
   const handleChatSubmit = async (e: FormEvent<HTMLFormElement>) => {

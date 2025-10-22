@@ -345,8 +345,7 @@ interface CommunityChatProps {
 }
 
 export function CommunityChat({ allUsers, isAdmin }: CommunityChatProps) {
-    const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-    const [userData, setUserData] = useState<AppUser | null>(null);
+    const { user: currentUser, userData } = useAuth();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [attachment, setAttachment] = useState<File | null>(null);
@@ -362,17 +361,6 @@ export function CommunityChat({ allUsers, isAdmin }: CommunityChatProps) {
 
 
      useEffect(() => {
-        const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-            setCurrentUser(user);
-            if (user) {
-                const userDocRef = doc(db, 'users', user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                if (userDocSnap.exists()) {
-                    setUserData(userDocSnap.data() as AppUser);
-                }
-            }
-        });
-        
         const q = query(collection(db, "communityChat"), orderBy("timestamp", "asc"));
         const unsubscribeMessages = onSnapshot(q, (querySnapshot) => {
             const fetchedMessages: Message[] = [];
@@ -383,7 +371,6 @@ export function CommunityChat({ allUsers, isAdmin }: CommunityChatProps) {
         });
 
         return () => {
-            unsubscribeAuth();
             unsubscribeMessages();
         };
     }, []);
