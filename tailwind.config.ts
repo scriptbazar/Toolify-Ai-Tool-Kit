@@ -29,6 +29,10 @@ export default {
         permanent: ['"Permanent Marker"', 'cursive'],
         rocksalt: ['"Rock Salt"', 'cursive'],
         sacramento: ['"Sacramento"', 'cursive'],
+        caveat: ['"Caveat"', 'cursive'],
+        pacifico: ['"Pacifico"', 'cursive'],
+        'homemade-apple': ['"Homemade Apple"', 'cursive'],
+        zeyada: ['"Zeyada"', 'cursive'],
       },
       colors: {
         background: 'hsl(var(--background))',

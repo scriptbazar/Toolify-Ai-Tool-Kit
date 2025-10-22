@@ -23,6 +23,10 @@ const fontOptions = [
     { name: 'Permanent Marker', value: 'font-permanent' },
     { name: 'Rock Salt', value: 'font-rocksalt' },
     { name: 'Sacramento', value: 'font-sacramento' },
+    { name: 'Caveat', value: 'font-caveat' },
+    { name: 'Pacifico', value: 'font-pacifico' },
+    { name: 'Homemade Apple', value: 'font-homemade-apple' },
+    { name: 'Zeyada', value: 'font-zeyada' },
 ];
 
 export function TextToHandwritingConverter() {
