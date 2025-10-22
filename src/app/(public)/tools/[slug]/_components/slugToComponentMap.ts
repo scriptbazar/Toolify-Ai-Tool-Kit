@@ -1,6 +1,7 @@
 
 
 export const slugToComponentMap: { [key: string]: string } = {
+  'advance-text-cleaner': 'AdvanceTextCleaner',
   'admob-revenue-calculator': 'AdMobRevenueCalculator',
   'age-calculator': 'AgeCalculator',
   'amazon-shipping-label-cropper': 'AmazonShippingLabelCropper',
@@ -142,7 +143,6 @@ export const slugToComponentMap: { [key: string]: string } = {
   'adsense-revenue-calculator': 'AdSenseRevenueCalculator',
   'unit-converter': 'UnitConverter',
   'image-to-pdf': 'ImageToPdf',
-  'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
   'epf-calculator': 'EPFCalculator',
   'gratuity-calculator': 'GratuityCalculator',
   'inflation-calculator': 'InflationCalculator',
@@ -157,3 +157,5 @@ export const slugToComponentMap: { [key: string]: string } = {
   'text-to-ascii-converter': 'TextToAsciiConverter',
   'random-name-generator': 'RandomNameGenerator',
 };
+
+  

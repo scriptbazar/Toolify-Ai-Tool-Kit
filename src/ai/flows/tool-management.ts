@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -15,6 +16,7 @@ const TOOLS_COLLECTION = 'tools';
 const TOOL_REQUESTS_COLLECTION = 'toolRequests';
 
 const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
+    { name: 'Advance Text Cleaner', description: 'एडवांस्ड टेक्स्ट क्लीनर (फालतू कोड हटाएँ) - यह एक शक्तिशाली वेब-आधारित उपयोगिता है जिसे विशेष रूप से टेक्स्ट से अनावश्यक फ़ॉर्मेटिंग, कोडिंग सिम्बल्स और अतिरिक्त वर्णों को कुशलतापूर्वक हटाने के लिए डिज़ाइन किया गया है।', icon: 'Eraser', category: 'text', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste your formatted or coded text into the input box.', 'Click the "Clean Text" button.', 'Copy the cleaned, plain text from the output box.'] },
     { name: 'Crypto Converter', description: 'Convert between different cryptocurrencies with live exchange rates. Essential for crypto enthusiasts and investors.', icon: 'Bitcoin', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the amount you wish to convert.', 'Select the "From" and "To" cryptocurrencies.', 'The converted amount will be displayed based on real-time exchange rates.'] },
     { name: 'File Encryption & Decryption', description: 'Encrypt and decrypt your files securely using AES encryption right in your browser.', icon: 'FileLock', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the file you want to encrypt or decrypt.', 'Enter a strong password.', 'Click the button to process your file and download the result.'] },
     { name: 'QR Code Generator', description: 'Generate custom QR codes from any text or URL. Download as PNG, JPG, or SVG for your personal or business needs.', icon: 'QrCode', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the text or URL you want to encode.', 'Customize the QR code size and colors if needed.', 'Click "Download" and choose your desired format (PNG, JPG, or SVG).'] },
@@ -145,7 +147,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image Watermark Adder', description: 'Add a custom text or image watermark to your photos. Adjust opacity, position, and size to protect your images.', icon: 'Fingerprint', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image you want to watermark.', 'Choose between a text or image watermark.', 'Customize the watermark\'s content, size, and position.', 'Download your watermarked image.'] },
     { name: 'Loan Calculator', description: 'Calculate your loan EMI and total interest payable.', icon: 'Banknote', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the loan amount, interest rate, and loan tenure.', 'The calculator will show your monthly EMI.', 'View the total interest paid over the loan period.'] },
     { name: 'XML Sitemap Generator', description: 'Create an XML sitemap for your website to improve SEO.', icon: 'FileCode', category: 'seo', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a list of your website URLs, one per line.', 'Click "Generate Sitemap".', 'Copy or download the generated sitemap.xml content.'] },
-    { name: 'IFSC Code to Bank Details', description: 'Get complete bank branch details instantly from an Indian Financial System Code (IFSC). Find the bank name, branch, address, and more.', icon: 'Landmark', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a valid 11-character IFSC code.', 'Click the "Find Bank Details" button.', 'The tool will display the bank name, branch, address, and other available details.'] },
     { name: 'EPF Calculator', description: 'Calculate the maturity amount of your Employee Provident Fund (EPF) account.', icon: 'Landmark', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your current age and monthly basic salary.', 'Provide your EPF contribution rate and current balance.', 'See your estimated EPF corpus at retirement.'] },
     { name: 'Gratuity Calculator', description: 'Estimate the gratuity amount you are eligible to receive from your employer.', icon: 'Award', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your last drawn monthly salary.', 'Provide your total years of service.', 'The tool will calculate your estimated gratuity amount.'] },
     { name: 'Inflation Calculator', description: 'Calculate the future value of money and understand the impact of inflation.', icon: 'TrendingUp', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter an amount of money.', 'Provide the annual inflation rate and the number of years.', 'See the future value and the loss of purchasing power.'] },
@@ -548,3 +549,6 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
 
+
+
+  

@@ -1,5 +1,7 @@
 
+
 export { AdMobRevenueCalculator } from './AdMobRevenueCalculator';
+export { AdvanceTextCleaner } from './AdvanceTextCleaner';
 export { AgeCalculator } from './AgeCalculator';
 export { AmazonShippingLabelCropper } from './AmazonShippingLabelCropper';
 export { AsciiToTextConverter } from './AsciiToTextConverter';
@@ -140,7 +142,6 @@ export { NpsCalculator } from './NpsCalculator';
 export { AdSenseRevenueCalculator } from './AdSenseRevenueCalculator';
 export { UnitConverter } from './UnitConverter';
 export { ImageToPdf } from './ImageToPdf';
-export { IfscCodeToBankDetails } from './IfscCodeToBankDetails';
 export { EPFCalculator } from './EPFCalculator';
 export { GratuityCalculator } from './GratuityCalculator';
 export { InflationCalculator } from './InflationCalculator';
@@ -154,3 +155,5 @@ export { HraCalculator } from './HraCalculator';
 export { TextToHandwritingConverter } from './TextToHandwritingConverter';
 export { TextToAsciiConverter } from './TextToAsciiConverter';
 export { RandomNameGenerator } from './RandomNameGenerator';
+
+  
