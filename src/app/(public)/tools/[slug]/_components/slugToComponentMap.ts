@@ -1,4 +1,5 @@
 
+
 export const slugToComponentMap: { [key: string]: string } = {
   'admob-revenue-calculator': 'AdMobRevenueCalculator',
   'age-calculator': 'AgeCalculator',
@@ -125,7 +126,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'sales-tax-calculator': 'SalesTaxCalculator',
   'tds-calculator': 'TDSCalculator',
   'image-aspect-ratio-calculator': 'ImageAspectRatioCalculator',
-  'url-encoder-&-decoder': 'UrlEncoderDecoder',
+  'url-encoder-decoder': 'UrlEncoderDecoder',
   'spelling-checker': 'SpellingChecker',
   'whats-chat-url-generator': 'WhatsChatUrlGenerator',
   'whats-app-group-url-generator': 'WhatsAppGroupUrlGenerator',

@@ -158,7 +158,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Retirement Savings Calculator', description: 'Estimate the savings you need for a comfortable retirement.', icon: 'User', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your current age, retirement age, and monthly expenses.', 'Provide expected inflation and return rates.', 'The calculator will estimate the retirement corpus you need.'] },
     { name: 'Mortgage Calculator', description: 'Calculate your monthly mortgage payments.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the loan amount, interest rate, and loan term.', 'The tool will calculate your monthly mortgage payment (EMI).'] },
     { name: 'Hra Calculator', description: 'Calculate your House Rent Allowance exemption.', icon: 'Home', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your basic salary, HRA received, and actual rent paid.', 'Indicate if you live in a metro city.', 'The calculator will show your HRA exemption amount.'] },
-    { name: 'Text to Handwriting Generator', description: 'Convert your typed text into a realistic, cursive handwriting style. Choose from various fonts and download as a PDF.', icon: 'PenLine', category: 'text', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Type or paste your text into the text area.', 'Select a handwriting font from the dropdown list.', 'Preview the result and download it as a PDF.'] },
+    { name: 'Text to Handwriting Converter', description: 'Convert your typed text into a realistic, cursive handwriting style. Choose from various fonts and download as a PDF.', icon: 'PenLine', category: 'text', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Type or paste your text into the text area.', 'Select a handwriting font from the dropdown list.', 'Preview the result and download it as a PDF.'] },
     { name: 'ASCII to Text Converter', description: 'Convert ASCII character codes into readable text.', icon: 'Binary', category: 'text', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter ASCII codes separated by spaces or commas.', 'The converted text will appear instantly.', 'Copy the result to your clipboard.'] },
     { name: 'Text to ASCII Converter', description: 'Convert text into a sequence of ASCII character codes.', icon: 'Binary', category: 'text', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter any text in the input box.', 'The ASCII representation will be generated automatically.', 'Choose your preferred separator and copy the result.'] },
     { name: 'Random Name Generator', description: 'Generate random names based on country and gender.', icon: 'Users', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select a country and gender.', 'Choose the number of names to generate.', 'Click the generate button to see the results.'] },
@@ -544,6 +544,7 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     
 
     
+
 
 
 
