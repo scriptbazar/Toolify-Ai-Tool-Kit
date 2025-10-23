@@ -205,6 +205,14 @@ async function getToolsFn (options: GetToolsOptions = {}) {
             console.error("Firebase Admin is not initialized. Cannot fetch tools.");
             return [];
         }
+        
+        // This is a one-time check for an empty collection to seed the database.
+        const toolsCollection = adminDb.collection(TOOLS_COLLECTION);
+        const snapshot = await toolsCollection.limit(1).get();
+        if (snapshot.empty) {
+            console.log("Tools collection is empty. Seeding initial tools...");
+            await seedInitialTools();
+        }
 
         let query: Query | FirebaseFirestore.DocumentReference | FirebaseFirestore.CollectionReference = adminDb.collection(TOOLS_COLLECTION);
         
@@ -229,9 +237,9 @@ async function getToolsFn (options: GetToolsOptions = {}) {
             query = query.where('category', '==', options.category);
         }
         
-        const snapshot = await query.get();
+        const finalSnapshot = await query.get();
         
-        return processSnapshot(snapshot.docs, options);
+        return processSnapshot(finalSnapshot.docs, options);
 
     } catch(e: any) {
         console.error("Error in getTools:", e.message);
@@ -519,4 +527,3 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
   }
 }
 
-    
