@@ -1,4 +1,3 @@
-
 export const slugToComponentMap: { [key: string]: string } = {
   'advance-text-cleaner': 'AdvanceTextCleaner',
   'admob-revenue-calculator': 'AdMobRevenueCalculator',
@@ -126,7 +125,6 @@ export const slugToComponentMap: { [key: string]: string } = {
   'sales-tax-calculator': 'SalesTaxCalculator',
   'tds-calculator': 'TDSCalculator',
   'image-aspect-ratio-calculator': 'ImageAspectRatioCalculator',
-  'url-encoder-decoder': 'UrlEncoderDecoder',
   'spelling-checker': 'SpellingChecker',
   'whats-chat-url-generator': 'WhatsChatUrlGenerator',
   'whats-app-group-url-generator': 'WhatsAppGroupUrlGenerator',
@@ -156,6 +154,9 @@ export const slugToComponentMap: { [key: string]: string } = {
   'text-to-ascii-converter': 'TextToAsciiConverter',
   'random-name-generator': 'RandomNameGenerator',
   'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
+  'product-sku-encryptor': 'SkuEncryptor',
 };
 
   
+
+    

@@ -1,92 +1,156 @@
-
-'use client';
-
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Copy, Trash2, Link, RefreshCw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-
-export function UrlEncoderDecoder() {
-  const [inputText, setInputText] = useState('');
-  const [outputText, setOutputText] = useState('');
-  const { toast } = useToast();
-
-  const handleEncode = () => {
-    if (!inputText) {
-      setOutputText('');
-      return;
-    }
-    try {
-      const encoded = encodeURIComponent(inputText);
-      setOutputText(encoded);
-      toast({ title: "Text Encoded!" });
-    } catch (e) {
-      toast({ title: "Encoding Error", variant: "destructive" });
-    }
-  };
-
-  const handleDecode = () => {
-    if (!inputText) {
-      setOutputText('');
-      return;
-    }
-    try {
-      const decoded = decodeURIComponent(inputText);
-      setOutputText(decoded);
-      toast({ title: "Text Decoded!" });
-    } catch (e) {
-      toast({ title: "Decoding Error", description: "The input string may not be correctly URI encoded.", variant: "destructive" });
-    }
-  };
-
-  const handleCopy = (text: string) => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
-    toast({ title: 'Copied to clipboard!' });
-  };
-
-  const handleClear = () => {
-    setInputText('');
-    setOutputText('');
-  };
-
-  return (
-    <div className="space-y-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-             <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                    <Label htmlFor="input-text">Input</Label>
-                    <Button variant="ghost" size="icon" onClick={() => handleCopy(inputText)} disabled={!inputText}><Copy className="h-4 w-4" /></Button>
-                </div>
-                <Textarea
-                    id="input-text"
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Enter text or URL to encode/decode..."
-                    className="min-h-[200px]"
-                />
-            </div>
-             <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                    <Label htmlFor="output-text">Output</Label>
-                     <Button variant="ghost" size="icon" onClick={() => handleCopy(outputText)} disabled={!outputText}><Copy className="h-4 w-4" /></Button>
-                </div>
-                <Textarea
-                    id="output-text"
-                    value={outputText}
-                    readOnly
-                    placeholder="Result will appear here..."
-                    className="min-h-[200px] bg-muted"
-                />
-            </div>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={handleEncode} className="w-full">Encode</Button>
-            <Button onClick={handleDecode} className="w-full">Decode</Button>
-            <Button variant="destructive" onClick={handleClear} className="w-full"><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
-        </div>
-    </div>
-  );
-}
+export { AdMobRevenueCalculator } from './AdMobRevenueCalculator';
+export { AdvanceTextCleaner } from './AdvanceTextCleaner';
+export { AgeCalculator } from './AgeCalculator';
+export { AmazonShippingLabelCropper } from './AmazonShippingLabelCropper';
+export { AsciiToTextConverter } from './AsciiToTextConverter';
+export { AverageCalculator } from './AverageCalculator';
+export { BarcodeGenerator } from './BarcodeGenerator';
+export { BarcodeScanner } from './BarcodeScanner';
+export { Base64Converter } from './Base64Converter';
+export { BinaryToText } from './BinaryToText';
+export { BmiCalculator } from './BmiCalculator';
+export { CaseConverter } from './CaseConverter';
+export { CgpaToGpaConverter } from './CgpaToGpaConverter';
+export { CgpaToMarksCalculator } from './CgpaToMarksCalculator';
+export { ColorPicker } from './ColorPicker';
+export { CompressPdf } from './CompressPdf';
+export { CreditCardInterestCalculator } from './CreditCardInterestCalculator';
+export { CrontabGenerator } from './CrontabGenerator';
+export { CryptoConverter } from './CryptoConverter';
+export { CssMinifier } from './CssMinifier';
+export { CurrencyConverter } from './CurrencyConverter';
+export { DateCalculator } from './DateCalculator';
+export { DiscountCalculator } from './DiscountCalculator';
+export * from './DrivingLicenceResizer';
+export { DropboxDirectLinkGenerator } from './DropboxDirectLinkGenerator';
+export { ExcelToPdf } from './ExcelToPdf';
+export { FaviconChecker } from './FaviconChecker';
+export { FindAndReplace } from './FindAndReplace';
+export { FlipkartShippingLabelCropper } from './FlipkartShippingLabelCropper';
+export { FlipImage } from './FlipImage';
+export { FuelCostCalculator } from './FuelCostCalculator';
+export { GpaCalculator } from './GpaCalculator';
+export { GpaToCgpaCalculator } from './GpaToCgpaCalculator';
+export { GpaToPercentageConverter } from './GpaToPercentageConverter';
+export { GSTCalculator } from './GSTCalculator';
+export { GoogleDriveDirectLinkGenerator } from './GoogleDriveDirectLinkGenerator';
+export { HtmlMinifier } from './HtmlMinifier';
+export { HtmlToMarkdownConverter } from './HtmlToMarkdownConverter';
+export { IcoConverter } from './IcoConverter';
+export { ImageColorExtractor } from './ImageColorExtractor';
+export { ImageCompressor } from './ImageCompressor';
+export { ImageConverter } from './ImageConverter';
+export { ImageCropper } from './ImageCropper';
+export { ImageGrayscaleConverter } from './ImageGrayscaleConverter';
+export { ImageResizer } from './ImageResizer';
+export { ImageShapeConverter } from './ImageShapeConverter';
+export { ImageToBase64 } from './ImageToBase64';
+export { ImageWatermarkAdder } from './ImageWatermarkAdder';
+export { ImageMetadataViewer } from './ImageMetadataViewer';
+export { InterestCalculator } from './InterestCalculator';
+export { JavascriptMinifier } from './JavascriptMinifier';
+export { JsonFormatter } from './JsonFormatter';
+export { KeywordDensityChecker } from './KeywordDensityChecker';
+export { LoanCalculator } from './LoanCalculator';
+export { LockPdf } from './LockPdf';
+export { LoremIpsumGenerator } from './LoremIpsumGenerator';
+export { MarksToPercentageCalculator } from './MarksToPercentageCalculator';
+export { MeeshoShippingLabelCropper } from './MeeshoShippingLabelCropper';
+export { MetaTagGenerator } from './MetaTagGenerator';
+export { MorseToTextTranslator } from './MorseToTextTranslator';
+export { MyntraShippingLabelCropper } from './MyntraShippingLabelCropper';
+export { NegativeMarkingCalculator } from './NegativeMarkingCalculator';
+export { NSDLPANCardPhotoAndSignatureResizer } from './NSDLPANCardPhotoAndSignatureResizer';
+export { OneDriveDirectLinkGenerator } from './OneDriveDirectLinkGenerator';
+export { PasswordGenerator } from './PasswordGenerator';
+export { PasswordStrengthChecker } from './PasswordStrengthChecker';
+export { PdfMerger } from './PdfMerger';
+export { PdfOrganizer } from './PdfOrganizer';
+export { PdfPageCounter } from './PdfPageCounter';
+export { PdfPageNumberer } from './PdfPageNumberer';
+export { PdfPageRemover } from './PdfPageRemover';
+export { PdfPageReorder } from './PdfPageReorder';
+export { PdfSigner } from './PdfSigner';
+export { PdfSplitter } from './PdfSplitter';
+export { PdfToJpg } from './PdfToJpg';
+export { PdfToWord } from './PdfToWord';
+export { PercentageCalculator } from './PercentageCalculator';
+export { PercentageToCgpaConverter } from './PercentageToCgpaConverter';
+export { PptToPdf } from './PptToPdf';
+export { QrCodeGenerator } from './QrCodeGenerator';
+export { QrCodeScanner } from './QrCodeScanner';
+export { RandomWordGenerator } from './RandomWordGenerator';
+export { ReadabilityScoreChecker } from './ReadabilityScoreChecker';
+export { RemoveExtraSpaces } from './RemoveExtraSpaces';
+export { RedirectChecker } from './RedirectChecker';
+export { ReverseText } from './ReverseText';
+export { RobotsTxtGenerator } from './RobotsTxtGenerator';
+export { RotateImage } from './RotateImage';
+export { RotatePdf } from './RotatePdf';
+export { SchemaGenerator } from './SchemaGenerator';
+export { SerpChecker } from './SerpChecker';
+export { Sha256HashGenerator } from './Sha256HashGenerator';
+export { SkuEncryptor } from './SkuEncryptor';
+export { SrmToCgpaCalculator } from './SrmToCgpaCalculator';
+export { SqlFormatter } from './SqlFormatter';
+export { TextRepeater } from './TextRepeater';
+export { TextToBinary } from './TextToBinary';
+export { TextToMorseCode } from './TextToMorseCode';
+export { FileEncryptionDecryption } from './FileEncryptionDecryption';
+export { ImageToText } from './ImageToText';
+export { TimeZoneConverter } from './TimeZoneConverter';
+export { TitleTagChecker } from './TitleTagChecker';
+export { UnixTimestampConverter } from './UnixTimestampConverter';
+export { UniversalHashGenerator } from './UniversalHashGenerator';
+export { UnlockPdf } from './UnlockPdf';
+export { UrlShortener } from './UrlShortener';
+export { UuidGenerator } from './UuidGenerator';
+export { UTIPANCardPhotoAndSignatureResizer } from './UTIPANCardPhotoAndSignatureResizer';
+export { WebsiteScreenshot } from './WebsiteScreenshot';
+export { WebsiteWordCounter } from './WebsiteWordCounter';
+export { WhatIsMyBrowser } from './WhatIsMyBrowser';
+export { WordCounter } from './WordCounter';
+export { WordToPdf } from './WordToPdf';
+export { XmlSitemapGenerator } from './XmlSitemapGenerator';
+export { YouTubeChannelBannerDownloader } from './YouTubeChannelBannerDownloader';
+export { YouTubeChannelLogoDownloader } from './YouTubeChannelLogoDownloader';
+export { YouTubeRegionRestrictionChecker } from './YouTubeRegionRestrictionChecker';
+export { YouTubeVideoDescriptionExtractor } from './YouTubeVideoDescriptionExtractor';
+export { YouTubeVideoThumbnailDownloader } from './YouTubeVideoThumbnailDownloader';
+export { YouTubeVideoTitleExtractor } from './YouTubeVideoTitleExtractor';
+export { ProfitLossCalculator } from './ProfitLossCalculator';
+export { SIPCalculator } from './SIPCalculator';
+export { FDCalculator } from './FDCalculator';
+export { MutualFundCalculator } from './MutualFundCalculator';
+export { SalesTaxCalculator } from './SalesTaxCalculator';
+export { TDSCalculator } from './TDSCalculator';
+export { ImageAspectRatioCalculator } from './ImageAspectRatioCalculator';
+export { SpellingChecker } from './SpellingChecker';
+export { WhatsChatUrlGenerator } from './WhatsChatUrlGenerator';
+export { WhatsAppGroupUrlGenerator } from './WhatsAppGroupUrlGenerator';
+export { InternetSpeedTester } from './InternetSpeedTester';
+export { PageSizeChecker } from './PageSizeChecker';
+export { DeviceInformationDetector } from './DeviceInformationDetector';
+export { NumbersToWord } from './NumbersToWord';
+export { EmojiRemover } from './EmojiRemover';
+export { RomanToNumberConverter } from './RomanToNumberConverter';
+export { NumberToRomanConverter } from './NumberToRomanConverter';
+export { RdCalculator } from './RdCalculator';
+export { NpsCalculator } from './NpsCalculator';
+export { AdSenseRevenueCalculator } from './AdSenseRevenueCalculator';
+export { UnitConverter } from './UnitConverter';
+export { ImageToPdf } from './ImageToPdf';
+export { EPFCalculator } from './EPFCalculator';
+export { GratuityCalculator } from './GratuityCalculator';
+export { InflationCalculator } from './InflationCalculator';
+export { LoanAffordabilityCalculator } from './LoanAffordabilityCalculator';
+export { NscCalculator } from './NscCalculator';
+export { PpfCalculator } from './PpfCalculator';
+export { SwpCalculator } from './SwpCalculator';
+export { RetirementSavingsCalculator } from './RetirementSavingsCalculator';
+export { MortgageCalculator } from './MortgageCalculator';
+export { HraCalculator } from './HraCalculator';
+export { TextToHandwritingConverter } from './TextToHandwritingConverter';
+export { TextToAsciiConverter } from './TextToAsciiConverter';
+export { RandomNameGenerator } from './RandomNameGenerator';
+export { IfscCodeToBankDetails } from './IfscCodeToBankDetails';

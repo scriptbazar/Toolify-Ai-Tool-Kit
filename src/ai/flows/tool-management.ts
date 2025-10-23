@@ -128,7 +128,6 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Sales Tax Calculator', description: 'Easily calculate sales tax for any amount.', icon: 'ShoppingBag', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the price of the item.', 'Enter the sales tax rate percentage.', 'The calculator will show you the tax amount and the total price.'] },
     { name: 'TDS Calculator', description: 'Calculate Tax Deducted at Source for your income.', icon: 'IndianRupee', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your total income amount.', 'Enter the applicable TDS rate percentage.', 'The tool will show the TDS amount and your net income.'] },
     { name: 'Image Aspect Ratio Calculator', description: 'Calculate the aspect ratio or dimensions of an image.', icon: 'AspectRatio', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the width and height of an image to find its ratio.', 'Or, enter a ratio and one dimension to find the other.'] },
-    { name: 'URL Encoder & Decoder', description: 'Encode or decode URLs for safe transmission.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste a URL or text to encode it for use in a URL.', 'Or, paste an encoded URL to decode it back to readable text.'] },
     { name: 'Spelling Checker', description: 'Check and correct spelling in your text.', icon: 'SpellCheck', category: 'text', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste your text into the text area.', 'Click the analyze button.', 'Misspelled words will be highlighted with suggestions for correction.'] },
     { name: 'Whats Chat URL Generator', description: 'Generate a WhatsApp chat link with a pre-filled message.', icon: 'MessageSquare', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the phone number and a pre-filled message.', 'A WhatsApp chat link will be generated instantly.', 'Share the link to start a conversation easily.'] },
     { name: 'Whats App Group URL Generator', description: 'Generate a WhatsApp group invitation link.', icon: 'Users', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your WhatsApp group invitation link.', 'Add custom text for the link.', 'The tool will generate an HTML link for your website.'] },
@@ -164,6 +163,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image to PDF', description: '📑 Convert your JPG, PNG, and other image files into a single, easy-to-share PDF document. Combine multiple images into one file.', icon: 'FileImage', category: 'pdf', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload one or more image files.', 'Drag and drop to reorder the images if needed.', 'Click "Convert &amp; Download PDF".', 'A single PDF containing all your images will be created.'] },
     { name: 'Average Calculator', description: 'Calculate the average of a set of numbers.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a set of numbers separated by commas or spaces.', 'The tool will calculate the sum, count, and average of the numbers.'] },
     { name: 'IFSC Code to Bank Details', description: 'Find bank branch details from an IFSC code.', icon: 'Landmark', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the 11-character IFSC code.', 'Click "Find Details".', 'The bank and branch information will be displayed.'] },
+    { name: 'Product SKU Encryptor', description: 'Securely encrypt and decrypt your product SKUs using a secret key.', icon: 'KeyRound', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your SKU and a secret key.', 'Click "Encrypt" to get the encrypted text.', 'Use the same key to "Decrypt" it back.'] },
 ];
 
 const generateSlug = (name: string) => {
@@ -552,3 +552,4 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
 
 
   
+    

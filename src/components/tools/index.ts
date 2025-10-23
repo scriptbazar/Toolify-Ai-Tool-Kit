@@ -92,6 +92,7 @@ export { RotatePdf } from './RotatePdf';
 export { SchemaGenerator } from './SchemaGenerator';
 export { SerpChecker } from './SerpChecker';
 export { Sha256HashGenerator } from './Sha256HashGenerator';
+export { SkuEncryptor } from './SkuEncryptor';
 export { SrmToCgpaCalculator } from './SrmToCgpaCalculator';
 export { SqlFormatter } from './SqlFormatter';
 export { TextRepeater } from './TextRepeater';
@@ -104,7 +105,6 @@ export { TitleTagChecker } from './TitleTagChecker';
 export { UnixTimestampConverter } from './UnixTimestampConverter';
 export { UniversalHashGenerator } from './UniversalHashGenerator';
 export { UnlockPdf } from './UnlockPdf';
-export { UrlEncoderDecoder } from './UrlEncoderDecoder';
 export { UrlShortener } from './UrlShortener';
 export { UuidGenerator } from './UuidGenerator';
 export { UTIPANCardPhotoAndSignatureResizer } from './UTIPANCardPhotoAndSignatureResizer';
@@ -158,3 +158,5 @@ export { RandomNameGenerator } from './RandomNameGenerator';
 export { IfscCodeToBankDetails } from './IfscCodeToBankDetails';
 
   
+
+    
