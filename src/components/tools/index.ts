@@ -1,5 +1,4 @@
 
-
 export { AdMobRevenueCalculator } from './AdMobRevenueCalculator';
 export { AdvanceTextCleaner } from './AdvanceTextCleaner';
 export { AgeCalculator } from './AgeCalculator';
@@ -156,7 +155,3 @@ export { TextToHandwritingConverter } from './TextToHandwritingConverter';
 export { TextToAsciiConverter } from './TextToAsciiConverter';
 export { RandomNameGenerator } from './RandomNameGenerator';
 export { IfscCodeToBankDetails } from './IfscCodeToBankDetails';
-
-  
-
-    
