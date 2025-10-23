@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -160,7 +161,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Random Name Generator', description: 'Generate random names based on country and gender.', icon: 'Users', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Select a country and gender.', 'Choose the number of names to generate.', 'Click the generate button to see the results.'] },
     { name: 'URL Shortener', description: 'Create short, shareable links from long URLs.', icon: 'Link', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Paste your long URL into the input field.', 'Click "Shorten URL".', 'Copy your new, shorter link.'] },
     { name: 'Image Grayscale Converter', description: 'Convert colorful images into black and white (grayscale).', icon: 'Palette', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload an image you want to convert.', 'The tool will automatically convert it to grayscale.', 'Download your new black and white image.'] },
-    { name: 'Image to PDF', description: '📑 Convert your JPG, PNG, and other image files into a single, easy-to-share PDF document. Combine multiple images into one file.', icon: 'FileImage', category: 'pdf', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload one or more image files.', 'Drag and drop to reorder the images if needed.', 'Click "Convert &amp; Download PDF".', 'A single PDF containing all your images will be created.'] },
+    { name: 'Image to PDF', description: '📑 Convert your JPG, PNG, and other image files into a single, easy-to-share PDF document. Combine multiple images into one file.', icon: 'FileImage', category: 'pdf', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload one or more image files.', 'Drag and drop to reorder the images if needed.', 'Click "Convert&amp; Download PDF".', 'A single PDF containing all your images will be created.'] },
     { name: 'Average Calculator', description: 'Calculate the average of a set of numbers.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a set of numbers separated by commas or spaces.', 'The tool will calculate the sum, count, and average of the numbers.'] },
     { name: 'IFSC Code to Bank Details', description: 'Find bank branch details from an IFSC code.', icon: 'Landmark', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the 11-character IFSC code.', 'Click "Find Details".', 'The bank and branch information will be displayed.'] },
     { name: 'Product SKU Encryptor', description: 'Securely encrypt and decrypt your product SKUs using a secret key.', icon: 'KeyRound', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your SKU and a secret key.', 'Click "Encrypt" to get the encrypted text.', 'Use the same key to "Decrypt" it back.'] },
@@ -229,13 +230,6 @@ async function getToolsFn (options: GetToolsOptions = {}) {
         }
         
         const snapshot = await query.get();
-        
-        // This seeding logic is problematic with caching. Let's remove it for now.
-        // if (snapshot.empty && !options.slug && !options.category) {
-        //     await seedInitialTools();
-        //     const retrySnapshot = await adminDb.collection(TOOLS_COLLECTION).get();
-        //     return processSnapshot(retrySnapshot.docs, options);
-        // }
         
         return processSnapshot(snapshot.docs, options);
 
@@ -524,32 +518,5 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     return { success: false, message: "Could not update favorites." };
   }
 }
-    
 
-    
-    
-
-      
-
-
-      
-
-
-
-
-
-    
-
-    
-
-    
-
-
-
-
-
-
-
-
-  
     
