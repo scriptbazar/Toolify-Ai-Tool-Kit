@@ -9,6 +9,7 @@
 import { z } from 'zod';
 import { ai } from '@/ai/genkit';
 import { ImageAnnotatorClient } from '@google-cloud/vision';
+import serviceAccount from '@/firebase-service-account-key.json';
 import { 
     AnalyzeImageInputSchema,
     AnalyzeImageOutputSchema,
@@ -29,7 +30,14 @@ const analyzeImageForTextFlow = ai.defineFlow(
         outputSchema: AnalyzeImageOutputSchema,
     },
     async (input) => {
-        const visionClient = new ImageAnnotatorClient();
+        // Initialize with credentials to ensure authentication on the server
+        const visionClient = new ImageAnnotatorClient({
+            projectId: serviceAccount.project_id,
+            credentials: {
+                client_email: serviceAccount.client_email,
+                private_key: serviceAccount.private_key,
+            },
+        });
         const imageBuffer = Buffer.from(input.imageDataUri.split(',')[1], 'base64');
         
         try {
@@ -53,4 +61,3 @@ const analyzeImageForTextFlow = ai.defineFlow(
         }
     }
 );
-
