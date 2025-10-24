@@ -30,14 +30,15 @@ const analyzeImageForTextFlow = ai.defineFlow(
         outputSchema: AnalyzeImageOutputSchema,
     },
     async (input) => {
-        // Initialize with credentials to ensure authentication on the server
+        // Correctly initialize with the full service account object
         const visionClient = new ImageAnnotatorClient({
-            projectId: serviceAccount.project_id,
             credentials: {
                 client_email: serviceAccount.client_email,
                 private_key: serviceAccount.private_key,
             },
+            projectId: serviceAccount.project_id,
         });
+
         const imageBuffer = Buffer.from(input.imageDataUri.split(',')[1], 'base64');
         
         try {
@@ -48,8 +49,6 @@ const analyzeImageForTextFlow = ai.defineFlow(
             const fullTextAnnotation = result.fullTextAnnotation || null;
             const textAnnotations = result.textAnnotations || [];
 
-            // Here you could add more processing, e.g., entity detection if needed
-            
             return {
                 fullTextAnnotation: fullTextAnnotation,
                 textAnnotations: textAnnotations,
@@ -61,4 +60,3 @@ const analyzeImageForTextFlow = ai.defineFlow(
         }
     }
 );
-
