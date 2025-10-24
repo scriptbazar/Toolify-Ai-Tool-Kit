@@ -3,9 +3,11 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, Scissors, Loader2 } from 'lucide-react';
+import { UploadCloud, Scissors, Loader2, FileUp, FileText, ArrowRight, Printer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument } from 'pdf-lib';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
 
 export function MyntraShippingLabelCropper() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -66,23 +68,59 @@ export function MyntraShippingLabelCropper() {
   };
 
   return (
-    <div className="space-y-6">
-      <div 
-        className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
-        <div className="flex flex-col items-center">
-          <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-          <p className="text-sm text-muted-foreground">{pdfFile ? `Selected: ${pdfFile.name}` : 'Click or drag Myntra label PDF to upload'}</p>
-          <p className="text-xs text-muted-foreground">Crops standard labels to 4x6" format.</p>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><FileUp className="h-5 w-5"/>Step 1: Upload Your Label</CardTitle>
+                    <CardDescription>Upload the standard PDF label you downloaded from Myntra.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div 
+                        className="w-full aspect-video border-2 border-dashed border-muted-foreground/30 rounded-lg text-center cursor-pointer hover:bg-muted/50 flex items-center justify-center relative"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
+                        <div className="flex flex-col items-center">
+                        <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">Click or drag PDF label to upload</p>
+                        </div>
+                    </div>
+                     {pdfFile && (
+                        <div className="mt-4 p-2 bg-muted rounded-md flex items-center gap-2">
+                           <FileText className="h-5 w-5 text-primary"/>
+                           <span className="text-sm font-medium truncate">{pdfFile.name}</span>
+                           <span className="text-xs text-muted-foreground ml-auto">{(pdfFile.size / 1024).toFixed(1)} KB</span>
+                        </div>
+                     )}
+                </CardContent>
+            </Card>
         </div>
-      </div>
-      
-      <Button onClick={handleCrop} disabled={isLoading || !pdfFile} className="w-full">
-        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Scissors className="mr-2 h-4 w-4" />}
-        Crop Myntra Label
-      </Button>
+        <div className="space-y-6">
+           <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Printer className="h-5 w-5"/>Step 2: Preview & Crop</CardTitle>
+                    <CardDescription>Your label will be cropped to a perfect 4" x 6" size, ready for your thermal printer.</CardDescription>
+                </CardHeader>
+                 <CardContent className="flex flex-col items-center gap-4">
+                     <div className="flex items-center gap-4">
+                        <div className="flex flex-col items-center">
+                            <FileUp className="h-20 w-20 text-muted-foreground"/>
+                            <Badge>Original PDF</Badge>
+                        </div>
+                        <ArrowRight className="h-8 w-8 text-primary"/>
+                        <div className="flex flex-col items-center">
+                             <Printer className="h-20 w-20 text-muted-foreground"/>
+                             <Badge>4" x 6" Label</Badge>
+                        </div>
+                     </div>
+                     <Button onClick={handleCrop} disabled={isLoading || !pdfFile} className="w-full mt-4">
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Scissors className="mr-2 h-4 w-4" />}
+                        Crop Myntra Label
+                    </Button>
+                 </CardContent>
+            </Card>
+        </div>
     </div>
   );
 }
