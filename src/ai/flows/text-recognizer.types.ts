@@ -8,7 +8,7 @@ export const BoundingPolySchema = z.object({ vertices: z.array(VertexSchema) });
 export const TextAnnotationSchema = z.object({
   description: z.string(),
   boundingPoly: BoundingPolySchema,
-  // Simplified nested structure for blocks/paragraphs/words/symbols
+  // Using z.any() for nested structures that we don't need to strictly type for this feature.
   pages: z.array(z.any()).optional(),
   blocks: z.array(z.any()).optional(),
   paragraphs: z.array(z.any()).optional(),
@@ -18,16 +18,6 @@ export const TextAnnotationSchema = z.object({
 });
 export type TextAnnotation = z.infer<typeof TextAnnotationSchema>;
 
-export const EntityAnnotationSchema = z.object({
-  mid: z.string().optional(),
-  locale: z.string().optional(),
-  description: z.string(),
-  score: z.number(),
-  confidence: z.number().optional(),
-  topicality: z.number().optional(),
-  boundingPoly: BoundingPolySchema.optional(),
-});
-export type EntityAnnotation = z.infer<typeof EntityAnnotationSchema>;
 
 export const AnalyzeImageInputSchema = z.object({
   imageDataUri: z.string().describe('The image file to analyze, as a data URI.'),
@@ -36,6 +26,6 @@ export type AnalyzeImageInput = z.infer<typeof AnalyzeImageInputSchema>;
 
 export const AnalyzeImageOutputSchema = z.object({
   fullTextAnnotation: TextAnnotationSchema.nullable(),
-  textAnnotations: z.array(EntityAnnotationSchema),
+  textAnnotations: z.array(TextAnnotationSchema),
 });
 export type AnalyzeImageOutput = z.infer<typeof AnalyzeImageOutputSchema>;

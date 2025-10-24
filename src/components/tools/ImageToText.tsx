@@ -4,21 +4,39 @@
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, Loader2, FileText, Bot, Copy, Trash2 } from 'lucide-react';
+import { UploadCloud, Loader2, FileText, Bot, Copy, Trash2, ZoomIn, ZoomOut, Move, Languages, Text, Square, Sigma, Baseline } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
-import { analyzeImageForText } from '@/ai/flows/text-recognizer';
-import { ScrollArea } from '../ui/scroll-area';
+import { analyzeImage } from '@/ai/flows/text-recognizer';
+import type { TextAnnotation, BoundingPolySchema } from '@/ai/flows/text-recognizer.types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Skeleton } from '../ui/skeleton';
+import { ScrollArea } from '../ui/scroll-area';
+import { Badge } from '../ui/badge';
+import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '../ui/table';
+import Image from 'next/image';
+
+interface BoundingBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 export function ImageToText() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [extractedText, setExtractedText] = useState<string>('');
+  const [fullText, setFullText] = useState<string>('');
+  const [blocks, setBlocks] = useState<TextAnnotation[]>([]);
+  const [detectedLanguage, setDetectedLanguage] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const lastMousePos = useRef({ x: 0, y: 0 });
+  const [highlightedBox, setHighlightedBox] = useState<BoundingBox | null>(null);
   const { toast } = useToast();
 
   const handleFile = (file: File) => {
@@ -28,7 +46,12 @@ export function ImageToText() {
             return;
         }
         setImageFile(file);
-        setExtractedText('');
+        setFullText('');
+        setBlocks([]);
+        setDetectedLanguage('');
+        setHighlightedBox(null);
+        setZoom(1);
+        setOffset({ x: 0, y: 0 });
         setImagePreview(URL.createObjectURL(file));
         handleAnalyze(file);
     } else {
@@ -48,13 +71,13 @@ export function ImageToText() {
       reader.readAsDataURL(fileToAnalyze);
       reader.onloadend = async () => {
         const base64Image = reader.result as string;
-        const result = await analyzeImageForText({ imageDataUri: base64Image });
-        if (result.fullTextAnnotation && result.fullTextAnnotation.text) {
-          setExtractedText(result.fullTextAnnotation.text);
-          toast({ title: 'Success!', description: 'Text has been extracted from the image.'});
+        const result = await analyzeImage({ imageDataUri: base64Image });
+        if (result.fullTextAnnotation) {
+          setFullText(result.fullTextAnnotation.text);
+          setBlocks(result.fullTextAnnotation.pages?.[0]?.blocks || []);
+          setDetectedLanguage(result.fullTextAnnotation.pages?.[0]?.property?.detectedLanguages?.[0]?.languageCode || 'N/A');
         } else {
-          setExtractedText('');
-          toast({ title: 'No Text Found', description: 'Could not detect any text in the image.', variant: 'default'});
+          toast({ title: 'No Text Detected', description: 'The AI could not find any text in this image.', variant: 'default'});
         }
         setIsLoading(false);
       };
@@ -64,64 +87,123 @@ export function ImageToText() {
     }
   };
 
-  const handleCopy = () => { navigator.clipboard.writeText(extractedText); toast({ title: "Copied to clipboard!" }); };
-  const handleClear = () => { setImageFile(null); setImagePreview(null); setExtractedText(''); if (fileInputRef.current) fileInputRef.current.value = ''; };
+  const handleCopy = (text: string) => { navigator.clipboard.writeText(text); toast({ title: "Copied to clipboard!" }); };
+  const handleClear = () => { setImageFile(null); setImagePreview(null); setFullText(''); setBlocks([]); setDetectedLanguage(''); if (fileInputRef.current) fileInputRef.current.value = ''; };
+  
+  // Panning and Zooming Logic
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => { if (e.button === 0) { setIsPanning(true); lastMousePos.current = { x: e.clientX, y: e.clientY }; }};
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => { if (isPanning) { const dx = e.clientX - lastMousePos.current.x; const dy = e.clientY - lastMousePos.current.y; setOffset(prev => ({ x: prev.x + dx, y: prev.y + dy })); lastMousePos.current = { x: e.clientX, y: e.clientY }; }};
+  const handleMouseUp = () => setIsPanning(false);
+  const handleMouseLeave = () => setIsPanning(false);
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => { e.preventDefault(); const newZoom = zoom - e.deltaY * 0.001; setZoom(Math.max(0.1, Math.min(newZoom, 5))); };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div className="space-y-4">
-            <Card 
-                className={cn(
-                    "transition-colors",
-                    isDragging ? 'border-primary bg-primary/10' : 'border-border'
-                )}
-                onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
-            >
-                <CardContent 
-                    className="p-6 text-center cursor-pointer"
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-                    <div className="flex flex-col items-center justify-center h-full aspect-video">
-                        {imagePreview ? (
-                            <Image src={imagePreview} alt="Uploaded preview" layout="fill" objectFit="contain" className="p-2"/>
-                        ) : (
-                             <div className="flex flex-col items-center">
-                                <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                                <p className="text-sm text-muted-foreground">Click or drag image to upload</p>
+    <div className="space-y-6">
+        <div 
+            className={cn("w-full h-48 border-2 border-dashed rounded-lg text-center cursor-pointer flex flex-col items-center justify-center relative transition-colors", 
+                isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/30 hover:bg-muted/50'
+            )}
+            onClick={() => fileInputRef.current?.click()}
+            onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+        >
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+            <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+            <h3 className="text-lg font-semibold">Click or drag image to upload</h3>
+            <p className="text-sm text-muted-foreground">(JPG, PNG, WEBP | Max 10MB)</p>
+        </div>
+        
+        {isLoading && <div className="flex justify-center items-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary"/></div>}
+
+        {(imagePreview && !isLoading) && (
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in-50">
+                 <Card className="h-full">
+                    <CardHeader>
+                        <CardTitle className="flex justify-between items-center">Image Preview
+                        <div className="flex items-center gap-2">
+                           <Button variant="outline" size="icon" onClick={() => setZoom(z => Math.max(0.1, z - 0.1))}><ZoomOut className="h-4 w-4"/></Button>
+                           <Button variant="outline" size="icon" onClick={() => setZoom(z => Math.min(5, z + 0.1))}><ZoomIn className="h-4 w-4"/></Button>
+                           <Button variant="outline" size="icon" onClick={() => {setZoom(1); setOffset({x:0, y:0})}}><Move className="h-4 w-4"/></Button>
+                        </div>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent 
+                        className="relative w-full h-[500px] overflow-hidden bg-muted cursor-grab active:cursor-grabbing rounded-md"
+                        onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseLeave} onWheel={handleWheel}
+                    >
+                         {imagePreview && (
+                            <div style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`, transformOrigin: 'center center' }}>
+                                <img src={imagePreview} alt="Uploaded preview" className="absolute top-0 left-0" />
+                                {highlightedBox && (
+                                    <div 
+                                        className="absolute border-2 border-primary bg-primary/20"
+                                        style={{ 
+                                            left: `${highlightedBox.x}px`,
+                                            top: `${highlightedBox.y}px`,
+                                            width: `${highlightedBox.width}px`,
+                                            height: `${highlightedBox.height}px`,
+                                        }}
+                                    />
+                                )}
                             </div>
                         )}
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-        <div className="space-y-4">
-             <Card>
-                <CardHeader className="flex flex-row justify-between items-start">
-                    <div>
-                        <CardTitle className="flex items-center gap-2"><Bot className="h-5 w-5"/>Extracted Text</CardTitle>
-                        <CardDescription>Text recognized by the AI.</CardDescription>
-                    </div>
-                    <div className="flex gap-1">
-                        <Button variant="outline" size="sm" onClick={handleCopy} disabled={!extractedText}><Copy className="mr-2 h-4 w-4"/>Copy</Button>
-                        <Button variant="destructive" size="sm" onClick={handleClear}><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <ScrollArea className="h-72 w-full p-4 border rounded-md bg-muted">
-                        {isLoading ? (
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-3/4" />
+                    </CardContent>
+                 </Card>
+                 <Card>
+                    <CardHeader><CardTitle>Extracted Text Analysis</CardTitle></CardHeader>
+                    <CardContent>
+                        <Tabs defaultValue="full-text">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="full-text">Full Text</TabsTrigger>
+                                <TabsTrigger value="by-block">By Block</TabsTrigger>
+                            </TabsList>
+                             <div className="flex items-center justify-between mt-4">
+                                <Badge variant="outline" className="flex items-center gap-1.5"><Languages className="h-4 w-4"/> Detected: <span className="font-semibold">{detectedLanguage}</span></Badge>
+                                <div className="flex gap-1">
+                                    <Button variant="outline" size="sm" onClick={() => handleCopy(fullText)} disabled={!fullText}><Copy className="mr-2 h-4 w-4"/>Copy All</Button>
+                                    <Button variant="destructive" size="sm" onClick={handleClear}><Trash2 className="mr-2 h-4 w-4"/>Clear</Button>
+                                </div>
                             </div>
-                        ) : (
-                           <p className="text-sm whitespace-pre-wrap">{extractedText || "Upload an image to see the extracted text here."}</p>
-                        )}
-                    </ScrollArea>
-                </CardContent>
-             </Card>
-        </div>
+                            <TabsContent value="full-text" className="mt-4">
+                                <ScrollArea className="h-[400px] w-full p-4 border rounded-md bg-muted">
+                                    <p className="text-sm whitespace-pre-wrap">{fullText || "No text detected."}</p>
+                                </ScrollArea>
+                            </TabsContent>
+                             <TabsContent value="by-block" className="mt-4">
+                                <ScrollArea className="h-[400px] w-full border rounded-md">
+                                    <Table>
+                                        <TableHeader className="sticky top-0 bg-background"><TableRow><TableHead>Type</TableHead><TableHead>Text</TableHead></TableRow></TableHeader>
+                                        <TableBody>
+                                            {blocks.flatMap(block => 
+                                                block.paragraphs?.flatMap(para => 
+                                                    para.words?.flatMap(word => 
+                                                        word.symbols?.map(symbol => ({
+                                                            type: 'Symbol',
+                                                            text: symbol.text,
+                                                            boundingBox: symbol.boundingBox,
+                                                            confidence: symbol.confidence,
+                                                        })) || []
+                                                    ) || []
+                                                ) || []
+                                            ).map((item, index) => (
+                                                <TableRow 
+                                                    key={index}
+                                                    onMouseEnter={() => item.boundingBox && setHighlightedBox({ x: item.boundingBox.vertices[0].x, y: item.boundingBox.vertices[0].y, width: item.boundingBox.vertices[1].x - item.boundingBox.vertices[0].x, height: item.boundingBox.vertices[2].y - item.boundingBox.vertices[0].y })}
+                                                    onMouseLeave={() => setHighlightedBox(null)}
+                                                    className="cursor-pointer"
+                                                >
+                                                    <TableCell><Badge variant="secondary"><Baseline className="h-3 w-3 mr-1" />{item.type}</Badge></TableCell>
+                                                    <TableCell className="font-mono text-xs">{item.text}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </ScrollArea>
+                            </TabsContent>
+                        </Tabs>
+                    </CardContent>
+                 </Card>
+            </div>
+        )}
     </div>
   );
 }
