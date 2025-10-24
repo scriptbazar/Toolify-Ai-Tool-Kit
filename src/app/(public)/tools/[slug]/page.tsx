@@ -6,6 +6,31 @@ import { notFound } from 'next/navigation';
 import { ToolComponentRenderer } from './_components/ToolPageClient';
 import { ToolSidebar } from '@/components/tools/ToolSidebar';
 import { getPosts } from '@/ai/flows/blog-management';
+import type { Metadata, ResolvingMetadata } from 'next';
+
+type Props = {
+  params: { slug: string }
+}
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const slug = params.slug;
+  const tools = await getTools({ slug });
+  const tool = tools[0];
+
+  if (!tool) {
+    return {
+      title: 'Tool Not Found',
+    }
+  }
+
+  return {
+    title: tool.name,
+    description: tool.description,
+  }
+}
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
 
@@ -53,3 +78,4 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         </ToolComponentRenderer>
     );
 }
+
