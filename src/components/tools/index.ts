@@ -1,4 +1,3 @@
-
 export { AdMobRevenueCalculator } from './AdMobRevenueCalculator';
 export { AdvanceTextCleaner } from './AdvanceTextCleaner';
 export { AgeCalculator } from './AgeCalculator';
@@ -130,7 +129,6 @@ export { SpellingChecker } from './SpellingChecker';
 export { WhatsChatUrlGenerator } from './WhatsChatUrlGenerator';
 export { WhatsAppGroupUrlGenerator } from './WhatsAppGroupUrlGenerator';
 export { InternetSpeedTester } from './InternetSpeedTester';
-export { PageSizeChecker } from './PageSizeChecker';
 export { DeviceInformationDetector } from './DeviceInformationDetector';
 export { NumbersToWord } from './NumbersToWord';
 export { EmojiRemover } from './EmojiRemover';
