@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -20,6 +19,55 @@ interface UserData {
   planId?: 'free' | 'pro' | 'team';
   role?: 'user' | 'admin';
 }
+
+const AdSlot = ({ adCode }: { adCode: string }) => {
+  const adRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const adContainer = adRef.current;
+    if (adContainer && adCode) {
+      // Clear previous content
+      adContainer.innerHTML = '';
+      
+      // Create a script tag and append it. This is a more reliable way to execute ad scripts.
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.async = true;
+      
+      // This is a tricky part. Some ad codes are just script sources, some are inline scripts.
+      // We try to handle both.
+      if (adCode.includes('<script')) {
+        // If the code is a full script tag, we need to extract its content or src
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = adCode;
+        const adScript = tempDiv.querySelector('script');
+        if (adScript) {
+            if (adScript.src) {
+                script.src = adScript.src;
+            } else {
+                try {
+                    script.appendChild(document.createTextNode(adScript.innerHTML));
+                } catch(e) {
+                    script.text = adScript.innerHTML;
+                }
+            }
+        }
+      } else {
+          // Assume it's just the script content
+           try {
+                script.appendChild(document.createTextNode(adCode));
+            } catch(e) {
+                script.text = adCode;
+            }
+      }
+      
+      adContainer.appendChild(script);
+    }
+  }, [adCode]);
+
+  return <div ref={adRef} />;
+};
+
 
 export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholderProps) {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -76,10 +124,9 @@ export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholder
     // If the slot has ad code, render it for everyone (respecting the pro user rule handled above).
     if (slot?.code) {
       return (
-        <div
-          className={cn('ad-slot-container', className)}
-          dangerouslySetInnerHTML={{ __html: slot.code }}
-        />
+        <div className={cn('ad-slot-container', className)}>
+            <AdSlot adCode={slot.code} />
+        </div>
       );
     }
     
@@ -106,7 +153,6 @@ export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholder
 
   // Rule 4: Handle Auto Ads. These are managed by a script in the head,
   // so no specific placeholder needs to be rendered for users.
-  // We can show a generic placeholder for admins if needed, but it's often not necessary.
   // Returning null is the cleanest option for auto-ads.
   return null;
 }

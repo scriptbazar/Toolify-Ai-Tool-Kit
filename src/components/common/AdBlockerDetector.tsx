@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,68 +10,82 @@ import { Button } from '@/components/ui/button';
 import { ShieldAlert } from 'lucide-react';
 
 export function AdBlockerDetector() {
-  const [isBlocking, setIsBlocking] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userPlan, setUserPlan] = useState<string | null>(null);
-  const [adBlockerDetectionEnabled, setAdBlockerDetectionEnabled] = useState(false);
+  const [shouldCheck, setShouldCheck] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch user and settings in parallel
     Promise.all([
       new Promise<User | null>(resolve => onAuthStateChanged(auth, resolve)),
       getSettings()
     ]).then(async ([user, settings]) => {
       const detectionEnabled = settings.general?.security?.enableAdBlockerDetection ?? false;
-      setAdBlockerDetectionEnabled(detectionEnabled);
+      let userPlan = 'free';
 
       if (user) {
         const userDocRef = doc(db, 'users', user.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
-          setUserPlan(userDocSnap.data().planId || 'free');
-        } else {
-          setUserPlan('free');
+          userPlan = userDocSnap.data().planId || 'free';
         }
-      } else {
-        setUserPlan('free'); // Treat non-logged-in users as free users
       }
+      
+      // Only enable the check if the setting is on AND the user is on a free plan
+      if (detectionEnabled && userPlan === 'free') {
+        setShouldCheck(true);
+      }
+
       setLoading(false);
     }).catch(console.error);
   }, []);
 
   useEffect(() => {
-    // Only run detection logic if the setting is enabled and the user is on a free plan
-    if (loading || !adBlockerDetectionEnabled || userPlan !== 'free') {
+    if (loading || !shouldCheck) {
       return;
     }
 
     const adBlockTest = document.createElement('div');
     adBlockTest.innerHTML = '&nbsp;';
-    adBlockTest.className = 'adsbox'; // A common class name targeted by ad blockers
+    adBlockTest.className = 'adsbox';
     adBlockTest.style.position = 'absolute';
     adBlockTest.style.left = '-9999px';
     adBlockTest.style.top = '-9999px';
     document.body.appendChild(adBlockTest);
 
     const checkAdBlocker = () => {
-      if (adBlockTest.offsetHeight === 0) {
-        setIsBlocking(true);
+      // Check both offsetHeight and computed style for display property
+      const isBlockedByHeight = adBlockTest.offsetHeight === 0;
+      const isBlockedByDisplay = window.getComputedStyle(adBlockTest).getPropertyValue('display') === 'none';
+
+      if (isBlockedByHeight || isBlockedByDisplay) {
         setIsModalOpen(true);
       }
-      document.body.removeChild(adBlockTest);
-    };
-
-    // Use a timeout to give the ad blocker time to hide the element
-    const detectionTimeout = setTimeout(checkAdBlocker, 1000);
-
-    return () => {
-      clearTimeout(detectionTimeout);
-      if (document.body.contains(adBlockTest)) {
-        document.body.removeChild(adBlockTest);
+      
+      // Cleanup
+      try {
+        if (document.body.contains(adBlockTest)) {
+          document.body.removeChild(adBlockTest);
+        }
+      } catch (e) {
+        // Ignore errors during cleanup
       }
     };
-  }, [loading, adBlockerDetectionEnabled, userPlan]);
+
+    // Use requestAnimationFrame for a more reliable check after render
+    const rafId = requestAnimationFrame(() => {
+      // And a small timeout to give ad blockers time to act
+      setTimeout(checkAdBlocker, 300);
+    });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (document.body.contains(adBlockTest)) {
+          try {
+            document.body.removeChild(adBlockTest);
+          } catch(e) {}
+      }
+    };
+  }, [loading, shouldCheck]);
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
