@@ -4,7 +4,7 @@
 import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, FileDown, Loader2, Trash2, Wand2, FileImage, X, Folder, CheckCircle } from 'lucide-react';
+import { UploadCloud, FileDown, Loader2, Trash2, Wand2, FileImage, X, Folder, CheckCircle, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -165,7 +165,7 @@ export function ImageConverter() {
       <Card 
         className={cn(
             "transition-colors",
-            isDragging ? 'border-primary bg-primary/10' : 'border-border'
+            isDragging && 'border-primary bg-primary/10'
         )}
         onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
       >
@@ -211,7 +211,7 @@ export function ImageConverter() {
         </Card>
       )}
 
-       <Card>
+      <Card>
         <CardHeader>
           <CardTitle>Conversion Settings</CardTitle>
         </CardHeader>
@@ -231,8 +231,8 @@ export function ImageConverter() {
               </div>
               {(targetFormat === 'jpeg' || targetFormat === 'webp' || targetFormat === 'jpg') && (
                   <div className="space-y-2">
-                      <Label>Compression Quality: {quality}%</Label>
-                      <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={10} max={100} step={10} />
+                    <Label>Compression Quality: {quality}%</Label>
+                    <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={10} max={100} step={10} />
                   </div>
               )}
           </div>
