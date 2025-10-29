@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { UploadCloud, FileDown, Loader2, Trash2, Wand2, FileImage, X, Folder, CheckCircle } from 'lucide-react';
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils';
 import JSZip from 'jszip';
 import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
+import { Label } from '@/components/ui/label';
 
 type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'jpg';
 
@@ -159,42 +161,61 @@ export function ImageConverter() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <div 
+    <div className="space-y-6">
+      <Card 
         className={cn(
-            "w-full h-32 border-2 border-dashed rounded-lg text-center cursor-pointer flex flex-col items-center justify-center transition-colors",
-            isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/30 hover:bg-muted/50'
+            "transition-colors",
+            isDragging ? 'border-primary bg-primary/10' : 'border-border'
         )}
-        onClick={() => fileInputRef.current?.click()}
         onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
       >
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple />
-        <div className="flex items-center gap-2 text-muted-foreground">
-            <Folder className="h-6 w-6 text-primary"/>
-            <p className="font-semibold">Drag & Drop images here or click to upload</p>
-        </div>
-      </div>
-
+        <CardContent 
+          className="p-6 text-center cursor-pointer"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple />
+          <div className="flex flex-col items-center justify-center h-full">
+            <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Click or drag files to upload</h3>
+            <p className="text-sm text-muted-foreground">Select one or more images to convert.</p>
+          </div>
+        </CardContent>
+      </Card>
+      
       {files.length > 0 && (
-        <div className="space-y-2">
-          <Label>Image Queue</Label>
-          <ScrollArea className="h-32 w-full pr-4 border rounded-lg p-2">
-              <div className="space-y-2">
-              {files.map((item) => (
-                  <div key={item.id} className="flex items-center gap-2 p-1.5 bg-muted rounded-md text-sm">
-                      <Image src={item.previewUrl} alt={item.file.name} width={32} height={32} className="rounded-sm object-cover w-8 h-8"/>
-                      <div className="flex-1 overflow-hidden"><p className="font-medium truncate">{item.file.name}</p></div>
-                      <p className="text-xs text-muted-foreground">{formatBytes(item.file.size)}</p>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(item.id)}><X className="h-4 w-4" /></Button>
-                  </div>
-              ))}
-              </div>
-          </ScrollArea>
-        </div>
+        <Card className="animate-in fade-in-50">
+            <CardHeader>
+                <CardTitle>Image Queue ({files.length})</CardTitle>
+                <CardDescription>Images waiting to be converted.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ScrollArea className="h-48 w-full pr-4">
+                    <div className="space-y-2">
+                    {files.map((item) => (
+                        <div key={item.id} className="flex items-center gap-2 p-1.5 bg-muted rounded-md text-sm">
+                            <Image src={item.previewUrl} alt={item.file.name} width={32} height={32} className="rounded-sm object-cover w-8 h-8"/>
+                            <div className="flex-1 overflow-hidden"><p className="font-medium truncate">{item.file.name}</p></div>
+                            <p className="text-xs text-muted-foreground">{formatBytes(item.file.size)}</p>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(item.id)}><X className="h-4 w-4" /></Button>
+                        </div>
+                    ))}
+                    </div>
+                </ScrollArea>
+                 <div className="flex justify-end mt-4">
+                     <Button variant="secondary" size="sm" onClick={handleClear}>
+                        <Trash2 className="mr-2 h-4 w-4"/>
+                        Clear Queue
+                    </Button>
+                 </div>
+            </CardContent>
+        </Card>
       )}
 
-      <Card>
-        <CardContent className="p-6 space-y-6">
+       <Card>
+        <CardHeader>
+          <CardTitle>Conversion Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                   <Label htmlFor="target-format">Convert to:</Label>
@@ -220,17 +241,14 @@ export function ImageConverter() {
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
                   Convert Images
               </Button>
-              <Button onClick={handleDownloadAll} disabled={convertedFiles.length === 0}>
-                  <Download className="mr-2 h-4 w-4"/> Download All
+              <Button onClick={handleDownloadAll} disabled={convertedFiles.length === 0 || isLoading}>
+                  <Download className="mr-2 h-4 w-4"/> Download All as ZIP
               </Button>
            </div>
-           <Button onClick={handleClear} disabled={files.length === 0} variant="destructive" className="w-full">
-              <Trash2 className="mr-2 h-4 w-4"/> Clear
-          </Button>
         </CardContent>
       </Card>
 
-      {isLoading && (
+      {isLoading && convertedFiles.length === 0 && (
           <div className="p-4 bg-muted rounded-lg flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin"/>
               <span className="text-sm font-medium">Converting images, please wait...</span>
@@ -238,23 +256,28 @@ export function ImageConverter() {
       )}
       
       {convertedFiles.length > 0 && (
-           <div className="space-y-2">
-              <div className="p-4 bg-green-500/10 text-green-700 dark:text-green-300 rounded-lg flex items-center gap-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Converted Images</CardTitle>
+            </CardHeader>
+             <CardContent className="space-y-2">
+                <div className="p-4 bg-green-500/10 text-green-700 dark:text-green-300 rounded-lg flex items-center gap-2">
                   <CheckCircle className="h-4 w-4"/>
-                  <span className="text-sm font-medium">Conversion complete! You can download individual files or use 'Download All'.</span>
-              </div>
-              {convertedFiles.map((item, index) => (
-                  <div key={`${item.name}-${index}`} className="flex items-center gap-2 p-2 bg-muted rounded-md">
-                      <Image src={item.previewUrl} alt="Original" width={32} height={32} className="rounded-sm object-cover w-8 h-8"/>
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <div className="flex-1 overflow-hidden">
-                         <p className="text-sm font-medium truncate">{item.name}</p>
-                      </div>
-                      <Badge variant="outline">{formatBytes(item.blob.size)}</Badge>
-                      <Button size="sm" onClick={() => handleIndividualDownload(item)}>Download</Button>
-                  </div>
-              ))}
-           </div>
+                  <span className="text-sm font-medium">Conversion complete!</span>
+                </div>
+                {convertedFiles.map((item, index) => (
+                    <div key={`${item.name}-${index}`} className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                        <Image src={item.previewUrl} alt="Original" width={32} height={32} className="rounded-sm object-cover w-8 h-8"/>
+                        <FileImage className="h-5 w-5 text-primary" />
+                        <div className="flex-1 overflow-hidden">
+                            <p className="text-sm font-medium truncate">{item.name}</p>
+                        </div>
+                        <Badge variant="outline">{formatBytes(item.blob.size)}</Badge>
+                        <Button size="sm" onClick={() => handleIndividualDownload(item)}>Download</Button>
+                    </div>
+                ))}
+             </CardContent>
+          </Card>
       )}
     </div>
   );
