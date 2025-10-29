@@ -34,12 +34,11 @@ export async function generateMetadata(
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
 
-    // Fetch all necessary data in parallel for this page and its sidebar
-    const [settings, tools, allTools, allPosts] = await Promise.all([
+    // Fetch only the essential data for the main tool page
+    const [settings, tools, toolReviews] = await Promise.all([
         getSettings(),
         getTools({ slug: params.slug }),
-        getTools({ status: 'Active' }), // For popular tools in sidebar
-        getPosts('Published') // For recent posts in sidebar
+        getReviews({ toolId: params.slug })
     ]);
     
     const tool = tools[0];
@@ -48,20 +47,8 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     if (!tool || tool.status === 'Disabled') {
         notFound();
     }
-
-    // Fetch reviews only if the tool exists
-    const toolReviews = await getReviews({ toolId: tool.slug });
     
     const adSettings = settings?.advertisement ?? null;
-    const sidebarSettings = settings?.sidebar?.toolSidebar ?? null;
-
-    // Prepare data for the sidebar
-    const popularTools = sidebarSettings?.showPopularTools 
-        ? allTools.filter(t => t.slug !== params.slug).slice(0, 10) 
-        : [];
-    const recentPosts = sidebarSettings?.showRecentPosts 
-        ? allPosts.slice(0, 5) 
-        : [];
 
     return (
         <ToolComponentRenderer
@@ -69,13 +56,11 @@ export default async function ToolPage({ params }: { params: { slug: string } })
             toolReviews={toolReviews}
             adSettings={adSettings}
         >
+            {/* The sidebar will now fetch its own data */}
             <ToolSidebar
                 adSettings={adSettings}
-                sidebarSettings={sidebarSettings}
-                popularTools={popularTools}
-                recentPosts={recentPosts}
+                currentToolSlug={params.slug}
             />
         </ToolComponentRenderer>
     );
 }
-

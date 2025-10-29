@@ -1,14 +1,16 @@
 
-'use client';
-
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import * as Icons from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import type { Tool } from '@/ai/flows/tool-management.types';
 import type { Post } from '@/ai/flows/blog-management.types';
 import type { AdvertisementSettings, ToolSidebarSettings } from '@/ai/flows/settings-management.types';
+import { getTools } from '@/ai/flows/tool-management';
+import { getPosts } from '@/ai/flows/blog-management';
+import { getSettings } from '@/ai/flows/settings-management';
+import { unstable_cache as cache } from 'next/cache';
+
 
 const SidebarWidget = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <Card>
@@ -23,12 +25,29 @@ const SidebarWidget = ({ title, children }: { title: string; children: React.Rea
 
 interface ToolSidebarProps {
     adSettings: AdvertisementSettings | null;
-    sidebarSettings: ToolSidebarSettings | null;
-    popularTools: Tool[];
-    recentPosts: Post[];
+    currentToolSlug: string;
 }
 
-export function ToolSidebar({ adSettings, sidebarSettings, popularTools, recentPosts }: ToolSidebarProps) {
+// Cached functions to fetch data specifically for the sidebar
+const getPopularTools = cache(async (currentToolSlug: string) => {
+    const allTools = await getTools({ status: 'Active' });
+    return allTools.filter(t => t.slug !== currentToolSlug).slice(0, 10);
+}, ['sidebar-popular-tools'], { revalidate: 3600 });
+
+const getRecentPosts = cache(async () => {
+    const allPosts = await getPosts('Published');
+    return allPosts.slice(0, 5);
+}, ['sidebar-recent-posts'], { revalidate: 3600 });
+
+
+export async function ToolSidebar({ adSettings, currentToolSlug }: ToolSidebarProps) {
+    
+    const [sidebarSettings, popularTools, recentPosts] = await Promise.all([
+        getSettings().then(s => s.sidebar?.toolSidebar ?? null),
+        getPopularTools(currentToolSlug),
+        getRecentPosts()
+    ]);
+
     const showSidebar = (sidebarSettings?.showPopularTools && popularTools.length > 0) || (sidebarSettings?.showRecentPosts && recentPosts.length > 0) || adSettings?.adType !== 'none';
 
     if (!showSidebar) return null;
