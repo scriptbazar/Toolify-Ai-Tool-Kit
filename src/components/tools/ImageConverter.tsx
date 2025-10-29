@@ -4,7 +4,7 @@
 import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Download, Loader2, Trash2, Image as ImageIcon, Wand2 } from 'lucide-react';
+import { UploadCloud, Download, Loader2, Trash2, Wand2, FileImage, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -74,12 +74,16 @@ export function ImageConverter() {
   
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); handleFiles(e.dataTransfer.files); };
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); e.dataTransfer.files && handleFiles(e.dataTransfer.files); };
   
-  const removeFile = (index: number) => {
-    const fileToRemove = files[index];
-    URL.revokeObjectURL(fileToRemove.previewUrl);
-    setFiles(prev => prev.filter((_, i) => i !== index));
+  const removeFile = (id: string) => {
+    setFiles(prev => {
+        const fileToRemove = prev.find(f => f.id === id);
+        if (fileToRemove) {
+            URL.revokeObjectURL(fileToRemove.previewUrl);
+        }
+        return prev.filter(f => f.id !== id);
+    });
   };
 
 
@@ -157,91 +161,130 @@ export function ImageConverter() {
   }
 
   return (
-    <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-            <div className="space-y-4">
-                 <Card 
-                    className={cn("transition-colors", isDragging && 'border-primary bg-primary/10')}
-                    onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="space-y-6">
+            <Card 
+                className={cn("transition-colors", isDragging && 'border-primary bg-primary/10')}
+                onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+            >
+                <CardContent 
+                    className="p-6 text-center cursor-pointer h-48 flex items-center justify-center"
+                    onClick={() => fileInputRef.current?.click()}
                 >
-                    <CardContent 
-                        className="p-6 text-center cursor-pointer h-48 flex items-center justify-center"
-                        onClick={() => fileInputRef.current?.click()}
-                    >
-                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple />
-                        <div className="flex flex-col items-center justify-center h-full">
-                            <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                            <h3 className="text-lg font-semibold">Click or drag images to upload</h3>
-                        </div>
-                    </CardContent>
-                </Card>
-                
-                <Card>
-                    <CardHeader><CardTitle>Conversion Settings</CardTitle></CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="target-format">Convert To:</Label>
-                            <Select value={targetFormat} onValueChange={(val) => setTargetFormat(val as ImageFormat)}>
-                                <SelectTrigger id="target-format"><SelectValue placeholder="Select format" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="jpg">JPG</SelectItem>
-                                    <SelectItem value="png">PNG</SelectItem>
-                                    <SelectItem value="webp">WEBP</SelectItem>
-                                    <SelectItem value="pdf">PDF</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        {(targetFormat === 'jpeg' || targetFormat === 'webp' || targetFormat === 'jpg') && (
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple />
+                    <div className="flex flex-col items-center justify-center h-full">
+                        <UploadCloud className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                        <h3 className="text-lg font-semibold">Click or drag images to upload</h3>
+                        <p className="text-sm text-muted-foreground">Select one or more images to convert.</p>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {files.length > 0 && (
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Image Queue ({files.length})</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ScrollArea className="h-48 w-full pr-4">
                             <div className="space-y-2">
-                                <Label>Quality: {quality}%</Label>
-                                <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={10} max={100} step={10} />
+                            {files.map((item, index) => (
+                                <div key={item.id} className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                                    <Image src={item.previewUrl} alt={item.file.name} width={40} height={40} className="rounded-sm object-cover w-10 h-10"/>
+                                    <div className="flex-1 overflow-hidden">
+                                        <p className="text-sm font-medium truncate">{item.file.name}</p>
+                                        <p className="text-xs text-muted-foreground">{formatBytes(item.file.size)}</p>
+                                    </div>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(item.id)}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
                             </div>
-                        )}
+                        </ScrollArea>
                     </CardContent>
                 </Card>
-                 <Button onClick={handleConvert} disabled={files.length === 0 || isLoading} className="w-full">
+            )}
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Conversion Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="target-format">Convert To:</Label>
+                        <Select value={targetFormat} onValueChange={(val) => setTargetFormat(val as ImageFormat)}>
+                            <SelectTrigger id="target-format"><SelectValue placeholder="Select format" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="jpg">JPG</SelectItem>
+                                <SelectItem value="png">PNG</SelectItem>
+                                <SelectItem value="webp">WEBP</SelectItem>
+                                <SelectItem value="pdf">PDF</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {(targetFormat === 'jpeg' || targetFormat === 'webp' || targetFormat === 'jpg') && (
+                        <div className="space-y-2">
+                            <Label>Quality: {quality}%</Label>
+                            <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={10} max={100} step={10} />
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+             <div className="flex flex-col sm:flex-row gap-2">
+                <Button onClick={handleConvert} disabled={files.length === 0 || isLoading} className="w-full">
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
                     Convert Images
                 </Button>
+                <Button onClick={handleClear} disabled={files.length === 0} variant="destructive" className="w-full">
+                    <Trash2 className="mr-2 h-4 w-4"/> Clear All
+                </Button>
             </div>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Output</CardTitle>
-                    <CardDescription>Your converted images will appear here.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {files.length > 0 && (
-                        <Button onClick={handleClear} variant="destructive" size="sm" className="mb-4">
-                            <Trash2 className="mr-2 h-4 w-4"/> Clear Queue
-                        </Button>
-                    )}
-                    <ScrollArea className="h-[70vh] w-full pr-4 border rounded-lg">
+        </div>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Converted Images ({convertedFiles.length})</CardTitle>
+                 <CardDescription>Your converted images will appear here.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ScrollArea className="h-[70vh] w-full pr-4 border rounded-lg">
+                    {convertedFiles.length > 0 ? (
                         <div className="grid grid-cols-2 gap-4 p-4">
-                            {convertedFiles.length > 0 ? convertedFiles.map((item) => (
-                                <div key={item.name} className="p-2 border rounded-lg bg-muted flex flex-col items-center gap-2">
+                            {convertedFiles.map((item, index) => (
+                                <div key={`${item.name}-${index}`} className="p-2 border rounded-lg bg-muted flex flex-col items-center gap-2">
                                     <div className="w-full aspect-square bg-white flex items-center justify-center shadow-md relative">
-                                        <Image src={item.previewUrl} alt={`Preview ${item.name}`} layout="fill" objectFit="contain" />
+                                        {item.blob.type === 'application/pdf' ? (
+                                            <div className="flex flex-col items-center text-muted-foreground">
+                                                <FileText className="h-12 w-12"/>
+                                                <p className="text-xs mt-2">PDF</p>
+                                            </div>
+                                        ) : (
+                                            <Image src={URL.createObjectURL(item.blob)} alt={`Converted ${item.name}`} layout="fill" objectFit="contain" />
+                                        )}
                                     </div>
                                     <p className="text-xs font-medium truncate w-full text-center">{item.name}</p>
+                                     <p className="text-xs text-muted-foreground">{formatBytes(item.blob.size)}</p>
                                     <Button size="sm" className="w-full" onClick={() => handleIndividualDownload(item)}>
                                         <Download className="mr-2 h-4 w-4"/>Download
                                     </Button>
                                 </div>
-                            )) : (
-                                <div className="col-span-2 text-center text-muted-foreground py-10">
-                                    <p>Your converted images will appear here.</p>
-                                </div>
-                            )}
+                            ))}
                         </div>
-                    </ScrollArea>
-                    {convertedFiles.length > 0 && (
-                         <Button onClick={handleDownloadAll} className="w-full mt-4">
-                            <Download className="mr-2 h-4 w-4"/> Download All as ZIP
-                        </Button>
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-center text-muted-foreground">
+                            <p>Your converted images will appear here.</p>
+                        </div>
                     )}
-                </CardContent>
-            </Card>
-        </div>
+                </ScrollArea>
+                {convertedFiles.length > 0 && (
+                    <Button onClick={handleDownloadAll} className="w-full mt-4">
+                        <Download className="mr-2 h-4 w-4"/> Download All as ZIP
+                    </Button>
+                )}
+            </CardContent>
+        </Card>
     </div>
   );
 }
