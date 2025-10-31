@@ -4,7 +4,7 @@
 import { useState, useRef, type DragEvent, type ChangeEvent, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../ui/card';
-import { UploadCloud, FileDown, Loader2, Trash2, Wand2, FileImage, X, ArrowLeft, ArrowRight } from 'lucide-react';
+import { UploadCloud, FileDown, Loader2, Trash2, Wand2, FileImage, X, ArrowLeft, ArrowRight, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -13,7 +13,6 @@ import imageCompression from 'browser-image-compression';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 import JSZip from 'jszip';
-import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
 
@@ -105,7 +104,7 @@ export function ImageConverter() {
     }
     setIsLoading(true);
     setConvertedFiles([]);
-    setCurrentPage(1);
+    setConvertedCurrentPage(1);
 
     try {
         const conversionPromises = files.map(async (item) => {
@@ -188,7 +187,6 @@ export function ImageConverter() {
 
   const totalConvertedPages = Math.ceil(convertedFiles.length / ITEMS_PER_PAGE);
 
-
   return (
     <div className="space-y-6">
       <Card 
@@ -214,42 +212,39 @@ export function ImageConverter() {
         </CardContent>
       </Card>
       
-       <Card>
-        <CardHeader>
-          <CardTitle>Conversion Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                  <Label htmlFor="target-format">Convert to:</Label>
-                  <Select value={targetFormat} onValueChange={(val) => setTargetFormat(val as ImageFormat)}>
-                      <SelectTrigger id="target-format"><SelectValue placeholder="Select format" /></SelectTrigger>
-                      <SelectContent>
-                          <SelectItem value="jpg">JPG</SelectItem>
-                          <SelectItem value="png">PNG</SelectItem>
-                          <SelectItem value="webp">WEBP</SelectItem>
-                          <SelectItem value="pdf">PDF</SelectItem>
-                      </SelectContent>
-                  </Select>
-              </div>
-              {(targetFormat === 'jpeg' || targetFormat === 'webp' || targetFormat === 'jpg') && (
-                  <div className="space-y-2">
-                    <Label>Compression Quality: {quality}%</Label>
-                    <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={10} max={100} step={10} />
-                  </div>
-              )}
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={handleConvert} disabled={files.length === 0 || isLoading} className="w-full">
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
-                Convert Images
-            </Button>
-            <Button onClick={handleDownloadAll} disabled={convertedFiles.length === 0 || isLoading} className="w-full">
-                <FileDown className="mr-2 h-4 w-4"/> Download All as ZIP
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {files.length > 0 && (
+        <Card>
+            <CardHeader>
+                <CardTitle>Conversion Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                    <div className="space-y-2">
+                        <Label htmlFor="target-format">Convert to:</Label>
+                        <Select value={targetFormat} onValueChange={(val) => setTargetFormat(val as ImageFormat)}>
+                            <SelectTrigger id="target-format"><SelectValue placeholder="Select format" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="jpg">JPG</SelectItem>
+                                <SelectItem value="png">PNG</SelectItem>
+                                <SelectItem value="webp">WEBP</SelectItem>
+                                <SelectItem value="pdf">PDF</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {(targetFormat === 'jpeg' || targetFormat === 'webp' || targetFormat === 'jpg') && (
+                        <div className="space-y-2">
+                            <Label>Compression Quality: {quality}%</Label>
+                            <Slider value={[quality]} onValueChange={([val]) => setQuality(val)} min={10} max={100} step={10} />
+                        </div>
+                    )}
+                </div>
+                 <Button onClick={handleConvert} disabled={files.length === 0 || isLoading} className="w-full">
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
+                    Convert Images
+                </Button>
+            </CardContent>
+        </Card>
+      )}
 
       {files.length > 0 && convertedFiles.length === 0 && !isLoading && (
         <Card className="animate-in fade-in-50">
@@ -276,15 +271,10 @@ export function ImageConverter() {
                     </div>
                 )}
             </CardContent>
-            <CardFooter>
-                 <Button onClick={handleClear} variant="destructive" className="w-full">
-                    <Trash2 className="mr-2 h-4 w-4"/> Clear All
-                </Button>
-            </CardFooter>
         </Card>
       )}
 
-       {isLoading && convertedFiles.length === 0 && (
+      {isLoading && convertedFiles.length === 0 && (
         <div className="text-center p-4">
           <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary" />
           <p className="mt-2 text-muted-foreground">Converting images, please wait...</p>
@@ -295,9 +285,9 @@ export function ImageConverter() {
           <Card>
             <CardHeader>
               <CardTitle>Converted Images</CardTitle>
-               <CardDescription>Your images have been successfully converted.</CardDescription>
+              <CardDescription>Your images have been successfully converted.</CardDescription>
             </CardHeader>
-             <CardContent className="space-y-4">
+            <CardContent className="space-y-4">
                 <div className="space-y-2">
                     {paginatedConvertedFiles.map((item, index) => (
                         <div key={`${item.name}-${index}`} className="flex items-center gap-4 p-2 bg-muted rounded-md">
@@ -310,21 +300,24 @@ export function ImageConverter() {
                             </div>
                             <Badge variant="outline">{(((item.originalSize - item.blob.size) / item.originalSize) * 100).toFixed(0)}% smaller</Badge>
                             <Button size="sm" onClick={() => handleIndividualDownload(item)}>
-                               <FileDown className="h-4 w-4"/>
+                               <Download className="h-4 w-4"/>
                             </Button>
                         </div>
                     ))}
                 </div>
-                 {totalConvertedPages > 1 && (
+                {totalConvertedPages > 1 && (
                     <div className="flex items-center justify-end space-x-2 pt-2">
                         <Button variant="outline" size="sm" onClick={() => setConvertedCurrentPage(p => Math.max(p - 1, 1))} disabled={convertedCurrentPage === 1}><ArrowLeft className="mr-2 h-4 w-4" /> Previous</Button>
                         <span className="text-sm text-muted-foreground">Page {convertedCurrentPage} of {totalConvertedPages}</span>
                         <Button variant="outline" size="sm" onClick={() => setConvertedCurrentPage(p => Math.min(p + 1, totalConvertedPages))} disabled={convertedCurrentPage === totalConvertedPages}>Next <ArrowRight className="ml-2 h-4 w-4" /></Button>
                     </div>
                 )}
-             </CardContent>
-              <CardFooter>
-                 <Button onClick={handleClear} variant="destructive" className="w-full">
+            </CardContent>
+            <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+                <Button onClick={handleDownloadAll} disabled={convertedFiles.length === 0 || isLoading} className="w-full sm:w-auto">
+                    <FileDown className="mr-2 h-4 w-4"/> Download All as ZIP
+                </Button>
+                <Button onClick={handleClear} variant="destructive" className="w-full sm:w-auto">
                     <Trash2 className="mr-2 h-4 w-4"/> Clear All
                 </Button>
             </CardFooter>
