@@ -13,8 +13,8 @@ import imageCompression from 'browser-image-compression';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 import JSZip from 'jszip';
-import { Label } from '../ui/label';
-import { Badge } from '../ui/badge';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 
 type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'jpg';
 
@@ -133,6 +133,8 @@ export function ImageConverter() {
 
         const results = await Promise.all(conversionPromises);
         setConvertedFiles(results);
+        setFiles([]); // Clear the queue after successful conversion
+        setQueueCurrentPage(1);
         toast({ title: 'Conversion Complete!', description: `Converted ${results.length} images.` });
 
     } catch (error: any) {
@@ -190,32 +192,32 @@ export function ImageConverter() {
   return (
     <div className="space-y-6">
       <Card 
-        className={cn(
-            "transition-colors",
-            isDragging && 'border-primary bg-primary/10'
-        )}
-        onDragEnter={handleDragEnter}
-        onDragOver={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <CardContent 
-          className="p-6 text-center cursor-pointer"
-          onClick={() => fileInputRef.current?.click()}
+            className={cn(
+                "transition-colors",
+                isDragging && 'border-primary bg-primary/10'
+            )}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
         >
-          <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple />
-          <div className="flex flex-col items-center justify-center h-full">
-            <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold">Click or drag files to upload</h3>
-            <p className="text-sm text-muted-foreground">Select one or more images to convert.</p>
-          </div>
-        </CardContent>
-      </Card>
+            <CardContent 
+                className="p-6 text-center cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+            >
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple />
+                 <div className="flex flex-col items-center justify-center h-full">
+                    <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold">Click or drag files to upload</h3>
+                    <p className="text-sm text-muted-foreground">Select one or more images to convert.</p>
+                </div>
+            </CardContent>
+       </Card>
       
-      {files.length > 0 && (
+       {files.length > 0 && (
         <Card>
             <CardHeader>
-                <CardTitle>Conversion Settings</CardTitle>
+                <CardTitle>Settings &amp; Queue</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
@@ -242,34 +244,27 @@ export function ImageConverter() {
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
                     Convert Images
                 </Button>
-            </CardContent>
-        </Card>
-      )}
 
-      {files.length > 0 && convertedFiles.length === 0 && !isLoading && (
-        <Card className="animate-in fade-in-50">
-            <CardHeader>
-                <CardTitle>Image Queue ({files.length})</CardTitle>
-                <CardDescription>These images are ready to be converted.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="space-y-2">
-                    {paginatedQueueFiles.map((item) => (
-                        <div key={item.id} className="flex items-center gap-2 p-1.5 bg-muted rounded-md text-sm">
-                            <Image src={item.previewUrl} alt={item.file.name} width={32} height={32} className="rounded-sm object-cover w-8 h-8"/>
-                            <div className="flex-1 overflow-hidden"><p className="font-medium truncate">{item.file.name}</p></div>
-                            <p className="text-xs text-muted-foreground">{formatBytes(item.file.size)}</p>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(item.id)}><X className="h-4 w-4" /></Button>
-                        </div>
-                    ))}
-                </div>
-                {totalQueuePages > 1 && (
-                    <div className="flex items-center justify-end space-x-2 pt-2">
-                        <Button variant="outline" size="sm" onClick={() => setQueueCurrentPage(p => Math.max(p - 1, 1))} disabled={queueCurrentPage === 1}><ArrowLeft className="mr-2 h-4 w-4" /> Previous</Button>
-                        <span className="text-sm text-muted-foreground">Page {queueCurrentPage} of {totalQueuePages}</span>
-                        <Button variant="outline" size="sm" onClick={() => setQueueCurrentPage(p => Math.min(p + 1, totalQueuePages))} disabled={queueCurrentPage === totalQueuePages}>Next <ArrowRight className="ml-2 h-4 w-4" /></Button>
+                 <div className="space-y-4 pt-4 border-t">
+                    <h4 className="font-semibold">Image Queue ({files.length})</h4>
+                    <div className="space-y-2">
+                        {paginatedQueueFiles.map((item) => (
+                            <div key={item.id} className="flex items-center gap-2 p-1.5 bg-muted rounded-md text-sm">
+                                <Image src={item.previewUrl} alt={item.file.name} width={32} height={32} className="rounded-sm object-cover w-8 h-8"/>
+                                <div className="flex-1 overflow-hidden"><p className="font-medium truncate">{item.file.name}</p></div>
+                                <p className="text-xs text-muted-foreground">{formatBytes(item.file.size)}</p>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(item.id)}><X className="h-4 w-4" /></Button>
+                            </div>
+                        ))}
                     </div>
-                )}
+                    {totalQueuePages > 1 && (
+                        <div className="flex items-center justify-end space-x-2 pt-2">
+                            <Button variant="outline" size="sm" onClick={() => setQueueCurrentPage(p => Math.max(p - 1, 1))} disabled={queueCurrentPage === 1}><ArrowLeft className="mr-2 h-4 w-4" /> Previous</Button>
+                            <span className="text-sm text-muted-foreground">Page {queueCurrentPage} of {totalQueuePages}</span>
+                            <Button variant="outline" size="sm" onClick={() => setQueueCurrentPage(p => Math.min(p + 1, totalQueuePages))} disabled={queueCurrentPage === totalQueuePages}>Next <ArrowRight className="ml-2 h-4 w-4" /></Button>
+                        </div>
+                    )}
+                 </div>
             </CardContent>
         </Card>
       )}
@@ -313,13 +308,15 @@ export function ImageConverter() {
                     </div>
                 )}
             </CardContent>
-            <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
-                <Button onClick={handleDownloadAll} disabled={convertedFiles.length === 0 || isLoading} className="w-full sm:w-auto">
-                    <FileDown className="mr-2 h-4 w-4"/> Download All as ZIP
-                </Button>
-                <Button onClick={handleClear} variant="destructive" className="w-full sm:w-auto">
-                    <Trash2 className="mr-2 h-4 w-4"/> Clear All
-                </Button>
+             <CardFooter className="pt-4 border-t">
+                <div className="flex flex-col sm:flex-row gap-2 w-full">
+                    <Button onClick={handleDownloadAll} disabled={convertedFiles.length === 0 || isLoading} className="flex-1">
+                        <FileDown className="mr-2 h-4 w-4"/> Download All as ZIP
+                    </Button>
+                    <Button onClick={handleClear} variant="destructive" className="flex-1">
+                        <Trash2 className="mr-2 h-4 w-4"/> Clear All
+                    </Button>
+                </div>
             </CardFooter>
           </Card>
       )}
