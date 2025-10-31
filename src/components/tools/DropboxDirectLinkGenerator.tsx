@@ -45,7 +45,7 @@ export function DropboxDirectLinkGenerator() {
         <LinkIcon className="h-4 w-4" />
         <AlertTitle>How to use this tool?</AlertTitle>
         <AlertDescription>
-          In Dropbox, click 'Share', then 'Create link'. Paste the generated shareable link below and the tool will automatically convert it.
+          In Dropbox, click 'Share', then 'Copy link'. Paste the generated shareable link below and the tool will automatically convert it. The link must end with `?dl=0`.
         </AlertDescription>
       </Alert>
 
@@ -58,7 +58,7 @@ export function DropboxDirectLinkGenerator() {
             <CardContent>
                 <div className="space-y-2">
                     <Label htmlFor="share-link">Dropbox Shareable URL</Label>
-                    <Input id="share-link" value={shareableLink} onChange={e => setShareableLink(e.target.value)} placeholder="https://www.dropbox.com/s/...."/>
+                    <Input id="share-link" value={shareableLink} onChange={e => setShareableLink(e.target.value)} placeholder="https://www.dropbox.com/s/...?dl=0"/>
                 </div>
             </CardContent>
            </Card>

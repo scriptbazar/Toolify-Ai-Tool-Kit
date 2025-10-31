@@ -26,9 +26,6 @@ export function OneDriveDirectLinkGenerator() {
     }
     
     try {
-        // The conversion logic for OneDrive direct links is to replace "embed" with "download".
-        // Example Share Link: https://onedrive.live.com/embed?cid=...&resid=...&authkey=...
-        // Example Direct Link: https://onedrive.live.com/download?cid=...&resid=...&authkey=...
         const newDirectLink = shareableLink.replace("/embed?", "/download?");
         
         if (newDirectLink === shareableLink) {
