@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -115,7 +116,7 @@ export function GoogleDriveDirectLinkGenerator() {
         <div className="space-y-4">
            <Card>
             <CardHeader>
-                <CardTitle>Step 1: Input Your Google Drive Links</CardTitle>
+                <CardTitle>Input Your Google Drive Links</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 {links.map((link, index) => (
@@ -155,7 +156,7 @@ export function GoogleDriveDirectLinkGenerator() {
         {generatedLinks.length > 0 && (
            <Card>
             <CardHeader>
-                <CardTitle>Step 2: Get Your Direct Links</CardTitle>
+                <CardTitle>Your Direct Links</CardTitle>
                 <CardDescription>Use these links for direct downloads. Invalid links will show an error.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
