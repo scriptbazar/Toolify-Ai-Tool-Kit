@@ -19,8 +19,7 @@ export function DropboxDirectLinkGenerator() {
     try {
       const url = new URL(shareableLink);
       if (url.hostname === 'www.dropbox.com' || url.hostname === 'dropbox.com') {
-        url.hostname = 'dl.dropboxusercontent.com';
-        url.searchParams.delete('dl');
+        url.searchParams.set('dl', '1');
         return url.toString();
       }
       return '';
@@ -46,7 +45,7 @@ export function DropboxDirectLinkGenerator() {
         <LinkIcon className="h-4 w-4" />
         <AlertTitle>How to use this tool?</AlertTitle>
         <AlertDescription>
-            In Dropbox, get a shareable link for your file. Make sure the link ends with `?dl=0`. Paste that link below and it will be instantly converted.
+          In Dropbox, click 'Share', then 'Create link'. Paste the generated shareable link below and the tool will automatically convert it.
         </AlertDescription>
       </Alert>
 
@@ -59,7 +58,7 @@ export function DropboxDirectLinkGenerator() {
             <CardContent>
                 <div className="space-y-2">
                     <Label htmlFor="share-link">Dropbox Shareable URL</Label>
-                    <Input id="share-link" value={shareableLink} onChange={e => setShareableLink(e.target.value)} placeholder="https://www.dropbox.com/s/....?dl=0"/>
+                    <Input id="share-link" value={shareableLink} onChange={e => setShareableLink(e.target.value)} placeholder="https://www.dropbox.com/s/...."/>
                 </div>
             </CardContent>
            </Card>
