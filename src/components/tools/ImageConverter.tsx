@@ -3,8 +3,8 @@
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, FileDown, Loader2, Trash2, Wand2, FileImage, X, CheckCircle, Download, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../ui/card';
+import { UploadCloud, FileDown, Loader2, Trash2, Wand2, FileImage, X, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -14,8 +14,8 @@ import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 import JSZip from 'jszip';
 import { ScrollArea } from '../ui/scroll-area';
+import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
-import { Label } from '@/components/ui/label';
 
 type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'jpg';
 
@@ -41,7 +41,8 @@ export function ImageConverter() {
   const [quality, setQuality] = useState(80);
   const [isLoading, setIsLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [queueCurrentPage, setQueueCurrentPage] = useState(1);
+  const [convertedCurrentPage, setConvertedCurrentPage] = useState(1);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -70,6 +71,7 @@ export function ImageConverter() {
     
     setFiles(prev => [...prev, ...newFilesWithPreview]);
     setConvertedFiles([]); // Clear old conversions
+    setConvertedCurrentPage(1);
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +89,12 @@ export function ImageConverter() {
         if (fileToRemove) {
             URL.revokeObjectURL(fileToRemove.previewUrl);
         }
-        return prev.filter(f => f.id !== id);
+        const remainingFiles = prev.filter(f => f.id !== id);
+        const totalPages = Math.ceil(remainingFiles.length / ITEMS_PER_PAGE);
+        if (queueCurrentPage > totalPages) {
+            setQueueCurrentPage(totalPages || 1);
+        }
+        return remainingFiles;
     });
   };
 
@@ -162,16 +169,25 @@ export function ImageConverter() {
       files.forEach(f => URL.revokeObjectURL(f.previewUrl));
       setFiles([]);
       setConvertedFiles([]);
-      setCurrentPage(1);
+      setQueueCurrentPage(1);
+      setConvertedCurrentPage(1);
       if (fileInputRef.current) fileInputRef.current.value = '';
   }
+  
+  const paginatedQueueFiles = useMemo(() => {
+    const startIndex = (queueCurrentPage - 1) * ITEMS_PER_PAGE;
+    return files.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [files, queueCurrentPage]);
 
-  const paginatedFiles = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const totalQueuePages = Math.ceil(files.length / ITEMS_PER_PAGE);
+
+  const paginatedConvertedFiles = useMemo(() => {
+    const startIndex = (convertedCurrentPage - 1) * ITEMS_PER_PAGE;
     return convertedFiles.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [convertedFiles, currentPage]);
+  }, [convertedFiles, convertedCurrentPage]);
 
-  const totalPages = Math.ceil(convertedFiles.length / ITEMS_PER_PAGE);
+  const totalConvertedPages = Math.ceil(convertedFiles.length / ITEMS_PER_PAGE);
+
 
   return (
     <div className="space-y-6">
@@ -198,7 +214,7 @@ export function ImageConverter() {
         </CardContent>
       </Card>
       
-      <Card>
+       <Card>
         <CardHeader>
           <CardTitle>Conversion Settings</CardTitle>
         </CardHeader>
@@ -229,18 +245,11 @@ export function ImageConverter() {
                 Convert Images
             </Button>
             <Button onClick={handleDownloadAll} disabled={convertedFiles.length === 0 || isLoading} className="w-full">
-                <Download className="mr-2 h-4 w-4"/> Download All as ZIP
+                <FileDown className="mr-2 h-4 w-4"/> Download All as ZIP
             </Button>
           </div>
         </CardContent>
       </Card>
-      
-      {isLoading && (
-        <div className="text-center p-4">
-          <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary" />
-          <p className="mt-2 text-muted-foreground">Converting images, please wait...</p>
-        </div>
-      )}
 
       {files.length > 0 && convertedFiles.length === 0 && !isLoading && (
         <Card className="animate-in fade-in-50">
@@ -248,10 +257,9 @@ export function ImageConverter() {
                 <CardTitle>Image Queue ({files.length})</CardTitle>
                 <CardDescription>These images are ready to be converted.</CardDescription>
             </CardHeader>
-            <CardContent>
-                <ScrollArea className="h-48 w-full pr-4 border rounded-lg">
-                    <div className="space-y-2 p-4">
-                    {files.map((item) => (
+            <CardContent className="space-y-4">
+                <div className="space-y-2">
+                    {paginatedQueueFiles.map((item) => (
                         <div key={item.id} className="flex items-center gap-2 p-1.5 bg-muted rounded-md text-sm">
                             <Image src={item.previewUrl} alt={item.file.name} width={32} height={32} className="rounded-sm object-cover w-8 h-8"/>
                             <div className="flex-1 overflow-hidden"><p className="font-medium truncate">{item.file.name}</p></div>
@@ -259,10 +267,28 @@ export function ImageConverter() {
                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(item.id)}><X className="h-4 w-4" /></Button>
                         </div>
                     ))}
+                </div>
+                {totalQueuePages > 1 && (
+                    <div className="flex items-center justify-end space-x-2 pt-2">
+                        <Button variant="outline" size="sm" onClick={() => setQueueCurrentPage(p => Math.max(p - 1, 1))} disabled={queueCurrentPage === 1}><ArrowLeft className="mr-2 h-4 w-4" /> Previous</Button>
+                        <span className="text-sm text-muted-foreground">Page {queueCurrentPage} of {totalQueuePages}</span>
+                        <Button variant="outline" size="sm" onClick={() => setQueueCurrentPage(p => Math.min(p + 1, totalQueuePages))} disabled={queueCurrentPage === totalQueuePages}>Next <ArrowRight className="ml-2 h-4 w-4" /></Button>
                     </div>
-                </ScrollArea>
+                )}
             </CardContent>
+            <CardFooter>
+                 <Button onClick={handleClear} variant="destructive" className="w-full">
+                    <Trash2 className="mr-2 h-4 w-4"/> Clear All
+                </Button>
+            </CardFooter>
         </Card>
+      )}
+
+       {isLoading && convertedFiles.length === 0 && (
+        <div className="text-center p-4">
+          <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary" />
+          <p className="mt-2 text-muted-foreground">Converting images, please wait...</p>
+        </div>
       )}
 
       {convertedFiles.length > 0 && !isLoading && (
@@ -273,7 +299,7 @@ export function ImageConverter() {
             </CardHeader>
              <CardContent className="space-y-4">
                 <div className="space-y-2">
-                    {paginatedFiles.map((item, index) => (
+                    {paginatedConvertedFiles.map((item, index) => (
                         <div key={`${item.name}-${index}`} className="flex items-center gap-4 p-2 bg-muted rounded-md">
                             <Image src={item.previewUrl} alt="Original" width={48} height={48} className="rounded-md object-cover w-12 h-12"/>
                             <div className="flex-1 overflow-hidden">
@@ -283,41 +309,26 @@ export function ImageConverter() {
                                 </p>
                             </div>
                             <Badge variant="outline">{(((item.originalSize - item.blob.size) / item.originalSize) * 100).toFixed(0)}% smaller</Badge>
-                            <Button size="sm" onClick={() => handleIndividualDownload(item)}>Download</Button>
+                            <Button size="sm" onClick={() => handleIndividualDownload(item)}>
+                               <FileDown className="h-4 w-4"/>
+                            </Button>
                         </div>
                     ))}
                 </div>
-                 {totalPages > 1 && (
-                    <div className="flex items-center justify-center space-x-2 pt-4">
-                        <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
-                        disabled={currentPage === 1}
-                        >
-                        <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-                        </Button>
-                        <span className="text-sm text-muted-foreground">
-                        Page {currentPage} of {totalPages}
-                        </span>
-                        <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                        >
-                        Next <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
+                 {totalConvertedPages > 1 && (
+                    <div className="flex items-center justify-end space-x-2 pt-2">
+                        <Button variant="outline" size="sm" onClick={() => setConvertedCurrentPage(p => Math.max(p - 1, 1))} disabled={convertedCurrentPage === 1}><ArrowLeft className="mr-2 h-4 w-4" /> Previous</Button>
+                        <span className="text-sm text-muted-foreground">Page {convertedCurrentPage} of {totalConvertedPages}</span>
+                        <Button variant="outline" size="sm" onClick={() => setConvertedCurrentPage(p => Math.min(p + 1, totalConvertedPages))} disabled={convertedCurrentPage === totalConvertedPages}>Next <ArrowRight className="ml-2 h-4 w-4" /></Button>
                     </div>
                 )}
              </CardContent>
+              <CardFooter>
+                 <Button onClick={handleClear} variant="destructive" className="w-full">
+                    <Trash2 className="mr-2 h-4 w-4"/> Clear All
+                </Button>
+            </CardFooter>
           </Card>
-      )}
-
-      {(files.length > 0 || convertedFiles.length > 0) && (
-           <Button onClick={handleClear} variant="destructive" className="w-full">
-                <Trash2 className="mr-2 h-4 w-4"/> Clear All
-            </Button>
       )}
     </div>
   );
