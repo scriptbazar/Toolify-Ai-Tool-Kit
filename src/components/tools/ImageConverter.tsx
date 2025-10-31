@@ -87,7 +87,7 @@ export function ImageConverter() {
         if (fileToRemove) {
             URL.revokeObjectURL(fileToRemove.previewUrl);
         }
-        return prev.filter(f => f.id === id);
+        return prev.filter(f => f.id !== id);
     });
   };
 
@@ -98,6 +98,7 @@ export function ImageConverter() {
     }
     setIsLoading(true);
     setConvertedFiles([]);
+    setCurrentPage(1);
 
     try {
         const conversionPromises = files.map(async (item) => {
@@ -233,8 +234,15 @@ export function ImageConverter() {
           </div>
         </CardContent>
       </Card>
+      
+      {isLoading && (
+        <div className="text-center p-4">
+          <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary" />
+          <p className="mt-2 text-muted-foreground">Converting images, please wait...</p>
+        </div>
+      )}
 
-      {files.length > 0 && convertedFiles.length === 0 && (
+      {files.length > 0 && convertedFiles.length === 0 && !isLoading && (
         <Card className="animate-in fade-in-50">
             <CardHeader>
                 <CardTitle>Image Queue ({files.length})</CardTitle>
@@ -257,7 +265,7 @@ export function ImageConverter() {
         </Card>
       )}
 
-      {convertedFiles.length > 0 && (
+      {convertedFiles.length > 0 && !isLoading && (
           <Card>
             <CardHeader>
               <CardTitle>Converted Images</CardTitle>
