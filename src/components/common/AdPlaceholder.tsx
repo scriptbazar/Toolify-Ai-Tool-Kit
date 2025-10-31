@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -21,51 +22,9 @@ interface UserData {
 }
 
 const AdSlot = ({ adCode }: { adCode: string }) => {
-  const adRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const adContainer = adRef.current;
-    if (adContainer && adCode) {
-      // Clear previous content
-      adContainer.innerHTML = '';
-      
-      // Create a script tag and append it. This is a more reliable way to execute ad scripts.
-      const script = document.createElement('script');
-      script.type = 'text/javascript';
-      script.async = true;
-      
-      // This is a tricky part. Some ad codes are just script sources, some are inline scripts.
-      // We try to handle both.
-      if (adCode.includes('<script')) {
-        // If the code is a full script tag, we need to extract its content or src
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = adCode;
-        const adScript = tempDiv.querySelector('script');
-        if (adScript) {
-            if (adScript.src) {
-                script.src = adScript.src;
-            } else {
-                try {
-                    script.appendChild(document.createTextNode(adScript.innerHTML));
-                } catch(e) {
-                    script.text = adScript.innerHTML;
-                }
-            }
-        }
-      } else {
-          // Assume it's just the script content
-           try {
-                script.appendChild(document.createTextNode(adCode));
-            } catch(e) {
-                script.text = adCode;
-            }
-      }
-      
-      adContainer.appendChild(script);
-    }
-  }, [adCode]);
-
-  return <div ref={adRef} />;
+  // Use dangerouslySetInnerHTML to ensure script tags from ad providers are executed correctly.
+  // React's normal rendering process can interfere with how third-party ad scripts work.
+  return <div dangerouslySetInnerHTML={{ __html: adCode }} />;
 };
 
 
