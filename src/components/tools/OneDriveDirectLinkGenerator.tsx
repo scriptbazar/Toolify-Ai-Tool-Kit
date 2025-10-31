@@ -1,120 +1,185 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Link as LinkIcon, FileCheck, Copy, TestTube2, Trash2, Wand2 } from 'lucide-react';
+import { Link as LinkIcon, Copy, Trash2, Wand2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
+interface LinkPair {
+    id: number;
+    original: string;
+    direct: string;
+    error?: string;
+}
+
 export function OneDriveDirectLinkGenerator() {
-  const [shareableLink, setShareableLink] = useState('');
-  const [directLink, setDirectLink] = useState('');
+  const [links, setLinks] = useState([{ id: 1, value: '' }]);
+  const [generatedLinks, setGeneratedLinks] = useState<LinkPair[]>([]);
   const { toast } = useToast();
 
+  const getDirectLink = (link: string): string | null => {
+    try {
+        const newDirectLink = link.replace("/embed?", "/download?");
+        if (newDirectLink !== link) {
+            return newDirectLink;
+        }
+        return null;
+    } catch (e) {
+      return null;
+    }
+  };
+
   const handleGenerate = () => {
-    if (!shareableLink.trim()) {
+    const validLinks = links.filter(l => l.value.trim() !== '');
+    if (validLinks.length === 0) {
       toast({
-        title: 'Invalid URL',
-        description: 'Please enter a valid OneDrive file sharing link.',
+        title: 'No URLs provided',
+        description: 'Please enter at least one OneDrive embed link.',
         variant: 'destructive',
       });
       return;
     }
+
+    const newGeneratedLinks: LinkPair[] = validLinks.map((link) => {
+      const directLink = getDirectLink(link.value);
+      if (directLink) {
+        return {
+          id: link.id,
+          original: link.value,
+          direct: directLink
+        };
+      }
+      return {
+        id: link.id,
+        original: link.value,
+        direct: '',
+        error: 'Invalid Link Format'
+      };
+    });
     
-    try {
-        const newDirectLink = shareableLink.replace("/embed?", "/download?");
-        
-        if (newDirectLink === shareableLink) {
-            throw new Error("Could not convert the link. Please ensure you are using the 'Embed' link from OneDrive's share options.");
-        }
-
-        setDirectLink(newDirectLink);
-        toast({
-          title: 'Link Generated!',
-          description: 'Your direct download link is ready.',
-        });
-
-    } catch (error: any) {
-        setDirectLink('');
-        toast({
-            title: 'Conversion Failed',
-            description: error.message || 'Please use the "Embed" link from OneDrive.',
-            variant: 'destructive',
-        });
-    }
+    setGeneratedLinks(newGeneratedLinks);
+    toast({
+      title: 'Links Generated!',
+      description: `Processed ${newGeneratedLinks.length} URLs.`,
+    });
   };
   
-  const handleCopy = () => {
-    if (!directLink) return;
-    navigator.clipboard.writeText(directLink);
-    toast({ title: 'Copied to clipboard!' });
+  const handleLinkChange = (id: number, value: string) => {
+    setLinks(links.map(link => link.id === id ? { ...link, value } : link));
+  };
+  
+  const addLinkInput = () => {
+    setLinks([...links, { id: Date.now(), value: '' }]);
+  };
+  
+  const removeLinkInput = (id: number) => {
+    setLinks(links.filter(link => link.id !== id));
+  };
+
+  const handleCopy = (link: string) => {
+    navigator.clipboard.writeText(link);
+    toast({ description: 'Link copied to clipboard!' });
+  };
+  
+  const handleCopyAll = () => {
+    const allLinks = generatedLinks.map(l => l.direct).filter(Boolean).join('\n');
+    if (!allLinks) return;
+    navigator.clipboard.writeText(allLinks);
+    toast({ title: 'All valid links copied to clipboard!' });
   };
   
   const handleClear = () => {
-    setShareableLink('');
-    setDirectLink('');
-  }
+    setLinks([{ id: 1, value: '' }]);
+    setGeneratedLinks([]);
+  };
 
   return (
     <div className="space-y-6">
        <Alert>
         <LinkIcon className="h-4 w-4" />
-        <AlertTitle>How to use this tool?</AlertTitle>
         <AlertDescription>
           Open your file in OneDrive, click 'Share', then select 'Embed'. Copy the `src` URL from the iframe code and paste it below.
         </AlertDescription>
       </Alert>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-4">
-           <Card>
-            <CardHeader>
-                <CardTitle>Step 1: Input Your Embed Link</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-2">
-                    <Label htmlFor="share-link">OneDrive Embed URL</Label>
-                    <Input id="share-link" value={shareableLink} onChange={e => setShareableLink(e.target.value)} placeholder="https://onedrive.live.com/embed?cid=..."/>
-                </div>
-            </CardContent>
-           </Card>
-
-           <Button onClick={handleGenerate} disabled={!shareableLink} className="w-full">
-            <Wand2 className="mr-2 h-4 w-4"/> Generate Direct Link
-           </Button>
-        </div>
-        
+      <div className="space-y-6">
         <Card>
             <CardHeader>
-                <CardTitle>Step 2: Get Your Direct Link</CardTitle>
-                <CardDescription>Use this link for direct downloads.</CardDescription>
+                <CardTitle>Input Your OneDrive Embed Links</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {links.map((link, index) => (
+                    <div key={link.id} className="flex items-end gap-2">
+                        <div className="flex-grow space-y-2">
+                            <Label htmlFor={`share-link-${index}`}>Embed URL #{index + 1}</Label>
+                            <Input 
+                                id={`share-link-${index}`} 
+                                value={link.value} 
+                                onChange={e => handleLinkChange(link.id, e.target.value)} 
+                                placeholder="https://onedrive.live.com/embed?cid=..."
+                            />
+                        </div>
+                        {links.length > 1 && (
+                            <Button variant="destructive" size="icon" onClick={() => removeLinkInput(link.id)}>
+                                <Trash2 className="h-4 w-4"/>
+                            </Button>
+                        )}
+                    </div>
+                ))}
+                <Button variant="outline" onClick={addLinkInput} className="w-full">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add URL
+                </Button>
+            </CardContent>
+        </Card>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+            <Button onClick={handleGenerate} className="w-full">
+                <Wand2 className="mr-2 h-4 w-4"/> Generate Direct Links
+            </Button>
+            <Button onClick={handleClear} variant="destructive" className="w-full">
+                <Trash2 className="mr-2 h-4 w-4"/> Clear All
+            </Button>
+        </div>
+        
+        {generatedLinks.length > 0 && (
+           <Card>
+            <CardHeader>
+                <CardTitle>Generated Direct Links</CardTitle>
+                <CardDescription>Use these links for direct downloads. Invalid links will show an error.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
-                    <Label htmlFor="direct-link">Generated Direct Download Link</Label>
-                    <Input id="direct-link" value={directLink} readOnly className="font-mono bg-muted"/>
+                    {generatedLinks.map((link) => (
+                        <div key={link.id} className="p-2 border rounded-md bg-muted">
+                           <p className="text-xs text-muted-foreground truncate mb-1">Original: {link.original}</p>
+                           <div className="flex items-center gap-2">
+                           <div className="flex-1 overflow-hidden">
+                             {link.error ? (
+                                <p className="text-sm font-mono text-red-500 truncate" title={link.error}>{link.error}</p>
+                             ) : (
+                                <a href={link.direct} target="_blank" rel="noopener noreferrer" className="text-sm font-mono text-primary hover:underline truncate block" title={link.direct}>
+                                    {link.direct}
+                                </a>
+                             )}
+                           </div>
+                           <Button variant="ghost" size="icon" onClick={() => handleCopy(link.direct)} disabled={!!link.error}>
+                               <Copy className="h-4 w-4"/>
+                           </Button>
+                           </div>
+                        </div>
+                    ))}
                 </div>
-                 <div className="flex flex-col sm:flex-row gap-2">
-                    <Button onClick={handleCopy} disabled={!directLink} className="w-full">
-                        <Copy className="mr-2 h-4 w-4"/> Copy Link
-                    </Button>
-                     <Button asChild variant="outline" disabled={!directLink} className="w-full">
-                        <a href={directLink} target="_blank" rel="noopener noreferrer">
-                           <TestTube2 className="mr-2 h-4 w-4"/> Test Link
-                        </a>
-                    </Button>
-                </div>
-                <div className="pt-4 border-t">
-                    <Button onClick={handleClear} variant="destructive" className="w-full">
-                        <Trash2 className="mr-2 h-4 w-4"/> Clear All
-                    </Button>
-                </div>
+                 <Button onClick={handleCopyAll} variant="outline" className="w-full">
+                    <Copy className="mr-2 h-4 w-4"/> Copy All Valid Links
+                </Button>
             </CardContent>
         </Card>
+       )}
       </div>
     </div>
   );
