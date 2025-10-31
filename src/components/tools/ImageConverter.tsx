@@ -106,13 +106,9 @@ export function ImageConverter() {
     setConvertedFiles([]);
     setConvertedCurrentPage(1);
 
-    let successCount = 0;
-
-    for (const item of files) {
+    const processFile = async (item: FileWithPreview): Promise<ConvertedFile | null> => {
         try {
             const originalName = item.file.name.split('.')[0] || 'image';
-            let result: ConvertedFile;
-
             if (targetFormat === 'pdf') {
                 const imageBytes = await item.file.arrayBuffer();
                 const pdfDoc = await PDFDocument.create();
@@ -121,7 +117,7 @@ export function ImageConverter() {
                 page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
                 const pdfBytes = await pdfDoc.save();
                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                result = { name: `${originalName}.pdf`, blob, previewUrl: item.previewUrl, originalSize: item.file.size };
+                return { name: `${originalName}.pdf`, blob, previewUrl: item.previewUrl, originalSize: item.file.size };
             } else {
                 const options = {
                     maxSizeMB: 20,
@@ -130,21 +126,31 @@ export function ImageConverter() {
                     fileType: `image/${targetFormat === 'jpg' ? 'jpeg' : targetFormat}`,
                 };
                 const compressedFile = await imageCompression(item.file, options);
-                result = { name: `${originalName}.${targetFormat}`, blob: compressedFile, previewUrl: item.previewUrl, originalSize: item.file.size };
+                return { name: `${originalName}.${targetFormat}`, blob: compressedFile, previewUrl: item.previewUrl, originalSize: item.file.size };
             }
-            setConvertedFiles(prev => [...prev, result]);
-            successCount++;
         } catch (error: any) {
              toast({ title: `Failed to convert ${item.file.name}`, description: error.message, variant: 'destructive'});
+             return null;
+        }
+    }
+    
+    let successCount = 0;
+    for (const item of files) {
+        const result = await processFile(item);
+        if (result) {
+            setConvertedFiles(prev => [...prev, result]);
+            successCount++;
         }
     }
     
     setIsLoading(false);
-    setFiles([]); // Clear the queue after conversion attempt
-    setQueueCurrentPage(1);
-
+    
     if (successCount > 0) {
+        setFiles([]); // Clear the queue after conversion attempt
+        setQueueCurrentPage(1);
         toast({ title: 'Conversion Complete!', description: `Successfully converted ${successCount} out of ${files.length} images.` });
+    } else {
+        toast({ title: 'Conversion Failed', description: 'No images could be converted.', variant: 'destructive'});
     }
   };
 
@@ -205,12 +211,12 @@ export function ImageConverter() {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
         >
-            <CardContent 
-                className="p-6 text-center cursor-pointer"
+             <CardContent 
+                className="p-6 text-center cursor-pointer flex flex-col items-center justify-center h-48"
                 onClick={() => fileInputRef.current?.click()}
             >
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple />
-                 <div className="flex flex-col items-center justify-center h-full">
+                <div className="flex flex-col items-center justify-center h-full">
                     <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold">Click or drag files to upload</h3>
                     <p className="text-sm text-muted-foreground">Select one or more images to convert.</p>
@@ -264,6 +270,12 @@ export function ImageConverter() {
                             <Button variant="outline" size="sm" onClick={() => setQueueCurrentPage(p => Math.min(p + 1, totalQueuePages))} disabled={queueCurrentPage === totalQueuePages}>Next <ArrowRight className="ml-2 h-4 w-4" /></Button>
                         </div>
                     )}
+                     <div className="flex justify-end mt-4">
+                        <Button variant="secondary" onClick={handleClear}>
+                            <Trash2 className="mr-2 h-4 w-4"/>
+                            Clear Queue
+                        </Button>
+                     </div>
                  </div>
             </CardContent>
              <CardFooter>
@@ -299,7 +311,7 @@ export function ImageConverter() {
                         </div>
                     ))}
                 </div>
-                {totalConvertedPages > 1 && (
+                 {totalConvertedPages > 1 && (
                     <div className="flex items-center justify-end space-x-2 pt-2">
                         <Button variant="outline" size="sm" onClick={() => setConvertedCurrentPage(p => Math.max(p - 1, 1))} disabled={convertedCurrentPage === 1}><ArrowLeft className="mr-2 h-4 w-4" /> Previous</Button>
                         <span className="text-sm text-muted-foreground">Page {convertedCurrentPage} of {totalConvertedPages}</span>
