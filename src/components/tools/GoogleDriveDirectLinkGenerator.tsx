@@ -1,24 +1,25 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Link as LinkIcon, FileCheck, Copy, TestTube2, Trash2, Wand2 } from 'lucide-react';
+import { Link as LinkIcon, FileCheck, Copy, TestTube2, Trash2, Wand2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Textarea } from '../ui/textarea';
 
-interface GeneratedLink {
+interface LinkPair {
+    id: number;
     original: string;
     direct: string;
     error?: string;
 }
 
 export function GoogleDriveDirectLinkGenerator() {
-  const [shareableLinks, setShareableLinks] = useState('');
-  const [directLinks, setDirectLinks] = useState<GeneratedLink[]>([]);
+  const [links, setLinks] = useState([{ id: 1, value: '' }]);
+  const [generatedLinks, setGeneratedLinks] = useState<LinkPair[]>([]);
   const { toast } = useToast();
   
   const getFileId = (link: string): string | null => {
@@ -38,7 +39,8 @@ export function GoogleDriveDirectLinkGenerator() {
   }
 
   const handleGenerate = () => {
-    if (!shareableLinks.trim()) {
+    const validLinks = links.filter(l => l.value.trim() !== '');
+    if (validLinks.length === 0) {
       toast({
         title: 'Invalid URL',
         description: 'Please enter at least one Google Drive file sharing link.',
@@ -47,44 +49,57 @@ export function GoogleDriveDirectLinkGenerator() {
       return;
     }
 
-    const urls = shareableLinks.split('\n').filter(link => link.trim() !== '');
-    const generated: GeneratedLink[] = urls.map(original => {
-        const fileId = getFileId(original);
+    const newGeneratedLinks: LinkPair[] = validLinks.map((link, index) => {
+        const fileId = getFileId(link.value);
         if (fileId) {
             return {
-                original,
+                id: link.id,
+                original: link.value,
                 direct: `https://drive.google.com/uc?export=download&id=${fileId}`
             };
         }
         return {
-            original,
+            id: link.id,
+            original: link.value,
             direct: '',
             error: 'Invalid Link Format'
         };
     });
     
-    setDirectLinks(generated);
+    setGeneratedLinks(newGeneratedLinks);
     toast({
       title: 'Links Generated!',
-      description: `Processed ${generated.length} URLs.`,
+      description: `Processed ${newGeneratedLinks.length} URLs.`,
     });
   };
   
+  const handleLinkChange = (id: number, value: string) => {
+    setLinks(links.map(link => link.id === id ? { ...link, value } : link));
+  };
+  
+  const addLinkInput = () => {
+    setLinks([...links, { id: Date.now(), value: '' }]);
+  };
+  
+  const removeLinkInput = (id: number) => {
+    setLinks(links.filter(link => link.id !== id));
+  };
+
   const handleCopy = (link: string) => {
     navigator.clipboard.writeText(link);
     toast({ description: 'Link copied to clipboard!' });
   };
   
-   const handleCopyAll = () => {
-    const allLinks = directLinks.map(l => l.direct).filter(Boolean).join('\n');
+  const handleCopyAll = () => {
+    const allLinks = generatedLinks.map(l => l.direct).filter(Boolean).join('\n');
     if (!allLinks) return;
     navigator.clipboard.writeText(allLinks);
-    toast({ title: 'All links copied to clipboard!' });
+    toast({ title: 'All valid links copied to clipboard!' });
   };
   
   const handleClear = () => {
-    setShareableLinks('');
-    setDirectLinks([]);
+    setLinks([{ id: 1, value: '' }]);
+    setGeneratedLinks([]);
   }
 
   return (
@@ -93,34 +108,52 @@ export function GoogleDriveDirectLinkGenerator() {
         <LinkIcon className="h-4 w-4" />
         <AlertTitle>How to use this tool?</AlertTitle>
         <AlertDescription>
-          In Google Drive, get a shareable link for your file (set to 'Anyone with the link can view'). Paste one or more links below (one per line).
+          In Google Drive, get a shareable link for your file (set to 'Anyone with the link can view'). Paste one or more links below.
         </AlertDescription>
       </Alert>
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-4">
            <Card>
             <CardHeader>
                 <CardTitle>Step 1: Input Your Google Drive Links</CardTitle>
             </CardHeader>
-            <CardContent>
-                <div className="space-y-2">
-                    <Label htmlFor="share-links">Google Drive Shareable URLs (one per line)</Label>
-                    <Textarea id="share-links" value={shareableLinks} onChange={e => setShareableLinks(e.target.value)} placeholder="https://drive.google.com/file/d/FILE_ID/view?usp=sharing" className="min-h-[150px]"/>
-                </div>
+            <CardContent className="space-y-4">
+                {links.map((link, index) => (
+                    <div key={link.id} className="flex items-end gap-2">
+                        <div className="flex-grow space-y-2">
+                            <Label htmlFor={`share-link-${index}`}>Google Drive URL #{index + 1}</Label>
+                            <Input 
+                                id={`share-link-${index}`} 
+                                value={link.value} 
+                                onChange={e => handleLinkChange(link.id, e.target.value)} 
+                                placeholder="https://drive.google.com/file/d/FILE_ID/view?usp=sharing"
+                            />
+                        </div>
+                        {links.length > 1 && (
+                            <Button variant="destructive" size="icon" onClick={() => removeLinkInput(link.id)}>
+                                <Trash2 className="h-4 w-4"/>
+                            </Button>
+                        )}
+                    </div>
+                ))}
+                <Button variant="outline" onClick={addLinkInput} className="w-full">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add URL
+                </Button>
             </CardContent>
            </Card>
-      </div>
 
-       <div className="flex flex-col sm:flex-row gap-4">
-          <Button onClick={handleGenerate} className="w-full">
-              <Wand2 className="mr-2 h-4 w-4"/> Generate Direct Links
-          </Button>
-           <Button onClick={handleClear} variant="destructive" className="w-full">
-              <Trash2 className="mr-2 h-4 w-4"/> Clear All
-          </Button>
-       </div>
-       
-       {directLinks.length > 0 && (
+           <div className="flex flex-col sm:flex-row gap-4">
+              <Button onClick={handleGenerate} className="w-full">
+                  <Wand2 className="mr-2 h-4 w-4"/> Generate Direct Links
+              </Button>
+               <Button onClick={handleClear} variant="destructive" className="w-full">
+                  <Trash2 className="mr-2 h-4 w-4"/> Clear All
+              </Button>
+           </div>
+        </div>
+        
+        {generatedLinks.length > 0 && (
            <Card>
             <CardHeader>
                 <CardTitle>Step 2: Get Your Direct Links</CardTitle>
@@ -128,14 +161,13 @@ export function GoogleDriveDirectLinkGenerator() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
-                    {directLinks.map((link, index) => (
-                        <div key={index} className="flex items-center gap-2 p-2 border rounded-md bg-muted">
+                    {generatedLinks.map((link, index) => (
+                        <div key={index} className="p-2 border rounded-md bg-muted">
+                           <p className="text-xs text-muted-foreground truncate mb-1">Original: {link.original}</p>
+                           <div className="flex items-center gap-2">
                            <div className="flex-1 overflow-hidden">
                              {link.error ? (
-                                <>
-                                 <p className="text-sm font-mono text-red-500 truncate" title={link.original}>{link.error}</p>
-                                 <p className="text-xs text-muted-foreground truncate">{link.original}</p>
-                                </>
+                                <p className="text-sm font-mono text-red-500 truncate" title={link.error}>{link.error}</p>
                              ) : (
                                 <a href={link.direct} target="_blank" rel="noopener noreferrer" className="text-sm font-mono text-primary hover:underline truncate block" title={link.direct}>
                                     {link.direct}
@@ -145,6 +177,7 @@ export function GoogleDriveDirectLinkGenerator() {
                            <Button variant="ghost" size="icon" onClick={() => handleCopy(link.direct)} disabled={!!link.error}>
                                <Copy className="h-4 w-4"/>
                            </Button>
+                           </div>
                         </div>
                     ))}
                 </div>
@@ -154,6 +187,7 @@ export function GoogleDriveDirectLinkGenerator() {
             </CardContent>
         </Card>
        )}
+      </div>
     </div>
   );
 }
