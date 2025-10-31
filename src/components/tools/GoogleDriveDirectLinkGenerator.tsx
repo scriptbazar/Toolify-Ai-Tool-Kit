@@ -106,9 +106,8 @@ export function GoogleDriveDirectLinkGenerator() {
     <div className="space-y-6">
        <Alert>
         <LinkIcon className="h-4 w-4" />
-        <AlertTitle>How to use this tool?</AlertTitle>
         <AlertDescription>
-          In Google Drive, get a shareable link for your file (set to 'Anyone with the link can view'). Paste one or more links below.
+          To generate a direct download link, get a shareable link for your file in Google Drive (set to 'Anyone with the link can view') and paste it below.
         </AlertDescription>
       </Alert>
 
