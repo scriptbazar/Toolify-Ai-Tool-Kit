@@ -19,13 +19,13 @@ import {
 
 
 export async function analyzeImage(input: AnalyzeImageInput): Promise<AnalyzeImageOutput> {
-    return analyzeImageForTextFlow(input);
+    return textRecognizerFlow(input);
 }
 
 
-const analyzeImageForTextFlow = ai.defineFlow(
+const textRecognizerFlow = ai.defineFlow(
     {
-        name: 'analyzeImageForTextFlow',
+        name: 'textRecognizerFlow',
         inputSchema: AnalyzeImageInputSchema,
         outputSchema: AnalyzeImageOutputSchema,
     },

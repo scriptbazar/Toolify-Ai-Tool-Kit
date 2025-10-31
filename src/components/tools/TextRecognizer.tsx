@@ -7,13 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { UploadCloud, Loader2, FileText, Bot, Copy, Trash2, ZoomIn, ZoomOut, Move, Languages, Text, Square, Sigma, Baseline } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { analyzeImageForText } from '@/ai/flows/text-recognizer';
+import { analyzeImage } from '@/ai/flows/text-recognizer';
 import type { TextAnnotation, EntityAnnotation } from '@/ai/flows/text-recognizer.types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Skeleton } from '../ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '../ui/table';
+import Image from 'next/image';
 
 interface BoundingBox {
   x: number;
@@ -70,11 +71,11 @@ export function TextRecognizer() {
       reader.readAsDataURL(fileToAnalyze);
       reader.onloadend = async () => {
         const base64Image = reader.result as string;
-        const result = await analyzeImageForText({ imageDataUri: base64Image });
+        const result = await analyzeImage({ imageDataUri: base64Image });
         if (result.fullTextAnnotation) {
           setFullText(result.fullTextAnnotation.text);
-          setBlocks(result.fullTextAnnotation.pages[0]?.blocks || []);
-          setDetectedLanguage(result.fullTextAnnotation.pages[0]?.property?.detectedLanguages?.[0]?.languageCode || 'N/A');
+          setBlocks(result.fullTextAnnotation.pages?.[0]?.blocks || []);
+          setDetectedLanguage(result.fullTextAnnotation.pages?.[0]?.property?.detectedLanguages?.[0]?.languageCode || 'N/A');
         } else {
           toast({ title: 'No Text Detected', description: 'The AI could not find any text in this image.', variant: 'default'});
         }
@@ -173,16 +174,16 @@ export function TextRecognizer() {
                                         <TableHeader className="sticky top-0 bg-background"><TableRow><TableHead>Type</TableHead><TableHead>Text</TableHead></TableRow></TableHeader>
                                         <TableBody>
                                             {blocks.flatMap(block => 
-                                                block.paragraphs.flatMap(para => 
-                                                    para.words.flatMap(word => 
-                                                        word.symbols.map(symbol => ({
+                                                block.paragraphs?.flatMap(para => 
+                                                    para.words?.flatMap(word => 
+                                                        word.symbols?.map(symbol => ({
                                                             type: 'Symbol',
                                                             text: symbol.text,
                                                             boundingBox: symbol.boundingBox,
                                                             confidence: symbol.confidence,
-                                                        }))
-                                                    )
-                                                )
+                                                        })) || []
+                                                    ) || []
+                                                ) || []
                                             ).map((item, index) => (
                                                 <TableRow 
                                                     key={index}
