@@ -4,7 +4,7 @@
 import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { UploadCloud, FileDown, Loader2, Trash2, Wand2, FileImage, X, Folder, CheckCircle, Download } from 'lucide-react';
+import { UploadCloud, FileDown, Loader2, Trash2, Wand2, FileImage, X, CheckCircle, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
@@ -29,6 +29,7 @@ interface ConvertedFile {
     name: string;
     blob: Blob;
     previewUrl: string;
+    originalSize: number;
 }
 
 export function ImageConverter() {
@@ -107,7 +108,7 @@ export function ImageConverter() {
                 page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
                 const pdfBytes = await pdfDoc.save();
                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                return { name: `${originalName}.pdf`, blob, previewUrl: item.previewUrl };
+                return { name: `${originalName}.pdf`, blob, previewUrl: item.previewUrl, originalSize: item.file.size };
             } else {
                 const options = {
                     maxSizeMB: 20,
@@ -116,7 +117,7 @@ export function ImageConverter() {
                     fileType: `image/${targetFormat === 'jpg' ? 'jpeg' : targetFormat}`,
                 };
                 const compressedFile = await imageCompression(item.file, options);
-                return { name: `${originalName}.${targetFormat}`, blob: compressedFile, previewUrl: item.previewUrl };
+                return { name: `${originalName}.${targetFormat}`, blob: compressedFile, previewUrl: item.previewUrl, originalSize: item.file.size };
             }
         });
 
@@ -182,35 +183,6 @@ export function ImageConverter() {
         </CardContent>
       </Card>
       
-      {files.length > 0 && (
-        <Card className="animate-in fade-in-50">
-            <CardHeader>
-                <CardTitle>Image Queue ({files.length})</CardTitle>
-                <CardDescription>Images waiting to be converted.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <ScrollArea className="h-48 w-full pr-4">
-                    <div className="space-y-2">
-                    {files.map((item) => (
-                        <div key={item.id} className="flex items-center gap-2 p-1.5 bg-muted rounded-md text-sm">
-                            <Image src={item.previewUrl} alt={item.file.name} width={32} height={32} className="rounded-sm object-cover w-8 h-8"/>
-                            <div className="flex-1 overflow-hidden"><p className="font-medium truncate">{item.file.name}</p></div>
-                            <p className="text-xs text-muted-foreground">{formatBytes(item.file.size)}</p>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(item.id)}><X className="h-4 w-4" /></Button>
-                        </div>
-                    ))}
-                    </div>
-                </ScrollArea>
-                 <div className="flex justify-end mt-4">
-                     <Button variant="secondary" size="sm" onClick={handleClear}>
-                        <Trash2 className="mr-2 h-4 w-4"/>
-                        Clear Queue
-                    </Button>
-                 </div>
-            </CardContent>
-        </Card>
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle>Conversion Settings</CardTitle>
@@ -248,8 +220,31 @@ export function ImageConverter() {
         </CardContent>
       </Card>
 
+      {files.length > 0 && convertedFiles.length === 0 && (
+        <Card className="animate-in fade-in-50">
+            <CardHeader>
+                <CardTitle>Image Queue ({files.length})</CardTitle>
+                <CardDescription>These images are ready to be converted.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ScrollArea className="h-48 w-full pr-4">
+                    <div className="space-y-2">
+                    {files.map((item) => (
+                        <div key={item.id} className="flex items-center gap-2 p-1.5 bg-muted rounded-md text-sm">
+                            <Image src={item.previewUrl} alt={item.file.name} width={32} height={32} className="rounded-sm object-cover w-8 h-8"/>
+                            <div className="flex-1 overflow-hidden"><p className="font-medium truncate">{item.file.name}</p></div>
+                            <p className="text-xs text-muted-foreground">{formatBytes(item.file.size)}</p>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(item.id)}><X className="h-4 w-4" /></Button>
+                        </div>
+                    ))}
+                    </div>
+                </ScrollArea>
+            </CardContent>
+        </Card>
+      )}
+
       {isLoading && convertedFiles.length === 0 && (
-          <div className="p-4 bg-muted rounded-lg flex items-center gap-2">
+          <div className="p-4 bg-muted rounded-lg flex items-center justify-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin"/>
               <span className="text-sm font-medium">Converting images, please wait...</span>
           </div>
@@ -259,25 +254,39 @@ export function ImageConverter() {
           <Card>
             <CardHeader>
               <CardTitle>Converted Images</CardTitle>
+               <CardDescription>Your images have been successfully converted.</CardDescription>
             </CardHeader>
              <CardContent className="space-y-2">
                 <div className="p-4 bg-green-500/10 text-green-700 dark:text-green-300 rounded-lg flex items-center gap-2">
                   <CheckCircle className="h-4 w-4"/>
                   <span className="text-sm font-medium">Conversion complete!</span>
                 </div>
-                {convertedFiles.map((item, index) => (
-                    <div key={`${item.name}-${index}`} className="flex items-center gap-2 p-2 bg-muted rounded-md">
-                        <Image src={item.previewUrl} alt="Original" width={32} height={32} className="rounded-sm object-cover w-8 h-8"/>
-                        <FileImage className="h-5 w-5 text-primary" />
-                        <div className="flex-1 overflow-hidden">
-                            <p className="text-sm font-medium truncate">{item.name}</p>
+                <ScrollArea className="h-72 pr-4">
+                    <div className="space-y-2">
+                    {convertedFiles.map((item, index) => (
+                        <div key={`${item.name}-${index}`} className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                            <Image src={item.previewUrl} alt="Original" width={32} height={32} className="rounded-sm object-cover w-8 h-8"/>
+                            <FileImage className="h-5 w-5 text-primary" />
+                            <div className="flex-1 overflow-hidden">
+                                <p className="text-sm font-medium truncate">{item.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    {formatBytes(item.originalSize)} &rarr; {formatBytes(item.blob.size)}
+                                </p>
+                            </div>
+                            <Badge variant="outline">{(((item.originalSize - item.blob.size) / item.originalSize) * 100).toFixed(0)}% smaller</Badge>
+                            <Button size="sm" onClick={() => handleIndividualDownload(item)}>Download</Button>
                         </div>
-                        <Badge variant="outline">{formatBytes(item.blob.size)}</Badge>
-                        <Button size="sm" onClick={() => handleIndividualDownload(item)}>Download</Button>
+                    ))}
                     </div>
-                ))}
+                </ScrollArea>
              </CardContent>
           </Card>
+      )}
+
+      {files.length > 0 && (
+           <Button onClick={handleClear} variant="destructive" className="w-full">
+                <Trash2 className="mr-2 h-4 w-4"/> Clear All
+            </Button>
       )}
     </div>
   );
