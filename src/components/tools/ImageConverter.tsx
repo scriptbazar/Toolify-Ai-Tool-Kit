@@ -13,8 +13,8 @@ import imageCompression from 'browser-image-compression';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 import JSZip from 'jszip';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { Label } from '../ui/label';
+import { Badge } from '../ui/badge';
 
 type ImageFormat = 'jpeg' | 'png' | 'webp' | 'gif' | 'bmp' | 'pdf' | 'avif' | 'jpg';
 
@@ -106,10 +106,13 @@ export function ImageConverter() {
     setConvertedFiles([]);
     setConvertedCurrentPage(1);
 
-    try {
-        const conversionPromises = files.map(async (item) => {
+    let successCount = 0;
+
+    for (const item of files) {
+        try {
             const originalName = item.file.name.split('.')[0] || 'image';
-            
+            let result: ConvertedFile;
+
             if (targetFormat === 'pdf') {
                 const imageBytes = await item.file.arrayBuffer();
                 const pdfDoc = await PDFDocument.create();
@@ -118,7 +121,7 @@ export function ImageConverter() {
                 page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
                 const pdfBytes = await pdfDoc.save();
                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                return { name: `${originalName}.pdf`, blob, previewUrl: item.previewUrl, originalSize: item.file.size };
+                result = { name: `${originalName}.pdf`, blob, previewUrl: item.previewUrl, originalSize: item.file.size };
             } else {
                 const options = {
                     maxSizeMB: 20,
@@ -127,20 +130,21 @@ export function ImageConverter() {
                     fileType: `image/${targetFormat === 'jpg' ? 'jpeg' : targetFormat}`,
                 };
                 const compressedFile = await imageCompression(item.file, options);
-                return { name: `${originalName}.${targetFormat}`, blob: compressedFile, previewUrl: item.previewUrl, originalSize: item.file.size };
+                result = { name: `${originalName}.${targetFormat}`, blob: compressedFile, previewUrl: item.previewUrl, originalSize: item.file.size };
             }
-        });
+            setConvertedFiles(prev => [...prev, result]);
+            successCount++;
+        } catch (error: any) {
+             toast({ title: `Failed to convert ${item.file.name}`, description: error.message, variant: 'destructive'});
+        }
+    }
+    
+    setIsLoading(false);
+    setFiles([]); // Clear the queue after conversion attempt
+    setQueueCurrentPage(1);
 
-        const results = await Promise.all(conversionPromises);
-        setConvertedFiles(results);
-        setFiles([]); // Clear the queue after successful conversion
-        setQueueCurrentPage(1);
-        toast({ title: 'Conversion Complete!', description: `Converted ${results.length} images.` });
-
-    } catch (error: any) {
-        toast({ title: 'Conversion Failed', description: error.message, variant: 'destructive'});
-    } finally {
-        setIsLoading(false);
+    if (successCount > 0) {
+        toast({ title: 'Conversion Complete!', description: `Successfully converted ${successCount} out of ${files.length} images.` });
     }
   };
 
@@ -240,10 +244,6 @@ export function ImageConverter() {
                         </div>
                     )}
                 </div>
-                 <Button onClick={handleConvert} disabled={files.length === 0 || isLoading} className="w-full">
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
-                    Convert Images
-                </Button>
 
                  <div className="space-y-4 pt-4 border-t">
                     <h4 className="font-semibold">Image Queue ({files.length})</h4>
@@ -266,14 +266,13 @@ export function ImageConverter() {
                     )}
                  </div>
             </CardContent>
+             <CardFooter>
+                 <Button onClick={handleConvert} disabled={files.length === 0 || isLoading} className="w-full">
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4" />}
+                    Convert Images
+                </Button>
+            </CardFooter>
         </Card>
-      )}
-
-      {isLoading && convertedFiles.length === 0 && (
-        <div className="text-center p-4">
-          <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary" />
-          <p className="mt-2 text-muted-foreground">Converting images, please wait...</p>
-        </div>
       )}
 
       {convertedFiles.length > 0 && !isLoading && (
