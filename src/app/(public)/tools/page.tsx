@@ -1,5 +1,12 @@
+
 import { getTools } from '@/ai/flows/tool-management';
 import { ToolsPageClient } from './_components/ToolsPageClient';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Explore Our Tools | ToolifyAI',
+  description: 'Discover our comprehensive suite of 100+ powerful and easy-to-use tools for text, images, development, and more.',
+};
 
 export default async function ToolsDashboardPage({
   searchParams,
