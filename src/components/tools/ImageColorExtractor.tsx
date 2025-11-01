@@ -19,6 +19,82 @@ interface ColorInfo {
 const rgbToHex = (r: number, g: number, b: number): string =>
   '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
 
+// k-means clustering algorithm for color quantization
+const getDominantColors = (imageData: ImageData, k: number = 10): ColorInfo[] => {
+    const pixels = [];
+    for (let i = 0; i < imageData.data.length; i += 4) {
+        if (imageData.data[i + 3] > 128) { // Consider only opaque pixels
+            pixels.push([imageData.data[i], imageData.data[i + 1], imageData.data[i + 2]]);
+        }
+    }
+
+    // 1. Initialize centroids randomly
+    let centroids: number[][] = [];
+    const pixelSample = [...pixels]; // Create a mutable copy
+    for (let i = 0; i < k; i++) {
+        const randomIndex = Math.floor(Math.random() * pixelSample.length);
+        centroids.push(pixelSample.splice(randomIndex, 1)[0]);
+    }
+
+    let clusters: number[][][] = [];
+    const MAX_ITERATIONS = 20;
+
+    for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
+        // 2. Assign each pixel to the closest centroid
+        clusters = Array.from({ length: k }, () => []);
+        for (const pixel of pixels) {
+            let minDistance = Infinity;
+            let closestCentroidIndex = 0;
+            for (let i = 0; i < centroids.length; i++) {
+                const distance = Math.sqrt(
+                    Math.pow(pixel[0] - centroids[i][0], 2) +
+                    Math.pow(pixel[1] - centroids[i][1], 2) +
+                    Math.pow(pixel[2] - centroids[i][2], 2)
+                );
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestCentroidIndex = i;
+                }
+            }
+            clusters[closestCentroidIndex].push(pixel);
+        }
+
+        // 3. Recalculate centroids as the mean of the pixels in each cluster
+        let newCentroids: number[][] = [];
+        let hasConverged = true;
+        for (let i = 0; i < k; i++) {
+            if (clusters[i].length === 0) {
+                // If a cluster is empty, re-initialize its centroid
+                newCentroids[i] = pixels[Math.floor(Math.random() * pixels.length)];
+                continue;
+            }
+
+            const mean = clusters[i].reduce((acc, pixel) => [acc[0] + pixel[0], acc[1] + pixel[1], acc[2] + pixel[2]], [0, 0, 0]);
+            const newCentroid = [Math.round(mean[0] / clusters[i].length), Math.round(mean[1] / clusters[i].length), Math.round(mean[2] / clusters[i].length)];
+            
+            if (JSON.stringify(newCentroid) !== JSON.stringify(centroids[i])) {
+                hasConverged = false;
+            }
+            newCentroids[i] = newCentroid;
+        }
+
+        if (hasConverged) break;
+        centroids = newCentroids;
+    }
+
+    // Sort clusters by size to get dominant colors
+    clusters.sort((a, b) => b.length - a.length);
+
+    return clusters.slice(0, k).map((cluster, index) => {
+        const [r, g, b] = centroids[index];
+        return {
+            hex: rgbToHex(r, g, b),
+            rgb: `rgb(${r}, ${g}, ${b})`,
+        };
+    });
+};
+
+
 export function ImageColorExtractor() {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -83,37 +159,17 @@ export function ImageColorExtractor() {
             canvas.height = img.height * scaleRatio;
             // --------------------------------
 
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
             if (!ctx) {
                 setIsLoading(false);
+                toast({ title: 'Error', description: 'Could not get canvas context.', variant: 'destructive'});
                 return;
             }
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             try {
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                const colorCount: { [key: string]: number } = {};
-                
-                for (let i = 0; i < imageData.length; i += 4) {
-                    const r = imageData[i];
-                    const g = imageData[i+1];
-                    const b = imageData[i+2];
-                    // Skip transparent pixels
-                    if (imageData[i+3] < 128) continue;
-                    
-                    const rgb = `${r},${g},${b}`;
-                    colorCount[rgb] = (colorCount[rgb] || 0) + 1;
-                }
-
-                const sortedColors = Object.entries(colorCount).sort((a, b) => b[1] - a[1]);
-                const dominantColors = sortedColors.slice(0, 10).map(([rgbStr]) => {
-                    const [r, g, b] = rgbStr.split(',').map(Number);
-                    return {
-                        hex: rgbToHex(r, g, b),
-                        rgb: `rgb(${r}, ${g}, ${b})`,
-                    };
-                });
-
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const dominantColors = getDominantColors(imageData, 10);
                 setPalette(dominantColors);
             } catch (error) {
                 console.error("Color extraction failed:", error);
