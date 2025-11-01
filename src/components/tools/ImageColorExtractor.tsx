@@ -142,7 +142,7 @@ export function ImageColorExtractor() {
                     </CardHeader>
                     <CardContent>
                         <div 
-                            className={cn("w-full aspect-video border-2 border-dashed rounded-lg text-center cursor-pointer flex items-center justify-center relative transition-colors", 
+                            className={cn("w-full aspect-video border-2 border-dashed rounded-lg text-center cursor-pointer flex flex-col items-center justify-center relative transition-colors", 
                                 isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/30 hover:bg-muted/50'
                             )}
                             onClick={() => fileInputRef.current?.click()}
