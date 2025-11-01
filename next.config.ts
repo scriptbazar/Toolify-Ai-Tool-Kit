@@ -1,7 +1,5 @@
 
 import type {NextConfig} from 'next';
-import CopyWebpackPlugin from 'copy-webpack-plugin';
-import path from 'path';
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -82,24 +80,6 @@ const nextConfig: NextConfig = {
         filename: 'static/chunks/[name].[hash][ext]'
       }
     });
-
-    // Copy pdf.js CMaps and worker to public directory only for server build
-    if (isServer) {
-        config.plugins.push(
-            new CopyWebpackPlugin({
-                patterns: [
-                    {
-                        from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'cmaps'),
-                        to: path.join(process.cwd(), 'public', 'cmaps'),
-                    },
-                    {
-                        from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'build', 'pdf.worker.min.mjs'),
-                        to: path.join(process.cwd(), 'public'),
-                    }
-                ],
-            })
-        );
-    }
     
     return config;
   },
