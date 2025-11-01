@@ -26,7 +26,15 @@ export function DropboxDirectLinkGenerator() {
     try {
       const url = new URL(link);
       if (url.hostname === 'www.dropbox.com' || url.hostname === 'dropbox.com') {
-        url.searchParams.set('dl', '1');
+        // Correct method is to change dl=0 to dl=1
+        if (url.searchParams.get('dl') === '0') {
+            url.searchParams.set('dl', '1');
+            return url.toString();
+        } else if (!url.searchParams.has('dl')) {
+            url.searchParams.set('dl', '1');
+            return url.toString();
+        }
+        // If dl=1 is already there, it's already a direct link
         return url.toString();
       }
       return null;
@@ -104,7 +112,7 @@ export function DropboxDirectLinkGenerator() {
        <Alert>
         <LinkIcon className="h-4 w-4" />
         <AlertDescription>
-          In Dropbox, click 'Share', then 'Copy link'. Paste the generated shareable link below and the tool will automatically convert it. The link must end with `?dl=0`.
+          In Dropbox, get a shareable link. Paste it below and the tool will automatically convert it to a direct download link by changing `?dl=0` to `?dl=1`.
         </AlertDescription>
       </Alert>
 

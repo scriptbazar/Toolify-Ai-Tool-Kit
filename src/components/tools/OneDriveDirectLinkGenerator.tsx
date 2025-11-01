@@ -24,11 +24,8 @@ export function OneDriveDirectLinkGenerator() {
 
   const getDirectLink = (link: string): string | null => {
     try {
-        const newDirectLink = link.replace("/embed?", "/download?");
-        if (newDirectLink !== link) {
-            return newDirectLink;
-        }
-        return null;
+        const base64EncodedUrl = btoa(link).replace(/=/g, '').replace(/\//g, '_').replace(/\+/g, '-');
+        return `https://api.onedrive.com/v1.0/shares/u!${base64EncodedUrl}/root/content`;
     } catch (e) {
       return null;
     }
@@ -39,7 +36,7 @@ export function OneDriveDirectLinkGenerator() {
     if (validLinks.length === 0) {
       toast({
         title: 'No URLs provided',
-        description: 'Please enter at least one OneDrive embed link.',
+        description: 'Please enter at least one OneDrive shareable link.',
         variant: 'destructive',
       });
       return;
@@ -103,25 +100,25 @@ export function OneDriveDirectLinkGenerator() {
        <Alert>
         <LinkIcon className="h-4 w-4" />
         <AlertDescription>
-          Open your file in OneDrive, click 'Share', then select 'Embed'. Copy the `src` URL from the iframe code and paste it below.
+          Get a shareable link from OneDrive ('Anyone with the link can view'). Paste the link below to convert it to a direct download link.
         </AlertDescription>
       </Alert>
 
       <div className="space-y-6">
         <Card>
             <CardHeader>
-                <CardTitle>Input Your OneDrive Embed Links</CardTitle>
+                <CardTitle>Input Your OneDrive Links</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 {links.map((link, index) => (
                     <div key={link.id} className="flex items-end gap-2">
                         <div className="flex-grow space-y-2">
-                            <Label htmlFor={`share-link-${index}`}>Embed URL #{index + 1}</Label>
+                            <Label htmlFor={`share-link-${index}`}>OneDrive URL #{index + 1}</Label>
                             <Input 
                                 id={`share-link-${index}`} 
                                 value={link.value} 
                                 onChange={e => handleLinkChange(link.id, e.target.value)} 
-                                placeholder="https://onedrive.live.com/embed?cid=..."
+                                placeholder="https://1drv.ms/..."
                             />
                         </div>
                         {links.length > 1 && (
