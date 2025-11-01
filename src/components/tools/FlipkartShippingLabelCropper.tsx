@@ -1,17 +1,19 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadCloud, Scissors, Loader2, FileUp, FileText, ArrowRight, Printer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument } from 'pdf-lib';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
+import { cn } from '@/lib/utils';
 
 export function FlipkartShippingLabelCropper() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -24,6 +26,10 @@ export function FlipkartShippingLabelCropper() {
     }
   };
 
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); handleFileChange({ target: { files: e.dataTransfer.files } } as any); };
+
   const handleCrop = async () => {
     if (!pdfFile) {
       toast({ title: 'No PDF selected', description: 'Please upload a PDF file to crop.', variant: 'destructive' });
@@ -35,19 +41,25 @@ export function FlipkartShippingLabelCropper() {
       const pdfDoc = await PDFDocument.load(existingPdfBytes, { ignoreEncryption: true });
       const newPdfDoc = await PDFDocument.create();
 
-      const labelWidth = 4 * 72;  // 4 inches
-      const labelHeight = 6 * 72; // 6 inches
+      const labelWidth = 4 * 72;  // 4 inches in points
+      const labelHeight = 6 * 72; // 6 inches in points
+      
+      const pageIndicesToCopy = Array.from({ length: pdfDoc.getPageCount() }, (_, i) => i);
+      const copiedPages = await newPdfDoc.copyPages(pdfDoc, pageIndicesToCopy);
 
-      for (const page of pdfDoc.getPages()) {
-        const { width, height } = page.getSize();
-        page.setCropBox(0, height - labelHeight, labelWidth, labelHeight);
-        
-        const [embeddedPage] = await newPdfDoc.embedPdf(pdfDoc, [pdfDoc.getPages().indexOf(page)]);
-        
-        const newPage = newPdfDoc.addPage([labelWidth, labelHeight]);
-        newPage.drawPage(embeddedPage, { x: 0, y: 0 });
+      for (const copiedPage of copiedPages) {
+          const { width, height } = copiedPage.getSize();
+          
+          // Crop from top left
+          copiedPage.setCropBox(0, height - labelHeight, labelWidth, labelHeight);
+          
+          // Set media box for the new page to be the size of the crop box
+          const newPage = newPdfDoc.addPage([labelWidth, labelHeight]);
+          
+          // Draw the cropped page onto the new page
+          newPage.drawPage(copiedPage);
       }
-
+      
       const newPdfBytes = await newPdfDoc.save();
 
       const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
@@ -61,7 +73,7 @@ export function FlipkartShippingLabelCropper() {
 
     } catch (error: any) {
       console.error(error);
-      toast({ title: 'Error', description: 'Could not crop the PDF.', variant: 'destructive' });
+      toast({ title: 'Error', description: error.message || 'Could not crop the PDF. Please ensure it is a valid Flipkart label.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +82,13 @@ export function FlipkartShippingLabelCropper() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         <div className="space-y-6">
-            <Card>
+            <Card
+              className={cn(
+                "transition-colors h-full",
+                isDragging && 'border-primary bg-primary/10'
+              )}
+              onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+            >
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><FileUp className="h-5 w-5"/>Step 1: Upload Your Label</CardTitle>
                     <CardDescription>Upload the standard PDF label you downloaded from Flipkart.</CardDescription>
@@ -97,7 +115,7 @@ export function FlipkartShippingLabelCropper() {
             </Card>
         </div>
         <div className="space-y-6">
-           <Card>
+           <Card className="h-full">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Printer className="h-5 w-5"/>Step 2: Preview & Crop</CardTitle>
                     <CardDescription>Your label will be cropped to a perfect 4" x 6" size, ready for your thermal printer.</CardDescription>
