@@ -1,2 +1,1 @@
-import { EventEmitter } from 'events';
-export const errorEmitter = new EventEmitter();
+// This file is no longer needed and will be deleted.

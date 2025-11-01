@@ -37,7 +37,7 @@ import {
 import { useAuth } from '@/hooks/use-auth';
 import { AdminSidebarNav } from '@/components/admin/AdminSidebarNav';
 import { AuthContextProvider } from '@/context/AuthContext';
-import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
+
 
 // The actual client-side layout component
 function AdminLayoutClient({
@@ -250,7 +250,6 @@ export default function AdminRootLayout({
 }) {
   return (
     <AuthContextProvider>
-      <FirebaseErrorListener />
       <AdminLayoutClient>{children}</AdminLayoutClient>
     </AuthContextProvider>
   );
