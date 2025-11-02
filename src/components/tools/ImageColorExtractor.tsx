@@ -21,22 +21,25 @@ const rgbToHex = (r: number, g: number, b: number): string =>
 
 // k-means clustering algorithm for color quantization
 const getDominantColors = (imageData: ImageData, k: number = 10): ColorInfo[] => {
-    const pixels = [];
+    const pixels: number[][] = [];
     for (let i = 0; i < imageData.data.length; i += 4) {
         if (imageData.data[i + 3] > 128) { // Consider only opaque pixels
             pixels.push([imageData.data[i], imageData.data[i + 1], imageData.data[i + 2]]);
         }
     }
 
-    // 1. Initialize centroids randomly
+    if (pixels.length === 0) return [];
+
+    // 1. Initialize centroids by picking random pixels
     let centroids: number[][] = [];
-    const pixelSample = [...pixels]; // Create a mutable copy
+    const pixelSample = [...pixels];
     for (let i = 0; i < k; i++) {
+        if (pixelSample.length === 0) break;
         const randomIndex = Math.floor(Math.random() * pixelSample.length);
         centroids.push(pixelSample.splice(randomIndex, 1)[0]);
     }
 
-    let clusters: number[][][] = [];
+    let clusters: number[][][] = Array.from({ length: k }, () => []);
     const MAX_ITERATIONS = 20;
 
     for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
@@ -59,12 +62,12 @@ const getDominantColors = (imageData: ImageData, k: number = 10): ColorInfo[] =>
             clusters[closestCentroidIndex].push(pixel);
         }
 
-        // 3. Recalculate centroids as the mean of the pixels in each cluster
+        // 3. Recalculate centroids
         let newCentroids: number[][] = [];
         let hasConverged = true;
         for (let i = 0; i < k; i++) {
             if (clusters[i].length === 0) {
-                // If a cluster is empty, re-initialize its centroid
+                 // If a cluster is empty, re-initialize its centroid to a random pixel
                 newCentroids[i] = pixels[Math.floor(Math.random() * pixels.length)];
                 continue;
             }
@@ -81,12 +84,16 @@ const getDominantColors = (imageData: ImageData, k: number = 10): ColorInfo[] =>
         if (hasConverged) break;
         centroids = newCentroids;
     }
+    
+    // Use the final cluster's average color, sorted by size
+    const finalClusters = clusters.map((cluster, index) => ({
+        centroid: centroids[index],
+        size: cluster.length,
+    })).filter(c => c.size > 0) // filter out empty clusters
+      .sort((a, b) => b.size - a.size);
 
-    // Sort clusters by size to get dominant colors
-    clusters.sort((a, b) => b.length - a.length);
-
-    return clusters.slice(0, k).map((cluster, index) => {
-        const [r, g, b] = centroids[index];
+    return finalClusters.slice(0, k).map(({ centroid }) => {
+        const [r, g, b] = centroid;
         return {
             hex: rgbToHex(r, g, b),
             rgb: `rgb(${r}, ${g}, ${b})`,
@@ -151,13 +158,10 @@ export function ImageColorExtractor() {
         img.onload = () => {
             const canvas = document.createElement('canvas');
             
-            // --- Performance Improvement ---
-            // Resize image to a smaller thumbnail on canvas before processing
             const MAX_WIDTH = 100;
             const scaleRatio = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scaleRatio;
-            // --------------------------------
 
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
             if (!ctx) {
