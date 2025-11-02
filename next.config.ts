@@ -71,15 +71,6 @@ const nextConfig: NextConfig = {
     if (isServer) {
         config.externals.push('canvas');
     }
-
-    // Exclude the pdf.worker.min.mjs from being processed by webpack on the client.
-    config.module.rules.push({
-      test: /pdf\.worker\.min\.mjs/,
-      type: 'asset/resource',
-      generator: {
-        filename: 'static/chunks/[name].[hash][ext]'
-      }
-    });
     
     return config;
   },
