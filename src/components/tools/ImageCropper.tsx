@@ -63,6 +63,18 @@ export function ImageCropper() {
         setCrop(newCrop);
     }
     
+     React.useEffect(() => {
+        if (imgRef.current) {
+            const { width, height } = imgRef.current;
+            const newCrop = centerCrop(
+                makeAspectCrop({ unit: '%', width: 90 }, aspect || 1, width, height),
+                width,
+                height
+            );
+            setCrop(newCrop);
+        }
+    }, [aspect]);
+
      useDebounceEffect(
         async () => {
         if (
