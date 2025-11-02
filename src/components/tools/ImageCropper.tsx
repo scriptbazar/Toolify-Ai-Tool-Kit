@@ -66,6 +66,10 @@ export function ImageCropper() {
      React.useEffect(() => {
         if (imgRef.current) {
             const { width, height } = imgRef.current;
+            // Force a re-render of the crop selection on aspect change by resetting it.
+            // This is a workaround for a potential bug in react-image-crop where the
+            // aspect ratio doesn't visually update correctly on its own.
+            setCrop(undefined); 
             const newCrop = centerCrop(
                 makeAspectCrop({ unit: '%', width: 90 }, aspect || 1, width, height),
                 width,
