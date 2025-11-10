@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -165,6 +166,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'AI Image Generator', description: '🎨 Generate unique, high-quality images from text prompts using advanced AI.', icon: 'Cpu', category: 'ai', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a descriptive prompt of the image you want to create.', 'Click "Generate Image".', 'View and download your AI-generated artwork.'] },
     { name: 'Image to Text', description: '👁️ Extract text from any image. Upload a picture and our OCR tool will pull out the text for you to copy and use.', icon: 'ScanText', category: 'ai', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload an image file containing text.', 'The tool will automatically scan and extract the text.', 'The extracted text will be displayed in a text box, ready to be copied.'] },
     { name: 'Product SKU Encryptor', description: 'Securely encrypt and decrypt your product SKUs using a secret key.', icon: 'KeyRound', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your SKU and a secret key.', 'Click "Encrypt" to get the encrypted text.', 'Use the same key to "Decrypt" it back.'] },
+    { name: 'Text to Speech', description: '🗣️ Convert written text into natural-sounding speech. Download the audio as an MP3 file.', icon: 'AudioLines', category: 'ai', plan: 'Free', isNew: false, status: 'Active', howToUse: ['Type or paste your text into the text area.', 'Select a voice and adjust the speed or pitch if desired.', 'Click the "Listen" button to hear the audio.', 'Click "Download MP3" to save the audio file.'] },
 ];
 
 const generateSlug = (name: string) => {
