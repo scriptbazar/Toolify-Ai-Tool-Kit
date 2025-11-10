@@ -40,39 +40,34 @@ async function toWav(
   });
 }
 
-export const textToSpeechFlow = ai.defineFlow(
-  {
-    name: 'textToSpeechFlow',
-    inputSchema: TextToSpeechInputSchema,
-    outputSchema: TextToSpeechOutputSchema,
-  },
-  async ({ text, voice }) => {
-    const { media } = await ai.generate({
-      model: googleAI.model('gemini-2.5-flash-preview-tts'),
-      config: {
-        responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: voice || 'Algenib' },
-          },
+export async function textToSpeechFlow(input: z.infer<typeof TextToSpeechInputSchema>): Promise<z.infer<typeof TextToSpeechOutputSchema>> {
+  const { text, voice } = input;
+  
+  const { media } = await ai.generate({
+    model: googleAI.model('gemini-2.5-flash-preview-tts'),
+    config: {
+      responseModalities: ['AUDIO'],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: { voiceName: voice || 'Algenib' },
         },
       },
-      prompt: text,
-    });
+    },
+    prompt: text,
+  });
 
-    if (!media || !media.url) {
-      throw new Error('Audio generation failed to return valid data.');
-    }
-    
-    const audioBuffer = Buffer.from(
-      media.url.substring(media.url.indexOf(',') + 1),
-      'base64'
-    );
-
-    const wavBase64 = await toWav(audioBuffer);
-    
-    return {
-      audioDataUri: `data:audio/wav;base64,${wavBase64}`,
-    };
+  if (!media || !media.url) {
+    throw new Error('Audio generation failed to return valid data.');
   }
-);
+  
+  const audioBuffer = Buffer.from(
+    media.url.substring(media.url.indexOf(',') + 1),
+    'base64'
+  );
+
+  const wavBase64 = await toWav(audioBuffer);
+  
+  return {
+    audioDataUri: `data:audio/wav;base64,${wavBase64}`,
+  };
+}
