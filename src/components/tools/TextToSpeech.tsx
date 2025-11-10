@@ -12,18 +12,18 @@ import { Loader2, Play, Pause, Download, Wand2 } from 'lucide-react';
 import { generateSampleText } from '@/ai/flows/ai-writer';
 import { textToSpeechFlow } from '@/ai/flows/text-to-speech';
 
-// Pre-defined voices available in the Google TTS model
+// Pre-defined voices available in the Google TTS model with gender
 const availableVoices = [
-  { name: 'Algenib' },
-  { name: 'Achernar' },
-  { name: 'Enif' },
-  { name: 'Erakis' },
-  { name: 'Canopus' },
-  { name: 'Hadar' },
-  { name: 'Rigel' },
-  { name: 'Antares' },
-  { name: 'Arcturus' },
-  { name: 'Spica' },
+  { name: 'Algenib', gender: 'Male' },
+  { name: 'Achernar', gender: 'Male' },
+  { name: 'Enif', gender: 'Female' },
+  { name: 'Erakis', gender: 'Female' },
+  { name: 'Canopus', gender: 'Male' },
+  { name: 'Hadar', gender: 'Male' },
+  { name: 'Rigel', gender: 'Male' },
+  { name: 'Antares', gender: 'Male' },
+  { name: 'Arcturus', gender: 'Male' },
+  { name: 'Spica', gender: 'Female' },
 ];
 
 export function TextToSpeechTool() {
@@ -133,7 +133,7 @@ export function TextToSpeechTool() {
                     <Select value={voice} onValueChange={setVoice}>
                         <SelectTrigger id="voice-select"><SelectValue placeholder="Select a voice..."/></SelectTrigger>
                         <SelectContent>
-                            {availableVoices.map((v) => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}
+                            {availableVoices.map((v) => <SelectItem key={v.name} value={v.name}>{v.name} ({v.gender})</SelectItem>)}
                         </SelectContent>
                     </Select>
                  </div>
