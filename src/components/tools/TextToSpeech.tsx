@@ -26,7 +26,7 @@ const availableVoices = [
   { name: 'Spica' },
 ];
 
-export function TextToSpeech() {
+export function TextToSpeechTool() {
     const [text, setText] = useState('Hello, welcome to ToolifyAI. You can convert any text into natural-sounding speech.');
     const [voice, setVoice] = useState<string>('Algenib');
     const [isLoading, setIsLoading] = useState(false);
@@ -153,4 +153,4 @@ export function TextToSpeech() {
     );
 }
 
-export default TextToSpeech;
+export default TextToSpeechTool;

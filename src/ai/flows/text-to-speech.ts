@@ -9,6 +9,8 @@ import { z } from 'zod';
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/googleai';
 import wav from 'wav';
+import { TextToSpeechInputSchema, TextToSpeechOutputSchema } from './text-to-speech.types';
+
 
 // Helper function to convert PCM audio buffer to WAV format as a Base64 string
 async function toWav(
@@ -37,18 +39,6 @@ async function toWav(
     writer.end();
   });
 }
-
-export const TextToSpeechInputSchema = z.object({
-  text: z.string().min(1, 'Text cannot be empty.'),
-  voice: z.string().optional().default('Algenib'),
-});
-export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
-
-export const TextToSpeechOutputSchema = z.object({
-  audioDataUri: z.string(),
-});
-export type TextToSpeechOutput = z.infer<typeof TextToSpeechOutputSchema>;
-
 
 export const textToSpeechFlow = ai.defineFlow(
   {
