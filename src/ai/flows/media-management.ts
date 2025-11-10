@@ -41,7 +41,7 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
 
   try {
     const { media } = await ai.generate({
-      model: googleAI.model('imagen-2'),
+      model: googleAI.model('imagen-4.0-fast-generate-001'),
       prompt: promptText,
     });
     
@@ -94,4 +94,3 @@ export async function saveUserMedia(input: SaveMediaInput): Promise<{ success: b
     return { success: false, message: 'Could not save media record.' };
   }
 }
-
