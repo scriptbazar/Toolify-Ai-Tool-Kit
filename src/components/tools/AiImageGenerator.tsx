@@ -9,7 +9,7 @@ import { Wand2, Loader2, Download, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
 import Image from 'next/image';
-import { generateImage } from '@/ai/flows/media-management';
+import { generateImage, saveUserMedia } from '@/ai/flows/media-management';
 import { useAuth } from '@/hooks/use-auth';
 
 export function AiImageGenerator() {
@@ -34,7 +34,19 @@ export function AiImageGenerator() {
 
         try {
             const result = await generateImage({ promptText: prompt, userId: user.uid });
-            setGeneratedImage(result.imageDataUri);
+            const imageDataUri = result.imageDataUri;
+            setGeneratedImage(imageDataUri);
+
+            // Asynchronously save metadata to Firestore, but don't block the response
+            saveUserMedia({
+              userId: user.uid,
+              type: 'ai-generated',
+              mediaUrl: imageDataUri, // Note: For very large images, storing a URL from a service like Cloud Storage is better.
+              prompt: prompt,
+              createdAt: new Date().toISOString(),
+              expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+            }).catch(console.error);
+
             toast({ title: 'Image Generated!', description: 'Your AI-powered image is ready.'});
         } catch (error: any) {
             toast({ title: 'Generation Failed', description: error.message, variant: 'destructive'});

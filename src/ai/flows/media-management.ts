@@ -5,7 +5,8 @@
  * @fileOverview A set of flows for generating and managing media files.
  */
 import { ai } from '@/ai/genkit';
-import { getAdminDb } from '@/lib/firebase-admin';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
 import { googleAI } from '@genkit-ai/googleai';
@@ -34,10 +35,10 @@ const SaveMediaInputSchema = z.object({
 export type SaveMediaInput = z.infer<typeof SaveMediaInputSchema>;
 
 /**
- * Generates an image based on a text prompt and saves its metadata.
+ * Generates an image based on a text prompt.
  */
 export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
-  const { promptText, userId } = GenerateImageInputSchema.parse(input);
+  const { promptText } = GenerateImageInputSchema.parse(input);
 
   try {
     const { media } = await ai.generate({
@@ -51,16 +52,6 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
     
     const imageDataUri = media.url;
     
-    // Asynchronously save metadata to Firestore, but don't block the response
-    saveUserMedia({
-      userId,
-      type: 'ai-generated',
-      mediaUrl: imageDataUri, // Note: For very large images, storing a URL from a service like Cloud Storage is better.
-      prompt: promptText,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-    }).catch(console.error);
-
     return { imageDataUri };
 
   } catch (error: any) {
@@ -70,27 +61,21 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
 }
 
 /**
- * Saves a record of user-generated or uploaded media to Firestore.
+ * Saves a record of user-generated or uploaded media to Firestore from the client-side.
  */
 export async function saveUserMedia(input: SaveMediaInput): Promise<{ success: boolean; message: string }> {
   try {
-    const adminDb = getAdminDb();
-    if (!adminDb) {
-      throw new Error("Database not initialized for media logging.");
-    }
-    
     const validatedInput = SaveMediaInputSchema.parse(input);
 
-    await adminDb.collection('userMedia').add({
+    // Use the client-side 'db' instance
+    const mediaCollection = collection(db, 'userMedia');
+    await addDoc(mediaCollection, {
       ...validatedInput,
-      // The timestamps are now passed directly in the input
     });
 
     return { success: true, message: 'Media record saved.' };
   } catch (error: any) {
-    console.error("Error saving user media:", error);
-    // This is a background task, so we don't want to throw to the user.
-    // Just log the error and return a failure message.
-    return { success: false, message: 'Could not save media record.' };
+    console.error("Error saving user media from client:", error);
+    return { success: false, message: error.message || 'Could not save media record.' };
   }
 }
