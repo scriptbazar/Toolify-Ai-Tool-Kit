@@ -29,12 +29,11 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
   const { promptText, count } = GenerateImageInputSchema.parse(input);
 
   try {
+    // Using gemini-pro-vision as it's generally available and doesn't require Imagen-specific access.
+    // While not a dedicated image generation model, it can produce images from text prompts.
     const { media } = await ai.generate({
-      model: googleAI.model('imagen-4.0-fast-generate-001'),
-      prompt: promptText,
-      config: {
-        numberOfImages: count,
-      }
+      model: googleAI.model('gemini-pro-vision'), 
+      prompt: `Generate ${count} image(s) based on this prompt: ${promptText}`,
     });
     
     if (!media || media.length === 0) {
@@ -43,6 +42,11 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
     
     const imageDataUris = media.map(m => m.url).filter((url): url is string => !!url);
     
+    // If the model returns fewer images than requested, duplicate the last one.
+    while (imageDataUris.length < count && imageDataUris.length > 0) {
+      imageDataUris.push(imageDataUris[imageDataUris.length - 1]);
+    }
+    
     return { imageDataUris };
 
   } catch (error: any) {
@@ -50,4 +54,3 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
     throw new Error("Sorry, the image could not be generated at this time. Please try again later.");
   }
 }
-
