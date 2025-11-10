@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '../ui/select';
 import { Slider } from '../ui/slider';
-import { Loader2, Play, Pause, Download, Wand2 } from 'lucide-react';
+import { Loader2, Play, Pause, Download, Wand2, RefreshCw } from 'lucide-react';
 import { generateSampleText } from '@/ai/flows/ai-writer';
 import { textToSpeechFlow } from '@/ai/flows/text-to-speech';
 
@@ -49,6 +49,16 @@ export function TextToSpeechTool() {
         };
     }, []);
 
+    // Reset audio when text or voice changes
+    useEffect(() => {
+        setAudioUrl(null);
+        setIsSpeaking(false);
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
+    }, [text, voice]);
+
+
     const handleGenerateSample = async () => {
         setIsLoading(true);
         try {
@@ -78,12 +88,7 @@ export function TextToSpeechTool() {
         try {
             const result = await textToSpeechFlow({ text, voice });
             setAudioUrl(result.audioDataUri);
-            
-            const audio = new Audio(result.audioDataUri);
-            audioRef.current = audio;
-            audio.play();
-            setIsSpeaking(true);
-            audio.onended = () => setIsSpeaking(false);
+            toast({ title: 'Speech Generated!', description: 'Click the Play button to listen.'});
 
         } catch (error: any) {
              toast({ title: 'Speech Generation Failed', description: error.message, variant: 'destructive'});
@@ -93,7 +98,19 @@ export function TextToSpeechTool() {
     };
 
     const handlePlayPause = () => {
-        if (!audioRef.current) return;
+        if (!audioUrl) {
+            handleGenerateSpeech().then(() => {
+                // The new audio URL will be set, let's use an effect to play it.
+            });
+            return;
+        }
+
+        if (!audioRef.current || audioRef.current.src !== audioUrl) {
+            const audio = new Audio(audioUrl);
+            audioRef.current = audio;
+            audio.onended = () => setIsSpeaking(false);
+        }
+        
         if (isSpeaking) {
             audioRef.current.pause();
             setIsSpeaking(false);
@@ -102,6 +119,14 @@ export function TextToSpeechTool() {
             setIsSpeaking(true);
         }
     };
+    
+    // Effect to auto-play after generation if it was triggered by the play button
+    useEffect(() => {
+        if (audioUrl && !isSpeaking && !isLoading) {
+           // This logic is simplified; direct play is handled in handlePlayPause now.
+        }
+    }, [audioUrl, isSpeaking, isLoading]);
+
 
     const handleDownload = () => {
         if (!audioUrl) return;
@@ -139,21 +164,25 @@ export function TextToSpeechTool() {
                         <SelectContent>
                             <SelectGroup>
                                 <SelectLabel>Male Voices</SelectLabel>
-                                {maleVoices.map((v) => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}
+                                {maleVoices.map((v) => <SelectItem key={v.name} value={v.name}>{v.name} (Male)</SelectItem>)}
                             </SelectGroup>
                             <SelectGroup>
                                 <SelectLabel>Female Voices</SelectLabel>
-                                {femaleVoices.map((v) => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}
+                                {femaleVoices.map((v) => <SelectItem key={v.name} value={v.name}>{v.name} (Female)</SelectItem>)}
                             </SelectGroup>
                         </SelectContent>
                     </Select>
                  </div>
             </div>
 
-            <div className="flex gap-2 pt-4 border-t">
-                <Button onClick={audioUrl ? handlePlayPause : handleGenerateSpeech} className="flex-1" disabled={isLoading}>
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : isSpeaking ? <Pause className="mr-2 h-4 w-4"/> : <Play className="mr-2 h-4 w-4" />}
-                    {isLoading ? 'Generating...' : (isSpeaking ? 'Pause' : (audioUrl ? 'Play Again' : 'Listen'))}
+            <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+                 <Button onClick={handleGenerateSpeech} className="flex-1" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <RefreshCw className="mr-2 h-4 w-4" />}
+                    {isLoading ? 'Generating...' : 'Generate Speech'}
+                </Button>
+                <Button onClick={handlePlayPause} className="flex-1" disabled={!audioUrl || isLoading}>
+                    {isSpeaking ? <Pause className="mr-2 h-4 w-4"/> : <Play className="mr-2 h-4 w-4" />}
+                    {isSpeaking ? 'Pause' : 'Play'}
                 </Button>
                 <Button variant="outline" className="flex-1" onClick={handleDownload} disabled={!audioUrl || isLoading}>
                     <Download className="mr-2 h-4 w-4" />
