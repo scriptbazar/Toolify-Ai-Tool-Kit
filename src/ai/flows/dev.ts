@@ -20,6 +20,7 @@ import '@/ai/flows/currency-converter.ts';
 import '@/ai/flows/crypto-converter.ts';
 import '@/ai/flows/serp-checker.ts';
 import '@/ai/flows/url-shortener.ts';
+import '@/ai/flows/ai-writer.ts';
 import '@/ai/flows/media-management.ts';
 
 import '@/ai/flows/ai-email-composer.ts';
