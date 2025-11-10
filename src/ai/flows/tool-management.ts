@@ -162,9 +162,9 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image to PDF', description: '📑 Convert your JPG, PNG, and other image files into a single, easy-to-share PDF document.', icon: 'FileImage', category: 'pdf', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload one or more image files.', 'Drag and drop to reorder the images if needed.', 'Click "Convert & Download PDF".', 'A single PDF containing all your images will be created.'] },
     { name: 'Average Calculator', description: 'Calculate the average of a set of numbers.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a set of numbers separated by commas or spaces.', 'The tool will calculate the sum, count, and average of the numbers.'] },
     { name: 'IFSC Code to Bank Details', description: 'Find bank branch details from an IFSC code.', icon: 'Landmark', category: 'miscellaneous', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the 11-character IFSC code.', 'Click "Find Details".', 'The bank and branch information will be displayed.'] },
-    { name: 'Product SKU Encryptor', description: 'Securely encrypt and decrypt your product SKUs using a secret key.', icon: 'KeyRound', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your SKU and a secret key.', 'Click "Encrypt" to get the encrypted text.', 'Use the same key to "Decrypt" it back.'] },
     { name: 'AI Image Generator', description: '🎨 Generate unique, high-quality images from text prompts using advanced AI.', icon: 'Cpu', category: 'ai', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter a descriptive prompt of the image you want to create.', 'Click "Generate Image".', 'View and download your AI-generated artwork.'] },
     { name: 'Image to Text', description: '👁️ Extract text from any image. Upload a picture and our OCR tool will pull out the text for you to copy and use.', icon: 'ScanText', category: 'ai', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload an image file containing text.', 'The tool will automatically scan and extract the text.', 'The extracted text will be displayed in a text box, ready to be copied.'] },
+    { name: 'Product SKU Encryptor', description: 'Securely encrypt and decrypt your product SKUs using a secret key.', icon: 'KeyRound', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your SKU and a secret key.', 'Click "Encrypt" to get the encrypted text.', 'Use the same key to "Decrypt" it back.'] },
 ];
 
 const generateSlug = (name: string) => {
@@ -526,3 +526,5 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     return { success: false, message: "Could not update favorites." };
   }
 }
+
+    
