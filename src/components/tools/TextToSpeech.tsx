@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -48,7 +49,7 @@ export function TextToSpeechTool() {
         };
     }, []);
 
-    // Reset audio when text or voice changes
+    // When text or voice changes, invalidate the old audio
     useEffect(() => {
         setAudioUrl(null);
         setIsSpeaking(false);
@@ -88,24 +89,27 @@ export function TextToSpeechTool() {
             const result = await textToSpeech({ text, voice });
             setAudioUrl(result.audioDataUri);
             toast({ title: 'Speech Generated!', description: 'Click the Play button to listen.'});
+            return result.audioDataUri; // Return the new URL
 
         } catch (error: any) {
              toast({ title: 'Speech Generation Failed', description: error.message, variant: 'destructive'});
+             return null;
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handlePlayPause = () => {
-        if (!audioUrl) {
-            handleGenerateSpeech().then(() => {
-                // The new audio URL will be set, let's use an effect to play it.
-            });
-            return;
-        }
+    const handlePlayPause = async () => {
+        let currentAudioUrl = audioUrl;
 
-        if (!audioRef.current || audioRef.current.src !== audioUrl) {
-            const audio = new Audio(audioUrl);
+        // If no audio is ready, generate it first.
+        if (!currentAudioUrl) {
+            currentAudioUrl = await handleGenerateSpeech();
+            if (!currentAudioUrl) return; // Exit if generation failed
+        }
+        
+        if (!audioRef.current || audioRef.current.src !== currentAudioUrl) {
+            const audio = new Audio(currentAudioUrl);
             audioRef.current = audio;
             audio.onended = () => setIsSpeaking(false);
         }
@@ -114,18 +118,16 @@ export function TextToSpeechTool() {
             audioRef.current.pause();
             setIsSpeaking(false);
         } else {
-            audioRef.current.play();
-            setIsSpeaking(true);
+            try {
+                await audioRef.current.play();
+                setIsSpeaking(true);
+            } catch (error) {
+                console.error("Audio play failed:", error);
+                toast({ title: "Could not play audio", variant: "destructive"});
+                setIsSpeaking(false);
+            }
         }
     };
-    
-    // Effect to auto-play after generation if it was triggered by the play button
-    useEffect(() => {
-        if (audioUrl && !isSpeaking && !isLoading) {
-           // This logic is simplified; direct play is handled in handlePlayPause now.
-        }
-    }, [audioUrl, isSpeaking, isLoading]);
-
 
     const handleDownload = () => {
         if (!audioUrl) return;
@@ -179,7 +181,7 @@ export function TextToSpeechTool() {
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <RefreshCw className="mr-2 h-4 w-4" />}
                     {isLoading ? 'Generating...' : 'Generate Speech'}
                 </Button>
-                <Button onClick={handlePlayPause} className="flex-1" disabled={!audioUrl || isLoading}>
+                <Button onClick={handlePlayPause} className="flex-1" disabled={isLoading}>
                     {isSpeaking ? <Pause className="mr-2 h-4 w-4"/> : <Play className="mr-2 h-4 w-4" />}
                     {isSpeaking ? 'Pause' : 'Play'}
                 </Button>
