@@ -8,7 +8,7 @@ import { ai } from '@/ai/genkit';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
-import { googleAI } from '@genkit-ai/google-genai';
+import { googleAI } from '@genkit-ai/googleai';
 
 // Schema for generating an image
 const GenerateImageInputSchema = z.object({
