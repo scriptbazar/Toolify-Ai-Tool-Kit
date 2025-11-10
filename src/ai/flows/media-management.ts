@@ -52,6 +52,7 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
     
     const imageDataUri = media.url;
     
+    // IMPORTANT: Return the generated image data. The saving is handled client-side.
     return { imageDataUri };
 
   } catch (error: any) {
@@ -59,6 +60,7 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
     throw new Error("Sorry, the image could not be generated at this time. Please try again later.");
   }
 }
+
 
 /**
  * Saves a record of user-generated or uploaded media to Firestore from the client-side.

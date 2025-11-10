@@ -156,6 +156,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'random-name-generator': 'RandomNameGenerator',
   'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
   'product-sku-encryptor': 'SkuEncryptor',
+  'text-to-speech': 'TextToSpeech',
 };
 
   
