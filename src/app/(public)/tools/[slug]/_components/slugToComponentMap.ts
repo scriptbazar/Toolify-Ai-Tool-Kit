@@ -1,4 +1,3 @@
-
 export const slugToComponentMap: { [key: string]: string } = {
   'advance-text-cleaner': 'AdvanceTextCleaner',
   'admob-revenue-calculator': 'AdMobRevenueCalculator',
@@ -156,7 +155,7 @@ export const slugToComponentMap: { [key: string]: string } = {
   'random-name-generator': 'RandomNameGenerator',
   'ifsc-code-to-bank-details': 'IfscCodeToBankDetails',
   'product-sku-encryptor': 'SkuEncryptor',
-  'text-to-speech': 'TextToSpeech',
+  'text-to-speech': 'TextToSpeechTool',
 };
 
   
@@ -164,3 +163,4 @@ export const slugToComponentMap: { [key: string]: string } = {
     
 
     
+
