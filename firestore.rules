@@ -16,16 +16,76 @@ service cloud.firestore {
       allow write: if isOwner(userId);
     }
     
+    // Anyone can read settings, tools, announcements, blog content, etc.
+    match /settings/{docId} {
+      allow read: if true;
+      // Writing to settings should be restricted, e.g. to admins.
+      // This is handled by server-side logic (Admin SDK).
+      allow write: if false; 
+    }
+    
+    match /tools/{toolId} {
+      allow read: if true;
+      allow write: if false; // Managed by Admin SDK
+    }
+    
+    match /announcements/{announcementId} {
+        allow read: if true;
+        // readBy is updated by any authenticated user, so allow write
+        allow write: if request.auth != null; 
+    }
+    
+    match /blogPosts/{postId} {
+        allow read: if true;
+        allow write: if false; // Managed by Admin SDK
+    }
+
+    match /blogCategories/{categoryId} {
+        allow read: if true;
+        allow write: if false; // Managed by Admin SDK
+    }
+    
+    match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if request.auth != null; // Any logged-in user can create
+        allow update, delete: if false; // Managed by Admin SDK
+    }
+
+    match /toolRequests/{requestId} {
+      allow read: if true;
+      allow create: if request.auth != null; // Allow any logged-in user to create
+      allow update, delete: if false; // Managed by Admin SDK
+    }
+    
+    // User-specific subcollections
+    match /users/{userId}/{subcollection}/{docId} {
+        allow read, write, delete: if isOwner(userId);
+    }
+    
     // User media can only be read by the owner
     match /userMedia/{mediaId} {
       allow read, delete: if isOwner(resource.data.userId);
       allow create: if request.auth != null;
     }
     
+    // Shortened URLs can be read by anyone (for redirection) but not listed
+    match /shortenedUrls/{shortId} {
+      allow get: if true; // Allows fetching a single document by ID
+      allow list, create, update, delete: if false; // Disallow listing/writing
+    }
+    
     // Community chat messages
     match /communityChat/{messageId} {
+      // Any authenticated user can read the chat
       allow read: if request.auth != null;
       allow create: if request.auth != null;
+    }
+    
+     // Comments on blog posts
+    match /comments/{commentId} {
+      allow read: if true; // Anyone can read approved comments
+      allow create: if request.auth != null;
+      allow update, delete: if false; // Managed by Admin SDK
     }
   }
 }
