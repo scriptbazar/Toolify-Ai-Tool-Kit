@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { doc, getDoc } from "firebase/firestore";
@@ -32,6 +32,7 @@ const formSchema = z.object({
 export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
@@ -111,6 +112,13 @@ export default function LoginPage() {
       });
       
       await logUserLogin(user.uid);
+      
+      const redirectUrl = searchParams.get('redirectUrl');
+
+      if (redirectUrl) {
+          window.location.href = redirectUrl;
+          return;
+      }
 
       if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
         window.location.href = '/admin/dashboard';

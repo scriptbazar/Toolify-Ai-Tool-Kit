@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 type ToolCardProps = {
   tool: Tool;
@@ -39,6 +40,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
   const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
   const statusBadge = getStatusBadge(status);
   const { toast } = useToast();
+  const router = useRouter();
 
   const isClickable = status === 'Active' || status === 'New Version' || status === 'Beta';
   
@@ -55,6 +57,11 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
   };
   
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      if (!user) {
+          e.preventDefault();
+          router.push(`/login?redirectUrl=/tools/${slug}`);
+          return;
+      }
       if (plan === 'Pro' && !isProUser) {
           e.preventDefault();
           showUpgradeDialog();
