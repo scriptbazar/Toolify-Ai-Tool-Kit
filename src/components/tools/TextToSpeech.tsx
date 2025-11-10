@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '../ui/select';
 import { Slider } from '../ui/slider';
 import { Loader2, Play, Pause, Download, Wand2 } from 'lucide-react';
 import { generateSampleText } from '@/ai/flows/ai-writer';
@@ -25,6 +25,10 @@ const availableVoices = [
   { name: 'Arcturus', gender: 'Male' },
   { name: 'Spica', gender: 'Female' },
 ];
+
+const maleVoices = availableVoices.filter(v => v.gender === 'Male');
+const femaleVoices = availableVoices.filter(v => v.gender === 'Female');
+
 
 export function TextToSpeechTool() {
     const [text, setText] = useState('Hello, welcome to ToolifyAI. You can convert any text into natural-sounding speech.');
@@ -133,7 +137,14 @@ export function TextToSpeechTool() {
                     <Select value={voice} onValueChange={setVoice}>
                         <SelectTrigger id="voice-select"><SelectValue placeholder="Select a voice..."/></SelectTrigger>
                         <SelectContent>
-                            {availableVoices.map((v) => <SelectItem key={v.name} value={v.name}>{v.name} ({v.gender})</SelectItem>)}
+                            <SelectGroup>
+                                <SelectLabel>Male Voices</SelectLabel>
+                                {maleVoices.map((v) => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}
+                            </SelectGroup>
+                            <SelectGroup>
+                                <SelectLabel>Female Voices</SelectLabel>
+                                {femaleVoices.map((v) => <SelectItem key={v.name} value={v.name}>{v.name}</SelectItem>)}
+                            </SelectGroup>
                         </SelectContent>
                     </Select>
                  </div>
