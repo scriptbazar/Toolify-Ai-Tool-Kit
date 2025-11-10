@@ -9,13 +9,15 @@ import { Wand2, Loader2, Download, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
 import Image from 'next/image';
-import { generateImage, saveUserMedia } from '@/ai/flows/media-management';
+import { generateImage } from '@/ai/flows/media-management';
 import { useAuth } from '@/hooks/use-auth';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 export function AiImageGenerator() {
     const [prompt, setPrompt] = useState('');
-    const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+    const [generatedImages, setGeneratedImages] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [imageCount, setImageCount] = useState('1');
     const { toast } = useToast();
     const { user } = useAuth();
 
@@ -30,24 +32,17 @@ export function AiImageGenerator() {
         }
 
         setIsLoading(true);
-        setGeneratedImage(null);
+        setGeneratedImages([]);
 
         try {
-            const result = await generateImage({ promptText: prompt, userId: user.uid });
-            const imageDataUri = result.imageDataUri;
-            setGeneratedImage(imageDataUri);
+            const result = await generateImage({ 
+                promptText: prompt, 
+                userId: user.uid,
+                count: parseInt(imageCount, 10),
+            });
+            setGeneratedImages(result.imageDataUris);
 
-            // Asynchronously save metadata to Firestore, but don't block the response
-            saveUserMedia({
-              userId: user.uid,
-              type: 'ai-generated',
-              mediaUrl: imageDataUri, // Note: For very large images, storing a URL from a service like Cloud Storage is better.
-              prompt: prompt,
-              createdAt: new Date().toISOString(),
-              expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-            }).catch(console.error);
-
-            toast({ title: 'Image Generated!', description: 'Your AI-powered image is ready.'});
+            toast({ title: 'Images Generated!', description: 'Your AI-powered images are ready.'});
         } catch (error: any) {
             toast({ title: 'Generation Failed', description: error.message, variant: 'destructive'});
         } finally {
@@ -55,11 +50,10 @@ export function AiImageGenerator() {
         }
     };
 
-    const handleDownload = () => {
-        if (!generatedImage) return;
+    const handleDownload = (imageUrl: string, index: number) => {
         const link = document.createElement('a');
-        link.href = generatedImage;
-        link.download = `ai-image-${Date.now()}.png`;
+        link.href = imageUrl;
+        link.download = `ai-image-${index + 1}-${Date.now()}.png`;
         link.click();
     };
 
@@ -76,35 +70,64 @@ export function AiImageGenerator() {
                         placeholder="e.g., A photorealistic image of an astronaut riding a horse on the moon"
                         className="min-h-[100px]"
                     />
-                    <Button onClick={handleGenerate} disabled={isLoading} className="w-full mt-4">
-                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                        Generate Image
-                    </Button>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><ImageIcon/>Generated Image</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="w-full aspect-square bg-muted rounded-lg flex items-center justify-center relative">
-                        {isLoading ? (
-                            <Loader2 className="h-10 w-10 animate-spin text-primary"/>
-                        ) : generatedImage ? (
-                            <Image src={generatedImage} alt="Generated AI Image" layout="fill" objectFit="contain" className="p-2"/>
-                        ) : (
-                            <p className="text-muted-foreground">Your generated image will appear here.</p>
-                        )}
-                    </div>
-                     {generatedImage && !isLoading && (
-                        <Button onClick={handleDownload} className="w-full mt-4">
-                            <Download className="mr-2 h-4 w-4"/>
-                            Download Image
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] gap-4 mt-4">
+                         <div className="space-y-2">
+                            <Label htmlFor="image-count">Number of Images</Label>
+                            <Select value={imageCount} onValueChange={setImageCount}>
+                                <SelectTrigger id="image-count">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="1">1 Image</SelectItem>
+                                    <SelectItem value="2">2 Images</SelectItem>
+                                    <SelectItem value="3">3 Images</SelectItem>
+                                    <SelectItem value="4">4 Images</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <Button onClick={handleGenerate} disabled={isLoading} className="w-full self-end">
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                            Generate Image(s)
                         </Button>
-                     )}
+                    </div>
                 </CardContent>
             </Card>
+            
+            {isLoading && (
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><ImageIcon/>Generating Images...</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {Array.from({ length: parseInt(imageCount, 10) }).map((_, i) => (
+                             <div key={i} className="w-full aspect-square bg-muted rounded-lg flex items-center justify-center relative">
+                                <Loader2 className="h-10 w-10 animate-spin text-primary"/>
+                            </div>
+                        ))}
+                    </CardContent>
+                 </Card>
+            )}
+
+            {!isLoading && generatedImages.length > 0 && (
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><ImageIcon/>Generated Images</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {generatedImages.map((imgSrc, index) => (
+                            <div key={index} className="space-y-2">
+                                <div className="w-full aspect-square bg-muted rounded-lg flex items-center justify-center relative overflow-hidden">
+                                     <Image src={imgSrc} alt={`Generated AI Image ${index + 1}`} layout="fill" objectFit="contain" className="p-2"/>
+                                </div>
+                                <Button onClick={() => handleDownload(imgSrc, index)} className="w-full">
+                                    <Download className="mr-2 h-4 w-4"/>
+                                    Download Image {index + 1}
+                                </Button>
+                            </div>
+                        ))}
+                    </CardContent>
+                 </Card>
+            )}
         </div>
     );
 }

@@ -12,11 +12,12 @@ import { googleAI } from '@genkit-ai/googleai';
 const GenerateImageInputSchema = z.object({
   promptText: z.string().describe("A descriptive text prompt for image generation."),
   userId: z.string().describe("The ID of the user requesting the image."),
+  count: z.number().min(1).max(4).default(1).describe("The number of images to generate."),
 });
 export type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
 
 const GenerateImageOutputSchema = z.object({
-  imageDataUri: z.string().describe("The generated image as a data URI."),
+  imageDataUris: z.array(z.string().describe("A generated image as a data URI.")),
 });
 export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
 
@@ -25,24 +26,28 @@ export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
  * Generates an image based on a text prompt.
  */
 export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
-  const { promptText } = GenerateImageInputSchema.parse(input);
+  const { promptText, count } = GenerateImageInputSchema.parse(input);
 
   try {
     const { media } = await ai.generate({
       model: googleAI.model('imagen-4.0-fast-generate-001'),
       prompt: promptText,
+      config: {
+        numberOfImages: count,
+      }
     });
     
-    if (!media || !media.url) {
-      throw new Error("Image generation failed to return a valid image.");
+    if (!media || media.length === 0) {
+      throw new Error("Image generation failed to return any valid images.");
     }
     
-    const imageDataUri = media.url;
+    const imageDataUris = media.map(m => m.url).filter((url): url is string => !!url);
     
-    return { imageDataUri };
+    return { imageDataUris };
 
   } catch (error: any) {
     console.error("AI Image Generation Error:", error);
     throw new Error("Sorry, the image could not be generated at this time. Please try again later.");
   }
 }
+
