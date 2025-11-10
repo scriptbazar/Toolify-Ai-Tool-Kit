@@ -50,7 +50,7 @@ export function HomePageClient({ testimonials, steps, features, latestPosts }: H
             </Button>
           </div>
            <div className="mt-12 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 max-w-6xl mx-auto">
-            {toolCategories.filter(c => c.id !== 'calculator' && c.id !== 'miscellaneous').map(category => (
+            {toolCategories.filter(c => !['calculator', 'miscellaneous'].includes(c.id)).map(category => (
                 <CategoryCard key={category.id} category={category} />
             ))}
           </div>

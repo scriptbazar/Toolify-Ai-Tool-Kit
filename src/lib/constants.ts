@@ -1,5 +1,4 @@
 
-
 import {
   Type,
   File,
@@ -14,7 +13,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-export type ToolCategory = 'text' | 'pdf' | 'dev' | 'image' | 'seo' | 'video' | 'ecommerce' | 'calculator' | 'miscellaneous';
+export type ToolCategory = 'text' | 'pdf' | 'ai' | 'dev' | 'image' | 'seo' | 'video' | 'ecommerce' | 'calculator' | 'miscellaneous';
 
 export interface ToolCategoryDetails {
   id: ToolCategory;
@@ -65,6 +64,12 @@ export const toolCategories: ToolCategoryDetails[] = [
     name: 'Ecommerce Tools',
     description: 'Utilities for your online business.',
     Icon: ShoppingCart,
+  },
+  {
+    id: 'ai',
+    name: 'AI Tools',
+    description: 'Leverage the power of Artificial Intelligence.',
+    Icon: Cpu,
   },
   {
     id: 'calculator',

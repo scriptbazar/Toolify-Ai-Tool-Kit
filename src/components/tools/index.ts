@@ -153,3 +153,4 @@ export { TextToHandwritingConverter } from './TextToHandwritingConverter';
 export { TextToAsciiConverter } from './TextToAsciiConverter';
 export { RandomNameGenerator } from './RandomNameGenerator';
 export { IfscCodeToBankDetails } from './IfscCodeToBankDetails';
+export { AiImageGenerator } from './AiImageGenerator';
