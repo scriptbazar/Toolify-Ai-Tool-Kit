@@ -8,7 +8,7 @@ import { ai } from '@/ai/genkit';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
-import { googleAI } from '@genkit-ai/googleai';
+import { googleAI } from '@genkit-ai/google-genai';
 
 // Schema for generating an image
 const GenerateImageInputSchema = z.object({
@@ -41,7 +41,7 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
 
   try {
     const { media } = await ai.generate({
-      model: googleAI.model('imagen-2'),
+      model: googleAI.model('imagen-4.0-fast-generate-001'),
       prompt: promptText,
     });
     
