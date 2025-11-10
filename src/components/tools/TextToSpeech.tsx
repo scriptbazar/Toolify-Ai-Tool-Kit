@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -10,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGr
 import { Slider } from '../ui/slider';
 import { Loader2, Play, Pause, Download, Wand2, RefreshCw } from 'lucide-react';
 import { generateSampleText } from '@/ai/flows/ai-writer';
-import { textToSpeechFlow } from '@/ai/flows/text-to-speech';
+import { textToSpeech } from '@/ai/flows/text-to-speech';
 
 // Pre-defined voices available in the Google TTS model with gender
 const availableVoices = [
@@ -86,7 +85,7 @@ export function TextToSpeechTool() {
         }
 
         try {
-            const result = await textToSpeechFlow({ text, voice });
+            const result = await textToSpeech({ text, voice });
             setAudioUrl(result.audioDataUri);
             toast({ title: 'Speech Generated!', description: 'Click the Play button to listen.'});
 
