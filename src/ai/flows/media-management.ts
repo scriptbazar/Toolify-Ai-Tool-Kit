@@ -28,8 +28,6 @@ const SaveMediaInputSchema = z.object({
     type: z.enum(['ai-generated', 'community-chat', 'ticket-media']),
     mediaUrl: z.string().url(),
     prompt: z.string().optional(),
-    createdAt: z.string().datetime(),
-    expiresAt: z.string().datetime(),
 });
 export type SaveMediaInput = z.infer<typeof SaveMediaInputSchema>;
 
@@ -57,9 +55,6 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
       type: 'ai-generated',
       mediaUrl: imageDataUri, // Note: For very large images, storing a URL from a service like Cloud Storage is better.
       prompt: promptText,
-      createdAt: new Date().toISOString(),
-      // AI generated images expire after 3 days
-      expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
     }).catch(console.error);
 
     return { imageDataUri };
@@ -84,13 +79,16 @@ export async function saveUserMedia(input: SaveMediaInput): Promise<{ success: b
 
     await adminDb.collection('userMedia').add({
       ...validatedInput,
-      createdAt: FieldValue.serverTimestamp(),
+      createdAt: new Date().toISOString(),
+      // Set expiration based on media type
+      expiresAt: new Date(Date.now() + (input.type === 'community-chat' ? 2 : 15) * 24 * 60 * 60 * 1000).toISOString(),
     });
 
     return { success: true, message: 'Media record saved.' };
   } catch (error: any) {
     console.error("Error saving user media:", error);
-    // This is a background task, so we don't throw, just log.
+    // This is a background task, so we don't want to throw to the user.
+    // Just log the error and return a failure message.
     return { success: false, message: 'Could not save media record.' };
   }
 }
