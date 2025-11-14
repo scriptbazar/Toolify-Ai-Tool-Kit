@@ -6,7 +6,7 @@
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { googleAI } from '@genkit-ai/googleai';
+import { googleAI } from '@genkit-ai/google-genai';
 
 // Schema for generating an image
 const GenerateImageInputSchema = z.object({
@@ -29,25 +29,29 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
   const { promptText, count } = GenerateImageInputSchema.parse(input);
 
   try {
-    // Using gemini-pro-vision as it's generally available and doesn't require Imagen-specific access.
-    // While not a dedicated image generation model, it can produce images from text prompts.
-    const { media } = await ai.generate({
-      model: googleAI.model('gemini-pro-vision'), 
-      prompt: `Generate ${count} image(s) based on this prompt: ${promptText}`,
-    });
+    const images: string[] = [];
+    const generationPromises = [];
+
+    for (let i = 0; i < count; i++) {
+        generationPromises.push(ai.generate({
+            model: googleAI.model('imagen-4.0-fast-generate-001'), 
+            prompt: promptText,
+        }));
+    }
+
+    const results = await Promise.all(generationPromises);
+
+    for (const result of results) {
+        if (result.media && result.media.length > 0 && result.media[0].url) {
+            images.push(result.media[0].url);
+        }
+    }
     
-    if (!media || media.length === 0) {
+    if (images.length === 0) {
       throw new Error("Image generation failed to return any valid images.");
     }
     
-    const imageDataUris = media.map(m => m.url).filter((url): url is string => !!url);
-    
-    // If the model returns fewer images than requested, duplicate the last one.
-    while (imageDataUris.length < count && imageDataUris.length > 0) {
-      imageDataUris.push(imageDataUris[imageDataUris.length - 1]);
-    }
-    
-    return { imageDataUris };
+    return { imageDataUris: images };
 
   } catch (error: any) {
     console.error("AI Image Generation Error:", error);
