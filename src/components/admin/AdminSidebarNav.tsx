@@ -29,7 +29,6 @@ import {
   PanelLeft,
   Lightbulb,
   TrendingUp,
-  MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

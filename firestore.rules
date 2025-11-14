@@ -74,13 +74,6 @@ service cloud.firestore {
       allow list, create, update, delete: if false; // Disallow listing/writing
     }
     
-    // Community chat messages
-    match /communityChat/{messageId} {
-      // Any authenticated user can read the chat
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-    }
-    
      // Comments on blog posts
     match /comments/{commentId} {
       allow read: if true; // Anyone can read approved comments
