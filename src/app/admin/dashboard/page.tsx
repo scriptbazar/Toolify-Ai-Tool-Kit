@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, cache } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,7 +24,8 @@ const AdminDashboardClient = dynamic(() => import('./_components/DashboardClient
                 <Skeleton className="h-96" />
              </div>
         </div>
-      )
+      ),
+    ssr: false
 });
 
 interface User {

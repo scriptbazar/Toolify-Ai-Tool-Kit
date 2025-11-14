@@ -1,4 +1,3 @@
-
 import { getTools } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
 import { getReviews } from '@/ai/flows/review-management';
@@ -7,15 +6,16 @@ import { ToolComponentRenderer } from './_components/ToolPageClient';
 import { ToolSidebar } from '@/components/tools/ToolSidebar';
 import { getPosts } from '@/ai/flows/blog-management';
 import type { Metadata, ResolvingMetadata } from 'next';
+import { cache } from 'react';
 
 type Props = {
   params: { slug: string }
 }
 
-export async function generateMetadata(
+export const generateMetadata = cache(async (
   { params }: Props,
   parent: ResolvingMetadata
-): Promise<Metadata> {
+): Promise<Metadata> => {
   const { slug } = params;
   const tools = await getTools({ slug });
   const tool = tools[0];
@@ -30,7 +30,8 @@ export async function generateMetadata(
     title: tool.name,
     description: tool.description,
   }
-}
+});
+
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
 
