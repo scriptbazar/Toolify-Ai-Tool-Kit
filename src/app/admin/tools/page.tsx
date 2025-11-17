@@ -21,36 +21,26 @@ import { useRouter } from 'next/navigation';
 
 export default function AdminToolsPage() {
     const [allTools, setAllTools] = useState<Tool[]>([]);
-    const [filteredTools, setFilteredTools] = useState<Tool[]>([]);
     const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
     const router = useRouter();
-
-
-    const ITEMS_PER_PAGE = 10;
-    const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
 
     const fetchTools = async () => {
         setLoading(true);
         const tools = await getTools({status: 'all'});
         setAllTools(tools);
-        setFilteredTools(tools); // Initialize with all tools
         setLoading(false);
     };
     
     // The onToolUpdate function now simply refreshes the page data from the server.
     const handleToolUpdate = () => {
         router.refresh();
+        fetchTools();
     };
 
 
     useEffect(() => {
         fetchTools();
     }, []);
-
-    useEffect(() => {
-      setCurrentPage(1);
-    }, [filteredTools.length > 0 && filteredTools[0]?.id]);
 
     if (loading) {
         return (
@@ -96,12 +86,7 @@ export default function AdminToolsPage() {
                 <CardContent>
                     <AdminToolTableClient 
                         allTools={allTools}
-                        filteredTools={filteredTools}
-                        setFilteredTools={setFilteredTools}
                         onToolUpdate={handleToolUpdate} 
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        totalPages={totalPages}
                     />
                 </CardContent>
             </Card>

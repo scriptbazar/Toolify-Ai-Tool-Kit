@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -13,22 +14,39 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { cn } from '@/lib/utils';
 import { Slider } from '../ui/slider';
 import { generateSampleText } from '@/ai/flows/ai-writer';
+import { Cedarville_Cursive, Dancing_Script, Indie_Flower, Kalam, Marck_Script, Nanum_Pen_Script, Patrick_Hand, Permanent_Marker, Rock_Salt, Sacramento, Caveat, Pacifico, Homemade_Apple, Zeyada } from 'next/font/google';
+
+const cedarville = Cedarville_Cursive({ weight: '400', subsets: ['latin'], variable: '--font-cedarville', display: 'swap' });
+const dancing = Dancing_Script({ subsets: ['latin'], variable: '--font-dancing', display: 'swap' });
+const indie = Indie_Flower({ weight: '400', subsets: ['latin'], variable: '--font-indie', display: 'swap' });
+const kalam = Kalam({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-kalam', display: 'swap' });
+const marck = Marck_Script({ weight: '400', subsets: ['latin'], variable: '--font-marck', display: 'swap' });
+const nanum = Nanum_Pen_Script({ weight: '400', subsets: ['latin'], variable: '--font-nanum', display: 'swap' });
+const patrick = Patrick_Hand({ weight: '400', subsets: ['latin'], variable: '--font-patrick', display: 'swap' });
+const permanent = Permanent_Marker({ weight: '400', subsets: ['latin'], variable: '--font-permanent', display: 'swap' });
+const rocksalt = Rock_Salt({ weight: '400', subsets: ['latin'], variable: '--font-rocksalt', display: 'swap' });
+const sacramento = Sacramento({ weight: '400', subsets: ['latin'], variable: '--font-sacramento', display: 'swap' });
+const caveat = Caveat({ subsets: ['latin'], variable: '--font-caveat', display: 'swap' });
+const pacifico = Pacifico({ weight: '400', subsets: ['latin'], variable: '--font-pacifico', display: 'swap' });
+const homemadeApple = Homemade_Apple({ weight: '400', subsets: ['latin'], variable: '--font-homemade-apple', display: 'swap' });
+const zeyada = Zeyada({ weight: '400', subsets: ['latin'], variable: '--font-zeyada', display: 'swap' });
+
 
 const fontOptions = [
-    { name: 'Cedarville Cursive', value: 'font-cedarville' },
-    { name: 'Dancing Script', value: 'font-dancing' },
-    { name: 'Indie Flower', value: 'font-indie' },
-    { name: 'Kalam', value: 'font-kalam' },
-    { name: 'Marck Script', value: 'font-marck' },
-    { name: 'Nanum Pen Script', value: 'font-nanum' },
-    { name: 'Patrick Hand', value: 'font-patrick' },
-    { name: 'Permanent Marker', value: 'font-permanent' },
-    { name: 'Rock Salt', value: 'font-rocksalt' },
-    { name: 'Sacramento', value: 'font-sacramento' },
-    { name: 'Caveat', value: 'font-caveat' },
-    { name: 'Pacifico', value: 'font-pacifico' },
-    { name: 'Homemade Apple', value: 'font-homemade-apple' },
-    { name: 'Zeyada', value: 'font-zeyada' },
+    { name: 'Cedarville Cursive', value: cedarville.variable },
+    { name: 'Dancing Script', value: dancing.variable },
+    { name: 'Indie Flower', value: indie.variable },
+    { name: 'Kalam', value: kalam.variable },
+    { name: 'Marck Script', value: marck.variable },
+    { name: 'Nanum Pen Script', value: nanum.variable },
+    { name: 'Patrick Hand', value: patrick.variable },
+    { name: 'Permanent Marker', value: permanent.variable },
+    { name: 'Rock Salt', value: rocksalt.variable },
+    { name: 'Sacramento', value: sacramento.variable },
+    { name: 'Caveat', value: caveat.variable },
+    { name: 'Pacifico', value: pacifico.variable },
+    { name: 'Homemade Apple', value: homemadeApple.variable },
+    { name: 'Zeyada', value: zeyada.variable },
 ];
 
 export function TextToHandwritingConverter() {
@@ -48,7 +66,8 @@ export function TextToHandwritingConverter() {
     const handleDownload = () => {
         if (!text) return;
         const doc = new jsPDF();
-        doc.setFont(selectedFont.replace('font-', ''), 'normal');
+        // The font name in jsPDF needs to match how it's defined, which can be tricky with next/font
+        // For now, this will use a default font in the PDF. A more advanced setup is needed for font embedding.
         doc.setFontSize(fontSize);
         doc.setTextColor(fontColor);
         doc.text(text, 10, 10);

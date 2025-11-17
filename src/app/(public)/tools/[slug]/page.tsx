@@ -32,6 +32,14 @@ export const generateMetadata = cache(async (
   }
 });
 
+// Statically generate routes at build time
+export async function generateStaticParams() {
+  const tools = await getTools();
+  return tools.map((tool) => ({
+    slug: tool.slug,
+  }));
+}
+
 
 export default async function ToolPage({ params }: { params: { slug: string } }) {
 
