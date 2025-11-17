@@ -1,34 +1,23 @@
 
-'use client';
 
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Mail, ArrowRight, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { getSettings } from '@/ai/flows/settings-management';
-import { type FaqItem } from '@/ai/flows/settings-management.types';
 import * as Icons from 'lucide-react';
 
 
-export default function ContactUsPage() {
-    const [faqs, setFaqs] = useState<FaqItem[]>([]);
-    const [loading, setLoading] = useState(true);
+export default async function ContactUsPage() {
+    const settings = await getSettings();
+    const faqs = settings.faqs?.contactFaqs || [];
 
-    useEffect(() => {
-        async function fetchFaqs() {
-            try {
-                const settings = await getSettings();
-                setFaqs(settings.faqs?.contactFaqs || []);
-            } catch (error) {
-                console.error("Failed to fetch FAQs:", error);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchFaqs();
-    }, []);
+    const getIconComponent = (iconName?: string): React.ElementType => {
+        if (!iconName) return HelpCircle;
+        const IconComponent = (Icons as any)[iconName as keyof typeof Icons];
+        return IconComponent || HelpCircle;
+    };
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-20 space-y-8 max-w-4xl">
@@ -65,11 +54,7 @@ export default function ContactUsPage() {
         </CardContent>
       </Card>
       
-      {loading ? (
-          <Card>
-              <CardHeader><CardTitle className="text-2xl font-bold text-center">Loading FAQs...</CardTitle></CardHeader>
-          </Card>
-      ) : faqs.length > 0 && (
+      {faqs.length > 0 && (
         <Card>
             <CardHeader>
                 <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
@@ -80,7 +65,7 @@ export default function ContactUsPage() {
             <CardContent>
                 <Accordion type="single" collapsible className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                 {faqs.map((faq) => {
-                    const Icon = (Icons as any)[faq.icon] || HelpCircle;
+                    const Icon = getIconComponent(faq.icon as string);
                     return (
                         <AccordionItem value={faq.question} key={faq.id} className="border-none">
                             <AccordionTrigger className="faq-accordion-trigger">

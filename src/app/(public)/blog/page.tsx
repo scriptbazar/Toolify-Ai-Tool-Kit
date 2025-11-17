@@ -1,49 +1,24 @@
 
-'use client';
 
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
-import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getPosts, type Post } from '@/ai/flows/blog-management';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { Logo } from '@/components/common/Logo';
 
 const POSTS_PER_PAGE = 6;
 
-export default function BlogPage() {
-    const searchParams = useSearchParams();
-    const [posts, setPosts] = useState<Post[]>([]);
-    const [loading, setLoading] = useState(true);
+export default async function BlogPage({ searchParams }: { searchParams?: { page?: string } }) {
+    const allPosts = await getPosts();
+    const publishedPosts = allPosts.filter(p => p.status === 'Published');
 
-    useEffect(() => {
-        getPosts().then(allPosts => {
-            const publishedPosts = allPosts.filter(p => p.status === 'Published');
-            setPosts(publishedPosts);
-            setLoading(false);
-        });
-    }, []);
+    const currentPage = Number(searchParams?.page || 1);
+    const totalPages = Math.ceil(publishedPosts.length / POSTS_PER_PAGE);
 
-    const currentPage = Number(searchParams.get('page') || 1);
-    const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
-
-    const paginatedPosts = posts.slice(
+    const paginatedPosts = publishedPosts.slice(
         (currentPage - 1) * POSTS_PER_PAGE,
         currentPage * POSTS_PER_PAGE
     );
-
-    if (loading) {
-        return (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-background py-20">
-                <Logo className="h-16 w-16 animate-pulse" />
-                <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    <p className="text-lg">Loading posts...</p>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="container mx-auto px-4 py-12 md:py-20">

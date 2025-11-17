@@ -1,4 +1,5 @@
 
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Target, BookOpen, Lightbulb, MousePointerClick, ShieldCheck, LifeBuoy, Users, Gem } from 'lucide-react';
 import Image from 'next/image';

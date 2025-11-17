@@ -1,66 +1,36 @@
 
-'use client';
 
-import { useState, useEffect } from 'react';
-import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { History, Smartphone, Globe, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Smartphone, Globe, CheckCircle, AlertTriangle } from 'lucide-react';
 import { getLoginHistory } from '@/ai/flows/user-activity';
 import type { UserLoginHistory } from '@/ai/flows/user-activity.types';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { cookies } from 'next/headers';
+import { getAdminAuth } from '@/lib/firebase-admin-auth';
 
 const getDeviceIcon = (userAgent: string) => {
   if (/mobile/i.test(userAgent)) return <Smartphone className="h-4 w-4" />;
   return <Globe className="h-4 w-4" />;
 };
 
-export default function LoginHistoryPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [history, setHistory] = useState<UserLoginHistory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const { toast } = useToast();
+const parseUserAgent = (userAgent: string) => {
+    const parts = userAgent.match(/\(([^)]+)\)/);
+    return parts ? parts[1] : userAgent;
+};
 
-  useEffect(() => {
-    const fetchHistory = async (uid: string) => {
-      try {
-        const userHistory = await getLoginHistory(uid);
-        setHistory(userHistory);
-      } catch (error) {
-        console.error("Failed to load login history:", error);
-        toast({
-          title: "Error",
-          description: "Could not load your login history.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+export default async function LoginHistoryPage() {
+    let uid = '';
+    try {
+        const session = cookies().get('session')?.value || '';
+        const decodedClaims = await getAdminAuth().verifySessionCookie(session);
+        uid = decodedClaims.uid;
+    } catch (error) {
+        console.error("Error getting user session for login history:", error);
+    }
     
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser);
-        fetchHistory(firebaseUser.uid);
-      } else {
-        router.push('/login');
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router, toast]);
-  
-  const parseUserAgent = (userAgent: string) => {
-      const parts = userAgent.match(/\(([^)]+)\)/);
-      return parts ? parts[1] : userAgent;
-  };
+    const history: UserLoginHistory[] = uid ? await getLoginHistory(uid) : [];
 
   return (
     <div className="space-y-6">
@@ -94,13 +64,7 @@ export default function LoginHistoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
-                [...Array(5)].map((_, i) => (
-                    <TableRow key={i}>
-                        <TableCell colSpan={5}><Skeleton className="h-8 w-full" /></TableCell>
-                    </TableRow>
-                ))
-              ) : history.length > 0 ? (
+              {history.length > 0 ? (
                 history.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell>
