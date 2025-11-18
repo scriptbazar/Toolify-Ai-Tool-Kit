@@ -2,7 +2,6 @@ export const slugToComponentMap: { [key: string]: string } = {
   'advance-text-cleaner': 'AdvanceTextCleaner',
   'admob-revenue-calculator': 'AdMobRevenueCalculator',
   'age-calculator': 'AgeCalculator',
-  'ai-image-generator': 'AiImageGenerator',
   'amazon-shipping-label-cropper': 'AmazonShippingLabelCropper',
   'ascii-to-text-converter': 'AsciiToTextConverter',
   'average-calculator': 'AverageCalculator',
@@ -163,3 +162,4 @@ export const slugToComponentMap: { [key: string]: string } = {
     
 
     
+

@@ -24,37 +24,39 @@ export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
 
 /**
  * Generates an image based on a text prompt.
+ * This flow is currently disabled as the tool has been removed.
  */
-export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
-  const { promptText, count } = GenerateImageInputSchema.parse(input);
+// export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
+//   const { promptText, count } = GenerateImageInputSchema.parse(input);
 
-  try {
-    const images: string[] = [];
-    const generationPromises = [];
+//   try {
+//     const images: string[] = [];
+//     const generationPromises = [];
 
-    for (let i = 0; i < count; i++) {
-        generationPromises.push(ai.generate({
-            model: googleAI.model('imagen-4.0-fast-generate-001'), 
-            prompt: promptText,
-        }));
-    }
+//     for (let i = 0; i < count; i++) {
+//         generationPromises.push(ai.generate({
+//             model: googleAI.model('imagen-4.0-fast-generate-001'), 
+//             prompt: promptText,
+//         }));
+//     }
 
-    const results = await Promise.all(generationPromises);
+//     const results = await Promise.all(generationPromises);
 
-    for (const result of results) {
-        if (result.media && result.media.length > 0 && result.media[0].url) {
-            images.push(result.media[0].url);
-        }
-    }
+//     for (const result of results) {
+//         if (result.media && result.media.length > 0 && result.media[0].url) {
+//             images.push(result.media[0].url);
+//         }
+//     }
     
-    if (images.length === 0) {
-      throw new Error("Image generation failed to return any valid images.");
-    }
+//     if (images.length === 0) {
+//       throw new Error("Image generation failed to return any valid images.");
+//     }
     
-    return { imageDataUris: images };
+//     return { imageDataUris: images };
 
-  } catch (error: any) {
-    console.error("AI Image Generation Error:", error);
-    throw new Error("Sorry, the image could not be generated at this time. Please try again later.");
-  }
-}
+//   } catch (error: any) {
+//     console.error("AI Image Generation Error:", error);
+//     throw new Error("Sorry, the image could not be generated at this time. Please try again later.");
+//   }
+// }
+
