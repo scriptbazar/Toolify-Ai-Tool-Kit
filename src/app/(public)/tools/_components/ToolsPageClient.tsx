@@ -1,4 +1,5 @@
 
+'use client';
 
 import { useState, useMemo, useEffect } from 'react';
 import type { Tool } from '@/ai/flows/tool-management.types';
