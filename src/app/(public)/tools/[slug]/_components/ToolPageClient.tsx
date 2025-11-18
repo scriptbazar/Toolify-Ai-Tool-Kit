@@ -37,6 +37,8 @@ interface ToolComponentRendererProps {
   children: React.ReactNode;
 }
 
+const componentMap = slugToComponentMap;
+
 export function ToolComponentRenderer({ tool, toolReviews, adSettings, children: sidebar }: ToolComponentRendererProps) {
     const { user, userData } = useAuth();
     
@@ -47,7 +49,7 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, children:
     }, [user, tool]);
     
     const ToolComponent = useMemo(() => {
-        const componentName = slugToComponentMap[tool.slug as keyof typeof slugToComponentMap];
+        const componentName = componentMap[tool.slug as keyof typeof componentMap];
         if (!componentName) {
             return null;
         }
