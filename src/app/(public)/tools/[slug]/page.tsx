@@ -2,11 +2,15 @@ import { getTools } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
 import { getReviews } from '@/ai/flows/review-management';
 import { notFound } from 'next/navigation';
-import { ToolComponentRenderer } from './_components/ToolPageClient';
+import { ToolPage } from './_components/ToolPage';
 import { ToolSidebar } from '@/components/tools/ToolSidebar';
 import { getPosts } from '@/ai/flows/blog-management';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { cache } from 'react';
+import { getAdminAuth } from '@/lib/firebase-admin';
+import { cookies } from 'next/headers';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 type Props = {
   params: { slug: string }
@@ -41,7 +45,7 @@ export async function generateStaticParams() {
 }
 
 
-export default async function ToolPage({ params }: { params: { slug: string } }) {
+export default async function ToolPageWrapper({ params }: { params: { slug: string } }) {
 
     // Fetch only the essential data for the main tool page
     const [settings, tools, toolReviews] = await Promise.all([
@@ -50,6 +54,26 @@ export default async function ToolPage({ params }: { params: { slug: string } })
         getReviews({ toolId: params.slug })
     ]);
     
+    let user = null;
+    try {
+        const session = cookies().get('session')?.value || '';
+        const decodedClaims = await getAdminAuth().verifySessionCookie(session);
+        const userDocRef = doc(db, 'users', decodedClaims.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+            const data = userDocSnap.data();
+            user = {
+                uid: decodedClaims.uid,
+                email: decodedClaims.email,
+                role: data.role,
+                planId: data.planId,
+            }
+        }
+        
+    } catch (error) {
+        // User not logged in, user will be null
+    }
+
     const tool = tools[0];
     
     // If the main tool is not found, return 404
@@ -60,16 +84,17 @@ export default async function ToolPage({ params }: { params: { slug: string } })
     const adSettings = settings?.advertisement ?? null;
 
     return (
-        <ToolComponentRenderer
+        <ToolPage
             tool={tool}
             toolReviews={toolReviews}
             adSettings={adSettings}
+            user={user}
         >
             {/* The sidebar will now fetch its own data */}
             <ToolSidebar
                 adSettings={adSettings}
                 currentToolSlug={params.slug}
             />
-        </ToolComponentRenderer>
+        </ToolPage>
     );
 }

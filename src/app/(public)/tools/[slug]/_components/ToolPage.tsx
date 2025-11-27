@@ -4,7 +4,6 @@
 import Link from 'next/link';
 import { useEffect, useMemo } from 'react';
 import * as Icons from 'lucide-react';
-import { useAuth } from '@/hooks/use-auth';
 import type { Tool } from '@/ai/flows/tool-management.types';
 import type { Review } from '@/ai/flows/review-management.types';
 import type { AdvertisementSettings } from '@/ai/flows/settings-management.types';
@@ -20,6 +19,7 @@ import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UpgradeProDialog } from '@/components/tools/UpgradeProDialog';
 import { slugToComponentMap } from './slugToComponentMap';
+import type { User } from 'firebase/auth';
 
 
 const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
@@ -30,17 +30,17 @@ const ToolStatusDisplay = ({ icon: Icon, title, description }: { icon: React.Ele
     </div>
 );
 
-interface ToolComponentRendererProps {
+interface ToolPageProps {
   tool: Tool;
   toolReviews: Review[];
   adSettings: AdvertisementSettings | null;
   children: React.ReactNode;
+  user: (User & { role?: string; planId?: string; }) | null;
 }
 
 const componentMap = slugToComponentMap;
 
-export function ToolComponentRenderer({ tool, toolReviews, adSettings, children: sidebar }: ToolComponentRendererProps) {
-    const { user, userData } = useAuth();
+export function ToolPage({ tool, toolReviews, adSettings, children: sidebar, user }: ToolPageProps) {
     
     useEffect(() => {
         if (user && tool) {
@@ -68,7 +68,7 @@ export function ToolComponentRenderer({ tool, toolReviews, adSettings, children:
 
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
 
-    const isProUser = userData?.role === 'admin' || userData?.planId === 'pro' || userData?.planId === 'team';
+    const isProUser = user?.role === 'admin' || user?.planId === 'pro' || user?.planId === 'team';
     const isProTool = tool.plan === 'Pro';
 
     const renderToolContent = () => {
