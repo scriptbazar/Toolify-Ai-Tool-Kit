@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -26,28 +27,25 @@ import { AdminToolFilters } from '@/app/admin/tools/_components/AdminToolFilters
 
 interface AdminToolTableClientProps {
   allTools: Tool[];
+  filteredTools: Tool[];
+  setFilteredTools: (tools: Tool[]) => void;
   onToolUpdate: () => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalPages: number;
 }
 
-export function AdminToolTableClient({ allTools, onToolUpdate }: AdminToolTableClientProps) {
+export function AdminToolTableClient({ allTools, filteredTools, setFilteredTools, onToolUpdate, currentPage, setCurrentPage, totalPages }: AdminToolTableClientProps) {
   const router = useRouter();
   const [editingTool, setEditingTool] = React.useState<Tool | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [filteredTools, setFilteredTools] = React.useState(allTools);
-  const [currentPage, setCurrentPage] = React.useState(1);
   const { toast } = useToast();
-
-  const ITEMS_PER_PAGE = 10;
-  const totalPages = Math.ceil(filteredTools.length / ITEMS_PER_PAGE);
-
+  
   const paginatedTools = React.useMemo(() => {
+    const ITEMS_PER_PAGE = 10;
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredTools.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [filteredTools, currentPage]);
-  
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [filteredTools]);
 
 
   const getCategoryName = (categoryId: string) => {

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';
-import { AdminToolTableClient } from './_components/AdminToolTable';
+import { AdminToolTableClient } from './_components/AdminToolTableClient';
 import { unstable_noStore as noStore } from 'next/cache';
 
 

@@ -1,3 +1,4 @@
+
 import { getTools } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
 import { getReviews } from '@/ai/flows/review-management';
@@ -7,7 +8,7 @@ import { ToolSidebar } from '@/components/tools/ToolSidebar';
 import { getPosts } from '@/ai/flows/blog-management';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { cache } from 'react';
-import { getAdminAuth } from '@/lib/firebase-admin';
+import { getAdminAuth } from '@/lib/firebase-admin-auth';
 import { cookies } from 'next/headers';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';

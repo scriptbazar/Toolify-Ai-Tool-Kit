@@ -7,7 +7,6 @@
 
 import { z } from 'zod';
 import { ai } from '@/ai/genkit';
-import { type AiEmailComposerInput, AiEmailComposerOutputSchema } from './ai-email-composer.types';
 
 
 const GenerateSampleTextInputSchema = z.object({

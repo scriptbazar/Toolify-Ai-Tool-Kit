@@ -8,7 +8,7 @@ import { UploadCloud, Loader2, FileText, Bot, Copy, Trash2, ZoomIn, ZoomOut, Mov
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { analyzeImage } from '@/ai/flows/text-recognizer';
-import type { TextAnnotation, BoundingPolySchema } from '@/ai/flows/text-recognizer.types';
+import type { TextAnnotation } from '@/ai/flows/text-recognizer.types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Skeleton } from '../ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
