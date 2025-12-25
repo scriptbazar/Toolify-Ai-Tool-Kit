@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -207,14 +206,6 @@ async function getToolsFn (options: GetToolsOptions = {}) {
             return [];
         }
         
-        // This is a one-time check for an empty collection to seed the database.
-        const toolsCollection = adminDb.collection(TOOLS_COLLECTION);
-        const snapshot = await toolsCollection.limit(1).get();
-        if (snapshot.empty) {
-            console.log("Tools collection is empty. Seeding initial tools...");
-            await seedInitialTools();
-        }
-
         let query: Query | FirebaseFirestore.DocumentReference | FirebaseFirestore.CollectionReference = adminDb.collection(TOOLS_COLLECTION);
         
         if (options.slug) {
@@ -527,5 +518,3 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     return { success: false, message: "Could not update favorites." };
   }
 }
-
-    
