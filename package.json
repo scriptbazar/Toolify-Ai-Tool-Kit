@@ -63,7 +63,7 @@
     "jszip": "*",
     "lucide-react": "*",
     "nanoid": "*",
-    "next": "15.3.8",
+    "next": "*",
     "next-themes": "*",
     "pdf-lib": "*",
     "pdfjs-dist": "*",
