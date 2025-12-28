@@ -518,3 +518,5 @@ export async function toggleFavoriteTool(userId: string, toolSlug: string): Prom
     return { success: false, message: "Could not update favorites." };
   }
 }
+
+    

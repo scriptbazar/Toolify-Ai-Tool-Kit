@@ -1,3 +1,4 @@
+
 {
   "name": "nextn",
   "version": "0.1.0",
@@ -50,6 +51,9 @@
     "exifr": "*",
     "firebase": "*",
     "firebase-admin": "*",
+    "genkit": "*",
+    "@genkit-ai/core": "*",
+    "@genkit-ai/google-genai": "*",
     "html-to-image": "*",
     "html2canvas": "*",
     "jspdf": "*",
