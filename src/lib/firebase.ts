@@ -10,7 +10,7 @@ const firebaseConfig: FirebaseOptions = {
   apiKey: "AIzaSyCr9mGn2d7OWTX3B-TKxvO3kb7gB_yABdE",
   authDomain: "toolifyai-7sfvi.firebaseapp.com",
   projectId: "toolifyai-7sfvi",
-  storageBucket: "toolifyai-7sfvi.firebasestorage.app",
+  storageBucket: "toolifyai-7sfvi.appspot.com",
   messagingSenderId: "69818852370",
   appId: "1:69818852370:web:375b674cfee5e2c863e4cb",
   measurementId: "G-TPHVVFR0YT"
