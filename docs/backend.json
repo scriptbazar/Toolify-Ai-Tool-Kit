@@ -9,7 +9,14 @@
                 "uid": { "type": "string" },
                 "email": { "type": "string", "format": "email" },
                 "name": { "type": "string" },
-                "role": { "type": "string", "enum": ["user", "admin"] }
+                "role": { "type": "string", "enum": ["user", "admin"] },
+                "fcmTokens": {
+                    "type": "array",
+                    "description": "An array of Firebase Cloud Messaging (FCM) tokens for sending push notifications to the user's devices.",
+                    "items": {
+                        "type": "string"
+                    }
+                }
             },
             "required": ["uid", "email", "name", "role"]
         },
