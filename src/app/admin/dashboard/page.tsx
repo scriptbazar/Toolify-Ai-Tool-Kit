@@ -1,14 +1,13 @@
 
-'use client';
 
-import { useState, useEffect, cache } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAllEmails } from '@/ai/flows/user-management';
 import dynamic from 'next/dynamic';
+import { AdminDashboardClient } from './_components/DashboardClient';
 
-const AdminDashboardClient = dynamic(() => import('./_components/DashboardClient').then(mod => mod.AdminDashboardClient), {
+const AdminDashboardClientWithNoSSR = dynamic(() => import('./_components/DashboardClient').then(mod => mod.AdminDashboardClient), {
     loading: () => (
          <div className="space-y-6">
             <Skeleton className="h-10 w-64 mb-2" />
@@ -50,68 +49,62 @@ interface ChartData {
   users: number;
 }
 
-export default function AdminDashboard() {
-  const [dashboardData, setDashboardData] = useState<{
-    userCounts: UserCounts;
-    recentUsers: User[];
-    chartData: ChartData[];
-  } | null>(null);
+async function getDashboardData() {
+    const [allEmails, affiliatesSnapshot] = await Promise.all([
+      getAllEmails(),
+      getDocs(query(collection(db, "users"), where("affiliateStatus", "==", "approved")))
+    ]);
 
-  useEffect(() => {
-    async function getDashboardData() {
-        const [allEmails, affiliatesSnapshot] = await Promise.all([
-          getAllEmails(),
-          getDocs(query(collection(db, "users"), where("affiliateStatus", "==", "approved")))
-        ]);
+    const recentUsers = allEmails
+        .filter(u => u.source === 'Signup')
+        .slice(0, 5)
+        .map(user => ({
+            id: user.id,
+            name: user.name || 'Unknown',
+            email: user.email,
+            plan: 'Free', // Placeholder
+            status: 'Approved', // Placeholder
+            date: new Date(user.date).toLocaleDateString(),
+            amount: '$0.00', // Placeholder
+        }));
 
-        const recentUsers = allEmails
-            .filter(u => u.source === 'Signup')
-            .slice(0, 5)
-            .map(user => ({
-                id: user.id,
-                name: user.name || 'Unknown',
-                email: user.email,
-                plan: 'Free', // Placeholder
-                status: 'Approved', // Placeholder
-                date: new Date(user.date).toLocaleDateString(),
-                amount: '$0.00', // Placeholder
-            }));
+    const signupCount = allEmails.filter(u => u.source === 'Signup').length;
+    const leadCount = allEmails.filter(u => u.source === 'Lead').length;
+    const affiliateCount = affiliatesSnapshot.size;
+    
+    const userCounts = {
+        signup: signupCount,
+        lead: leadCount,
+        all: signupCount + leadCount,
+        affiliate: affiliateCount,
+    };
 
-        const signupCount = allEmails.filter(u => u.source === 'Signup').length;
-        const leadCount = allEmails.filter(u => u.source === 'Lead').length;
-        const affiliateCount = affiliatesSnapshot.size;
-        
-        const userCounts = {
-            signup: signupCount,
-            lead: leadCount,
-            all: signupCount + leadCount,
-            affiliate: affiliateCount,
-        };
-
-        const monthlySignups: { [key: string]: number } = {};
-        allEmails.forEach(user => {
-            if (user.source === 'Signup') {
-                const date = new Date(user.date);
-                const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
-                monthlySignups[monthKey] = (monthlySignups[monthKey] || 0) + 1;
-            }
-        });
-        
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const currentYear = new Date().getFullYear();
-        const fullYearData: ChartData[] = [];
-        for (let i = 0; i < 12; i++) {
-          const monthKey = `${currentYear}-${i}`;
-          fullYearData.push({
-            month: monthNames[i],
-            users: monthlySignups[monthKey] || 0,
-          });
+    const monthlySignups: { [key: string]: number } = {};
+    allEmails.forEach(user => {
+        if (user.source === 'Signup') {
+            const date = new Date(user.date);
+            const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+            monthlySignups[monthKey] = (monthlySignups[monthKey] || 0) + 1;
         }
-        
-        setDashboardData({ userCounts, recentUsers, chartData: fullYearData });
+    });
+    
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const currentYear = new Date().getFullYear();
+    const fullYearData: ChartData[] = [];
+    for (let i = 0; i < 12; i++) {
+      const monthKey = `${currentYear}-${i}`;
+      fullYearData.push({
+        month: monthNames[i],
+        users: monthlySignups[monthKey] || 0,
+      });
     }
-    getDashboardData();
-  }, []);
+    
+    return { userCounts, recentUsers, chartData: fullYearData };
+}
+
+
+export default async function AdminDashboard() {
+  const dashboardData = await getDashboardData();
 
   if (!dashboardData) {
       return (

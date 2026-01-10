@@ -42,7 +42,8 @@ export async function getChannelDetails(input: z.infer<typeof GetChannelDetailsI
     error?: string;
 }> {
     const { channelId } = GetChannelDetailsInputSchema.parse(input);
-    const apiKey = process.env.YOUTUBE_API_KEY;
+    const settings = await getSettings();
+    const apiKey = settings.general?.apiKeys?.youtubeApiKey;
 
     if (!apiKey) {
         return { error: "YouTube API key is not configured on the server." };
@@ -113,7 +114,8 @@ export async function getVideoDetails(input: z.infer<typeof GetVideoDetailsInput
     error?: string;
 }> {
     const { videoId } = GetVideoDetailsInputSchema.parse(input);
-    const apiKey = process.env.YOUTUBE_API_KEY;
+    const settings = await getSettings();
+    const apiKey = settings.general?.apiKeys?.youtubeApiKey;
 
     if (!apiKey) {
         // Fallback to noembed.com if API key is not available
