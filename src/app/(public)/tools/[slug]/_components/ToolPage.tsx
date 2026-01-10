@@ -38,8 +38,6 @@ interface ToolPageProps {
   user: (User & { role?: string; planId?: string; }) | null;
 }
 
-const componentMap = slugToComponentMap;
-
 export function ToolPage({ tool, toolReviews, adSettings, children: sidebar, user }: ToolPageProps) {
     
     useEffect(() => {
@@ -49,21 +47,10 @@ export function ToolPage({ tool, toolReviews, adSettings, children: sidebar, use
     }, [user, tool]);
     
     const ToolComponent = useMemo(() => {
-        const componentName = componentMap[tool.slug as keyof typeof componentMap];
-        if (!componentName) {
+        if (!tool.slug || !(tool.slug in slugToComponentMap)) {
             return null;
         }
-        return dynamic(
-            () => import(`@/components/tools/${componentName}`).then((mod) => mod.default || mod[componentName]),
-            { 
-                ssr: false,
-                loading: () => (
-                    <div className="flex justify-center items-center min-h-[300px]">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
-                )
-            }
-        );
+        return slugToComponentMap[tool.slug as keyof typeof slugToComponentMap];
     }, [tool.slug]);
 
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
