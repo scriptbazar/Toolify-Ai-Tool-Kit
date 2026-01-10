@@ -103,7 +103,6 @@ export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onTo
 
   return (
     <>
-    <AdminToolFilters allTools={allTools} setFilteredTools={setFilteredTools} />
     <div className="overflow-x-auto mt-6">
         <Table>
             <TableHeader>
