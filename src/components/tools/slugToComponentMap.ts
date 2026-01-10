@@ -94,6 +94,7 @@ export const slugToComponentMap: { [key: string]: React.ComponentType<any> } = {
   'schema-generator': dynamic(() => import('./SchemaGenerator').then(mod => mod.SchemaGenerator)),
   'serp-checker': dynamic(() => import('./SerpChecker').then(mod => mod.SerpChecker)),
   'sha256-hash-generator': dynamic(() => import('./Sha256HashGenerator').then(mod => mod.Sha256HashGenerator)),
+  'sku-encryptor': dynamic(() => import('./SkuEncryptor').then(mod => mod.SkuEncryptor)),
   'srm-to-cgpa-calculator': dynamic(() => import('./SrmToCgpaCalculator').then(mod => mod.SrmToCgpaCalculator)),
   'sql-formatter': dynamic(() => import('./SqlFormatter').then(mod => mod.SqlFormatter)),
   'text-repeater': dynamic(() => import('./TextRepeater').then(mod => mod.TextRepeater)),
