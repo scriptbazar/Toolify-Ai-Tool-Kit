@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -9,7 +10,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { type UserActivity, type UserActivityDetails, type UserActivityType, type UserLoginHistory } from './user-activity.types';
+import { type UserActivity, type UserActivityDetails, type UserActivityType, type UserLoginHistory, type UserMedia } from './user-activity.types';
 
 
 export type ToolUsageStat = {
@@ -319,6 +320,36 @@ export async function getAdminActivityLog(): Promise<AdminActivityLogItem[]> {
 
     } catch (error) {
         console.error("Error fetching admin activity log:", error);
+        return [];
+    }
+}
+
+
+/**
+ * Fetches all media for a specific user.
+ */
+export async function getUserMedia(userId: string): Promise<UserMedia[]> {
+    if (!userId) return [];
+    try {
+        const adminDb = getAdminDb();
+        const snapshot = await adminDb.collection('userMedia')
+            .where('userId', '==', userId)
+            .orderBy('createdAt', 'desc')
+            .get();
+
+        if (snapshot.empty) return [];
+        
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: data.createdAt?.toDate()?.toISOString() || new Date().toISOString(),
+                expiresAt: data.expiresAt?.toDate()?.toISOString() || new Date().toISOString(),
+            } as UserMedia;
+        });
+    } catch (error) {
+        console.error(`Error fetching media for user ${userId}:`, error);
         return [];
     }
 }
