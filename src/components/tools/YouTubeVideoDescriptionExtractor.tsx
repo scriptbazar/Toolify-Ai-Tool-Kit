@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import { Youtube, Copy, Trash2, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '../ui/textarea';
 import { getVideoDetails } from '@/ai/flows/youtube-data';
+import { getVideoId } from '@/lib/youtube-utils';
 
 export function YouTubeVideoDescriptionExtractor() {
     const [url, setUrl] = useState('');
@@ -17,21 +19,6 @@ export function YouTubeVideoDescriptionExtractor() {
     const [videoTitle, setVideoTitle] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
-
-    const getVideoId = (inputUrl: string): string | null => {
-        if (!inputUrl) return null;
-        try {
-            const urlObj = new URL(inputUrl);
-            if (urlObj.hostname === 'youtu.be') {
-                return urlObj.pathname.slice(1);
-            }
-            if (urlObj.hostname.includes('youtube.com')) {
-                const videoIdParam = urlObj.searchParams.get('v');
-                if (videoIdParam) return videoIdParam;
-            }
-        } catch (e) { return null; }
-        return null;
-    }
 
     const handleExtract = async () => {
         const videoId = getVideoId(url);

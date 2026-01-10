@@ -3,13 +3,8 @@
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { getAllEmails } from '@/ai/flows/user-management';
-import dynamic from 'next/dynamic';
 import { AdminDashboardClient } from './_components/DashboardClient';
 import { unstable_noStore as noStore } from 'next/cache';
-
-const AdminDashboardClientWithNoSSR = dynamic(() => import('./_components/DashboardClient').then(mod => mod.AdminDashboardClient), {
-    ssr: false,
-});
 
 interface User {
   id: string;

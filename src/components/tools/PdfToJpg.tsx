@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
@@ -7,15 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { UploadCloud, FileText, Loader2, FileDown, Image as ImageIcon, CheckCheck, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import * as pdfjsLib from 'pdfjs-dist';
+import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
 import { Slider } from '../ui/slider';
 import Image from 'next/image';
-
-// Set worker path
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 interface PagePreview {
     id: string;
@@ -40,13 +38,13 @@ export function PdfToJpg() {
 
       try {
         const fileBytes = await selectedFile.arrayBuffer();
-        const loadingTask = pdfjsLib.getDocument({ data: fileBytes });
-        const pdf = await loadingTask.promise;
-        const numPages = pdf.numPages;
+        const { getDocument } = await import('pdfjs-dist');
+        const pdfjsLib = await getDocument({ data: fileBytes }).promise;
+        
         const previews: PagePreview[] = [];
 
-        for (let i = 1; i <= numPages; i++) {
-          const page = await pdf.getPage(i);
+        for (let i = 1; i <= pdfjsLib.numPages; i++) {
+          const page = await pdfjsLib.getPage(i);
           const viewport = page.getViewport({ scale: 0.5 }); // Lower scale for faster preview
           const canvas = document.createElement('canvas');
           canvas.width = viewport.width;
@@ -100,8 +98,9 @@ export function PdfToJpg() {
 
     setIsLoading(true);
     try {
+        const { getDocument } = await import('pdfjs-dist');
         const fileBytes = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: fileBytes }).promise;
+        const pdf = await getDocument({ data: fileBytes }).promise;
         const zip = new JSZip();
         
         const conversionPromises = selectedPages.map(async (p) => {
@@ -160,7 +159,10 @@ export function PdfToJpg() {
   return (
     <div className="space-y-6">
       <Card 
-        className={cn("transition-colors", isDragging && 'border-primary bg-primary/10')}
+        className={cn(
+            "transition-colors",
+            isDragging && 'border-primary bg-primary/10'
+        )}
         onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
       >
         <CardContent 

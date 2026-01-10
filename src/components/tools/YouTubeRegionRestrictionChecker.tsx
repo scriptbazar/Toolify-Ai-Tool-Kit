@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import { Youtube, Globe, Loader2, Search, CheckCircle, XCircle } from 'lucide-re
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
 import { getVideoDetails } from '@/ai/flows/youtube-data';
+import { getVideoId } from '@/lib/youtube-utils';
 
 export function YouTubeRegionRestrictionChecker() {
     const [url, setUrl] = useState('');
@@ -17,21 +19,6 @@ export function YouTubeRegionRestrictionChecker() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
-
-    const getVideoId = (inputUrl: string): string | null => {
-        if (!inputUrl) return null;
-        try {
-            const urlObj = new URL(inputUrl);
-            if (urlObj.hostname === 'youtu.be') {
-                return urlObj.pathname.slice(1);
-            }
-            if (urlObj.hostname.includes('youtube.com')) {
-                const videoIdParam = urlObj.searchParams.get('v');
-                if (videoIdParam) return videoIdParam;
-            }
-        } catch (e) { return null; }
-        return null;
-    }
 
     const handleCheck = async () => {
         const videoId = getVideoId(url);

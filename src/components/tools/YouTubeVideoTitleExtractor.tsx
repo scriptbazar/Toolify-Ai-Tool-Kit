@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -8,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Youtube, Copy, Trash2, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getVideoId } from '@/lib/youtube-utils';
 
 interface OEmbedResponse {
     title?: string;
@@ -25,6 +27,13 @@ export function YouTubeVideoTitleExtractor() {
             toast({ title: 'Please enter a YouTube video URL.', variant: 'destructive' });
             return;
         }
+        
+        const videoId = getVideoId(url);
+        if (!videoId) {
+            toast({ title: 'Invalid YouTube URL', description: 'Could not extract Video ID from the URL.', variant: 'destructive' });
+            return;
+        }
+
         setIsLoading(true);
         setTitle(null);
         
