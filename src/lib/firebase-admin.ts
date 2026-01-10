@@ -8,7 +8,7 @@ import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { getAuth, Auth } from 'firebase-admin/auth';
 import { getStorage } from 'firebase-admin/storage';
 import { AppSettingsSchema, type AppSettings } from '@/ai/flows/settings-management.types';
-import serviceAccount from '../../firebase-service-account-key.json';
+import serviceAccount from '@/firebase-service-account-key.json';
 
 // This is a robust way to ensure Firebase Admin is initialized only once.
 function getAdminApp(): App {

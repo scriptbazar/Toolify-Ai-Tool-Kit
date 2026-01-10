@@ -12,6 +12,7 @@ import { cache } from 'react';
 import { getAdminAuth } from '@/lib/firebase-admin';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { cookies } from 'next/headers';
 
 type Props = {
   params: { slug: string }
@@ -57,19 +58,22 @@ export default async function ToolPageWrapper({ params }: { params: { slug: stri
     
     let user = null;
     try {
-        const adminAuth = getAdminAuth();
-        const userDocRef = doc(db, 'users', (await adminAuth.verifySessionCookie(cookies().get('session')?.value || '')).uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-            const data = userDocSnap.data();
-            user = {
-                uid: userDocSnap.id,
-                email: data.email,
-                role: data.role,
-                planId: data.planId,
+        const sessionCookie = cookies().get('session')?.value;
+        if (sessionCookie) {
+            const adminAuth = getAdminAuth();
+            const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+            const userDocRef = doc(db, 'users', decodedClaims.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+                const data = userDocSnap.data();
+                user = {
+                    uid: userDocSnap.id,
+                    email: data.email,
+                    role: data.role,
+                    planId: data.planId,
+                }
             }
         }
-        
     } catch (error) {
         // User not logged in, user will be null
     }
