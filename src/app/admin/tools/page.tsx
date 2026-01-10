@@ -20,9 +20,9 @@ export default async function AdminToolsPage() {
     const allTools = await getTools({status: 'all'});
     
     // The onToolUpdate function will be handled on the client via router.refresh
-    const handleToolUpdate = () => {
-        'use server';
-        // This is a placeholder for a potential server-side revalidation if needed
+    const handleToolUpdate = async () => {
+          'use server';
+          // This is a placeholder for a potential server-side revalidation if needed
     };
 
     return (
