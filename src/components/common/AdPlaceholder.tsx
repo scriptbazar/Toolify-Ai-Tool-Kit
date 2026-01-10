@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -31,8 +32,14 @@ const AdSlot = ({ adCode }: { adCode: string }) => {
 export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholderProps) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
 
   useEffect(() => {
+    const checkIsMobile = () => window.innerWidth < 768;
+    setIsMobile(checkIsMobile());
+    window.addEventListener('resize', () => setIsMobile(checkIsMobile()));
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const userDocRef = doc(db, 'users', firebaseUser.uid);
@@ -82,6 +89,11 @@ export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholder
     
     // If the slot has ad code, render it for everyone (respecting the pro user rule handled above).
     if (slot?.code) {
+        const showOn = slot.showOn ?? { desktop: true, mobile: true };
+        if ((isMobile && !showOn.mobile) || (!isMobile && !showOn.desktop)) {
+            return null; // Don't render if disabled for the current device
+        }
+
       return (
         <div className={cn('ad-slot-container', className)}>
             <AdSlot adCode={slot.code} />
@@ -112,6 +124,5 @@ export function AdPlaceholder({ className, adSlotId, adSettings }: AdPlaceholder
 
   // Rule 4: Handle Auto Ads. These are managed by a script in the head,
   // so no specific placeholder needs to be rendered for users.
-  // Returning null is the cleanest option for auto-ads.
   return null;
 }

@@ -15,6 +15,10 @@ export const ManualAdSlotSchema = z.object({
   id: z.string(),
   name: z.string(),
   code: z.string().optional(),
+  showOn: z.object({
+    desktop: z.boolean().default(true),
+    mobile: z.boolean().default(true),
+  }).optional(),
 });
 export type ManualAdSlot = z.infer<typeof ManualAdSlotSchema>;
 

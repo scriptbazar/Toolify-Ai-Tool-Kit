@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Save, Ban, Bot, Edit, Loader2, SlidersHorizontal, Code, ChevronDown } from 'lucide-react';
+import { Save, Ban, Bot, Edit, Loader2, SlidersHorizontal, Code, ChevronDown, Monitor, Smartphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSettings, updateSettings } from '@/ai/flows/settings-management';
 import type { AdvertisementSettings, ManualAdSlot } from '@/ai/flows/settings-management.types';
@@ -22,34 +22,34 @@ const defaultManualAdSlots: { group: string, slots: ManualAdSlot[] }[] = [
     {
         group: 'Homepage',
         slots: [
-            { id: 'homepage-banner-top', name: 'Top Banner', code: '' },
-            { id: 'homepage-banner-bottom', name: 'Bottom Banner', code: '' },
+            { id: 'homepage-banner-top', name: 'Top Banner', code: '', showOn: { desktop: true, mobile: true } },
+            { id: 'homepage-banner-bottom', name: 'Bottom Banner', code: '', showOn: { desktop: true, mobile: true } },
         ]
     },
     {
         group: 'Tool Page',
         slots: [
-            { id: 'toolpage-sidebar', name: 'Sidebar Ad', code: '' },
-            { id: 'toolpage-banner-top', name: 'Top Banner', code: '' },
-            { id: 'toolpage-in-description', name: 'In-description Ad', code: '' },
-            { id: 'toolpage-banner-bottom', name: 'Bottom Banner (After Content)', code: '' },
+            { id: 'toolpage-sidebar', name: 'Sidebar Ad', code: '', showOn: { desktop: true, mobile: false } },
+            { id: 'toolpage-banner-top', name: 'Top Banner', code: '', showOn: { desktop: true, mobile: true } },
+            { id: 'toolpage-in-description', name: 'In-description Ad', code: '', showOn: { desktop: true, mobile: true } },
+            { id: 'toolpage-banner-bottom', name: 'Bottom Banner (After Content)', code: '', showOn: { desktop: true, mobile: true } },
         ]
     },
      {
         group: 'Blog Page',
         slots: [
-            { id: 'blog-post-sidebar', name: 'Sidebar Ad', code: '' },
-            { id: 'blog-post-banner-top', name: 'Top Banner', code: '' },
-            { id: 'blog-post-in-content-start', name: 'In-content Ad (Start)', code: '' },
-            { id: 'blog-post-in-content-end', name: 'In-content Ad (End)', code: '' },
-            { id: 'blog-post-banner-bottom', name: 'Bottom Banner', code: '' },
+            { id: 'blog-post-sidebar', name: 'Sidebar Ad', code: '', showOn: { desktop: true, mobile: false } },
+            { id: 'blog-post-banner-top', name: 'Top Banner', code: '', showOn: { desktop: true, mobile: true } },
+            { id: 'blog-post-in-content-start', name: 'In-content Ad (Start)', code: '', showOn: { desktop: true, mobile: true } },
+            { id: 'blog-post-in-content-end', name: 'In-content Ad (End)', code: '', showOn: { desktop: true, mobile: true } },
+            { id: 'blog-post-banner-bottom', name: 'Bottom Banner', code: '', showOn: { desktop: true, mobile: true } },
         ]
     },
     {
         group: 'Site-wide',
         slots: [
-            { id: 'site-header-banner', name: 'Header Banner', code: '' },
-            { id: 'footer-banner', name: 'Footer Banner', code: '' },
+            { id: 'site-header-banner', name: 'Header Banner', code: '', showOn: { desktop: true, mobile: true } },
+            { id: 'footer-banner', name: 'Footer Banner', code: '', showOn: { desktop: true, mobile: true } },
         ]
     }
 ];
@@ -69,11 +69,13 @@ export default function AdvertisementPage() {
         const adSettings = appSettings.advertisement || {};
         const existingSlots = adSettings.manualAdSlots || [];
         
-        const allSlotIds = new Set(defaultManualAdSlots.flatMap(group => group.slots.map(slot => slot.id)));
-        const mergedSlots = [
-            ...existingSlots.filter(s => allSlotIds.has(s.id)), // Keep existing, valid slots
-            ...defaultManualAdSlots.flatMap(group => group.slots).filter(s => !existingSlots.some(es => es.id === s.id)) // Add new default slots
-        ];
+        const allDefaultSlots = defaultManualAdSlots.flatMap(group => group.slots);
+
+        // Merge existing settings with defaults
+        const mergedSlots = allDefaultSlots.map(defaultSlot => {
+            const existingSlot = existingSlots.find(s => s.id === defaultSlot.id);
+            return existingSlot ? { ...defaultSlot, ...existingSlot, showOn: { ...defaultSlot.showOn, ...existingSlot.showOn } } : defaultSlot;
+        });
 
         setSettings({
             ...adSettings,
@@ -98,11 +100,22 @@ export default function AdvertisementPage() {
     setOpenCollapsible(prevId => (prevId === id ? null : id));
   };
 
-  const handleManualAdSlotChange = (id: string, code: string) => {
+  const handleManualAdSlotChange = (id: string, field: 'code' | 'showOn.desktop' | 'showOn.mobile', value: string | boolean) => {
     if (!settings) return;
-    const updatedSlots = settings.manualAdSlots?.map(slot => 
-        slot.id === id ? { ...slot, code } : slot
-    );
+    const updatedSlots = settings.manualAdSlots?.map(slot => {
+        if (slot.id === id) {
+            const newSlot = { ...slot };
+            if (field === 'code') {
+                newSlot.code = value as string;
+            } else if (field === 'showOn.desktop') {
+                newSlot.showOn = { ...(newSlot.showOn || { desktop: true, mobile: true }), desktop: value as boolean };
+            } else if (field === 'showOn.mobile') {
+                newSlot.showOn = { ...(newSlot.showOn || { desktop: true, mobile: true }), mobile: value as boolean };
+            }
+            return newSlot;
+        }
+        return slot;
+    });
     setSettings(prev => prev ? { ...prev, manualAdSlots: updatedSlots } : null);
   };
 
@@ -253,18 +266,30 @@ export default function AdvertisementPage() {
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-4 p-4 pt-2 -mt-2 border-x border-b rounded-b-lg">
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                        {group.slots.map(slot => (
-                          <div key={slot.id} className="space-y-2">
+                        {group.slots.map(slot => {
+                          const currentSlot = settings.manualAdSlots?.find(s => s.id === slot.id);
+                          return (
+                          <div key={slot.id} className="space-y-4 p-4 border rounded-lg">
                             <Label htmlFor={`manual-ad-${slot.id}`}>{slot.name}</Label>
                             <Textarea
                                 id={`manual-ad-${slot.id}`}
                                 placeholder={`Paste ad code for ${slot.name}`}
-                                value={settings.manualAdSlots?.find(s => s.id === slot.id)?.code || ''}
-                                onChange={(e) => handleManualAdSlotChange(slot.id, e.target.value)}
+                                value={currentSlot?.code || ''}
+                                onChange={(e) => handleManualAdSlotChange(slot.id, 'code', e.target.value)}
                                 className="min-h-[100px] font-mono text-xs"
                             />
-                            </div>  
-                        ))}
+                            <div className="flex justify-between items-center pt-2 border-t">
+                               <div className="flex items-center space-x-2">
+                                  <Switch id={`desktop-${slot.id}`} checked={currentSlot?.showOn?.desktop ?? true} onCheckedChange={(checked) => handleManualAdSlotChange(slot.id, 'showOn.desktop', checked)} />
+                                  <Label htmlFor={`desktop-${slot.id}`} className="flex items-center gap-1 text-xs"><Monitor className="h-3 w-3"/> Desktop</Label>
+                               </div>
+                                <div className="flex items-center space-x-2">
+                                  <Switch id={`mobile-${slot.id}`} checked={currentSlot?.showOn?.mobile ?? true} onCheckedChange={(checked) => handleManualAdSlotChange(slot.id, 'showOn.mobile', checked)} />
+                                  <Label htmlFor={`mobile-${slot.id}`} className="flex items-center gap-1 text-xs"><Smartphone className="h-3 w-3"/> Mobile</Label>
+                               </div>
+                            </div>
+                          </div>  
+                        )})}
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
