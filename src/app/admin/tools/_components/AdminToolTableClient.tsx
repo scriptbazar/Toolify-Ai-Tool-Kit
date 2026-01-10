@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminToolFilters } from './AdminToolFilters';
-import { AdminToolTable } from './AdminToolTable';
+import { AdminToolTable } from '@/components/tools/AdminToolTable';
 
 interface Tool {
   id: string;
@@ -48,11 +48,13 @@ export function AdminToolTableClient({ allTools, onToolUpdate }: AdminToolTableC
     <>
       <AdminToolFilters allTools={allTools} setFilteredTools={setFilteredTools} />
       <AdminToolTable
+        allTools={allTools}
         filteredTools={filteredTools}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        setCurrentPage={setCurrentPage}
+        setFilteredTools={setFilteredTools}
         onToolUpdate={handleRefresh}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
       />
     </>
   );

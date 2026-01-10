@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { AdminToolFilters } from '@/app/admin/tools/_components/AdminToolFilters';
 
-interface AdminToolTableClientProps {
+interface AdminToolTableProps {
   allTools: Tool[];
   filteredTools: Tool[];
   setFilteredTools: (tools: Tool[]) => void;
@@ -35,7 +35,7 @@ interface AdminToolTableClientProps {
   totalPages: number;
 }
 
-export function AdminToolTableClient({ allTools, filteredTools, setFilteredTools, onToolUpdate, currentPage, setCurrentPage, totalPages }: AdminToolTableClientProps) {
+export function AdminToolTable({ allTools, filteredTools, setFilteredTools, onToolUpdate, currentPage, setCurrentPage, totalPages }: AdminToolTableProps) {
   const router = useRouter();
   const [editingTool, setEditingTool] = React.useState<Tool | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -171,7 +171,7 @@ export function AdminToolTableClient({ allTools, filteredTools, setFilteredTools
             onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
             >
-            Next <ArrowRight className="mr-2 h-4 w-4" />
+            Next <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
         </div>
     )}
