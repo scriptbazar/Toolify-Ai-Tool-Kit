@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -15,6 +14,7 @@ import {
   Users as UsersIcon,
   FileText,
   Bell,
+  MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { signOut } from 'firebase/auth';
@@ -43,6 +43,7 @@ import type { DocumentData } from 'firebase-admin/firestore';
 const allNavLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: Home, color: 'text-sky-500' },
     { href: '/my-favorites', label: 'My Favorites', icon: Star, color: 'text-yellow-500' },
+    { href: '/community-chat', label: 'Community Chat', icon: MessageSquare, color: 'text-blue-500' },
     { href: '/my-media', label: 'My Media', icon: FileText, color: 'text-orange-500' },
     { href: '/usage-history', label: 'Usage History', icon: History, color: 'text-indigo-500' },
     { href: '/my-tickets', label: 'My Tickets', icon: Ticket, color: 'text-rose-500' },

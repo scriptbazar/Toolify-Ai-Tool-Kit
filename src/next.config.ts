@@ -66,13 +66,14 @@ const nextConfig: NextConfig = {
 
     // This alias is necessary to resolve the 'node:process' import used by
     // some dependencies, which is not supported by Webpack by default.
+    // Fallback for node:process
     if (!config.resolve) {
       config.resolve = {};
     }
-    if (!config.resolve.alias) {
-      config.resolve.alias = {};
-    }
-    config.resolve.alias['node:process'] = 'process/browser';
+     config.resolve.fallback = {
+      ...config.resolve.fallback,
+      'process/browser': require.resolve('process/browser'),
+    };
     
     return config;
   },

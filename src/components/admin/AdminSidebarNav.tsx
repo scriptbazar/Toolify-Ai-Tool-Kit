@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -39,6 +38,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 const navLinks = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: Home, color: 'text-sky-500' },
     { href: '/admin/users', label: 'User Management', icon: Users, color: 'text-violet-500' },
+    { href: '/admin/community-chat', label: 'Community Chat', icon: MessageSquare, color: 'text-blue-500' },
     { href: '/admin/analytics', label: 'Analytics', icon: LineChart, color: 'text-amber-500' },
     { href: '/admin/ticket-management', label: 'Ticket Management', icon: Ticket, color: 'text-rose-500' },
     { href: '/admin/announcement', label: 'Announcement', icon: Megaphone, color: 'text-cyan-500' },
