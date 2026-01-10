@@ -41,16 +41,16 @@ import type { DocumentData } from 'firebase-admin/firestore';
 
 
 const allNavLinks = [
-    { href: '/dashboard', label: 'Dashboard', icon: Home },
-    { href: '/my-favorites', label: 'My Favorites', icon: Star },
-    { href: '/my-media', label: 'My Media', icon: FileText },
-    { href: '/usage-history', label: 'Usage History', icon: History },
-    { href: '/my-tickets', label: 'My Tickets', icon: Ticket },
-    { href: '/manage-subscription', label: 'Manage Subscription', icon: CreditCard },
-    { href: '/payment-history', label: 'Payment History', icon: CreditCard },
-    { href: '/affiliate-program', label: 'Affiliate Program', icon: UsersIcon },
-    { href: '/settings', label: 'Profile Settings', icon: Settings },
-    { href: '/login-history', label: 'Login History', icon: History },
+    { href: '/dashboard', label: 'Dashboard', icon: Home, color: 'text-sky-500' },
+    { href: '/my-favorites', label: 'My Favorites', icon: Star, color: 'text-yellow-500' },
+    { href: '/my-media', label: 'My Media', icon: FileText, color: 'text-orange-500' },
+    { href: '/usage-history', label: 'Usage History', icon: History, color: 'text-indigo-500' },
+    { href: '/my-tickets', label: 'My Tickets', icon: Ticket, color: 'text-rose-500' },
+    { href: '/manage-subscription', label: 'Manage Subscription', icon: CreditCard, color: 'text-lime-500' },
+    { href: '/payment-history', label: 'Payment History', icon: CreditCard, color: 'text-green-500' },
+    { href: '/affiliate-program', label: 'Affiliate Program', icon: UsersIcon, color: 'text-teal-500' },
+    { href: '/settings', label: 'Profile Settings', icon: Settings, color: 'text-slate-500' },
+    { href: '/login-history', label: 'Login History', icon: History, color: 'text-cyan-500' },
 ];
 
 
@@ -108,7 +108,7 @@ export function DashboardLayoutClient({
                         pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                     )}
                     >
-                    <link.icon className="h-4 w-4" />
+                    <link.icon className={cn('h-4 w-4', pathname !== link.href && link.color)} />
                     {link.label}
                 </Link>
             ))}
@@ -150,7 +150,7 @@ export function DashboardLayoutClient({
                         pathname === link.href && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                     )}
                     >
-                    <link.icon className="h-4 w-4" />
+                    <link.icon className={cn('h-4 w-4', pathname !== link.href && link.color)} />
                     {link.label}
                 </Link>
             ))}
