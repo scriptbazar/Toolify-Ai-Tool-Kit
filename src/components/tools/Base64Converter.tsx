@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState } from 'react';
@@ -65,7 +64,7 @@ export function Base64Converter() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-center">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto,1fr] gap-6 items-center">
       <div className="space-y-2">
         <div className="flex justify-between items-center">
             <Label htmlFor="input-text">Input</Label>
@@ -111,3 +110,5 @@ export function Base64Converter() {
     </div>
   );
 }
+
+    
