@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -35,7 +34,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { getAllEmails } from '@/ai/flows/user-management';
+import { getAllEmails, getAffiliates } from '@/ai/flows/user-management';
+import { getComments } from '@/ai/flows/blog-management';
 import { useRouter } from 'next/navigation';
 
 
@@ -80,7 +80,7 @@ export default function AdminProfilePage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userCounts, setUserCounts] = useState<UserCounts>({ total: 0, leads: 0, comments: 2, referrals: 573 });
+  const [userCounts, setUserCounts] = useState<UserCounts>({ total: 0, leads: 0, comments: 0, referrals: 0 });
 
 
   useEffect(() => {
@@ -107,15 +107,22 @@ export default function AdminProfilePage() {
 
      async function fetchUserCounts() {
       try {
-        const allEmails = await getAllEmails();
+        const [allEmails, affiliates, comments] = await Promise.all([
+          getAllEmails(),
+          getAffiliates(),
+          getComments()
+        ]);
+        
         const leadCount = allEmails.filter(e => e.source === 'Lead').length;
-        // Note: Comment and Referral counts are currently static placeholders.
-        // These would need dedicated backend functions to be dynamic.
-        setUserCounts(prev => ({
-            ...prev,
-            total: allEmails.length + 2, // Adding 2 dummy comment users for now
+        const commentCount = new Set(comments.map(c => c.authorEmail)).size;
+        
+        setUserCounts({
+            total: allEmails.length,
             leads: leadCount,
-        }));
+            comments: commentCount,
+            referrals: affiliates.length,
+        });
+
       } catch (error) {
         console.error("Could not fetch user counts", error);
          toast({
@@ -241,7 +248,7 @@ export default function AdminProfilePage() {
                   <StatCard href="/admin/users?filter=all" title="Total Users" value={userCounts.total.toLocaleString()} percentage="+5.2% from last month" icon={Users}/>
                   <StatCard href="/admin/users?filter=lead" title="Lead Users" value={userCounts.leads.toLocaleString()} percentage="+19% from last month" icon={UserPlus}/>
                   <StatCard href="/admin/users?filter=comment" title="Comment Users" value={userCounts.comments.toLocaleString()} percentage="+2 from last month" icon={MessageSquare}/>
-                  <StatCard href="/admin/referral-management" title="Referral Users" value={userCounts.referrals.toLocaleString()} percentage="+201 since last hour" icon={GitCommitVertical}/>
+                  <StatCard href="/admin/affiliate-management" title="Referral Users" value={userCounts.referrals.toLocaleString()} percentage="+201 since last hour" icon={GitCommitVertical}/>
                </div>
             </TabsContent>
             <TabsContent value="transactions">

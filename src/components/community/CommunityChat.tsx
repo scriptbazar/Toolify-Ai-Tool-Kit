@@ -24,7 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { getChatUsers } from '@/ai/flows/user-management';
-import { saveUserMedia } from '@/ai/flows/ai-image-generator';
+import { saveUserMedia } from '@/ai/flows/media-management';
 import type { User as FirebaseUser } from 'firebase/auth';
 
 

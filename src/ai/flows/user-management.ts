@@ -335,3 +335,25 @@ export async function deleteUser(userId: string): Promise<{ success: boolean; me
     return { success: false, message: error.message || 'An unknown error occurred.' };
   }
 }
+
+export async function getChatUsers() {
+    const adminDb = getAdminDb();
+    if (!adminDb) return [];
+    try {
+        const usersSnapshot = await adminDb.collection('users').get();
+        return usersSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                initials: `${data.firstName?.[0] || ''}${data.lastName?.[0] || ''}`.toUpperCase(),
+                name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+                username: data.userName,
+                createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || null,
+                lastActive: (data.lastActive as Timestamp)?.toDate().toISOString() || null,
+            };
+        });
+    } catch (error) {
+        console.error("Error fetching chat users:", error);
+        return [];
+    }
+}
