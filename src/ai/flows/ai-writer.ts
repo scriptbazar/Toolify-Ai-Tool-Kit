@@ -32,9 +32,6 @@ const generateSampleTextFlow = ai.defineFlow(
       prompt: `Generate a short, interesting sample text. It could be a famous quote, a short poem, a fun fact, or a single witty sentence.
       ${input.topic ? `The topic should be related to: ${input.topic}.` : ''}
       The text should be suitable for demonstrating a handwriting font. Keep it concise.`,
-      config: {
-        responseMimeType: "application/json",
-      },
       output: {
         schema: GenerateSampleTextOutputSchema,
       },
@@ -71,9 +68,6 @@ const aiWriterFlow = ai.defineFlow(
   async ({ topic, length, tone }) => {
     const { output } = await ai.generate({
       prompt: `Write a ${length.toLowerCase()}, ${tone.toLowerCase()} blog post about "${topic}". The output should be a single string of well-structured HTML, including headings (h2, h3), paragraphs (p), and lists (ul, li).`,
-      config: {
-        responseMimeType: "application/json",
-      },
       output: {
         schema: AiWriterOutputSchema,
       },
@@ -108,7 +102,6 @@ const generateMetaDescriptionFlow = ai.defineFlow({
         
         Title: ${title}
         Content: ${content.substring(0, 1000)}...`,
-        config: { responseMimeType: 'application/json' },
         output: { schema: GenerateMetaDescriptionOutputSchema }
     });
      if (!output) {
@@ -139,7 +132,6 @@ const generateTargetKeywordsFlow = ai.defineFlow({
         
         Title: ${title}
         Content: ${content.substring(0, 1000)}...`,
-        config: { responseMimeType: 'application/json' },
         output: { schema: GenerateTargetKeywordsOutputSchema }
     });
     if (!output) {

@@ -35,9 +35,6 @@ const emailComposerFlow = ai.defineFlow(
       - ${keyPoints.split('\n').join('\n- ')}
       
       The output should be a single string containing only the email body text.`,
-       config: {
-        responseMimeType: "application/json",
-      },
       output: {
         schema: AiEmailComposerOutputSchema,
       },
@@ -70,9 +67,6 @@ const generateFeatureAnnouncementEmailFlow = ai.defineFlow(
       Start with a friendly greeting like "Hi {{name}}," and end with a sign-off from "The ToolifyAI Team". 
       The tone should be enthusiastic. Explain the feature and its benefits.
       The output should be a single string of text, with line breaks for paragraphs.`,
-       config: {
-        responseMimeType: "application/json",
-      },
       output: {
         schema: GenerateFeatureAnnouncementEmailOutputSchema,
       },
@@ -103,9 +97,6 @@ const regenerateEmailTemplateFlow = ai.defineFlow(
       Keep it concise and to the point.
       
       Output only the email body text.`,
-       config: {
-        responseMimeType: "application/json",
-      },
       output: {
         schema: RegenerateEmailTemplateOutputSchema,
       },
