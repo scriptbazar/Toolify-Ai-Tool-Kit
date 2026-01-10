@@ -2,29 +2,13 @@
 
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Skeleton } from '@/components/ui/skeleton';
 import { getAllEmails } from '@/ai/flows/user-management';
 import dynamic from 'next/dynamic';
 import { AdminDashboardClient } from './_components/DashboardClient';
+import { unstable_noStore as noStore } from 'next/cache';
 
 const AdminDashboardClientWithNoSSR = dynamic(() => import('./_components/DashboardClient').then(mod => mod.AdminDashboardClient), {
-    loading: () => (
-         <div className="space-y-6">
-            <Skeleton className="h-10 w-64 mb-2" />
-            <Skeleton className="h-4 w-80" />
-            <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-                <Skeleton className="h-28" />
-                <Skeleton className="h-28" />
-                <Skeleton className="h-28" />
-                <Skeleton className="h-28" />
-            </div>
-             <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
-                <Skeleton className="h-96" />
-                <Skeleton className="h-96" />
-             </div>
-        </div>
-      ),
-    ssr: false
+    ssr: false,
 });
 
 interface User {
@@ -50,6 +34,7 @@ interface ChartData {
 }
 
 async function getDashboardData() {
+    noStore();
     const [allEmails, affiliatesSnapshot] = await Promise.all([
       getAllEmails(),
       getDocs(query(collection(db, "users"), where("affiliateStatus", "==", "approved")))
@@ -105,25 +90,6 @@ async function getDashboardData() {
 
 export default async function AdminDashboard() {
   const dashboardData = await getDashboardData();
-
-  if (!dashboardData) {
-      return (
-         <div className="space-y-6">
-            <Skeleton className="h-10 w-64 mb-2" />
-            <Skeleton className="h-4 w-80" />
-            <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-                <Skeleton className="h-28" />
-                <Skeleton className="h-28" />
-                <Skeleton className="h-28" />
-                <Skeleton className="h-28" />
-            </div>
-             <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
-                <Skeleton className="h-96" />
-                <Skeleton className="h-96" />
-             </div>
-        </div>
-      )
-  }
 
   return (
     <AdminDashboardClient

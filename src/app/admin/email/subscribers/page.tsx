@@ -3,10 +3,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SubscribersClient } from './_components/SubscribersClient';
 import { getAllEmails } from '@/ai/flows/user-management';
-
-export const revalidate = 0; // Disable caching
+import { unstable_noStore as noStore } from 'next/cache';
 
 export default async function SubscribersPage() {
+    noStore();
     const initialEmails = await getAllEmails();
 
     return (

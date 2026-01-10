@@ -3,10 +3,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getEmailLog } from '@/ai/flows/send-email';
 import { AllEmailsClient } from './_components/AllEmailsClient';
-
-export const revalidate = 0; // Disable caching for this page
+import { unstable_noStore as noStore } from 'next/cache';
 
 export default async function AllEmailsPage() {
+  noStore();
   const initialEmails = await getEmailLog();
 
   return (

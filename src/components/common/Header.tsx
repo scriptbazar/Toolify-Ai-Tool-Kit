@@ -67,6 +67,8 @@ export default function Header() {
   
   const handleLogout = async () => {
     await signOut(auth);
+    // Clear the session cookie by calling our API route
+    await fetch('/api/auth/session-logout', { method: 'POST' });
     toast({ title: 'Logged out successfully.' });
     router.push('/');
   };
@@ -186,7 +188,7 @@ export default function Header() {
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>
                     </DropdownMenuItem>
-                     <DropdownMenuItem onClick={() => router.push(`/profile`)}>
+                     <DropdownMenuItem onClick={() => router.push(`/settings`)}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>

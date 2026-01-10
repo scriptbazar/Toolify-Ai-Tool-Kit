@@ -2,40 +2,21 @@
 'use client';
 
 import * as React from 'react';
-import {
-  Bell,
-  Home,
-  LogOut,
-  User,
-  Settings,
-  Menu,
-  Star,
-  ShieldCheck,
-  UserCog,
-  Loader2,
-} from 'lucide-react';
 import Link from 'next/link';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Logo } from '@/components/common/Logo';
 import { ModeToggle } from '@/components/common/ModeToggle';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/use-auth';
 import { AdminSidebarNav } from '@/components/admin/AdminSidebarNav';
+import { Bell, Home, LogOut, User, Settings, Menu, Star, ShieldCheck, UserCog, Loader2 } from 'lucide-react';
 import { AuthContextProvider } from '@/context/AuthContext';
 
 
@@ -48,7 +29,7 @@ function AdminLayoutClient({
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
-  const { user, userData, loading } = useAuth();
+  const { user, userData, loading, isAdmin } = useAuth();
   
   const isLoginPage = pathname === '/admin/login';
 
@@ -58,12 +39,12 @@ function AdminLayoutClient({
         if (!isLoginPage) {
           router.replace('/admin/login');
         }
-      } else if (userData?.role !== 'admin') {
+      } else if (!isAdmin) {
         // If a non-admin is logged in, send them to their dashboard
         router.replace('/dashboard');
       }
     }
-  }, [user, userData, loading, isLoginPage, router]);
+  }, [user, isAdmin, loading, isLoginPage, router]);
 
 
   const handleLogout = async () => {
@@ -90,7 +71,7 @@ function AdminLayoutClient({
     return <>{children}</>;
   }
   
-  if (loading || !user || userData?.role !== 'admin') {
+  if (loading || !user || !isAdmin) {
     return (
         <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
           <Logo className="h-16 w-16 animate-pulse" />
@@ -184,7 +165,7 @@ function AdminLayoutClient({
                     className="shrink-0"
                   >
                     <Menu className="h-5 w-5" />
-                    <span className="sr-only">Toggle navigation menu</span>
+                    <span className="sr-only">Admin Menu</span>
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="flex flex-col p-0 w-[280px] sm:w-[320px]">
