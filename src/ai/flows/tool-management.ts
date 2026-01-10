@@ -163,6 +163,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image to Text', description: '👁️ Extract text from any image. Upload a picture and our OCR tool will pull out the text for you to copy and use.', icon: 'ScanText', category: 'ai', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload an image file containing text.', 'The tool will automatically scan and extract the text.', 'The extracted text will be displayed in a text box, ready to be copied.'] },
     { name: 'Product SKU Encryptor', description: 'Securely encrypt and decrypt your product SKUs using a secret key.', icon: 'KeyRound', category: 'dev', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter your SKU and a secret key.', 'Click "Encrypt" to get the encrypted text.', 'Use the same key to "Decrypt" it back.'] },
     { name: 'Text to Speech', description: '🗣️ Convert written text into natural-sounding speech. Download the audio as an MP3 file.', icon: 'AudioLines', category: 'ai', plan: 'Free', isNew: false, status: 'Active', howToUse: ['Type or paste your text into the text area.', 'Select a voice and adjust the speed or pitch if desired.', 'Click the "Listen" button to hear the audio.', 'Click "Download MP3" to save the audio file.'] },
+    { name: 'Product Background Remover', description: '✂️ Remove the background from your product images automatically. Perfect for creating clean listings on e-commerce sites like Meesho.', icon: 'Scissors', category: 'ai', plan: 'Pro', isNew: true, status: 'Active', howToUse: ['Upload your product image.', 'The AI will automatically detect and remove the background.', 'Download the result as a transparent PNG file.'] },
 ];
 
 const generateSlug = (name: string) => {
@@ -197,6 +198,7 @@ interface GetToolsOptions {
 }
 
 async function getToolsFn (options: GetToolsOptions = {}) {
+    await seedInitialTools();
     try {
         const adminDb = getAdminDb();
         if (!adminDb) {

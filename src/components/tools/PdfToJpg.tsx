@@ -37,14 +37,15 @@ export function PdfToJpg() {
       setPagePreviews([]);
 
       try {
-        const fileBytes = await selectedFile.arrayBuffer();
         const { getDocument } = await import('pdfjs-dist');
-        const pdfjsLib = await getDocument({ data: fileBytes }).promise;
+        const fileBytes = await selectedFile.arrayBuffer();
+        const loadingTask = getDocument({ data: fileBytes });
+        const pdf = await loadingTask.promise;
         
         const previews: PagePreview[] = [];
 
-        for (let i = 1; i <= pdfjsLib.numPages; i++) {
-          const page = await pdfjsLib.getPage(i);
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
           const viewport = page.getViewport({ scale: 0.5 }); // Lower scale for faster preview
           const canvas = document.createElement('canvas');
           canvas.width = viewport.width;
@@ -163,7 +164,10 @@ export function PdfToJpg() {
             "transition-colors",
             isDragging && 'border-primary bg-primary/10'
         )}
-        onDragEnter={handleDragEnter} onDragOver={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
         <CardContent 
           className="p-6 text-center cursor-pointer"
