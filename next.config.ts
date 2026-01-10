@@ -55,6 +55,15 @@ const nextConfig: NextConfig = {
     // "handlebars" library.
     config.externals.push('handlebars');
 
+    // These libraries are large and should be handled carefully.
+    // 'canvas' is a server-side dependency for node-canvas, which might be used by pdfjs-dist on the server.
+    // We mark it as external to prevent webpack from trying to bundle it for the client.
+    if (!isServer) {
+        config.externals.push('canvas');
+    }
+    config.externals.push('pdfjs-dist/build/pdf.worker.min.mjs');
+
+
     // This alias is necessary to resolve the 'node:process' import used by
     // some dependencies, which is not supported by Webpack by default.
     if (!config.resolve) {
@@ -70,3 +79,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+    
