@@ -33,18 +33,13 @@ function AdminLayoutClient({
   
   const isLoginPage = pathname === '/admin/login';
 
+  // Middleware now handles the primary redirection logic.
+  // This useEffect is a fallback and handles client-side state changes.
   React.useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        if (!isLoginPage) {
-          router.replace('/admin/login');
-        }
-      } else if (!isAdmin) {
-        // If a non-admin is logged in, send them to their dashboard
-        router.replace('/dashboard');
-      }
+    if (!loading && !isLoginPage && !user) {
+        router.replace('/admin/login');
     }
-  }, [user, isAdmin, loading, isLoginPage, router]);
+  }, [user, loading, isLoginPage, router]);
 
 
   const handleLogout = async () => {
@@ -56,6 +51,7 @@ function AdminLayoutClient({
         title: "Logged Out",
         description: "You have been successfully logged out.",
       });
+      // Redirect to the login page after logout
       router.push('/admin/login');
     } catch (error) {
       console.error("Logout error:", error);

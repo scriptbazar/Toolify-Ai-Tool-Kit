@@ -45,6 +45,10 @@ export async function getSettingsData(): Promise<AppSettings> {
     if (docSnap.exists) {
         const parsedData = AppSettingsSchema.safeParse(docSnap.data());
         if (parsedData.success) {
+            // Convert date string to Date object if it exists
+            if (parsedData.data.general?.security?.maintenanceModeUntil) {
+                parsedData.data.general.security.maintenanceModeUntil = new Date(parsedData.data.general.security.maintenanceModeUntil) as any;
+            }
             return parsedData.data;
         } else {
             console.warn("Firestore settings data is invalid, returning partial valid data.", parsedData.error.flatten());

@@ -77,7 +77,7 @@ export const SecuritySettingsSchema = z.object({
     recaptchaSecretKey: z.string().optional(),
     maintenanceMode: z.boolean().default(false),
     maintenanceModeMessage: z.string().optional(),
-    maintenanceModeUntil: z.date().optional(),
+    maintenanceModeUntil: z.string().datetime().optional(),
     enableNewLoginAlerts: z.boolean().default(true),
     enableAdBlockerDetection: z.boolean().default(false),
 });

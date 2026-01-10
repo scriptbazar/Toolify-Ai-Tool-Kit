@@ -16,6 +16,8 @@ export default function UserPanelLayout({
   const { user, userData, loading, isAdmin } = useAuth();
   const router = useRouter();
   
+  // Middleware handles redirection for non-authenticated users.
+  // This useEffect will handle cases where the auth state changes on the client-side.
   React.useEffect(() => {
     if (!loading) {
       if (!user) {
