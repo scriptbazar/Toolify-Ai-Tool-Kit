@@ -43,6 +43,24 @@ const nextConfig: NextConfig = {
         hostname: 'image.thum.io',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        port: '',
+        pathname: '/**',
+      },
+       {
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
@@ -66,18 +84,17 @@ const nextConfig: NextConfig = {
 
     // This alias is necessary to resolve the 'node:process' import used by
     // some dependencies, which is not supported by Webpack by default.
+    // Fallback for node:process
     if (!config.resolve) {
       config.resolve = {};
     }
-    if (!config.resolve.alias) {
-      config.resolve.alias = {};
-    }
-    config.resolve.alias['node:process'] = 'process/browser';
+     config.resolve.alias = {
+      ...config.resolve.alias,
+      'node:process': 'process/browser',
+    };
     
     return config;
   },
 };
 
 export default nextConfig;
-
-    
