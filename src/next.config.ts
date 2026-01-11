@@ -70,9 +70,9 @@ const nextConfig: NextConfig = {
     if (!config.resolve) {
       config.resolve = {};
     }
-     config.resolve.fallback = {
-      ...config.resolve.fallback,
-      'process/browser': require.resolve('process/browser'),
+     config.resolve.alias = {
+      ...config.resolve.alias,
+      'node:process': 'process/browser',
     };
     
     return config;
