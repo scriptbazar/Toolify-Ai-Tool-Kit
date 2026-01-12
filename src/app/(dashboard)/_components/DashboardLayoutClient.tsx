@@ -38,6 +38,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { DocumentData } from 'firebase-admin/firestore';
+import { NotificationDropdown } from '@/components/dashboard/NotificationDropdown';
+import type { Announcement } from '@/ai/flows/announcement-flow.types';
+import { getAnnouncementsForUser } from '@/ai/flows/announcement-flow';
 
 
 const allNavLinks = [
@@ -58,15 +61,18 @@ const allNavLinks = [
 export function DashboardLayoutClient({
   children,
   user,
-  userData
+  userData,
+  initialAnnouncements
 }: {
   children: React.ReactNode;
   user: FirebaseUser;
   userData: DocumentData | null;
+  initialAnnouncements: Announcement[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
+  const [announcements, setAnnouncements] = React.useState(initialAnnouncements);
 
   const handleLogout = async () => {
     try {
@@ -192,11 +198,12 @@ export function DashboardLayoutClient({
           </div>
           <div className="flex items-center gap-2 md:gap-4 justify-end flex-1">
              <ModeToggle />
-            <div className="hidden md:flex items-center gap-2">
-                 <Button variant="outline" size="icon" className="h-9 w-9">
-                    <Bell className="h-4 w-4" />
-                    <span className="sr-only">Toggle notifications</span>
-                 </Button>
+            <div className="flex items-center gap-2">
+                <NotificationDropdown 
+                    userId={user.uid} 
+                    initialAnnouncements={announcements} 
+                    onAnnouncementsRead={(readAnnouncements) => setAnnouncements(readAnnouncements)}
+                />
                  <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="secondary" size="icon" className="rounded-full">
@@ -261,3 +268,4 @@ export function DashboardLayoutClient({
     </div>
   );
 }
+      
