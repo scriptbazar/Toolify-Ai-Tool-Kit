@@ -1,5 +1,6 @@
 
 import type {NextConfig} from 'next';
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -43,24 +44,6 @@ const nextConfig: NextConfig = {
         hostname: 'image.thum.io',
         port: '',
         pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'firebasestorage.googleapis.com',
-        port: '',
-        pathname: '/**',
-      },
-       {
-        protocol: 'https',
-        hostname: 'i.ytimg.com',
-        port: '',
-        pathname: '/**',
       }
     ],
   },
@@ -92,6 +75,9 @@ const nextConfig: NextConfig = {
       ...config.resolve.alias,
       'node:process': 'process/browser',
     };
+
+    // Add the NodePolyfillPlugin to handle Node.js built-in modules
+    config.plugins.push(new NodePolyfillPlugin());
     
     return config;
   },
