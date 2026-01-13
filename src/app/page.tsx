@@ -1,9 +1,8 @@
 
-
 import { getSettings } from '@/ai/flows/settings-management';
 import { getPosts } from '@/ai/flows/blog-management';
 import { getReviews } from '@/ai/flows/review-management';
-import { HomePageClient } from './_components/HomePageClient';
+import { HomePageClient } from '@/app/(public)/_components/HomePageClient';
 
 export default async function Home() {
     const [settings, posts, testimonials] = await Promise.all([
