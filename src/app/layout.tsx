@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import { getSettings } from '@/ai/flows/settings-management';
 import Script from 'next/script';
 import { Providers } from '@/components/common/Providers';
-import Footer from '@/components/common/Footer';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
