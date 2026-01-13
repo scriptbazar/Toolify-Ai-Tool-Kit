@@ -1,5 +1,6 @@
 
 import type {NextConfig} from 'next';
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -74,6 +75,9 @@ const nextConfig: NextConfig = {
       ...config.resolve.alias,
       'node:process': 'process/browser',
     };
+
+    // Add the NodePolyfillPlugin to handle Node.js built-in modules
+    config.plugins.push(new NodePolyfillPlugin());
     
     return config;
   },
@@ -81,4 +85,3 @@ const nextConfig: NextConfig = {
 
 export default nextConfig;
 
-    
