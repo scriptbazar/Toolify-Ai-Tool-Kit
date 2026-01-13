@@ -55,6 +55,8 @@ const nextConfig: NextConfig = {
     // This can be worked around by telling webpack to not try and bundle the
     // "handlebars" library.
     config.externals.push('handlebars');
+    config.externals.push('firebase-admin');
+    config.externals.push('@google-cloud/firestore');
 
     // These libraries are large and should be handled carefully.
     // 'canvas' is a server-side dependency for node-canvas, which might be used by pdfjs-dist on the server.
