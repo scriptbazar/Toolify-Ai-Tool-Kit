@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
@@ -39,22 +38,19 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
+            setUser(firebaseUser); // Set user immediately so UI can update basic states
             const userDocRef = doc(db, "users", firebaseUser.uid);
             const userDocSnap = await getDoc(userDocRef);
 
             if (userDocSnap.exists()) {
                 const data = userDocSnap.data() as AppUser;
                 setUserData(data);
-                setUser(firebaseUser);
             } else {
-                // This can happen briefly during user creation
-                setUser(firebaseUser);
                 setUserData(null);
             }
         } catch (error) {
             console.error("Auth context error:", error);
-            // Reset to a clean state on error
-            setUser(null);
+            // Don't nullify user on data fetch failure to prevent unexpected logouts
             setUserData(null);
         } finally {
             setLoading(false);

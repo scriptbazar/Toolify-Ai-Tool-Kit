@@ -1,65 +1,83 @@
+'use client';
 
-
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/use-auth';
 import { getSettings } from '@/ai/flows/settings-management';
 import { getAnnouncementsForUser } from '@/ai/flows/announcement-flow';
 import { DashboardClient } from './_components/DashboardClient';
-import { getAdminAuth } from '@/lib/firebase-admin';
-import { collection, doc, getDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Plan } from '@/ai/flows/settings-management.types';
+import type { AppSettings } from '@/ai/flows/settings-management.types';
 import type { Announcement } from '@/ai/flows/announcement-flow.types';
-import { cookies } from 'next/headers';
-import { unstable_noStore as noStore } from 'next/cache';
-import type { DocumentData } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
 
+export default function UserDashboard() {
+  const { user, userData, loading: authLoading } = useAuth();
+  const [settings, setSettings] = useState<AppSettings | null>(null);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [stats, setStats] = useState({ toolsUsed: 0, referrals: 0 });
+  const [loading, setLoading] = useState(true);
 
-export default async function UserDashboard() {
-  noStore();
-  const session = cookies().get('session')?.value || '';
-  let uid = '';
-  try {
-    const decodedClaims = await getAdminAuth().verifySessionCookie(session, true);
-    uid = decodedClaims.uid;
-  } catch (error) {
-    // Should be handled by middleware or layout, but as a fallback:
-    return <p>Please log in to view your dashboard.</p>;
+  useEffect(() => {
+    async function fetchData() {
+      if (!user) return;
+
+      try {
+        const [settingsData, annData, referralsSnapshot, activitySnapshot] = await Promise.all([
+          getSettings(),
+          getAnnouncementsForUser(user.uid),
+          getDocs(query(collection(db, "users"), where("referredBy", "==", user.uid))),
+          getDocs(query(collection(db, `users/${user.uid}/activity`), where('type', '==', 'tool_usage'))),
+        ]);
+
+        setSettings(settingsData);
+        setAnnouncements(annData);
+        setStats({
+          toolsUsed: activitySnapshot.size,
+          referrals: referralsSnapshot.size,
+        });
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (!authLoading && user) {
+      fetchData();
+    }
+  }, [user, authLoading]);
+
+  // The parent layout handles authentication. If we are here, we are authenticated or loading.
+  if (authLoading || (loading && user)) {
+    return (
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground">Loading your dashboard...</p>
+      </div>
+    );
   }
 
-  const [settings, userDocSnap, fetchedAnnouncements, referralsSnapshot, activitySnapshot] = await Promise.all([
-    getSettings(),
-    getDoc(doc(db, "users", uid)),
-    getAnnouncementsForUser(uid),
-    getDocs(query(collection(db, "users"), where("referredBy", "==", uid))),
-    getDocs(query(collection(db, `users/${uid}/activity`), where('type', '==', 'tool_usage'))),
-  ]);
+  // Safe fallback if user is somehow null despite layout checks
+  if (!user) return null;
 
-  const userData = userDocSnap.exists() ? userDocSnap.data() as DocumentData : null;
+  const userPlan = settings?.plan?.plans.find(p => p.id === userData?.planId) || 
+                   settings?.plan?.plans.find(p => p.id === 'free') || null;
 
   const serializableProfile = userData ? {
     ...userData,
-    createdAt: (userData.createdAt as Timestamp)?.toDate().toISOString() || null,
-    lastActive: (userData.lastActive as Timestamp)?.toDate().toISOString() || null,
-    subscriptionEndDate: (userData.subscriptionEndDate as Timestamp)?.toDate().toISOString() || null,
-    referralRequestDate: (userData.referralRequestDate as Timestamp)?.toDate().toISOString() || null,
+    createdAt: userData.createdAt?.toDate?.()?.toISOString() || userData.createdAt || null,
+    lastActive: userData.lastActive?.toDate?.()?.toISOString() || userData.lastActive || null,
   } : null;
-
-  const userPlan = settings.plan?.plans.find(p => p.id === userData?.planId) || settings.plan?.plans.find(p => p.id === 'free') || null;
-
-  const stats = {
-    toolsUsed: activitySnapshot.size,
-    referrals: referralsSnapshot.size,
-  };
-
-  const welcomeMessage = userData?.firstName ? `Welcome Back, ${userData.firstName}!` : "User Dashboard";
 
   return (
     <DashboardClient 
-        welcomeMessage={welcomeMessage}
+        welcomeMessage={userData?.firstName ? `Welcome Back, ${userData.firstName}!` : "User Dashboard"}
         profile={serializableProfile}
         plan={userPlan}
         stats={stats}
-        announcements={fetchedAnnouncements}
-        uid={uid}
+        announcements={announcements}
+        uid={user.uid}
     />
   );
 }
