@@ -1,8 +1,19 @@
 
-// This file is being moved to the root to resolve a duplicate route conflict.
-// Please use src/app/settings/page.tsx instead.
-import { redirect } from 'next/navigation';
+'use client';
 
-export default function SettingsRedirect() {
-    redirect('/settings');
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function SettingsOldPage() {
+    const router = useRouter();
+    
+    useEffect(() => {
+        router.replace('/settings');
+    }, [router]);
+
+    return (
+        <div className="flex h-full items-center justify-center">
+            <p className="text-muted-foreground">Redirecting to profile settings...</p>
+        </div>
+    );
 }

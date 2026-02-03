@@ -13,9 +13,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { doc, setDoc, updateDoc, increment, getDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc, increment } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
-import { Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { trackAffiliateClick } from "@/ai/flows/user-management";
 import ReCAPTCHA from "react-google-recaptcha";
@@ -78,19 +78,11 @@ export default function SignupPage() {
   useEffect(() => {
     const referrerId = searchParams.get('ref');
     if (referrerId) {
-      // Store the referrer ID in local storage to persist it across sessions if needed
       localStorage.setItem('referrerId', referrerId);
-      
-      // Track the click only if it hasn't been tracked for this session
       const trackedKey = `tracked_${referrerId}`;
       if (!sessionStorage.getItem(trackedKey)) {
         trackAffiliateClick(referrerId).then(result => {
-            if (result.success) {
-                console.log(`Click tracked for referrer: ${referrerId}`);
-                sessionStorage.setItem(trackedKey, 'true');
-            } else {
-                 console.error(`Failed to track click for referrer: ${referrerId}. Reason: ${result.message}`);
-            }
+            if (result.success) sessionStorage.setItem(trackedKey, 'true');
         });
       }
     }
@@ -100,86 +92,65 @@ export default function SignupPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (securitySettings?.enableRecaptcha) {
         if (!recaptchaValue) {
-            toast({
-                title: "Verification Failed",
-                description: "Please complete the reCAPTCHA verification.",
-                variant: "destructive",
-            });
+            toast({ title: "Verification Failed", description: "Please complete reCAPTCHA.", variant: "destructive" });
             return;
         }
         try {
             const verification = await verifyRecaptcha(recaptchaValue);
-            if (!verification.success) {
-                throw new Error(verification.message);
-            }
+            if (!verification.success) throw new Error(verification.message);
         } catch (error: any) {
-             toast({
-                title: "reCAPTCHA Verification Failed",
-                description: error.message || 'Could not verify reCAPTCHA. Please try again.',
-                variant: "destructive",
-            });
-            recaptchaRef.current?.reset();
-            return;
+             toast({ title: "reCAPTCHA Failed", description: error.message, variant: "destructive" });
+             recaptchaRef.current?.reset();
+             return;
         }
     }
 
     try {
       const { email, password, firstName, lastName, userName } = values;
-      // Create user with email and password
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Send email verification
       await sendEmailVerification(user);
 
-      // Set subscription dates for free plan
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setFullYear(endDate.getFullYear() + 100); // Effectively "never" for free plan
+      // Wait for session sync
+      const token = await user.getIdToken();
+      const sessionResponse = await fetch('/api/auth/session-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      
+      if (sessionResponse.ok) {
+        await sessionResponse.json();
+      }
 
-      // Get referrer from local storage and update their stats
       const referrerId = localStorage.getItem('referrerId');
       if (referrerId) {
         const referrerRef = doc(db, "users", referrerId);
-        
-        // In a real app, earnings would be calculated based on payments.
-        // For now, let's assume a fixed earning on signup for demonstration.
-        const earningsOnSignup = 0; // Or calculate based on plan if they sign up for paid plan directly
-
         await updateDoc(referrerRef, {
             affiliateReferrals: increment(1),
-            affiliateEarnings: increment(earningsOnSignup)
+            affiliateEarnings: increment(0)
         });
       }
 
-
-      // Save user data to Firestore
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         firstName,
         lastName,
         userName,
         email,
-        role: "user", // Default role is 'user'
+        role: "user",
         createdAt: new Date(),
         planId: "free",
-        subscriptionStartDate: startDate,
-        subscriptionEndDate: endDate,
-        ...(referrerId && { referredBy: referrerId }), // Add referrer if exists
+        subscriptionStartDate: new Date(),
+        subscriptionEndDate: new Date(new Date().setFullYear(new Date().getFullYear() + 100)),
+        ...(referrerId && { referredBy: referrerId }),
       });
 
-      toast({
-        title: "Account created successfully!",
-        description: "We've sent a verification link to your email address.",
-      });
+      toast({ title: "Success!", description: "Verification email sent. Please log in." });
       router.push('/login');
     } catch (error: any) {
-      console.error("Signup error:", error);
-      toast({
-        title: "Uh oh! Something went wrong.",
-        description: error.message || "There was a problem with your request.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
         recaptchaRef.current?.reset();
     }
@@ -200,140 +171,32 @@ export default function SignupPage() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <FormField control={form.control} name="firstName" render={({ field }) => (
+                    <FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="John" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="lastName" render={({ field }) => (
+                    <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input placeholder="Doe" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <FormField
-                  control={form.control}
-                  name="userName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>User Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="johndoe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="you@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                 <FormField control={form.control} name="userName" render={({ field }) => (
+                    <FormItem><FormLabel>User Name</FormLabel><FormControl><Input placeholder="johndoe" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="email" render={({ field }) => (
+                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="you@example.com" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <div className="relative">
-                        <FormControl>
-                          <Input
-                            type={showPassword ? "text" : "password"}
-                            placeholder="••••••••"
-                            {...field}
-                          />
-                        </FormControl>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute inset-y-0 right-0 h-full px-3"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                          <span className="sr-only">
-                            {showPassword ? "Hide password" : "Show password"}
-                          </span>
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
-                       <div className="relative">
-                        <FormControl>
-                          <Input
-                            type={showConfirmPassword ? "text" : "password"}
-                            placeholder="••••••••"
-                            {...field}
-                          />
-                        </FormControl>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute inset-y-0 right-0 h-full px-3"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                          {showConfirmPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                          <span className="sr-only">
-                            {showConfirmPassword ? "Hide password" : "Show password"}
-                          </span>
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <FormField control={form.control} name="password" render={({ field }) => (
+                    <FormItem><FormLabel>Password</FormLabel><div className="relative"><FormControl><Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button></div><FormMessage /></FormItem>
+                )} />
+                 <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                    <FormItem><FormLabel>Confirm Password</FormLabel><div className="relative"><FormControl><Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>{showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button></div><FormMessage /></FormItem>
+                )} />
               </div>
               {securitySettings?.enableRecaptcha && securitySettings.recaptchaSiteKey && (
                 <div className="flex justify-center">
-                    <ReCAPTCHA
-                        ref={recaptchaRef}
-                        sitekey={securitySettings.recaptchaSiteKey}
-                        onChange={(value) => setRecaptchaValue(value)}
-                    />
+                    <ReCAPTCHA ref={recaptchaRef} sitekey={securitySettings.recaptchaSiteKey} onChange={(v) => setRecaptchaValue(v)} />
                 </div>
                )}
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
@@ -342,10 +205,7 @@ export default function SignupPage() {
             </form>
           </Form>
           <div className="mt-6 text-center text-sm">
-            Already have an account?{" "}
-            <Link href="/login" className="font-medium text-primary hover:underline">
-              Log in
-            </Link>
+            Already have an account? <Link href="/login" className="font-medium text-primary hover:underline">Log in</Link>
           </div>
         </CardContent>
       </Card>

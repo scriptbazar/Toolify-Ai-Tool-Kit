@@ -1,12 +1,12 @@
 
 import dynamic from 'next/dynamic';
-import { FC } from 'react';
+import React, { FC } from 'react';
 import { Loader2 } from 'lucide-react';
 
-const LoadingComponent = () => (
-  <div className="flex justify-center items-center min-h-[300px]">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-  </div>
+const LoadingComponent = () => React.createElement(
+  'div',
+  { className: "flex justify-center items-center min-h-[300px]" },
+  React.createElement(Loader2, { className: "h-8 w-8 animate-spin text-primary" })
 );
 
 export const slugToComponentMap: { [key: string]: FC<any> } = {

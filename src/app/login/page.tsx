@@ -14,7 +14,7 @@ import { z } from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { doc, getDoc } from "firebase/firestore";
 import { logUserLogin } from "@/ai/flows/user-activity";
@@ -101,7 +101,7 @@ export default function LoginPage() {
         throw new Error(errorData.error || 'Failed to create session.');
       }
       
-      await sessionResponse.json(); // Wait for the session creation to complete
+      await sessionResponse.json(); // Wait for the session creation to complete on server
 
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
