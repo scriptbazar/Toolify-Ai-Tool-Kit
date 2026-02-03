@@ -66,7 +66,7 @@ export default function LoginPage() {
 
     if (securitySettings?.enableRecaptcha) {
         if (!recaptchaValue) {
-            toast({ title: "Verification Failed", description: "Please complete reCAPTCHA.", variant: "destructive" });
+            toast({ title: "Verification Failed", description: "Please complete the reCAPTCHA verification.", variant: "destructive" });
             setIsSubmitting(false);
             return;
         }
@@ -74,7 +74,7 @@ export default function LoginPage() {
             const verification = await verifyRecaptcha(recaptchaValue);
             if (!verification.success) throw new Error(verification.message);
         } catch (error: any) {
-             toast({ title: "reCAPTCHA Failed", description: error.message, variant: "destructive" });
+             toast({ title: "reCAPTCHA Verification Failed", description: error.message || 'Could not verify reCAPTCHA. Please try again.', variant: "destructive" });
              recaptchaRef.current?.reset();
              setIsSubmitting(false);
              return;
@@ -105,9 +105,11 @@ export default function LoginPage() {
       window.location.href = redirectUrl;
       
     } catch (error: any) {
-      console.error("Login error:", error);
+      console.error("Admin login error:", error);
       let description = "Invalid email or password.";
-      if (error.code !== 'auth/wrong-password' && error.code !== 'auth/invalid-credential') {
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+        description = "Invalid email or password.";
+      } else {
         description = error.message;
       }
       toast({ title: "Login Failed", description, variant: "destructive" });
@@ -138,7 +140,9 @@ export default function LoginPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email</FormLabel>
-                      <FormControl><Input placeholder="you@example.com" {...field} /></FormControl>
+                      <FormControl>
+                        <Input placeholder="you@example.com" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -151,15 +155,34 @@ export default function LoginPage() {
                        <FormLabel>Password</FormLabel>
                        <div className="relative">
                         <FormControl>
-                           <Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            {...field}
+                          />
                         </FormControl>
-                         <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0" onClick={() => setShowPassword(!showPassword)}>
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute inset-y-0 right-0 h-full px-3"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">
+                            {showPassword ? "Hide password" : "Show password"}
+                          </span>
                         </Button>
                       </div>
                       <FormMessage />
                         <div className="text-right">
-                         <Link href="/forgot-password"><span className="text-sm text-primary hover:underline cursor-pointer">Forgot Password?</span></Link>
+                         <Link href="/forgot-password">
+                            <span className="text-sm text-primary hover:underline cursor-pointer">Forgot Password?</span>
+                         </Link>
                       </div>
                     </FormItem>
                   )}
@@ -167,16 +190,28 @@ export default function LoginPage() {
               </div>
               {securitySettings?.enableRecaptcha && securitySettings.recaptchaSiteKey && (
                 <div className="flex justify-center">
-                    <ReCAPTCHA ref={recaptchaRef} sitekey={securitySettings.recaptchaSiteKey} onChange={(v) => setRecaptchaValue(v)} />
+                    <ReCAPTCHA
+                        ref={recaptchaRef}
+                        sitekey={securitySettings.recaptchaSiteKey}
+                        onChange={(value) => setRecaptchaValue(value)}
+                    />
                 </div>
                )}
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Logging in...</> : "Log In"}
+                {isSubmitting ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                        Logging in...
+                    </>
+                ) : "Log In"}
               </Button>
             </form>
           </Form>
           <div className="mt-6 text-center text-sm">
-            Don't have an account? <Link href="/signup" className="font-medium text-primary hover:underline">Sign up</Link>
+            Don't have an account?{" "}
+            <Link href="/signup" className="font-medium text-primary hover:underline">
+              Sign up
+            </Link>
           </div>
         </CardContent>
       </Card>

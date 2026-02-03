@@ -8,11 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Copy, Download, Trash2, PenLine, Wand2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Slider } from '../ui/slider';
 import { generateSampleText } from '@/ai/flows/ai-writer';
 import { Cedarville_Cursive, Dancing_Script, Indie_Flower, Kalam, Marck_Script, Patrick_Hand, Permanent_Marker, Rock_Salt, Sacramento, Caveat, Pacifico, Homemade_Apple, Zeyada } from 'next/font/google';
+import { Input } from '../ui/input';
 
 const cedarville = Cedarville_Cursive({ weight: '400', subsets: ['latin'], variable: '--font-cedarville', display: 'swap' });
 const dancing = Dancing_Script({ subsets: ['latin'], variable: '--font-dancing', display: 'swap' });
