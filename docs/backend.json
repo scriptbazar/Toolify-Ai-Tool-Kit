@@ -1,77 +1,373 @@
-
 {
-    "entities": {
-        "User": {
-            "title": "User",
-            "description": "Represents a user of the application.",
-            "type": "object",
-            "properties": {
-                "uid": { "type": "string" },
-                "email": { "type": "string", "format": "email" },
-                "name": { "type": "string" },
-                "role": { "type": "string", "enum": ["user", "admin"] },
-                "fcmTokens": {
-                    "type": "array",
-                    "description": "An array of Firebase Cloud Messaging (FCM) tokens for sending push notifications to the user's devices.",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": ["uid", "email", "name", "role"]
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the ToolifyAI platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
         },
-        "UserMedia": {
-            "title": "User Media",
-            "description": "Media generated or uploaded by a user.",
-            "type": "object",
-            "properties": {
-                "userId": { "type": "string", "description": "The UID of the user who owns the media." },
-                "type": { "type": "string", "enum": ["ai-generated", "community-chat", "ticket-media"] },
-                "mediaUrl": { "type": "string", "format": "uri" },
-                "prompt": { "type": "string", "description": "The prompt used to generate the media, if applicable." },
-                "createdAt": { "type": "string", "format": "date-time" },
-                "expiresAt": { "type": "string", "format": "date-time" }
-            },
-            "required": ["userId", "type", "mediaUrl", "createdAt", "expiresAt"]
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
         },
-        "ShortenedURL": {
-            "title": "Shortened URL",
-            "description": "Represents a shortened URL mapping.",
-            "type": "object",
-            "properties": {
-                "originalUrl": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "The original, long URL."
-                },
-                "shortId": {
-                    "type": "string",
-                    "description": "The unique short identifier for the URL."
-                },
-                "createdAt": {
-                    "type": "string",
-                    "format": "date-time",
-                    "description": "The timestamp when the short URL was created."
-                }
-            },
-            "required": ["originalUrl", "shortId", "createdAt"]
+        "name": {
+          "type": "string",
+          "description": "User's full name."
+        },
+        "role": {
+          "type": "string",
+          "description": "User's role (guest, free, pro, admin).",
+          "format": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Date and time when the user account was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Date and time when the user account was last updated.",
+          "format": "date-time"
+        },
+        "subscriptionId": {
+          "type": "string",
+          "description": "Reference to Subscription. (Relationship: User 1:1 Subscription)"
         }
+      },
+      "required": [
+        "id",
+        "email",
+        "name",
+        "role",
+        "createdAt",
+        "updatedAt"
+      ]
     },
-    "auth": {
-        "providers": ["anonymous", "google.com"]
-    },
-    "firestore": {
-        "/users/{userId}": {
-            "schema": { "$ref": "#/entities/User" },
-            "description": "Stores public user profile information."
+    "Tool": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tool",
+      "type": "object",
+      "description": "Represents a tool available on the ToolifyAI platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the tool."
         },
-        "/userMedia/{mediaId}": {
-            "schema": { "$ref": "#/entities/UserMedia" },
-            "description": "Stores media files associated with a user."
+        "name": {
+          "type": "string",
+          "description": "Name of the tool."
         },
-        "/shortenedUrls/{shortId}": {
-            "schema": { "$ref": "#/entities/ShortenedURL" },
-            "description": "Stores the mapping between short URL IDs and original URLs."
+        "description": {
+          "type": "string",
+          "description": "Description of the tool."
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the tool (text, PDF, AI, dev, image, SEO, embed tools)."
+        },
+        "isAiTool": {
+          "type": "boolean",
+          "description": "Indicates whether the tool is AI-powered."
+        },
+        "route": {
+          "type": "string",
+          "description": "The route/path for accessing the tool."
+        },
+        "promptTemplateId": {
+          "type": "string",
+          "description": "Reference to PromptTemplate. (Relationship: Tool 1:1 PromptTemplate). Only used for AI Tools."
         }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "category",
+        "isAiTool",
+        "route"
+      ]
+    },
+    "PromptTemplate": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PromptTemplate",
+      "type": "object",
+      "description": "Represents a prompt template for AI-powered tools.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the prompt template."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the prompt template."
+        },
+        "content": {
+          "type": "string",
+          "description": "Content of the prompt template."
+        },
+        "toolId": {
+          "type": "string",
+          "description": "Reference to Tool. (Relationship: Tool 1:1 PromptTemplate)"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "content"
+      ]
+    },
+    "Subscription": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Subscription",
+      "type": "object",
+      "description": "Represents a user's subscription plan.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the subscription."
+        },
+        "planName": {
+          "type": "string",
+          "description": "Name of the subscription plan (e.g., monthly, yearly)."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "Start date of the subscription.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "End date of the subscription.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the subscription (active, inactive, cancelled)."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:1 Subscription)"
+        }
+      },
+      "required": [
+        "id",
+        "planName",
+        "startDate",
+        "endDate",
+        "status"
+      ]
+    },
+    "UsageLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UsageLog",
+      "type": "object",
+      "description": "Represents a log of tool usage by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the usage log."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N UsageLog)"
+        },
+        "toolId": {
+          "type": "string",
+          "description": "Reference to Tool. (Relationship: Tool 1:N UsageLog)"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the tool was used.",
+          "format": "date-time"
+        },
+        "input": {
+          "type": "string",
+          "description": "Input provided to the tool by the user."
+        },
+        "output": {
+          "type": "string",
+          "description": "Output generated by the tool."
+        },
+        "tokensUsed": {
+          "type": "number",
+          "description": "Number of tokens used in case the tool is AI-powered"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "toolId",
+        "timestamp"
+      ]
+    },
+    "Announcement": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Announcement",
+      "type": "object",
+      "description": "Represents an announcement to be displayed on the platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the announcement."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the announcement."
+        },
+        "content": {
+          "type": "string",
+          "description": "Content of the announcement."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Date and time when the announcement was created.",
+          "format": "date-time"
+        },
+        "validUntil": {
+          "type": "string",
+          "description": "Date and time when the announcement is valid until.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "content",
+        "createdAt",
+        "validUntil"
+      ]
     }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. Path-based ownership ensures that only the user or an admin can access this data.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "AdminRole",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Indicates admin role via document existence. No data required in the document itself. Used for role-based access control.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user who is an admin."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/tools/{toolId}",
+        "definition": {
+          "entityName": "Tool",
+          "schema": {
+            "$ref": "#/backend/entities/Tool"
+          },
+          "description": "Stores information about each tool available on the platform. Publicly accessible.",
+          "params": [
+            {
+              "name": "toolId",
+              "description": "The unique identifier for the tool."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/prompt_templates/{promptTemplateId}",
+        "definition": {
+          "entityName": "PromptTemplate",
+          "schema": {
+            "$ref": "#/backend/entities/PromptTemplate"
+          },
+          "description": "Stores prompt templates for AI-powered tools. Publicly accessible.",
+          "params": [
+            {
+              "name": "promptTemplateId",
+              "description": "The unique identifier for the prompt template."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/subscriptions/{subscriptionId}",
+        "definition": {
+          "entityName": "Subscription",
+          "schema": {
+            "$ref": "#/backend/entities/Subscription"
+          },
+          "description": "Stores user subscription information. Limited access based on ownership.",
+          "params": [
+            {
+              "name": "subscriptionId",
+              "description": "The unique identifier for the subscription."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/usage_logs/{usageLogId}",
+        "definition": {
+          "entityName": "UsageLog",
+          "schema": {
+            "$ref": "#/backend/entities/UsageLog"
+          },
+          "description": "Stores usage logs for each user. Path-based ownership ensures only the user or an admin can access these logs.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "usageLogId",
+              "description": "The unique identifier for the usage log."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/announcements/{announcementId}",
+        "definition": {
+          "entityName": "Announcement",
+          "schema": {
+            "$ref": "#/backend/entities/Announcement"
+          },
+          "description": "Stores platform announcements. Publicly accessible.",
+          "params": [
+            {
+              "name": "announcementId",
+              "description": "The unique identifier for the announcement."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support ToolifyAI's requirements, focusing on security, scalability, and maintainability. It leverages denormalization for authorization independence, segregates data based on access needs, and employs consistent access modeling patterns. Key considerations include:\n\n*   **Authorization Independence**: The structure avoids hierarchical authorization dependencies by denormalizing access-related data (e.g., user roles, membership lists) directly into documents where it's needed. This eliminates the need for `get()` calls in security rules, enabling atomic operations and improving security.\n*   **Structural Segregation**: Data with different access requirements are stored in separate collections. This simplifies security rules by ensuring that all documents within a collection share the same authorization logic.\n*   **Access Modeling**: Standardized patterns are applied for authorization, including path-based ownership for user-specific data and membership maps for collaborative entities.\n*   **QAPs**: The structure enables secure list operations by clearly defining ownership and access rights at the collection level.\n*   **Global Roles (DBAC)**: User roles (admin, pro, etc.) are managed through the existence of documents in dedicated collections, making role-based access control straightforward.\n*   **Invariants**: Timestamp fields (createdAt, updatedAt) and relationships are enforced within the security rules to maintain data integrity."
+  }
 }

@@ -1,84 +1,147 @@
-
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
+    /**
+     * TOOLIFYAI SECURITY RULES
+     *
+     * CORE PHILOSOPHY:
+     * This ruleset implements a robust, multi-layered security model for ToolifyAI. It combines
+     * path-based ownership for user profiles and logs with role-based access control (RBAC) via 
+     * a dedicated admin collection. 
+     *
+     * DATA STRUCTURE:
+     * - /users/{userId}: Private user profiles and personal metadata.
+     * - /users/{userId}/usage_logs/{logId}: Private activity history scoped to the user.
+     * - /subscriptions/{subId}: Subscription data linked to users via field-level ownership.
+     * - /tools, /prompt_templates, /announcements: Publicly readable platform content.
+     * - /roles_admin/{userId}: Administrative flag documents for backend authorization.
+     *
+     * KEY SECURITY DECISIONS:
+     * 1. Admin Override: A global `isAdmin()` helper allows designated administrators to manage platform content 
+     *    and view user-specific data for support purposes.
+     * 2. Public Content: Tools, prompt templates, and announcements are accessible to all (including guests) 
+     *    to drive SEO and landing page engagement, while writes are strictly restricted.
+     * 3. Relational Integrity: On document creation, the system enforces that the internal `userId` 
+     *    matches the authenticated user's UID to prevent data spoofing.
+     * 4. Denormalization: Authorization relies on data present within the path or the document itself 
+     *    to ensure performant rule evaluation.
+     */
+
+    // --- Helper Functions ---
+
+    /** @description Checks if the user is authenticated. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** @description Checks if the user is the owner of the resource based on a provided ID. */
     function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+      return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Public user data, anyone can read
+    /** @description Checks if the user has an administrative role document. */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /** @description Validates ownership for existing documents during update/delete. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for user profiles. Users manage their own data; Admins have full access.
+     * @path /users/{userId}
+     * @allow (create) if auth.uid matches userId.
+     * @deny (update) if auth.uid does not match userId and user is not an Admin.
+     * @principle Path-based ownership and relational integrity.
+     */
     match /users/{userId} {
-      allow read: if true;
-      // Only the authenticated user can write to their own document
-      allow write: if isOwner(userId);
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin(); // Users generally don't list other users; Admins can.
+      allow create: if (isOwner(userId) && request.resource.data.id == userId) || isAdmin();
+      allow update: if (isExistingOwner(userId) && request.resource.data.id == resource.data.id) || isAdmin();
+      allow delete: if isAdmin(); // Prevent accidental self-deletion; restrict to Admin.
     }
-    
-    // Anyone can read settings, tools, announcements, blog content, etc.
-    match /settings/{docId} {
-      allow read: if true;
-      // Writing to settings should be restricted, e.g. to admins.
-      // This is handled by server-side logic (Admin SDK).
-      allow write: if false; 
+
+    /**
+     * @description Metadata collection to define admin privileges.
+     * @path /roles_admin/{userId}
+     * @allow (get) if user is signed in (for existence checks).
+     * @deny (write) Any non-admin attempt to modify roles.
+     * @principle RBAC via document existence.
+     */
+    match /roles_admin/{userId} {
+      allow get: if isSignedIn();
+      allow list, create, update, delete: if isAdmin();
     }
-    
+
+    /**
+     * @description Publicly available tools. Only admins can modify the tool library.
+     * @path /tools/{toolId}
+     * @allow (get, list) for any visitor.
+     * @deny (write) for any non-admin.
+     * @principle Public read with admin-only writes.
+     */
     match /tools/{toolId} {
-      allow read: if true;
-      allow write: if false; // Managed by Admin SDK
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
     }
-    
+
+    /**
+     * @description AI prompt templates. Public for tool execution, writeable by admins.
+     * @path /prompt_templates/{promptTemplateId}
+     * @allow (get, list) for any visitor.
+     * @deny (write) for any non-admin.
+     * @principle Public read with admin-only writes.
+     */
+    match /prompt_templates/{promptTemplateId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description User subscriptions. Access is controlled via the userId field.
+     * @path /subscriptions/{subscriptionId}
+     * @allow (get) if resource.data.userId matches auth.uid.
+     * @deny (create) if request.resource.data.userId does not match auth.uid.
+     * @principle Field-based ownership for top-level collections.
+     */
+    match /subscriptions/{subscriptionId} {
+      allow get: if (resource != null && isOwner(resource.data.userId)) || isAdmin();
+      allow list: if isAdmin(); // Subscriptions are not typically listed by users.
+      allow create: if (isOwner(request.resource.data.userId)) || isAdmin();
+      allow update: if (resource != null && isOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Private user activity logs. Nested under the user's path for security.
+     * @path /users/{userId}/usage_logs/{usageLogId}
+     * @allow (create) if the user is the owner of the parent path.
+     * @deny (get) if the user is not the owner or an admin.
+     * @principle Path-scoped private subcollection.
+     */
+    match /users/{userId}/usage_logs/{usageLogId} {
+      allow get, list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if (isExistingOwner(userId) && request.resource.data.userId == resource.data.userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Platform announcements visible to all users.
+     * @path /announcements/{announcementId}
+     * @allow (get, list) for any visitor.
+     * @deny (write) for any non-admin.
+     * @principle Public read with admin-only writes.
+     */
     match /announcements/{announcementId} {
-        allow read: if true;
-        // readBy is updated by any authenticated user, so allow write
-        allow write: if request.auth != null; 
-    }
-    
-    match /blogPosts/{postId} {
-        allow read: if true;
-        allow write: if false; // Managed by Admin SDK
-    }
-
-    match /blogCategories/{categoryId} {
-        allow read: if true;
-        allow write: if false; // Managed by Admin SDK
-    }
-    
-    match /reviews/{reviewId} {
-        allow read: if true;
-        allow create: if request.auth != null; // Any logged-in user can create
-        allow update, delete: if false; // Managed by Admin SDK
-    }
-
-    match /toolRequests/{requestId} {
-      allow read: if true;
-      allow create: if request.auth != null; // Allow any logged-in user to create
-      allow update, delete: if false; // Managed by Admin SDK
-    }
-    
-    // User-specific subcollections
-    match /users/{userId}/{subcollection}/{docId} {
-        allow read, write, delete: if isOwner(userId);
-    }
-    
-    // User media can only be read by the owner
-    match /userMedia/{mediaId} {
-      allow read, delete: if isOwner(resource.data.userId);
-      allow create: if request.auth != null;
-    }
-    
-    // Shortened URLs can be read by anyone (for redirection) but not listed
-    match /shortenedUrls/{shortId} {
-      allow get: if true; // Allows fetching a single document by ID
-      allow list, create, update, delete: if false; // Disallow listing/writing
-    }
-    
-     // Comments on blog posts
-    match /comments/{commentId} {
-      allow read: if true; // Anyone can read approved comments
-      allow create: if request.auth != null;
-      allow update, delete: if false; // Managed by Admin SDK
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
     }
   }
 }
