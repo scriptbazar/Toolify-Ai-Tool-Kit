@@ -4,11 +4,11 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function SettingsRedirectPage() {
+export default function DashboardSettingsRedirect() {
     const router = useRouter();
     
     useEffect(() => {
-        // Resolve conflict by redirecting to the main settings page
+        // Resolve conflict by redirecting to the main unified settings page
         router.replace('/settings');
     }, [router]);
 

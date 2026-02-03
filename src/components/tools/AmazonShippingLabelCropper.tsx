@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { ShippingLabelCropper } from './ShippingLabelCropper';
 
