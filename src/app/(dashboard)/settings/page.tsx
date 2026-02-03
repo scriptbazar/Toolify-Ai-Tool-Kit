@@ -1,12 +1,14 @@
+
 'use client';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function SettingsOldPage() {
+export default function SettingsRedirectPage() {
     const router = useRouter();
     
     useEffect(() => {
+        // Resolve conflict by redirecting to the main settings page
         router.replace('/settings');
     }, [router]);
 

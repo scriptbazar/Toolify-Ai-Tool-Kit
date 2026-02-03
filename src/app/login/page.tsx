@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -21,7 +22,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { getSettings } from "@/ai/flows/settings-management";
 import type { SecuritySettings } from '@/ai/flows/settings-management.types';
 import { verifyRecaptcha } from '@/ai/flows/verify-recaptcha';
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/context/AuthContext";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -65,28 +66,18 @@ export default function LoginPage() {
 
     if (securitySettings?.enableRecaptcha) {
         if (!recaptchaValue) {
-            toast({
-                title: "Verification Failed",
-                description: "Please complete the reCAPTCHA verification.",
-                variant: "destructive",
-            });
+            toast({ title: "Verification Failed", description: "Please complete reCAPTCHA.", variant: "destructive" });
             setIsSubmitting(false);
             return;
         }
         try {
             const verification = await verifyRecaptcha(recaptchaValue);
-            if (!verification.success) {
-                throw new Error(verification.message);
-            }
+            if (!verification.success) throw new Error(verification.message);
         } catch (error: any) {
-             toast({
-                title: "reCAPTCHA Verification Failed",
-                description: error.message || 'Could not verify reCAPTCHA. Please try again.',
-                variant: "destructive",
-            });
-            recaptchaRef.current?.reset();
-            setIsSubmitting(false);
-            return;
+             toast({ title: "reCAPTCHA Failed", description: error.message, variant: "destructive" });
+             recaptchaRef.current?.reset();
+             setIsSubmitting(false);
+             return;
         }
     }
 
@@ -94,40 +85,32 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // CRITICAL: Force synchronization of the session cookie and wait for it
+      // CRITICAL: Synchronize session and wait before redirecting
       const synced = await syncSession(user);
       if (!synced) {
           throw new Error('Failed to synchronize session with server. Please try again.');
       }
 
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnap = await getDoc(userDocRef);
-
-      toast({
-        title: "Logged in successfully!",
-        description: "Redirecting to your dashboard...",
-      });
-      
       await logUserLogin(user.uid);
       
-      const redirectUrl = searchParams.get('redirectUrl') || (userDocSnap.exists() && userDocSnap.data().role === 'admin' ? '/admin/dashboard' : '/dashboard');
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      const role = userDocSnap.exists() ? userDocSnap.data().role : 'user';
 
-      // Use window.location.href for a clean reload to ensure all state/cookies are fresh
+      toast({ title: "Logged in successfully!", description: "Redirecting to your dashboard..." });
+      
+      const redirectUrl = searchParams.get('redirectUrl') || (role === 'admin' ? '/admin/dashboard' : '/dashboard');
+      
+      // Perform a clean reload to ensure server-side middleware picks up the new cookie
       window.location.href = redirectUrl;
       
     } catch (error: any) {
       console.error("Login error:", error);
-       let description = "There was a problem with your request.";
-      if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        description = "Invalid email or password.";
-      } else {
+      let description = "Invalid email or password.";
+      if (error.code !== 'auth/wrong-password' && error.code !== 'auth/invalid-credential') {
         description = error.message;
       }
-      toast({
-        title: "Uh oh! Something went wrong.",
-        description,
-        variant: "destructive",
-      });
+      toast({ title: "Login Failed", description, variant: "destructive" });
       setIsSubmitting(false);
     } finally {
         recaptchaRef.current?.reset();
@@ -155,9 +138,7 @@ export default function LoginPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="you@example.com" {...field} />
-                      </FormControl>
+                      <FormControl><Input placeholder="you@example.com" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -170,36 +151,15 @@ export default function LoginPage() {
                        <FormLabel>Password</FormLabel>
                        <div className="relative">
                         <FormControl>
-                           <Input
-                            type={showPassword ? "text" : "password"}
-                            placeholder="••••••••"
-                            {...field}
-                          />
+                           <Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
                         </FormControl>
-                         <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute inset-y-0 right-0 h-full px-3"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                          <span className="sr-only">
-                            {showPassword ? "Hide password" : "Show password"}
-                          </span>
+                         <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0" onClick={() => setShowPassword(!showPassword)}>
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                       </div>
                       <FormMessage />
                         <div className="text-right">
-                         <Link href="/forgot-password" passHref>
-                          <span className="text-sm text-primary hover:underline cursor-pointer">
-                            Forgot Password?
-                          </span>
-                        </Link>
+                         <Link href="/forgot-password"><span className="text-sm text-primary hover:underline cursor-pointer">Forgot Password?</span></Link>
                       </div>
                     </FormItem>
                   )}
@@ -207,11 +167,7 @@ export default function LoginPage() {
               </div>
               {securitySettings?.enableRecaptcha && securitySettings.recaptchaSiteKey && (
                 <div className="flex justify-center">
-                    <ReCAPTCHA
-                        ref={recaptchaRef}
-                        sitekey={securitySettings.recaptchaSiteKey}
-                        onChange={(value) => setRecaptchaValue(value)}
-                    />
+                    <ReCAPTCHA ref={recaptchaRef} sitekey={securitySettings.recaptchaSiteKey} onChange={(v) => setRecaptchaValue(v)} />
                 </div>
                )}
               <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -220,10 +176,7 @@ export default function LoginPage() {
             </form>
           </Form>
           <div className="mt-6 text-center text-sm">
-            Don't have an account?{" "}
-            <Link href="/signup" className="font-medium text-primary hover:underline">
-              Sign up
-            </Link>
+            Don't have an account? <Link href="/signup" className="font-medium text-primary hover:underline">Sign up</Link>
           </div>
         </CardContent>
       </Card>
