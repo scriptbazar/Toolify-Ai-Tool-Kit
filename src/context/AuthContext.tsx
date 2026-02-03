@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
@@ -37,8 +36,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [userData, setUserData] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const syncSession = async () => {
-    const currentUser = auth.currentUser;
+  const syncSession = async (forceUser?: FirebaseUser) => {
+    const currentUser = forceUser || auth.currentUser;
     if (currentUser) {
       try {
         const token = await currentUser.getIdToken(true);
@@ -55,10 +54,11 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
       if (firebaseUser) {
         setUser(firebaseUser);
-        // Force session sync immediately on auth state change
-        await syncSession();
+        // CRITICAL: Ensure session is synced with server before letting app proceed
+        await syncSession(firebaseUser);
 
         try {
             const userDocRef = doc(db, "users", firebaseUser.uid);
@@ -72,14 +72,12 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
             console.error("AuthContext: Firestore fetch error:", error);
             setUserData(null);
-        } finally {
-            setLoading(false);
         }
       } else {
         setUser(null);
         setUserData(null);
-        setLoading(false);
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();

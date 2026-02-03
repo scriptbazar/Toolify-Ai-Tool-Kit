@@ -1,4 +1,3 @@
-
 'use client';
 
 import { PDFDocument } from 'pdf-lib';
@@ -37,7 +36,7 @@ export function AmazonShippingLabelCropper() {
   return (
     <ShippingLabelCropper
       platform="Amazon"
-      description={'Upload the standard 8.5" x 11" PDF label you downloaded from Amazon Seller Central.'}
+      description="Upload the standard 8.5 inch x 11 inch PDF label you downloaded from Amazon Seller Central."
       cropFunction={cropAmazonLabel}
     />
   );

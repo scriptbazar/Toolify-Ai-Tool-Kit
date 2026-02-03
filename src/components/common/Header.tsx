@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -184,18 +182,24 @@ export default function Header() {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => router.push(dashboardHref)}>
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      <span>Dashboard</span>
+                    <DropdownMenuItem asChild>
+                      <Link href={dashboardHref}>
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
+                      </Link>
                     </DropdownMenuItem>
-                     <DropdownMenuItem onClick={() => router.push(`/settings`)}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                     <DropdownMenuItem asChild>
+                      <Link href="/settings">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </Link>
                     </DropdownMenuItem>
                     {!isAdmin && (
-                       <DropdownMenuItem onClick={() => router.push(`/my-favorites`)}>
-                        <Star className="mr-2 h-4 w-4" />
-                        <span>My Favorites</span>
+                       <DropdownMenuItem asChild>
+                        <Link href="/my-favorites">
+                          <Star className="mr-2 h-4 w-4" />
+                          <span>My Favorites</span>
+                        </Link>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />

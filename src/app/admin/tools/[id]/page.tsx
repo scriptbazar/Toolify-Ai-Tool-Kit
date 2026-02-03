@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -23,7 +22,7 @@ export default function EditToolPage() {
     useEffect(() => {
         async function fetchTool() {
             if (id) {
-                const allTools = await getTools({ slug: id });
+                const allTools = await getTools({ slug: id, status: 'all' });
                 const foundTool = allTools.length > 0 ? allTools[0] : null;
                 if (foundTool) {
                     setTool(foundTool);
