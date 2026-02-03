@@ -42,7 +42,7 @@ export const toolCategories: ToolCategoryDetails[] = [
     Icon: ImageIcon,
     color: { bg: 'bg-rose-500/20', text: 'text-rose-600', border: 'border-rose-500/40' }
   },
-   {
+  {
     id: 'video',
     name: 'Video Tools',
     description: 'Process and edit video content.',
@@ -70,7 +70,7 @@ export const toolCategories: ToolCategoryDetails[] = [
     Icon: Component,
     color: { bg: 'bg-violet-500/20', text: 'text-violet-600', border: 'border-violet-500/40' }
   },
-   {
+  {
     id: 'ecommerce',
     name: 'Ecommerce Tools',
     description: 'Utilities for your online business.',

@@ -31,7 +31,6 @@ const formSchema = z.object({
 
 export default function LoginPage() {
   const { toast } = useToast();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { syncSession } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -85,7 +84,7 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // Force a clean session sync
+      // Ensure session cookie is set on the server
       const synced = await syncSession(user);
       if (!synced) {
           throw new Error('Failed to synchronize session with server. Please try again.');

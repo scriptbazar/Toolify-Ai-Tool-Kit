@@ -43,7 +43,6 @@ const formSchema = z.object({
 
 export default function SignupPage() {
   const { toast } = useToast();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { syncSession } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -105,7 +104,7 @@ export default function SignupPage() {
 
       await sendEmailVerification(user);
 
-      // CRITICAL: Synchronize session and wait before redirecting
+      // Synchronize session cookie before redirection
       const synced = await syncSession(user);
       if (!synced) {
           throw new Error('Failed to synchronize session with server.');
