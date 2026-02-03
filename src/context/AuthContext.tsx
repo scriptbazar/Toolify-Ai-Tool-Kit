@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
@@ -39,7 +40,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       if (firebaseUser) {
         setUser(firebaseUser);
         
-        // Sync session cookie immediately to prevent middleware redirects
+        // Ensure session cookie is synced when auth state is determined
         try {
           const token = await firebaseUser.getIdToken();
           await fetch('/api/auth/session-login', {

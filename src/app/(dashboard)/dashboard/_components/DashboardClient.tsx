@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -26,7 +27,7 @@ const AnnouncementItem = ({ announcement }: { announcement: Announcement }) => (
             <h4 className="font-semibold">{announcement.title}</h4>
             <div className="flex items-center gap-2">
                 {announcement.isNew && <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />}
-                <p className="text-xs text-muted-foreground">{new Date(announcement.createdAt).toLocaleDateString()}</p>
+                <p className="text-xs text-muted-foreground">{announcement.createdAt ? new Date(announcement.createdAt).toLocaleDateString() : 'Recent'}</p>
             </div>
         </div>
         <p className="text-sm text-muted-foreground mt-2 mb-4">{announcement.content}</p>
@@ -45,7 +46,7 @@ export function DashboardClient({ welcomeMessage, profile, plan, stats, announce
   
   const handleOpenWhatsNew = async () => {
     setIsWhatsNewOpen(true);
-    const newAnnouncements = announcements?.filter(a => a.isNew) || [];
+    const newAnnouncements = announcements?.filter(a => a?.isNew) || [];
     if (newAnnouncements.length > 0) {
       const newIds = newAnnouncements.map(a => a.id);
       await markAnnouncementsAsRead(uid, newIds);
@@ -54,7 +55,7 @@ export function DashboardClient({ welcomeMessage, profile, plan, stats, announce
     }
   };
 
-  const hasNewAnnouncements = announcements?.some(a => a.isNew) || false;
+  const hasNewAnnouncements = announcements?.some(a => a?.isNew) || false;
   
   return (
     <div className="space-y-6">
