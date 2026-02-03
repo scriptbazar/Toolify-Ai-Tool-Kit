@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,6 +11,8 @@ import * as Icons from 'lucide-react';
 import { Button } from '../ui/button';
 import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { toolCategories } from '@/lib/constants';
+import { cn } from '@/lib/utils';
 
 export function RecentlyUsedTools() {
     const { user } = useAuth();
@@ -75,10 +75,15 @@ export function RecentlyUsedTools() {
             <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {recentTools.map(tool => {
                     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
+                    const categoryInfo = toolCategories.find(c => c.id === tool.category);
+                    const iconColors = categoryInfo?.color || { bg: 'bg-primary/10', text: 'text-primary' };
+
                     return (
                         <Link key={tool.slug} href={`/tools/${tool.slug}`} className="group">
                             <Card className="h-full flex flex-col items-center justify-center p-4 text-center hover:bg-muted transition-colors">
-                                <Icon className="h-8 w-8 mb-2 text-primary" />
+                                <div className={cn("p-3 rounded-full mb-2 transition-colors", iconColors.bg)}>
+                                    <Icon className={cn("h-6 w-6 transition-colors", iconColors.text)} />
+                                </div>
                                 <p className="text-sm font-medium">{tool.name}</p>
                             </Card>
                         </Link>

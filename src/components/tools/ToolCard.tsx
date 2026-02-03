@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, forwardRef, type MouseEvent } from 'react';
@@ -11,6 +10,7 @@ import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
+import { toolCategories } from '@/lib/constants';
 
 type ToolCardProps = {
   tool: Tool;
@@ -35,12 +35,15 @@ const getStatusBadge = (status: Tool['status']) => {
 }
 
 export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog }: ToolCardProps) {
-  const { name, description, slug, status, plan } = tool;
+  const { name, description, slug, status, plan, category } = tool;
   const { user } = useAuth();
   const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
   const statusBadge = getStatusBadge(status);
   const { toast } = useToast();
   const router = useRouter();
+
+  const categoryInfo = toolCategories.find(c => c.id === category);
+  const iconColors = categoryInfo?.color || { bg: 'bg-primary/10', text: 'text-primary' };
 
   const isClickable = status === 'Active' || status === 'New Version' || status === 'Beta';
   
@@ -96,8 +99,8 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
                 <Badge className="shadow-md">Pro</Badge>
             </div>
         )}
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4 transition-colors group-hover:bg-primary/20">
-          <Icon className="h-6 w-6 text-primary transition-transform group-hover:animate-bounce" />
+        <div className={cn("flex h-12 w-12 items-center justify-center rounded-full mb-4 transition-colors group-hover:opacity-80", iconColors.bg)}>
+          <Icon className={cn("h-6 w-6 transition-transform group-hover:animate-bounce", iconColors.text)} />
         </div>
         <div className="flex-grow">
             <h3 className="text-sm font-semibold mb-1">{name}</h3>

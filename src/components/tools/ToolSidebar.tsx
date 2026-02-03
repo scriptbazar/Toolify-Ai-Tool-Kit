@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
@@ -10,6 +9,8 @@ import { getTools } from '@/ai/flows/tool-management';
 import { getPosts } from '@/ai/flows/blog-management';
 import { getSettings } from '@/ai/flows/settings-management';
 import { unstable_cache as cache } from 'next/cache';
+import { toolCategories } from '@/lib/constants';
+import { cn } from '@/lib/utils';
 
 
 const SidebarWidget = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -60,10 +61,13 @@ export async function ToolSidebar({ adSettings, currentToolSlug }: ToolSidebarPr
                     <ul className="space-y-2">
                         {popularTools.map(t => {
                             const ToolIcon = (Icons as any)[t.icon] || Icons.HelpCircle;
+                            const categoryInfo = toolCategories.find(c => c.id === t.category);
                             return (
                             <li key={t.id}>
                                 <Link href={`/tools/${t.slug}`} className="flex items-center gap-3 text-base text-muted-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-muted">
-                                    <ToolIcon className="h-5 w-5" />
+                                    <div className={cn("p-1.5 rounded-md", categoryInfo?.color?.bg || "bg-muted")}>
+                                        <ToolIcon className={cn("h-4 w-4", categoryInfo?.color?.text || "text-muted-foreground")} />
+                                    </div>
                                     <span>{t.name}</span>
                                 </Link>
                             </li>

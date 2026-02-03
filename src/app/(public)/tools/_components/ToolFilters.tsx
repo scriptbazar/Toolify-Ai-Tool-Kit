@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useMemo, useCallback } from 'react';
@@ -9,6 +7,7 @@ import { Search, LayoutGrid } from 'lucide-react';
 import { toolCategories } from '@/lib/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type Tool } from '@/ai/flows/tool-management.types';
+import { cn } from '@/lib/utils';
 
 interface ToolFiltersProps {
   tools: Tool[];
@@ -73,7 +72,7 @@ export function ToolFilters({ tools }: ToolFiltersProps) {
                     {toolCategories.map(cat => (
                         <SelectItem key={cat.id} value={cat.id}>
                             <div className="flex items-center gap-2">
-                            <cat.Icon className="h-4 w-4" />
+                            <cat.Icon className={cn("h-4 w-4", cat.color?.text)} />
                             {cat.name} ({categoryCounts[cat.id] || 0})
                             </div>
                         </SelectItem>
