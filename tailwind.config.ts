@@ -1,4 +1,3 @@
-
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -24,7 +23,6 @@ export default {
         indie: 'var(--font-indie)',
         kalam: 'var(--font-kalam)',
         marck: 'var(--font-marck)',
-        nanum: 'var(--font-nanum)',
         patrick: 'var(--font-patrick)',
         permanent: 'var(--font-permanent)',
         rocksalt: 'var(--font-rocksalt)',
