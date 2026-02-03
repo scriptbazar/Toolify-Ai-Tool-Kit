@@ -46,16 +46,16 @@ export function DashboardClient({ welcomeMessage, profile, plan, stats, announce
   
   const handleOpenWhatsNew = async () => {
     setIsWhatsNewOpen(true);
-    const newAnnouncements = announcements?.filter(a => a?.isNew) || [];
+    const newAnnouncements = (announcements || []).filter(a => a?.isNew);
     if (newAnnouncements.length > 0) {
       const newIds = newAnnouncements.map(a => a.id);
       await markAnnouncementsAsRead(uid, newIds);
       // Optimistically update the UI
-      setAnnouncements(prev => prev.map(a => ({ ...a, isNew: false })));
+      setAnnouncements(prev => (prev || []).map(a => ({ ...a, isNew: false })));
     }
   };
 
-  const hasNewAnnouncements = announcements?.some(a => a?.isNew) || false;
+  const hasNewAnnouncements = (announcements || []).some(a => a?.isNew);
   
   return (
     <div className="space-y-6">
@@ -183,7 +183,7 @@ export function DashboardClient({ welcomeMessage, profile, plan, stats, announce
             </DialogHeader>
             <ScrollArea className="h-[60vh] -mx-6 px-6">
                 <div className="space-y-4 py-4">
-                  {announcements && announcements.length > 0 ? (
+                  {(announcements || []).length > 0 ? (
                     announcements.map(announcement => (
                       <AnnouncementItem key={announcement.id} announcement={announcement} />
                     ))
