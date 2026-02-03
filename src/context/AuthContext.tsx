@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
@@ -21,6 +20,7 @@ interface AuthContextType {
   userData: AppUser | null;
   isAdmin: boolean;
   loading: boolean;
+  syncSession: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -28,6 +28,7 @@ export const AuthContext = createContext<AuthContextType>({
   userData: null,
   isAdmin: false,
   loading: true,
+  syncSession: async () => {},
 });
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
@@ -35,22 +36,27 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [userData, setUserData] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const syncSession = async () => {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      try {
+        const token = await currentUser.getIdToken(true);
+        await fetch('/api/auth/session-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+      } catch (e) {
+        console.error("AuthContext: Session sync error", e);
+      }
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        
-        // Ensure session sync
-        try {
-          const token = await firebaseUser.getIdToken();
-          await fetch('/api/auth/session-login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token }),
-          });
-        } catch (e) {
-          console.error("AuthContext: Session sync error", e);
-        }
+        await syncSession();
 
         try {
             const userDocRef = doc(db, "users", firebaseUser.uid);
@@ -80,7 +86,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const isAdmin = userData?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, userData, isAdmin, loading }}>
+    <AuthContext.Provider value={{ user, userData, isAdmin, loading, syncSession }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { PDFDocument } from 'pdf-lib';
@@ -6,19 +5,14 @@ import { ShippingLabelCropper } from './ShippingLabelCropper';
 
 const cropAmazonLabel = async (pdfDoc: PDFDocument): Promise<PDFDocument> => {
     const newPdfDoc = await PDFDocument.create();
-    if (pdfDoc.getPageCount() > 1) {
-        // Potentially handle multi-page PDFs differently if needed
-    }
-
     const firstPage = pdfDoc.getPage(0);
     const { width, height } = firstPage.getSize();
     
     const labelHeight = height / 2;
     const labelWidth = width;
     
-    // Crop and add top label
     const [topEmbeddedPage] = await newPdfDoc.embedPdf(pdfDoc, [0]);
-    const topPage = newPdfDoc.addPage([4 * 72, 6 * 72]); // 4x6 inches
+    const topPage = newPdfDoc.addPage([4 * 72, 6 * 72]);
     topPage.drawPage(topEmbeddedPage, {
       x: - (labelWidth - (4 * 72)) / 2,
       y: - (height - labelHeight) - (labelHeight - (6*72))/2,
@@ -26,7 +20,6 @@ const cropAmazonLabel = async (pdfDoc: PDFDocument): Promise<PDFDocument> => {
       height: height
     });
     
-    // Crop and add bottom label
     const [bottomEmbeddedPage] = await newPdfDoc.embedPdf(pdfDoc, [0]);
     const bottomPage = newPdfDoc.addPage([4 * 72, 6 * 72]);
     bottomPage.drawPage(bottomEmbeddedPage, {
@@ -43,7 +36,7 @@ export function AmazonShippingLabelCropper() {
   return (
     <ShippingLabelCropper
       platform="Amazon"
-      description="Upload the standard 8.5\" x 11\" PDF label you downloaded from Amazon Seller Central."
+      description="Upload the standard 8.5 x 11 inch PDF label you downloaded from Amazon Seller Central."
       cropFunction={cropAmazonLabel}
     />
   );

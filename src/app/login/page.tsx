@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -93,9 +92,8 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      const token = await user.getIdToken();
+      const token = await user.getIdToken(true);
       
-      // CRITICAL: Wait for session cookie to be set on the server
       const sessionResponse = await fetch('/api/auth/session-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
