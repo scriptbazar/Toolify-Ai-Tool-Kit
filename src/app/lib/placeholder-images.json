@@ -1,0 +1,30 @@
+{
+  "notFound": {
+    "src": "https://picsum.photos/seed/404/800/600",
+    "width": 800,
+    "height": 600,
+    "hint": "abstract texture"
+  },
+  "aboutUs": {
+    "mission": {
+      "src": "https://picsum.photos/seed/mission/800/600",
+      "width": 800,
+      "height": 600,
+      "hint": "team collaboration"
+    },
+    "story": {
+      "src": "https://picsum.photos/seed/story/800/600",
+      "width": 800,
+      "height": 600,
+      "hint": "garage startup"
+    }
+  },
+  "blog": {
+    "default": {
+      "src": "https://picsum.photos/seed/blog/600/400",
+      "width": 600,
+      "height": 400,
+      "hint": "blog post"
+    }
+  }
+}

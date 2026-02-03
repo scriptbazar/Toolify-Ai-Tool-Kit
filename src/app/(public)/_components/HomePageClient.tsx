@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -7,16 +6,14 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Star } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { CategoryCard } from '@/components/tools/CategoryCard';
-import { type Tool } from '@/ai/flows/tool-management.types';
-import { type Review } from '@/ai/flows/review-management.types';
 import { type Post } from '@/ai/flows/blog-management.types';
+import { type Review } from '@/ai/flows/review-management.types';
 import { type HomepageSettings } from '@/ai/flows/settings-management.types';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
+import { placeholderImages } from '@/lib/placeholder-images';
 
 const Testimonials = dynamic(() => import('@/app/(public)/_components/Testimonials').then(mod => mod.Testimonials), {
   loading: () => <Skeleton className="h-96 w-full" />,
@@ -146,8 +143,8 @@ export function HomePageClient({ testimonials, steps, features, latestPosts }: H
                   category={post.category}
                   title={post.title}
                   description={post.content.substring(0, 100) + '...'}
-                  imageUrl={post.imageUrl || 'https://picsum.photos/seed/blog/600/400'}
-                  imageHint={post.imageHint || 'blog post image'}
+                  imageUrl={post.imageUrl || placeholderImages.blog.default.src}
+                  imageHint={post.imageHint || placeholderImages.blog.default.hint}
                   href={`/blog/${post.slug}`}
                 />
               ))}

@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -9,6 +8,7 @@ import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
+import { headers } from 'next/headers';
 
 const CreateShortUrlInputSchema = z.object({
   originalUrl: z.string().url('Please provide a valid URL.'),
@@ -37,7 +37,7 @@ export async function createShortUrl(input: CreateShortUrlInput): Promise<Create
     }
     
     const { originalUrl } = CreateShortUrlInputSchema.parse(input);
-    const shortId = nanoid(7); // Generate a 7-character unique ID
+    const shortId = nanoid(7); 
     const shortUrlRef = adminDb.collection('shortenedUrls').doc(shortId);
 
     await shortUrlRef.set({
@@ -46,7 +46,9 @@ export async function createShortUrl(input: CreateShortUrlInput): Promise<Create
       createdAt: FieldValue.serverTimestamp(),
     });
     
-    const baseUrl = 'https://toolifyai.in';
+    const host = headers().get('host') || 'toolifyai.in';
+    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+    const baseUrl = `${protocol}://${host}`;
     const shortUrl = `${baseUrl}/s/${shortId}`;
 
     return { shortUrl };

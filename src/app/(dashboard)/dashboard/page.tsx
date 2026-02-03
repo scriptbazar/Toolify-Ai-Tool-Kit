@@ -11,12 +11,16 @@ import type { AppSettings } from '@/ai/flows/settings-management.types';
 import type { Announcement } from '@/ai/flows/announcement-flow.types';
 import { Loader2 } from 'lucide-react';
 
+/**
+ * User Dashboard Page - Client Component
+ * Handles data fetching for the dashboard overview.
+ */
 export default function UserDashboard() {
   const { user, userData, loading: authLoading } = useAuth();
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [stats, setStats] = useState({ toolsUsed: 0, referrals: 0 });
-  const [loading, setLoading] = useState(true);
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
@@ -39,17 +43,19 @@ export default function UserDashboard() {
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
-        setLoading(false);
+        setIsDataLoading(false);
       }
     }
 
     if (!authLoading && user) {
       fetchData();
+    } else if (!authLoading && !user) {
+      setIsDataLoading(false);
     }
   }, [user, authLoading]);
 
-  // The parent layout handles authentication. If we are here, we are authenticated or loading.
-  if (authLoading || (loading && user)) {
+  // Loading State
+  if (authLoading || (isDataLoading && user)) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -58,8 +64,14 @@ export default function UserDashboard() {
     );
   }
 
-  // Safe fallback if user is somehow null despite layout checks
-  if (!user) return null;
+  // Not Logged In Fallback (Middleware should prevent this, but we handle it just in case)
+  if (!user) {
+    return (
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Please log in to view your dashboard.</p>
+      </div>
+    );
+  }
 
   const userPlan = settings?.plan?.plans.find(p => p.id === userData?.planId) || 
                    settings?.plan?.plans.find(p => p.id === 'free') || null;

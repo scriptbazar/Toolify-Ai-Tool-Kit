@@ -1,4 +1,3 @@
-
 import { getPosts, type Post } from '@/ai/flows/blog-management';
 import { getTools, type Tool } from '@/ai/flows/tool-management';
 import { getSettings } from '@/ai/flows/settings-management';
@@ -10,7 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AdPlaceholder } from '@/components/common/AdPlaceholder';
 import * as Icons from 'lucide-react';
-import { type AppSettings } from '@/ai/flows/settings-management.types';
+import { placeholderImages } from '@/lib/placeholder-images';
 
 const SidebarWidget = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <Card>
@@ -74,17 +73,15 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                             </div>
                         </div>
                     </header>
-                    {post.imageUrl && (
-                        <div className="relative aspect-video w-full mb-8 rounded-lg overflow-hidden">
-                            <Image
-                                src={post.imageUrl}
-                                alt={post.title}
-                                fill
-                                className="object-cover"
-                                data-ai-hint={post.imageHint || 'blog post image'}
-                            />
-                        </div>
-                    )}
+                    <div className="relative aspect-video w-full mb-8 rounded-lg overflow-hidden">
+                        <Image
+                            src={post.imageUrl || placeholderImages.blog.default.src}
+                            alt={post.title}
+                            fill
+                            className="object-cover"
+                            data-ai-hint={post.imageHint || placeholderImages.blog.default.hint}
+                        />
+                    </div>
                     <AdPlaceholder adSlotId="blog-post-in-content-start" adSettings={settings.advertisement ?? null} className="mb-6" />
                     <div
                         className="prose prose-lg dark:prose-invert max-w-none"

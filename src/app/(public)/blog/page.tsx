@@ -1,10 +1,9 @@
-
-
 import { Button } from '@/components/ui/button';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getPosts, type Post } from '@/ai/flows/blog-management';
 import Link from 'next/link';
+import { placeholderImages } from '@/lib/placeholder-images';
 
 const POSTS_PER_PAGE = 6;
 
@@ -39,8 +38,8 @@ export default async function BlogPage({ searchParams }: { searchParams?: { page
                             category={post.category}
                             title={post.title}
                             description={post.content.substring(0, 100) + '...'}
-                            imageUrl={post.imageUrl || 'https://picsum.photos/600/400'}
-                            imageHint={post.imageHint || 'blog post'}
+                            imageUrl={post.imageUrl || placeholderImages.blog.default.src}
+                            imageHint={post.imageHint || placeholderImages.blog.default.hint}
                             href={`/blog/${post.slug}`}
                         />
                     ))}

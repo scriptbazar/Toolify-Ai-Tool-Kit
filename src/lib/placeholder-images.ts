@@ -1,25 +1,4 @@
-
+import placeholderData from '@/app/lib/placeholder-images.json';
 import { type PlaceholderImages } from '@/ai/flows/settings-management.types';
 
-export const placeholderImages: PlaceholderImages = {
-    "notFound": {
-        "src": "https://picsum.photos/seed/404/800/600",
-        "width": 800,
-        "height": 600,
-        "hint": "abstract texture"
-    },
-    "aboutUs": {
-        "mission": {
-            "src": "https://picsum.photos/seed/mission/800/600",
-            "width": 800,
-            "height": 600,
-            "hint": "team collaboration"
-        },
-        "story": {
-            "src": "https://picsum.photos/seed/story/800/600",
-            "width": 800,
-            "height": 600,
-            "hint": "garage startup"
-        }
-    }
-}
+export const placeholderImages: PlaceholderImages = placeholderData as any;
