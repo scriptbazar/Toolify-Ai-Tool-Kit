@@ -1,7 +1,8 @@
+
 'use client';
 
 import dynamic from 'next/dynamic';
-import React, { FC } from 'react';
+import * as React from 'react';
 import { Loader2 } from 'lucide-react';
 
 const LoadingComponent = () => (
@@ -10,7 +11,7 @@ const LoadingComponent = () => (
   </div>
 );
 
-export const slugToComponentMap: Record<string, FC<any>> = {
+export const slugToComponentMap: Record<string, React.FC<any>> = {
   'advance-text-cleaner': dynamic(() => import('@/components/tools/AdvanceTextCleaner'), { loading: LoadingComponent }),
   'admob-revenue-calculator': dynamic(() => import('@/components/tools/AdMobRevenueCalculator').then(mod => mod.AdMobRevenueCalculator), { loading: LoadingComponent }),
   'age-calculator': dynamic(() => import('@/components/tools/AgeCalculator'), { loading: LoadingComponent }),
