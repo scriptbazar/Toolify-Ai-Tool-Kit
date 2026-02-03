@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -41,20 +40,21 @@ const AnnouncementItem = ({ announcement }: { announcement: Announcement }) => (
 
 
 export function DashboardClient({ welcomeMessage, profile, plan, stats, announcements: initialAnnouncements, uid }: DashboardClientProps) {
-  const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements || []);
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false);
   
   const handleOpenWhatsNew = async () => {
     setIsWhatsNewOpen(true);
-    if (announcements.some(a => a.isNew)) {
-      const newIds = announcements.filter(a => a.isNew).map(a => a.id);
+    const newAnnouncements = announcements?.filter(a => a.isNew) || [];
+    if (newAnnouncements.length > 0) {
+      const newIds = newAnnouncements.map(a => a.id);
       await markAnnouncementsAsRead(uid, newIds);
       // Optimistically update the UI
       setAnnouncements(prev => prev.map(a => ({ ...a, isNew: false })));
     }
   };
 
-  const hasNewAnnouncements = announcements.some(a => a.isNew);
+  const hasNewAnnouncements = announcements?.some(a => a.isNew) || false;
   
   return (
     <div className="space-y-6">
@@ -182,7 +182,7 @@ export function DashboardClient({ welcomeMessage, profile, plan, stats, announce
             </DialogHeader>
             <ScrollArea className="h-[60vh] -mx-6 px-6">
                 <div className="space-y-4 py-4">
-                  {announcements.length > 0 ? (
+                  {announcements && announcements.length > 0 ? (
                     announcements.map(announcement => (
                       <AnnouncementItem key={announcement.id} announcement={announcement} />
                     ))

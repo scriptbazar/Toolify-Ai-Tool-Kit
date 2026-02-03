@@ -37,20 +37,31 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        setUser(firebaseUser);
+        
+        // Sync session cookie immediately to prevent middleware redirects
         try {
-            setUser(firebaseUser); // Set user immediately so UI can update basic states
+          const token = await firebaseUser.getIdToken();
+          await fetch('/api/auth/session-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+          });
+        } catch (e) {
+          console.error("AuthContext: Session sync failed:", e);
+        }
+
+        try {
             const userDocRef = doc(db, "users", firebaseUser.uid);
             const userDocSnap = await getDoc(userDocRef);
 
             if (userDocSnap.exists()) {
-                const data = userDocSnap.data() as AppUser;
-                setUserData(data);
+                setUserData(userDocSnap.data() as AppUser);
             } else {
                 setUserData(null);
             }
         } catch (error) {
-            console.error("Auth context error:", error);
-            // Don't nullify user on data fetch failure to prevent unexpected logouts
+            console.error("AuthContext: Data fetch error:", error);
             setUserData(null);
         } finally {
             setLoading(false);
