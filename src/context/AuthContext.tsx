@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -36,7 +36,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [userData, setUserData] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const syncSession = async (forceUser?: FirebaseUser) => {
+  const syncSession = useCallback(async (forceUser?: FirebaseUser) => {
     const currentUser = forceUser || auth.currentUser;
     if (currentUser) {
       try {
@@ -53,13 +53,13 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     return false;
-  };
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        // Sync session cookie immediately
+        // Ensure session cookie is present on every client-side auth detection
         await syncSession(firebaseUser);
 
         try {
@@ -78,12 +78,14 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUser(null);
         setUserData(null);
+        // Clear session on logout
+        await fetch('/api/auth/session-logout', { method: 'POST' }).catch(console.error);
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [syncSession]);
   
   const isAdmin = userData?.role === 'admin';
 

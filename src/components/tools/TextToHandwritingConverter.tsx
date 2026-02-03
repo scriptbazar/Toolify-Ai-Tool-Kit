@@ -59,6 +59,7 @@ export function TextToHandwritingConverter() {
 
     const handleDownload = async () => {
         if (!text) return;
+        // Dynamically import jsPDF to reduce initial bundle size and avoid build-time node issues
         const { jsPDF } = await import('jspdf');
         const doc = new jsPDF();
         doc.setFontSize(fontSize);

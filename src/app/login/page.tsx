@@ -94,10 +94,10 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // CRITICAL: Sync session and wait for it to complete
+      // CRITICAL: Force synchronization of the session cookie and wait for it
       const synced = await syncSession(user);
       if (!synced) {
-          throw new Error('Failed to synchronize session with server.');
+          throw new Error('Failed to synchronize session with server. Please try again.');
       }
 
       const userDocRef = doc(db, "users", user.uid);
@@ -105,23 +105,16 @@ export default function LoginPage() {
 
       toast({
         title: "Logged in successfully!",
-        description: "Redirecting...",
+        description: "Redirecting to your dashboard...",
       });
       
       await logUserLogin(user.uid);
       
-      const redirectUrl = searchParams.get('redirectUrl');
+      const redirectUrl = searchParams.get('redirectUrl') || (userDocSnap.exists() && userDocSnap.data().role === 'admin' ? '/admin/dashboard' : '/dashboard');
 
-      if (redirectUrl) {
-          window.location.href = redirectUrl;
-          return;
-      }
-
-      if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-        window.location.href = '/admin/dashboard';
-      } else {
-        window.location.href = '/dashboard';
-      }
+      // Use window.location.href for a clean reload to ensure all state/cookies are fresh
+      window.location.href = redirectUrl;
+      
     } catch (error: any) {
       console.error("Login error:", error);
        let description = "There was a problem with your request.";
