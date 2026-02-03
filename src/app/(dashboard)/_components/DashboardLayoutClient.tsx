@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -37,10 +38,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { User as FirebaseUser } from 'firebase/auth';
-import type { DocumentData } from 'firebase-admin/firestore';
+import type { DocumentData } from 'firebase/firestore';
 import { NotificationDropdown } from '@/components/dashboard/NotificationDropdown';
 import type { Announcement } from '@/ai/flows/announcement-flow.types';
-import { getAnnouncementsForUser } from '@/ai/flows/announcement-flow';
 
 
 const allNavLinks = [
@@ -83,7 +83,8 @@ export function DashboardLayoutClient({
         title: "Logged Out",
         description: "You have been successfully logged out.",
       });
-      router.push('/login');
+      // Force redirect to clear cache
+      window.location.href = '/login';
     } catch (error) {
       console.error("Logout error:", error);
       toast({
@@ -194,7 +195,6 @@ export function DashboardLayoutClient({
             </Link>
           </div>
           <div className="w-full flex-1 hidden md:block">
-            {/* Can add search or other header elements here if needed */}
           </div>
           <div className="flex items-center gap-2 md:gap-4 justify-end flex-1">
              <ModeToggle />
@@ -268,4 +268,3 @@ export function DashboardLayoutClient({
     </div>
   );
 }
-      

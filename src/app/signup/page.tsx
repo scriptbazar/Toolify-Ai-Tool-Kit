@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -21,7 +22,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { getSettings } from "@/ai/flows/settings-management";
 import type { SecuritySettings } from '@/ai/flows/settings-management.types';
 import { verifyRecaptcha } from '@/ai/flows/verify-recaptcha';
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/context/AuthContext";
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required." }),
@@ -76,19 +77,6 @@ export default function SignupPage() {
     },
   });
 
-  useEffect(() => {
-    const referrerId = searchParams.get('ref');
-    if (referrerId) {
-      localStorage.setItem('referrerId', referrerId);
-      const trackedKey = `tracked_${referrerId}`;
-      if (!sessionStorage.getItem(trackedKey)) {
-        trackAffiliateClick(referrerId).then(result => {
-            if (result.success) sessionStorage.setItem(trackedKey, 'true');
-        });
-      }
-    }
-  }, [searchParams]);
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -117,16 +105,10 @@ export default function SignupPage() {
 
       await sendEmailVerification(user);
 
-      // Sync session and wait for it
-      await syncSession(user);
-
-      const referrerId = localStorage.getItem('referrerId');
-      if (referrerId) {
-        const referrerRef = doc(db, "users", referrerId);
-        await updateDoc(referrerRef, {
-            affiliateReferrals: increment(1),
-            affiliateEarnings: increment(0)
-        });
+      // CRITICAL: Synchronize session and wait before redirecting
+      const synced = await syncSession(user);
+      if (!synced) {
+          throw new Error('Failed to synchronize session with server.');
       }
 
       await setDoc(doc(db, "users", user.uid), {
@@ -140,11 +122,12 @@ export default function SignupPage() {
         planId: "free",
         subscriptionStartDate: new Date(),
         subscriptionEndDate: new Date(new Date().setFullYear(new Date().getFullYear() + 100)),
-        ...(referrerId && { referredBy: referrerId }),
       });
 
-      toast({ title: "Success!", description: "Verification email sent. Please log in." });
-      router.push('/login');
+      toast({ title: "Account Created!", description: "A verification email has been sent. Please log in." });
+      
+      // Use Hard reload to ensure cookies are fresh
+      window.location.href = '/login';
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       setIsSubmitting(false);

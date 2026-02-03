@@ -62,8 +62,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       if (firebaseUser) {
         setUser(firebaseUser);
         
-        // Ensure session cookie is set before allowing navigation
-        const synced = await syncSession(firebaseUser);
+        // Ensure session cookie is set
+        await syncSession(firebaseUser);
         
         try {
             const userDocRef = doc(db, "users", firebaseUser.uid);

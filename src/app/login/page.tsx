@@ -85,7 +85,7 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // CRITICAL: Synchronize session and wait before redirecting
+      // Force a clean session sync
       const synced = await syncSession(user);
       if (!synced) {
           throw new Error('Failed to synchronize session with server. Please try again.');
@@ -101,11 +101,11 @@ export default function LoginPage() {
       
       const redirectUrl = searchParams.get('redirectUrl') || (role === 'admin' ? '/admin/dashboard' : '/dashboard');
       
-      // Perform a clean reload to ensure server-side middleware picks up the new cookie
+      // CRITICAL: Use window.location.href to force a full reload and ensure cookies are picked up by middleware
       window.location.href = redirectUrl;
       
     } catch (error: any) {
-      console.error("Admin login error:", error);
+      console.error("Login error:", error);
       let description = "Invalid email or password.";
       if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
         description = "Invalid email or password.";

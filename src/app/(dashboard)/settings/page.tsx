@@ -8,7 +8,7 @@ export default function DashboardSettingsRedirect() {
     const router = useRouter();
     
     useEffect(() => {
-        // Resolve conflict by redirecting to the main unified settings page
+        // Redirect to the primary unified settings page to resolve route conflict
         router.replace('/settings');
     }, [router]);
 
