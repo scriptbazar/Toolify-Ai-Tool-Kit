@@ -20,9 +20,10 @@ export interface ToolCategoryDetails {
   name: string;
   description: string;
   Icon: LucideIcon;
-  color?: {
+  color: {
       bg: string;
       text: string;
+      border: string;
   }
 }
 
@@ -32,69 +33,69 @@ export const toolCategories: ToolCategoryDetails[] = [
     name: 'Text Tools',
     description: 'Manipulate and analyze text with ease.',
     Icon: Type,
-    color: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-500' }
+    color: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-200 dark:border-blue-800' }
   },
   {
     id: 'image',
     name: 'Image Tools',
     description: 'Edit and transform your images.',
     Icon: ImageIcon,
-    color: { bg: 'bg-rose-100 dark:bg-rose-900/30', text: 'text-rose-500' }
+    color: { bg: 'bg-rose-100 dark:bg-rose-900/30', text: 'text-rose-600 dark:text-rose-400', border: 'border-rose-200 dark:border-rose-800' }
   },
    {
     id: 'video',
     name: 'Video Tools',
     description: 'Process and edit video content.',
     Icon: Video,
-    color: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-500' }
+    color: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-800' }
   },
   {
     id: 'pdf',
     name: 'PDF Tools',
     description: 'Process and get insights from your PDF documents.',
     Icon: File,
-    color: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-500' }
+    color: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-600 dark:text-orange-400', border: 'border-orange-200 dark:border-orange-800' }
   },
   {
     id: 'seo',
     name: 'SEO Tools',
     description: 'Optimize your content for search engines.',
     Icon: Search,
-    color: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-500' }
+    color: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-800' }
   },
   {
     id: 'dev',
     name: 'Developer Tools',
     description: 'Utilities to help with your coding projects.',
     Icon: Component,
-    color: { bg: 'bg-violet-100 dark:bg-violet-900/30', text: 'text-violet-500' }
+    color: { bg: 'bg-violet-100 dark:bg-violet-900/30', text: 'text-violet-600 dark:text-violet-400', border: 'border-violet-200 dark:border-violet-800' }
   },
    {
     id: 'ecommerce',
     name: 'Ecommerce Tools',
     description: 'Utilities for your online business.',
     Icon: ShoppingCart,
-    color: { bg: 'bg-lime-100 dark:bg-lime-900/30', text: 'text-lime-500' }
+    color: { bg: 'bg-lime-100 dark:bg-lime-900/30', text: 'text-lime-600 dark:text-lime-400', border: 'border-lime-200 dark:border-lime-800' }
   },
   {
     id: 'ai',
     name: 'AI Tools',
     description: 'Leverage the power of Artificial Intelligence.',
     Icon: Cpu,
-    color: { bg: 'bg-indigo-100 dark:bg-indigo-900/30', text: 'text-indigo-500' }
+    color: { bg: 'bg-indigo-100 dark:bg-indigo-900/30', text: 'text-indigo-600 dark:text-indigo-400', border: 'border-indigo-200 dark:border-indigo-800' }
   },
   {
     id: 'calculator',
     name: 'Calculators & Converters',
     description: 'Perform calculations and unit conversions.',
     Icon: Calculator,
-     color: { bg: 'bg-cyan-100 dark:bg-cyan-900/30', text: 'text-cyan-500' }
+     color: { bg: 'bg-cyan-100 dark:bg-cyan-900/30', text: 'text-cyan-600 dark:text-cyan-400', border: 'border-cyan-200 dark:border-cyan-800' }
   },
   {
     id: 'miscellaneous',
     name: 'Miscellaneous Tools',
     description: 'A collection of various other tools.',
     Icon: GanttChartSquare,
-     color: { bg: 'bg-slate-100 dark:bg-slate-900/30', text: 'text-slate-500' }
+     color: { bg: 'bg-slate-100 dark:bg-slate-900/30', text: 'text-slate-600 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-800' }
   }
 ];

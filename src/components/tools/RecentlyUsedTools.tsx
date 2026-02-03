@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -80,11 +81,11 @@ export function RecentlyUsedTools() {
 
                     return (
                         <Link key={tool.slug} href={`/tools/${tool.slug}`} className="group">
-                            <Card className="h-full flex flex-col items-center justify-center p-4 text-center hover:bg-muted transition-colors">
-                                <div className={cn("p-3 rounded-full mb-2 transition-colors", iconColors.bg)}>
+                            <Card className="h-full flex flex-col items-center justify-center p-4 text-center hover:bg-muted transition-all hover:shadow-md">
+                                <div className={cn("p-3 rounded-full mb-2 transition-all group-hover:scale-110", iconColors.bg)}>
                                     <Icon className={cn("h-6 w-6 transition-colors", iconColors.text)} />
                                 </div>
-                                <p className="text-sm font-medium">{tool.name}</p>
+                                <p className="text-sm font-bold group-hover:text-primary transition-colors">{tool.name}</p>
                             </Card>
                         </Link>
                     )

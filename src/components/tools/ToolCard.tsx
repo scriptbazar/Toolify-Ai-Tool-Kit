@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, forwardRef, type MouseEvent } from 'react';
@@ -43,7 +44,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
   const router = useRouter();
 
   const categoryInfo = toolCategories.find(c => c.id === category);
-  const iconColors = categoryInfo?.color || { bg: 'bg-primary/10', text: 'text-primary' };
+  const iconColors = categoryInfo?.color || { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20' };
 
   const isClickable = status === 'Active' || status === 'New Version' || status === 'Beta';
   
@@ -77,8 +78,9 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
         !isClickable && "cursor-not-allowed"
       )}>
       <div className={cn(
-        "relative flex h-full flex-col items-center justify-start rounded-lg border bg-card p-6 text-center transition-all duration-300 group-hover:-translate-y-1",
-        !isClickable && "opacity-70"
+        "relative flex h-full flex-col items-center justify-start rounded-lg border bg-card p-6 text-center transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-md",
+        !isClickable && "opacity-70",
+        iconColors.border
       )}>
         {statusBadge ? statusBadge : (
             <>
@@ -99,12 +101,12 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
                 <Badge className="shadow-md">Pro</Badge>
             </div>
         )}
-        <div className={cn("flex h-12 w-12 items-center justify-center rounded-full mb-4 transition-colors group-hover:opacity-80", iconColors.bg)}>
-          <Icon className={cn("h-6 w-6 transition-transform group-hover:animate-bounce", iconColors.text)} />
+        <div className={cn("flex h-14 w-14 items-center justify-center rounded-full mb-4 transition-all group-hover:scale-110", iconColors.bg)}>
+          <Icon className={cn("h-7 w-7 transition-transform group-hover:animate-bounce", iconColors.text)} />
         </div>
         <div className="flex-grow">
-            <h3 className="text-sm font-semibold mb-1">{name}</h3>
-            <p className="text-xs text-muted-foreground h-16 overflow-hidden">
+            <h3 className="text-base font-bold mb-1 group-hover:text-primary transition-colors">{name}</h3>
+            <p className="text-xs text-muted-foreground h-16 overflow-hidden line-clamp-3">
                 {description}
             </p>
         </div>
