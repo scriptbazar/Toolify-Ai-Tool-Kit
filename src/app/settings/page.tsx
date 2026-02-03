@@ -131,16 +131,7 @@ export default function EditUserDetailPage() {
   }
 
   const handleSwitchChange = (id: string, checked: boolean) => {
-     setProfile(prev => {
-        if (!prev) return null;
-        return {
-            ...prev,
-            security: {
-                ...(prev as any).security,
-                [id]: checked
-            }
-        }
-    });
+     setProfile(prev => prev ? { ...prev, [id]: checked } : null);
   };
   
   const handle2faMethodChange = (method: 'email' | 'authenticatorApp' | 'mobileNumber', checked: boolean) => {
@@ -148,12 +139,9 @@ export default function EditUserDetailPage() {
         if (!prev) return null;
         return {
             ...prev,
-            security: {
-                ...(prev as any).security,
-                twoFactorAuthMethods: {
-                    ...((prev as any).security?.twoFactorAuthMethods || {}),
-                    [method]: checked,
-                }
+            twoFactorAuthMethods: {
+                ...(prev.twoFactorAuthMethods || {}),
+                [method]: checked,
             }
         }
      });
@@ -217,7 +205,7 @@ export default function EditUserDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-8">
       <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" />
         Back To Dashboard
