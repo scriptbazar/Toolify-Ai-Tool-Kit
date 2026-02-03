@@ -15,14 +15,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc, updateDoc, increment } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { trackAffiliateClick } from "@/ai/flows/user-management";
 import ReCAPTCHA from "react-google-recaptcha";
 import { getSettings } from "@/ai/flows/settings-management";
 import type { SecuritySettings } from '@/ai/flows/settings-management.types';
 import { verifyRecaptcha } from '@/ai/flows/verify-recaptcha';
-
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required." }),
@@ -49,6 +48,7 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   useEffect(() => {
@@ -88,11 +88,14 @@ export default function SignupPage() {
     }
   }, [searchParams]);
 
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     if (securitySettings?.enableRecaptcha) {
         if (!recaptchaValue) {
             toast({ title: "Verification Failed", description: "Please complete reCAPTCHA.", variant: "destructive" });
+            setIsSubmitting(false);
             return;
         }
         try {
@@ -101,6 +104,7 @@ export default function SignupPage() {
         } catch (error: any) {
              toast({ title: "reCAPTCHA Failed", description: error.message, variant: "destructive" });
              recaptchaRef.current?.reset();
+             setIsSubmitting(false);
              return;
         }
     }
@@ -112,7 +116,6 @@ export default function SignupPage() {
 
       await sendEmailVerification(user);
 
-      // Wait for session sync
       const token = await user.getIdToken();
       const sessionResponse = await fetch('/api/auth/session-login', {
         method: 'POST',
@@ -151,6 +154,7 @@ export default function SignupPage() {
       router.push('/login');
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
+      setIsSubmitting(false);
     } finally {
         recaptchaRef.current?.reset();
     }
@@ -199,8 +203,8 @@ export default function SignupPage() {
                     <ReCAPTCHA ref={recaptchaRef} sitekey={securitySettings.recaptchaSiteKey} onChange={(v) => setRecaptchaValue(v)} />
                 </div>
                )}
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Creating account..." : "Sign Up"}
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Creating...</> : "Sign Up"}
               </Button>
             </form>
           </Form>

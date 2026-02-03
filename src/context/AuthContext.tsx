@@ -40,7 +40,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       if (firebaseUser) {
         setUser(firebaseUser);
         
-        // Synchronize session cookie with server immediately
+        // Ensure session sync
         try {
           const token = await firebaseUser.getIdToken();
           await fetch('/api/auth/session-login', {
@@ -49,7 +49,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
             body: JSON.stringify({ token }),
           });
         } catch (e) {
-          console.error("AuthContext: Session sync network error:", e);
+          console.error("AuthContext: Session sync error", e);
         }
 
         try {

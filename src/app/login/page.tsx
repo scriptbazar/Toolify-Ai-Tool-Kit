@@ -14,7 +14,7 @@ import { z } from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { doc, getDoc } from "firebase/firestore";
 import { logUserLogin } from "@/ai/flows/user-activity";
@@ -22,7 +22,6 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { getSettings } from "@/ai/flows/settings-management";
 import type { SecuritySettings } from '@/ai/flows/settings-management.types';
 import { verifyRecaptcha } from '@/ai/flows/verify-recaptcha';
-
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -36,6 +35,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   useEffect(() => {
@@ -59,6 +59,9 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     if (securitySettings?.enableRecaptcha) {
         if (!recaptchaValue) {
             toast({
@@ -66,6 +69,7 @@ export default function LoginPage() {
                 description: "Please complete the reCAPTCHA verification.",
                 variant: "destructive",
             });
+            setIsSubmitting(false);
             return;
         }
         try {
@@ -80,6 +84,7 @@ export default function LoginPage() {
                 variant: "destructive",
             });
             recaptchaRef.current?.reset();
+            setIsSubmitting(false);
             return;
         }
     }
@@ -90,6 +95,7 @@ export default function LoginPage() {
 
       const token = await user.getIdToken();
       
+      // CRITICAL: Wait for session cookie to be set on the server
       const sessionResponse = await fetch('/api/auth/session-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +107,7 @@ export default function LoginPage() {
         throw new Error(errorData.error || 'Failed to create session.');
       }
       
-      await sessionResponse.json(); // Wait for the session creation to complete on server
+      await sessionResponse.json();
 
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
@@ -138,6 +144,7 @@ export default function LoginPage() {
         description,
         variant: "destructive",
       });
+      setIsSubmitting(false);
     } finally {
         recaptchaRef.current?.reset();
     }
@@ -223,8 +230,8 @@ export default function LoginPage() {
                     />
                 </div>
                )}
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Logging in..." : "Log In"}
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Logging in...</> : "Log In"}
               </Button>
             </form>
           </Form>
