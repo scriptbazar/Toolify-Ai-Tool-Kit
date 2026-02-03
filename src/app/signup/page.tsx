@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -22,6 +21,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { getSettings } from "@/ai/flows/settings-management";
 import type { SecuritySettings } from '@/ai/flows/settings-management.types';
 import { verifyRecaptcha } from '@/ai/flows/verify-recaptcha';
+import { useAuth } from "@/hooks/use-auth";
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required." }),
@@ -44,6 +44,7 @@ export default function SignupPage() {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { syncSession } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
@@ -116,16 +117,8 @@ export default function SignupPage() {
 
       await sendEmailVerification(user);
 
-      const token = await user.getIdToken();
-      const sessionResponse = await fetch('/api/auth/session-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
-      
-      if (sessionResponse.ok) {
-        await sessionResponse.json();
-      }
+      // Sync session and wait for it
+      await syncSession(user);
 
       const referrerId = localStorage.getItem('referrerId');
       if (referrerId) {

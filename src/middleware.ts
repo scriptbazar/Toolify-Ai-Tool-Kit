@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -29,9 +28,12 @@ export async function middleware(request: NextRequest) {
 
   // If trying to access a protected route without a session, redirect to login
   if (isProtectedRoute && !session) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirectUrl', pathname);
-    return NextResponse.redirect(loginUrl);
+    // Only redirect if it's not a request for a session-login API
+    if (!pathname.startsWith('/api/auth')) {
+        const loginUrl = new URL('/login', request.url);
+        loginUrl.searchParams.set('redirectUrl', pathname);
+        return NextResponse.redirect(loginUrl);
+    }
   }
 
   return NextResponse.next();

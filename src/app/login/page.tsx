@@ -21,6 +21,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { getSettings } from "@/ai/flows/settings-management";
 import type { SecuritySettings } from '@/ai/flows/settings-management.types';
 import { verifyRecaptcha } from '@/ai/flows/verify-recaptcha';
+import { useAuth } from "@/hooks/use-auth";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -31,6 +32,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { syncSession } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
@@ -92,20 +94,11 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      const token = await user.getIdToken(true);
-      
-      const sessionResponse = await fetch('/api/auth/session-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
-      
-      if (!sessionResponse.ok) {
-        const errorData = await sessionResponse.json();
-        throw new Error(errorData.error || 'Failed to create session.');
+      // CRITICAL: Sync session and wait for it to complete
+      const synced = await syncSession(user);
+      if (!synced) {
+          throw new Error('Failed to synchronize session with server.');
       }
-      
-      await sessionResponse.json();
 
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);

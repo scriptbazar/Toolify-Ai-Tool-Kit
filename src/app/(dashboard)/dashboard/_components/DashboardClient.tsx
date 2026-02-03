@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -24,14 +23,14 @@ interface DashboardClientProps {
 const AnnouncementItem = ({ announcement }: { announcement: Announcement }) => (
     <div className="p-4 rounded-lg border bg-background/50">
         <div className="flex items-center justify-between">
-            <h4 className="font-semibold">{announcement.title}</h4>
+            <h4 className="font-semibold">{announcement?.title || 'Announcement'}</h4>
             <div className="flex items-center gap-2">
-                {announcement.isNew && <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />}
-                <p className="text-xs text-muted-foreground">{announcement.createdAt ? new Date(announcement.createdAt).toLocaleDateString() : 'Recent'}</p>
+                {announcement?.isNew && <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />}
+                <p className="text-xs text-muted-foreground">{announcement?.createdAt ? new Date(announcement.createdAt).toLocaleDateString() : 'Recent'}</p>
             </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-2 mb-4">{announcement.content}</p>
-        {announcement.featureSlug && (
+        <p className="text-sm text-muted-foreground mt-2 mb-4">{announcement?.content}</p>
+        {announcement?.featureSlug && (
             <Button size="sm" asChild>
                 <Link href={`/tools/${announcement.featureSlug}`}>Check it out</Link>
             </Button>

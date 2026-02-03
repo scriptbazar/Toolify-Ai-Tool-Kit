@@ -20,7 +20,7 @@ interface AuthContextType {
   userData: AppUser | null;
   isAdmin: boolean;
   loading: boolean;
-  syncSession: () => Promise<void>;
+  syncSession: (forceUser?: FirebaseUser) => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -28,7 +28,7 @@ export const AuthContext = createContext<AuthContextType>({
   userData: null,
   isAdmin: false,
   loading: true,
-  syncSession: async () => {},
+  syncSession: async () => false,
 });
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
@@ -41,23 +41,25 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     if (currentUser) {
       try {
         const token = await currentUser.getIdToken(true);
-        await fetch('/api/auth/session-login', {
+        const res = await fetch('/api/auth/session-login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
         });
+        return res.ok;
       } catch (e) {
         console.error("AuthContext: Session sync error", e);
+        return false;
       }
     }
+    return false;
   };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setLoading(true);
       if (firebaseUser) {
         setUser(firebaseUser);
-        // CRITICAL: Ensure session is synced with server before letting app proceed
+        // Sync session cookie immediately
         await syncSession(firebaseUser);
 
         try {
