@@ -11,11 +11,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
 
-  // Handle route conflict for settings
-  if (pathname === '/settings/profile') {
-      return NextResponse.next();
-  }
-
   // Rule 2: Protect dashboard and admin routes
   const protectedPaths = [
     '/dashboard',
@@ -32,6 +27,7 @@ export async function middleware(request: NextRequest) {
 
   const isProtectedRoute = protectedPaths.some(path => pathname.startsWith(path));
 
+  // If trying to access a protected route without a session, redirect to login
   if (isProtectedRoute && !session) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirectUrl', pathname);
@@ -43,6 +39,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.svg).*)',
+    // Optimize matcher to exclude all static assets and internal paths
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.svg|.*\\.ico|.*\\.webp).*)',
   ],
 };

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -6,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Copy, Download, Trash2, PenLine, Wand2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { jsPDF } from 'jspdf';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
@@ -58,8 +58,9 @@ export function TextToHandwritingConverter() {
         toast({ title: 'Copied to clipboard!' });
     };
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
         if (!text) return;
+        const { jsPDF } = await import('jspdf');
         const doc = new jsPDF();
         doc.setFontSize(fontSize);
         doc.setTextColor(fontColor);

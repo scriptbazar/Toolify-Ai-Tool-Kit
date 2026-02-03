@@ -1,3 +1,4 @@
+
 'use client';
 
 import dynamic from 'next/dynamic';
@@ -10,7 +11,7 @@ const LoadingComponent = () => (
   </div>
 );
 
-export const slugToComponentMap: { [key: string]: FC<any> } = {
+export const slugToComponentMap: Record<string, FC<any>> = {
   'advance-text-cleaner': dynamic(() => import('@/components/tools/AdvanceTextCleaner'), { loading: LoadingComponent }),
   'admob-revenue-calculator': dynamic(() => import('@/components/tools/AdMobRevenueCalculator').then(mod => mod.AdMobRevenueCalculator), { loading: LoadingComponent }),
   'age-calculator': dynamic(() => import('@/components/tools/AgeCalculator'), { loading: LoadingComponent }),

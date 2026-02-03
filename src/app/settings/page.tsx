@@ -6,9 +6,6 @@ import {
   ArrowLeft,
   UploadCloud,
   Save,
-  KeyRound,
-  Eye,
-  EyeOff,
   User,
   Lock,
   Loader2,
@@ -17,6 +14,8 @@ import {
   MessageSquare,
   AlertTriangle,
   X,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -36,7 +35,7 @@ import { countries } from '@/lib/countries';
 import { Combobox } from '@/components/ui/combobox';
 import { sendPasswordChangeEmail } from '@/ai/flows/send-email';
 import { updateUserProfile } from '@/ai/flows/user-management';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 
 interface UserProfile {
@@ -81,7 +80,7 @@ const TwoFactorAuthOptionCard = ({
 };
 
 
-export default function EditUserDetailPage() {
+export default function ProfileSettingsPage() {
   const { toast } = useToast();
   const router = useRouter();
 

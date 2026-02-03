@@ -50,12 +50,11 @@ export function DashboardClient({ welcomeMessage, profile, plan, stats, announce
     if (newAnnouncements.length > 0) {
       const newIds = newAnnouncements.map(a => a.id);
       await markAnnouncementsAsRead(uid, newIds);
-      // Optimistically update the UI
       setAnnouncements(prev => (prev || []).map(a => ({ ...a, isNew: false })));
     }
   };
 
-  const hasNewAnnouncements = (announcements || []).some(a => a?.isNew);
+  const hasNewAnnouncements = announcements?.some(a => a?.isNew) ?? false;
   
   return (
     <div className="space-y-6">
@@ -69,23 +68,17 @@ export function DashboardClient({ welcomeMessage, profile, plan, stats, announce
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Tools Used
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Tools Used</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.toolsUsed}</div>
-            <p className="text-xs text-muted-foreground">
-              in total
-            </p>
+            <p className="text-xs text-muted-foreground">in total</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Subscription
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Subscription</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -97,23 +90,17 @@ export function DashboardClient({ welcomeMessage, profile, plan, stats, announce
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Referrals
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Referrals</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+{stats.referrals}</div>
-            <p className="text-xs text-muted-foreground">
-              friends joined
-            </p>
+            <p className="text-xs text-muted-foreground">friends joined</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Next Payment
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Next Payment</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
