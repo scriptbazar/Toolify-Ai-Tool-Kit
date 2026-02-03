@@ -101,7 +101,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
                 <Badge className="shadow-md">Pro</Badge>
             </div>
         )}
-        <div className={cn("flex h-14 w-14 items-center justify-center rounded-full mb-4 transition-all group-hover:scale-110", iconColors.bg)}>
+        <div className={cn("flex h-14 w-14 items-center justify-center rounded-full mb-4 transition-all group-hover:scale-110 shadow-sm", iconColors.bg)}>
           <Icon className={cn("h-7 w-7 transition-transform group-hover:animate-bounce", iconColors.text)} />
         </div>
         <div className="flex-grow">

@@ -40,18 +40,14 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       if (firebaseUser) {
         setUser(firebaseUser);
         
-        // Synchronize session cookie with server to prevent middleware redirect loops
+        // Synchronize session cookie with server immediately
         try {
           const token = await firebaseUser.getIdToken();
-          const response = await fetch('/api/auth/session-login', {
+          await fetch('/api/auth/session-login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token }),
           });
-          
-          if (!response.ok) {
-            console.error("AuthContext: Session sync failed with status", response.status);
-          }
         } catch (e) {
           console.error("AuthContext: Session sync network error:", e);
         }

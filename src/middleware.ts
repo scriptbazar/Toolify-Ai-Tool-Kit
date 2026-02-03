@@ -33,9 +33,8 @@ export async function middleware(request: NextRequest) {
 
   const isProtectedRoute = protectedPaths.some(path => pathname.startsWith(path));
 
+  // If trying to access protected route without a session, redirect to login
   if (isProtectedRoute && !session) {
-    // If trying to access protected route without a session, redirect to login
-    // but only if it's not an internal sync or a static asset (handled by matcher)
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirectUrl', pathname);
     return NextResponse.redirect(loginUrl);
