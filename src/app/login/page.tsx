@@ -104,7 +104,7 @@ export default function LoginPage() {
       
     } catch (error: any) {
       console.error("Login error:", error);
-      toast({ title: "Login Failed", description: error.message || "Invalid email or password.", variant: "destructive" });
+      toast({ title: "Login Failed", description: "Invalid email or password.", variant: "destructive" });
       setIsSubmitting(false);
     } finally {
         recaptchaRef.current?.reset();
