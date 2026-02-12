@@ -58,10 +58,11 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
       if (firebaseUser) {
         setUser(firebaseUser);
         
-        // Ensure session cookie is set
+        // Ensure session cookie is synced
         await syncSession(firebaseUser);
         
         try {
@@ -80,8 +81,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUser(null);
         setUserData(null);
-        // Clean up session on logout
-        await fetch('/api/auth/session-logout', { method: 'POST' }).catch(console.error);
+        // Ensure session is cleared
+        await fetch('/api/auth/session-logout', { method: 'POST' }).catch(() => {});
       }
       setLoading(false);
     });

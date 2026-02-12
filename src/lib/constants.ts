@@ -33,7 +33,7 @@ export const toolCategories: ToolCategoryDetails[] = [
     name: 'Text Tools',
     description: 'Manipulate and analyze text with ease.',
     Icon: Type,
-    color: { bg: 'bg-blue-500/20', text: 'text-blue-600', border: 'border-blue-500/40' }
+    color: { bg: 'bg-indigo-500/20', text: 'text-indigo-600', border: 'border-indigo-500/40' }
   },
   {
     id: 'image',
@@ -82,7 +82,7 @@ export const toolCategories: ToolCategoryDetails[] = [
     name: 'AI Tools',
     description: 'Leverage the power of Artificial Intelligence.',
     Icon: Cpu,
-    color: { bg: 'bg-indigo-500/20', text: 'text-indigo-600', border: 'border-indigo-500/40' }
+    color: { bg: 'bg-blue-500/20', text: 'text-blue-600', border: 'border-blue-500/40' }
   },
   {
     id: 'calculator',

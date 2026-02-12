@@ -13,11 +13,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { doc, setDoc, updateDoc, increment } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
-import { trackAffiliateClick } from "@/ai/flows/user-management";
 import ReCAPTCHA from "react-google-recaptcha";
 import { getSettings } from "@/ai/flows/settings-management";
 import type { SecuritySettings } from '@/ai/flows/settings-management.types';
@@ -29,15 +28,10 @@ const formSchema = z.object({
   lastName: z.string().min(1, { message: "Last name is required." }),
   userName: z.string().min(3, { message: "Username must be at least 3 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
-  password: z.string()
-    .min(8, { message: "Password must be at least 8 characters long." })
-    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter." })
-    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter." })
-    .regex(/[0-9]/, { message: "Password must contain at least one number." })
-    .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character." }),
+  password: z.string().min(8, { message: "At least 8 characters required." }),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: "Passwords do not match",
   path: ["confirmPassword"],
 });
 
@@ -82,7 +76,7 @@ export default function SignupPage() {
 
     if (securitySettings?.enableRecaptcha) {
         if (!recaptchaValue) {
-            toast({ title: "Verification Failed", description: "Please complete reCAPTCHA.", variant: "destructive" });
+            toast({ title: "Verification Required", description: "Please complete reCAPTCHA.", variant: "destructive" });
             setIsSubmitting(false);
             return;
         }
@@ -104,12 +98,7 @@ export default function SignupPage() {
 
       await sendEmailVerification(user);
 
-      // Synchronize session cookie before redirection
-      const synced = await syncSession(user);
-      if (!synced) {
-          throw new Error('Failed to synchronize session with server.');
-      }
-
+      // Create Firestore profile
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         firstName,
@@ -119,14 +108,18 @@ export default function SignupPage() {
         role: "user",
         createdAt: new Date(),
         planId: "free",
-        subscriptionStartDate: new Date(),
-        subscriptionEndDate: new Date(new Date().setFullYear(new Date().getFullYear() + 100)),
       });
 
-      toast({ title: "Account Created!", description: "A verification email has been sent. Please log in." });
+      // Synchronize session cookie
+      const synced = await syncSession(user);
+      if (!synced) {
+          throw new Error('Session synchronization failed.');
+      }
+
+      toast({ title: "Account created!", description: "Redirecting to dashboard..." });
       
-      // Use Hard reload to ensure cookies are fresh
-      window.location.href = '/login';
+      // Use Hard reload to ensure Middleware picks up the new cookie
+      window.location.href = '/dashboard';
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       setIsSubmitting(false);
@@ -143,13 +136,13 @@ export default function SignupPage() {
             <Logo />
             <span className="text-2xl font-bold">ToolifyAI</span>
           </Link>
-          <CardTitle className="text-2xl">Create an Account</CardTitle>
-          <CardDescription>Join ToolifyAI to get started</CardDescription>
+          <CardTitle className="text-2xl">Create Account</CardTitle>
+          <CardDescription>Join us to start exploring our smart toolkit</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="firstName" render={({ field }) => (
                     <FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="John" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
@@ -157,20 +150,20 @@ export default function SignupPage() {
                     <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input placeholder="Doe" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                  <FormField control={form.control} name="userName" render={({ field }) => (
                     <FormItem><FormLabel>User Name</FormLabel><FormControl><Input placeholder="johndoe" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="email" render={({ field }) => (
-                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="you@example.com" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="you@email.com" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="password" render={({ field }) => (
                     <FormItem><FormLabel>Password</FormLabel><div className="relative"><FormControl><Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button></div><FormMessage /></FormItem>
                 )} />
                  <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-                    <FormItem><FormLabel>Confirm Password</FormLabel><div className="relative"><FormControl><Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>{showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button></div><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Confirm</FormLabel><div className="relative"><FormControl><Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>{showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button></div><FormMessage /></FormItem>
                 )} />
               </div>
               {securitySettings?.enableRecaptcha && securitySettings.recaptchaSiteKey && (
@@ -179,12 +172,12 @@ export default function SignupPage() {
                 </div>
                )}
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Creating...</> : "Sign Up"}
+                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Creating account...</> : "Sign Up"}
               </Button>
             </form>
           </Form>
-          <div className="mt-6 text-center text-sm">
-            Already have an account? <Link href="/login" className="font-medium text-primary hover:underline">Log in</Link>
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            Already have an account? <Link href="/login" className="font-semibold text-primary hover:underline">Log in</Link>
           </div>
         </CardContent>
       </Card>

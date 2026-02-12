@@ -65,7 +65,7 @@ export default function LoginPage() {
 
     if (securitySettings?.enableRecaptcha) {
         if (!recaptchaValue) {
-            toast({ title: "Verification Failed", description: "Please complete the reCAPTCHA verification.", variant: "destructive" });
+            toast({ title: "Verification Required", description: "Please complete the reCAPTCHA.", variant: "destructive" });
             setIsSubmitting(false);
             return;
         }
@@ -73,7 +73,7 @@ export default function LoginPage() {
             const verification = await verifyRecaptcha(recaptchaValue);
             if (!verification.success) throw new Error(verification.message);
         } catch (error: any) {
-             toast({ title: "reCAPTCHA Verification Failed", description: error.message || 'Could not verify reCAPTCHA. Please try again.', variant: "destructive" });
+             toast({ title: "reCAPTCHA Failed", description: error.message, variant: "destructive" });
              recaptchaRef.current?.reset();
              setIsSubmitting(false);
              return;
@@ -84,9 +84,10 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
+      // CRITICAL: Synchronize session before redirecting
       const synced = await syncSession(user);
       if (!synced) {
-          throw new Error('Failed to synchronize session with server. Please try again.');
+          throw new Error('Session synchronization failed. Please try again.');
       }
 
       await logUserLogin(user.uid);
@@ -95,23 +96,18 @@ export default function LoginPage() {
       const userDocSnap = await getDoc(userDocRef);
       const role = userDocSnap.exists() ? userDocSnap.data().role : 'user';
 
-      toast({ title: "Logged in successfully!", description: "Redirecting to your dashboard..." });
+      toast({ title: "Welcome back!", description: "Accessing your dashboard..." });
       
       const targetUrl = searchParams.get('redirectUrl') || (role === 'admin' ? '/admin/dashboard' : '/dashboard');
       
+      // Use Hard reload to ensure Middleware picks up the new cookie
       setTimeout(() => {
           window.location.href = targetUrl;
       }, 500);
       
     } catch (error: any) {
       console.error("Login error:", error);
-      let description = "Invalid email or password.";
-      if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        description = "Invalid email or password.";
-      } else {
-        description = error.message;
-      }
-      toast({ title: "Login Failed", description, variant: "destructive" });
+      toast({ title: "Login Failed", description: error.message || "Invalid email or password.", variant: "destructive" });
       setIsSubmitting(false);
     } finally {
         recaptchaRef.current?.reset();
@@ -126,8 +122,8 @@ export default function LoginPage() {
             <Logo />
             <span className="text-2xl font-bold">ToolifyAI</span>
           </Link>
-          <CardTitle className="text-2xl">Welcome Back!</CardTitle>
-          <CardDescription>Sign in to your ToolifyAI account</CardDescription>
+          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardDescription>Enter your credentials to access your account</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -140,7 +136,7 @@ export default function LoginPage() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="you@example.com" {...field} />
+                        <Input placeholder="name@example.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -172,15 +168,12 @@ export default function LoginPage() {
                           ) : (
                             <Eye className="h-4 w-4" />
                           )}
-                          <span className="sr-only">
-                            {showPassword ? "Hide password" : "Show password"}
-                          </span>
                         </Button>
                       </div>
                       <FormMessage />
                         <div className="text-right">
                          <Link href="/forgot-password">
-                            <span className="text-sm text-primary hover:underline cursor-pointer">Forgot Password?</span>
+                            <span className="text-sm text-primary hover:underline">Forgot Password?</span>
                          </Link>
                       </div>
                     </FormItem>
@@ -192,24 +185,19 @@ export default function LoginPage() {
                     <ReCAPTCHA
                         ref={recaptchaRef}
                         sitekey={securitySettings.recaptchaSiteKey}
-                        onChange={(value) => setRecaptchaValue(value)}
+                        onChange={(v) => setRecaptchaValue(v)}
                     />
                 </div>
                )}
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? (
-                    <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
-                        Logging in...
-                    </>
-                ) : "Log In"}
+                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Logging in...</> : "Log In"}
               </Button>
             </form>
           </Form>
-          <div className="mt-6 text-center text-sm">
-            Don't have an account?{" "}
-            <Link href="/signup" className="font-medium text-primary hover:underline">
-              Sign up
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            New here?{" "}
+            <Link href="/signup" className="font-semibold text-primary hover:underline">
+              Create an account
             </Link>
           </div>
         </CardContent>

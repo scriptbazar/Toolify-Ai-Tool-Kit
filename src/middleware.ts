@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
     '/manage-subscription',
     '/payment-history',
     '/affiliate-program',
-    '/settings', // Now strictly protected
+    '/settings', 
     '/admin'
   ];
 
@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Optimize matcher to exclude all static assets and internal paths
+    // Optimized matcher
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.svg|.*\\.ico|.*\\.webp).*)',
   ],
 };
