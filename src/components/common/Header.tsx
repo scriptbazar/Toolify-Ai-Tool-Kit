@@ -135,16 +135,16 @@ export default function Header() {
           <nav className="flex-1 flex items-center justify-center space-x-1 text-sm font-medium">
             <NavLinks />
           </nav>
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end gap-2 min-w-[200px]">
              <ModeToggle />
              {loading ? (
                 <div className="h-8 w-24 rounded-md bg-muted animate-pulse" />
              ) : !user ? (
                 <div className="flex items-center gap-2">
-                  <Button asChild variant="ghost">
+                  <Button asChild variant="ghost" size="sm">
                     <Link href="/login">Log in</Link>
                   </Button>
-                  <Button asChild>
+                  <Button asChild size="sm">
                     <Link href="/signup">Sign Up</Link>
                   </Button>
                 </div>
@@ -153,14 +153,14 @@ export default function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="secondary" size="icon" className="rounded-full">
                        <Avatar className="h-8 w-8">
-                         <AvatarFallback>{userData?.firstName?.[0] || 'U'}</AvatarFallback>
+                         <AvatarFallback>{userData?.firstName?.[0] || userData?.name?.[0] || 'U'}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium">{userData?.firstName} {userData?.lastName}</p>
+                        <p className="text-sm font-medium">{userData?.firstName || userData?.name || 'User'}</p>
                         <p className="text-xs text-muted-foreground">{user?.email}</p>
                       </div>
                     </DropdownMenuLabel>
