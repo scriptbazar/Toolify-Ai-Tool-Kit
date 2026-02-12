@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 
 /**
  * Redirect component to resolve Next.js parallel route conflict.
- * This file replaces the duplicate settings page in the (dashboard) group.
  */
 export default function SettingsRedirect() {
     const router = useRouter();
