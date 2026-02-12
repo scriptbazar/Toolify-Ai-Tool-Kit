@@ -1,17 +1,8 @@
 
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
 /**
- * Redundant settings page within route group.
- * Redirecting to the main settings page to avoid parallel route conflicts.
+ * redundant page file causing route conflicts.
+ * The primary settings page is located at src/app/settings/page.tsx
  */
-export default function SettingsRedirect() {
-    const router = useRouter();
-    useEffect(() => {
-        router.replace('/settings');
-    }, [router]);
+export default function RemovedPage() {
     return null;
 }

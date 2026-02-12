@@ -33,7 +33,7 @@ export const toolCategories: ToolCategoryDetails[] = [
     name: 'Text Tools',
     description: 'Manipulate and analyze text with ease.',
     Icon: Type,
-    color: { bg: 'bg-blue-500/20', text: 'text-blue-600', border: 'border-blue-500/40' }
+    color: { bg: 'bg-sky-500/20', text: 'text-sky-600', border: 'border-sky-500/40' }
   },
   {
     id: 'image',

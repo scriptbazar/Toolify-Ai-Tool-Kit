@@ -64,7 +64,7 @@ export default function Header() {
               className="font-medium text-sm"
             >
               <Link href={link.href}>
-                <link.icon className="mr-2 h-4 w-4" />
+                <link.icon className={cn("mr-2 h-4 w-4", pathname === link.href ? "text-primary" : "text-muted-foreground")} />
                 {link.label}
               </Link>
             </Button>
@@ -90,7 +90,7 @@ export default function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full ring-2 ring-primary/10">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback>{userData?.firstName?.[0] || 'U'}</AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary">{userData?.firstName?.[0] || 'U'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -104,7 +104,7 @@ export default function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href={dashboardHref} className="cursor-pointer w-full flex items-center">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <LayoutDashboard className="mr-2 h-4 w-4 text-sky-500" />
                     <span>Dashboard</span>
                   </Link>
                 </DropdownMenuItem>
@@ -116,7 +116,7 @@ export default function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings" className="cursor-pointer w-full flex items-center">
-                    <User className="mr-2 h-4 w-4" />
+                    <User className="mr-2 h-4 w-4 text-violet-500" />
                     <span>Profile Settings</span>
                   </Link>
                 </DropdownMenuItem>
@@ -153,7 +153,7 @@ export default function Header() {
                     <>
                       <Button asChild variant="ghost" onClick={() => setIsOpen(false)} className="justify-start">
                         <Link href={dashboardHref}>
-                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          <LayoutDashboard className="mr-2 h-4 w-4 text-sky-500" />
                           Dashboard
                         </Link>
                       </Button>
