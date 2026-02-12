@@ -48,7 +48,8 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    optimizePackageImports: ['lucide-react', 'recharts', 'date-fns', 'clsx'],
+    optimizePackageImports: ['lucide-react', 'recharts', 'date-fns', 'clsx', 'framer-motion'],
+    serverExternalPackages: ['genkit', '@genkit-ai/core', '@genkit-ai/google-genai', '@opentelemetry/sdk-node'],
   },
   webpack: (config, { isServer }) => {
     config.experiments = { ...config.experiments, topLevelAwait: true };

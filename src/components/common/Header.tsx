@@ -44,6 +44,9 @@ export default function Header() {
   
   const dashboardHref = isAdmin ? '/admin/dashboard' : '/dashboard';
 
+  // Force show buttons if not loading and no user
+  const showAuthButtons = !loading && !user;
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
@@ -74,9 +77,9 @@ export default function Header() {
         <div className="flex items-center gap-2 md:gap-4">
           <ModeToggle />
 
-          {!loading && !user && (
-            <div className="flex items-center gap-2">
-              <Button asChild variant="ghost" size="sm" className="font-bold border border-primary/20 hover:bg-primary/5">
+          {showAuthButtons && (
+            <div className="flex items-center gap-2 animate-in fade-in duration-500">
+              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex font-bold border border-primary/20 hover:bg-primary/5">
                 <Link href="/login">Log in</Link>
               </Button>
               <Button asChild size="sm" className="font-bold shadow-md">
@@ -165,7 +168,7 @@ export default function Header() {
                       </Button>
                     </>
                   )}
-                  {!loading && !user && (
+                  {showAuthButtons && (
                     <div className="grid grid-cols-2 gap-2 mt-4">
                       <Button asChild variant="outline" onClick={() => setIsOpen(false)}>
                         <Link href="/login">Log in</Link>
