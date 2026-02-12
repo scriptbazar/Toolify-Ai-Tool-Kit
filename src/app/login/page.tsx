@@ -84,7 +84,6 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // CRITICAL: Synchronize session before redirecting
       const synced = await syncSession(user);
       if (!synced) {
           throw new Error('Session synchronization failed. Please try again.');
@@ -100,7 +99,7 @@ export default function LoginPage() {
       
       const targetUrl = searchParams.get('redirectUrl') || (role === 'admin' ? '/admin/dashboard' : '/dashboard');
       
-      // Use Hard reload to ensure Middleware picks up the new cookie immediately
+      // Force hard reload to ensure cookie is picked up by Middleware
       window.location.href = targetUrl;
       
     } catch (error: any) {
@@ -161,11 +160,7 @@ export default function LoginPage() {
                           className="absolute inset-y-0 right-0 h-full px-3"
                           onClick={() => setShowPassword(!showPassword)}
                         >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                       </div>
                       <FormMessage />

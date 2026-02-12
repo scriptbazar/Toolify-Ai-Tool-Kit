@@ -1,3 +1,4 @@
+
 'use client';
 
 import dynamic from 'next/dynamic';
@@ -166,5 +167,6 @@ export const slugToComponentMap: Record<string, React.FC<any>> = {
   'text-to-ascii-converter': dynamic(() => import('@/components/tools/TextToAsciiConverter'), { loading: LoadingComponent }),
   'random-name-generator': dynamic(() => import('@/components/tools/RandomNameGenerator'), { loading: LoadingComponent }),
   'ifsc-code-to-bank-details': dynamic(() => import('@/components/tools/IfscCodeToBankDetails'), { loading: LoadingComponent }),
-  'text-to-speech': dynamic(() => import('@/components/tools/TextToSpeech').then(mod => mod.TextToSpeechTool), { loading: LoadingComponent }),
+  'product-sku-encryptor': dynamic(() => import('./SkuEncryptor')),
+  'text-to-speech': dynamic(() => import('./TextToSpeech').then(mod => mod.TextToSpeechTool), { loading: LoadingComponent }),
 };

@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +37,6 @@ const formSchema = z.object({
 
 export default function SignupPage() {
   const { toast } = useToast();
-  const searchParams = useSearchParams();
   const { syncSession } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -97,7 +97,6 @@ export default function SignupPage() {
 
       await sendEmailVerification(user);
 
-      // Create Firestore profile
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         firstName,
@@ -109,7 +108,6 @@ export default function SignupPage() {
         planId: "free",
       });
 
-      // Synchronize session cookie
       const synced = await syncSession(user);
       if (!synced) {
           throw new Error('Session synchronization failed.');
@@ -117,7 +115,7 @@ export default function SignupPage() {
 
       toast({ title: "Account created!", description: "Redirecting to dashboard..." });
       
-      // Use Hard reload to ensure Middleware picks up the new cookie
+      // Force hard reload to ensure cookie is picked up by Middleware
       window.location.href = '/dashboard';
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });

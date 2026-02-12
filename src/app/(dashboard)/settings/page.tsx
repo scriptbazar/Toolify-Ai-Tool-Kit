@@ -1,19 +1,6 @@
 
-'use client';
+import { redirect } from 'next/navigation';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
-/**
- * Redirection Component to resolve path conflict.
- * The primary settings page is now at src/app/settings/page.tsx.
- */
-export default function DashboardSettingsRedirect() {
-    const router = useRouter();
-    
-    useEffect(() => {
-        router.replace('/settings');
-    }, [router]);
-
-    return null;
+export default function SettingsRedirect() {
+    redirect('/settings');
 }

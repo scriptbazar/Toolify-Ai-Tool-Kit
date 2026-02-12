@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -55,7 +55,6 @@ const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => {
 export default function Header() {
   const { user, userData, isAdmin, loading } = useAuth();
   const { toast } = useToast();
-  const pathname = usePathname();
   
   const handleLogout = async () => {
     await signOut(auth);
@@ -70,7 +69,6 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 md:px-8">
         
-        {/* Mobile menu and logo */}
         <div className="flex w-full items-center justify-between md:hidden">
             <Link href="/" className="flex items-center space-x-2">
               <Logo />
@@ -104,22 +102,18 @@ export default function Header() {
                           {!loading && !user ? (
                             <div className="grid grid-cols-2 gap-2">
                              <Button asChild variant="ghost" className="flex-1 justify-center">
-                               <Link href="/login"><LogIn className="mr-2 h-4 w-4" /> Log in</Link>
+                               <Link href="/login">Log in</Link>
                              </Button>
                              <Button asChild className="flex-1 justify-center">
-                               <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" /> Sign Up</Link>
+                               <Link href="/signup">Sign Up</Link>
                              </Button>
                             </div>
                           ) : !loading && user ? (
                             <div className="grid grid-cols-2 gap-2">
                                <Button asChild variant="secondary" className="justify-center">
-                                <Link href={dashboardHref}>
-                                    {isAdmin ? <ShieldCheck className="mr-2 h-4 w-4"/> : <LayoutDashboard className="mr-2 h-4 w-4"/>}
-                                    {isAdmin ? 'Admin' : 'Dashboard'}
-                                </Link>
+                                <Link href={dashboardHref}>Dashboard</Link>
                               </Button>
                               <Button variant="destructive" onClick={handleLogout} className="justify-center">
-                                  <LogoutIcon className="mr-2 h-4 w-4"/>
                                   Logout
                               </Button>
                             </div>
@@ -131,7 +125,6 @@ export default function Header() {
             </div>
         </div>
 
-        {/* Desktop Header */}
         <div className="hidden md:flex w-full items-center">
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
@@ -149,10 +142,10 @@ export default function Header() {
              ) : !user ? (
                 <div className="flex items-center gap-2">
                   <Button asChild variant="ghost">
-                    <Link href="/login"><LogIn className="mr-2 h-4 w-4" />Log in</Link>
+                    <Link href="/login">Log in</Link>
                   </Button>
                   <Button asChild>
-                    <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" />Sign Up</Link>
+                    <Link href="/signup">Sign Up</Link>
                   </Button>
                 </div>
               ) : (
@@ -162,45 +155,25 @@ export default function Header() {
                        <Avatar className="h-8 w-8">
                          <AvatarFallback>{userData?.firstName?.[0] || 'U'}</AvatarFallback>
                       </Avatar>
-                      <span className="sr-only">Toggle user menu</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel className="font-normal">
+                    <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {userData ? `${userData.firstName} ${userData.lastName}` : 'User'}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {user?.email || ''}
-                        </p>
+                        <p className="text-sm font-medium">{userData?.firstName} {userData?.lastName}</p>
+                        <p className="text-xs text-muted-foreground">{user?.email}</p>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href={dashboardHref}>
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
-                      </Link>
+                      <Link href={dashboardHref}>Dashboard</Link>
                     </DropdownMenuItem>
                      <DropdownMenuItem asChild>
-                      <Link href="/settings">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
-                      </Link>
+                      <Link href="/settings">Profile</Link>
                     </DropdownMenuItem>
-                    {!isAdmin && (
-                       <DropdownMenuItem asChild>
-                        <Link href="/my-favorites">
-                          <Star className="mr-2 h-4 w-4" />
-                          <span>My Favorites</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>
-                       <LogoutIcon className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                      Logout
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
