@@ -58,7 +58,6 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setLoading(true);
       if (firebaseUser) {
         setUser(firebaseUser);
         
