@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -44,7 +43,7 @@ export default function Header() {
   
   const dashboardHref = isAdmin ? '/admin/dashboard' : '/dashboard';
 
-  // Force show buttons if not loading and no user
+  // Explicitly show auth buttons only when loading is finished AND no user is present
   const showAuthButtons = !loading && !user;
 
   return (
@@ -77,31 +76,33 @@ export default function Header() {
         <div className="flex items-center gap-2 md:gap-4">
           <ModeToggle />
 
+          {/* Auth Buttons for logged-out users */}
           {showAuthButtons && (
             <div className="flex items-center gap-2 animate-in fade-in duration-500">
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex font-bold border border-primary/20 hover:bg-primary/5">
                 <Link href="/login">Log in</Link>
               </Button>
-              <Button asChild size="sm" className="font-bold shadow-md">
+              <Button asChild size="sm" className="font-bold shadow-md bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Link href="/signup">Sign Up</Link>
               </Button>
             </div>
           )}
 
+          {/* User Profile for logged-in users */}
           {!loading && user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="icon" className="rounded-full ring-2 ring-primary/10">
+                <Button variant="secondary" size="icon" className="rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary/10 text-primary">{userData?.firstName?.[0] || 'U'}</AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary font-bold">{userData?.firstName?.[0] || user.email?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userData ? `${userData.firstName} ${userData.lastName}` : 'User'}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                    <p className="text-sm font-medium leading-none">{userData ? `${userData.firstName} ${userData.lastName}` : 'Welcome'}</p>
+                    <p className="text-xs leading-none text-muted-foreground truncate">{user.email}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -132,6 +133,7 @@ export default function Header() {
             </DropdownMenu>
           )}
 
+          {/* Mobile Menu */}
           <div className="md:hidden">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>

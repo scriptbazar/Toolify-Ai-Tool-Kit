@@ -1,4 +1,3 @@
-
 import type {NextConfig} from 'next';
 import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 
@@ -47,29 +46,22 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'recharts', 'date-fns', 'clsx', 'framer-motion'],
+    serverExternalPackages: ['genkit', '@genkit-ai/core', '@genkit-ai/google-genai', '@opentelemetry/sdk-node', 'pdf-lib', 'pdfjs-dist'],
+  },
   webpack: (config, { isServer }) => {
     config.experiments = { ...config.experiments, topLevelAwait: true };
     
-    // The "handlebars" library is a sub-dependency of genkit, and it uses
-    // an old "require.extensions" feature that is not supported by webpack.
-    // This can be worked around by telling webpack to not try and bundle the
-    // "handlebars" library.
     config.externals.push('handlebars');
     config.externals.push('firebase-admin');
     config.externals.push('@google-cloud/firestore');
 
-    // These libraries are large and should be handled carefully.
-    // 'canvas' is a server-side dependency for node-canvas, which might be used by pdfjs-dist on the server.
-    // We mark it as external to prevent webpack from trying to bundle it for the client.
     if (!isServer) {
         config.externals.push('canvas');
     }
     config.externals.push('pdfjs-dist/build/pdf.worker.min.mjs');
 
-
-    // This alias is necessary to resolve the 'node:process' import used by
-    // some dependencies, which is not supported by Webpack by default.
-    // Fallback for node:process
     if (!config.resolve) {
       config.resolve = {};
     }
@@ -78,7 +70,6 @@ const nextConfig: NextConfig = {
       'node:process': 'process/browser',
     };
 
-    // Add the NodePolyfillPlugin to handle Node.js built-in modules
     config.plugins.push(new NodePolyfillPlugin());
     
     return config;
