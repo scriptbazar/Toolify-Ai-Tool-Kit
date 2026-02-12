@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -84,10 +83,10 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // CRITICAL: Synchronize session cookie BEFORE redirecting
+      // Ensure session is synchronized
       const synced = await syncSession(user);
       if (!synced) {
-          throw new Error('Session synchronization failed. Please try again.');
+          throw new Error('Session synchronization failed.');
       }
 
       await logUserLogin(user.uid);
@@ -96,16 +95,16 @@ export default function LoginPage() {
       const userDocSnap = await getDoc(userDocRef);
       const role = userDocSnap.exists() ? userDocSnap.data().role : 'user';
 
-      toast({ title: "Welcome back!", description: "Accessing your dashboard..." });
+      toast({ title: "Welcome back!" });
       
       const targetUrl = searchParams.get('redirectUrl') || (role === 'admin' ? '/admin/dashboard' : '/dashboard');
       
-      // Force hard reload to ensure cookie is picked up by Middleware
+      // Force hard refresh to ensure server sees cookie
       window.location.href = targetUrl;
       
     } catch (error: any) {
       console.error("Login error:", error);
-      toast({ title: "Login Failed", description: "Invalid email or password.", variant: "destructive" });
+      toast({ title: "Login Failed", description: "Invalid credentials.", variant: "destructive" });
       setIsSubmitting(false);
     } finally {
         recaptchaRef.current?.reset();

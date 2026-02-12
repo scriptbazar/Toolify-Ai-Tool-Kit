@@ -16,13 +16,13 @@ const LoadingComponent = () => (
 
 /**
  * Centralized High-Performance Tool Map
- * Every tool is imported lazily with correct named export handling.
+ * Standardized dynamic imports to prevent "Element type is invalid" error.
  */
 export const slugToComponentMap: Record<string, FC<any>> = {
-  'advance-text-cleaner': dynamic(() => import('@/components/tools/AdvanceTextCleaner'), { loading: LoadingComponent, ssr: false }),
+  'advance-text-cleaner': dynamic(() => import('@/components/tools/AdvanceTextCleaner').then(mod => mod.AdvanceTextCleaner), { loading: LoadingComponent, ssr: false }),
   'admob-revenue-calculator': dynamic(() => import('@/components/tools/AdMobRevenueCalculator').then(mod => mod.AdMobRevenueCalculator), { loading: LoadingComponent, ssr: false }),
   'age-calculator': dynamic(() => import('@/components/tools/AgeCalculator').then(mod => mod.AgeCalculator), { loading: LoadingComponent, ssr: false }),
-  'amazon-shipping-label-cropper': dynamic(() => import('@/components/tools/AmazonShippingLabelCropper'), { loading: LoadingComponent, ssr: false }),
+  'amazon-shipping-label-cropper': dynamic(() => import('@/components/tools/AmazonShippingLabelCropper'), { loading: LoadingComponent, ssr: false }), // Default export
   'ascii-to-text-converter': dynamic(() => import('@/components/tools/AsciiToTextConverter').then(mod => mod.AsciiToTextConverter), { loading: LoadingComponent, ssr: false }),
   'average-calculator': dynamic(() => import('@/components/tools/AverageCalculator').then(mod => mod.AverageCalculator), { loading: LoadingComponent, ssr: false }),
   'barcode-generator': dynamic(() => import('@/components/tools/BarcodeGenerator').then(mod => mod.BarcodeGenerator), { loading: LoadingComponent, ssr: false }),
@@ -111,7 +111,7 @@ export const slugToComponentMap: Record<string, FC<any>> = {
   'schema-generator': dynamic(() => import('@/components/tools/SchemaGenerator').then(mod => mod.SchemaGenerator), { loading: LoadingComponent, ssr: false }),
   'serp-checker': dynamic(() => import('@/components/tools/SerpChecker').then(mod => mod.SerpChecker), { loading: LoadingComponent, ssr: false }),
   'sha256-hash-generator': dynamic(() => import('@/components/tools/Sha256HashGenerator').then(mod => mod.Sha256HashGenerator), { loading: LoadingComponent, ssr: false }),
-  'sku-encryptor': dynamic(() => import('@/components/tools/SkuEncryptor'), { loading: LoadingComponent, ssr: false }),
+  'sku-encryptor': dynamic(() => import('@/components/tools/SkuEncryptor').then(mod => mod.SkuEncryptor), { loading: LoadingComponent, ssr: false }),
   'srm-to-cgpa-calculator': dynamic(() => import('@/components/tools/SrmToCgpaCalculator').then(mod => mod.SrmToCgpaCalculator), { loading: LoadingComponent, ssr: false }),
   'sql-formatter': dynamic(() => import('@/components/tools/SqlFormatter').then(mod => mod.SqlFormatter), { loading: LoadingComponent, ssr: false }),
   'text-repeater': dynamic(() => import('@/components/tools/TextRepeater').then(mod => mod.TextRepeater), { loading: LoadingComponent, ssr: false }),
@@ -173,6 +173,6 @@ export const slugToComponentMap: Record<string, FC<any>> = {
   'text-to-handwriting-converter': dynamic(() => import('@/components/tools/TextToHandwritingConverter').then(mod => mod.TextToHandwritingConverter), { loading: LoadingComponent, ssr: false }),
   'text-to-ascii-converter': dynamic(() => import('@/components/tools/TextToAsciiConverter').then(mod => mod.TextToAsciiConverter), { loading: LoadingComponent, ssr: false }),
   'random-name-generator': dynamic(() => import('@/components/tools/RandomNameGenerator').then(mod => mod.RandomNameGenerator), { loading: LoadingComponent, ssr: false }),
-  'ifsc-code-to-bank-details': dynamic(() => import('@/components/tools/IfscCodeToBankDetails'), { loading: LoadingComponent, ssr: false }),
+  'ifsc-code-to-bank-details': dynamic(() => import('@/components/tools/IfscCodeToBankDetails').then(mod => mod.IfscCodeToBankDetails), { loading: LoadingComponent, ssr: false }),
   'text-to-speech': dynamic(() => import('@/components/tools/TextToSpeech').then(mod => mod.TextToSpeechTool), { loading: LoadingComponent, ssr: false }),
 };

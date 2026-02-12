@@ -1,4 +1,3 @@
-
 import type {NextConfig} from 'next';
 import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 

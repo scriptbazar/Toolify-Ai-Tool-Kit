@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -108,15 +107,15 @@ export default function SignupPage() {
         planId: "free",
       });
 
-      // CRITICAL: Synchronize session cookie BEFORE redirecting
+      // Synchronize session before reload
       const synced = await syncSession(user);
       if (!synced) {
-          throw new Error('Session synchronization failed. Please try again.');
+          throw new Error('Session synchronization failed.');
       }
 
-      toast({ title: "Account created!", description: "Redirecting to dashboard..." });
+      toast({ title: "Account created!" });
       
-      // Force hard reload to ensure cookie is picked up by Middleware
+      // Hard reload to redirect to dashboard
       window.location.href = '/dashboard';
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
