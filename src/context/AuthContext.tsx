@@ -62,7 +62,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         setUser(firebaseUser);
         
         // Background sync session cookie
-        syncSession(firebaseUser);
+        await syncSession(firebaseUser);
         
         try {
             const userDocRef = doc(db, "users", firebaseUser.uid);

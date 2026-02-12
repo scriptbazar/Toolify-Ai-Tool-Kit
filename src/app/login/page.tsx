@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -99,10 +100,8 @@ export default function LoginPage() {
       
       const targetUrl = searchParams.get('redirectUrl') || (role === 'admin' ? '/admin/dashboard' : '/dashboard');
       
-      // Use Hard reload to ensure Middleware picks up the new cookie
-      setTimeout(() => {
-          window.location.href = targetUrl;
-      }, 500);
+      // Use Hard reload to ensure Middleware picks up the new cookie immediately
+      window.location.href = targetUrl;
       
     } catch (error: any) {
       console.error("Login error:", error);
