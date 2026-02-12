@@ -5,7 +5,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Home, Newspaper, Mail, DollarSign, User, LogOut, Lightbulb } from 'lucide-react';
+import { Menu, Home, Newspaper, Mail, DollarSign, User, LogOut, Lightbulb, Star, LayoutDashboard } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
@@ -74,7 +74,6 @@ export default function Header() {
         <div className="flex items-center gap-2 md:gap-4">
           <ModeToggle />
 
-          {/* Corrected logic: only show login/signup if NOT loading and user is NULL */}
           {!loading && !user && (
             <div className="flex items-center gap-2">
               <Button asChild variant="ghost" size="sm" className="font-bold">
@@ -86,7 +85,6 @@ export default function Header() {
             </div>
           )}
 
-          {/* Show profile dropdown if NOT loading and user is NOT NULL */}
           {!loading && user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -99,21 +97,33 @@ export default function Header() {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userData?.firstName || 'User'}</p>
+                    <p className="text-sm font-medium leading-none">{userData ? `${userData.firstName} ${userData.lastName}` : 'User'}</p>
                     <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href={dashboardHref} className="cursor-pointer w-full">Dashboard</Link>
+                  <Link href={dashboardHref} className="cursor-pointer w-full flex items-center">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/settings" className="cursor-pointer w-full">Profile Settings</Link>
+                  <Link href="/my-favorites" className="cursor-pointer w-full flex items-center">
+                    <Star className="mr-2 h-4 w-4 text-yellow-500 fill-yellow-500" />
+                    <span>My Favorites</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="cursor-pointer w-full flex items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile Settings</span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
-                  Logout
+                  <span>Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -139,6 +149,22 @@ export default function Header() {
                       </Link>
                     </Button>
                   ))}
+                  {!loading && user && (
+                    <>
+                      <Button asChild variant="ghost" onClick={() => setIsOpen(false)} className="justify-start">
+                        <Link href={dashboardHref}>
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          Dashboard
+                        </Link>
+                      </Button>
+                      <Button asChild variant="ghost" onClick={() => setIsOpen(false)} className="justify-start">
+                        <Link href="/my-favorites">
+                          <Star className="mr-2 h-4 w-4 text-yellow-500 fill-yellow-500" />
+                          My Favorites
+                        </Link>
+                      </Button>
+                    </>
+                  )}
                   {!loading && !user && (
                     <div className="grid grid-cols-2 gap-2 mt-4">
                       <Button asChild variant="outline" onClick={() => setIsOpen(false)}>
