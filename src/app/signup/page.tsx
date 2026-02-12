@@ -108,9 +108,10 @@ export default function SignupPage() {
         planId: "free",
       });
 
+      // CRITICAL: Synchronize session cookie BEFORE redirecting
       const synced = await syncSession(user);
       if (!synced) {
-          throw new Error('Session synchronization failed.');
+          throw new Error('Session synchronization failed. Please try again.');
       }
 
       toast({ title: "Account created!", description: "Redirecting to dashboard..." });

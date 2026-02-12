@@ -84,6 +84,7 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
+      // CRITICAL: Synchronize session cookie BEFORE redirecting
       const synced = await syncSession(user);
       if (!synced) {
           throw new Error('Session synchronization failed. Please try again.');

@@ -32,10 +32,14 @@ export default function Header() {
   const pathname = usePathname();
   
   const handleLogout = async () => {
-    await signOut(auth);
-    await fetch('/api/auth/session-logout', { method: 'POST' });
-    toast({ title: 'Logged out successfully.' });
-    window.location.href = '/';
+    try {
+      await signOut(auth);
+      await fetch('/api/auth/session-logout', { method: 'POST' });
+      toast({ title: 'Logged out successfully.' });
+      window.location.href = '/';
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
   
   const dashboardHref = isAdmin ? '/admin/dashboard' : '/dashboard';
@@ -70,6 +74,7 @@ export default function Header() {
         <div className="flex items-center gap-2 md:gap-4">
           <ModeToggle />
 
+          {/* Corrected logic: only show login/signup if NOT loading and user is NULL */}
           {!loading && !user && (
             <div className="flex items-center gap-2">
               <Button asChild variant="ghost" size="sm" className="font-bold">
@@ -81,7 +86,8 @@ export default function Header() {
             </div>
           )}
 
-          {user && (
+          {/* Show profile dropdown if NOT loading and user is NOT NULL */}
+          {!loading && user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full ring-2 ring-primary/10">
@@ -133,7 +139,7 @@ export default function Header() {
                       </Link>
                     </Button>
                   ))}
-                  {!user && (
+                  {!loading && !user && (
                     <div className="grid grid-cols-2 gap-2 mt-4">
                       <Button asChild variant="outline" onClick={() => setIsOpen(false)}>
                         <Link href="/login">Log in</Link>
