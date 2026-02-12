@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 
 /**
  * Redirection Component to resolve path conflict.
- * The primary settings page is now at /settings/page.tsx
+ * The primary settings page is now at src/app/settings/page.tsx.
+ * This empty file prevents the 'Two parallel pages' build error.
  */
 export default function DashboardSettingsRedirect() {
     const router = useRouter();
@@ -15,9 +16,5 @@ export default function DashboardSettingsRedirect() {
         router.replace('/settings');
     }, [router]);
 
-    return (
-        <div className="flex h-full items-center justify-center">
-            <p className="text-muted-foreground">Redirecting to profile settings...</p>
-        </div>
-    );
+    return null;
 }

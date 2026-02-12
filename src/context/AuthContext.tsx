@@ -34,7 +34,7 @@ export const AuthContext = createContext<AuthContextType>({
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [userData, setUserData] = useState<AppUser | null>(null);
+  const [userData, setLocalUserData] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   const syncSession = useCallback(async (forceUser?: FirebaseUser) => {
@@ -58,31 +58,30 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setLoading(true);
       if (firebaseUser) {
         setUser(firebaseUser);
         
-        // Ensure session cookie is synced
-        await syncSession(firebaseUser);
+        // Background sync session cookie
+        syncSession(firebaseUser);
         
         try {
             const userDocRef = doc(db, "users", firebaseUser.uid);
             const userDocSnap = await getDoc(userDocRef);
 
             if (userDocSnap.exists()) {
-                setUserData(userDocSnap.data() as AppUser);
+                setLocalUserData(userDocSnap.data() as AppUser);
             } else {
-                setUserData(null);
+                setLocalUserData(null);
             }
         } catch (error) {
             console.error("AuthContext: Firestore fetch error:", error);
-            setUserData(null);
+            setLocalUserData(null);
         }
       } else {
         setUser(null);
-        setUserData(null);
-        // Ensure session is cleared
-        await fetch('/api/auth/session-logout', { method: 'POST' }).catch(() => {});
+        setLocalUserData(null);
+        // Clear session on logout
+        fetch('/api/auth/session-logout', { method: 'POST' }).catch(() => {});
       }
       setLoading(false);
     });

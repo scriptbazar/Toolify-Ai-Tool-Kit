@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { LogIn, Menu, UserPlus, Home, Newspaper, Info, Mail, DollarSign, User, LayoutDashboard, LogOut as LogoutIcon, ShieldCheck, Lightbulb, Star } from 'lucide-react';
+import { LogIn, Menu, UserPlus, Home, Newspaper, Mail, DollarSign, User, LayoutDashboard, LogOut as LogoutIcon, ShieldCheck, Lightbulb, Star } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
@@ -13,7 +13,7 @@ import { ModeToggle } from './ModeToggle';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/context/AuthContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
@@ -25,7 +25,7 @@ const mainNavLinks = [
   { href: '/pricing', label: 'Pricing', icon: DollarSign },
 ];
 
-const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }: { isMobile?: boolean; isLoggedIn?: boolean; isAdmin?: boolean }) => {
+const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => {
   const pathname = usePathname();
   return (
     <>
@@ -55,7 +55,7 @@ const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }: { i
 export default function Header() {
   const { user, userData, isAdmin, loading } = useAuth();
   const { toast } = useToast();
-  const router = useRouter();
+  const pathname = usePathname();
   
   const handleLogout = async () => {
     await signOut(auth);
@@ -96,7 +96,7 @@ export default function Header() {
                     </SheetHeader>
                     <div className="flex-1 overflow-y-auto p-4">
                       <nav className="flex flex-col space-y-2">
-                         <NavLinks isMobile={true} isLoggedIn={!!user} isAdmin={isAdmin} />
+                         <NavLinks isMobile={true} />
                       </nav>
                     </div>
                      <div className="mt-auto p-4 border-t">
@@ -140,7 +140,7 @@ export default function Header() {
             </Link>
           </div>
           <nav className="flex-1 flex items-center justify-center space-x-1 text-sm font-medium">
-            <NavLinks isLoggedIn={!!user} isAdmin={isAdmin} />
+            <NavLinks />
           </nav>
           <div className="flex items-center justify-end gap-2">
              <ModeToggle />
