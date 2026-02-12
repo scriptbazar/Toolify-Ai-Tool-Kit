@@ -14,19 +14,20 @@ const cropAmazonLabel = async (pdfDoc: PDFDocument): Promise<PDFDocument> => {
     const labelWidth = width;
     
     const [topEmbeddedPage] = await newPdfDoc.embedPdf(pdfDoc, [0]);
-    const topPage = newPdfDoc.addPage([4 * 72, 6 * 72]);
+    // PDF points: 4x6 inch = 288x432 points
+    const topPage = newPdfDoc.addPage([288, 432]);
     topPage.drawPage(topEmbeddedPage, {
-      x: - (labelWidth - (4 * 72)) / 2,
-      y: - (height - labelHeight) - (labelHeight - (6 * 72)) / 2,
+      x: - (labelWidth - 288) / 2,
+      y: - (height - labelHeight) - (labelHeight - 432) / 2,
       width: labelWidth,
       height: height
     });
     
     const [bottomEmbeddedPage] = await newPdfDoc.embedPdf(pdfDoc, [0]);
-    const bottomPage = newPdfDoc.addPage([4 * 72, 6 * 72]);
+    const bottomPage = newPdfDoc.addPage([288, 432]);
     bottomPage.drawPage(bottomEmbeddedPage, {
-       x: - (labelWidth - (4 * 72)) / 2,
-       y: - (labelHeight - (6 * 72)) / 2,
+       x: - (labelWidth - 288) / 2,
+       y: - (labelHeight - 432) / 2,
        width: labelWidth,
        height: height
     });

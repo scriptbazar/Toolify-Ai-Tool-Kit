@@ -2,7 +2,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import * as React from 'react';
+import React, { FC } from 'react';
 import { Loader2 } from 'lucide-react';
 
 const LoadingComponent = () => (
@@ -11,7 +11,7 @@ const LoadingComponent = () => (
   </div>
 );
 
-export const slugToComponentMap: Record<string, React.FC<any>> = {
+export const slugToComponentMap: { [key: string]: FC<any> } = {
   'advance-text-cleaner': dynamic(() => import('@/components/tools/AdvanceTextCleaner'), { loading: LoadingComponent }),
   'admob-revenue-calculator': dynamic(() => import('@/components/tools/AdMobRevenueCalculator').then(mod => mod.AdMobRevenueCalculator), { loading: LoadingComponent }),
   'age-calculator': dynamic(() => import('@/components/tools/AgeCalculator'), { loading: LoadingComponent }),
@@ -167,6 +167,5 @@ export const slugToComponentMap: Record<string, React.FC<any>> = {
   'text-to-ascii-converter': dynamic(() => import('@/components/tools/TextToAsciiConverter'), { loading: LoadingComponent }),
   'random-name-generator': dynamic(() => import('@/components/tools/RandomNameGenerator'), { loading: LoadingComponent }),
   'ifsc-code-to-bank-details': dynamic(() => import('@/components/tools/IfscCodeToBankDetails'), { loading: LoadingComponent }),
-  'product-sku-encryptor': dynamic(() => import('./SkuEncryptor')),
-  'text-to-speech': dynamic(() => import('./TextToSpeech').then(mod => mod.TextToSpeechTool), { loading: LoadingComponent }),
+  'text-to-speech': dynamic(() => import('@/components/tools/TextToSpeech').then(mod => mod.TextToSpeechTool), { loading: LoadingComponent }),
 };
