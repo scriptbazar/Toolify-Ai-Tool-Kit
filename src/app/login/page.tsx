@@ -84,7 +84,6 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // Ensure session cookie is set on the server
       const synced = await syncSession(user);
       if (!synced) {
           throw new Error('Failed to synchronize session with server. Please try again.');
@@ -100,7 +99,6 @@ export default function LoginPage() {
       
       const targetUrl = searchParams.get('redirectUrl') || (role === 'admin' ? '/admin/dashboard' : '/dashboard');
       
-      // CRITICAL: Use window.location.href to force a full reload and ensure cookies are picked up by middleware
       setTimeout(() => {
           window.location.href = targetUrl;
       }, 500);

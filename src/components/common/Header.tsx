@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,7 +17,6 @@ import { useAuth } from '@/hooks/use-auth';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
-
 const mainNavLinks = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/blog', label: 'Blog', icon: Newspaper },
@@ -25,16 +25,11 @@ const mainNavLinks = [
   { href: '/pricing', label: 'Pricing', icon: DollarSign },
 ];
 
-const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }) => {
+const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }: { isMobile?: boolean; isLoggedIn?: boolean; isAdmin?: boolean }) => {
   const pathname = usePathname();
-  
-  const allLinks = [
-    ...mainNavLinks,
-  ];
-
   return (
     <>
-      {allLinks.map((link) => {
+      {mainNavLinks.map((link) => {
         const isActive = pathname === link.href;
         return (
           <Button
@@ -43,8 +38,7 @@ const NavLinks = ({ isMobile = false, isLoggedIn = false, isAdmin = false }) => 
             variant={isActive ? 'secondary' : 'ghost'}
             className={cn(
               'w-full justify-start text-base',
-              !isMobile &&
-                'text-sm w-auto'
+              !isMobile && 'text-sm w-auto'
             )}
           >
             <Link href={link.href}>
@@ -65,10 +59,9 @@ export default function Header() {
   
   const handleLogout = async () => {
     await signOut(auth);
-    // Clear the session cookie by calling our API route
     await fetch('/api/auth/session-logout', { method: 'POST' });
     toast({ title: 'Logged out successfully.' });
-    router.push('/');
+    window.location.href = '/';
   };
   
   const dashboardHref = isAdmin ? '/admin/dashboard' : '/dashboard';
@@ -108,7 +101,7 @@ export default function Header() {
                     </div>
                      <div className="mt-auto p-4 border-t">
                         <div className="flex flex-col gap-2">
-                          {loading ? null : !user ? (
+                          {!loading && !user ? (
                             <div className="grid grid-cols-2 gap-2">
                              <Button asChild variant="ghost" className="flex-1 justify-center">
                                <Link href="/login"><LogIn className="mr-2 h-4 w-4" /> Log in</Link>
@@ -117,7 +110,7 @@ export default function Header() {
                                <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" /> Sign Up</Link>
                              </Button>
                             </div>
-                          ) : (
+                          ) : !loading && user ? (
                             <div className="grid grid-cols-2 gap-2">
                                <Button asChild variant="secondary" className="justify-center">
                                 <Link href={dashboardHref}>
@@ -130,7 +123,7 @@ export default function Header() {
                                   Logout
                               </Button>
                             </div>
-                          )}
+                          ) : null}
                         </div>
                     </div>
                   </SheetContent>
@@ -151,21 +144,23 @@ export default function Header() {
           </nav>
           <div className="flex items-center justify-end gap-2">
              <ModeToggle />
-             {loading ? <div className="h-8 w-8 rounded-full bg-muted animate-pulse" /> : !user ? (
-                <>
+             {loading ? (
+                <div className="h-8 w-24 rounded-md bg-muted animate-pulse" />
+             ) : !user ? (
+                <div className="flex items-center gap-2">
                   <Button asChild variant="ghost">
                     <Link href="/login"><LogIn className="mr-2 h-4 w-4" />Log in</Link>
                   </Button>
                   <Button asChild>
                     <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" />Sign Up</Link>
                   </Button>
-                </>
+                </div>
               ) : (
                  <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="secondary" size="icon" className="rounded-full">
                        <Avatar className="h-8 w-8">
-                         <AvatarFallback>{userData?.firstName?.[0] || 'A'}</AvatarFallback>
+                         <AvatarFallback>{userData?.firstName?.[0] || 'U'}</AvatarFallback>
                       </Avatar>
                       <span className="sr-only">Toggle user menu</span>
                     </Button>
