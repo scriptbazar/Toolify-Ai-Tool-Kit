@@ -22,7 +22,7 @@ export const slugToComponentMap: Record<string, FC<any>> = {
   'advance-text-cleaner': dynamic(() => import('@/components/tools/AdvanceTextCleaner').then(mod => mod.AdvanceTextCleaner), { loading: LoadingComponent, ssr: false }),
   'admob-revenue-calculator': dynamic(() => import('@/components/tools/AdMobRevenueCalculator').then(mod => mod.AdMobRevenueCalculator), { loading: LoadingComponent, ssr: false }),
   'age-calculator': dynamic(() => import('@/components/tools/AgeCalculator').then(mod => mod.AgeCalculator), { loading: LoadingComponent, ssr: false }),
-  'amazon-shipping-label-cropper': dynamic(() => import('@/components/tools/AmazonShippingLabelCropper'), { loading: LoadingComponent, ssr: false }), // Default export
+  'amazon-shipping-label-cropper': dynamic(() => import('@/components/tools/AmazonShippingLabelCropper'), { loading: LoadingComponent, ssr: false }),
   'ascii-to-text-converter': dynamic(() => import('@/components/tools/AsciiToTextConverter').then(mod => mod.AsciiToTextConverter), { loading: LoadingComponent, ssr: false }),
   'average-calculator': dynamic(() => import('@/components/tools/AverageCalculator').then(mod => mod.AverageCalculator), { loading: LoadingComponent, ssr: false }),
   'barcode-generator': dynamic(() => import('@/components/tools/BarcodeGenerator').then(mod => mod.BarcodeGenerator), { loading: LoadingComponent, ssr: false }),

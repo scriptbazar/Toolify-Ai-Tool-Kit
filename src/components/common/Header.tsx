@@ -43,9 +43,6 @@ export default function Header() {
   
   const dashboardHref = isAdmin ? '/admin/dashboard' : '/dashboard';
 
-  // Explicitly show auth buttons only when loading is finished AND no user is present
-  const showAuthButtons = !loading && !user;
-
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
@@ -76,32 +73,30 @@ export default function Header() {
         <div className="flex items-center gap-2 md:gap-4">
           <ModeToggle />
 
-          {/* Auth Buttons for logged-out users */}
-          {showAuthButtons && (
-            <div className="flex items-center gap-2 animate-in fade-in duration-500">
-              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex font-bold border border-primary/20 hover:bg-primary/5">
+          {!loading && !user && (
+            <div className="flex items-center gap-2">
+              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex font-bold">
                 <Link href="/login">Log in</Link>
               </Button>
-              <Button asChild size="sm" className="font-bold shadow-md bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button asChild size="sm" className="font-bold shadow-md">
                 <Link href="/signup">Sign Up</Link>
               </Button>
             </div>
           )}
 
-          {/* User Profile for logged-in users */}
           {!loading && user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="icon" className="rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
+                <Button variant="secondary" size="icon" className="rounded-full ring-2 ring-primary/20">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold">{userData?.firstName?.[0] || user.email?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary font-bold">{userData?.firstName?.[0] || 'U'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userData ? `${userData.firstName} ${userData.lastName}` : 'Welcome'}</p>
+                    <p className="text-sm font-medium leading-none">{userData ? `${userData.firstName} ${userData.lastName}` : 'User'}</p>
                     <p className="text-xs leading-none text-muted-foreground truncate">{user.email}</p>
                   </div>
                 </DropdownMenuLabel>
@@ -118,14 +113,8 @@ export default function Header() {
                     <span>My Favorites</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/settings" className="cursor-pointer w-full flex items-center">
-                    <User className="mr-2 h-4 w-4 text-violet-500" />
-                    <span>Profile Settings</span>
-                  </Link>
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Logout</span>
                 </DropdownMenuItem>
@@ -133,7 +122,6 @@ export default function Header() {
             </DropdownMenu>
           )}
 
-          {/* Mobile Menu */}
           <div className="md:hidden">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
@@ -154,23 +142,7 @@ export default function Header() {
                       </Link>
                     </Button>
                   ))}
-                  {!loading && user && (
-                    <>
-                      <Button asChild variant="ghost" onClick={() => setIsOpen(false)} className="justify-start">
-                        <Link href={dashboardHref}>
-                          <LayoutDashboard className="mr-2 h-4 w-4 text-sky-500" />
-                          Dashboard
-                        </Link>
-                      </Button>
-                      <Button asChild variant="ghost" onClick={() => setIsOpen(false)} className="justify-start">
-                        <Link href="/my-favorites">
-                          <Star className="mr-2 h-4 w-4 text-yellow-500" />
-                          My Favorites
-                        </Link>
-                      </Button>
-                    </>
-                  )}
-                  {showAuthButtons && (
+                  {!user && (
                     <div className="grid grid-cols-2 gap-2 mt-4">
                       <Button asChild variant="outline" onClick={() => setIsOpen(false)}>
                         <Link href="/login">Log in</Link>
