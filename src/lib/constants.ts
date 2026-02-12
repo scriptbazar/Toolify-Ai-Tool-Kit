@@ -89,13 +89,13 @@ export const toolCategories: ToolCategoryDetails[] = [
     name: 'Calculators & Converters',
     description: 'Perform calculations and unit conversions.',
     Icon: Calculator,
-     color: { bg: 'bg-pink-500/20', text: 'text-pink-600', border: 'border-pink-500/40' }
+     color: { bg: 'bg-indigo-500/20', text: 'text-indigo-600', border: 'border-indigo-500/40' }
   },
   {
     id: 'miscellaneous',
     name: 'Miscellaneous Tools',
     description: 'A collection of various other tools.',
     Icon: GanttChartSquare,
-     color: { bg: 'bg-slate-500/20', text: 'text-slate-600', border: 'border-slate-500/40' }
+     color: { bg: 'bg-lime-500/20', text: 'text-lime-600', border: 'border-lime-500/40' }
   }
 ];

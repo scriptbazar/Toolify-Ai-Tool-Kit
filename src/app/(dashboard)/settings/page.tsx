@@ -1,6 +1,17 @@
 
-// This file is intentionally left blank to resolve the parallel route conflict with /src/app/settings/page.tsx.
-// Next.js cannot have two pages resolving to the same route.
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+/**
+ * Redundant settings page within route group.
+ * Redirecting to the main settings page to avoid parallel route conflicts.
+ */
 export default function SettingsRedirect() {
+    const router = useRouter();
+    useEffect(() => {
+        router.replace('/settings');
+    }, [router]);
     return null;
 }
