@@ -32,7 +32,7 @@ export const toolCategories: ToolCategoryDetails[] = [
     name: 'Text Tools',
     description: 'Manipulate and analyze text with ease.',
     Icon: Type,
-    color: { bg: 'bg-indigo-500/20', text: 'text-indigo-600', border: 'border-indigo-500/40' }
+    color: { bg: 'bg-blue-500/20', text: 'text-blue-600', border: 'border-blue-500/40' }
   },
   {
     id: 'image',
@@ -81,14 +81,14 @@ export const toolCategories: ToolCategoryDetails[] = [
     name: 'AI Tools',
     description: 'Leverage the power of Artificial Intelligence.',
     Icon: Cpu,
-    color: { bg: 'bg-blue-500/20', text: 'text-blue-600', border: 'border-blue-500/40' }
+    color: { bg: 'bg-cyan-500/20', text: 'text-cyan-600', border: 'border-cyan-500/40' }
   },
   {
     id: 'calculator',
     name: 'Calculators & Converters',
     description: 'Perform calculations and unit conversions.',
     Icon: Calculator,
-     color: { bg: 'bg-cyan-500/20', text: 'text-cyan-600', border: 'border-cyan-500/40' }
+     color: { bg: 'bg-pink-500/20', text: 'text-pink-600', border: 'border-pink-500/40' }
   },
   {
     id: 'miscellaneous',
