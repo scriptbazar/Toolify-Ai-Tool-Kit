@@ -1,4 +1,3 @@
-
 import type {NextConfig} from 'next';
 import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 
@@ -48,8 +47,7 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    // Optimize specific package imports for faster builds and smaller bundles
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'recharts'],
+    optimizePackageImports: ['lucide-react', 'recharts', 'date-fns', 'clsx'],
   },
   webpack: (config, { isServer }) => {
     config.experiments = { ...config.experiments, topLevelAwait: true };

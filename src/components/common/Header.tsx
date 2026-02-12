@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -93,8 +92,8 @@ export default function Header() {
           {loading ? (
             <div className="h-8 w-24 rounded-md bg-muted animate-pulse" />
           ) : !user ? (
-            <div className="hidden md:flex items-center gap-2">
-              <Button asChild variant="ghost" size="sm" className="font-medium">
+            <div className="flex items-center gap-2">
+              <Button asChild variant="ghost" size="sm" className="font-medium hidden md:flex">
                 <Link href="/login">Log in</Link>
               </Button>
               <Button asChild size="sm" className="font-medium">
@@ -135,14 +134,9 @@ export default function Header() {
 
           {/* Mobile Menu Trigger */}
           <div className="md:hidden flex items-center gap-2">
-            {!user && (
-               <Button asChild variant="ghost" size="sm" className="px-3">
-                  <Link href="/login">Login</Link>
-               </Button>
-            )}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
+                <Button variant="ghost" size="icon">
                   <Menu className="h-6 w-6" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
