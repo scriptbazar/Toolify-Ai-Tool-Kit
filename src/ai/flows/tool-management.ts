@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -59,7 +58,7 @@ const initialTools: Omit<Tool, 'id' | 'slug' | 'createdAt'>[] = [
     { name: 'Image Color Extractor', description: '🎨 Extract a complete color palette from any uploaded image. Great for designers to find inspiration.', icon: 'Pipette', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload an image from your device.', 'The tool will analyze the image and display a palette of its most dominant colors.', 'Click on any color swatch to copy its HEX, RGB, or HSL code.'] },
     { name: 'Image Cropper', description: '✂️ Crop your images to your desired dimensions with an easy-to-use visual cropping tool.', icon: 'Crop', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the image you want to crop.', 'Drag the corners of the selection box to define your crop area.', 'Click the "Crop Image" button.', 'Download your newly cropped image.'] },
     { name: 'Image Compressor', description: '💨 Reduce the file size of your JPG and PNG images while maintaining the best possible quality.', icon: 'FileArchive', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload a JPG or PNG image.', 'The tool intelligently reduces the file size while maintaining quality.', 'Click "Compress & Download".', 'Your optimized image will be downloaded.'] },
-    { name: 'Image Converter', description: '🔄 Convert your images between a wide variety of formats like PNG, JPG, WEBP, and more.', icon: 'FileImage', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your source image file.', 'Select the desired output format (e.g., PNG, JPG, WEBP).', 'Click the "Convert & Download" button.', 'Your new image file will be automatically downloaded.'] },
+    { name: 'Image Converter', description: '🔄 Convert your images between a wide variety of formats like PNG, JPG, WEBP, and more.', icon: 'FileImage', category: 'image', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your source image file.', 'Select the desired output format (e.g., PNG, JPG, WEBP).', 'Click the "Convert & Download button.', 'Your new image file will be automatically downloaded.'] },
     { name: 'PDF Signer', description: '✍️ Sign your PDF documents electronically. Draw, type, or upload your signature.', icon: 'PenSquare', category: 'pdf', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload the PDF document you need to sign.', 'Choose to draw your signature, type it, or upload an image of it.', 'Place your signature on the desired location in the document.', 'Click "Apply & Download" to save the signed PDF.'] },
     { name: 'Rotate PDF', description: '🔄 Rotate all pages or specific pages in your PDF document to the correct orientation.', icon: 'RotateCw', category: 'pdf', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Upload your PDF file.', 'Select whether to rotate all pages or specific pages.', 'Choose the rotation angle (90, 180, or 270 degrees).', 'Click "Rotate & Download" to get the updated PDF.'] },
     { name: 'Marks To Percentage Calculator', description: '🎓 Convert your exam marks or grades into a standardized percentage score quickly and easily.', icon: 'Calculator', category: 'calculator', plan: 'Free', isNew: true, status: 'Active', howToUse: ['Enter the marks you obtained.', 'Enter the total possible marks for the exam.', 'Click "Calculate Percentage".', 'The tool will display your percentage score.'] },
@@ -175,9 +174,14 @@ const generateSlug = (name: string) => {
  */
 export async function seedInitialTools() {
     const adminDb = getAdminDb();
-    const toolsCollection = adminDb.collection(TOOLS_COLLECTION);
+    if (!adminDb) return false;
     
-    console.log("Forcing update of all tools in the database...");
+    const toolsCollection = adminDb.collection(TOOLS_COLLECTION);
+    const existing = await toolsCollection.limit(1).get();
+    
+    if (!existing.empty) return true;
+
+    console.log("Seeding initial tools...");
     const batch = adminDb.batch();
     initialTools.forEach(tool => {
         const slug = generateSlug(tool.name);
@@ -185,7 +189,6 @@ export async function seedInitialTools() {
         batch.set(docRef, { ...tool, slug, createdAt: FieldValue.serverTimestamp() }, { merge: true });
     });
     await batch.commit();
-    console.log(`${initialTools.length} tools force-updated successfully.`);
     return true;
 }
 
@@ -198,31 +201,20 @@ interface GetToolsOptions {
 }
 
 async function getToolsFn (options: GetToolsOptions = {}) {
-    await seedInitialTools();
     try {
         const adminDb = getAdminDb();
-        if (!adminDb) {
-            console.error("Firebase Admin is not initialized. Cannot fetch tools.");
-            return [];
-        }
+        if (!adminDb) return [];
         
         let query: Query | FirebaseFirestore.DocumentReference | FirebaseFirestore.CollectionReference = adminDb.collection(TOOLS_COLLECTION);
         
         if (options.slug) {
             const docRef = adminDb.collection(TOOLS_COLLECTION).doc(options.slug);
             const docSnap = await docRef.get();
-             if (!docSnap.exists) {
-                return [];
-            }
+             if (!docSnap.exists) return [];
             const data = docSnap.data();
             if (!data) return [];
             const tool = ToolSchema.safeParse({ id: docSnap.id, slug: docSnap.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
-            if (tool.success) {
-                return [tool.data];
-            } else {
-                 console.warn(`Invalid tool data in Firestore with ID ${docSnap.id}:`, tool.error);
-                return [];
-            }
+            return tool.success ? [tool.data] : [];
         }
         
         if (options.category && options.category !== 'all') {
@@ -230,7 +222,6 @@ async function getToolsFn (options: GetToolsOptions = {}) {
         }
         
         const finalSnapshot = await query.get();
-        
         return processSnapshot(finalSnapshot.docs, options);
 
     } catch(e: any) {
@@ -253,15 +244,11 @@ function processSnapshot(docs: FirebaseFirestore.DocumentData[], options: GetToo
         const tool = ToolSchema.safeParse({ id: doc.id, slug: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString() });
         if (tool.success) {
             tools.push(tool.data);
-        } else {
-            console.warn(`Invalid tool data in Firestore with ID ${doc.id}:`, tool.error);
         }
     });
     
-    // Sort after fetching
     tools.sort((a, b) => a.name.localeCompare(b.name));
 
-    // Manual filtering after fetch for search query which is not efficient to do on server for substrings
     if (options.query) {
         const lowercasedQuery = options.query.toLowerCase();
         tools = tools.filter(tool => 
@@ -270,7 +257,6 @@ function processSnapshot(docs: FirebaseFirestore.DocumentData[], options: GetToo
         );
     }
     
-    // Filter out disabled tools unless a specific slug is requested OR 'all' status is requested
     if (options.status !== 'all' && !options.slug) {
         tools = tools.filter(tool => tool.status !== 'Disabled');
     }
@@ -295,33 +281,24 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
     
     let docId = id;
 
-    // For new tools, generate a slug from the name. This becomes the document ID.
     if (data.name && !id) {
       data.slug = generateSlug(data.name);
       docId = data.slug;
     }
 
-    if (!docId) {
-       throw new Error("Document ID (slug) is required for updating a tool or could not be generated for a new tool.");
-    }
+    if (!docId) throw new Error("Document ID required.");
     
-    // Validate data before saving
     const validatedData = UpsertToolInputSchema.parse(data);
-
     const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(docId);
     
-    if (id) { // This is an update
+    if (id) {
       await toolRef.set({ ...validatedData }, { merge: true });
-      revalidatePath('/tools');
-      revalidatePath(`/tools/${docId}`);
-      revalidatePath(`/admin/tools`);
-      return { success: true, message: 'Tool updated successfully.', toolId: docId };
-    } else { // This is a new tool
+    } else {
       await toolRef.set({ ...validatedData, slug: docId, createdAt: FieldValue.serverTimestamp() });
-      revalidatePath('/tools');
-      revalidatePath(`/admin/tools`);
-      return { success: true, message: 'Tool added successfully.', toolId: docId };
     }
+    
+    revalidatePath('/tools');
+    return { success: true, message: 'Tool saved successfully.', toolId: docId };
   } catch (error: any) {
     console.error("Error upserting tool:", error);
     return { success: false, message: error.message || 'An unknown error occurred.' };
@@ -336,35 +313,11 @@ export async function upsertTool(toolData: Partial<Tool>): Promise<{ success: bo
  */
 export async function deleteTool(toolId: string): Promise<{ success: boolean; message: string }> {
     const adminDb = getAdminDb();
-    if (!toolId) {
-        return { success: false, message: 'Tool ID is required.' };
-    }
+    if (!toolId) return { success: false, message: 'Tool ID required.' };
     try {
         const toolRef = adminDb.collection(TOOLS_COLLECTION).doc(toolId);
-        const doc = await toolRef.get();
-        if (!doc.exists) {
-            return { success: false, message: 'Tool not found.' };
-        }
-        
         await toolRef.delete();
-
-        const toolName = doc.data()?.name || toolId;
-        const componentName = toolName.replace(/\s+/g, '');
-        const componentPath = `src/components/tools/${componentName}.tsx`;
-        const logMessage = `
-*****************************************************************
-ACTION REQUIRED: Tool '${toolName}' deleted from database.
-To complete the deletion, please manually delete the following files:
-1. Component: ${componentPath}
-2. Entry in: src/components/tools/index.ts
-3. Entry in: src/app/(public)/tools/[slug]/_components/ToolPageClient.tsx (slugToComponentMap)
-*****************************************************************
-        `;
-        console.log(logMessage);
-        
         revalidatePath('/tools');
-        revalidatePath(`/admin/tools`);
-
         return { success: true, message: 'Tool deleted successfully.' };
     } catch (error: any) {
         console.error(`Error deleting tool ${toolId}:`, error);
@@ -383,59 +336,35 @@ export async function getFavoriteTools(userId: string): Promise<Tool[]> {
     const userDocRef = adminDb.collection('users').doc(userId);
     const userDocSnap = await userDocRef.get();
 
-    if (!userDocSnap.exists) {
-      return [];
-    }
+    if (!userDocSnap.exists) return [];
 
     const userData = userDocSnap.data();
     const favoriteSlugs: string[] = userData?.favorites || [];
 
-    if (favoriteSlugs.length === 0) {
-      return [];
-    }
+    if (favoriteSlugs.length === 0) return [];
 
     const allTools = await getTools({});
-    const userFavorites = allTools.filter(tool => favoriteSlugs.includes(tool.slug));
-    
-    return userFavorites;
+    return allTools.filter(tool => favoriteSlugs.includes(tool.slug));
   } catch (error) {
-    console.error(`Error fetching favorite tools for user ${userId}:`, error);
+    console.error(`Error fetching favorite tools:`, error);
     return [];
   }
 }
 
-const RequestToolInputSchema = ToolRequestSchema.pick({
-    name: true,
-    email: true,
-    toolName: true,
-    description: true,
-});
-type RequestToolInput = {
-    name: string;
-    email: string;
-    toolName: string;
-    description: string;
-};
-
-export async function requestNewTool(input: RequestToolInput): Promise<{ success: boolean; message: string }> {
+export async function requestNewTool(input: any): Promise<{ success: boolean; message: string }> {
     try {
         const adminDb = getAdminDb();
-        const validatedInput = RequestToolInputSchema.parse(input);
         await adminDb.collection(TOOL_REQUESTS_COLLECTION).add({
-            ...validatedInput,
+            ...input,
             status: 'pending',
             requestedAt: FieldValue.serverTimestamp(),
         });
-        return { success: true, message: "Your tool request has been submitted successfully!" };
+        return { success: true, message: "Request submitted successfully!" };
     } catch (error: any) {
-        console.error("Error submitting tool request:", error);
-        return { success: false, message: error.message || 'An unknown error occurred.' };
+        return { success: false, message: error.message };
     }
 }
 
-/**
- * Fetches all tool requests from Firestore.
- */
 export async function getToolRequests(): Promise<ToolRequest[]> {
     try {
         const adminDb = getAdminDb();
@@ -449,74 +378,40 @@ export async function getToolRequests(): Promise<ToolRequest[]> {
             } as ToolRequest;
         });
     } catch (error) {
-        console.error("Error fetching tool requests:", error);
         return [];
     }
 }
 
-/**
- * Updates the status of a tool request.
- */
 export async function updateToolRequestStatus(requestId: string, status: 'approved' | 'rejected'): Promise<{ success: boolean, message: string }> {
     try {
         const adminDb = getAdminDb();
         const requestRef = adminDb.collection(TOOL_REQUESTS_COLLECTION).doc(requestId);
         await requestRef.update({ status });
-        return { success: true, message: 'Request status updated.' };
+        return { success: true, message: 'Request updated.' };
     } catch (error: any) {
-        return { success: false, message: error.message || 'An unknown error occurred.' };
+        return { success: false, message: error.message };
     }
 }
 
-
-const GenerateToolDescriptionInputSchema = z.object({
-  toolName: z.string().describe('The name of the tool to generate a description for.'),
-});
-
-const GenerateToolDescriptionOutputSchema = z.object({
-  description: z.string().describe('A detailed, user-friendly description of what the tool does.'),
-});
-
-export async function generateToolDescription(input: z.infer<typeof GenerateToolDescriptionInputSchema>): Promise<z.infer<typeof GenerateToolDescriptionOutputSchema>> {
-  const prompt = `Generate a concise and user-friendly description for a web tool called "${input.toolName}". The description should be a single sentence, starting with a verb, and clearly explain the tool's primary function. For example, for a "Case Converter" tool, a good description would be "Convert text between different letter cases (e.g., uppercase, lowercase, title case)."`;
-
-  // This would be a call to a Genkit flow in a real app
-  // For now, we simulate a simple response.
-  const generatedDesc = `A new, amazing tool that helps you with ${input.toolName}.`;
-
-  return { description: generatedDesc };
-}
-
-// src/ai/flows/user-management.ts (for toggleFavoriteTool)
 export async function toggleFavoriteTool(userId: string, toolSlug: string): Promise<{ success: boolean, message: string }> {
   const adminDb = getAdminDb();
-  if (!userId || !toolSlug) {
-    return { success: false, message: "User ID and tool slug are required." };
-  }
+  if (!userId || !toolSlug) return { success: false, message: "Missing data." };
   try {
     const userRef = adminDb.collection('users').doc(userId);
     const userDoc = await userRef.get();
-
-    if (!userDoc.exists) {
-      return { success: false, message: "User not found." };
-    }
+    if (!userDoc.exists) return { success: false, message: "User not found." };
 
     const userData = userDoc.data();
     const currentFavorites: string[] = userData?.favorites || [];
 
     if (currentFavorites.includes(toolSlug)) {
-      // The field exists, so we can use update.
       await userRef.update({ favorites: FieldValue.arrayRemove(toolSlug) });
       return { success: true, message: "Removed from favorites." };
     } else {
-      // If the field might not exist, using set with merge is safer.
       await userRef.set({ favorites: FieldValue.arrayUnion(toolSlug) }, { merge: true });
       return { success: true, message: "Added to favorites." };
     }
   } catch (error: any) {
-    console.error("Error toggling favorite tool:", error);
     return { success: false, message: "Could not update favorites." };
   }
 }
-
-    

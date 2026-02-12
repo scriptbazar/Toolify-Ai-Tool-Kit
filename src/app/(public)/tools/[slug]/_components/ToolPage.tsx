@@ -15,10 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, CheckCircle2, Cpu, DownloadCloud, ListOrdered, Sparkles, Star, Zap, BrainCircuit, Construction, ShieldCheck, MousePointerClick, Loader2, ShieldAlert } from 'lucide-react';
 import { addUserActivity } from '@/ai/flows/user-activity';
-import dynamic from 'next/dynamic';
-import { Skeleton } from '@/components/ui/skeleton';
-import { UpgradeProDialog } from '@/components/tools/UpgradeProDialog';
-import { slugToComponentMap } from './slugToComponentMap';
+import { slugToComponentMap } from '@/lib/tool-map';
 import type { User } from 'firebase/auth';
 
 
@@ -50,7 +47,7 @@ export function ToolPage({ tool, toolReviews, adSettings, children: sidebar, use
         if (!tool.slug || !(tool.slug in slugToComponentMap)) {
             return null;
         }
-        return slugToComponentMap[tool.slug as keyof typeof slugToComponentMap];
+        return slugToComponentMap[tool.slug];
     }, [tool.slug]);
 
     const Icon = (Icons as any)[tool.icon] || Icons.HelpCircle;
