@@ -76,10 +76,10 @@ export default function Header() {
 
           {!loading && !user && (
             <div className="flex items-center gap-2">
-              <Button asChild variant="ghost" size="sm" className="font-bold">
+              <Button asChild variant="ghost" size="sm" className="font-bold border border-primary/20 hover:bg-primary/5">
                 <Link href="/login">Log in</Link>
               </Button>
-              <Button asChild size="sm" className="font-bold">
+              <Button asChild size="sm" className="font-bold shadow-md">
                 <Link href="/signup">Sign Up</Link>
               </Button>
             </div>
@@ -110,7 +110,7 @@ export default function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/my-favorites" className="cursor-pointer w-full flex items-center">
-                    <Star className="mr-2 h-4 w-4 text-yellow-500 fill-yellow-500" />
+                    <Star className="mr-2 h-4 w-4 text-yellow-500 fill-yellow-400" />
                     <span>My Favorites</span>
                   </Link>
                 </DropdownMenuItem>
@@ -159,7 +159,7 @@ export default function Header() {
                       </Button>
                       <Button asChild variant="ghost" onClick={() => setIsOpen(false)} className="justify-start">
                         <Link href="/my-favorites">
-                          <Star className="mr-2 h-4 w-4 text-yellow-500 fill-yellow-500" />
+                          <Star className="mr-2 h-4 w-4 text-yellow-500" />
                           My Favorites
                         </Link>
                       </Button>

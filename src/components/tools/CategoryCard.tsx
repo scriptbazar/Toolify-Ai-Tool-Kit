@@ -17,15 +17,15 @@ export function CategoryCard({ category }: CategoryCardProps) {
     <Link href={`/tools?category=${id}`} className="group block h-full">
       <Card className={cn(
         "h-full transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-2 p-6 flex flex-col items-center text-center border-2",
-        color?.border || "border-border"
+        color.border
       )}>
         <div className={cn(
-          "flex items-center justify-center h-16 w-16 mb-4 rounded-full transition-all duration-300 group-hover:scale-110",
-          color?.bg || "bg-primary/10"
+          "flex items-center justify-center h-16 w-16 mb-4 rounded-full transition-all duration-300 group-hover:scale-110 shadow-sm",
+          color.bg
         )}>
           <Icon className={cn(
             "h-8 w-8 transition-colors",
-            color?.text || "text-primary"
+            color.text
           )} />
         </div>
         <CardContent className="p-0 flex flex-col flex-grow justify-center">
