@@ -4,11 +4,14 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+/**
+ * Redirection Component to resolve path conflict.
+ * The primary settings page is now at /settings/page.tsx
+ */
 export default function DashboardSettingsRedirect() {
     const router = useRouter();
     
     useEffect(() => {
-        // Redirect to the primary unified settings page to resolve route conflict
         router.replace('/settings');
     }, [router]);
 

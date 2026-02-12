@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { doc, getDoc } from "firebase/firestore";
@@ -98,10 +98,12 @@ export default function LoginPage() {
 
       toast({ title: "Logged in successfully!", description: "Redirecting to your dashboard..." });
       
-      const redirectUrl = searchParams.get('redirectUrl') || (role === 'admin' ? '/admin/dashboard' : '/dashboard');
+      const targetUrl = searchParams.get('redirectUrl') || (role === 'admin' ? '/admin/dashboard' : '/dashboard');
       
       // CRITICAL: Use window.location.href to force a full reload and ensure cookies are picked up by middleware
-      window.location.href = redirectUrl;
+      setTimeout(() => {
+          window.location.href = targetUrl;
+      }, 500);
       
     } catch (error: any) {
       console.error("Login error:", error);
