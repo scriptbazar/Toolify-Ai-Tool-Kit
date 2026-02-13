@@ -1,3 +1,4 @@
+
 'use client';
 
 import { forwardRef, type MouseEvent } from 'react';
@@ -76,7 +77,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
         !isClickable && "cursor-not-allowed opacity-60"
       )}>
       <div className={cn(
-        "relative flex h-full flex-col items-center justify-start rounded-xl border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1",
+        "relative flex h-full flex-col items-center justify-start rounded-2xl border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1",
         "border-2",
         iconColors.border,
         "hover:shadow-xl",
@@ -106,7 +107,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
         </div>
         <div className="flex-grow w-full">
             <h3 className="text-base font-extrabold mb-3 group-hover:text-primary transition-colors leading-tight">{name}</h3>
-            <div className="h-16 overflow-hidden">
+            <div className="h-20 overflow-hidden">
                 <p className="text-[11px] md:text-xs text-muted-foreground line-clamp-3 leading-relaxed">
                     {description}
                 </p>
