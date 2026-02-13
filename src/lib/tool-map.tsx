@@ -17,7 +17,7 @@ const LoadingComponent = () => (
 
 /**
  * Centralized High-Performance Tool Map
- * Standardized dynamic imports to prevent "Element type is invalid" error.
+ * Standardized dynamic imports to ensure they resolve to a component function.
  */
 export const slugToComponentMap: Record<string, FC<any>> = {
   'advance-text-cleaner': dynamic(() => import('@/components/tools/AdvanceTextCleaner').then(mod => mod.AdvanceTextCleaner), { loading: LoadingComponent, ssr: false }),

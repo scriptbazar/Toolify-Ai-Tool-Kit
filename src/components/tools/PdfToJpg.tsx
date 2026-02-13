@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
@@ -8,12 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { UploadCloud, FileText, Loader2, FileDown, Image as ImageIcon, CheckCheck, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
 import { Slider } from '../ui/slider';
 import Image from 'next/image';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Standardized worker source
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 interface PagePreview {
     id: string;
@@ -37,16 +39,15 @@ export function PdfToJpg() {
       setPagePreviews([]);
 
       try {
-        const { getDocument } = await import('pdfjs-dist');
         const fileBytes = await selectedFile.arrayBuffer();
-        const loadingTask = getDocument({ data: fileBytes });
+        const loadingTask = pdfjsLib.getDocument({ data: fileBytes });
         const pdf = await loadingTask.promise;
         
         const previews: PagePreview[] = [];
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 0.5 }); // Lower scale for faster preview
+          const viewport = page.getViewport({ scale: 0.5 });
           const canvas = document.createElement('canvas');
           canvas.width = viewport.width;
           canvas.height = viewport.height;
@@ -99,15 +100,14 @@ export function PdfToJpg() {
 
     setIsLoading(true);
     try {
-        const { getDocument } = await import('pdfjs-dist');
         const fileBytes = await file.arrayBuffer();
-        const pdf = await getDocument({ data: fileBytes }).promise;
+        const pdf = await pdfjsLib.getDocument({ data: fileBytes }).promise;
         const zip = new JSZip();
         
         const conversionPromises = selectedPages.map(async (p) => {
             const pageNum = parseInt(p.id.split('-')[1]);
             const page = await pdf.getPage(pageNum);
-            const viewport = page.getViewport({ scale: 2.0 }); // Higher scale for better quality
+            const viewport = page.getViewport({ scale: 2.0 }); 
             const canvas = document.createElement('canvas');
             canvas.width = viewport.width;
             canvas.height = viewport.height;
@@ -121,18 +121,16 @@ export function PdfToJpg() {
         });
 
         const results = await Promise.all(conversionPromises);
-        const validResults = results.filter(r => r !== null);
+        const validResults = results.filter((r): r is { name: string; data: string } => r !== null);
 
         if (validResults.length === 1 && validResults[0]) {
-            // Single file download
             const link = document.createElement('a');
             link.href = `data:image/jpeg;base64,${validResults[0].data}`;
             link.download = validResults[0].name;
             link.click();
         } else if (validResults.length > 1) {
-            // Multiple files, zip them
             validResults.forEach(res => {
-                if (res) zip.file(res.name, res.data, { base64: true });
+                zip.file(res.name, res.data, { base64: true });
             });
             const zipBlob = await zip.generateAsync({ type: 'blob' });
             const link = document.createElement('a');
@@ -183,9 +181,9 @@ export function PdfToJpg() {
       </Card>
       
       {isLoading && pagePreviews.length === 0 && (
-          <div className="text-center">
+          <div className="text-center p-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto"/>
-              <p className="text-muted-foreground">Analyzing your PDF...</p>
+              <p className="text-muted-foreground mt-2">Analyzing your PDF...</p>
           </div>
       )}
 

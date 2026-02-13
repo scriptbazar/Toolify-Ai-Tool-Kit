@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, forwardRef, type MouseEvent } from 'react';
+import { forwardRef, type MouseEvent } from 'react';
 import Link from 'next/link';
 import type { Tool } from '@/ai/flows/tool-management.types';
 import * as Icons from 'lucide-react';
@@ -23,13 +23,13 @@ type ToolCardProps = {
 const getStatusBadge = (status: Tool['status']) => {
     switch (status) {
         case 'Maintenance':
-            return <Badge className="absolute top-2 right-2 bg-yellow-500 hover:bg-yellow-600 text-white shadow">Maintenance</Badge>;
+            return <Badge className="absolute top-2 right-2 bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm">Maintenance</Badge>;
         case 'Coming Soon':
-            return <Badge className="absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white shadow">Coming Soon</Badge>;
+            return <Badge className="absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white shadow-sm">Coming Soon</Badge>;
         case 'New Version':
-            return <Badge className="absolute top-2 right-2 bg-green-500 hover:bg-green-600 text-white shadow">New Version</Badge>;
+            return <Badge className="absolute top-2 right-2 bg-green-500 hover:bg-green-600 text-white shadow-sm">New Version</Badge>;
         case 'Beta':
-            return <Badge className="absolute top-2 right-2 bg-orange-500 hover:bg-orange-600 text-white shadow">Beta</Badge>;
+            return <Badge className="absolute top-2 right-2 bg-orange-500 hover:bg-orange-600 text-white shadow-sm">Beta</Badge>;
         default:
             return null;
     }
@@ -44,10 +44,9 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
   const router = useRouter();
 
   const categoryInfo = toolCategories.find(c => c.id === category);
-  const iconColors = categoryInfo?.color || { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20' };
+  const iconColors = categoryInfo?.color || { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20', glow: '' };
 
   const isClickable = status === 'Active' || status === 'New Version' || status === 'Beta';
-  
   const isProUser = user?.role === 'admin' || user?.planId === 'pro' || user?.planId === 'team';
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
@@ -75,16 +74,17 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
   const CardContent = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>((props, ref) => (
     <div ref={ref} {...props} className={cn(
         "relative group h-full w-full",
-        !isClickable && "cursor-not-allowed"
+        !isClickable && "cursor-not-allowed opacity-60"
       )}>
       <div className={cn(
-        "relative flex h-full flex-col items-center justify-start rounded-lg border bg-card p-6 text-center transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-md",
-        !isClickable && "opacity-70",
-        iconColors.border
+        "relative flex h-full flex-col items-center justify-start rounded-xl border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1",
+        iconColors.border,
+        "hover:shadow-lg",
+        iconColors.glow
       )}>
         {statusBadge ? statusBadge : (
             <>
-              {tool.isNew && <Badge variant="outline" className="absolute top-2 left-2 border-primary text-primary bg-background/80 shadow">New</Badge>}
+              {tool.isNew && <Badge variant="outline" className="absolute top-2 left-2 border-primary text-primary bg-background/80 shadow-sm">New</Badge>}
             </>
         )}
         <Button
@@ -98,15 +98,15 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
         </Button>
         {plan === 'Pro' && (
             <div className="absolute bottom-3 right-3">
-                <Badge className="shadow-md font-bold" style={{ backgroundColor: 'hsl(var(--primary))' }}>Pro</Badge>
+                <Badge className="shadow-sm font-bold bg-primary text-primary-foreground">Pro</Badge>
             </div>
         )}
-        <div className={cn("flex h-14 w-14 items-center justify-center rounded-full mb-4 transition-all group-hover:scale-110 shadow-sm", iconColors.bg)}>
-          <Icon className={cn("h-7 w-7 transition-transform group-hover:animate-bounce", iconColors.text)} />
+        <div className={cn("flex h-16 w-16 items-center justify-center rounded-2xl mb-4 transition-all group-hover:scale-110 shadow-sm", iconColors.bg)}>
+          <Icon className={cn("h-8 w-8 transition-transform", iconColors.text)} />
         </div>
         <div className="flex-grow">
-            <h3 className="text-base font-bold mb-1 group-hover:text-primary transition-colors">{name}</h3>
-            <p className="text-xs text-muted-foreground h-12 overflow-hidden line-clamp-2">
+            <h3 className="text-base font-bold mb-2 group-hover:text-primary transition-colors">{name}</h3>
+            <p className="text-xs text-muted-foreground h-12 overflow-hidden line-clamp-2 leading-relaxed">
                 {description}
             </p>
         </div>
@@ -117,7 +117,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
 
   if (isClickable) {
       return (
-        <Link href={`/tools/${slug}`} passHref>
+        <Link href={`/tools/${slug}`} passHref className="h-full">
           <CardContent onClick={handleCardClick} />
         </Link>
       );

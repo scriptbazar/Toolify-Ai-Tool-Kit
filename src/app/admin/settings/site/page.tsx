@@ -24,8 +24,6 @@ import { AdBlockerDetector } from '@/components/common/AdBlockerDetector';
 import { clearCache } from '@/ai/flows/utility-actions';
 
 
-export const runtime = 'nodejs';
-
 type CollapsibleSectionProps = {
   id: string;
   title: string;
@@ -306,22 +304,25 @@ export default function SiteSettingsPage() {
     );
   }
 
-  const sections = [
-    { id: 'general', title: 'General Settings', description: "Update your site's title, description, etc.", icon: SlidersHorizontal },
-    { id: 'branding', title: 'Branding & Contact', description: "Customize your site's appearance and contact info.", icon: Palette },
-    { id: 'social', title: 'Social Media Links', description: 'Provide links to your social media profiles.', icon: LinkIcon },
-    { id: 'webmaster', title: 'Webmaster Tools', description: 'Add verification codes for webmaster tools.', icon: Globe },
-    { id: 'apiKeys', title: 'API Keys for Tools', description: 'Configure API keys for third-party services.', icon: KeyRound },
-    { id: 'security', title: 'Security & Utilities', description: 'Manage site security and maintenance.', icon: ShieldCheck },
-  ];
-
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Site Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your application's general settings and appearance.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Site Settings</h1>
+          <p className="text-muted-foreground">
+            Manage your application's general settings and appearance.
+          </p>
+        </div>
+        <div className="flex gap-2">
+            <Button variant="outline" type="button" onClick={handleClearCache} disabled={isClearingCache}>
+                {isClearingCache ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Eraser className="mr-2 h-4 w-4" />}
+                Clear Cache
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save Changes
+            </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -616,10 +617,6 @@ export default function SiteSettingsPage() {
                     <div className="space-y-4 rounded-lg border p-4">
                         <Label className="font-medium">Site Utilities</Label>
                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            <Button variant="outline" type="button" onClick={handleClearCache} disabled={isClearingCache}>
-                                {isClearingCache ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Eraser className="mr-2 h-4 w-4" />}
-                                Clear Cache
-                            </Button>
                             <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Sitemap')}><FileCode className="mr-2 h-4 w-4" />Generate sitemap.xml</Button>
                             <Button variant="outline" type="button" onClick={() => handleUtilityClick('Generate Robots.txt')}><FileText className="mr-2 h-4 w-4" />Generate robots.txt</Button>
                          </div>
@@ -627,13 +624,6 @@ export default function SiteSettingsPage() {
                  </div>
             </div>
         </CollapsibleSection>
-      </div>
-      
-      <div className="flex justify-end pt-6">
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-          Save Changes
-        </Button>
       </div>
     </div>
   );

@@ -5,8 +5,9 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 /**
- * Emptying this file completely to resolve Parallel Route Conflict.
+ * Resolved Parallel Route Conflict.
  * Next.js cannot have (dashboard)/settings/page.tsx AND /settings/page.tsx.
+ * This file is now a permanent redirect to avoid build errors.
  */
 export default function RedundantSettingsRedirect() {
     const router = useRouter();
