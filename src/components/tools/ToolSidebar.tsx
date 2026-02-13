@@ -14,11 +14,11 @@ import { cn } from '@/lib/utils';
 
 
 const SidebarWidget = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <Card>
-        <CardHeader className="p-4">
-            <CardTitle className="text-base">{title}</CardTitle>
+    <Card className="border-none shadow-sm">
+        <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-lg font-bold">{title}</CardTitle>
         </CardHeader>
-        <CardContent className="p-4 pt-0">
+        <CardContent className="p-2">
             {children}
         </CardContent>
     </Card>
@@ -32,7 +32,7 @@ interface ToolSidebarProps {
 // Cached functions to fetch data specifically for the sidebar
 const getPopularTools = cache(async (currentToolSlug: string) => {
     const allTools = await getTools({ status: 'Active' });
-    return allTools.filter(t => t.slug !== currentToolSlug).slice(0, 10);
+    return allTools.filter(t => t.slug !== currentToolSlug).slice(0, 12);
 }, ['sidebar-popular-tools'], { revalidate: 3600 });
 
 const getRecentPosts = cache(async () => {
@@ -54,21 +54,24 @@ export async function ToolSidebar({ adSettings, currentToolSlug }: ToolSidebarPr
     if (!showSidebar) return null;
 
     return (
-        <aside className="w-full lg:w-64 xl:w-80 mt-8 lg:mt-0 space-y-6 lg:sticky lg:top-24">
+        <aside className="w-full lg:w-80 xl:w-[350px] mt-8 lg:mt-0 space-y-6 lg:sticky lg:top-24">
             <AdPlaceholder adSlotId="toolpage-sidebar" adSettings={adSettings} />
             {sidebarSettings?.showPopularTools && popularTools.length > 0 && (
                 <SidebarWidget title="Popular Tools">
-                    <ul className="space-y-2">
+                    <ul className="space-y-1">
                         {popularTools.map(t => {
                             const ToolIcon = (Icons as any)[t.icon] || Icons.HelpCircle;
                             const categoryInfo = toolCategories.find(c => c.id === t.category);
                             return (
                             <li key={t.id}>
-                                <Link href={`/tools/${t.slug}`} className="flex items-center gap-3 text-base text-muted-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-muted">
-                                    <div className={cn("p-1.5 rounded-md", categoryInfo?.color?.bg || "bg-muted")}>
-                                        <ToolIcon className={cn("h-4 w-4", categoryInfo?.color?.text || "text-muted-foreground")} />
+                                <Link href={`/tools/${t.slug}`} className="flex items-center gap-3 text-sm md:text-base text-muted-foreground hover:text-primary font-medium transition-all p-2.5 rounded-xl hover:bg-accent/50 group">
+                                    <div className={cn(
+                                        "p-2 rounded-lg transition-transform group-hover:scale-110", 
+                                        categoryInfo?.color?.bg || "bg-muted"
+                                    )}>
+                                        <ToolIcon className={cn("h-5 w-5", categoryInfo?.color?.text || "text-muted-foreground")} />
                                     </div>
-                                    <span>{t.name}</span>
+                                    <span className="truncate">{t.name}</span>
                                 </Link>
                             </li>
                         )})}
@@ -77,12 +80,12 @@ export async function ToolSidebar({ adSettings, currentToolSlug }: ToolSidebarPr
             )}
             {sidebarSettings?.showRecentPosts && recentPosts.length > 0 && (
                 <SidebarWidget title="Recent Posts">
-                    <ul className="space-y-3">
+                    <ul className="space-y-3 p-2">
                         {recentPosts.map(post => (
                             <li key={post.id}>
-                                <Link href={`/blog/${post.slug}`} className="group">
-                                    <p className="font-medium text-sm group-hover:text-primary transition-colors leading-tight">{post.title}</p>
-                                    <p className="text-xs text-muted-foreground">{new Date(post.publishedAt!).toLocaleDateString()}</p>
+                                <Link href={`/blog/${post.slug}`} className="group block">
+                                    <p className="font-bold text-sm group-hover:text-primary transition-colors leading-tight line-clamp-2">{post.title}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">{new Date(post.publishedAt!).toLocaleDateString()}</p>
                                 </Link>
                             </li>
                         ))}
