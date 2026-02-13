@@ -37,6 +37,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [userData, setLocalUserData] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Synchronizes the Firebase Auth token with the Server-Side session cookie
   const syncSession = useCallback(async (forceUser?: FirebaseUser) => {
     const currentUser = forceUser || auth.currentUser;
     if (currentUser) {
@@ -62,15 +63,13 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       if (firebaseUser) {
         setUser(firebaseUser);
         
-        // Ensure session cookie is synced
-        await syncSession(firebaseUser);
-        
         try {
             const userDocRef = doc(db, "users", firebaseUser.uid);
             const userDocSnap = await getDoc(userDocRef);
 
             if (userDocSnap.exists()) {
-                setLocalUserData(userDocSnap.data() as AppUser);
+                const data = userDocSnap.data() as AppUser;
+                setLocalUserData(data);
             } else {
                 setLocalUserData(null);
             }
@@ -82,13 +81,13 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         setLocalUserData(null);
         // Clear session on logout
-        await fetch('/api/auth/session-logout', { method: 'POST' }).catch(() => {});
+        fetch('/api/auth/session-logout', { method: 'POST' }).catch(() => {});
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [syncSession]);
+  }, []);
   
   const isAdmin = userData?.role === 'admin';
 

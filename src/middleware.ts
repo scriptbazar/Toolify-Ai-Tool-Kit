@@ -6,12 +6,12 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = request.cookies.get('session')?.value;
 
-  // Rule 1: Redirect from /admin or /admin/ to /admin/dashboard
+  // 1. Redirect root admin to dashboard
   if (pathname === '/admin' || pathname === '/admin/') {
     return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
 
-  // Rule 2: Protect dashboard and settings routes
+  // 2. Define protected paths
   const protectedPaths = [
     '/dashboard',
     '/usage-history',
@@ -28,17 +28,23 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = pathname.startsWith('/admin');
   const isProtectedRoute = protectedPaths.some(path => pathname.startsWith(path));
 
-  // If trying to access an ADMIN route without a session, redirect to ADMIN login
+  // 3. Handle Unauthorized Admin Access
   if (isAdminRoute && !session && pathname !== '/admin/login') {
       const loginUrl = new URL('/admin/login', request.url);
       return NextResponse.redirect(loginUrl);
   }
 
-  // If trying to access a protected route without a session, redirect to PUBLIC login
+  // 4. Handle Unauthorized User Access
   if (isProtectedRoute && !session && pathname !== '/login') {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirectUrl', pathname);
       return NextResponse.redirect(loginUrl);
+  }
+
+  // 5. Prevent double login (If session exists, don't show login pages)
+  if (session && (pathname === '/login' || pathname === '/admin/login')) {
+      const target = pathname.startsWith('/admin') ? '/admin/dashboard' : '/dashboard';
+      return NextResponse.redirect(new URL(target, request.url));
   }
 
   return NextResponse.next();
@@ -46,7 +52,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Optimized matcher
+    // Optimized matcher to exclude static assets
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.svg|.*\\.ico|.*\\.webp).*)',
   ],
 };

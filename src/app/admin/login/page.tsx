@@ -12,7 +12,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { Eye, EyeOff, ShieldCheck, Loader2 } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
@@ -29,7 +28,6 @@ const formSchema = z.object({
 
 export default function AdminLoginPage() {
   const { toast } = useToast();
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
@@ -60,6 +58,7 @@ export default function AdminLoginPage() {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
+    // 1. ReCAPTCHA Check
     if (securitySettings?.enableRecaptcha && securitySettings.recaptchaSiteKey) {
         if (!recaptchaValue) {
             toast({
@@ -88,13 +87,16 @@ export default function AdminLoginPage() {
     }
 
     try {
+      // 2. Firebase Sign In
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
+      // 3. Admin Role Verification
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
       if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
+        // 4. Create Server-Side Session Cookie
         const token = await user.getIdToken(true);
         const sessionResponse = await fetch('/api/auth/session-login', {
           method: 'POST',
@@ -107,28 +109,27 @@ export default function AdminLoginPage() {
         }
 
         toast({
-          title: "Admin login successful!",
-          description: "Redirecting to the dashboard...",
+          title: "Admin Authenticated",
+          description: "Welcome to the control panel. Redirecting...",
         });
         
-        // Force hard refresh to ensure middleware and server components see the cookie
-        window.location.href = '/admin/dashboard';
+        // 5. Hard Redirect to Admin Dashboard
+        // Using window.location.assign ensures the browser makes a new request with the cookie
+        window.location.assign('/admin/dashboard');
       } else {
         await auth.signOut();
         toast({
           title: "Access Denied",
-          description: "This account does not have administrative privileges.",
+          description: "You do not have administrative privileges.",
           variant: "destructive",
         });
         setIsSubmitting(false);
       }
     } catch (error: any) {
       console.error("Admin login error:", error);
-      let description = "Check your email and password.";
+      let description = "Please check your credentials and try again.";
       if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        description = "Invalid admin credentials.";
-      } else {
-        description = error.message;
+        description = "Incorrect email or password.";
       }
       toast({
         title: "Login Failed",
@@ -143,7 +144,7 @@ export default function AdminLoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
-      <Card className="w-full max-w-md shadow-2xl">
+      <Card className="w-full max-w-md shadow-2xl border-primary/20">
         <CardHeader className="text-center">
            <Link href="/" className="flex justify-center items-center gap-2 mb-4">
             <Logo className="h-10 w-10" />
@@ -153,7 +154,7 @@ export default function AdminLoginPage() {
             <ShieldCheck className="text-primary h-6 w-6" />
             Admin Access
           </CardTitle>
-          <CardDescription>Sign in to the administrative control panel</CardDescription>
+          <CardDescription>Sign in to your administrative account</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -164,7 +165,7 @@ export default function AdminLoginPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Admin Email</FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input placeholder="admin@toolifyai.com" {...field} disabled={isSubmitting} />
                       </FormControl>
@@ -208,7 +209,7 @@ export default function AdminLoginPage() {
                 />
               </div>
               {securitySettings?.enableRecaptcha && securitySettings.recaptchaSiteKey && (
-                <div className="flex justify-center">
+                <div className="flex justify-center py-2">
                     <ReCAPTCHA
                         ref={recaptchaRef}
                         sitekey={securitySettings.recaptchaSiteKey}
@@ -217,7 +218,11 @@ export default function AdminLoginPage() {
                 </div>
                )}
               <Button type="submit" className="w-full font-bold h-11" disabled={isSubmitting}>
-                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Authenticating...</> : "Log In to Admin Panel"}
+                {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin"/> Authenticating...
+                    </span>
+                ) : "Sign In to Control Panel"}
               </Button>
             </form>
           </Form>
