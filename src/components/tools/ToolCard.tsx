@@ -98,7 +98,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
         </Button>
         {plan === 'Pro' && (
             <div className="absolute bottom-3 right-3">
-                <Badge className="shadow-md">Pro</Badge>
+                <Badge className="shadow-md font-bold" style={{ backgroundColor: 'hsl(var(--primary))' }}>Pro</Badge>
             </div>
         )}
         <div className={cn("flex h-14 w-14 items-center justify-center rounded-full mb-4 transition-all group-hover:scale-110 shadow-sm", iconColors.bg)}>
@@ -106,7 +106,7 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
         </div>
         <div className="flex-grow">
             <h3 className="text-base font-bold mb-1 group-hover:text-primary transition-colors">{name}</h3>
-            <p className="text-xs text-muted-foreground h-16 overflow-hidden line-clamp-3">
+            <p className="text-xs text-muted-foreground h-12 overflow-hidden line-clamp-2">
                 {description}
             </p>
         </div>

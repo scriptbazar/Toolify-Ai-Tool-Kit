@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -73,7 +74,8 @@ export default function Header() {
         <div className="flex items-center gap-2 md:gap-4">
           <ModeToggle />
 
-          {!loading && !user && (
+          {/* Explicitly check loading state to prevent flickering buttons */}
+          {!loading && !user ? (
             <div className="flex items-center gap-2">
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex font-bold">
                 <Link href="/login">Log in</Link>
@@ -82,9 +84,7 @@ export default function Header() {
                 <Link href="/signup">Sign Up</Link>
               </Button>
             </div>
-          )}
-
-          {!loading && user && (
+          ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full ring-2 ring-primary/20">
@@ -120,7 +120,7 @@ export default function Header() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
+          ) : null}
 
           <div className="md:hidden">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
