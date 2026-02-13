@@ -33,13 +33,23 @@ function AdminLayoutClient({
   
   const isLoginPage = pathname === '/admin/login';
 
-  // Middleware now handles the primary redirection logic.
-  // This useEffect is a fallback and handles client-side state changes.
+  // Fallback redirection logic
   React.useEffect(() => {
-    if (!loading && !isLoginPage && !user) {
-        router.replace('/admin/login');
+    if (!loading && !isLoginPage) {
+        if (!user) {
+            router.replace('/admin/login');
+        } else if (!isAdmin) {
+            // User is logged in but is NOT an admin.
+            // Show error and kick them to the main dashboard.
+            toast({
+                title: "Access Restricted",
+                description: "You do not have permission to view the admin panel.",
+                variant: "destructive"
+            });
+            router.replace('/dashboard');
+        }
     }
-  }, [user, loading, isLoginPage, router]);
+  }, [user, loading, isLoginPage, isAdmin, router, toast]);
 
 
   const handleLogout = async () => {
@@ -49,9 +59,9 @@ function AdminLayoutClient({
       await fetch('/api/auth/session-logout', { method: 'POST' });
       toast({
         title: "Logged Out",
-        description: "You have been successfully logged out.",
+        description: "Admin session cleared successfully.",
       });
-      // Redirect to the login page after logout
+      // Redirect to the admin login page after logout
       router.push('/admin/login');
     } catch (error) {
       console.error("Logout error:", error);
@@ -67,13 +77,14 @@ function AdminLayoutClient({
     return <>{children}</>;
   }
   
+  // Only render the layout if user is logged in AND is an admin
   if (loading || !user || !isAdmin) {
     return (
         <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
           <Logo className="h-16 w-16 animate-pulse" />
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
-            <p className="text-lg">Loading Admin Panel...</p>
+            <p className="text-lg">Verifying Admin Access...</p>
           </div>
         </div>
     );
@@ -178,7 +189,7 @@ function AdminLayoutClient({
                 <DropdownMenuTrigger asChild>
                   <Button variant="secondary" size="icon" className="rounded-full">
                     <Avatar className="h-8 w-8">
-                       <AvatarFallback>{userData?.firstName?.[0] || 'A'}</AvatarFallback>
+                       <AvatarFallback className="bg-primary/10 text-primary font-bold">{userData?.firstName?.[0] || 'A'}</AvatarFallback>
                     </Avatar>
                     <span className="sr-only">Toggle user menu</span>
                   </Button>
@@ -196,15 +207,15 @@ function AdminLayoutClient({
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                    <DropdownMenuItem onClick={() => router.push(`/admin/profile`)}>
-                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    <ShieldCheck className="mr-2 h-4 w-4 text-primary" />
                     <span>Admin Profile</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push(`/admin/users/${user?.uid}`)}>
-                    <UserCog className="mr-2 h-4 w-4" />
+                    <UserCog className="mr-2 h-4 w-4 text-sky-500" />
                     <span>Edit Admin Profile</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                      <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>
@@ -212,7 +223,7 @@ function AdminLayoutClient({
               </DropdownMenu>
             </div>
           </header>
-          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/40">
+          <main className="flex-1 flex flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/40">
             {children}
           </main>
         </div>

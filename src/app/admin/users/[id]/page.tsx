@@ -134,12 +134,9 @@ export default function EditUserDetailPage() {
         if (!prev) return null;
         return {
             ...prev,
-            security: {
-                ...(prev as any).security,
-                twoFactorAuthMethods: {
-                    ...((prev as any).security?.twoFactorAuthMethods || {}),
-                    [method]: checked,
-                }
+            twoFactorAuthMethods: {
+                ...(prev.twoFactorAuthMethods || {}),
+                [method]: checked,
             }
         }
      });

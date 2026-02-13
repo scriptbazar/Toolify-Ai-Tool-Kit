@@ -14,14 +14,13 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
-import { Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, Loader2 } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import Link from "next/link";
 import { getSettings } from "@/ai/flows/settings-management";
 import type { SecuritySettings } from '@/ai/flows/settings-management.types';
 import ReCAPTCHA from "react-google-recaptcha";
 import { verifyRecaptcha } from "@/ai/flows/verify-recaptcha";
-
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -34,6 +33,7 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
    useEffect(() => {
@@ -57,13 +57,17 @@ export default function AdminLoginPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-     if (securitySettings?.enableRecaptcha) {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    if (securitySettings?.enableRecaptcha && securitySettings.recaptchaSiteKey) {
         if (!recaptchaValue) {
             toast({
                 title: "Verification Failed",
                 description: "Please complete the reCAPTCHA verification.",
                 variant: "destructive",
             });
+            setIsSubmitting(false);
             return;
         }
         try {
@@ -74,10 +78,11 @@ export default function AdminLoginPage() {
         } catch (error: any) {
              toast({
                 title: "reCAPTCHA Verification Failed",
-                description: error.message || 'Could not verify reCAPTCHA. Please try again.',
+                description: error.message || 'Could not verify reCAPTCHA.',
                 variant: "destructive",
             });
             recaptchaRef.current?.reset();
+            setIsSubmitting(false);
             return;
         }
     }
@@ -90,7 +95,7 @@ export default function AdminLoginPage() {
       const userDocSnap = await getDoc(userDocRef);
 
       if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-        const token = await user.getIdToken();
+        const token = await user.getIdToken(true);
         const sessionResponse = await fetch('/api/auth/session-login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -98,30 +103,30 @@ export default function AdminLoginPage() {
         });
 
         if (!sessionResponse.ok) {
-          const errorData = await sessionResponse.json();
-          throw new Error(errorData.error || 'Failed to create session.');
+          throw new Error('Failed to create secure session.');
         }
-
-        await sessionResponse.json(); // Wait for the session creation to complete
 
         toast({
           title: "Admin login successful!",
-          description: "Redirecting to the admin panel...",
+          description: "Redirecting to the dashboard...",
         });
+        
+        // Force hard refresh to ensure middleware and server components see the cookie
         window.location.href = '/admin/dashboard';
       } else {
         await auth.signOut();
         toast({
           title: "Access Denied",
-          description: "You do not have permission to access the admin panel.",
+          description: "This account does not have administrative privileges.",
           variant: "destructive",
         });
+        setIsSubmitting(false);
       }
     } catch (error: any) {
       console.error("Admin login error:", error);
-      let description = "There was a problem with your request.";
+      let description = "Check your email and password.";
       if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        description = "Invalid email or password.";
+        description = "Invalid admin credentials.";
       } else {
         description = error.message;
       }
@@ -130,21 +135,25 @@ export default function AdminLoginPage() {
         description,
         variant: "destructive",
       });
+      setIsSubmitting(false);
     } finally {
         recaptchaRef.current?.reset();
     }
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen bg-background p-4">
+      <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center">
            <Link href="/" className="flex justify-center items-center gap-2 mb-4">
-            <Logo />
-            <span className="text-2xl font-bold">ToolifyAI</span>
+            <Logo className="h-10 w-10" />
+            <span className="text-2xl font-bold tracking-tight">ToolifyAI</span>
           </Link>
-          <CardTitle className="text-2xl">Admin Access</CardTitle>
-          <CardDescription>Sign in to the ToolifyAI Admin Panel</CardDescription>
+          <CardTitle className="text-2xl flex items-center justify-center gap-2">
+            <ShieldCheck className="text-primary h-6 w-6" />
+            Admin Access
+          </CardTitle>
+          <CardDescription>Sign in to the administrative control panel</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -155,9 +164,9 @@ export default function AdminLoginPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Admin Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="admin@example.com" {...field} />
+                        <Input placeholder="admin@toolifyai.com" {...field} disabled={isSubmitting} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -175,6 +184,7 @@ export default function AdminLoginPage() {
                             type={showPassword ? "text" : "password"}
                             placeholder="••••••••"
                             {...field}
+                            disabled={isSubmitting}
                           />
                         </FormControl>
                         <Button
@@ -183,15 +193,13 @@ export default function AdminLoginPage() {
                           size="icon"
                           className="absolute inset-y-0 right-0 h-full px-3"
                           onClick={() => setShowPassword(!showPassword)}
+                          disabled={isSubmitting}
                         >
                           {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
                           ) : (
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-4 w-4 text-muted-foreground" />
                           )}
-                          <span className="sr-only">
-                            {showPassword ? "Hide password" : "Show password"}
-                          </span>
                         </Button>
                       </div>
                       <FormMessage />
@@ -208,8 +216,8 @@ export default function AdminLoginPage() {
                     />
                 </div>
                )}
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Logging in..." : "Log In"}
+              <Button type="submit" className="w-full font-bold h-11" disabled={isSubmitting}>
+                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Authenticating...</> : "Log In to Admin Panel"}
               </Button>
             </form>
           </Form>

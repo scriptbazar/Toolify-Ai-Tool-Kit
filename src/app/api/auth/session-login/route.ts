@@ -12,15 +12,16 @@ export async function POST(request: NextRequest) {
 
     const adminAuth = getAdminAuth();
     
-    // Set session expiration to 5 days.
+    // Set session expiration to 5 days (in milliseconds for Firebase).
     const expiresIn = 60 * 60 * 24 * 5 * 1000;
     
     // Create the session cookie. This will also verify the ID token.
     const sessionCookie = await adminAuth.createSessionCookie(token, { expiresIn });
 
     // Set cookie policy for session cookie.
+    // NOTE: maxAge in cookies().set is in SECONDS.
     cookies().set('session', sessionCookie, {
-      maxAge: expiresIn,
+      maxAge: expiresIn / 1000, 
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',

@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
 
-  // Rule 2: Protect dashboard, admin, and settings routes
+  // Rule 2: Protect dashboard and settings routes
   const protectedPaths = [
     '/dashboard',
     '/usage-history',
@@ -23,18 +23,22 @@ export async function middleware(request: NextRequest) {
     '/payment-history',
     '/affiliate-program',
     '/settings', 
-    '/admin'
   ];
 
+  const isAdminRoute = pathname.startsWith('/admin');
   const isProtectedRoute = protectedPaths.some(path => pathname.startsWith(path));
 
-  // If trying to access a protected route without a session, redirect to login
-  if (isProtectedRoute && !session) {
-    if (!pathname.startsWith('/api/auth') && pathname !== '/login') {
-        const loginUrl = new URL('/login', request.url);
-        loginUrl.searchParams.set('redirectUrl', pathname);
-        return NextResponse.redirect(loginUrl);
-    }
+  // If trying to access an ADMIN route without a session, redirect to ADMIN login
+  if (isAdminRoute && !session && pathname !== '/admin/login') {
+      const loginUrl = new URL('/admin/login', request.url);
+      return NextResponse.redirect(loginUrl);
+  }
+
+  // If trying to access a protected route without a session, redirect to PUBLIC login
+  if (isProtectedRoute && !session && pathname !== '/login') {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirectUrl', pathname);
+      return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
