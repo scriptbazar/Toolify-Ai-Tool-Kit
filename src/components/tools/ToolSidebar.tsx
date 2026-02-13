@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 
 const SidebarWidget = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <Card className="border-none shadow-sm">
+    <Card className="border-none shadow-sm bg-transparent">
         <CardHeader className="p-4 pb-2">
             <CardTitle className="text-lg font-bold">{title}</CardTitle>
         </CardHeader>
@@ -62,14 +62,24 @@ export async function ToolSidebar({ adSettings, currentToolSlug }: ToolSidebarPr
                         {popularTools.map(t => {
                             const ToolIcon = (Icons as any)[t.icon] || Icons.HelpCircle;
                             const categoryInfo = toolCategories.find(c => c.id === t.category);
+                            const isActive = currentToolSlug === t.slug;
+                            
                             return (
                             <li key={t.id}>
-                                <Link href={`/tools/${t.slug}`} className="flex items-center gap-3 text-sm md:text-base text-muted-foreground hover:text-primary font-medium transition-all p-2.5 rounded-xl hover:bg-accent/50 group">
+                                <Link 
+                                    href={`/tools/${t.slug}`} 
+                                    className={cn(
+                                        "flex items-center gap-3 text-sm md:text-base font-medium transition-all p-2.5 rounded-xl group",
+                                        isActive 
+                                            ? "bg-primary text-primary-foreground shadow-md" 
+                                            : "text-muted-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                                    )}
+                                >
                                     <div className={cn(
                                         "p-2 rounded-lg transition-transform group-hover:scale-110", 
-                                        categoryInfo?.color?.bg || "bg-muted"
+                                        isActive ? "bg-white/20" : (categoryInfo?.color?.bg || "bg-muted")
                                     )}>
-                                        <ToolIcon className={cn("h-5 w-5", categoryInfo?.color?.text || "text-muted-foreground")} />
+                                        <ToolIcon className={cn("h-5 w-5", isActive ? "text-white" : (categoryInfo?.color?.text || "text-muted-foreground"))} />
                                     </div>
                                     <span className="truncate">{t.name}</span>
                                 </Link>
