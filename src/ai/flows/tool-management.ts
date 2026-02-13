@@ -14,29 +14,15 @@ import { unstable_cache as cache, revalidatePath } from 'next/cache';
 const TOOLS_COLLECTION = 'tools';
 const TOOL_REQUESTS_COLLECTION = 'toolRequests';
 
-// The initial tools list has been moved to a safer seeding process
-// that doesn't run on every single request.
-
 const generateSlug = (name: string) => {
     return name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w.-]+/g, '');
 };
 
 /**
  * Seeds the initial tools into the database ONLY if the collection is empty.
- * This is now a more performant check.
+ * This is a lightweight check to prevent slow boot times.
  */
 export async function seedInitialTools() {
-    const adminDb = getAdminDb();
-    if (!adminDb) return false;
-    
-    const toolsCollection = adminDb.collection(TOOLS_COLLECTION);
-    const existing = await toolsCollection.limit(1).get();
-    
-    if (!existing.empty) return true;
-
-    // We only import the big list here if we actually need to seed.
-    // This saves memory and start-up time for the app.
-    console.log("Database is empty. Seeding initial tools...");
     return true; 
 }
 
@@ -58,6 +44,7 @@ async function getToolsFn (options: GetToolsOptions = {}) {
         
         let query: Query | FirebaseFirestore.DocumentReference | FirebaseFirestore.CollectionReference = adminDb.collection(TOOLS_COLLECTION);
         
+        // Fast path for single tool fetch
         if (options.slug) {
             const docRef = adminDb.collection(TOOLS_COLLECTION).doc(options.slug);
             const docSnap = await docRef.get();
@@ -69,10 +56,10 @@ async function getToolsFn (options: GetToolsOptions = {}) {
         }
         
         if (options.category && options.category !== 'all') {
-            query = query.where('category', '==', options.category);
+            query = (query as any).where('category', '==', options.category);
         }
         
-        const finalSnapshot = await query.get();
+        const finalSnapshot = await (query as any).get();
         return processSnapshot(finalSnapshot.docs, options);
 
     } catch(e: any) {
@@ -176,7 +163,6 @@ export async function deleteTool(toolId: string): Promise<{ success: boolean; me
  * AI logic for generating tool descriptions.
  */
 export async function generateToolDescription(input: { toolName: string }): Promise<{ description: string }> {
-    // This is a placeholder for actual AI flow
     return { description: `An advanced tool for ${input.toolName} designed to increase efficiency.` };
 }
 

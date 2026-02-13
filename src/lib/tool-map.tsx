@@ -6,18 +6,18 @@ import React, { FC } from 'react';
 import { Loader2 } from 'lucide-react';
 
 /**
- * Optimized Tool Loading Component
+ * High-Performance Minimal Loading Component
  */
 const LoadingComponent = () => (
   <div className="flex flex-col justify-center items-center min-h-[300px] space-y-4">
     <Loader2 className="h-10 w-10 animate-spin text-primary" />
-    <p className="text-muted-foreground animate-pulse font-medium">Opening Tool...</p>
+    <p className="text-muted-foreground animate-pulse font-medium">Loading Tool...</p>
   </div>
 );
 
 /**
  * Centralized High-Performance Tool Map
- * Standardized dynamic imports to ensure they resolve to a component function.
+ * Standardized dynamic imports with SSR disabled for maximum client-side speed.
  */
 export const slugToComponentMap: Record<string, FC<any>> = {
   'advance-text-cleaner': dynamic(() => import('@/components/tools/AdvanceTextCleaner').then(mod => mod.AdvanceTextCleaner), { loading: LoadingComponent, ssr: false }),

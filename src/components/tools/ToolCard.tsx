@@ -44,7 +44,13 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
   const router = useRouter();
 
   const categoryInfo = toolCategories.find(c => c.id === category);
-  const iconColors = categoryInfo?.color || { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20', glow: '' };
+  const iconColors = categoryInfo?.color || { 
+    bg: 'bg-primary/10', 
+    text: 'text-primary', 
+    border: 'border-primary/20', 
+    glow: 'shadow-primary/20',
+    gradient: 'from-primary to-primary/60' 
+  };
 
   const isClickable = status === 'Active' || status === 'New Version' || status === 'Beta';
   const isProUser = user?.role === 'admin' || user?.planId === 'pro' || user?.planId === 'team';
@@ -77,10 +83,10 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
         !isClickable && "cursor-not-allowed opacity-60"
       )}>
       <div className={cn(
-        "relative flex h-full flex-col items-center justify-start rounded-2xl border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1",
+        "relative flex h-full flex-col items-center justify-start rounded-2xl border bg-card p-6 text-center transition-all duration-300 hover:-translate-y-1.5",
         "border-2",
         iconColors.border,
-        "hover:shadow-xl",
+        "hover:shadow-2xl",
         iconColors.glow
       )}>
         {statusBadge ? statusBadge : (
@@ -102,13 +108,21 @@ export function ToolCard({ tool, isFavorite, onToggleFavorite, showUpgradeDialog
                 <Badge className="shadow-sm font-bold bg-primary text-primary-foreground">Pro</Badge>
             </div>
         )}
-        <div className={cn("flex h-16 w-16 items-center justify-center rounded-2xl mb-4 transition-all group-hover:scale-110 shadow-md", iconColors.bg)}>
-          <Icon className={cn("h-8 w-8 transition-transform", iconColors.text)} />
+        
+        {/* Colorful Icon with Gradient */}
+        <div className={cn(
+            "flex h-16 w-16 items-center justify-center rounded-2xl mb-5 transition-all group-hover:scale-110 shadow-lg bg-gradient-to-br",
+            iconColors.gradient
+        )}>
+          <Icon className="h-8 w-8 text-white stroke-[2.5px]" />
         </div>
-        <div className="flex-grow w-full">
-            <h3 className="text-base font-extrabold mb-3 group-hover:text-primary transition-colors leading-tight">{name}</h3>
-            <div className="h-20 overflow-hidden">
-                <p className="text-[11px] md:text-xs text-muted-foreground line-clamp-3 leading-relaxed">
+
+        <div className="flex-grow w-full flex flex-col justify-start">
+            <h3 className="text-[15px] font-extrabold mb-3 group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                {name}
+            </h3>
+            <div className="min-h-[3.5rem] flex items-start justify-center">
+                <p className="text-[11px] md:text-[12px] text-muted-foreground line-clamp-3 leading-relaxed">
                     {description}
                 </p>
             </div>
