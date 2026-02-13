@@ -1,6 +1,6 @@
 
 /**
- * Barrel file for tools. Empty to avoid conflicts with dynamic imports.
- * The tools are managed by the slugToComponentMap.
+ * Barrel file for tools. 
+ * Redundant due to centralized src/lib/tool-map.tsx.
  */
 export {};

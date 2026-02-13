@@ -18,14 +18,6 @@ const generateSlug = (name: string) => {
     return name.toLowerCase().replace(/ & /g, ' and ').replace(/\s+/g, '-').replace(/[^\w.-]+/g, '');
 };
 
-/**
- * Seeds the initial tools into the database ONLY if the collection is empty.
- * This is a lightweight check to prevent slow boot times.
- */
-export async function seedInitialTools() {
-    return true; 
-}
-
 interface GetToolsOptions {
   query?: string;
   category?: string;

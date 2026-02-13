@@ -1,20 +1,9 @@
 
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
 /**
- * Resolved Parallel Route Conflict.
- * Next.js cannot have (dashboard)/settings/page.tsx AND /settings/page.tsx.
- * This file is now a permanent redirect to avoid build errors.
+ * This file is intentionally deprecated.
+ * The primary settings page is located at src/app/settings/page.tsx.
+ * Keeping this empty to prevent parallel route conflicts in Next.js.
  */
-export default function RedundantSettingsRedirect() {
-    const router = useRouter();
-
-    useEffect(() => {
-        router.replace('/settings');
-    }, [router]);
-
+export default function DeadSettingsPage() {
     return null;
 }
