@@ -5,7 +5,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Home, Newspaper, Mail, DollarSign, User, LogOut, Lightbulb, Star, LayoutDashboard } from 'lucide-react';
+import { Menu, Home, Newspaper, Mail, DollarSign, User, LogOut, Lightbulb, Star, LayoutDashboard, LogIn, UserPlus } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
 import { cn } from '@/lib/utils';
@@ -78,10 +78,16 @@ export default function Header() {
           {!loading && !user ? (
             <div className="flex items-center gap-2">
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex font-bold">
-                <Link href="/login">Log in</Link>
+                <Link href="/login">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Log in
+                </Link>
               </Button>
-              <Button asChild size="sm" className="font-bold shadow-md">
-                <Link href="/signup">Sign Up</Link>
+              <Button asChild size="sm" className="font-bold shadow-md bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link href="/signup">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Sign Up
+                </Link>
               </Button>
             </div>
           ) : user ? (
@@ -143,12 +149,18 @@ export default function Header() {
                     </Button>
                   ))}
                   {!user && (
-                    <div className="grid grid-cols-2 gap-2 mt-4">
-                      <Button asChild variant="outline" onClick={() => setIsOpen(false)}>
-                        <Link href="/login">Log in</Link>
+                    <div className="grid grid-cols-1 gap-2 mt-4">
+                      <Button asChild variant="outline" onClick={() => setIsOpen(false)} className="justify-start">
+                        <Link href="/login">
+                          <LogIn className="mr-2 h-4 w-4" />
+                          Log in
+                        </Link>
                       </Button>
-                      <Button asChild onClick={() => setIsOpen(false)}>
-                        <Link href="/signup">Sign Up</Link>
+                      <Button asChild onClick={() => setIsOpen(false)} className="justify-start">
+                        <Link href="/signup">
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          Sign Up
+                        </Link>
                       </Button>
                     </div>
                   )}
