@@ -13,7 +13,7 @@ import { z } from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { useSearchParams } from "next/navigation";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, LogIn } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { doc, getDoc } from "firebase/firestore";
 import { logUserLogin } from "@/ai/flows/user-activity";
@@ -83,11 +83,8 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // Ensure session is synchronized
       const synced = await syncSession(user);
-      if (!synced) {
-          throw new Error('Session synchronization failed.');
-      }
+      if (!synced) throw new Error('Session synchronization failed.');
 
       await logUserLogin(user.uid);
       
@@ -99,8 +96,7 @@ export default function LoginPage() {
       
       const targetUrl = searchParams.get('redirectUrl') || (role === 'admin' ? '/admin/dashboard' : '/dashboard');
       
-      // Force hard refresh to ensure server sees cookie
-      window.location.href = targetUrl;
+      window.location.assign(targetUrl);
       
     } catch (error: any) {
       console.error("Login error:", error);
@@ -112,8 +108,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen bg-background p-4">
+      <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
            <Link href="/" className="flex justify-center items-center gap-2 mb-4">
             <Logo />
@@ -182,8 +178,8 @@ export default function LoginPage() {
                     />
                 </div>
                )}
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Logging in...</> : "Log In"}
+              <Button type="submit" className="w-full gap-2" disabled={isSubmitting}>
+                {isSubmitting ? <><Loader2 className="h-4 w-4 animate-spin"/>Logging in...</> : <><LogIn className="h-4 w-4"/>Log In</>}
               </Button>
             </form>
           </Form>

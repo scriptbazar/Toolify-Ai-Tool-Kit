@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -14,14 +13,11 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/context/AuthContext';
 import { AdminSidebarNav } from '@/components/admin/AdminSidebarNav';
-import { Bell, Home, LogOut, User, Settings, Menu, Star, ShieldCheck, UserCog, Loader2 } from 'lucide-react';
-import { AuthContextProvider } from '@/context/AuthContext';
+import { Bell, LogOut, Menu, ShieldCheck, UserCog, Loader2 } from 'lucide-react';
 
-
-// The actual client-side layout component
-function AdminLayoutClient({
+export default function AdminRootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -33,14 +29,11 @@ function AdminLayoutClient({
   
   const isLoginPage = pathname === '/admin/login';
 
-  // Fallback redirection logic
   React.useEffect(() => {
     if (!loading && !isLoginPage) {
         if (!user) {
             router.replace('/admin/login');
         } else if (!isAdmin) {
-            // User is logged in but is NOT an admin.
-            // Show error and kick them to the main dashboard.
             toast({
                 title: "Access Restricted",
                 description: "You do not have permission to view the admin panel.",
@@ -51,33 +44,22 @@ function AdminLayoutClient({
     }
   }, [user, loading, isLoginPage, isAdmin, router, toast]);
 
-
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // Make a call to our backend to clear the session cookie
       await fetch('/api/auth/session-logout', { method: 'POST' });
       toast({
         title: "Logged Out",
         description: "Admin session cleared successfully.",
       });
-      // Redirect to the admin login page after logout
       router.push('/admin/login');
     } catch (error) {
       console.error("Logout error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to log out. Please try again.",
-        variant: "destructive",
-      });
     }
   };
 
-  if (isLoginPage) {
-    return <>{children}</>;
-  }
+  if (isLoginPage) return <>{children}</>;
   
-  // Only render the layout if user is logged in AND is an admin
   if (loading || !user || !isAdmin) {
     return (
         <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-background">
@@ -166,11 +148,7 @@ function AdminLayoutClient({
                <ModeToggle />
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="shrink-0"
-                  >
+                  <Button variant="outline" size="icon" className="shrink-0">
                     <Menu className="h-5 w-5" />
                     <span className="sr-only">Admin Menu</span>
                   </Button>
@@ -228,17 +206,5 @@ function AdminLayoutClient({
           </main>
         </div>
       </div>
-  );
-}
-
-export default function AdminRootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <AuthContextProvider>
-      <AdminLayoutClient>{children}</AdminLayoutClient>
-    </AuthContextProvider>
   );
 }

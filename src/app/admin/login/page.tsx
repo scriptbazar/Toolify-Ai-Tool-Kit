@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -20,6 +19,7 @@ import { getSettings } from "@/ai/flows/settings-management";
 import type { SecuritySettings } from '@/ai/flows/settings-management.types';
 import ReCAPTCHA from "react-google-recaptcha";
 import { verifyRecaptcha } from "@/ai/flows/verify-recaptcha";
+import { useAuth } from "@/context/AuthContext";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -28,6 +28,7 @@ const formSchema = z.object({
 
 export default function AdminLoginPage() {
   const { toast } = useToast();
+  const { syncSession } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
@@ -58,7 +59,6 @@ export default function AdminLoginPage() {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    // 1. ReCAPTCHA Check
     if (securitySettings?.enableRecaptcha && securitySettings.recaptchaSiteKey) {
         if (!recaptchaValue) {
             toast({
@@ -71,9 +71,7 @@ export default function AdminLoginPage() {
         }
         try {
             const verification = await verifyRecaptcha(recaptchaValue);
-            if (!verification.success) {
-                throw new Error(verification.message);
-            }
+            if (!verification.success) throw new Error(verification.message);
         } catch (error: any) {
              toast({
                 title: "reCAPTCHA Verification Failed",
@@ -87,34 +85,21 @@ export default function AdminLoginPage() {
     }
 
     try {
-      // 2. Firebase Sign In
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // 3. Admin Role Verification
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
       if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-        // 4. Create Server-Side Session Cookie
-        const token = await user.getIdToken(true);
-        const sessionResponse = await fetch('/api/auth/session-login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
-        });
-
-        if (!sessionResponse.ok) {
-          throw new Error('Failed to create secure session.');
-        }
+        const synced = await syncSession(user);
+        if (!synced) throw new Error('Failed to create secure session.');
 
         toast({
           title: "Admin Authenticated",
           description: "Welcome to the control panel. Redirecting...",
         });
         
-        // 5. Hard Redirect to Admin Dashboard
-        // Using window.location.assign ensures the browser makes a new request with the cookie
         window.location.assign('/admin/dashboard');
       } else {
         await auth.signOut();
@@ -127,13 +112,9 @@ export default function AdminLoginPage() {
       }
     } catch (error: any) {
       console.error("Admin login error:", error);
-      let description = "Please check your credentials and try again.";
-      if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        description = "Incorrect email or password.";
-      }
       toast({
         title: "Login Failed",
-        description,
+        description: "Incorrect email or password, or insufficient permissions.",
         variant: "destructive",
       });
       setIsSubmitting(false);

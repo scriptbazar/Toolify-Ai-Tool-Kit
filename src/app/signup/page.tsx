@@ -10,11 +10,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter, useSearchParams } from "next/navigation";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, UserPlus } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import ReCAPTCHA from "react-google-recaptcha";
 import { getSettings } from "@/ai/flows/settings-management";
@@ -107,16 +106,12 @@ export default function SignupPage() {
         planId: "free",
       });
 
-      // Synchronize session before reload
       const synced = await syncSession(user);
-      if (!synced) {
-          throw new Error('Session synchronization failed.');
-      }
+      if (!synced) throw new Error('Session synchronization failed.');
 
       toast({ title: "Account created!" });
       
-      // Hard reload to redirect to dashboard
-      window.location.href = '/dashboard';
+      window.location.assign('/dashboard');
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       setIsSubmitting(false);
@@ -126,8 +121,8 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen bg-background p-4">
+      <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
            <Link href="/" className="flex justify-center items-center gap-2 mb-4">
             <Logo />
@@ -157,10 +152,10 @@ export default function SignupPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="password" render={({ field }) => (
-                    <FormItem><FormLabel>Password</FormLabel><div className="relative"><FormControl><Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button></div><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Password</FormLabel><div className="relative"><FormControl><Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button></div><FormMessage /></FormItem>
                 )} />
                  <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-                    <FormItem><FormLabel>Confirm</FormLabel><div className="relative"><FormControl><Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>{showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button></div><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Confirm</FormLabel><div className="relative"><FormControl><Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>{showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</Button></div><FormMessage /></FormItem>
                 )} />
               </div>
               {securitySettings?.enableRecaptcha && securitySettings.recaptchaSiteKey && (
@@ -168,8 +163,8 @@ export default function SignupPage() {
                     <ReCAPTCHA ref={recaptchaRef} sitekey={securitySettings.recaptchaSiteKey} onChange={(v) => setRecaptchaValue(v)} />
                 </div>
                )}
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Creating account...</> : "Sign Up"}
+              <Button type="submit" className="w-full gap-2" disabled={isSubmitting}>
+                {isSubmitting ? <><Loader2 className="h-4 w-4 animate-spin"/>Creating account...</> : <><UserPlus className="h-4 w-4"/>Sign Up</>}
               </Button>
             </form>
           </Form>

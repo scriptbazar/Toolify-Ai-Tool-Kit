@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
@@ -37,7 +36,6 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [userData, setLocalUserData] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Synchronizes the Firebase Auth token with the Server-Side session cookie
   const syncSession = useCallback(async (forceUser?: FirebaseUser) => {
     const currentUser = forceUser || auth.currentUser;
     if (currentUser) {
@@ -59,17 +57,14 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setLoading(true);
       if (firebaseUser) {
         setUser(firebaseUser);
-        
         try {
             const userDocRef = doc(db, "users", firebaseUser.uid);
             const userDocSnap = await getDoc(userDocRef);
 
             if (userDocSnap.exists()) {
-                const data = userDocSnap.data() as AppUser;
-                setLocalUserData(data);
+                setLocalUserData(userDocSnap.data() as AppUser);
             } else {
                 setLocalUserData(null);
             }
@@ -80,8 +75,6 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUser(null);
         setLocalUserData(null);
-        // Clear session on logout
-        fetch('/api/auth/session-logout', { method: 'POST' }).catch(() => {});
       }
       setLoading(false);
     });
