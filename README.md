@@ -1,67 +1,86 @@
 # 🚀 Toolify AI Tool Kit
 
-**Toolify AI Tool Kit** is a comprehensive, high-performance web application built with **Next.js 14**, **Firebase**, and **AI integrations**. It serves as a one-stop destination for over **170+ digital tools** across various categories like PDF management, image processing, financial calculations, development utilities, and AI-powered content generation.
+**Toolify AI Tool Kit** is a state-of-the-art, high-performance web application suite built with **Next.js 14**, **Firebase**, and advanced **AI integrations**. Designed as a comprehensive solution for digital creators, developers, and businesses, it offers over **170+ professional tools** ranging from AI content generation to complex financial calculations and document management.
 
 ---
 
-## ✨ Key Features
+## 🏗️ Architecture Overview
 
-### 🤖 AI-Powered Tools
-Leveraging **Google Gemini** and **Genkit**, Toolify provides advanced AI capabilities:
-- AI Content Generation
-- Smart Image Recognition
-- AI Writing Assistant
+Toolify is built on a robust, dual-panel architecture ensuring a seamless experience for both administrators and end-users.
 
-### 📄 PDF Suite
-A complete set of tools to manage your documents:
-- **Merge & Split:** Combine multiple PDFs or extract specific pages.
-- **Compress:** Reduce file size without losing quality.
-- **Sign & Protect:** Add digital signatures and encrypt with passwords.
-- **Convert:** PDF to JPG, Word to PDF, Excel to PDF, and more.
+### 🛡️ Separate Admin Panel
+A high-control administrative dashboard for managing the entire ecosystem:
+- **User Management:** Full control over user accounts, roles, and status.
+- **Tools Management:** Dynamic control over tool visibility, categories, and slugs.
+- **Real-time Analytics:** Track traffic, tool usage, and user growth.
+- **Revenue Management:** Oversight of payment history (Stripe, PayPal, Razorpay).
+- **Affiliate Management:** Monitor and manage the affiliate program performance.
+- **Support & Tickets:** Integrated system to resolve user queries and issues.
+- **Content Control:** Manage blogs, announcements, and on-site advertisements.
+- **Email System:** Built-in tools for communication and user notifications.
 
-### 🖼️ Image Toolkit
-Professional-grade image processing tools:
-- **Resizer & Cropper:** Adjust dimensions for social media or printing.
-- **Compressor:** Optimize images for faster web loading.
-- **Converter:** Support for PNG, JPG, WebP, SVG, and ICO.
-- **Watermark:** Protect your photos with custom watermarks.
-- **Background & Color:** Extract color palettes or remove backgrounds.
-
-### 🔢 Calculators & Financial Tools
-- **Financial:** GST, SIP, Loan (EMI), Mutual Fund, HRA, and TDS calculators.
-- **Academic:** GPA to CGPA, Marks to Percentage, and Age calculators.
-- **Health:** BMI and Fuel Cost calculators.
-
-### 💻 Development & SEO Utilities
-- **Code Formatters:** JSON, SQL, and HTML/CSS/JS minifiers.
-- **Generators:** QR Code, Barcode, Robots.txt, and XML Sitemap generators.
-- **Converters:** Base64, Binary, Hex, and ASCII converters.
-- **Network:** Internet Speed Test, Redirect Checker, and Status Code checker.
+### 👤 User Dashboard
+A personalized workspace for end-users to manage their interactions:
+- **Usage Statistics:** Detailed history of tools used and activity logs.
+- **Subscription Management:** Manage plans, billing history, and upgrades.
+- **My Favorites:** Quick access to frequently used tools.
+- **Media Library:** Centralized storage for processed files and generated content.
+- **Ticket Support:** Create and track support requests.
+- **Affiliate Program:** Personalized dashboard for tracking referrals and earnings.
+- **Community Chat:** Connect and interact with other users.
 
 ---
 
-## 🛠️ Tech Stack
+## ✨ Core Feature Categories
 
-- **Framework:** [Next.js 14](https://nextjs.org/) (App Router)
-- **Language:** [TypeScript](https://www.typescriptlang.org/)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **Components:** [Radix UI](https://www.radix-ui.com/) & [Lucide Icons](https://lucide.dev/)
-- **Backend:** [Firebase](https://firebase.google.com/) (Firestore, Auth, Admin SDK)
-- **AI Engine:** [Google Genkit](https://github.com/firebase/genkit)
-- **Payments:** Stripe, PayPal, and Razorpay integration.
+### 🤖 AI-Powered Suite
+Powered by **Google Genkit** and **Gemini API**:
+- **AI Writing Assistant:** Blog posts, emails, and social media content.
+- **Image Recognition:** Advanced OCR and object detection via Cloud Vision.
+- **AI Utility flows:** Custom-built logic for automated tasks.
+
+### 📄 Professional PDF Tools
+- **Manipulation:** Merge, Split, Rotate, and Reorder pages.
+- **Optimization:** High-fidelity compression.
+- **security:** Password protection and digital signing.
+- **Conversion:** PDF to Office formats and high-quality image extraction.
+
+### 🖼️ Image Processing Lab
+- **Editing:** Precision cropping, resizing, and rotation.
+- **Optimization:** Web-optimized compression for PNG/JPG/WebP.
+- **Branding:** Batch watermarking and metadata (Exif) management.
+- **Aesthetics:** Background removal and color palette extraction.
+
+### 🔢 Calculation & Dev Utilities
+- **Financial:** GST, SIP, EMI, Mutual Funds, and TDS calculators.
+- **Academic:** Performance calculators (GPA/CGPA) and age metrics.
+- **Developer Tools:** JSON/SQL formatters, QR/Barcode generators, and Base64 converters.
+- **Network:** Speed testing and HTTP status code verification.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Framework:** [Next.js 14](https://nextjs.org/) (App Router, Rendering optimization)
+- **Programming:** [TypeScript](https://www.typescriptlang.org/) (Type-safe codebase)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) with [Shadcn UI](https://ui.shadcn.com/)
+- **Backend Service:** [Firebase](https://firebase.google.com/) (Firestore, Auth, Cloud Storage, Admin SDK)
+- **AI Infrastructure:** [Google Genkit](https://github.com/firebase/genkit) & [Google Generative AI](https://ai.google.dev/)
+- **Payment Gateways:** Integrated Stripe, PayPal, and Razorpay.
+- **Visuals:** Lucide React Icons, Recharts for analytics visualization.
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18.x or later)
-- Firebase Account
-- Google Cloud Project (for Genkit/Gemini API)
+- Node.js **v20.x** or later.
+- A Firebase project with Firestore and Auth enabled.
+- API keys for Google Gemini, Cloud Vision, and Payment providers.
 
 ### Installation
 
-1. **Clone the repository:**
+1. **Clone the project:**
    ```bash
    git clone https://github.com/yourusername/toolify-ai-tool-kit.git
    cd toolify-ai-tool-kit
@@ -69,56 +88,45 @@ Professional-grade image processing tools:
 
 2. **Install dependencies:**
    ```bash
-   npm install
+   npm install --legacy-peer-deps
    ```
 
-3. **Set up Environment Variables:**
-   Create a `.env` file in the root directory and add your credentials:
+3. **Environment Configuration:**
+   Copy `.env.example` to `.env` and populate:
    ```env
-   NEXT_PUBLIC_FIREBASE_API_KEY=your_key
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project
-   GOOGLE_GENAI_API_KEY=your_gemini_key
-   # Add other keys for Stripe, PayPal, etc.
+   # Firebase Config
+   NEXT_PUBLIC_FIREBASE_API_KEY=xxx
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=xxx
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=xxx
+
+   # AI Config
+   GOOGLE_GENAI_API_KEY=xxx
+
+   # Payment Configs
+   STRIPE_SECRET_KEY=xxx
+   RAZORPAY_KEY_ID=xxx
+   PAYPAL_CLIENT_ID=xxx
    ```
 
-4. **Run the development server:**
+4. **Launch Development Environment:**
    ```bash
    npm run dev
    ```
-   Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ---
 
-## 🏗️ Project Structure
-
-```text
-src/
-├── app/            # Next.js App Router (Pages & API)
-├── components/      # Reusable UI & Tool Components
-├── ai/             # Genkit Flows & AI Logic
-├── firebase/       # Client & Admin SDK Config
-├── lib/            # Utility functions & Shared logic
-└── hooks/          # Custom React hooks
-```
+## 🌍 SEO & Performance
+Toolify is engineered for speed and search engine visibility:
+- **Dynamic Meta Tags:** Every tool and blog post has unique SEO-optimized headers.
+- **Semantic HTML5:** Ensuring maximum accessibility and crawlability.
+- **Image Optimization:** Automatic WebP serving and lazy loading.
 
 ---
 
-## 🌍 SEO & Meta Optimization
+## 🤝 Contributing & Support
+Made with ❤️ by [script Bazar](mailto:scriptbazar76@gmail.com).
 
-Every tool page is pre-optimized for SEO with dynamic meta tags, titles, and descriptions, ensuring visibility on search engines.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+For commercial inquiries or feature requests, please open an issue or reach out via email.
 
 ---
-
-## 🤝 Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or new tool ideas.
-
----
-Created with ❤️ by [script Bazar](scriptbazar76@gmail.com)
+© 2024 Toolify AI Tool Kit. All Rights Reserved.
